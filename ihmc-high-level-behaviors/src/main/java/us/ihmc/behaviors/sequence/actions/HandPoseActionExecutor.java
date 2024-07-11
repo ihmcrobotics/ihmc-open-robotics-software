@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.*;
 import us.ihmc.commons.Conversions;
@@ -80,7 +81,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          ChestOrientationActionState concurrentChestOrientationAction = null;
          PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
-         ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
+         BehaviorTreeRootNodeExecutor actionSequenceExecutor = BehaviorTreeTools.findRootNode(this);
          if (actionSequenceExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
@@ -257,8 +258,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
-      state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-      state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+      if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
+      {
+         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+      }
 
       if (trackingCalculator.getHitTimeLimit())
       {

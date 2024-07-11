@@ -15,7 +15,7 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "beebda92db5337a99d026ea2adc5daaa36fc0b5a1d9ab4fc743a5d1515b8263d";
+   		return "e5ee356ec1d2e88ef5f06f45db55e0b0d3af5d04e9bd0249cdd49d391ac8bc96";
    }
    
    @Override
@@ -54,13 +54,11 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       for(int i0 = 0; i0 < (8); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -84,23 +82,21 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNode(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectType().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectType().length() + 1;
-
-      for(int i0 = 0; i0 < data.getBoundingBox2dVertices().length; ++i0)
-      {
-              current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBox2dVertices()[i0], current_alignment);
-      }
       for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
       {
               current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxVertices()[i0], current_alignment);
+      }
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices2d().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxVertices2d()[i0], current_alignment);
       }
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -112,23 +108,22 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    public static void write(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
-      cdr.write_type_2(data.getObjectId());
-
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
-      cdr.write_type_6(data.getConfidence());
-
       if(data.getObjectType().length() <= 255)
       cdr.write_type_d(data.getObjectType());else
           throw new RuntimeException("object_type field exceeds the maximum length");
 
-      for(int i0 = 0; i0 < data.getBoundingBox2dVertices().length; ++i0)
-      {
-        	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBox2dVertices()[i0], cdr);		
-      }
+      cdr.write_type_2(data.getObjectId());
+
+      cdr.write_type_6(data.getConfidence());
 
       for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
       {
         	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxVertices()[i0], cdr);		
+      }
+
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices2d().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxVertices2d()[i0], cdr);		
       }
 
       cdr.write_type_7(data.getEnableTracking());
@@ -138,20 +133,19 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    public static void read(perception_msgs.msg.dds.CenterposeNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
+      cdr.read_type_d(data.getObjectType());	
       data.setObjectId(cdr.read_type_2());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
       data.setConfidence(cdr.read_type_6());
-      	
-      cdr.read_type_d(data.getObjectType());	
-      for(int i0 = 0; i0 < data.getBoundingBox2dVertices().length; ++i0)
-      {
-        	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBox2dVertices()[i0], cdr);	
-      }
       	
       for(int i0 = 0; i0 < data.getBoundingBoxVertices().length; ++i0)
       {
         	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxVertices()[i0], cdr);	
+      }
+      	
+      for(int i0 = 0; i0 < data.getBoundingBoxVertices2d().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxVertices2d()[i0], cdr);	
       }
       	
       data.setEnableTracking(cdr.read_type_7());
@@ -164,13 +158,11 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.write_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      ser.write_type_2("object_id", data.getObjectId());
-      ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
-
-      ser.write_type_6("confidence", data.getConfidence());
       ser.write_type_d("object_type", data.getObjectType());
-      ser.write_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
+      ser.write_type_2("object_id", data.getObjectId());
+      ser.write_type_6("confidence", data.getConfidence());
       ser.write_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      ser.write_type_f("bounding_box_vertices_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices2d());
       ser.write_type_7("enable_tracking", data.getEnableTracking());
    }
 
@@ -179,13 +171,11 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.read_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      data.setObjectId(ser.read_type_2("object_id"));
-      ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
-
-      data.setConfidence(ser.read_type_6("confidence"));
       ser.read_type_d("object_type", data.getObjectType());
-      ser.read_type_f("bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBox2dVertices());
+      data.setObjectId(ser.read_type_2("object_id"));
+      data.setConfidence(ser.read_type_6("confidence"));
       ser.read_type_f("bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices());
+      ser.read_type_f("bounding_box_vertices_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxVertices2d());
       data.setEnableTracking(ser.read_type_7("enable_tracking"));
    }
 

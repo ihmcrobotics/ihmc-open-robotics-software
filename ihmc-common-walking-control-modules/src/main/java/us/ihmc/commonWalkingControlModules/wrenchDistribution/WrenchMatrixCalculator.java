@@ -284,6 +284,7 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
          rhoStartIndex += helper.getRhoSize();
       }
 
+      // This reshape call also zeros the task objectives, jacobians, and weights
       inputToPack.reshape(2);
       inputToPack.setConstraintType(command.getConstraintType());
 
@@ -293,14 +294,12 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
                                          inputToPack.getTaskJacobian(),
                                          inputToPack.getTaskObjective());
 
-      inputToPack.getTaskObjective().zero();
-      inputToPack.getTaskWeightMatrix().zero();
       if (command.getConstraintType() == ConstraintType.OBJECTIVE)
       {
          weight.setIncludingFrame(command.getWeight());
          weight.changeFrameAndProjectToXYPlane(planeFrame);
-         inputToPack.getTaskWeightMatrix().set(0, 0, command.getWeight().getX());
-         inputToPack.getTaskWeightMatrix().set(1, 1, command.getWeight().getY());
+         inputToPack.getTaskWeightMatrix().set(0, 0, weight.getX());
+         inputToPack.getTaskWeightMatrix().set(1, 1, weight.getY());
       }
       else if (command.getConstraintType() != ConstraintType.EQUALITY)
       {

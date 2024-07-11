@@ -5,16 +5,14 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
@@ -62,14 +60,26 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       updateActionSubtree(this);
 
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
-      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
+      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
 
-      if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
+      boolean shouldClearStaticHandles = false;
+      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+
+      if (shouldClearStaticHandles)
       {
-         if (staticHandleClosedDoor != null)
+         for (String nodeName : sceneGraph.getNodeNameList())
          {
-            staticHandleClosedDoor.clearOffset();
-            staticHandleClosedDoor.freeze();
+            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+            {
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
+               {
+                  staticHandleNode.clearOffset();
+                  staticHandleNode.freeze();
+               }
+            }
          }
       }
 

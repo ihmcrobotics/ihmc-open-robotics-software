@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -168,7 +168,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingMessageHandler walkingMessageHandler;
    private final WalkingTrajectoryPath walkingTrajectoryPath;
 
-   private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
+   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
    private final YoBoolean updateWholeBodyContactState = new YoBoolean("updateWholeBodyContactState", registry);
    private final WholeBodyContactState wholeBodyContactState;
 
@@ -348,7 +348,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator("", totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
 
       String graphicListName = getClass().getSimpleName();
@@ -1071,7 +1072,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return wholeBodyContactState;
    }
 
-   public CenterOfMassStaticStabilityRegionCalculator getMultiContactRegionCalculator()
+   public CenterOfMassStabilityMarginRegionCalculator getMultiContactRegionCalculator()
    {
       return multiContactRegionCalculator;
    }

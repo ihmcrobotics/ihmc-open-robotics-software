@@ -66,7 +66,7 @@ public class StancePoseCalculator
    public void populationCandidatePoses(ArrayList<FramePose3D> posesToPack, FramePose3DReadOnly goalPose, RobotSide side)
    {
       posesToPack.clear();
-      double multiplier = side == RobotSide.LEFT ? -1 : 1;
+      double multiplier = side == RobotSide.LEFT ? 1 : -1;
 
       // Sample poses around the provided goal pose and check if they are valid in the height map
       int windowSize = stancePoseParameters.getSearchWindowSize();

@@ -34,7 +34,7 @@ import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -708,7 +708,7 @@ public class RDXTeleoperationManager extends RDXPanel
       return avoidanceCollisionModel;
    }
 
-   public RDXLocomotionParameters getLocomotionParameters()
+   public LocomotionParameters getLocomotionParameters()
    {
       return locomotionManager.getLocomotionParameters();
    }

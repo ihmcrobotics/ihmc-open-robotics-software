@@ -4,6 +4,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.ArrayList;
@@ -31,6 +32,11 @@ public class SceneNode extends RequestConfirmFreezable
       this.id = id;
       this.name = name;
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
+   }
+
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
+   {
+
    }
 
    public long getID()
@@ -89,5 +95,14 @@ public class SceneNode extends RequestConfirmFreezable
    public List<SceneNode> getChildren()
    {
       return children;
+   }
+
+   /**
+    * This method is called when the node is removed from the scene graph.
+    * Note that this method does not destroy this node's children as they may want to be adopted by another node.
+    */
+   public void destroy(SceneGraph sceneGraph)
+   {
+
    }
 }

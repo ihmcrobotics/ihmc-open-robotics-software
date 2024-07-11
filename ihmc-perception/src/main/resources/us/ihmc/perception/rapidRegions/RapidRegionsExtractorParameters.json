@@ -36,7 +36,7 @@
     "upperBound" : 8
   },
   "Patch size" : {
-    "value" : 7,
+    "value" : 12,
     "lowerBound" : 2,
     "upperBound" : 20
   },

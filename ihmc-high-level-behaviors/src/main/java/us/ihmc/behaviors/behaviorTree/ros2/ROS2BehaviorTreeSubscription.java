@@ -24,8 +24,9 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private final BehaviorTreeState behaviorTreeState;
    private final Consumer<T> rootNodeSetter;
    private long numberOfMessagesReceived = 0;
-   private long previousUpdateNumber = -1;
+   private long previousSequenceID = -1;
    private long messageDropCount = 0;
+   private long outOfOrderCount = 0;
    private int numberOfOnRobotNodes = 0;
    private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
    private final Notification recievedMessageNotification = new Notification();
@@ -40,7 +41,34 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       this.rootNodeSetter = rootNodeSetter;
 
       topic = AutonomyAPI.BEAVIOR_TREE.getTopic(behaviorTreeState.getCRDTInfo().getActorDesignation().getIncomingQualifier());
-      behaviorTreeStateMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaSwapReference(topic, recievedMessageNotification);
+      behaviorTreeStateMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaSwapReference(topic, behaviorTreeStateMessage ->
+      {
+         ++numberOfMessagesReceived;
+         for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+         {
+            messageRecievedCallback.run();
+         }
+
+         long receivedSequenceID = behaviorTreeStateMessage.getSequenceId();
+         long expectedSequenceID = previousSequenceID + 1;
+         long difference = receivedSequenceID - expectedSequenceID;
+
+         if (Math.abs(difference) < ROS2BehaviorTreeState.SYNC_FREQUENCY) // Account for restarts
+         {
+            if (difference > 0)
+            {
+               messageDropCount += difference;
+            }
+            else if (difference < 0)
+            {
+               outOfOrderCount -= difference;
+            }
+         }
+
+         previousSequenceID = receivedSequenceID;
+
+         recievedMessageNotification.set();
+      });
    }
 
    public void update()
@@ -50,20 +78,6 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
          synchronized (behaviorTreeStateMessageSwapReference)
          {
             BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageSwapReference.getForThreadTwo();
-
-            ++numberOfMessagesReceived;
-            for (Runnable messageRecievedCallback : messageRecievedCallbacks)
-            {
-               messageRecievedCallback.run();
-            }
-
-            long nextUpdateNumber = behaviorTreeStateMessage.getSequenceId();
-            if (previousUpdateNumber > -1)
-            {
-               long expectedUpdateNumber = previousUpdateNumber + 1;
-               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
-            }
-            previousUpdateNumber = nextUpdateNumber;
 
             numberOfOnRobotNodes = behaviorTreeStateMessage.getBehaviorTreeIndices().size();
 
@@ -205,9 +219,19 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
+   public long getPreviousSequenceID()
+   {
+      return previousSequenceID;
+   }
+
    public long getMessageDropCount()
    {
-      return messageDropCount;
+      return messageDropCount - outOfOrderCount;
+   }
+
+   public long getOutOfOrderCount()
+   {
+      return outOfOrderCount;
    }
 
    public int getNumberOfOnRobotNodes()

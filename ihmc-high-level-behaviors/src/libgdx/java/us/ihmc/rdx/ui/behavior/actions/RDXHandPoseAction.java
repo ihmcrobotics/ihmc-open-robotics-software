@@ -10,8 +10,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
@@ -304,7 +304,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          }
       }
 
-      ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+      BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
       if (actionSequence != null)
       {
          HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,

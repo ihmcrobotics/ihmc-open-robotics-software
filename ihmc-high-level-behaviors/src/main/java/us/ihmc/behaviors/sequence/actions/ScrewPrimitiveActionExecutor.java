@@ -10,9 +10,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -109,7 +109,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+         BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
          if (actionSequence != null)
          {
             if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
@@ -470,8 +470,11 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          state.getCurrentPose().getValue().set(syncedHandControlPose);
          state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
          state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
-         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+         if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
+         {
+            state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+            state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+         }
 
          if (meetsDesiredCompletionCriteria)
          {

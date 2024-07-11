@@ -44,6 +44,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean mouseHoveringNodeLine;
    private boolean anySpecificWidgetOnLineClicked = false;
    private boolean treeWidgetExpanded = false;
+   private int previousNumberOfChildren = 0;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
@@ -73,6 +74,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void update()
    {
       BehaviorTreeNodeLayer.super.update();
+
+      // Automatically expand if less than 5 children are added at once
+      int deltaChildren = getChildren().size() - previousNumberOfChildren;
+      previousNumberOfChildren = getChildren().size();
+      if (deltaChildren > 0 && deltaChildren < 5)
+         treeWidgetExpanded = true;
 
       while (!state.getLogger().getRecentMessages().isEmpty())
       {
@@ -154,7 +161,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.Header));
       }
 
-      if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          setSpecificWidgetOnRowClicked();
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
@@ -195,14 +202,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderContextMenuItems()
    {
-      if (ImGui.menuItem(labels.get("Rename...")))
+      if (!isRootNode())
       {
-         RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
-         isNameBeingEdited = true;
-         imNodeNameText.set(definition.getName());
-      }
+         if (ImGui.menuItem(labels.get("Rename...")))
+         {
+            RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
+            isNameBeingEdited = true;
+            imNodeNameText.set(definition.getName());
+         }
 
-      ImGui.separator();
+         ImGui.separator();
+      }
 
       if (definition.isJSONRoot())
       {
@@ -216,7 +226,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             definition.setName(definition.getName().replace(".json", ""));
          }
       }
-      else
+      else if (!isRootNode())
       {
          if (ImGui.menuItem(labels.get("Convert to JSON Root")))
          {

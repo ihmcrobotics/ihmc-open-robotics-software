@@ -155,10 +155,19 @@ public class GroundPlaneEstimator
     */
    public void compute()
    {
+      compute(0.0);
+   }
+
+   /**
+    * Estimate the ground plane given the current list of ground contact points, accounting for yaw.
+    * @param yaw : yaw of ground plane relative to world
+    */
+   public void compute(double yaw)
+   {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
 
       groundPlanePose.getPosition().set(groundPlane.getPoint());
-      groundPlanePose.getOrientation().setYawPitchRoll(0.0, getPitch(), getRoll());
+      groundPlanePose.getOrientation().setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
       groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 
@@ -168,13 +177,23 @@ public class GroundPlaneEstimator
     */
    public void compute(List<? extends FramePoint3DReadOnly> contactPoints)
    {
+      compute(contactPoints, 0.0);
+   }
+
+   /**
+    * Set the list of ground contact points and compute the ground plane, accounting for yaw.
+    * @param contactPoints : list of ground contact points
+    * @param yaw : yaw of ground plane relative to world
+    */
+   public void compute(List<? extends FramePoint3DReadOnly> contactPoints, double yaw)
+   {
       groundPlanePoints.clear();
 
       int nPoints = Math.min(contactPoints.size(), MAX_GROUND_PLANE_POINTS);
       for (int i = 0; i < nPoints; i++)
          addContactPoint(contactPoints.get(i));
 
-      compute();
+      compute(yaw);
    }
 
    /**
@@ -183,12 +202,22 @@ public class GroundPlaneEstimator
     */
    public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints)
    {
+      compute(contactPoints, 0.0);
+   }
+
+   /**
+    * Set the list of ground contact points and compute the ground plane, accounting for yaw.
+    * @param contactPoints : quadrant dependent list of contact points
+    * @param yaw : yaw of ground plane relative to world
+    */
+   public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints, double yaw)
+   {
       groundPlanePoints.clear();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          addContactPoint(contactPoints.get(robotQuadrant));
 
-      compute();
+      compute(yaw);
    }
 
    public PoseReferenceFrame getGroundPlaneFrame()

@@ -1,7 +1,6 @@
 package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.TestTools;
 import us.ihmc.tools.UnitConversions;
@@ -22,9 +21,7 @@ public class ThrottlerAndFrequencyCounterTest
          frequencyCalculator.ping();
 
          double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         long sleepTimeMillis = (long) (sleepTimeSeconds * 1000);
-
-         ThreadTools.sleep(sleepTimeMillis);
+         MissingThreadTools.sleep(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
@@ -45,17 +42,15 @@ public class ThrottlerAndFrequencyCounterTest
          frequencyCalculator.ping();
 
          double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         long sleepTimeMillis = (long) (sleepTimeSeconds * 1000);
-
-         ThreadTools.sleep(sleepTimeMillis);
+         MissingThreadTools.sleep(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
 
       // Decaying sleep
-      ThreadTools.sleep((long) (decayTimeSeconds * 1000));
+      MissingThreadTools.sleep(decayTimeSeconds);
 
-      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.sqrt(decayTimeSeconds);
+      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
       TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
    }
 
@@ -65,6 +60,7 @@ public class ThrottlerAndFrequencyCounterTest
 
       Throttler throttler = new Throttler();
       throttler.setFrequency(targetFrequency);
+      throttler.waitAndRun();
 
       long start = System.currentTimeMillis();
       FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
@@ -85,54 +81,54 @@ public class ThrottlerAndFrequencyCounterTest
    @Test
    public void testFrequencyCounter100Hz()
    {
-      testFrequencyCounter(100, 5);
+      testFrequencyCounter(100, 2);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter100Hz()
    {
-      testThrottlerAndFrequencyCounter(100, 5);
+      testThrottlerAndFrequencyCounter(100, 2);
    }
 
    @Test
    public void testFrequencyCounter10Hz()
    {
-      testFrequencyCounter(10, 0.1);
+      testFrequencyCounter(10, 0.2);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter10Hz()
    {
-      testThrottlerAndFrequencyCounter(10, 0.1);
+      testThrottlerAndFrequencyCounter(10, 0.2);
    }
 
    @Test
    public void testFrequencyCounter1Hz()
    {
-      testFrequencyCounter(1, 0.01);
+      testFrequencyCounter(1, 0.002);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter1Hz()
    {
-      testThrottlerAndFrequencyCounter(1, 0.01);
+      testThrottlerAndFrequencyCounter(1, 0.002);
    }
 
    @Test
    public void testFrequencyCounter0_5Hz()
    {
-      testFrequencyCounter(0.5, 0.005);
+      testFrequencyCounter(0.5, 0.001);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter0_5Hz()
    {
-      testThrottlerAndFrequencyCounter(0.5, 0.005);
+      testThrottlerAndFrequencyCounter(0.5, 0.001);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter100HzDecaying()
    {
-      testFrequencyCounterDecaying(100, 5, 10);
+      testFrequencyCounterDecaying(100, 5, 2);
    }
 }

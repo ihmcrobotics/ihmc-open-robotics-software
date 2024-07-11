@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.activeMapping;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -26,6 +25,7 @@ import java.util.HashMap;
 
 public class ContinuousPlannerStatistics
 {
+   private static final boolean DEBUG = false;
    private File file;
    private final HashMap<String, Float> statistics = new HashMap<>();
 
@@ -56,8 +56,8 @@ public class ContinuousPlannerStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      String filePath = IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY.resolve(logFileName).toString();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
 
 //      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
 //      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
@@ -67,9 +67,9 @@ public class ContinuousPlannerStatistics
 
       try
       {
-         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY))
+         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
          {
-            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY);
+            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
          }
          if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
          {
@@ -173,6 +173,7 @@ public class ContinuousPlannerStatistics
 
          if (logToFile)
          {
+            if (DEBUG)
             LogTools.info("Logging Continuous Walking Statistics: {}", file.getAbsoluteFile().toPath());
             FileTools.write(file.getAbsoluteFile().toPath(), toString().getBytes(), WriteOption.APPEND, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
@@ -204,7 +205,8 @@ public class ContinuousPlannerStatistics
       }
 
       builder.append("]\n");
-      LogTools.warn("Additional String: {}", additionalString.toString());
+      if (DEBUG)
+         LogTools.warn("Additional String: {}", additionalString.toString());
       builder.append(additionalString.toString()).append("\n");
 
       return builder.toString();
@@ -212,7 +214,8 @@ public class ContinuousPlannerStatistics
 
    public void appendString(String string)
    {
-      LogTools.warn("Additional String: {}", string);
+      if (DEBUG)
+         LogTools.warn("Additional String: {}", string);
       additionalString.append(String.format("[%s]: (", new SimpleDateFormat("HH:mm:ss.SSS").format(new Date())));
       additionalString.append(string);
       additionalString.append(")\n");

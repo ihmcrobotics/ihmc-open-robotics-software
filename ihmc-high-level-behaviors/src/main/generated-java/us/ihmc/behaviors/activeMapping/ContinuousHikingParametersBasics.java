@@ -8,14 +8,9 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ContinuousHikingParametersBasics extends ContinuousHikingParametersReadOnly, StoredPropertySetBasics
 {
-   default void setEnableContinuousWalking(boolean enableContinuousWalking)
+   default void setEnableContinuousHiking(boolean enableContinuousHiking)
    {
-      set(ContinuousHikingParameters.enableContinuousWalking, enableContinuousWalking);
-   }
-
-   default void setShortcutIsPressed(boolean shortcutIsPressed)
-   {
-      set(ContinuousHikingParameters.shortcutIsPressed, shortcutIsPressed);
+      set(ContinuousHikingParameters.enableContinuousHiking, enableContinuousHiking);
    }
 
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
@@ -61,6 +56,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)
    {
       set(ContinuousHikingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
+   }
+
+   default void setPercentThroughSwingToPlanTo(double percentThroughSwingToPlanTo)
+   {
+      set(ContinuousHikingParameters.percentThroughSwingToPlanTo, percentThroughSwingToPlanTo);
    }
 
    default void setLogFootstepPlans(boolean logFootstepPlans)

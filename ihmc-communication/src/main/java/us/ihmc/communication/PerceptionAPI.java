@@ -24,8 +24,11 @@ import perception_msgs.msg.dds.REAStateRequestMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
+import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
+import std_msgs.msg.dds.Int64;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -144,6 +147,10 @@ public final class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = BEST_EFFORT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
    public static final ROS2Topic<Empty> REQUEST_OUSTER_DEPTH = PERCEPTION_MODULE.withSuffix("request_ouster_depth").withType(Empty.class);
 
+   public static final ROS2Topic<ZEDSVOCurrentFileMessage> ZED_SVO_CURRENT_FILE = PERCEPTION_MODULE.withSuffix("zed_svo_current_file").withType(ZEDSVOCurrentFileMessage.class);
+   public static final ROS2Topic<Int64> ZED_SVO_SET_POSITION = PERCEPTION_MODULE.withSuffix("zed_svo_set_position").withType(Int64.class);
+   public static final ROS2Topic<Empty> ZED_SVO_PAUSE = PERCEPTION_MODULE.withSuffix("zed_svo_pause").withType(Empty.class);
+   public static final ROS2Topic<Empty> ZED_SVO_PLAY = PERCEPTION_MODULE.withSuffix("zed_svo_play").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_ZED_COLOR = PERCEPTION_MODULE.withSuffix("request_zed_color").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("request_zed_depth").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
@@ -168,6 +175,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
    public static final ROS2Topic<BallDetectionParametersMessage> BALL_DETECTION_PARAMETERS = IHMC_ROOT.withModule("ping_pong_ball")
                                                                                                       .withSuffix("detection_parameters")
                                                                                                       .withType(BallDetectionParametersMessage.class);

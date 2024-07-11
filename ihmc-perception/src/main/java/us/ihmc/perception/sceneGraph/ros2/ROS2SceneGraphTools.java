@@ -1,13 +1,13 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
+import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -16,10 +16,14 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+
+import java.util.Arrays;
 
 public class ROS2SceneGraphTools
 {
@@ -76,23 +80,22 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new CenterposeNode(nodeID,
                                         nodeName,
-                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking(),
+                                        subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString(),
+                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
+                                        subscriptionNode.getCenterposeNodeMessage().getConfidence(),
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
+                                        Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
+                                              .map(Point2D::new)
+                                              .toArray(Point2D[]::new),
                                         crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
-                                    subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
-                                    subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
-                                    YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
                                     subscriptionNode.getYOLONodeMessage().getConfidence(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose(),
                                     crdtInfo);
@@ -116,12 +119,20 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
-         DoorNode doorNode = new DoorNode(nodeID, nodeName, crdtInfo);
-         doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
-         doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
-         doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
-         doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
-         doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
+         DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
+         doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
+         doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
+         doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
+         for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
+         {
+            DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
+            DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
+            DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide,
+                                                                                 openingMechanismType,
+                                                                                 MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId()));
+            doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
+            doorNode.getOpeningMechanisms().put(doorOpeningMechanism.getDetectionID(), doorOpeningMechanism);
+         }
          sceneNode = doorNode;
       }
       else

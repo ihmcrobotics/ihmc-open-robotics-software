@@ -64,7 +64,7 @@ public class RDXSwingTrajectoryGraphic implements RenderableProvider
                                                                                                          trajectory.get(Axis3D.Z));
       swingTrajectoryModel.compute(polynomials);
 
-      LogTools.warn("Swing trajectory type: " + footstep.getTrajectoryType() + ", number of waypoints: " + trajectoryWaypointModel.size() + ", number of polynomials: " + polynomials.size());
+      LogTools.info("Swing trajectory type: " + footstep.getTrajectoryType() + ", number of waypoints: " + trajectoryWaypointModel.size() + ", number of polynomials: " + polynomials.size());
    }
 
    @Override

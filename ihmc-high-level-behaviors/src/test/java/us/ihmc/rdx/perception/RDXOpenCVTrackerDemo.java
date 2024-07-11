@@ -66,8 +66,9 @@ public class RDXOpenCVTrackerDemo
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH)::isDemanded,
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR)::isDemanded);
+      imageRetriever.start();
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
       tracker = TrackerKCF.create();
