@@ -31,7 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 //TODO move parameters of poses in Nadia
 public class RDXHumanoidDemoPoses extends RDXPanel
 {
-   private static final double maxFootSpeed = 0.4;
+   private static final double maxFootSpeed = 0.7;
+   private static final double nominalFootWidth = 0.225;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final DRCRobotModel robotModel;
@@ -165,6 +166,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       if (ImGui.button(labels.get("Squat")))
       {
+         double delay = setBothFeetDown(1.0);
+
          if (!usedFirstMode)
          {
             System.arraycopy(leftArmSquat, 0, leftArm, 0, Math.min(leftArm.length, leftArmSquat.length));
@@ -176,9 +179,9 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             pelvisPosition.setZ(0.78);
          }
          for (RobotSide robotSide : RobotSide.values)
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
-         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), delay);
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), delay);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), delay);
 
          publishPoses();
          usedFirstMode = !usedFirstMode;
@@ -186,6 +189,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       if (ImGui.button(labels.get("Flex")))
       {
+         double delay = setBothFeetDown(1.0);
+
          if (usedFirstMode)
          {
             System.arraycopy(leftArmFlex1, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex1.length));
@@ -203,9 +208,9 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
          for (RobotSide robotSide : RobotSide.values)
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
-         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), delay);
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), delay);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), delay);
          publishPoses();
          usedFirstMode = !usedFirstMode;
       }
@@ -224,9 +229,10 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             pelvisOrientation.setYaw(Math.toRadians(15));
             pelvisOrientation.setPitch(Math.toRadians(10));
 
-            FramePose3D rightLiftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.RIGHT));
-            rightLiftFootPose.getPosition().addZ(0.05);
-            appendFootPoseToPublish(RobotSide.RIGHT, 0.15, rightLiftFootPose);
+            FramePose3D rightLiftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+            rightLiftFootPose.getPosition().addZ(0.03);
+            rightLiftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            appendFootPoseToPublish(RobotSide.RIGHT, 0.1, rightLiftFootPose);
 
             FramePose3D rightFinalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
             rightFinalFootPose.setZ(0.2);
@@ -235,12 +241,12 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             rightFinalFootPose.appendPitchRotation(Math.toRadians(45.0));
             rightFinalFootPose.appendRollRotation(Math.toRadians(-25.0));
 
-            appendFootPoseToPublish(RobotSide.RIGHT, 0.75, rightFinalFootPose);
+            appendFootPoseToPublish(RobotSide.RIGHT, teleoperationParameters.getTrajectoryTime(), rightFinalFootPose);
 
             for (RobotSide robotSide : RobotSide.values)
-               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.25);
-            appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.25);
-            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.25);
+               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.1);
+            appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.1);
+            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.1);
          }
          else
          {
@@ -254,8 +260,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             pelvisOrientation.setToPitchOrientation(Math.toRadians(30));
             pelvisPosition.setZ(0.90);
 
-            if (isFootOffGround(RobotSide.RIGHT))
-               setFootDown(RobotSide.RIGHT, 1.0);
+            setBothFeetDown(teleoperationParameters.getTrajectoryTime() + 0.25);
 
             for (RobotSide robotSide : RobotSide.values)
                appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.25);
@@ -416,12 +421,18 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             System.arraycopy(extendedDab, 0, rightArm, 0, Math.min(rightArm.length, extendedDab.length));
             leftArm[1] = -leftArm[1];
             leftArm[2] = -leftArm[2];
-            leftArm[4] = -leftArm[4];
-            leftArm[5] = -leftArm[5];
+            if (leftArm.length > 4)
+            {
+               leftArm[4] = -leftArm[4];
+               leftArm[5] = -leftArm[5];
+            }
             rightArm[1] = -rightArm[1];
             rightArm[2] = -rightArm[2];
-            rightArm[4] = -rightArm[4];
-            rightArm[5] = -rightArm[5];
+            if (rightArm.length > 4)
+            {
+               rightArm[4] = -rightArm[4];
+               rightArm[5] = -rightArm[5];
+            }
          }
          else
          {
@@ -458,47 +469,87 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          return syncedRobot.getLatestCapturabilityBasedStatus().getRightFootSupportPolygon3d().isEmpty();
    }
 
-   private void setFootDown(RobotSide robotSide, double totalDuration)
+   private double setBothFeetDown(double totalDuration)
    {
-      FramePose3D currentFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
-      FramePose3D finalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide()));
-      finalFootPose.setY(robotSide.negateIfRightSide(0.225)); // TODO extract this parameter
+      boolean movedFoot = false;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (isFootOffGround(robotSide))
+         {
+            movedFoot = true;
+            totalDuration = setFootDown(robotSide, totalDuration);
+         }
+      }
+
+      if (movedFoot)
+         return totalDuration;
+
+      return 0.0;
+   }
+
+   private double setFootDown(RobotSide robotSide, double totalDuration)
+   {
+      FramePose3D finalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide()));
+      finalFootPose.setY(robotSide.negateIfRightSide(nominalFootWidth)); // TODO extract this parameter
 
       FramePose3D intermediatePose = new FramePose3D(finalFootPose);
-      intermediatePose.getPosition().addZ(0.075);
-      finalFootPose.getPosition().subZ(0.02);
+      intermediatePose.getPosition().setZ(0.075);
+      finalFootPose.getPosition().setZ(-0.02);
 
       intermediatePose.changeFrame(ReferenceFrame.getWorldFrame());
       finalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      FramePose3D currentFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
       currentFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double minDuration = currentFootPose.getPositionDistance(finalFootPose) / maxFootSpeed;
-      totalDuration = Math.max(totalDuration, minDuration);
+      double distanceToIntermediate = currentFootPose.getPositionDistance(intermediatePose);
+      double distanceToFinal = intermediatePose.getPositionDistance(finalFootPose);
 
-      appendFootPoseToPublish(robotSide, 0.75 * totalDuration, intermediatePose);
-      appendFootPoseToPublish(robotSide, 0.25 * totalDuration, finalFootPose);
+      double intermediateAlpha = 0.7;
+      double durationScale = (distanceToIntermediate / (intermediateAlpha * totalDuration)) / maxFootSpeed;
+      durationScale = Math.max((distanceToFinal / ((1.0 - intermediateAlpha) * totalDuration)) / maxFootSpeed, durationScale);
+      durationScale = Math.max(durationScale, 1.0);
+
+      totalDuration = durationScale * totalDuration;
+
+      appendFootPoseToPublish(robotSide, intermediateAlpha * totalDuration, intermediatePose);
+      appendFootPoseToPublish(robotSide, (1.0 - intermediateAlpha) * totalDuration, finalFootPose);
 
       FootLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
-      loadBearingMessage.setExecutionDelayTime(totalDuration);
+      loadBearingMessage.setExecutionDelayTime(totalDuration + 0.1);
 
       footLoadBearingMessagesToPublish.put(robotSide, loadBearingMessage);
+
+      return totalDuration;
    }
 
    private void appendFootPoseToPublish(RobotSide robotSide, double moveDuration, FramePose3DReadOnly footPose)
    {
+      FramePose3D lastPose = new FramePose3D();
       if (footTrajectoryMessagesToPublish.get(robotSide) == null)
       {
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
          footTrajectoryMessage.setRobotSide(robotSide.toByte());
 
+         lastPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
+         lastPose.changeFrame(ReferenceFrame.getWorldFrame());
+
          footTrajectoryMessagesToPublish.put(robotSide, footTrajectoryMessage);
+      }
+      else
+      {
+         SE3TrajectoryPointMessage lastPoint = footTrajectoryMessagesToPublish.get(robotSide).getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast();
+         lastPose.getPosition().set(lastPoint.getPosition());
+         lastPose.getOrientation().set(lastPoint.getOrientation());
       }
 
       FootTrajectoryMessage footTrajectoryMessage = footTrajectoryMessagesToPublish.get(robotSide);
 
       FramePose3D poseToPublish = new FramePose3D(footPose);
       poseToPublish.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double minDuration = poseToPublish.getPositionDistance(lastPose) / maxFootSpeed;
+      moveDuration = Math.max(moveDuration, minDuration);
 
       double waypointTime;
       if (!footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
