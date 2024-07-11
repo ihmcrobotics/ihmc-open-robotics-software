@@ -10,6 +10,8 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
@@ -130,19 +132,19 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       pelvisToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
-   public RotationMatrixBasics getRotation()
+   public Orientation3DReadOnly getRotation()
    {
-      return pelvisToParentTransform.accessValue().getRotation();
+      return pelvisToParentTransform.getValueReadOnly().getRotation();
    }
 
    public double getHeight()
    {
-      return pelvisToParentTransform.accessValue().getTranslationZ();
+      return pelvisToParentTransform.getValueReadOnly().getTranslationZ();
    }
 
    public double getPitch()
    {
-      return pelvisToParentTransform.accessValue().getRotation().getPitch();
+      return pelvisToParentTransform.getValueReadOnly().getRotation().getPitch();
    }
 
    public double getTrajectoryDuration()
