@@ -9,7 +9,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager;
-import us.ihmc.tools.Timer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final BehaviorTreeRootNodeState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
-   private final Timer manualExecutionOverrideTimer = new Timer();
    private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
@@ -124,20 +122,12 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
          {
             ImGui.sameLine();
 
-            boolean confirmationState = manualExecutionOverrideTimer.isRunning(5.0);
             boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
             if (disableManuallyExecuteButton)
                ImGui.beginDisabled();
-            if (ImGui.button(labels.get(confirmationState ? "Manually (confirm)" : "Manually")))
+            if (ImGui.button(labels.get("Manually")))
             {
-               if (confirmationState)
-               {
-                  getState().setManualExecutionRequested();
-               }
-               else
-               {
-                  manualExecutionOverrideTimer.reset();
-               }
+               getState().setManualExecutionRequested();
             }
             if (disableManuallyExecuteButton)
                ImGui.endDisabled();
