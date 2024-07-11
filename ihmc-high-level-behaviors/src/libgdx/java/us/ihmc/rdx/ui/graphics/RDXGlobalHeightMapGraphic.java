@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
+import perception_msgs.msg.dds.GlobalMapCellEntry;
+import perception_msgs.msg.dds.GlobalMapCellMap;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,6 +29,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,29 +48,49 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-
    public void update()
    {
       for (RDXHeightMapGraphicNew mapRenderables : globalMapRenderables.values())
          mapRenderables.update();
    }
 
-   public void generateMeshesAsync(HeightMapMessage heightMapMessage)
+   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
    {
-      executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
+      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
    }
 
-   public void generateMeshes(HeightMapMessage heightMapMessage)
+   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
    {
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-      globalHeightMap.addHeightMap(heightMapData);
+      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
+      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
 
-      for (GlobalMapCell globalMapCell : globalHeightMap.getModifiedMapCells())
+      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
       {
-         RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapCell);
-         graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
+         GlobalMapCell globalMapCell = new GlobalMapCell(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
+         globalMapCell.setHeightAt(0, globalMapCellEntry.getCellHeight());
+
+         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapCell);
+
+         graphic.generateMeshesGlobal(globalMapCell);
       }
    }
+
+   //   public void generateMeshesAsync(HeightMapMessage heightMapMessage)
+   //   {
+   //      executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
+   //   }
+
+   //   public void generateMeshes(HeightMapMessage heightMapMessage)
+   //   {
+   //      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+   //      globalHeightMap.addHeightMap(heightMapData);
+   //
+   //      for (GlobalMapCell globalMapCell : globalHeightMap.getModifiedMapCells())
+   //      {
+   //         RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapCell);
+   //         graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
+   //      }
+   //   }
 
    private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapCell globalMapCell)
    {
@@ -84,8 +107,8 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-         for (RDXHeightMapGraphicNew mapRenderables : globalMapRenderables.values())
-            mapRenderables.getRenderables(renderables, pool);
+      for (RDXHeightMapGraphicNew mapRenderables : globalMapRenderables.values())
+         mapRenderables.getRenderables(renderables, pool);
    }
 
    public void destroy()

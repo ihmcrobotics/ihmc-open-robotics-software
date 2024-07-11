@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapCell;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -69,6 +70,23 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
                      heightMapMessage.getGridCenterX(),
                      heightMapMessage.getGridCenterY(),
                      heightMapMessage.getEstimatedGroundHeight());
+   }
+
+   public void generateMeshesGlobal(GlobalMapCell globalMapCell)
+   {
+      IntToDoubleFunction heightsProvider = globalMapCell::getHeight;
+      IntFunction<Integer> keysProvider = globalMapCell::getKey;
+
+
+      List<RDXMultiColorMeshBuilder> meshBuilders = generateHeightCells(heightsProvider,
+                                                                        keysProvider,
+                                                                        1,
+                                                                        2,
+                                                                        globalMapCell.getGridSizeXY(),
+                                                                        globalMapCell.getCenterX(),
+                                                                        globalMapCell.getCenterY(),
+                                                                        globalMapCell.getHeight(0));
+      latestMeshBuilder.set(meshBuilders);
    }
 
    private void generateMeshes(IntToDoubleFunction heightsProvider,

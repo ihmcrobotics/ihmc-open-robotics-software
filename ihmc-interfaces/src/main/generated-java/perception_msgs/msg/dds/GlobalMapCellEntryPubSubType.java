@@ -15,7 +15,7 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a5ded94460ee9d88c5be1d5b24b607749cc4a170f9efee8fc281f44b3dedd3f8";
+   		return "3fb32caedd6b932601c21f35fd43795b6ef05b8e83f6ecfe932dca5f19b33f51";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +87,9 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +104,8 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       cdr.write_type_6(data.getCellHeight());
 
+      cdr.write_type_6(data.getResolution());
+
    }
 
    public static void read(perception_msgs.msg.dds.GlobalMapCellEntry data, us.ihmc.idl.CDR cdr)
@@ -111,6 +118,8 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       data.setCellHeight(cdr.read_type_6());
       	
+      data.setResolution(cdr.read_type_6());
+      	
 
    }
 
@@ -121,6 +130,7 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_2("x_index", data.getXIndex());
       ser.write_type_2("y_index", data.getYIndex());
       ser.write_type_6("cell_height", data.getCellHeight());
+      ser.write_type_6("resolution", data.getResolution());
    }
 
    @Override
@@ -130,6 +140,7 @@ public class GlobalMapCellEntryPubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setXIndex(ser.read_type_2("x_index"));
       data.setYIndex(ser.read_type_2("y_index"));
       data.setCellHeight(ser.read_type_6("cell_height"));
+      data.setResolution(ser.read_type_6("resolution"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.GlobalMapCellEntry src, perception_msgs.msg.dds.GlobalMapCellEntry dest)

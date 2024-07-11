@@ -15,6 +15,7 @@ module perception_msgs
         long x_index;
         long y_index;
         double cell_height;
+        double resolution;
       };
     };
   };

@@ -7,4 +7,6 @@ int32 y_index
 
 float64 cell_height
 
+float64 resolution
+
 

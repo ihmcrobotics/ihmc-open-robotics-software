@@ -12,6 +12,10 @@ public class GlobalHeightMap
    private final IntMap<GlobalMapCell> heightMapDataIntMap = new IntMap<>();
    private final HashSet<GlobalMapCell> modifiedCells = new HashSet<>();
 
+   public GlobalHeightMap()
+   {
+   }
+
    public void addHeightMap(HeightMapData heightMapData)
    {
       modifiedCells.clear();
@@ -50,7 +54,6 @@ public class GlobalHeightMap
 
       return data;
    }
-
 }
 
 //# File: GlobalHeightMap.msg

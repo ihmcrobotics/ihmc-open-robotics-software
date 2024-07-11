@@ -12,6 +12,7 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
    public int x_index_;
    public int y_index_;
    public double cell_height_;
+   public double resolution_;
 
    public GlobalMapCellEntry()
    {
@@ -32,6 +33,8 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
       y_index_ = other.y_index_;
 
       cell_height_ = other.cell_height_;
+
+      resolution_ = other.resolution_;
 
    }
 
@@ -71,6 +74,15 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
       return cell_height_;
    }
 
+   public void setResolution(double resolution)
+   {
+      resolution_ = resolution;
+   }
+   public double getResolution()
+   {
+      return resolution_;
+   }
+
 
    public static Supplier<GlobalMapCellEntryPubSubType> getPubSubType()
    {
@@ -97,6 +109,8 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_height_, other.cell_height_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resolution_, other.resolution_, epsilon)) return false;
+
 
       return true;
    }
@@ -118,6 +132,8 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
 
       if(this.cell_height_ != otherMyClass.cell_height_) return false;
 
+      if(this.resolution_ != otherMyClass.resolution_) return false;
+
 
       return true;
    }
@@ -135,7 +151,9 @@ public class GlobalMapCellEntry extends Packet<GlobalMapCellEntry> implements Se
       builder.append("y_index=");
       builder.append(this.y_index_);      builder.append(", ");
       builder.append("cell_height=");
-      builder.append(this.cell_height_);
+      builder.append(this.cell_height_);      builder.append(", ");
+      builder.append("resolution=");
+      builder.append(this.resolution_);
       builder.append("}");
       return builder.toString();
    }

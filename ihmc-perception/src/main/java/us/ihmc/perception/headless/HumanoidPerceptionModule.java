@@ -86,7 +86,7 @@ public class HumanoidPerceptionModule
    private FramePlanarRegionsList sensorFrameRegions;
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
-   private GlobalHeightMap globalHeightMap;
+   private final GlobalHeightMap globalHeightMap = new GlobalHeightMap();
 
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
    private final Notification resetHeightMapRequested = new Notification();
@@ -172,16 +172,8 @@ public class HumanoidPerceptionModule
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
-                                   //updating global height map
-                                   Instant globalAcquisitionTime = Instant.now();
                                    HeightMapData requiredHeightMapData = getLatestHeightMapData();
                                    globalHeightMap.addHeightMap(requiredHeightMapData);
-//                                   PerceptionMessageTools.convertHeightMapDataToMat(globalHeightMap,globalHeightMap.)
-
-
-
-
-
 
                                    if (ros2Helper != null)
                                    {
@@ -192,7 +184,7 @@ public class HumanoidPerceptionModule
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
 
-                                      publishGlobalHeightMap(ros2Helper, globalHeightMap, globalAcquisitionTime,PerceptionAPI.GLOBAL_HEIGHT_MAP);
+                                      publishGlobalHeightMap(ros2Helper, globalHeightMap, null,PerceptionAPI.GLOBAL_HEIGHT_MAP);
 
                                    }
                                 });
@@ -237,6 +229,7 @@ public class HumanoidPerceptionModule
          globalMapCellEntry.setKey(cell.hashCode());
          globalMapCellEntry.setXIndex(cell.getCenterX());
          globalMapCellEntry.setYIndex(cell.getCenterY());
+         globalMapCellEntry.setResolution(cell.getGridResolutionXY());
          // Entered a 0 for now as the assumption as this global map cell has only one height
          globalMapCellEntry.setCellHeight(cell.getHeight(0));
          collectionOfGlobalMapCells.add(globalMapCellEntry);
