@@ -1,9 +1,11 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
+import us.ihmc.rdx.ui.behavior.actions.RDXPsyonicAbilityHandCommandAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -43,6 +45,8 @@ public class RDXActionProgressWidgetsManager
          if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
             containsHandMovements = true;
          if (action instanceof RDXSakeHandCommandAction)
+            containsHandConfiguration = true;
+         if (action instanceof RDXPsyonicAbilityHandCommandAction)
             containsHandConfiguration = true;
       }
       boolean showPosePlots = containsFootsteps || containsHandMovements;

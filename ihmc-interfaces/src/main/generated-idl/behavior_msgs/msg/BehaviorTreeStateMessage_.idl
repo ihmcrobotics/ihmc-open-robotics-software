@@ -12,6 +12,7 @@
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./PsyonicAbilityHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./TrashCanInteractionStateMessage_.idl"
@@ -50,23 +51,26 @@ module behavior_msgs
       const octet SAKE_HAND_COMMAND_ACTION =
       12;
 
-      const octet HAND_POSE_ACTION =
+      const octet PSYONIC_ABILITY_HAND_COMMAND_ACTION =
       13;
 
-      const octet HAND_WRENCH_ACTION =
+      const octet HAND_POSE_ACTION =
       14;
 
-      const octet SCREW_PRIMITIVE_ACTION =
+      const octet HAND_WRENCH_ACTION =
       15;
 
-      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
+      const octet SCREW_PRIMITIVE_ACTION =
       16;
 
-      const octet WAIT_DURATION_ACTION =
+      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
       17;
 
-      const octet FOOT_POSE_ACTION =
+      const octet WAIT_DURATION_ACTION =
       18;
+
+      const octet FOOT_POSE_ACTION =
+      19;
 
 
       /**
@@ -109,6 +113,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
+        sequence<behavior_msgs::msg::dds::PsyonicAbilityHandCommandActionStateMessage, 200> psyonic_ability_hand_command_actions;
         sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 200> screw_primitive_actions;

@@ -5,10 +5,10 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionExecutor;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.door.DoorTraversalExecutor;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.door.DoorTraversalExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -119,6 +119,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
          return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
+      }
+      if (nodeType == PsyonicAbilityHandCommandActionDefinition.class)
+      {
+         return new PsyonicAbilityHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {

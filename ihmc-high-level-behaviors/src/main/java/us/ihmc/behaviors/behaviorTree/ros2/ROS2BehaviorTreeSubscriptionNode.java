@@ -1,6 +1,23 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.msg.dds.ActionNodeStateMessage;
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
+import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.DoorTraversalStateMessage;
+import behavior_msgs.msg.dds.FootPoseActionStateMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
+import behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage;
+import behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
+import behavior_msgs.msg.dds.TrashCanInteractionStateMessage;
+import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +36,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
+   private PsyonicAbilityHandCommandActionStateMessage psyonicAbilityHandCommandActionStateMessage;
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
@@ -41,6 +59,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
+      psyonicAbilityHandCommandActionStateMessage = null;
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
       screwPrimitiveActionStateMessage = null;
@@ -168,6 +187,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setSakeHandCommandActionStateMessage(SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage)
    {
       this.sakeHandCommandActionStateMessage = sakeHandCommandActionStateMessage;
+   }
+
+   public PsyonicAbilityHandCommandActionStateMessage getPsyonicAbilityHandCommandActionStateMessage()
+   {
+      return psyonicAbilityHandCommandActionStateMessage;
+   }
+
+   public void setPsyonicAbilityHandCommandActionStateMessage(PsyonicAbilityHandCommandActionStateMessage psyonicAbilityHandCommandActionStateMessage)
+   {
+      this.psyonicAbilityHandCommandActionStateMessage = psyonicAbilityHandCommandActionStateMessage;
    }
 
    public HandPoseActionStateMessage getHandPoseActionStateMessage()

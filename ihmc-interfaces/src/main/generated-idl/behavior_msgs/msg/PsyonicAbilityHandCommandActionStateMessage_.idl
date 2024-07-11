@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__PsyonicAbilityHandCommandActionStateMessage__idl__
+#define __behavior_msgs__msg__PsyonicAbilityHandCommandActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./PsyonicAbilityHandCommandActionDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::PsyonicAbilityHandCommandActionStateMessage_")
+      struct PsyonicAbilityHandCommandActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::PsyonicAbilityHandCommandActionDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif

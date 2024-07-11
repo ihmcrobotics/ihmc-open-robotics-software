@@ -21,17 +21,19 @@ int8 FOOTSTEP_PLAN_ACTION=11
 
 int8 SAKE_HAND_COMMAND_ACTION=12
 
-int8 HAND_POSE_ACTION=13
+int8 PSYONIC_ABILITY_HAND_COMMAND_ACTION=13
 
-int8 HAND_WRENCH_ACTION=14
+int8 HAND_POSE_ACTION=14
 
-int8 SCREW_PRIMITIVE_ACTION=15
+int8 HAND_WRENCH_ACTION=15
 
-int8 PELVIS_HEIGHT_ORIENTATION_ACTION=16
+int8 SCREW_PRIMITIVE_ACTION=16
 
-int8 WAIT_DURATION_ACTION=17
+int8 PELVIS_HEIGHT_ORIENTATION_ACTION=17
 
-int8 FOOT_POSE_ACTION=18
+int8 WAIT_DURATION_ACTION=18
+
+int8 FOOT_POSE_ACTION=19
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -67,6 +69,8 @@ behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 behavior_msgs/FootstepPlanActionStateMessage[] footstep_plan_actions
 
 behavior_msgs/SakeHandCommandActionStateMessage[] sake_hand_command_actions
+
+behavior_msgs/PsyonicAbilityHandCommandActionStateMessage[] psyonic_ability_hand_command_actions
 
 behavior_msgs/HandPoseActionStateMessage[] hand_pose_actions
 

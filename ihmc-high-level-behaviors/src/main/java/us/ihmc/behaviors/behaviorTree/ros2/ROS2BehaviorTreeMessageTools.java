@@ -1,13 +1,38 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import behavior_msgs.msg.dds.BasicNodeStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.DoorTraversalStateMessage;
+import behavior_msgs.msg.dds.FootPoseActionStateMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
+import behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage;
+import behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
+import behavior_msgs.msg.dds.TrashCanInteractionStateMessage;
+import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
+import us.ihmc.behaviors.sequence.actions.FootPoseActionState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionState;
+import us.ihmc.behaviors.sequence.actions.PsyonicAbilityHandCommandActionState;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 
 /**
  * All the stuff that for packing/unpacking the specific types goes in here
@@ -33,6 +58,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getScrewPrimitiveActions().clear();
       treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
+      treeStateMessage.getPsyonicAbilityHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
       treeStateMessage.getFootPoseActions().clear();
    }
@@ -86,6 +112,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSakeHandCommandActions().size());
          sakeHandCommandActionState.toMessage(treeStateMessage.getSakeHandCommandActions().add());
+      }
+      else if (nodeState instanceof PsyonicAbilityHandCommandActionState psyonicAbilityHandCommandActionState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PSYONIC_ABILITY_HAND_COMMAND_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPsyonicAbilityHandCommandActions().size());
+         psyonicAbilityHandCommandActionState.toMessage(treeStateMessage.getPsyonicAbilityHandCommandActions().add());
       }
       else if (nodeState instanceof HandPoseActionState handPoseActionState)
       {
@@ -166,6 +198,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof SakeHandCommandActionState sakeHandCommandActionState)
       {
          sakeHandCommandActionState.fromMessage(subscriptionNode.getSakeHandCommandActionStateMessage());
+      }
+      else if (nodeState instanceof PsyonicAbilityHandCommandActionState psyonicAbilityHandCommandActionState)
+      {
+         psyonicAbilityHandCommandActionState.fromMessage(subscriptionNode.getPsyonicAbilityHandCommandActionStateMessage());
       }
       else if (nodeState instanceof HandPoseActionState handPoseActionState)
       {
@@ -293,6 +329,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setSakeHandCommandActionStateMessage(sakeHandCommandActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(sakeHandCommandActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sakeHandCommandActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.PSYONIC_ABILITY_HAND_COMMAND_ACTION ->
+         {
+            PsyonicAbilityHandCommandActionStateMessage psyonicAbilityHandCommandActionStateMessage = treeStateMessage.getPsyonicAbilityHandCommandActions().get(indexInTypesList);
+            subscriptionNode.setPsyonicAbilityHandCommandActionStateMessage(psyonicAbilityHandCommandActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(psyonicAbilityHandCommandActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(psyonicAbilityHandCommandActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.WAIT_DURATION_ACTION ->
          {

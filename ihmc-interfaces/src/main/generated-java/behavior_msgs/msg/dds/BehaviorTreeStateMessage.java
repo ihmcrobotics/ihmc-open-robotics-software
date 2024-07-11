@@ -23,12 +23,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
-   public static final byte HAND_POSE_ACTION = (byte) 13;
-   public static final byte HAND_WRENCH_ACTION = (byte) 14;
-   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 16;
-   public static final byte WAIT_DURATION_ACTION = (byte) 17;
-   public static final byte FOOT_POSE_ACTION = (byte) 18;
+   public static final byte PSYONIC_ABILITY_HAND_COMMAND_ACTION = (byte) 13;
+   public static final byte HAND_POSE_ACTION = (byte) 14;
+   public static final byte HAND_WRENCH_ACTION = (byte) 15;
+   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 16;
+   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 17;
+   public static final byte WAIT_DURATION_ACTION = (byte) 18;
+   public static final byte FOOT_POSE_ACTION = (byte) 19;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -60,6 +61,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage>  chest_orientation_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage>  footstep_plan_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage>  sake_hand_command_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessage>  psyonic_ability_hand_command_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage>  hand_wrench_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  screw_primitive_actions_;
@@ -83,6 +85,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
       footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
       sake_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage> (200, new behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType());
+      psyonic_ability_hand_command_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessage> (200, new behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessagePubSubType());
       hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (200, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
       screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (200, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
@@ -116,6 +119,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       chest_orientation_actions_.set(other.chest_orientation_actions_);
       footstep_plan_actions_.set(other.footstep_plan_actions_);
       sake_hand_command_actions_.set(other.sake_hand_command_actions_);
+      psyonic_ability_hand_command_actions_.set(other.psyonic_ability_hand_command_actions_);
       hand_pose_actions_.set(other.hand_pose_actions_);
       hand_wrench_actions_.set(other.hand_wrench_actions_);
       screw_primitive_actions_.set(other.screw_primitive_actions_);
@@ -235,6 +239,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.SakeHandCommandActionStateMessage>  getSakeHandCommandActions()
    {
       return sake_hand_command_actions_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PsyonicAbilityHandCommandActionStateMessage>  getPsyonicAbilityHandCommandActions()
+   {
+      return psyonic_ability_hand_command_actions_;
    }
 
 
@@ -363,6 +373,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.sake_hand_command_actions_.get(i).epsilonEquals(other.sake_hand_command_actions_.get(i), epsilon)) return false; }
       }
 
+      if (this.psyonic_ability_hand_command_actions_.size() != other.psyonic_ability_hand_command_actions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.psyonic_ability_hand_command_actions_.size(); i++)
+         {  if (!this.psyonic_ability_hand_command_actions_.get(i).epsilonEquals(other.psyonic_ability_hand_command_actions_.get(i), epsilon)) return false; }
+      }
+
       if (this.hand_pose_actions_.size() != other.hand_pose_actions_.size()) { return false; }
       else
       {
@@ -434,6 +451,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.chest_orientation_actions_.equals(otherMyClass.chest_orientation_actions_)) return false;
       if (!this.footstep_plan_actions_.equals(otherMyClass.footstep_plan_actions_)) return false;
       if (!this.sake_hand_command_actions_.equals(otherMyClass.sake_hand_command_actions_)) return false;
+      if (!this.psyonic_ability_hand_command_actions_.equals(otherMyClass.psyonic_ability_hand_command_actions_)) return false;
       if (!this.hand_pose_actions_.equals(otherMyClass.hand_pose_actions_)) return false;
       if (!this.hand_wrench_actions_.equals(otherMyClass.hand_wrench_actions_)) return false;
       if (!this.screw_primitive_actions_.equals(otherMyClass.screw_primitive_actions_)) return false;
@@ -478,6 +496,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.footstep_plan_actions_);      builder.append(", ");
       builder.append("sake_hand_command_actions=");
       builder.append(this.sake_hand_command_actions_);      builder.append(", ");
+      builder.append("psyonic_ability_hand_command_actions=");
+      builder.append(this.psyonic_ability_hand_command_actions_);      builder.append(", ");
       builder.append("hand_pose_actions=");
       builder.append(this.hand_pose_actions_);      builder.append(", ");
       builder.append("hand_wrench_actions=");

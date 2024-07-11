@@ -1,0 +1,39 @@
+#ifndef __behavior_msgs__msg__PsyonicAbilityHandCommandActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__PsyonicAbilityHandCommandActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::PsyonicAbilityHandCommandActionDefinitionMessage_")
+      struct PsyonicAbilityHandCommandActionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The string value of the legacy grip type
+         * https://github.com/ihmcrobotics/psyonic-ability-hand-java/blob/main/src/main/java/us/ihmc/abilityhand/AbilityHandLegacyGripCommand.java#L63
+         */
+        string grip_type;
+        /**
+         * The string value of the legacy grip speed
+         * https://github.com/ihmcrobotics/psyonic-ability-hand-java/blob/main/src/main/java/us/ihmc/abilityhand/AbilityHandLegacyGripCommand.java#L58
+         */
+        string grip_speed;
+      };
+    };
+  };
+};
+
+#endif
