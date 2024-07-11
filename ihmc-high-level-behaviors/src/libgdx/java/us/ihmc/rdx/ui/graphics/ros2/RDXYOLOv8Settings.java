@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.tools.thread.Throttler;

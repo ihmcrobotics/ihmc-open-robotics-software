@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;

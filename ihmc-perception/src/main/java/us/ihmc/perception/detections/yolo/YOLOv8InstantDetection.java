@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.communication.packets.MessageTools;

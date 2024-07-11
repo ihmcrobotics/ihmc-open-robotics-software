@@ -12,7 +12,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;

@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -59,7 +59,7 @@ public class YOLOv8DetectionExecutor
    private final BooleanSupplier isDemandedSupplier;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
-   private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
+   private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector("IHMC_obj_seg_0.1.onnx");
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;

@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 

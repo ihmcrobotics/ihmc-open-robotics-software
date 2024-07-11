@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class YOLOv8ObjectDetector
 {
-   private static final String ONNX_FILE_NAME = "IHMC_obj_seg_0.1.onnx";
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
    private static final int NUMBER_OF_DETECTABLE_CLASSES = YOLOv8DetectionClass.values().length;
@@ -36,10 +35,10 @@ public class YOLOv8ObjectDetector
 
    private final AtomicBoolean isReady = new AtomicBoolean(true);
 
-   public YOLOv8ObjectDetector()
+   public YOLOv8ObjectDetector(String onnxFileName)
    {
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/yolo/");
-      WorkspaceResourceFile onnxFile = new WorkspaceResourceFile(directory, ONNX_FILE_NAME);
+      WorkspaceResourceFile onnxFile = new WorkspaceResourceFile(directory, onnxFileName);
 
       if (onnxFile.getClasspathResource() == null)
          throw new NullPointerException("YOLOv8 ONNX file could not be found");

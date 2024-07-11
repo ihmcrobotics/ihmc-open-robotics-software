@@ -10,9 +10,9 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionResults;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionResults;
+import us.ihmc.perception.detections.yolo.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.pubsub.DomainFactory;
@@ -47,7 +47,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
 
-   private final YOLOv8ObjectDetector yoloObjectDetector = new YOLOv8ObjectDetector();
+   private final YOLOv8ObjectDetector yoloObjectDetector = new YOLOv8ObjectDetector("IHMC_obj_seg_0.1.onnx");
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();

@@ -1,4 +1,4 @@
-package us.ihmc.perception.detections.YOLOv8;
+package us.ihmc.perception.detections.yolo;
 
 public record YOLOv8DetectionOutput(YOLOv8DetectionClass objectClass,
                                     float confidence,

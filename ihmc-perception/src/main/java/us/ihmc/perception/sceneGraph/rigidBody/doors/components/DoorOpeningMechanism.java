@@ -6,7 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
