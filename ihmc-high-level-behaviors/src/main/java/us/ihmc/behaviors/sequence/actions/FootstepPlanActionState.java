@@ -6,10 +6,10 @@ import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
-import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
-import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
-import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
+import us.ihmc.communication.crdt.CRDTStatusEnumField;
+import us.ihmc.communication.crdt.CRDTStatusInteger;
+import us.ihmc.communication.crdt.CRDTStatusPose3D;
+import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,11 +30,11 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
    private ReferenceFrame parentFrame;
-   private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
-   private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
-   private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
-   private final SideDependentList<CRDTUnidirectionalPose3D> currentFootPoses = new SideDependentList<>();
-   private final CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> executionState;
+   private final CRDTStatusInteger totalNumberOfFootsteps;
+   private final CRDTStatusInteger numberOfIncompleteFootsteps;
+   private final SideDependentList<CRDTStatusSE3Trajectory> desiredFootPoses = new SideDependentList<>();
+   private final SideDependentList<CRDTStatusPose3D> currentFootPoses = new SideDependentList<>();
+   private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -50,14 +50,14 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              definition.getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(definition.getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
-      totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, definition, 0);
-      numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, definition, 0);
+      totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      numberOfIncompleteFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       for (RobotSide side : RobotSide.values)
       {
-         desiredFootPoses.set(side, new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, definition));
-         currentFootPoses.set(side, new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, definition));
+         desiredFootPoses.set(side, new CRDTStatusSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo));
+         currentFootPoses.set(side, new CRDTStatusPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
       }
-      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, definition, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+      executionState = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
    }
 
    @Override
@@ -192,17 +192,17 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
    }
 
-   public SideDependentList<CRDTUnidirectionalSE3Trajectory> getDesiredFootPoses()
+   public SideDependentList<CRDTStatusSE3Trajectory> getDesiredFootPoses()
    {
       return desiredFootPoses;
    }
 
-   public SideDependentList<CRDTUnidirectionalPose3D> getCurrentFootPoses()
+   public SideDependentList<CRDTStatusPose3D> getCurrentFootPoses()
    {
       return currentFootPoses;
    }
 
-   public CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> getExecutionState()
+   public CRDTStatusEnumField<FootstepPlanActionExecutionState> getExecutionState()
    {
       return executionState;
    }

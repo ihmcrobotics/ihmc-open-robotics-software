@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTStatusRigidBodyTransform;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -20,7 +20,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
     * This is used to compute joint angles that achieve the desired and previewed end pose
     * even when the pelvis and/or chest might also move.
     */
-   private final CRDTUnidirectionalRigidBodyTransform goalPelvisToWorldTransform;
+   private final CRDTStatusRigidBodyTransform goalPelvisToWorldTransform;
    private final ReferenceFrame goalPelvisFrame;
 
    public ChestOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
@@ -32,7 +32,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                     getDefinition().getCRDTParentFrameName(),
                                                     getDefinition().getChestToParentTransform());
-      goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, definition);
+      goalPelvisToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                goalPelvisToWorldTransform.getValueReadOnly());
    }
@@ -67,7 +67,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       return chestFrame;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getGoalPelvisToWorldTransform()
+   public CRDTStatusRigidBodyTransform getGoalPelvisToWorldTransform()
    {
       return goalPelvisToWorldTransform;
    }

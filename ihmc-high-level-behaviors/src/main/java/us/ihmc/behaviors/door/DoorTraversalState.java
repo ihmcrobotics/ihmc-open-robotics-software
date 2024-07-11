@@ -8,7 +8,7 @@ import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -39,8 +39,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private WaitDurationActionState postGraspEvaluationAction;
    private WaitDurationActionState postPullDoorEvaluationAction;
 
-   private final CRDTUnidirectionalDouble doorHingeJointAngle;
-   private final CRDTUnidirectionalDouble doorHandleDistanceFromStart;
+   private final CRDTStatusDouble doorHingeJointAngle;
+   private final CRDTStatusDouble doorHandleDistanceFromStart;
 
    public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -48,8 +48,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
       definition = getDefinition();
 
-      doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
-      doorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, 0.0);
+      doorHingeJointAngle = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      doorHandleDistanceFromStart = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
 
    @Override
@@ -189,12 +189,12 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       return postPullDoorEvaluationAction;
    }
 
-   public CRDTUnidirectionalDouble getDoorHingeJointAngle()
+   public CRDTStatusDouble getDoorHingeJointAngle()
    {
       return doorHingeJointAngle;
    }
 
-   public CRDTUnidirectionalDouble getDoorHandleDistanceFromStart()
+   public CRDTStatusDouble getDoorHandleDistanceFromStart()
    {
       return doorHandleDistanceFromStart;
    }
