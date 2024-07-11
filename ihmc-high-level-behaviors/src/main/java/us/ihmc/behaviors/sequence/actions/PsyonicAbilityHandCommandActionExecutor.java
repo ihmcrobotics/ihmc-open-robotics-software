@@ -1,9 +1,14 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import controller_msgs.msg.dds.AbilityHandLegacyGripCommandMessage;
+import us.ihmc.abilityhand.AbilityHandLegacyGripCommand.LegacyGripSpeed;
+import us.ihmc.abilityhand.AbilityHandLegacyGripCommand.LegacyGripType;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.communication.AbilityHandAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PsyonicAbilityHandCommandActionExecutor extends ActionNodeExecutor<PsyonicAbilityHandCommandActionState, PsyonicAbilityHandCommandActionDefinition>
@@ -40,11 +45,22 @@ public class PsyonicAbilityHandCommandActionExecutor extends ActionNodeExecutor<
    public void triggerActionExecution()
    {
       super.triggerActionExecution();
+
+      sendLegacyGrip(definition.getLegacyGripType(), definition.getLegacyGripSpeed(), definition.getSide());
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
       state.setIsExecuting(false);
+   }
+
+   private void sendLegacyGrip(LegacyGripType gripType, LegacyGripSpeed gripSpeed, RobotSide hand)
+   {
+      AbilityHandLegacyGripCommandMessage message = new AbilityHandLegacyGripCommandMessage();
+      message.setLegacyGripType(gripType.getAsciiGripIndex());
+      message.setLegacyGripSpeed(gripSpeed.name());
+
+      ros2ControllerHelper.publish(AbilityHandAPI.getAbilityHandLegacyGripCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName(), hand), message);
    }
 }

@@ -90,8 +90,8 @@ public class PsyonicAbilityHandCommandActionDefinition extends ActionNodeDefinit
       super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toMessage().toByte());
-      message.setGripType(legacyGripType.getValue().name());
-      message.setGripSpeed(legacyGripSpeed.getValue().name());
+      message.setGripType(legacyGripType.toMessage().name());
+      message.setGripSpeed(legacyGripSpeed.toMessage().name());
    }
 
    public void fromMessage(PsyonicAbilityHandCommandActionDefinitionMessage message)
@@ -99,8 +99,8 @@ public class PsyonicAbilityHandCommandActionDefinition extends ActionNodeDefinit
       super.fromMessage(message.getDefinition());
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
-      legacyGripType.setValue(LegacyGripType.valueOf(message.getGripTypeAsString()));
-      legacyGripSpeed.setValue(LegacyGripSpeed.valueOf(message.getGripSpeedAsString()));
+      legacyGripType.fromMessage(LegacyGripType.valueOf(message.getGripTypeAsString()));
+      legacyGripSpeed.fromMessage(LegacyGripSpeed.valueOf(message.getGripSpeedAsString()));
    }
 
    public RobotSide getSide()
