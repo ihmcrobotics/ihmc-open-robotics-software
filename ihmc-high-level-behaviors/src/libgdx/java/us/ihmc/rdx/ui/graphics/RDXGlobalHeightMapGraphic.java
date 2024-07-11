@@ -1,40 +1,18 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL41;
 import perception_msgs.msg.dds.GlobalMapCellEntry;
 import perception_msgs.msg.dds.GlobalMapCellMap;
-import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
-import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapCell;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapTile;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.IntFunction;
-import java.util.function.IntToDoubleFunction;
 
 /**
  * Creates a graphic for the GPU Height Map to be visualized in the RDX UI. Each height value from the height map is turned into a 2cm polygon that is then
@@ -44,7 +22,7 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 {
    private final GlobalHeightMap globalHeightMap = new GlobalHeightMap();
 
-   private final HashMap<GlobalMapCell, RDXHeightMapGraphicNew> globalMapRenderables = new HashMap<>();
+   private final HashMap<GlobalMapTile, RDXHeightMapGraphicNew> globalMapRenderables = new HashMap<>();
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -66,12 +44,12 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 
       for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
       {
-         GlobalMapCell globalMapCell = new GlobalMapCell(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
-         globalMapCell.setHeightAt(0, globalMapCellEntry.getCellHeight());
+         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
+         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
 
-         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapCell);
+         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
 
-         graphic.generateMeshesGlobal(globalMapCell);
+         graphic.generateMeshesGlobal(globalMapTile);
       }
    }
 
@@ -92,13 +70,13 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
    //      }
    //   }
 
-   private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapCell globalMapCell)
+   private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapTile globalMapTile)
    {
-      RDXHeightMapGraphicNew graphic = globalMapRenderables.get(globalMapCell);
+      RDXHeightMapGraphicNew graphic = globalMapRenderables.get(globalMapTile);
       if (graphic == null)
       {
          graphic = new RDXHeightMapGraphicNew();
-         globalMapRenderables.put(globalMapCell, graphic);
+         globalMapRenderables.put(globalMapTile, graphic);
       }
 
       return graphic;

@@ -1,14 +1,13 @@
 package us.ihmc.sensorProcessing.globalHeightMap;
 
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-public class GlobalMapCell extends HeightMapData
+public class GlobalMapTile extends HeightMapData
 {
    private final int centerX, centerY;
    private int hashCode;
 
-   public GlobalMapCell(double resolution, double centerX, double centerY)
+   public GlobalMapTile(double resolution, double centerX, double centerY)
    {
       super(resolution, GlobalLattice.latticeWidth, centerX, centerY);
 

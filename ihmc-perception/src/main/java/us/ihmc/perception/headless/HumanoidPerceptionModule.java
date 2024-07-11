@@ -1,8 +1,5 @@
 package us.ihmc.perception.headless;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -34,7 +31,6 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,7 +39,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
-import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapCell;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapTile;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -217,13 +213,13 @@ public class HumanoidPerceptionModule
    private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapCellMap> topic) {
 
       // get the modified cells from the globalheightmap
-      Collection<GlobalMapCell> modifiedCells = globalHeightMap.getModifiedMapCells();
+      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapCells();
 
       // Full global map cell map
       GlobalMapCellMap globalHeightMapModifiedCells = new GlobalMapCellMap();
       List<GlobalMapCellEntry> collectionOfGlobalMapCells = new ArrayList<>();
 
-      for (GlobalMapCell cell: modifiedCells)
+      for (GlobalMapTile cell: modifiedCells)
       {
          GlobalMapCellEntry globalMapCellEntry = new GlobalMapCellEntry();
          globalMapCellEntry.setKey(cell.hashCode());

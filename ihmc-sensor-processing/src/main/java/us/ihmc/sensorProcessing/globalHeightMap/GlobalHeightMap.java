@@ -9,46 +9,50 @@ import java.util.HashSet;
 
 public class GlobalHeightMap
 {
-   private final IntMap<GlobalMapCell> heightMapDataIntMap = new IntMap<>();
-   private final HashSet<GlobalMapCell> modifiedCells = new HashSet<>();
+   private final IntMap<GlobalMapTile> heightMapDataIntMap = new IntMap<>();
+   private final HashSet<GlobalMapTile> modifiedCells = new HashSet<>();
 
    public GlobalHeightMap()
    {
    }
 
+   //adding a height map tile to the global height map
    public void addHeightMap(HeightMapData heightMapData)
    {
       modifiedCells.clear();
 
+      //for a particular height map there are occupied cells, iterating over only the occupied cells and adding them to the globalmap tile
       for (int occupiedCell = 0; occupiedCell < heightMapData.getNumberOfOccupiedCells(); occupiedCell++)
       {
          double cellHeight = heightMapData.getHeight(occupiedCell);
-         Point2DReadOnly cellPosition = heightMapData.getCellPosition(occupiedCell);
 
-         GlobalMapCell globalMapCell = getOrCreateDataContainingCell(cellPosition, heightMapData.getGridResolutionXY());
+         //get cell position in the globalMapTile
+         Point2DReadOnly occupiedCellPosition = heightMapData.getCellPosition(occupiedCell);
 
-         globalMapCell.setHeightAt(cellPosition.getX(), cellPosition.getY(), cellHeight);
+         GlobalMapTile globalMapTile = getOrCreateDataContainingCell(occupiedCellPosition, heightMapData.getGridResolutionXY());
 
-         modifiedCells.add(globalMapCell);
+         globalMapTile.setHeightAt(occupiedCellPosition.getX(), occupiedCellPosition.getY(), cellHeight);
+
+         modifiedCells.add(globalMapTile);
       }
    }
 
-   public Collection<GlobalMapCell> getModifiedMapCells()
+   public Collection<GlobalMapTile> getModifiedMapCells()
    {
       return modifiedCells;
    }
 
-   private GlobalMapCell getOrCreateDataContainingCell(Point2DReadOnly cellPosition, double resolution)
+   private GlobalMapTile getOrCreateDataContainingCell(Point2DReadOnly cellPosition, double resolution)
    {
       int xIndex = GlobalLattice.toIndex(cellPosition.getX());
       int yIndex = GlobalLattice.toIndex(cellPosition.getY());
 
       int hashOfMap = GlobalLattice.hashCodeOfCell(xIndex, yIndex);
-      GlobalMapCell data = heightMapDataIntMap.get(hashOfMap);
+      GlobalMapTile data = heightMapDataIntMap.get(hashOfMap);
 
       if (data == null)
       {
-         data = new GlobalMapCell(resolution, GlobalLattice.toPosition(xIndex), GlobalLattice.toPosition(yIndex));
+         data = new GlobalMapTile(resolution, GlobalLattice.toPosition(xIndex), GlobalLattice.toPosition(yIndex));
          heightMapDataIntMap.put(hashOfMap, data);
       }
 
