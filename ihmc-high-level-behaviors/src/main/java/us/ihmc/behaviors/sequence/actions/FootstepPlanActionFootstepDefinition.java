@@ -3,9 +3,9 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,10 +21,10 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    private RobotSide onDiskSide;
    private final RigidBodyTransform onDiskSoleToPlanFrameTransform = new RigidBodyTransform();
 
-   public FootstepPlanActionFootstepDefinition(CRDTInfo crdtInfo)
+   public FootstepPlanActionFootstepDefinition(RequestConfirmFreezable freezable)
    {
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      soleToPlanFrameTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, freezable, RobotSide.LEFT);
+      soleToPlanFrameTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, freezable);
    }
 
    @Override
@@ -52,7 +52,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void loadFromFile(JsonNode jsonNode)
    {
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValue());
+      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.accessValue());
    }
 
    public void setOnDiskFields()
@@ -64,7 +64,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void undoAllNontopologicalChanges()
    {
       side.setValue(onDiskSide);
-      soleToPlanFrameTransform.getValue().set(onDiskSoleToPlanFrameTransform);
+      soleToPlanFrameTransform.accessValue().set(onDiskSoleToPlanFrameTransform);
    }
 
    public boolean hasChanges()

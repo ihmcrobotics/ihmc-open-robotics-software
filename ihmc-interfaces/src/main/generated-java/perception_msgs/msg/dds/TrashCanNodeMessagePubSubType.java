@@ -15,7 +15,7 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7ee42811b3b00f967b991119d183c1278c0d81b811d6d9e5db7ec799b88d966e";
+   		return "483e978831db7bf9918e503819213aab9ea46e9c2a40caea61d42f636fb25bf9";
    }
    
    @Override

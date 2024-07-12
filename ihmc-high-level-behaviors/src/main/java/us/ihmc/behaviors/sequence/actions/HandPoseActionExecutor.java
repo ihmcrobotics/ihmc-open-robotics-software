@@ -116,18 +116,18 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
          if (concurrentChestOrientationAction == null && concurrentPelvisHeightPitchAction == null)
          {
-            state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
+            state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
          else if (concurrentPelvisHeightPitchAction == null)
          {
             concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
-            state.getGoalChestToWorldTransform().getValue().set(concurrentChestOrientationAction.getChestFrame().getReferenceFrame().getTransformToRoot());
+            state.getGoalChestToWorldTransform().accessValue().set(concurrentChestOrientationAction.getChestFrame().getReferenceFrame().getTransformToRoot());
          }
          else if (concurrentChestOrientationAction == null)
          {
             // FIXME We are ignoring this case for now, just add a pelvis pose to get the desired result
             //   We need to switch to a proper whole body action node
-            state.getGoalChestToWorldTransform().getValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
+            state.getGoalChestToWorldTransform().accessValue().set(syncedRobot.getReferenceFrames().getChestFrame().getTransformToRoot());
          }
          else // Combined case
          {
@@ -144,7 +144,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             goalChestFrame.getRotation().append(chestInPelvis.getRotation()); // Append chest rotation
             goalChestFrame.prependTranslation(chestToPelvisZeroAngles.getTranslation());
             goalChestFrame.changeFrame(ReferenceFrame.getWorldFrame());
-            goalChestFrame.get(state.getGoalChestToWorldTransform().getValue());
+            goalChestFrame.get(state.getGoalChestToWorldTransform().accessValue());
          }
          state.getGoalChestFrame().update();
       }
@@ -156,7 +156,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setSolutionQuality(0.0);
          for (int i = 0; i < definition.getJointAngles().getLength(); i++)
          {
-            state.getJointAngles().getValue()[i] = definition.getJointAngles().getValueReadOnly(i);
+            state.getPreviewJointAngles().accessValue()[i] = definition.getJointAngles().getValueReadOnly(i);
          }
       }
       else
@@ -174,7 +174,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             state.setSolutionQuality(armIKSolver.getQuality());
             for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
             {
-               state.getJointAngles().getValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+               state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
             }
          }
       }
@@ -260,8 +260,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
       if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
       {
-         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+         state.getForce().accessValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+         state.getTorque().accessValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
       }
 
       if (trackingCalculator.getHitTimeLimit())
@@ -287,7 +287,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.getCurrentPose().getValue().set(syncedHandControlPose);
+         state.getCurrentPose().accessValue().set(syncedHandControlPose);
          state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
          state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
 

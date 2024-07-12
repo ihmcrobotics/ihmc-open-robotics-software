@@ -73,7 +73,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
       this.syncedRobot = syncedRobot;
 
-      screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
+      screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().accessValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
@@ -147,6 +147,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       {
          screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
          screwAxisGizmo.getPoseGizmo().update();
+
+         if (screwAxisGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+            definition.getScrewAxisPoseInObjectFrame().accessValue();
 
          double screwAxisLineWidth = 0.005;
          screwAxisGraphic.update(screwAxisGizmo.getPoseGizmo().getPose(), screwAxisLineWidth, 1.0);

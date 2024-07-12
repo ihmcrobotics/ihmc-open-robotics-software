@@ -66,20 +66,20 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TRAJECTORY_DURATION);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_HOLD_POSE);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_IS_JOINTSPACE_MODE);
-      usePredefinedJointAngles = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
-      preset = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, PresetArmConfiguration.HOME);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.OPERATOR, crdtInfo, MAX_NUMBER_OF_JOINTS);
-      palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
-      palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
-      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_LINEAR_POSITION_WEIGHT);
-      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ANGULAR_POSITION_WEIGHT);
-      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_JOINTSPACE_WEIGHT);
-      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_POSITION_ERROR_TOLERANCE);
-      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_TRAJECTORY_DURATION);
+      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_HOLD_POSE);
+      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_IS_JOINTSPACE_MODE);
+      usePredefinedJointAngles = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
+      preset = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, PresetArmConfiguration.HOME);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.OPERATOR, this, MAX_NUMBER_OF_JOINTS);
+      palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
+      palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
+      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_LINEAR_POSITION_WEIGHT);
+      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ANGULAR_POSITION_WEIGHT);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_JOINTSPACE_WEIGHT);
+      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
 
    }
 
@@ -135,14 +135,14 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          {
             for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
             {
-               jointAngles.getValue()[i] = jsonNode.get("j" + i).asDouble();
+               jointAngles.accessValue()[i] = jsonNode.get("j" + i).asDouble();
             }
          }
       }
       else
       {
          palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
+         JSONTools.toEuclid(jsonNode, palmTransformToParent.accessValue());
          holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
          jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
          linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
@@ -188,9 +188,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
       preset.setValue(onDiskPreset);
       for (int i = 0; i < jointAngles.getLength(); i++)
-         jointAngles.getValue()[i] = onDiskJointAngles[i];
+         jointAngles.accessValue()[i] = onDiskJointAngles[i];
       palmParentFrameName.setValue(onDiskPalmParentFrameName);
-      palmTransformToParent.getValue().set(onDiskPalmTransformToParent);
+      palmTransformToParent.accessValue().set(onDiskPalmTransformToParent);
       linearPositionWeight.setValue(onDiskLinearPositionWeight);
       angularPositionWeight.setValue(onDiskAngularPositionWeight);
       jointspaceWeight.setValue(onDiskJointspaceWeight);

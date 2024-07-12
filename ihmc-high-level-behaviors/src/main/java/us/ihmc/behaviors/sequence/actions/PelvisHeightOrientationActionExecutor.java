@@ -126,7 +126,7 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
             state.setIsExecuting(false);
          }
 
-         state.getCurrentPose().getValue().set(syncedPelvisPose);
+         state.getCurrentPose().accessValue().set(syncedPelvisPose);
          state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       }
    }

@@ -15,7 +15,7 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "124937dc3c0304a6410a420af418da3edde2c3616474ddc8d28951b3403eb6d5";
+   		return "fd136397e2e15c38157baf57c2f8dde2ee093936cc739d8674a122e0cb20546c";
    }
    
    @Override

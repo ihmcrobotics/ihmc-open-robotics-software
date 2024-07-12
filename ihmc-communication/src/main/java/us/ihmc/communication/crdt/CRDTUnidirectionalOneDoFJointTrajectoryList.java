@@ -11,9 +11,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTraj
 
 public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectionalMutableField<RecyclingArrayList<RecyclingArrayList<OneDoFTrajectoryPoint>>>
 {
-   public CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(() -> new RecyclingArrayList<>(OneDoFTrajectoryPoint::new)));
+      super(sideThatCanModify, requestConfirmFreezable, () -> new RecyclingArrayList<>(() -> new RecyclingArrayList<>(OneDoFTrajectoryPoint::new)));
    }
 
    public OneDoFTrajectoryPointReadOnly getValueReadOnly(int jointIndex, int trajectoryPointIndex)
@@ -64,7 +64,7 @@ public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectio
 
    public void fromMessage(IDLSequence.Object<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().clear();
 
@@ -83,30 +83,30 @@ public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectio
 
    public void clear(int numberOfJoints)
    {
-      for (RecyclingArrayList<OneDoFTrajectoryPoint> oneDoFTrajectoryPoints : getValue())
+      for (RecyclingArrayList<OneDoFTrajectoryPoint> oneDoFTrajectoryPoints : accessValue())
       {
          oneDoFTrajectoryPoints.clear();
       }
 
-      getValue().clear();
+      accessValue().clear();
       for (int i = 0; i < numberOfJoints; i++)
-         getValue().add();
+         accessValue().add();
    }
 
    public void addTrajectoryPoint(int jointIndex, double position, double time)
    {
-      OneDoFTrajectoryPoint point = getValue().get(jointIndex).add();
+      OneDoFTrajectoryPoint point = accessValue().get(jointIndex).add();
       point.setTime(time);
       point.setPosition(position);
    }
 
    public void setSingleSegmentTrajectory(int jointIndex, double startPosition, double endPosition, double trajectoryDuration)
    {
-      getValue().clear();
-      OneDoFTrajectoryPoint start = getValue().get(jointIndex).add();
+      accessValue().clear();
+      OneDoFTrajectoryPoint start = accessValue().get(jointIndex).add();
       start.setTime(0.0);
       start.setPosition(startPosition);
-      OneDoFTrajectoryPoint end = getValue().get(jointIndex).add();
+      OneDoFTrajectoryPoint end = accessValue().get(jointIndex).add();
       end.setTime(trajectoryDuration);
       end.setPosition(endPosition);
    }
