@@ -6,7 +6,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -29,14 +28,14 @@ public class DoorOpeningMechanism
    @Nullable
    private PersistentDetection detection = null;
 
-   public DoorOpeningMechanism(DoorSide doorSide, YOLOv8DetectionClass yolOv8DetectionClass, UUID detectionID)
+   public DoorOpeningMechanism(DoorSide doorSide, String yoloObjectClass, UUID detectionID)
    {
-      switch (yolOv8DetectionClass)
+      switch (yoloObjectClass)
       {
-         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
-         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
-         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
-         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
+         case "TODO" -> type = DoorOpeningMechanismType.LEVER_HANDLE;
+         case "TODO2" -> type = DoorOpeningMechanismType.KNOB;
+         case "door_pull_handle" -> type = DoorOpeningMechanismType.PULL_HANDLE;
+         case "TODO4" -> type = DoorOpeningMechanismType.PUSH_BAR;
          default -> type = DoorOpeningMechanismType.UNKNOWN;
       }
       this.doorSide = doorSide;

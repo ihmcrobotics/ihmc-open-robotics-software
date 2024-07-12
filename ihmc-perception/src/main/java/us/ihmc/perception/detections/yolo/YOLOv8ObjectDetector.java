@@ -28,7 +28,8 @@ public class YOLOv8ObjectDetector
 {
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
-   private static final int NUMBER_OF_DETECTABLE_CLASSES = YOLOv8DetectionClass.values().length;
+
+   private YOLOv8Model yoloModel;
 
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
@@ -36,22 +37,41 @@ public class YOLOv8ObjectDetector
    private final AtomicBoolean isReady = new AtomicBoolean(true);
 
    // TODO: Remove
-   public YOLOv8ObjectDetector(String onnxFileName)
+//   @Deprecated
+//   public YOLOv8ObjectDetector(String onnxFileName)
+//   {
+//      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/yolo/");
+//      WorkspaceResourceFile onnxFile = new WorkspaceResourceFile(directory, onnxFileName);
+//
+//      if (onnxFile.getClasspathResource() == null)
+//         throw new NullPointerException("YOLOv8 ONNX file could not be found");
+//
+//      try
+//      {
+//         yoloNet = opencv_dnn.readNetFromONNX(onnxFile.getClasspathResourceAsStream().readAllBytes());
+//      }
+//      catch (IOException e)
+//      {
+//         throw new RuntimeException(e);
+//      }
+//      if (opencv_core.getCudaEnabledDeviceCount() > 0)
+//      {
+//         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
+//         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
+//      }
+//      else
+//      {
+//         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_OPENCV);
+//         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
+//      }
+//
+//      outputNames = yoloNet.getUnconnectedOutLayersNames();
+//   }
+
+   public YOLOv8ObjectDetector(YOLOv8Model yoloModel)
    {
-      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/yolo/");
-      WorkspaceResourceFile onnxFile = new WorkspaceResourceFile(directory, onnxFileName);
+      yoloNet = opencv_dnn.readNetFromONNX(yoloModel.readONNXFile());
 
-      if (onnxFile.getClasspathResource() == null)
-         throw new NullPointerException("YOLOv8 ONNX file could not be found");
-
-      try
-      {
-         yoloNet = opencv_dnn.readNetFromONNX(onnxFile.getClasspathResourceAsStream().readAllBytes());
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
       if (opencv_core.getCudaEnabledDeviceCount() > 0)
       {
          yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
@@ -64,42 +84,39 @@ public class YOLOv8ObjectDetector
       }
 
       outputNames = yoloNet.getUnconnectedOutLayersNames();
-   }
 
-   public YOLOv8ObjectDetector(YOLOv8Model model)
-   {
-      yoloNet = opencv_dnn.readNetFromONNX(model.readONNXFile());
-
-      if (opencv_core.getCudaEnabledDeviceCount() > 0)
-      {
-         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
-         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
-      }
-      else
-      {
-         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_OPENCV);
-         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
-      }
-
-      outputNames = yoloNet.getUnconnectedOutLayersNames();
+      this.yoloModel = yoloModel;
    }
 
    public YOLOv8DetectionResults runOnImage(RawImage bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold)
    {
-      bgrImage.get();
-      isReady.set(false);
-      Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
-      MatVector outputBlobs = new MatVector(outputNames.size());
+      YOLOv8DetectionResults results = null;
 
-      yoloNet.setInput(blob);
-      yoloNet.forward(outputBlobs, outputNames);
-      isReady.set(true);
+      try
+      {
+         bgrImage.get();
+         isReady.set(false);
+         Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
+         MatVector outputBlobs = new MatVector(outputNames.size());
 
-      Set<YOLOv8DetectionOutput> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
-      YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
+         yoloNet.setInput(blob);
+         yoloNet.forward(outputBlobs, outputNames);
+         isReady.set(true);
 
-      blob.release();
-      bgrImage.release();
+         Set<YOLOv8DetectionOutput> detections = processOutput(outputBlobs,
+                                                               confidenceThreshold,
+                                                               nonMaximumSuppressionThreshold,
+                                                               bgrImage.getImageWidth(),
+                                                               bgrImage.getImageHeight());
+         results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
+
+         blob.release();
+         bgrImage.release();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       return results;
    }
@@ -136,7 +153,7 @@ public class YOLOv8ObjectDetector
             // Find most confident class detection
             float maxConfidence = 0;
             long maxConfidenceClass = 0;
-            for (long j = 0; j < NUMBER_OF_DETECTABLE_CLASSES; j++)
+            for (long j = 0; j < yoloModel.getDetectionClassNames().size(); j++)
             {
                float confidence = output0Indexer.get(0, 4 + j, i);
                if (confidence > maxConfidence)
@@ -160,7 +177,7 @@ public class YOLOv8ObjectDetector
                detectedBoxes.push_back(new Rect(left, top, width, height));
                for (long k = 0; k < numberOfMasks; k++)
                {
-                  detectedMaskWeights.push_back(output0Indexer.get(0, NUMBER_OF_DETECTABLE_CLASSES + 4 + k, i));
+                  detectedMaskWeights.push_back(output0Indexer.get(0, yoloModel.getDetectionClassNames().size() + 4 + k, i));
                }
             }
          }
@@ -182,7 +199,7 @@ public class YOLOv8ObjectDetector
             {
                maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
             }
-            detections.add(new YOLOv8DetectionOutput(YOLOv8DetectionClass.fromClassID(detectedClassIds.get(index)),
+            detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
                                                      detectedConfidences.get(index),
                                                detectedBoxes.get(index).x() + shiftWidth,
                                                detectedBoxes.get(index).y() + shiftHeight,

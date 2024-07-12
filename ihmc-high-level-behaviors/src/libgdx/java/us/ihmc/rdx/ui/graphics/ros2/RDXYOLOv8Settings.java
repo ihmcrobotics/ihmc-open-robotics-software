@@ -8,14 +8,12 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 /*
  *  FIXME: It doesn't make sense to have a visualizer for settings.
@@ -35,7 +33,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private final ImFloat outlierRejectionThreshold = new ImFloat(1.0f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
-   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
+//   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
 
    private final ROS2Heartbeat demandYOLOv8ICPZed;
    private final ROS2Heartbeat demandYOLOv8ICPRealsense;
@@ -53,7 +51,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
       demandYOLOv8ICPRealsense = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
 
       // Select all target detections at beginning
-      targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
+//      targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
    }
 
    @Override
@@ -77,33 +75,33 @@ public class RDXYOLOv8Settings extends RDXVisualizer
       if (ImGui.sliderFloat("outlierThreshold", outlierRejectionThreshold.getData(), 0.0f, 10.0f))
          parametersChanged.set();
 
-      if (ImGui.collapsingHeader("Target Detection Classes"))
-      {
-         if (ImGui.button("Select All"))
-         {
-            targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
-            parametersChanged.set();
-         }
-         ImGui.sameLine();
-         if (ImGui.button("Unselect All"))
-         {
-            targetDetections.clear();
-            parametersChanged.set();
-         }
-
-         for (YOLOv8DetectionClass detectionClass : YOLOv8DetectionClass.values())
-         {
-            if (ImGuiTools.smallCheckbox(detectionClass.toString(), targetDetections.contains(detectionClass)))
-            {
-               if (targetDetections.contains(detectionClass))
-                  targetDetections.remove(detectionClass);
-               else
-                  targetDetections.add(detectionClass);
-
-               parametersChanged.set();
-            }
-         }
-      }
+//      if (ImGui.collapsingHeader("Target Detection Classes"))
+//      {
+//         if (ImGui.button("Select All"))
+//         {
+//            targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
+//            parametersChanged.set();
+//         }
+//         ImGui.sameLine();
+//         if (ImGui.button("Unselect All"))
+//         {
+//            targetDetections.clear();
+//            parametersChanged.set();
+//         }
+//
+//         for (YOLOv8DetectionClass detectionClass : YOLOv8DetectionClass.values())
+//         {
+//            if (ImGuiTools.smallCheckbox(detectionClass.toString(), targetDetections.contains(detectionClass)))
+//            {
+//               if (targetDetections.contains(detectionClass))
+//                  targetDetections.remove(detectionClass);
+//               else
+//                  targetDetections.add(detectionClass);
+//
+//               parametersChanged.set();
+//            }
+//         }
+//      }
    }
 
    @Override
@@ -120,9 +118,9 @@ public class RDXYOLOv8Settings extends RDXVisualizer
          message.setSegmentationThreshold(maskThreshold.get());
          message.setOutlierThreshold(outlierRejectionThreshold.get());
 
-         message.getTargetDetectionClasses().clear();
-         for (YOLOv8DetectionClass targetDetection : targetDetections)
-            message.getTargetDetectionClasses().add(targetDetection.toByte());
+//         message.getTargetDetectionClasses().clear();
+//         for (YOLOv8DetectionClass targetDetection : targetDetections)
+//            message.getTargetDetectionClasses().add(targetDetection.toByte());
 
          ros2.publish(PerceptionAPI.YOLO_PARAMETERS, message);
       }

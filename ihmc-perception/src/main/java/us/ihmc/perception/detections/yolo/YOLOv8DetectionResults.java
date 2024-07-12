@@ -11,9 +11,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +27,7 @@ public class YOLOv8DetectionResults
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
-   private final EnumMap<YOLOv8DetectionClass, Mat> objectMasks = new EnumMap<>(YOLOv8DetectionClass.class);
+   private final Map<String, Mat> objectMasks = new HashMap<>();
 
    private final int maskOpenCVType;
    private final int numberOfMasks;
@@ -75,47 +73,29 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
-   public Map<YOLOv8DetectionOutput, RawImage> getTargetSegmentationImages(float maskThreshold, Set<YOLOv8DetectionClass> targetClasses)
+   public Map<YOLOv8DetectionOutput, RawImage> getTargetSegmentationImages(float maskThreshold, Set<String> targetClasses)
    {
       Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
 
       for (YOLOv8DetectionOutput detection : detections)
       {
-         if (targetClasses.contains(detection.objectClass()))
-         {
+//         if (targetClasses.contains(detection.objectClass()))
+//         {
             Mat floatMaskMat = getFloatMaskMat(detection);
             Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
             segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
             floatMaskMat.close();
-         }
+//         }
       }
 
       return segmentationImages;
    }
 
-   public Map<YOLOv8DetectionOutput, RawImage> getICPSegmentationImages(float maskThreshold)
+   public RawImage getSegmentationMatrixForObject(String objectClass, float maskThreshold)
    {
-      Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
-
-      for (YOLOv8DetectionOutput detection : detections)
+      if (objectMasks.containsKey(objectClass))
       {
-         if (detection.objectClass().getPointCloudFileName() != null)
-         {
-            Mat floatMaskMat = getFloatMaskMat(detection);
-            Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
-            segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
-            floatMaskMat.close();
-         }
-      }
-
-      return segmentationImages;
-   }
-
-   public RawImage getSegmentationMatrixForObject(YOLOv8DetectionClass objectType, float maskThreshold)
-   {
-      if (objectMasks.containsKey(objectType))
-      {
-         Mat mask = objectMasks.get(objectType);
+         Mat mask = objectMasks.get(objectClass);
          return createRawImageWithMat(mask);
       }
 
@@ -124,7 +104,7 @@ public class YOLOv8DetectionResults
       for (YOLOv8DetectionOutput detection : detections)
       {
          // Find the detection that matches the query object type
-         if (detection.objectClass() == objectType)
+         if (detection.objectClass().equals(objectClass))
          {
             Mat floatMaskMat = getFloatMaskMat(detection);
             maskBooleanMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
@@ -136,12 +116,12 @@ public class YOLOv8DetectionResults
 
       if (maskBooleanMat != null)
       {
-         objectMasks.put(objectType, maskBooleanMat);
+         objectMasks.put(objectClass, maskBooleanMat);
          return createRawImageWithMat(maskBooleanMat);
       }
 
       // Did not find object we're looking for
-      Mat previousValue = objectMasks.putIfAbsent(objectType, null);
+      Mat previousValue = objectMasks.putIfAbsent(objectClass, null);
       if (previousValue != null)
          previousValue.close();
 
@@ -151,18 +131,6 @@ public class YOLOv8DetectionResults
    public Set<YOLOv8DetectionOutput> getDetections()
    {
       return detections;
-   }
-
-   public Set<YOLOv8DetectionOutput> getICPDetections()
-   {
-      Set<YOLOv8DetectionOutput> icpDetections = new HashSet<>();
-      for (YOLOv8DetectionOutput detection : detections)
-      {
-         if (detection.objectClass().getPointCloudFileName() != null)
-            icpDetections.add(detection);
-      }
-
-      return icpDetections;
    }
 
    private Mat getFloatMaskMat(YOLOv8DetectionOutput detection)

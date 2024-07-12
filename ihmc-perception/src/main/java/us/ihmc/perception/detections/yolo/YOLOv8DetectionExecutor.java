@@ -31,11 +31,11 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +59,8 @@ public class YOLOv8DetectionExecutor
    private final BooleanSupplier isDemandedSupplier;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
-   private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector("IHMC_obj_seg_0.1.onnx");
+   private final List<YOLOv8ObjectDetector> yolOv8ObjectDetectors = new ArrayList<>();
+//   private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector("IHMC_obj_seg_0.1.onnx");
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;
@@ -68,7 +69,8 @@ public class YOLOv8DetectionExecutor
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
-   private Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
+   // TODO: add back
+//   private Set<String> targetDetections = new HashSet<>();
 
    public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier isDemandedSupplier)
    {
@@ -86,12 +88,23 @@ public class YOLOv8DetectionExecutor
          outlierThreshold = parametersMessage.getOutlierThreshold();
 
          // Create a new set of target detections to use
-         Set<YOLOv8DetectionClass> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
-         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
-            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
-
-         targetDetections = newTargetDetections;
+//         Set<String> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
+//         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
+//            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
+//
+//         targetDetections = newTargetDetections;
       });
+
+      for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
+      {
+         YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
+         YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
+
+         LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
+         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+
+         yolOv8ObjectDetectors.add(objectDetector);
+      }
    }
 
    public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
@@ -99,12 +112,20 @@ public class YOLOv8DetectionExecutor
       detectionConsumerCallbacks.add(callback);
    }
 
+   public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
+   {
+      for (YOLOv8ObjectDetector yoloDetector : yolOv8ObjectDetectors)
+      {
+         runYOLODetection(yoloDetector, colorImage, depthImage);
+      }
+   }
+
    /**
     * Non-blocking call to run YOLO on the provided images
     * @param colorImage BGR color image, used for YOLO detection
     * @param depthImage 16UC1 depth image, used to get points of detected objects
     */
-   public void runYOLODetection(RawImage colorImage, RawImage depthImage)
+   public void runYOLODetection(YOLOv8ObjectDetector yoloDetector, RawImage colorImage, RawImage depthImage)
    {
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
@@ -120,7 +141,7 @@ public class YOLOv8DetectionExecutor
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
             // Get the object masks from the results
-            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
+            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>());
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
@@ -151,7 +172,7 @@ public class YOLOv8DetectionExecutor
                   return;
 
                // Create an instant detection from data
-               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(simpleDetection.objectClass().getDefaultNodeName(),
+               YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(simpleDetection.objectClass(),
                                                                                     simpleDetection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
@@ -180,7 +201,9 @@ public class YOLOv8DetectionExecutor
       segmenter.destroy();
       extractor.destroy();
 
-      yoloDetector.destroy();
+      for (YOLOv8ObjectDetector yoloDetector : yolOv8ObjectDetectors)
+         yoloDetector.destroy();
+
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
@@ -207,7 +230,7 @@ public class YOLOv8DetectionExecutor
    {
       Mat resultMat = colorImage.get().getCpuImageMat().clone();
 
-      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
+      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>());
       detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
       {
          YOLOv8DetectionOutput detection = entry.getKey();

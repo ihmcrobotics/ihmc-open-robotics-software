@@ -9,6 +9,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 public class YOLOv8Tools
 {
    public static final String CLASS_NAME_FILE_NAME = "class_names.yaml";
-   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
+//   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
    public static List<Point3D32> filterOutliers(List<Point3D32> pointCloud, double zScoreThreshold, int numberOfSamples)
    {
@@ -82,33 +83,33 @@ public class YOLOv8Tools
       return Math.sqrt(varianceVector.getX() + varianceVector.getY() + varianceVector.getZ());
    }
 
-   public static List<Point3D32> loadPointCloudFromFile(String fileName)
-   {
-      if (fileName == null)
-         throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
-
-      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(POINT_CLOUD_DIRECTORY, fileName);
-      List<Point3D32> pointCloud;
-      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pointCloudFile.getFilesystemFile().toFile())))
-      {
-         pointCloud = bufferedReader.lines().map(line ->
-                                                 {
-                                                    String[] xyzValues = line.split(",");
-                                                    float x = Float.parseFloat(xyzValues[0]);
-                                                    float y = Float.parseFloat(xyzValues[1]);
-                                                    float z = Float.parseFloat(xyzValues[2]);
-                                                    return new Point3D32(x, y, z);
-                                                 }).collect(Collectors.toList());
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         throw new RuntimeException("Failed trying to load the file.");
-         // Handle any I/O problems
-      }
-
-      return pointCloud;
-   }
+//   public static List<Point3D32> loadPointCloudFromFile(String fileName)
+//   {
+//      if (fileName == null)
+//         throw new NullPointerException("We can't run ICP on this object yet because we don't have a model point cloud file.");
+//
+//      WorkspaceResourceFile pointCloudFile = new WorkspaceResourceFile(POINT_CLOUD_DIRECTORY, fileName);
+//      List<Point3D32> pointCloud;
+//      try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pointCloudFile.getFilesystemFile().toFile())))
+//      {
+//         pointCloud = bufferedReader.lines().map(line ->
+//                                                 {
+//                                                    String[] xyzValues = line.split(",");
+//                                                    float x = Float.parseFloat(xyzValues[0]);
+//                                                    float y = Float.parseFloat(xyzValues[1]);
+//                                                    float z = Float.parseFloat(xyzValues[2]);
+//                                                    return new Point3D32(x, y, z);
+//                                                 }).collect(Collectors.toList());
+//      }
+//      catch (Exception e)
+//      {
+//         e.printStackTrace();
+//         throw new RuntimeException("Failed trying to load the file.");
+//         // Handle any I/O problems
+//      }
+//
+//      return pointCloud;
+//   }
 
    public static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
    {
@@ -122,12 +123,20 @@ public class YOLOv8Tools
       return centroid;
    }
 
-   public static List<Path> getYoloModelDirectories()
+   public static List<Path> getYOLOModelDirectories()
    {
-      return getYoloModelDirectories(IHMCCommonPaths.YOLO_MODELS_DIRECTORY);
+      // Automatically create the yolo-models directory if it doesn't exist
+      File yoloModelsDirectoryFile = IHMCCommonPaths.YOLO_MODELS_DIRECTORY.toFile();
+
+      if (!yoloModelsDirectoryFile.exists() || !yoloModelsDirectoryFile.isDirectory())
+      {
+         yoloModelsDirectoryFile.mkdirs();
+      }
+
+      return getYOLOModelDirectories(IHMCCommonPaths.YOLO_MODELS_DIRECTORY);
    }
 
-   public static List<Path> getYoloModelDirectories(Path baseDirectoryPath)
+   public static List<Path> getYOLOModelDirectories(Path baseDirectoryPath)
    {
       try (Stream<Path> directoryContents = Files.list(baseDirectoryPath))
       {

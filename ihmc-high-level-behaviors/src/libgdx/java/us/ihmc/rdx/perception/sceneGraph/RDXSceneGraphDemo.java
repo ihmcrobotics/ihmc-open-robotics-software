@@ -227,7 +227,7 @@ public class RDXSceneGraphDemo
                   }
                   else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
                   {
-                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+                     yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
                   }
                }
 

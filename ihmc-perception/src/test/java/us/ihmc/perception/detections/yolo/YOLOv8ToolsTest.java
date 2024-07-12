@@ -65,7 +65,7 @@ public class YOLOv8ToolsTest
    @Test
    public void testGetYoloModelDirectories()
    {
-      List<Path> yoloModelDirectories = YOLOv8Tools.getYoloModelDirectories(testDirectoryPath);
+      List<Path> yoloModelDirectories = YOLOv8Tools.getYOLOModelDirectories(testDirectoryPath);
       assertEquals(1, yoloModelDirectories.size());
 
       assertTrue(yoloModelDirectories.contains(goodYoloModelDirectory.toPath()));

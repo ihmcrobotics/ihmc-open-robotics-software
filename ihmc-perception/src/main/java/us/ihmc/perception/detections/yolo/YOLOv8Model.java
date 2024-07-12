@@ -1,10 +1,16 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class YOLOv8Model
 {
@@ -17,10 +23,25 @@ public class YOLOv8Model
       if (!YOLOv8Tools.isValidYOLOModelDirectory(modelBaseDirectory))
          throw new IllegalArgumentException("Provided directory is not a YOLO model directory");
 
-      modelName = modelBaseDirectory.getFileName().toString(); // TODO: maybe something other than this?
+      modelName = modelBaseDirectory.getFileName().toString();
       onnxFile = YOLOv8Tools.getONNXFile(modelBaseDirectory);
 
-      // TODO: Read class_names.yaml file
+      // Parse class_names.yaml
+      InputStream inputStream = null;
+      try
+      {
+         inputStream = new FileInputStream(YOLOv8Tools.getClassNamesFile(modelBaseDirectory).toFile());
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+      }
+      Yaml yaml = new Yaml();
+      Map<String, Object> data = yaml.load(inputStream);
+
+      List<String> names = (List<String>) data.get("names");
+
+      detectionClassNames.addAll(names);
    }
 
    public String getModelName()
@@ -43,5 +64,10 @@ public class YOLOv8Model
    public List<String> getDetectionClassNames()
    {
       return detectionClassNames;
+   }
+
+   public String getObjectClassFromIndex(int i)
+   {
+      return detectionClassNames.get(i);
    }
 }

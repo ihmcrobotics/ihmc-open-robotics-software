@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -180,7 +179,7 @@ public class DoorNode extends DetectableSceneNode
 
       // Must be new opening mechanism of this door; add to list
       DoorOpeningMechanism openingMechanism = new DoorOpeningMechanism(detectionSide,
-                                                                       YOLOv8DetectionClass.fromName(doorOpeningMechanismDetection.getDetectedObjectName()),
+                                                                       doorOpeningMechanismDetection.getDetectedObjectName(),
                                                                        doorOpeningMechanismDetection.getID());
       openingMechanism.setDetection(doorOpeningMechanismDetection);
       openingMechanisms.put(doorOpeningMechanismDetection.getID(), openingMechanism);
