@@ -11,6 +11,7 @@ import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -250,12 +251,17 @@ public class YOLOv8DetectionExecutor
 
          // Draw text background
          Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
-         Rect textBox = new Rect(detection.x(), detection.y() - textSize.height(), textSize.width(), textSize.height());
+
+         int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getImageWidth() - textSize.width());
+         int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getImageHeight() - textSize.height());
+
+         Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
+
          opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
          opencv_imgproc.putText(resultMat,
                                 text,
-                                new Point(detection.x(), detection.y()),
+                                new Point(textBoxClampedX, textBoxClampedY + textSize.height()),
                                 opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
                                 FONT_SCALE,
                                 new Scalar(255.0, 255.0, 255.0, 255.0),
