@@ -32,10 +32,10 @@ public class DoorOpeningMechanism
    {
       switch (yoloObjectClass)
       {
-         case "TODO" -> type = DoorOpeningMechanismType.LEVER_HANDLE;
-         case "TODO2" -> type = DoorOpeningMechanismType.KNOB;
+         case "door_lever" -> type = DoorOpeningMechanismType.LEVER_HANDLE;
+         case "door_knob" -> type = DoorOpeningMechanismType.KNOB;
          case "door_pull_handle" -> type = DoorOpeningMechanismType.PULL_HANDLE;
-         case "TODO4" -> type = DoorOpeningMechanismType.PUSH_BAR;
+         case "door_push_bar" -> type = DoorOpeningMechanismType.PUSH_BAR;
          default -> type = DoorOpeningMechanismType.UNKNOWN;
       }
       this.doorSide = doorSide;

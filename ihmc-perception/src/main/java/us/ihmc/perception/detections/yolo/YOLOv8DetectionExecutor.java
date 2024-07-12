@@ -59,8 +59,9 @@ public class YOLOv8DetectionExecutor
    private final BooleanSupplier isDemandedSupplier;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
-   private final List<YOLOv8ObjectDetector> yolOv8ObjectDetectors = new ArrayList<>();
-//   private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector("IHMC_obj_seg_0.1.onnx");
+   // TODO: temp hack
+   private int lastRunDetectorIndex = 0;
+   private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;
@@ -103,7 +104,7 @@ public class YOLOv8DetectionExecutor
          LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
          LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
 
-         yolOv8ObjectDetectors.add(objectDetector);
+         yoloObjectDetectors.add(objectDetector);
       }
    }
 
@@ -114,10 +115,12 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
-      for (YOLOv8ObjectDetector yoloDetector : yolOv8ObjectDetectors)
-      {
-         runYOLODetection(yoloDetector, colorImage, depthImage);
-      }
+      if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
+         lastRunDetectorIndex = 0;
+
+      YOLOv8ObjectDetector yoloDetector = yoloObjectDetectors.get(lastRunDetectorIndex++);
+
+      runYOLODetection(yoloDetector, colorImage, depthImage);
    }
 
    /**
@@ -201,7 +204,7 @@ public class YOLOv8DetectionExecutor
       segmenter.destroy();
       extractor.destroy();
 
-      for (YOLOv8ObjectDetector yoloDetector : yolOv8ObjectDetectors)
+      for (YOLOv8ObjectDetector yoloDetector : yoloObjectDetectors)
          yoloDetector.destroy();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
