@@ -74,6 +74,7 @@ public class WalkingCommandConsumer
    private final YoDouble timeOfLastManipulationAbortRequest = new YoDouble("timeOfLastManipulationAbortRequest", registry);
    private final YoDouble manipulationIgnoreInputsDurationAfterAbort = new YoDouble("manipulationIgnoreInputsDurationAfterAbort", registry);
    private final YoDouble allowManipulationAbortAfterThisTime = new YoDouble("allowManipulationAbortAfterThisTime", registry);
+   private final YoBoolean stopAllTrajectories = new YoBoolean("stopAllTrajectories", registry);
 
    private final YoBoolean commandConsumerHasFootsteps = new YoBoolean("commandConsumerHasFootsteps", registry);
 
@@ -540,25 +541,37 @@ public class WalkingCommandConsumer
 
    public void consumeStopAllTrajectoryCommands()
    {
-      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(StopAllTrajectoryCommand.class))
-         return;
-
-      StopAllTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(StopAllTrajectoryCommand.class);
-      for (RobotSide robotSide : RobotSide.values)
+      StopAllTrajectoryCommand command = null;
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StopAllTrajectoryCommand.class))
       {
-         if (handManagers.get(robotSide) != null)
-            handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
+         command = commandConsumerWithDelayBuffers.pollNewestCommand(StopAllTrajectoryCommand.class);
+      }
+      else if (stopAllTrajectories.getBooleanValue())
+      {
+         stopAllTrajectories.set(false);
+         command = new StopAllTrajectoryCommand();
+         command.setStopAllTrajectory(true);
+         command.setExecutionDelayTime(0.0);
       }
 
-      if (chestManager != null)
+      if (command != null)
       {
-         chestManager.handleStopAllTrajectoryCommand(command);
-      }
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (handManagers.get(robotSide) != null)
+               handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
+         }
 
-      feetManager.handleStopAllTrajectoryCommand(command);
-      comHeightManager.handleStopAllTrajectoryCommand(command);
-      balanceManager.handleStopAllTrajectoryCommand(command);
-      pelvisOrientationManager.handleStopAllTrajectoryCommand(command);
+         if (chestManager != null)
+         {
+            chestManager.handleStopAllTrajectoryCommand(command);
+         }
+
+         feetManager.handleStopAllTrajectoryCommand(command);
+         comHeightManager.handleStopAllTrajectoryCommand(command);
+         balanceManager.handleStopAllTrajectoryCommand(command);
+         pelvisOrientationManager.handleStopAllTrajectoryCommand(command);
+      }
    }
 
    public void consumeFootCommands()
