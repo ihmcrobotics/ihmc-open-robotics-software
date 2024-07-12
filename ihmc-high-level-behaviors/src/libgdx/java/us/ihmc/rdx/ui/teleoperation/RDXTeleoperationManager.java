@@ -520,7 +520,8 @@ public class RDXTeleoperationManager extends RDXPanel
          ImGui.unindent();
       }
 
-      wholeBodyIKManager.renderImGuiWidgets();
+      // Commenting this guy out until we are using it.
+      // wholeBodyIKManager.renderImGuiWidgets();
 
       ImGui.text("Show collisions:");
       ImGui.sameLine();
