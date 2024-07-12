@@ -94,6 +94,7 @@ public class WalkingCommandConsumer
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
+   private final StopAllTrajectoryCommand stopAllTrajectoryCommandFromYoVariable = new StopAllTrajectoryCommand();
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusMessageOutputManager,
@@ -549,7 +550,7 @@ public class WalkingCommandConsumer
       else if (stopAllTrajectories.getBooleanValue())
       {
          stopAllTrajectories.set(false);
-         command = new StopAllTrajectoryCommand();
+         command = stopAllTrajectoryCommandFromYoVariable;
          command.setStopAllTrajectory(true);
          command.setExecutionDelayTime(0.0);
       }
