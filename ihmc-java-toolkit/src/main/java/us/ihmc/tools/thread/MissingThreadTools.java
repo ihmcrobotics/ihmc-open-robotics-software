@@ -58,6 +58,18 @@ public class MissingThreadTools
       LockSupport.parkNanos(nanoseconds); // More accurate than Thread.sleep
    }
 
+   public static void sleepMillis(int millis)
+   {
+      try
+      {
+         Thread.sleep(millis);
+      }
+      catch (InterruptedException interruptedException)
+      {
+         // Ignore
+      }
+   }
+
    public static ThreadFactory createNamedThreadFactory(String prefix, boolean daemon)
    {
       boolean includePoolInName = true;
