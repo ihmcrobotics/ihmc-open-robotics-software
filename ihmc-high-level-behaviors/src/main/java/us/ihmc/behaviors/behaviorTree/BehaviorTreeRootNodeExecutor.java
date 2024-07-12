@@ -71,11 +71,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
          else if (i == executionNextIndex)
          {
-            state.getActionChildren().get(executionNextIndex).setIsNextForExecution(true);
+            state.getActionChildren().get(i).setIsNextForExecution(true);
          }
          else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex)
          {
-            state.getActionChildren().get(executionNextIndex).setIsNextForExecution(true);
+            state.getActionChildren().get(i).setIsNextForExecution(true);
          }
          else
          {
