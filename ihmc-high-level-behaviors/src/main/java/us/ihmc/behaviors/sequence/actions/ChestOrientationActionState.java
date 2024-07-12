@@ -43,6 +43,12 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
       chestFrame.update();
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      return goalPelvisToWorldTransform.pollHasStatus();
+   }
+
    public void toMessage(ChestOrientationActionStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());

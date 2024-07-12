@@ -46,6 +46,12 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       logger = new BehaviorTreeNodeMessageLogger(definition);
    }
 
+   /** Used to determine if the node's full data needs to be sent. */
+   public boolean hasStatus()
+   {
+      return false;
+   }
+
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
       message.setId(id);

@@ -10,6 +10,7 @@ import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveActionDefinition>
@@ -51,6 +52,22 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    public void update()
    {
       screwFrame.update(getDefinition().getObjectFrameName());
+   }
+
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= previewTrajectory.pollHasStatus();
+      hasStatus |= force.pollHasStatus();
+      hasStatus |= torque.pollHasStatus();
+      hasStatus |= previewTrajectoryDuration.pollHasStatus();
+      hasStatus |= previewTrajectoryLinearVelocity.pollHasStatus();
+      hasStatus |= previewTrajectoryAngularVelocity.pollHasStatus();
+      hasStatus |= previewRequestedTime.pollHasStatus();
+      hasStatus |= previewJointAngles.pollHasStatus();
+      hasStatus |= previewSolutionQuality.pollHasStatus();
+      return hasStatus;
    }
 
    public void toMessage(ScrewPrimitiveActionStateMessage message)

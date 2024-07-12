@@ -96,6 +96,21 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       definition.getGoalFootstepToGoalYaw(side).setValue(goalFootstepToGoalTransforms.get(side).getRotation().getYaw());
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= totalNumberOfFootsteps.pollHasStatus();
+      hasStatus |= numberOfIncompleteFootsteps.pollHasStatus();
+      for (RobotSide side : RobotSide.values)
+      {
+         hasStatus |= desiredFootPoses.get(side).pollHasStatus();
+         hasStatus |= currentFootPoses.get(side).pollHasStatus();
+      }
+      hasStatus |= executionState.pollHasStatus();
+      return hasStatus;
+   }
+
    public void toMessage(FootstepPlanActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());

@@ -58,6 +58,26 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       orientationDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= isNextForExecution.pollHasStatus();
+      hasStatus |= concurrencyRank.pollHasStatus();
+      hasStatus |= canExecute.pollHasStatus();
+      hasStatus |= isExecuting.pollHasStatus();
+      hasStatus |= failed.pollHasStatus();
+      hasStatus |= nominalExecutionDuration.pollHasStatus();
+      hasStatus |= elapsedExecutionTime.pollHasStatus();
+      hasStatus |= commandedTrajectory.pollHasStatus();
+      hasStatus |= currentPose.pollHasStatus();
+      hasStatus |= commandedJointTrajectories.pollHasStatus();
+      hasStatus |= currentJointAngles.pollHasStatus();
+      hasStatus |= positionDistanceToGoalTolerance.pollHasStatus();
+      hasStatus |= orientationDistanceToGoalTolerance.pollHasStatus();
+      return hasStatus;
+   }
+
    public void toMessage(ActionNodeStateMessage message)
    {
       super.toMessage(message.getState());

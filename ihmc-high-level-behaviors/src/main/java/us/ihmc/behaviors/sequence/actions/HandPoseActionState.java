@@ -62,6 +62,18 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       palmFrame.update();
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= goalChestToWorldTransform.pollHasStatus();
+      hasStatus |= force.pollHasStatus();
+      hasStatus |= torque.pollHasStatus();
+      hasStatus |= previewJointAngles.pollHasStatus();
+      hasStatus |= solutionQuality.pollHasStatus();
+      return hasStatus;
+   }
+
    public void toMessage(HandPoseActionStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());

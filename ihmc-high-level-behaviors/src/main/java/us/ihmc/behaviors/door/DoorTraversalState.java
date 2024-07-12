@@ -113,6 +113,15 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       }
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= doorHingeJointAngle.pollHasStatus();
+      hasStatus |= doorHandleDistanceFromStart.pollHasStatus();
+      return hasStatus;
+   }
+
    public void toMessage(DoorTraversalStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());

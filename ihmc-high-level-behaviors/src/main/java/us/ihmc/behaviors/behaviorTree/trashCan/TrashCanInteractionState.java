@@ -109,6 +109,12 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       }
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      return stance.pollHasStatus();
+   }
+
    public void toMessage(TrashCanInteractionStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());
