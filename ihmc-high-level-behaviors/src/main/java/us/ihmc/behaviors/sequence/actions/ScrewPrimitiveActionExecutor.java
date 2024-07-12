@@ -28,6 +28,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -385,7 +386,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                trajectoryPoint1DMessage.setVelocity(armIKSolver.getSolutionOneDoFJoints()[j].getQd());
             }
 
-            state.getLogger().info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
+            LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
                     .formatted(waypointTime,
                                desiredPose.getPosition(),
                                new YawPitchRoll(desiredPose.getOrientation()),
