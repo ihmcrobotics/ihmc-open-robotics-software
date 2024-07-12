@@ -123,6 +123,11 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
          poseGizmo.getPoseGizmo().update();
          highlightModel.setPose(graphicFrame.getReferenceFrame());
 
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         {
+            getDefinition().getChestToParentTransform().accessValue();
+         }
+
          if (poseGizmo.isSelected() || isMouseHovering)
          {
             highlightModel.setTransparency(0.7);

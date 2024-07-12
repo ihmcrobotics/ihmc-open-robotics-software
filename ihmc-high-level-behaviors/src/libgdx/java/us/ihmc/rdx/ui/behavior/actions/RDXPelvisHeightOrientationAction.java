@@ -126,6 +126,11 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
          poseGizmo.getPoseGizmo().update();
          highlightModel.setPose(graphicFrame.getReferenceFrame());
 
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         {
+            getDefinition().getPelvisToParentTransform().accessValue();
+         }
+
          if (poseGizmo.isSelected() || isMouseHovering)
          {
             highlightModel.setTransparency(0.7);
