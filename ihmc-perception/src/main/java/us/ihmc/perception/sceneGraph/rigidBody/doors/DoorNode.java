@@ -128,8 +128,8 @@ public class DoorNode extends DetectableSceneNode
        * The doors will be oriented such that they are push doors.
        * At this moment there will be no opening mechanisms in the list (first detection)
        */
-      if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLODoorLever")
-          || doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLODoorKnob"))
+      if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("door_lever")
+          || doorOpeningMechanismDetection.getDetectedObjectClass().contains("door_knob"))
       {
          detectionSide = DoorSide.PUSH;
 
@@ -137,7 +137,7 @@ public class DoorNode extends DetectableSceneNode
          if (!openingMechanisms.isEmpty())
             detectionSide = DoorSide.getOppositeSide(detectionSide);
       }
-      else if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLOPushBar"))
+      else if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("door_push_bar"))
       {
          detectionSide = DoorSide.PUSH;
       }
@@ -155,7 +155,7 @@ public class DoorNode extends DetectableSceneNode
       {
          double openerToHingeCornerY = DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_OPENER_INSET;
          // Centroid of push bar is further right compared to other opening mechanisms
-         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLOPushBar"))
+         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("door_push_bar"))
             openerToHingeCornerY -= 0.25;
 
 
@@ -166,12 +166,12 @@ public class DoorNode extends DetectableSceneNode
           * Door Handle -> right
           * (looking at the push side of the door)
           */
-         if (!doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLODoorKnob"))
+         if (!doorOpeningMechanismDetection.getDetectedObjectName().contains("door_knob"))
             openerToHingeCornerY *= -1.0;
 
          double openerToHingeCornerZ = -1.0 * DoorModelParameters.DOOR_OPENER_FROM_BOTTOM_OF_PANEL;
          // Centroid of pull handle is higher up compared to other opening mechanisms
-         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLOPullHandle"))
+         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("door_pull_handle"))
             openerToHingeCornerZ -= 0.18;
 
          openingMechanismToHingeCornerTranslation.set(0.0, openerToHingeCornerY, openerToHingeCornerZ);
