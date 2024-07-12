@@ -13,9 +13,9 @@ import us.ihmc.idl.IDLSequence;
  */
 public class CRDTUnidirectionalPoseList extends CRDTUnidirectionalMutableField<RecyclingArrayList<Pose3D>>
 {
-   public CRDTUnidirectionalPoseList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalPoseList(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(Pose3D::new));
+      super(sideThatCanModify, requestConfirmFreezable, () -> new RecyclingArrayList<>(Pose3D::new));
    }
 
    public Pose3DReadOnly getValueReadOnly(int index)
@@ -40,7 +40,7 @@ public class CRDTUnidirectionalPoseList extends CRDTUnidirectionalMutableField<R
 
    public void fromMessage(IDLSequence.Object<Pose3D> trajectoryMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().clear();
 

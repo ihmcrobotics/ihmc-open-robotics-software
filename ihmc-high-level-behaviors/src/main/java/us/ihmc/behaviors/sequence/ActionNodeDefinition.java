@@ -39,9 +39,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterPrevious = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
-      executeAfterBeginning = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
-      executeAfterNodeID = new CRDTUnidirectionalLong(ROS2ActorDesignation.OPERATOR, crdtInfo, 0);
+      executeAfterPrevious = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true);
+      executeAfterBeginning = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
+      executeAfterNodeID = new CRDTUnidirectionalLong(ROS2ActorDesignation.OPERATOR, this, 0);
    }
 
    public void saveToFile(ObjectNode jsonNode)

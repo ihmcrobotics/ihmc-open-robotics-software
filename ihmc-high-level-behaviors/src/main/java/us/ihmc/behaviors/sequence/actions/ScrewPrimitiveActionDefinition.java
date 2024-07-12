@@ -53,19 +53,19 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      objectFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
-      screwAxisPoseInObjectFrame = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
-      translation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.1);
-      rotation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      maxLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.1);
-      maxAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.6);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true); // Jointspace only works best for now
-      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
-      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
-      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
-      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_POSITION_ERROR_TOLERANCE);
-      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
+      objectFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
+      screwAxisPoseInObjectFrame = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
+      translation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.1);
+      rotation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0);
+      maxLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.1);
+      maxAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.6);
+      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true); // Jointspace only works best for now
+      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
+      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
+      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
+      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
    }
 
    @Override
@@ -95,7 +95,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       objectFrameName.setValue(jsonNode.get("objectFrame").textValue());
-      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValue());
+      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.accessValue());
       translation.setValue(jsonNode.get("translation").asDouble());
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
@@ -135,7 +135,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(onDiskSide);
       objectFrameName.setValue(onDiskObjectFrameName);
-      screwAxisPoseInObjectFrame.getValue().set(onDiskScrewAxisPoseInObjectFrame);
+      screwAxisPoseInObjectFrame.accessValue().set(onDiskScrewAxisPoseInObjectFrame);
       translation.setValue(onDiskTranslation);
       rotation.setValue(onDiskRotation);
       maxLinearVelocity.setValue(onDiskMaxLinearVelocity);

@@ -14,9 +14,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMutableField<RigidBodyTransform>
 {
-   public CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, RigidBodyTransform::new);
+      super(sideThatCanModify, requestConfirmFreezable, RigidBodyTransform::new);
    }
 
    public RigidBodyTransformReadOnly getValueReadOnly()
@@ -36,7 +36,7 @@ public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMuta
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
       }
@@ -44,7 +44,7 @@ public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMuta
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().set(poseMessage);
       }

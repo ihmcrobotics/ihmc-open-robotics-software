@@ -8,6 +8,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
@@ -51,6 +52,10 @@ public class RDXSceneGraphTools
       else if (sceneNodeToCopy instanceof DoorNode doorNode)
       {
          return new RDXDoorNode(doorNode, labels);
+      }
+      else if (sceneNodeToCopy instanceof TrashCanNode trashCanNode)
+      {
+         return new RDXTrashCanNode(trashCanNode);
       }
       else
       {

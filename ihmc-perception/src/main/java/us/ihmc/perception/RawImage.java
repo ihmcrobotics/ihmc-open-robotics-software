@@ -49,9 +49,9 @@ public class RawImage
     * at least one should be not null.
     */
    @Nullable
-   private Mat cpuImageMat;
+   private Mat cpuImageMat = null;
    @Nullable
-   private GpuMat gpuImageMat;
+   private GpuMat gpuImageMat = null;
    private final float focalLengthX;
    private final float focalLengthY;
    private final float principalPointX;
@@ -128,6 +128,42 @@ public class RawImage
                              new FramePoint3D(ReferenceFrame.getWorldFrame(), imageMessage.getPosition()),
                              new FrameQuaternion(ReferenceFrame.getWorldFrame(), imageMessage.getOrientation()));
       }
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions & type.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(Mat newCpuImageMat)
+   {
+      if (getImageWidth() != newCpuImageMat.cols() || getImageHeight() != newCpuImageMat.rows())
+         throw new IllegalArgumentException("New image must have the same dimensions as the current image");
+
+      RawImage newRawImage = new RawImage(this);
+      newCpuImageMat.copyTo(newRawImage.getCpuImageMat());
+      newRawImage.getGpuImageMat().upload(newCpuImageMat);
+      return newRawImage;
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions & type.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(GpuMat newGpuImageMat)
+   {
+      if (getImageWidth() != newGpuImageMat.cols() || getImageHeight() != newGpuImageMat.rows())
+         throw new IllegalArgumentException("New image must have the same dimensions as the current image");
+      if (getOpenCVType() != newGpuImageMat.type())
+         throw new IllegalArgumentException("New image must be the same OpenCV type as the current image");
+
+      RawImage newRawImage = new RawImage(this);
+      newGpuImageMat.copyTo(newRawImage.getGpuImageMat());
+      newGpuImageMat.download(newRawImage.getCpuImageMat());
+      return newRawImage;
    }
 
    public long getSequenceNumber()

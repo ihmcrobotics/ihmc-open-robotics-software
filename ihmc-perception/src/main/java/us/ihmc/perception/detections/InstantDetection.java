@@ -109,4 +109,9 @@ public class InstantDetection
       else
          return false;
    }
+
+   public void destroy()
+   {
+
+   }
 }

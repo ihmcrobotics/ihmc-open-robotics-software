@@ -2,7 +2,6 @@
 #define __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorTreeLogMessage_.idl"
-#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -21,10 +20,6 @@ module behavior_msgs
          * A node is active if it lies on the path of the current tree tick.
          */
         boolean is_active;
-        /**
-         * A mechanism for confirming and ending a freeze early
-         */
-        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
         /**
          * Recent log messages
          */

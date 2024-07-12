@@ -72,7 +72,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
 
       getDefinition().setName("Pelvis height and orientation");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().accessValue());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -125,6 +125,11 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
 
          poseGizmo.getPoseGizmo().update();
          highlightModel.setPose(graphicFrame.getReferenceFrame());
+
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         {
+            getDefinition().getPelvisToParentTransform().accessValue();
+         }
 
          if (poseGizmo.isSelected() || isMouseHovering)
          {

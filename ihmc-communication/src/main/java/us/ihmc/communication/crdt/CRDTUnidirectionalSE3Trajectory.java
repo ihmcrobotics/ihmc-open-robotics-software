@@ -11,9 +11,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3Traject
 
 public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableField<RecyclingArrayList<SE3TrajectoryPoint>>
 {
-   public CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, () -> new RecyclingArrayList<>(SE3TrajectoryPoint::new));
+      super(sideThatCanModify, requestConfirmFreezable, () -> new RecyclingArrayList<>(SE3TrajectoryPoint::new));
    }
 
    public SE3TrajectoryPointReadOnly getValueReadOnly(int index)
@@ -53,7 +53,7 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void fromMessage(IDLSequence.Object<SE3TrajectoryPointMessage> trajectoryMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().clear();
 
@@ -66,7 +66,7 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void addTrajectoryPoint(RigidBodyTransformReadOnly pose, double time)
    {
-      SE3TrajectoryPoint point = getValue().add();
+      SE3TrajectoryPoint point = accessValue().add();
       point.setTime(time);
       point.getPosition().set(pose.getTranslation());
       point.getOrientation().set(pose.getRotation());
@@ -74,12 +74,12 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void setSingleSegmentTrajectory(RigidBodyTransformReadOnly startPose, RigidBodyTransformReadOnly endPose, double trajectoryDuration)
    {
-      getValue().clear();
-      SE3TrajectoryPoint start = getValue().add();
+      accessValue().clear();
+      SE3TrajectoryPoint start = accessValue().add();
       start.setTime(0.0);
       start.getPosition().set(startPose.getTranslation());
       start.getOrientation().set(startPose.getRotation());
-      SE3TrajectoryPoint end = getValue().add();
+      SE3TrajectoryPoint end = accessValue().add();
       end.setTime(trajectoryDuration);
       end.getPosition().set(endPose.getTranslation());
       end.getOrientation().set(endPose.getRotation());

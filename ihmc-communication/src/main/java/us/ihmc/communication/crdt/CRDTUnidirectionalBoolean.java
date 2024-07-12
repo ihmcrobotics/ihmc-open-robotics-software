@@ -10,9 +10,9 @@ public class CRDTUnidirectionalBoolean extends CRDTUnidirectionalField
 {
    private boolean value;
 
-   public CRDTUnidirectionalBoolean(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, boolean initialValue)
+   public CRDTUnidirectionalBoolean(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, boolean initialValue)
    {
-      super(sideThatCanModify, crdtInfo);
+      super(sideThatCanModify, requestConfirmFreezable);
 
       value = initialValue;
    }
@@ -24,9 +24,12 @@ public class CRDTUnidirectionalBoolean extends CRDTUnidirectionalField
 
    public void setValue(boolean value)
    {
-      checkActorCanModify();
+      if (this.value != value)
+      {
+         checkActorCanModifyAndFreeze();
 
-      this.value = value;
+         this.value = value;
+      }
    }
 
    public boolean toMessage()
@@ -36,7 +39,7 @@ public class CRDTUnidirectionalBoolean extends CRDTUnidirectionalField
 
    public void fromMessage(boolean value)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          this.value = value;
       }
