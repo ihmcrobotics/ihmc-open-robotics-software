@@ -126,13 +126,16 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       T localNode = (T) behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
-         Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
-         LogTools.info("Replicating node: {}:{} Actor: {}",
+         LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
                        subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                        nodeID,
-                       behaviorTreeState.getCRDTInfo().getActorDesignation().name());
+                       subscriptionNode.getType().getSimpleName(),
+                       behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
          localNode = (T) behaviorTreeState.getNodeStateBuilder()
-                                          .createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo(), behaviorTreeState.getSaveFileDirectory());
+                                          .createNode(subscriptionNode.getType(),
+                                                      nodeID,
+                                                      behaviorTreeState.getCRDTInfo(),
+                                                      behaviorTreeState.getSaveFileDirectory());
       }
 
       return localNode;

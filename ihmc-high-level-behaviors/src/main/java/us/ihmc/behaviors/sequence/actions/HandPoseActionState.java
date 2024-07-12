@@ -65,7 +65,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    @Override
    public boolean hasStatus()
    {
-      boolean hasStatus = false;
+      boolean hasStatus = super.hasStatus();
       hasStatus |= goalChestToWorldTransform.pollHasStatus();
       hasStatus |= force.pollHasStatus();
       hasStatus |= torque.pollHasStatus();

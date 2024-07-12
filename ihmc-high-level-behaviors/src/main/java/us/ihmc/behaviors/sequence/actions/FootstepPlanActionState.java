@@ -99,7 +99,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    @Override
    public boolean hasStatus()
    {
-      boolean hasStatus = false;
+      boolean hasStatus = super.hasStatus();
       hasStatus |= totalNumberOfFootsteps.pollHasStatus();
       hasStatus |= numberOfIncompleteFootsteps.pollHasStatus();
       for (RobotSide side : RobotSide.values)

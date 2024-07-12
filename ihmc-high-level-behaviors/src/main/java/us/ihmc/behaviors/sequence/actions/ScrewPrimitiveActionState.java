@@ -57,7 +57,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    @Override
    public boolean hasStatus()
    {
-      boolean hasStatus = false;
+      boolean hasStatus = super.hasStatus();
       hasStatus |= previewTrajectory.pollHasStatus();
       hasStatus |= force.pollHasStatus();
       hasStatus |= torque.pollHasStatus();
