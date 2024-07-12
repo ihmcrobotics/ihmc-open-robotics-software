@@ -25,7 +25,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
-   private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
+   private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
@@ -46,10 +46,10 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());
-      footsteps = new RecyclingArrayList<>(() ->
+      manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              definition.getCRDTParentFrameName(),
-                                             RecyclingArrayListTools.getUnsafe(definition.getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
+                                             RecyclingArrayListTools.getUnsafe(definition.getManuallyPlacedFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
       totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       numberOfIncompleteFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       for (RobotSide side : RobotSide.values)
@@ -72,12 +72,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       goalFrame.update(definition.getParentFrameName());
       parentFrame = goalFrame.getReferenceFrame().getParent();
 
-      RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps().getSize());
+      RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, definition.getManuallyPlacedFootsteps().getSize());
 
-      for (int i = 0; i < footsteps.size(); i++)
+      for (int i = 0; i < manuallyPlacedFootsteps.size(); i++)
       {
-         footsteps.get(i).setIndex(i);
-         footsteps.get(i).update();
+         manuallyPlacedFootsteps.get(i).setIndex(i);
+         manuallyPlacedFootsteps.get(i).update();
       }
    }
 
@@ -126,7 +126,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
 
       message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepState footstep : footsteps)
+      for (FootstepPlanActionFootstepState footstep : manuallyPlacedFootsteps)
       {
          footstep.toMessage(message.getFootsteps().add());
       }
@@ -148,10 +148,10 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose());
       currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
 
-      footsteps.clear();
+      manuallyPlacedFootsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
-         footsteps.add().fromMessage(footstep);
+         manuallyPlacedFootsteps.add().fromMessage(footstep);
       }
 
       executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
@@ -182,9 +182,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return goalFrame;
    }
 
-   public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
+   public RecyclingArrayList<FootstepPlanActionFootstepState> getManuallyPlacedFootsteps()
    {
-      return footsteps;
+      return manuallyPlacedFootsteps;
    }
 
    public int getTotalNumberOfFootsteps()

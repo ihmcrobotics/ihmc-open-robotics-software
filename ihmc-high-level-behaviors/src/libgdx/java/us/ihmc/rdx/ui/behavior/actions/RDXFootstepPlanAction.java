@@ -106,7 +106,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          new RDXFootstepPlanActionFootstep(baseUI,
                                            robotModel,
                                            this,
-                                           RecyclingArrayListTools.getUnsafe(state.getFootsteps(), numberOfAllocatedFootsteps++)));
+                                           RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
 
       for (RobotSide side : RobotSide.values)
       {
@@ -142,7 +142,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       super.update();
 
-      RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getFootsteps());
+      RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getManuallyPlacedFootsteps());
 
       if (state.areFramesInWorld())
       {
@@ -150,7 +150,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(definition.getFootsteps().accessValue(), state.getFootsteps());
+            RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             addedFootstep.getState().update();
@@ -181,8 +181,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userRemovedFootstep.poll())
          {
             RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
-            RecyclingArrayListTools.removeLast(state.getFootsteps());
-            RecyclingArrayListTools.removeLast(definition.getFootsteps().accessValue());
+            RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
+            RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
          }
 
          for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
@@ -370,7 +370,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                if (ImGui.button(labels.get(side.getPascalCaseName())))
                   userAddedFootstep.set(side);
             }
-            if (!getState().getFootsteps().isEmpty())
+            if (!getState().getManuallyPlacedFootsteps().isEmpty())
             {
                ImGui.sameLine();
                ImGui.text("Remove:");
@@ -480,7 +480,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       goalStancePointGizmo.getPoseGizmo().update();
       goalFocalPointGizmo.getPoseGizmo().update();
 
-      for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
+      for (FootstepPlanActionFootstepState footstepState : getState().getManuallyPlacedFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);
       }

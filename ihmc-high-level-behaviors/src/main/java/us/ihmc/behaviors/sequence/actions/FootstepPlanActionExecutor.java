@@ -165,6 +165,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                 state.getGoalFootstepToGoalTransform(side));
             liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
          }
+
+         if (state.getIsNextForExecution())
+         {
+            if (!footstepPlanningThread.isExecuting())
+               startFootstepPlanningAsync();
+
+            if (footstepPlanNotification.poll())
+            {
+               FootstepPlan footstepPlan = footstepPlanNotification.read();
+
+            }
+         }
       }
 
       for (RobotSide side : RobotSide.values)
@@ -194,7 +206,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       {
          if (definition.getIsManuallyPlaced())
          {
-            if (state.getFootsteps().isEmpty())
+            if (state.getManuallyPlacedFootsteps().isEmpty())
             {
                state.getExecutionState().setValue(FootstepPlanActionExecutionState.PLANNING_FAILED);
             }
@@ -206,6 +218,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          else
          {
+            // Make sure we're getting a fresh plan
+            footstepPlanningThread.interruptAndReset();
+            while (footstepPlanningThread.isExecuting())
+               MissingThreadTools.sleepMillis(10);
+            footstepPlanNotification.poll();
+
             startFootstepPlanningAsync();
             state.getExecutionState().setValue(FootstepPlanActionExecutionState.FOOTSTEP_PLANNING);
          }
@@ -261,7 +279,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private void packManuallyPlacedFootstepsIntoPlan()
    {
       footstepPlanToExecute.clear();
-      for (FootstepPlanActionFootstepState footstep : state.getFootsteps())
+      for (FootstepPlanActionFootstepState footstep : state.getManuallyPlacedFootsteps())
       {
          solePose.setIncludingFrame(footstep.getSoleFrame().getReferenceFrame().getParent(),
                                     footstep.getDefinition().getSoleToPlanFrameTransform().getValueReadOnly());
