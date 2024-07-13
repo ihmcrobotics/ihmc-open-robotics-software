@@ -283,8 +283,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (robotSide == RobotSide.RIGHT)
-            continue;
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -316,9 +314,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (robotSide == RobotSide.RIGHT)
-            continue;
-
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
          initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
