@@ -1,21 +1,41 @@
 package us.ihmc.behaviors.buildingExploration;
 
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.behaviors.door.DoorTraversalExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
+import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<BuildingExplorationState, BuildingExplorationDefinition>
 {
+   private final BuildingExplorationState state;
+   private final BuildingExplorationDefinition definition;
+   private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
 
-   public BuildingExplorationExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, SceneGraph sceneGraph)
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+
+   public BuildingExplorationExecutor(long id,
+                                      CRDTInfo crdtInfo,
+                                      WorkspaceResourceDirectory saveFileDirectory,
+                                      ROS2ControllerHelper ros2ControllerHelper,
+                                      ROS2SyncedRobotModel syncedRobot,
+                                      SceneGraph sceneGraph)
    {
       super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
+
+      state = getState();
+      definition = getDefinition();
+
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
    }
 
@@ -25,31 +45,52 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
    {
       super.update();
 
-      // Find the next door to traverse
-      if (getState().getNextDoorNode() == null)
-      {
-         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-         {
-            if (sceneNode instanceof DoorNode doorNode)
-            {
-               // TODO: check detection status
-               // boolean detected = doorNode.isDetected();
-               boolean detected = true;
+      updateActionSubtree(this);
 
-               // If detected and we have not traversed the door
-               if (detected && !getState().getTraversedDoorNodes().contains(doorNode))
+      boolean shouldClearStaticHandles = false;
+      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+
+      if (shouldClearStaticHandles)
+      {
+         for (String nodeName : sceneGraph.getNodeNameList())
+         {
+            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+            {
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
                {
-                  getState().setNextDoorNode(doorNode);
+                  staticHandleNode.clearOffset();
+                  staticHandleNode.freeze();
                }
             }
          }
       }
 
-      for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
+//      if (!state.getPostGraspEvaluationAction().getIsExecuting())
+//      {
+//         waitForGraspToFinish = false;
+//      }
+//      if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
+//      {
+//         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+//         waitForGraspToFinish = true;
+//         state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+//      }
+   }
+
+   public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
-         if (child instanceof DoorTraversalExecutor doorTraversalExecutor)
+         if (child instanceof ActionNodeExecutor<?, ?> actionNode)
          {
-            doorTraversalExecutor.getState().setDoorNode(getState().getNextDoorNode());
+
+         }
+         else
+         {
+            updateActionSubtree(child);
          }
       }
    }

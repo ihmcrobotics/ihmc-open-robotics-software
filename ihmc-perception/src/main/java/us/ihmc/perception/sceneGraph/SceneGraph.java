@@ -244,8 +244,11 @@ public class SceneGraph
                        });
          }
       }
-//      for (PersistentDetection newDetection : newlyValidDetections)
-//         addNodeFromDetection(newDetection);
+
+      newlyValidDetections.removeAll(newlyValidDoorDetections);
+      newlyValidDetections.removeAll(newlyValidTrashCanDetections);
+      for (PersistentDetection newDetection : newlyValidDetections)
+         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }

@@ -81,7 +81,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {
-         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
