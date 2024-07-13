@@ -94,9 +94,14 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
           state.getEndTurnDoorBAction().getIsNextForExecution() ||
           state.getEndWalkCouchAction().getIsNextForExecution()))
       {
-
-   
-         state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+         for (String nodeName : sceneGraph.getNodeNameList())
+         {
+            if (nodeName.startsWith("tom"))
+            {
+               state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+               break;
+            }
+         }
       }
    }
 
