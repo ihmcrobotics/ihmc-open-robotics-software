@@ -5,7 +5,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -67,8 +66,7 @@ public class YOLOv8Node extends DetectableSceneNode
       objectPose.set(mostRecentDetection.getPose());
       objectPose.appendTransform(centroidToObjectTransform);
 
-      getNodeToParentFrameTransform().set(objectPose);
-      getNodeFrame().update();
+      setNodeToParentFrameTransformAndUpdate(objectPose);
    }
 
    public RigidBodyTransformReadOnly getCentroidToObjectTransform()
