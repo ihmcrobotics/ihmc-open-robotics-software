@@ -8,8 +8,10 @@ import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -58,21 +60,21 @@ public class RDXHumanoidDemoPoses extends RDXPanel
    private static final double[] leftArmSquat = new double[] {-0.7, 0.8, 0.53, -1.9};
    private static final double[] rightArmSquat = new double[] {-0.7, -0.8, -0.53, -1.9};
 
-   private static final double[] leftArmFlex1 = new double[] {0.71, 1.4, 1.12, -2.32};
-   private static final double[] rightArmFlex1 = new double[] {0.71, -1.4, -1.12, -2.32};
-   private static final double[] leftArmFlex2 = new double[] {0.02, 1.1, -0.96, -2.32};
-   private static final double[] rightArmFlex2 = new double[] {0.02, -1.1, 0.96, -2.32};
+   private static final double[] leftArmFlex1 = new double[] {0.71, 1.4, 1.05, -2.00};
+   private static final double[] rightArmFlex1 = new double[] {0.71, -1.4, -1.05, -2.00};
+   private static final double[] leftArmFlex2 = new double[] {0.02, 1.1, -0.96, -2.00};
+   private static final double[] rightArmFlex2 = new double[] {0.02, -1.1, 0.96, -2.00};
 
-   private static final double[] leftArmBallet1 = new double[] {-0.39, 2.21, 0.48, -2.32};
+   private static final double[] leftArmBallet1 = new double[] {-0.39, 2.21, 0.48, -2.00};
    private static final double[] rightArmBallet1 = new double[] {0.02, -0.7, 0.44, -1.7};
    private static final double[] leftArmBallet2 = new double[] {0.6, 0.8, -0.91, -1.84};
    private static final double[] rightArmBallet2 = new double[] {-0.56, -0.31, -0.53, -2.24};
 
-   private static final double[] leftArmKarateKid1 = new double[] {1.0, 1.22, 1.22, -1.57, -1.57, -0.61};
-   private static final double[] rightArmKarateKid1 = new double[] {1.0, -1.22, -1.22, -1.57, -1.57, -0.61};
+   private static final double[] leftArmKarateKid1 = new double[] {1.0, 1.22, 1.05, -1.57, -1.57, -0.61};
+   private static final double[] rightArmKarateKid1 = new double[] {1.0, -1.22, -1.05, -1.57, -1.57, -0.61};
 
-   private static final double[] leftArmKarateKid2 = new double[] {1.0, 0.0, 1.22, 0.0, 0.0, 0.0};
-   private static final double[] rightArmKarateKid2 = new double[] {1.0, 0.0, -1.22, 0.0, 0.0, 0.0};
+   private static final double[] leftArmKarateKid2 = new double[] {1.0, 0.0, 1.05, 0.0, 0.0, 0.0};
+   private static final double[] rightArmKarateKid2 = new double[] {1.0, 0.0, -1.05, 0.0, 0.0, 0.0};
 
    private static final double[] leftArmRunningMan = new double[] { 1.22, 0.0, 0.1, -0.8, 0.0};
    private static final double[] rightArmRunningMan = new double[] {-0.56, -0.39, -1.12, -1.74, -0.29, 0.4, 0.45};
@@ -80,6 +82,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
    private static final double[] extendedDab = new double[] {0.4, Math.toRadians(60), 0.0, 0.0};
    private static final double[] bentDab = new double[] {-0.42, -1.22, 0.33, -1.85, -1.73, -0.11, -0.156};
 
+   private static final double homeHeight = 1.05;
 
    public RDXHumanoidDemoPoses(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
@@ -98,7 +101,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       armsConfiguration.put(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
       chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
       pelvisOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-      pelvisPosition = new Point3D(0.0, 0.0, 1.08);
+      pelvisPosition = new Point3D(0.0, 0.0, homeHeight);
    }
 
    private static double[] quickCopy(double[] incoming)
@@ -115,7 +118,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       // zero our poses
       pelvisOrientation.setToZero();
       pelvisPosition.setToZero();
-      pelvisPosition.setZ(1.08);
+      pelvisPosition.setZ(homeHeight);
       chestOrientation.setToZero();
 
       double[] leftArm = quickCopy(robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
@@ -130,14 +133,18 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       if (ImGui.button(labels.get("Home Pose")))
       {
+         double delay = 0.0;
          for (RobotSide robotSide : RobotSide.values)
          {
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
             if (isFootOffGround(robotSide))
-               setFootDown(robotSide, 1.0);
+               delay = Math.max(delay, setFootDown(robotSide, 2.0));
          }
-         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.1);
+
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.1);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.1);
 
          publishPoses();
          usedFirstMode = false;
@@ -167,21 +174,22 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       if (ImGui.button(labels.get("Squat")))
       {
          double delay = setBothFeetDown(1.0);
+         double moveDuration = 3.0;
 
          if (!usedFirstMode)
          {
-            System.arraycopy(leftArmSquat, 0, leftArm, 0, Math.min(leftArm.length, leftArmSquat.length));
-            System.arraycopy(rightArmSquat, 0, rightArm, 0, Math.min(rightArm.length, rightArmSquat.length));
+//            System.arraycopy(leftArmSquat, 0, leftArm, 0, Math.min(leftArm.length, leftArmSquat.length));
+//            System.arraycopy(rightArmSquat, 0, rightArm, 0, Math.min(rightArm.length, rightArmSquat.length));
             armsConfiguration.put(RobotSide.LEFT, leftArm);
             armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
 //            pelvisOrientation.setToPitchOrientation(Math.toRadians(10.0));
-            pelvisPosition.setZ(0.70);
+            pelvisPosition.setZ(0.8);
          }
          for (RobotSide robotSide : RobotSide.values)
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), delay);
-         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), delay);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), delay);
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), moveDuration, delay);
+         appendChestOrientationToPublish(chestOrientation, moveDuration, delay);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, moveDuration, delay);
 
          publishPoses();
          usedFirstMode = !usedFirstMode;
@@ -189,7 +197,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       if (ImGui.button(labels.get("Flex")))
       {
-         double delay = setBothFeetDown(1.0);
+         double delay = setBothFeetDown(teleoperationParameters.getTrajectoryTime());
+         double moveDuration = 2.0;
 
          if (usedFirstMode)
          {
@@ -201,16 +210,16 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             System.arraycopy(leftArmFlex2, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex2.length));
             System.arraycopy(rightArmFlex2, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex2.length));
 
-            pelvisOrientation.setToPitchOrientation(Math.toRadians(35));
+            pelvisOrientation.setToPitchOrientation(Math.toRadians(0));
             pelvisPosition.setZ(1.0);
          }
          armsConfiguration.put(RobotSide.LEFT, leftArm);
          armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
          for (RobotSide robotSide : RobotSide.values)
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), delay);
-         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), delay);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), delay);
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), moveDuration, delay);
+         appendChestOrientationToPublish(chestOrientation, moveDuration, delay);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, moveDuration, delay);
          publishPoses();
          usedFirstMode = !usedFirstMode;
       }
@@ -225,14 +234,13 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             armsConfiguration.put(RobotSide.LEFT, leftArm);
             armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
-            chestOrientation.setToYawOrientation(Math.toRadians(30.0));
+            chestOrientation.setToYawOrientation(Math.toRadians(25));
             pelvisOrientation.setYaw(Math.toRadians(15));
-            pelvisOrientation.setPitch(Math.toRadians(10));
+            pelvisOrientation.setPitch(Math.toRadians(0));
 
             FramePose3D rightLiftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
             rightLiftFootPose.getPosition().addZ(0.03);
             rightLiftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-            appendFootPoseToPublish(RobotSide.RIGHT, 0.1, rightLiftFootPose);
 
             FramePose3D rightFinalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
             rightFinalFootPose.setZ(0.2);
@@ -241,7 +249,10 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             rightFinalFootPose.appendPitchRotation(Math.toRadians(45.0));
             rightFinalFootPose.appendRollRotation(Math.toRadians(-25.0));
 
-            appendFootPoseToPublish(RobotSide.RIGHT, teleoperationParameters.getTrajectoryTime(), rightFinalFootPose);
+            double[] durations = new double[] {0.1, teleoperationParameters.getTrajectoryTime()};
+            FramePose3D[] poses = new FramePose3D[] {rightLiftFootPose, rightFinalFootPose};
+
+            createFootPoseMessage(RobotSide.RIGHT, durations, poses);
 
             for (RobotSide robotSide : RobotSide.values)
                appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.1);
@@ -257,7 +268,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
             chestOrientation.setToZero();
-            pelvisOrientation.setToPitchOrientation(Math.toRadians(30));
+            pelvisOrientation.setToPitchOrientation(Math.toRadians(10));
             pelvisPosition.setZ(0.90);
 
             setBothFeetDown(teleoperationParameters.getTrajectoryTime() + 0.25);
@@ -272,73 +283,73 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          usedFirstMode = !usedFirstMode;
       }
 
-      if (ImGui.button(labels.get("Karate Kid")))
-      {
-         if (!usedFirstMode)
-         {
-            System.arraycopy(leftArmKarateKid1, 0, leftArm, 0, Math.min(leftArm.length, leftArmKarateKid1.length));
-            System.arraycopy(rightArmKarateKid1, 0, rightArm, 0, Math.min(rightArm.length, rightArmKarateKid1.length));
-
-            armsConfiguration.put(RobotSide.LEFT, leftArm);
-            armsConfiguration.put(RobotSide.RIGHT, rightArm);
-
-            double duration = 1.0;
-
-            RobotSide kickSide;
-            if (isFootOffGround(RobotSide.RIGHT))
-            {
-               kickSide = RobotSide.RIGHT;
-            }
-            else
-            {
-               kickSide = RobotSide.LEFT;
-            }
-            FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-            footPose.getPosition().addZ(0.45);
-            footPose.getPosition().addX(0.25);
-            footPose.getPosition().setY(kickSide.negateIfRightSide(0.15));
-            appendFootPoseToPublish(kickSide, duration, footPose);
-
-            for (RobotSide robotSide : RobotSide.values)
-               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
-            appendChestOrientationToPublish(chestOrientation, duration);
-            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
-         }
-         else
-         {
-            System.arraycopy(leftArmKarateKid2, 0, leftArm, 0, Math.min(leftArm.length, leftArmKarateKid2.length));
-            System.arraycopy(rightArmKarateKid2, 0, rightArm, 0, Math.min(rightArm.length, rightArmKarateKid2.length));
-
-            double duration = 1.0;
-
-            RobotSide kickSide;
-            if (isFootOffGround(RobotSide.RIGHT))
-            {
-               kickSide = RobotSide.RIGHT;
-            }
-            else
-            {
-               kickSide = RobotSide.LEFT;
-            }
-            FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-            footPose.getPosition().addZ(0.65);
-            footPose.getPosition().addX(0.75);
-            footPose.getPosition().addY(kickSide.negateIfRightSide(0.15));
-            footPose.getOrientation().setToPitchOrientation(Math.toRadians(-45.0));
-            appendFootPoseToPublish(kickSide, duration, footPose);
-
-            armsConfiguration.put(RobotSide.LEFT, leftArm);
-            armsConfiguration.put(RobotSide.RIGHT, rightArm);
-
-            for (RobotSide robotSide : RobotSide.values)
-               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
-            appendChestOrientationToPublish(chestOrientation, duration);
-            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
-         }
-
-         publishPoses();
-         usedFirstMode = !usedFirstMode;
-      }
+//      if (ImGui.button(labels.get("Karate Kid")))
+//      {
+//         if (!usedFirstMode)
+//         {
+//            System.arraycopy(leftArmKarateKid1, 0, leftArm, 0, Math.min(leftArm.length, leftArmKarateKid1.length));
+//            System.arraycopy(rightArmKarateKid1, 0, rightArm, 0, Math.min(rightArm.length, rightArmKarateKid1.length));
+//
+//            armsConfiguration.put(RobotSide.LEFT, leftArm);
+//            armsConfiguration.put(RobotSide.RIGHT, rightArm);
+//
+//            double duration = 1.0;
+//
+//            RobotSide kickSide;
+//            if (isFootOffGround(RobotSide.RIGHT))
+//            {
+//               kickSide = RobotSide.RIGHT;
+//            }
+//            else
+//            {
+//               kickSide = RobotSide.LEFT;
+//            }
+//            FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
+//            footPose.getPosition().addZ(0.45);
+//            footPose.getPosition().addX(0.25);
+//            footPose.getPosition().setY(kickSide.negateIfRightSide(0.15));
+//            createFootPoseMessage(kickSide, new double[] {duration}, new FramePose3D[] {footPose});
+//
+//            for (RobotSide robotSide : RobotSide.values)
+//               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
+//            appendChestOrientationToPublish(chestOrientation, duration);
+//            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
+//         }
+//         else
+//         {
+//            System.arraycopy(leftArmKarateKid2, 0, leftArm, 0, Math.min(leftArm.length, leftArmKarateKid2.length));
+//            System.arraycopy(rightArmKarateKid2, 0, rightArm, 0, Math.min(rightArm.length, rightArmKarateKid2.length));
+//
+//            double duration = 1.0;
+//
+//            RobotSide kickSide;
+//            if (isFootOffGround(RobotSide.RIGHT))
+//            {
+//               kickSide = RobotSide.RIGHT;
+//            }
+//            else
+//            {
+//               kickSide = RobotSide.LEFT;
+//            }
+//            FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
+//            footPose.getPosition().addZ(0.5);
+//            footPose.getPosition().addX(0.7);
+//            footPose.getPosition().addY(kickSide.negateIfRightSide(0.15));
+//            footPose.getOrientation().setToPitchOrientation(Math.toRadians(-45.0));
+//            createFootPoseMessage(kickSide, new double[] {duration}, new FramePose3D[] {footPose});
+//
+//            armsConfiguration.put(RobotSide.LEFT, leftArm);
+//            armsConfiguration.put(RobotSide.RIGHT, rightArm);
+//
+//            for (RobotSide robotSide : RobotSide.values)
+//               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
+//            appendChestOrientationToPublish(chestOrientation, duration);
+//            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
+//         }
+//
+//         publishPoses();
+//         usedFirstMode = !usedFirstMode;
+//      }
 
       if (ImGui.button(labels.get("Running Man")))
       {
@@ -348,7 +359,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          armsConfiguration.put(RobotSide.LEFT, leftArm);
          armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
-         double duration = 1.25;
+         double duration = 2.5;
 
          RobotSide kickSide;
          if (isFootOffGround(RobotSide.RIGHT))
@@ -360,13 +371,14 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             kickSide = RobotSide.LEFT;
          }
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-         footPose.getPosition().setZ(0.65);
-         footPose.getPosition().setX(-0.5);
+         footPose.getPosition().setZ(0.6);
+         footPose.getPosition().setX(-0.35);
          footPose.getPosition().setY(kickSide.negateIfRightSide(0.15));
+         footPose.changeFrame(ReferenceFrame.getWorldFrame());
          footPose.getOrientation().setYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
-         appendFootPoseToPublish(kickSide, duration, footPose);
+         createFootPoseMessage(kickSide, new double[] {duration}, new FramePose3D[] {footPose});
 
-         pelvisOrientation.setToPitchOrientation(Math.toRadians(30.0));
+         pelvisOrientation.setToPitchOrientation(Math.toRadians(10));
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
@@ -393,11 +405,11 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             kickSide = RobotSide.LEFT;
          }
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-         footPose.getPosition().setZ(0.8);
-         footPose.getPosition().setX(0.8);
+         footPose.getPosition().setZ(0.5);
+         footPose.getPosition().setX(0.7);
          footPose.getPosition().setY(kickSide.negateIfRightSide(0.175));
-         footPose.getOrientation().setYawPitchRoll(0.0, -Math.toRadians(80.0), 0.0);
-         appendFootPoseToPublish(kickSide, duration, footPose);
+         footPose.getOrientation().setYawPitchRoll(0.0, -Math.toRadians(70.0), 0.0);
+         createFootPoseMessage(kickSide, new double[] {duration}, new FramePose3D[] {footPose});
 
          pelvisOrientation.setToPitchOrientation(-Math.toRadians(30.0));
 
@@ -411,7 +423,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       if (ImGui.button(labels.get("Dab")))
       {
-         double duration = 2.0;
+         double duration = 4.0;
 
          RobotSide kickSide;
          if (isFootOffGround(RobotSide.RIGHT))
@@ -443,14 +455,14 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
 
          FramePose3D footPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(kickSide.getOppositeSide()));
-         footPose.getPosition().setZ(0.65);
+         footPose.getPosition().setZ(0.35);
          footPose.getPosition().setX(0.0);
-         footPose.getPosition().setY(kickSide.negateIfRightSide(0.7));
-         footPose.getOrientation().setToRollOrientation(kickSide.negateIfRightSide(Math.toRadians(70)));
+         footPose.getPosition().setY(kickSide.negateIfRightSide(0.75));
+         footPose.getOrientation().setToRollOrientation(kickSide.negateIfRightSide(Math.toRadians(60)));
 
          pelvisOrientation.setToRollOrientation(Math.toRadians(kickSide.negateIfRightSide(15.0)));
 
-         appendFootPoseToPublish(kickSide, duration, footPose);
+         createFootPoseMessage(kickSide, new double[]{duration}, new FramePose3D[]{footPose});
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
@@ -512,8 +524,9 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       totalDuration = durationScale * totalDuration;
 
-      appendFootPoseToPublish(robotSide, intermediateAlpha * totalDuration, intermediatePose);
-      appendFootPoseToPublish(robotSide, (1.0 - intermediateAlpha) * totalDuration, finalFootPose);
+      double[] durations = new double[] {intermediateAlpha * totalDuration,(1.0 - intermediateAlpha) * totalDuration};
+      FramePose3D[] waypoints = new FramePose3D[]{intermediatePose, finalFootPose};
+      createFootPoseMessage(robotSide, durations, waypoints);
 
       FootLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
       loadBearingMessage.setExecutionDelayTime(totalDuration + 0.1);
@@ -523,45 +536,37 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       return totalDuration;
    }
 
-   private void appendFootPoseToPublish(RobotSide robotSide, double moveDuration, FramePose3DReadOnly footPose)
+   private void createFootPoseMessage(RobotSide robotSide, double[] moveDurations, FramePose3DReadOnly[] footPoses)
    {
-      FramePose3D lastPose = new FramePose3D();
-      if (footTrajectoryMessagesToPublish.get(robotSide) == null)
+      FramePose3D lastFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
+      lastFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
+      footTrajectoryMessage.setRobotSide(robotSide.toByte());
+      footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().clear();
+      footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+
+      double waypointTime = 0.0;
+
+      for (int i = 0; i < moveDurations.length; i++)
       {
-         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
-         footTrajectoryMessage.setRobotSide(robotSide.toByte());
+         FramePose3D poseToPublish = new FramePose3D(footPoses[i]);
+         poseToPublish.changeFrame(ReferenceFrame.getWorldFrame());
 
-         lastPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
-         lastPose.changeFrame(ReferenceFrame.getWorldFrame());
+         double minDuration = poseToPublish.getPositionDistance(lastFootPose) / maxFootSpeed;
+         double moveDuration = Math.max(moveDurations[i], minDuration);
 
-         footTrajectoryMessagesToPublish.put(robotSide, footTrajectoryMessage);
+         waypointTime += moveDuration;
+
+         SE3TrajectoryPointMessage trajectoryPoint = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
+         trajectoryPoint.getPosition().set(poseToPublish.getPosition());
+         trajectoryPoint.getOrientation().set(poseToPublish.getOrientation());
+         trajectoryPoint.setTime(waypointTime);
+
+         lastFootPose.set(poseToPublish);
       }
-      else
-      {
-         SE3TrajectoryPointMessage lastPoint = footTrajectoryMessagesToPublish.get(robotSide).getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast();
-         lastPose.getPosition().set(lastPoint.getPosition());
-         lastPose.getOrientation().set(lastPoint.getOrientation());
-      }
 
-      FootTrajectoryMessage footTrajectoryMessage = footTrajectoryMessagesToPublish.get(robotSide);
-
-      FramePose3D poseToPublish = new FramePose3D(footPose);
-      poseToPublish.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double minDuration = poseToPublish.getPositionDistance(lastPose) / maxFootSpeed;
-      moveDuration = Math.max(moveDuration, minDuration);
-
-      double waypointTime;
-      if (!footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
-         waypointTime = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().get(footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().size() - 1).getTime();
-      else
-         waypointTime = 0.0;
-      waypointTime += moveDuration;
-
-      SE3TrajectoryPointMessage trajectoryPoint = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
-      trajectoryPoint.getPosition().set(footPose.getPosition());
-      trajectoryPoint.getOrientation().set(footPose.getOrientation());
-      trajectoryPoint.setTime(waypointTime);
+      footTrajectoryMessagesToPublish.put(robotSide, footTrajectoryMessage);
    }
 
    private void appendPelvisOrientationToPublish(Orientation3DReadOnly pelvisOrientation, Point3DReadOnly pelvisPosition, double trajectoryDuration)
@@ -678,5 +683,11 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
       while (!pelvisTrajectoryMessagesToPublish.isEmpty())
          ros2ControllerHelper.publishToController(pelvisTrajectoryMessagesToPublish.remove(0));
+
+      footTrajectoryMessagesToPublish.clear();
+      footLoadBearingMessagesToPublish.clear();
+      armTrajectoryMessagesToPublish.clear();
+      chestTrajectoryMessagesToPublish.set(null);
+      pelvisTrajectoryMessagesToPublish.clear();
    }
 }
