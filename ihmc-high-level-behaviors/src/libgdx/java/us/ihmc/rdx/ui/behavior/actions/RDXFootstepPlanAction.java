@@ -18,6 +18,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -92,25 +93,53 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       definition.setName("Footstep plan");
 
+      manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
+         new RDXFootstepPlanActionFootstep(baseUI,
+                                           robotModel,
+                                           this,
+                                           RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
+
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
                                                                 this::changeParentFrame);
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(definition::getIsManuallyPlaced,
                                                        definition::setIsManuallyPlaced,
-                                                       imBoolean -> ImGui.checkbox(labels.get("Manually place steps"), imBoolean));
+                                                       imBoolean ->
+      {
+         if (ImGui.checkbox(labels.get("Manually place steps"), imBoolean))
+         {
+            if (imBoolean.get()) // Copy planned footsteps into manually placed footsteps
+            {
+               while (!manuallyPlacedFootsteps.isEmpty())
+               {
+                  RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
+                  RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
+                  RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
+               }
+
+               for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
+               {
+                  RobotSide side = state.getPreviewFootsteps().getSide(i);
+                  RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
+                  RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
+                  addedFootstep.getDefinition().setSide(side);
+                  addedFootstep.update();
+
+                  Pose3DReadOnly poseInWorld = state.getPreviewFootsteps().getPoseReadOnly(i);
+                  FramePose3D poseInParent = new FramePose3D(poseInWorld);
+                  poseInParent.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
+                  addedFootstep.getDefinition().getSoleToPlanFrameTransform().accessValue().set(poseInParent);
+               }
+            }
+         }
+      });
       swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
                                                 definition::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
       transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
-
-      manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
-         new RDXFootstepPlanActionFootstep(baseUI,
-                                           robotModel,
-                                           this,
-                                           RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
 
       for (RobotSide side : RobotSide.values)
       {
