@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -28,16 +29,16 @@ public class InstantDetection
    /** Colloquial name of the detected object (e.g. "Shoe", "Door Lever", etc)*/
    private final String detectedObjectName;
    private final double confidence;
-   private final Pose3D pose;
+   private final Pose3DReadOnly pose;
    private final Instant detectionTime;
    private UUID persistentDetectionID = PersistentDetection.NULL_DETECTION_ID;
 
-   public InstantDetection(String detectedObjectClass, double confidence, Pose3D pose, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, double confidence, Pose3DReadOnly pose, Instant detectionTime)
    {
       this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime);
    }
 
-   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3D pose, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3DReadOnly pose, Instant detectionTime)
    {
       this.detectedObjectClass = detectedObjectClass;
       this.detectedObjectName = detectedObjectName;
@@ -61,7 +62,7 @@ public class InstantDetection
       return confidence;
    }
 
-   public Pose3D getPose()
+   public Pose3DReadOnly getPose()
    {
       return pose;
    }

@@ -26,16 +26,6 @@ public class YOLOv8Node extends DetectableSceneNode
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, PersistentDetection yoloDetection, CRDTInfo crdtInfo)
-   {
-      this(id,
-           name,
-           yoloDetection,
-           new Pose3D(),
-           yoloDetection.getMostRecentDetection().getPose(),
-           crdtInfo);
-   }
-
    public YOLOv8Node(long id,
                      String name,
                      PersistentDetection yoloDetection,
