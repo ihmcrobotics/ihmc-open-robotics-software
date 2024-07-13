@@ -113,6 +113,97 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
             {
                endScanAction = waitDurationAction;
             }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_PULL_DOOR))
+            {
+               startPullDoorAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_PULL_DOOR))
+            {
+               endPullDoorAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_PUSH_DOOR))
+            {
+               startPushDoorAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_PUSH_DOOR))
+            {
+               endPushDoorAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_COUCH))
+            {
+               startCouchAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_COUCH))
+            {
+               endCouchAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_TRASHCAN))
+            {
+               startTrashCanAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_TRASHCAN))
+            {
+               endTrashCanAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_TABLE_LEFT))
+            {
+               startTableLeftAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_TABLE_LEFT))
+            {
+               endTableLeftAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_TABLE_RIGHT))
+            {
+               startTableRightAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_TABLE_RIGHT))
+            {
+               endTableRightAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_SALUTE))
+            {
+               startSaluteAction = waitDurationAction;
+            }
+
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_WALK_DOOR_A))
+            {
+               endWalkDoorAAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_WALK_DOOR_B))
+            {
+               endWalkDoorBAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_TURN_DOOR_A))
+            {
+               endTurnDoorAAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_TURN_DOOR_B))
+            {
+               endTurnDoorBAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_WALK_COUCH))
+            {
+               endWalkCouchAction = waitDurationAction;
+            }
          }
          else
          {
@@ -148,5 +239,105 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public List<WaitDurationActionState> getSetStaticForGraspActions()
    {
       return setStaticForGraspActions;
+   }
+
+   public WaitDurationActionState getStartScanAction()
+   {
+      return startScanAction;
+   }
+
+   public WaitDurationActionState getEndScanAction()
+   {
+      return endScanAction;
+   }
+
+   public WaitDurationActionState getStartPullDoorAction()
+   {
+      return startPullDoorAction;
+   }
+
+   public WaitDurationActionState getEndPullDoorAction()
+   {
+      return endPullDoorAction;
+   }
+
+   public WaitDurationActionState getStartPushDoorAction()
+   {
+      return startPushDoorAction;
+   }
+
+   public WaitDurationActionState getEndPushDoorAction()
+   {
+      return endPushDoorAction;
+   }
+
+   public WaitDurationActionState getStartCouchAction()
+   {
+      return startCouchAction;
+   }
+
+   public WaitDurationActionState getEndCouchAction()
+   {
+      return endCouchAction;
+   }
+
+   public WaitDurationActionState getStartTrashCanAction()
+   {
+      return startTrashCanAction;
+   }
+
+   public WaitDurationActionState getEndTrashCanAction()
+   {
+      return endTrashCanAction;
+   }
+
+   public WaitDurationActionState getStartTableRightAction()
+   {
+      return startTableRightAction;
+   }
+
+   public WaitDurationActionState getEndTableRightAction()
+   {
+      return endTableRightAction;
+   }
+
+   public WaitDurationActionState getStartTableLeftAction()
+   {
+      return startTableLeftAction;
+   }
+
+   public WaitDurationActionState getEndTableLeftAction()
+   {
+      return endTableLeftAction;
+   }
+
+   public WaitDurationActionState getStartSaluteAction()
+   {
+      return startSaluteAction;
+   }
+
+   public WaitDurationActionState getEndWalkDoorAAction()
+   {
+      return endWalkDoorAAction;
+   }
+
+   public WaitDurationActionState getEndWalkDoorBAction()
+   {
+      return endWalkDoorBAction;
+   }
+
+   public WaitDurationActionState getEndTurnDoorAAction()
+   {
+      return endTurnDoorAAction;
+   }
+
+   public WaitDurationActionState getEndTurnDoorBAction()
+   {
+      return endTurnDoorBAction;
+   }
+
+   public WaitDurationActionState getEndWalkCouchAction()
+   {
+      return endWalkCouchAction;
    }
 }
