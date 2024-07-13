@@ -7,6 +7,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
+import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
@@ -35,6 +36,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final SideDependentList<CRDTStatusSE3Trajectory> desiredFootPoses = new SideDependentList<>();
    private final SideDependentList<CRDTStatusPose3D> currentFootPoses = new SideDependentList<>();
    private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
+   private final CRDTStatusFootstepList previewFootsteps;
 
    public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -58,6 +60,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          currentFootPoses.set(side, new CRDTStatusPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
       }
       executionState = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+      previewFootsteps = new CRDTStatusFootstepList(ROS2ActorDesignation.ROBOT, crdtInfo);
    }
 
    @Override
@@ -108,6 +111,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
          hasStatus |= currentFootPoses.get(side).pollHasStatus();
       }
       hasStatus |= executionState.pollHasStatus();
+      hasStatus |= previewFootsteps.pollHasStatus();
       return hasStatus;
    }
 
@@ -132,6 +136,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
 
       message.setExecutionState(executionState.toMessage().toByte());
+      previewFootsteps.toMessage(message.getPreviewFootsteps());
    }
 
    public void fromMessage(FootstepPlanActionStateMessage message)
@@ -155,6 +160,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
 
       executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
+      previewFootsteps.fromMessage(message.getPreviewFootsteps());
    }
 
    public CRDTBidirectionalRigidBodyTransform getGoalToParentTransform()
@@ -220,5 +226,10 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public CRDTStatusEnumField<FootstepPlanActionExecutionState> getExecutionState()
    {
       return executionState;
+   }
+
+   public CRDTStatusFootstepList getPreviewFootsteps()
+   {
+      return previewFootsteps;
    }
 }

@@ -11,11 +11,13 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -34,6 +36,7 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
@@ -41,6 +44,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.ArrayList;
 
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
@@ -68,6 +73,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
+   private final RDXFootstepPlanGraphic previewFootstepPlan;
 
    public RDXFootstepPlanAction(long id,
                                 CRDTInfo crdtInfo,
@@ -132,6 +138,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          goalFootGraphic.create();
          goalFeetGraphics.put(side, goalFootGraphic);
       }
+
+      previewFootstepPlan = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
@@ -244,6 +252,22 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFeetGizmos.get(side).update();
             goalFeetGraphics.get(side).setPose(goalFeetGizmos.get(side).getPose());
          }
+
+         if (!definition.getIsManuallyPlaced() && state.getPreviewFootsteps().getSize() > 0)
+         {
+            ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+            for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
+            {
+               minimalFootsteps.add(new MinimalFootstep(state.getPreviewFootsteps().getSide(i),
+                                                        new Pose3D(state.getPreviewFootsteps().getPoseReadOnly(i))));
+            }
+            previewFootstepPlan.generateMeshesAsync(minimalFootsteps);
+         }
+         else
+         {
+            previewFootstepPlan.clear();
+         }
+         previewFootstepPlan.update();
       }
    }
 
@@ -395,6 +419,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
       }
+
+      ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
    }
 
    @Override
@@ -448,6 +474,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                goalFeetGraphics.get(side).setHighlighted(footstepsWidget.getIsHovered().get(side));
                goalFeetGraphics.get(side).getRenderables(renderables, pool);
             }
+
+            previewFootstepPlan.getRenderables(renderables, pool);
          }
       }
    }
