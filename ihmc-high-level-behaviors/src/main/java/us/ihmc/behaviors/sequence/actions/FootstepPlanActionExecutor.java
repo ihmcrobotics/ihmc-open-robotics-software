@@ -171,7 +171,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          if (state.getIsNextForExecution())
          {
             if (!footstepPlanningThread.isExecuting() && previewPlanningThrottler.run())
-               startFootstepPlanningAsync();
+               startFootstepPlanningAsync(true);
 
             if (footstepPlanNotification.poll())
             {
@@ -235,7 +235,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                MissingThreadTools.sleepMillis(10);
             footstepPlanNotification.poll();
 
-            startFootstepPlanningAsync();
+            startFootstepPlanningAsync(false);
             state.getExecutionState().setValue(FootstepPlanActionExecutionState.FOOTSTEP_PLANNING);
          }
       }
@@ -299,7 +299,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       }
    }
 
-   private void startFootstepPlanningAsync()
+   private void startFootstepPlanningAsync(boolean previewPlan)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -327,10 +327,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          double idealFootstepLength = 0.5;
          footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
          footstepPlanner.getFootstepPlannerParameters().setMaxStepReach(idealFootstepLength);
-         state.getLogger().info("Planning footsteps...");
-         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+         if (!previewPlan)
+            state.getLogger().info("Planning footsteps...");
+         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, previewPlan);
          FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-         state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
+         if (!previewPlan)
+            state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 
          if (footstepPlan.getNumberOfSteps() < 1) // failed
          {
@@ -358,9 +360,12 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             footstepPlanNotification.set(new FootstepPlan(footstepPlan)); // Copy of the output to be safe
          }
 
-         FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
-         footstepPlannerLogger.logSession();
-         FootstepPlannerLogger.deleteOldLogs();
+         if (!previewPlan)
+         {
+            FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
+            footstepPlannerLogger.logSession();
+            FootstepPlannerLogger.deleteOldLogs();
+         }
       }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
