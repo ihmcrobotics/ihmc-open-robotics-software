@@ -39,6 +39,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.UUID;
 
@@ -63,6 +64,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final FootstepPlanningModule footstepPlanner;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
+   private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -168,13 +170,22 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (!footstepPlanningThread.isExecuting())
+            if (!footstepPlanningThread.isExecuting() && previewPlanningThrottler.run())
                startFootstepPlanningAsync();
 
             if (footstepPlanNotification.poll())
             {
                FootstepPlan footstepPlan = footstepPlanNotification.read();
 
+               var footstepsMessage = state.getPreviewFootsteps().accessValue();
+               footstepsMessage.clear();
+
+               for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+               {
+                  var messageFootstep = footstepsMessage.add();
+                  messageFootstep.setRobotSide(footstepPlan.getFootstep(i).getRobotSide().toByte());
+                  messageFootstep.getSolePose().set(footstepPlan.getFootstep(i).getFootstepPose());
+               }
             }
          }
       }
