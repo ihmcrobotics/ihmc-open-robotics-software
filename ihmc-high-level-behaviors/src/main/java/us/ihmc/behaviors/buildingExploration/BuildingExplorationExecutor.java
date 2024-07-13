@@ -78,6 +78,26 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
 //         waitForGraspToFinish = true;
 //         state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
 //      }
+
+      // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
+      if ( (state.getEndScanAction().getIsNextForExecution() ||
+          state.getEndPushDoorAction().getIsNextForExecution() ||
+          state.getEndPullDoorAction().getIsNextForExecution() ||
+          state.getEndTrashCanAction().getIsNextForExecution() ||
+          state.getEndCouchAction().getIsNextForExecution() ||
+          state.getEndTableLeftAction().getIsNextForExecution() ||
+          state.getEndTableRightAction().getIsNextForExecution() ||
+          state.getEndTableRightAction().getIsNextForExecution() ||
+          state.getEndWalkDoorAAction().getIsNextForExecution() ||
+          state.getEndWalkDoorBAction().getIsNextForExecution() ||
+          state.getEndTurnDoorAAction().getIsNextForExecution() ||
+          state.getEndTurnDoorBAction().getIsNextForExecution() ||
+          state.getEndWalkCouchAction().getIsNextForExecution()))
+      {
+
+   
+         state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+      }
    }
 
    public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
