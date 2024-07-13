@@ -8,7 +8,7 @@ public class DetectionManagerSettings extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey poseFilterAlpha = keys.addDoubleKey("Pose Filter Alpha", 0.2);
+   public static final DoubleStoredPropertyKey poseFilterAlpha = keys.addDoubleKey("Pose Filter Alpha", 0.1);
    public static final DoubleStoredPropertyKey maxMatchDistanceSquared = keys.addDoubleKey("Max Match Distance Squared", 1.0);
    public static final DoubleStoredPropertyKey acceptanceAverageConfidence = keys.addDoubleKey("Acceptance Average Confidence", 0.75);
    public static final DoubleStoredPropertyKey stabilityAverageConfidence = keys.addDoubleKey("Stability Average Confidence", 0.4);

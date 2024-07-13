@@ -22,16 +22,14 @@ import java.util.UUID;
 public class RDXDoorNode extends RDXDetectableSceneNode
 {
    private final DoorNode doorNode;
-   private final ImGuiUniqueLabelMap labels;
    private final RDXReferenceFrameGraphic doorFrameGraphic = new RDXReferenceFrameGraphic(0.2);
    private final Map<UUID, RDXDoorOpeningMechanismGraphic> openingMechanismGraphics = new HashMap<>();
    private final RDXPlanarRegionsGraphic doorPanelPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
-   public RDXDoorNode(DoorNode doorNode, ImGuiUniqueLabelMap labels)
+   public RDXDoorNode(DoorNode doorNode)
    {
       super(doorNode);
       this.doorNode = doorNode;
-      this.labels = labels;
 
       doorFrameGraphic.setToReferenceFrame(doorNode.getDoorCornerFrame());
    }

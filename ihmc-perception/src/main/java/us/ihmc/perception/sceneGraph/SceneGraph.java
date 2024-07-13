@@ -18,9 +18,11 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodyNodeTools;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
@@ -227,6 +229,21 @@ public class SceneGraph
          });
       }
 
+      Set<PersistentDetection> newlyValidTrashCanDetections = newlyValidDetections.stream()
+                                                                              .filter(RigidBodyNodeTools::detectionIsTrashCan)
+                                                                              .collect(Collectors.toSet());
+      for (PersistentDetection newlyValidTrashCanDetection : newlyValidTrashCanDetections)
+      {
+         if (!nodeNameList.contains("TrashCan"))
+         {
+            modifyTree(modificationQueue ->
+                       {
+                          // Create new trash can node
+                          TrashCanNode trashCanNode = new TrashCanNode(getNextID().getAndIncrement(), "TrashCan", newlyValidTrashCanDetection, getCRDTInfo());
+                          modificationQueue.accept(new SceneGraphNodeAddition(trashCanNode, rootNode));
+                       });
+         }
+      }
 //      for (PersistentDetection newDetection : newlyValidDetections)
 //         addNodeFromDetection(newDetection);
 

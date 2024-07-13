@@ -192,7 +192,7 @@ public class PersistentDetection
 
    public boolean isStable(Instant now)
    {
-      return getDetectionFrequencyDecaying(now) > stabilityDetectionFrequency && getAverageConfidence() > stabilityConfidenceThreshold;
+      return  getAverageConfidence() > stabilityConfidenceThreshold;
    }
 
    public boolean isValid()
