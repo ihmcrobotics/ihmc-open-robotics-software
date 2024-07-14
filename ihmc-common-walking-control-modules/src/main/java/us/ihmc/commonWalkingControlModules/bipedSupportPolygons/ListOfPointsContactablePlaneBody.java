@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,12 +24,12 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    private final List<FramePoint2D> frameContactPoints = new ArrayList<FramePoint2D>();
    private final int totalNumberOfContactPoints;
 
-   public ListOfPointsContactablePlaneBody(RigidBodyBasics rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame)
+   public ListOfPointsContactablePlaneBody(RigidBodyBasics rigidBody, ReferenceFrame soleFrame, List<? extends Point2DReadOnly> contactPointsInSoleFrame)
    {
       this.rigidBody = rigidBody;
       this.soleFrame = soleFrame;
 
-      for (Point2D contactPoint : contactPointsInSoleFrame)
+      for (Point2DReadOnly contactPoint : contactPointsInSoleFrame)
       {
          Point2D point = new Point2D(contactPoint);
          this.contactPoints.add(point);
