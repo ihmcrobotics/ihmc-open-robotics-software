@@ -443,19 +443,18 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
+            ImGui.text("Initial stance side:");
+            for (InitialStanceSide initialStanceSide : InitialStanceSide.values)
+            {
+               ImGui.sameLine();
+               if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
+                  definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
+            }
+            useTurnWalkTurnPlannerWidget.renderImGuiWidget();
+
+            ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
          }
       }
-
-      ImGui.text("Initial stance side:");
-      for (InitialStanceSide initialStanceSide : InitialStanceSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
-            definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
-      }
-      useTurnWalkTurnPlannerWidget.renderImGuiWidget();
-
-      ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
    }
 
    @Override

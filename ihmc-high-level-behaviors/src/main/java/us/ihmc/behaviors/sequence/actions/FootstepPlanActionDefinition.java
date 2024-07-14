@@ -102,9 +102,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             goalFootNode.put("y", (float) MathTools.roundToPrecision(goalFootstepToGoalYs.get(side).getValue(), 0.0005));
             goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
          }
+         jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
+         jsonNode.put("plannerUseTurnWalkTurn", plannerUseTurnWalkTurn.getValue());
       }
-      jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
-      jsonNode.put("plannerUseTurnWalkTurn", plannerUseTurnWalkTurn.getValue());
    }
 
    @Override
@@ -135,9 +135,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             goalFootstepToGoalYs.get(side).setValue(goalFootNode.get("y").asDouble());
             goalFootstepToGoalYaws.get(side).setValue(Math.toRadians(goalFootNode.get("yawInDegrees").asDouble()));
          }
+         if (jsonNode.get("plannerInitialStanceSide") != null)
+            plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(jsonNode.get("plannerInitialStanceSide").textValue()));
+         if (jsonNode.get("plannerUseTurnWalkTurn") != null)
+            plannerUseTurnWalkTurn.setValue(jsonNode.get("plannerUseTurnWalkTurn").asBoolean());
       }
-      plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(jsonNode.get("plannerInitialStanceSide").textValue()));
-      plannerUseTurnWalkTurn.setValue(jsonNode.get("plannerUseTurnWalkTurn").asBoolean());
    }
 
    @Override
