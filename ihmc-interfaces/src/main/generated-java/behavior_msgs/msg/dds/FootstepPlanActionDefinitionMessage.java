@@ -68,6 +68,14 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             * Right goal foot Yaw to the goal pose
             */
    public double right_goal_foot_yaw_to_gizmo_;
+   /**
+            * Initial stance side when planning
+            */
+   public byte planner_initial_stance_side_;
+   /**
+            * Whether to use the turn walk turn planner instead of A*
+            */
+   public boolean planner_use_turn_walk_turn_;
 
    public FootstepPlanActionDefinitionMessage()
    {
@@ -113,6 +121,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       right_goal_foot_y_to_gizmo_ = other.right_goal_foot_y_to_gizmo_;
 
       right_goal_foot_yaw_to_gizmo_ = other.right_goal_foot_yaw_to_gizmo_;
+
+      planner_initial_stance_side_ = other.planner_initial_stance_side_;
+
+      planner_use_turn_walk_turn_ = other.planner_use_turn_walk_turn_;
 
    }
 
@@ -326,6 +338,36 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       return right_goal_foot_yaw_to_gizmo_;
    }
 
+   /**
+            * Initial stance side when planning
+            */
+   public void setPlannerInitialStanceSide(byte planner_initial_stance_side)
+   {
+      planner_initial_stance_side_ = planner_initial_stance_side;
+   }
+   /**
+            * Initial stance side when planning
+            */
+   public byte getPlannerInitialStanceSide()
+   {
+      return planner_initial_stance_side_;
+   }
+
+   /**
+            * Whether to use the turn walk turn planner instead of A*
+            */
+   public void setPlannerUseTurnWalkTurn(boolean planner_use_turn_walk_turn)
+   {
+      planner_use_turn_walk_turn_ = planner_use_turn_walk_turn;
+   }
+   /**
+            * Whether to use the turn walk turn planner instead of A*
+            */
+   public boolean getPlannerUseTurnWalkTurn()
+   {
+      return planner_use_turn_walk_turn_;
+   }
+
 
    public static Supplier<FootstepPlanActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -376,6 +418,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_goal_foot_yaw_to_gizmo_, other.right_goal_foot_yaw_to_gizmo_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_initial_stance_side_, other.planner_initial_stance_side_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_use_turn_walk_turn_, other.planner_use_turn_walk_turn_, epsilon)) return false;
+
 
       return true;
    }
@@ -414,6 +460,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.right_goal_foot_y_to_gizmo_ != otherMyClass.right_goal_foot_y_to_gizmo_) return false;
 
       if(this.right_goal_foot_yaw_to_gizmo_ != otherMyClass.right_goal_foot_yaw_to_gizmo_) return false;
+
+      if(this.planner_initial_stance_side_ != otherMyClass.planner_initial_stance_side_) return false;
+
+      if(this.planner_use_turn_walk_turn_ != otherMyClass.planner_use_turn_walk_turn_) return false;
 
 
       return true;
@@ -454,7 +504,11 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append("right_goal_foot_y_to_gizmo=");
       builder.append(this.right_goal_foot_y_to_gizmo_);      builder.append(", ");
       builder.append("right_goal_foot_yaw_to_gizmo=");
-      builder.append(this.right_goal_foot_yaw_to_gizmo_);
+      builder.append(this.right_goal_foot_yaw_to_gizmo_);      builder.append(", ");
+      builder.append("planner_initial_stance_side=");
+      builder.append(this.planner_initial_stance_side_);      builder.append(", ");
+      builder.append("planner_use_turn_walk_turn=");
+      builder.append(this.planner_use_turn_walk_turn_);
       builder.append("}");
       return builder.toString();
    }
