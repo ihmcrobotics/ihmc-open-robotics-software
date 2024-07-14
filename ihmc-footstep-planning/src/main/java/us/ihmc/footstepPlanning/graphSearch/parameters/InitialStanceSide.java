@@ -7,6 +7,8 @@ public enum InitialStanceSide
    LEFT,
    RIGHT;
 
+   public static final InitialStanceSide[] values = values();
+
    public static InitialStanceSide fromByte(byte initialStanceSide)
    {
       return switch(initialStanceSide)

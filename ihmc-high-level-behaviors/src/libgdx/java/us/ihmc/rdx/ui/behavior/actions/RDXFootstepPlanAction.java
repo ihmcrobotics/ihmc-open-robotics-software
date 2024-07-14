@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -59,6 +60,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
+   private final ImBooleanWrapper useTurnWalkTurnPlannerWidget;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
@@ -140,6 +142,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
+      useTurnWalkTurnPlannerWidget = new ImBooleanWrapper(definition.getPlannerUseTurnWalkTurn()::getValue,
+                                                          definition.getPlannerUseTurnWalkTurn()::setValue,
+                                                          imBoolean -> ImGui.checkbox(labels.get("Use Turn Walk Turn Planner"), imBoolean));
 
       for (RobotSide side : RobotSide.values)
       {
@@ -440,6 +445,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
       }
+
+      ImGui.text("Initial stance side:");
+      for (InitialStanceSide initialStanceSide : InitialStanceSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
+            definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
+      }
+      useTurnWalkTurnPlannerWidget.renderImGuiWidget();
 
       ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
    }
