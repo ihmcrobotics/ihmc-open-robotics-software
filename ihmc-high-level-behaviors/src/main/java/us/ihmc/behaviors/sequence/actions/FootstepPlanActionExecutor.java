@@ -14,6 +14,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,6 +30,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -321,6 +323,18 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             footstepPlannerRequest.setGoalFootPose(side, goalFootPosesForThread.get(side));
          }
 
+         if (definition.getPlannerInitialStanceSide().getValue() == InitialStanceSide.LEFT)
+            footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
+         else if (definition.getPlannerInitialStanceSide().getValue() == InitialStanceSide.RIGHT)
+            footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
+         else // AUTO, swing the foot furthest from the goal first
+         {
+            double leftStartToGoal = goalFootPosesForThread.get(RobotSide.LEFT).getPositionDistance(startFootPosesForThread.get(RobotSide.LEFT));
+            double rightStartToGoal = goalFootPosesForThread.get(RobotSide.RIGHT).getPositionDistance(startFootPosesForThread.get(RobotSide.RIGHT));
+            footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
+         }
+
+         footstepPlannerRequest.setPerformAStarSearch(!definition.getPlannerUseTurnWalkTurn().getValue());
          footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
