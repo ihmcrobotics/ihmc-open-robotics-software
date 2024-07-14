@@ -7,10 +7,15 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<BuildingExplorationState, BuildingExplorationDefinition>
 {
@@ -19,6 +24,8 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
+   boolean tomDetected = false;
+   private final Map<String, Boolean> doorTraversed = new HashMap<>();
 
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
@@ -37,6 +44,9 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
+      doorTraversed.put("First", false);
+      doorTraversed.put("A", false);
+      doorTraversed.put("B", false);
    }
 
    // TODO: finish
@@ -68,17 +78,6 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          }
       }
 
-//      if (!state.getPostGraspEvaluationAction().getIsExecuting())
-//      {
-//         waitForGraspToFinish = false;
-//      }
-//      if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
-//      {
-//         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-//         waitForGraspToFinish = true;
-//         state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-//      }
-
       // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
       if ( (state.getEndScanAction().getIsNextForExecution() ||
           state.getEndPushDoorAction().getIsNextForExecution() ||
@@ -98,11 +97,111 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          {
             if (nodeName.startsWith("tom"))
             {
+               tomDetected = true;
                state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+               doorTraversed.put("First", false);
+               doorTraversed.put("A", false);
+               doorTraversed.put("B", false);
                break;
             }
          }
       }
+
+      if (!tomDetected)
+      {
+         if (state.getEndFirstDoorAction().getIsNextForExecution())
+         {
+            doorTraversed.put("First", true);
+         }
+         // PULL DOOR after WALK to pull door
+         if (state.getEndWalkDoorAAction().getIsNextForExecution())
+         {
+            doorTraversed.put("A", true);
+            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+         }
+         if (state.getEndWalkDoorBAction().getIsNextForExecution())
+         {
+            doorTraversed.put("B", true);
+            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+         }
+
+         // PULL DOOR after TRASHCAN
+         if (state.getEndTrashCanAction().getIsNextForExecution())
+         {
+            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+         }
+         // PUSH DOOR after Turn to face door
+         if (state.getEndTurnDoorAAction().getIsNextForExecution() || state.getEndTurnDoorBAction().getIsNextForExecution())
+         {
+            state.getActionSequence().setExecutionNextIndex(state.getStartPushDoorAction().getActionIndex());
+         }
+         // SCAN after PULL DOOR
+         if (state.getEndPullDoorAction().getIsNextForExecution())
+         {
+            state.getActionSequence().setExecutionNextIndex(state.getStartScanAction().getActionIndex());
+         }
+         // after SCAN
+         if (state.getEndScanAction().getIsNextForExecution() && doorTraversed.get("A"))
+         {
+            boolean isTableDetected = false;
+            for (String nodeName : sceneGraph.getNodeNameList())
+            {
+               // TABLE if there's a Table
+               if (nodeName.startsWith("table"))
+               {
+                  RigidBodyTransform transformTableToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
+                                                                                   .get(nodeName)
+                                                                                   .getNodeFrame()
+                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                          .getMidFeetZUpFrame());
+                  LogTools.info("Transform Table node - midFeetZUp {}", transformTableToRobotMidFeetFrame.getTranslationY());
+                  // TABLE RIGHT or LEFT according to where the table is
+                  if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
+                  {
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
+                  }
+                  else
+                  {
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
+                  }
+                  isTableDetected = true;
+                  break;
+               }
+            }
+            // TURN if no table
+            if (!isTableDetected)
+            {
+               if (doorTraversed.get("B"))
+                  state.getActionSequence().setExecutionNextIndex(state.getTurnDoorBAction().getActionIndex());
+               else
+                  state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+            }
+         }
+         // TURN after TABLE
+         if (state.getEndTableRightAction().getIsNextForExecution() || state.getEndTableLeftAction().getIsNextForExecution() )
+         {
+            state.getActionSequence().setExecutionNextIndex(state.getEndTurnDoorAAction().getActionIndex());
+         }
+
+         //// USING THIS TO EARLY TERMINATION FOR TESTING
+         if (state.getEndPushDoorAction().getIsNextForExecution())
+         {
+            state.getActionSequence().setExecutionNextIndex(state.getEndDemoAction().getActionIndex());
+         }
+         // WALK to DOOR B after PUSH DOOR A
+         // WALK TO COUCH after PUSH DOOR B
+         // COUCH after WALK to COUCH
+      }
+
+      // skip salute if it's next for execution and tom is not detected
+      if (state.getStartSaluteAction().getIsNextForExecution() && !tomDetected)
+      {
+         state.getActionSequence().setExecutionNextIndex(state.getEndDemoAction().getActionIndex());
+         doorTraversed.put("First", false);
+         doorTraversed.put("A", false);
+         doorTraversed.put("B", false);
+      }
+      tomDetected = false;
    }
 
    public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
