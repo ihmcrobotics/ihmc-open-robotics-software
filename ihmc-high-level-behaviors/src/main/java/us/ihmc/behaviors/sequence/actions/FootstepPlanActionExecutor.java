@@ -312,8 +312,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       footstepPlanNotification.poll(); // Make sure it's cleared
       footstepPlanningThread.execute(() ->
       {
-         footstepPlannerParameters.setFinalTurnProximity(1.0);
-
          FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
          footstepPlannerRequest.setPlanBodyPath(false);
          footstepPlannerRequest.setStartFootPoses(startFootPosesForThread.get(RobotSide.LEFT), startFootPosesForThread.get(RobotSide.RIGHT));
@@ -338,9 +336,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-         double idealFootstepLength = 0.5;
-         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
-         footstepPlanner.getFootstepPlannerParameters().setMaxStepReach(idealFootstepLength);
+
          if (!previewPlan)
             state.getLogger().info("Planning footsteps...");
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, previewPlan);
