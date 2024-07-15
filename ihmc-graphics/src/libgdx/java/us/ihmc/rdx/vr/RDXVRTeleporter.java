@@ -126,7 +126,7 @@ public class RDXVRTeleporter
      });
    }
 
-   private void snapToCameraView(RDXVRContext vrContext)
+   public void snapToCameraView(RDXVRContext vrContext)
    {
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
        {

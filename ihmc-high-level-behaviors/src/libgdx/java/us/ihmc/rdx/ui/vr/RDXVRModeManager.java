@@ -150,6 +150,11 @@ public class RDXVRModeManager
    private void renderImGuiWidgets()
    {
       ImGui.text("Teleport: Right joystick click");
+      ImGui.sameLine();
+      if (ImGui.button("Teleport"))
+      {
+         RDXBaseUI.getInstance().getVRManager().getTeleporter().snapToCameraView(RDXBaseUI.getInstance().getVRManager().getContext());
+      }
 
       if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
       {
