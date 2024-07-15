@@ -15,7 +15,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3ffea2d1d15b4509990f8bc39b809f83ff0a3954328123b168e90fd9f894bc33";
+   		return "714e96745fe087177360a219c4de9dd2efb7ca2316b7c08414373747c4f3c06b";
    }
    
    @Override
@@ -62,8 +62,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -93,9 +95,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getTargetDetectionClasses().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
+      for(int i0 = 0; i0 < data.getModelsToLoad().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getModelsToLoad().get(i0).length() + 1;
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -112,9 +115,9 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_5(data.getOutlierThreshold());
 
-      if(data.getTargetDetectionClasses().size() <= 100)
-      cdr.write_type_e(data.getTargetDetectionClasses());else
-          throw new RuntimeException("target_detection_classes field exceeds the maximum length");
+      if(data.getModelsToLoad().size() <= 50)
+      cdr.write_type_e(data.getModelsToLoad());else
+          throw new RuntimeException("models_to_load field exceeds the maximum length");
 
    }
 
@@ -130,7 +133,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setOutlierThreshold(cdr.read_type_5());
       	
-      cdr.read_type_e(data.getTargetDetectionClasses());	
+      cdr.read_type_e(data.getModelsToLoad());	
 
    }
 
@@ -142,7 +145,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_5("segmentation_threshold", data.getSegmentationThreshold());
       ser.write_type_2("erosion_kernel_radius", data.getErosionKernelRadius());
       ser.write_type_5("outlier_threshold", data.getOutlierThreshold());
-      ser.write_type_e("target_detection_classes", data.getTargetDetectionClasses());
+      ser.write_type_e("models_to_load", data.getModelsToLoad());
    }
 
    @Override
@@ -153,7 +156,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setSegmentationThreshold(ser.read_type_5("segmentation_threshold"));
       data.setErosionKernelRadius(ser.read_type_2("erosion_kernel_radius"));
       data.setOutlierThreshold(ser.read_type_5("outlier_threshold"));
-      ser.read_type_e("target_detection_classes", data.getTargetDetectionClasses());
+      ser.read_type_e("models_to_load", data.getModelsToLoad());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ParametersMessage src, perception_msgs.msg.dds.YOLOv8ParametersMessage dest)

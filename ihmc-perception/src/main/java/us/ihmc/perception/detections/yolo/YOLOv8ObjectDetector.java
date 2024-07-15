@@ -15,11 +15,9 @@ import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,7 +32,8 @@ public class YOLOv8ObjectDetector
    private final Net yoloNet;
    private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
 
-   private final AtomicBoolean isReady = new AtomicBoolean(true);
+   private final AtomicBoolean isReadyForNewInput = new AtomicBoolean(true); // set to true when the detector can accept new input
+   private final Notification destroyNotification = new Notification();
 
    // TODO: Remove
 //   @Deprecated
@@ -95,13 +94,13 @@ public class YOLOv8ObjectDetector
       try
       {
          bgrImage.get();
-         isReady.set(false);
+         isReadyForNewInput.set(false);
          Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
          MatVector outputBlobs = new MatVector(outputNames.size());
 
          yoloNet.setInput(blob);
          yoloNet.forward(outputBlobs, outputNames);
-         isReady.set(true);
+         isReadyForNewInput.set(true);
 
          Set<YOLOv8DetectionOutput> detections = processOutput(outputBlobs,
                                                                confidenceThreshold,
@@ -121,9 +120,14 @@ public class YOLOv8ObjectDetector
       return results;
    }
 
+   public YOLOv8Model getYoloModel()
+   {
+      return yoloModel;
+   }
+
    public boolean isReady()
    {
-      return isReady.get();
+      return isReadyForNewInput.get();
    }
 
    public void destroy()

@@ -34,10 +34,14 @@ import us.ihmc.ros2.ROS2PublisherBasics;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +70,7 @@ public class YOLOv8DetectionExecutor
    private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new HashMap<>();
 
    private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
+   private final Map<String, YOLOv8Model> modelNameToModelMap = new HashMap<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;
@@ -92,23 +97,34 @@ public class YOLOv8DetectionExecutor
          erosionKernelRadius = parametersMessage.getErosionKernelRadius();
          outlierThreshold = parametersMessage.getOutlierThreshold();
 
-         // Create a new set of target detections to use
-//         Set<String> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
-//         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
-//            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
-//
-//         targetDetections = newTargetDetections;
+         Set<String> requestedModelNames = new HashSet<>(Arrays.stream(parametersMessage.getModelsToLoad().toStringArray()).toList());
+         // Remove already loaded models from the requested models
+         Iterator<YOLOv8ObjectDetector> detectorIterator = yoloObjectDetectors.iterator();
+         while (detectorIterator.hasNext())
+         {
+            YOLOv8ObjectDetector detector = detectorIterator.next();
+            String loadedModelName = detector.getYoloModel().getModelName();
+            if (!requestedModelNames.remove(loadedModelName))
+            {
+               detector.destroyWhenDone();
+               detectorIterator.remove();
+            }
+         }
+         // Add not-loaded requested models
+         for (String requestedModelName : requestedModelNames)
+         {
+            YOLOv8Model requestedModel = modelNameToModelMap.get(requestedModelName);
+            YOLOv8ObjectDetector newObjectDetector = new YOLOv8ObjectDetector(requestedModel);
+            yoloObjectDetectors.add(newObjectDetector);
+            LogTools.info("Loaded YOLOv8 model: " + requestedModelName);
+            LogTools.info("\t\t\tClasses: " + requestedModel.getDetectionClassNames().size());
+         }
       });
 
       for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
-         YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
-
-         LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
-         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
-
-         yoloObjectDetectors.add(objectDetector);
+         modelNameToModelMap.put(model.getModelName(), model);
       }
    }
 
@@ -119,6 +135,9 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
+      if (yoloObjectDetectors.isEmpty())
+         return;
+
       if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
          lastRunDetectorIndex = 0;
 
