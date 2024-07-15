@@ -7,8 +7,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 
 import java.util.HashMap;
@@ -17,17 +15,13 @@ import java.util.Set;
 
 public class YOLOv8DetectionResults
 {
-   private final static Stopwatch totalWatch = new Stopwatch();
-   private final static Stopwatch floatWatch = new Stopwatch();
-   private double floatTime = 0.0;
-   private final static Stopwatch booleanWatch = new Stopwatch();
-   private double booleanTime = 0.0;
-
    private final Set<YOLOv8DetectionOutput> detections;
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
-   private final Map<String, Mat> objectMasks = new HashMap<>();
+   private final Map<YOLOv8DetectionOutput, Mat> objectMasks = new HashMap<>();
+
+   private final float maskThreshold;
 
    private final int maskOpenCVType;
    private final int numberOfMasks;
@@ -38,12 +32,13 @@ public class YOLOv8DetectionResults
    private final float maskPrincipalPointX;
    private final float maskPrincipalPointY;
 
-   public YOLOv8DetectionResults(Set<YOLOv8DetectionOutput> detections, MatVector outputBlobs, RawImage detectionImage)
+   public YOLOv8DetectionResults(Set<YOLOv8DetectionOutput> detections, MatVector outputBlobs, RawImage detectionImage, float maskThreshold)
    {
       this.detections = detections;
       this.outputBlobs = outputBlobs;
       this.detectionImage = detectionImage.get();
       this.outputMasksIndexer = outputBlobs.get(1).createIndexer();
+      this.maskThreshold = maskThreshold;
 
       maskOpenCVType = outputBlobs.get(1).col(0).type();
       numberOfMasks = (int) outputMasksIndexer.size(1);
@@ -58,72 +53,42 @@ public class YOLOv8DetectionResults
       maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
    }
 
-   public Map<YOLOv8DetectionOutput, RawImage> getSegmentationImages(float maskThreshold)
+   public Map<YOLOv8DetectionOutput, RawImage> getSegmentationImages()
    {
       Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
 
       for (YOLOv8DetectionOutput detection : detections)
       {
-         Mat floatMaskMat = getFloatMaskMat(detection);
-         Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
-         segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
-         floatMaskMat.close();
+         Mat detectionMask = getDetectionMask(detection);
+         segmentationImages.put(detection, createRawImageWithMat(detectionMask));
       }
 
       return segmentationImages;
    }
 
-   public Map<YOLOv8DetectionOutput, RawImage> getTargetSegmentationImages(float maskThreshold, Set<String> targetClasses)
+   public Map<YOLOv8DetectionOutput, RawImage> getTargetSegmentationImages(Set<String> targetClasses)
    {
       Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
 
       for (YOLOv8DetectionOutput detection : detections)
       {
-//         if (targetClasses.contains(detection.objectClass()))
-//         {
-            Mat floatMaskMat = getFloatMaskMat(detection);
-            Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
-            segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
-            floatMaskMat.close();
-//         }
-      }
-
-      return segmentationImages;
-   }
-
-   public RawImage getSegmentationMatrixForObject(String objectClass, float maskThreshold)
-   {
-      if (objectMasks.containsKey(objectClass))
-      {
-         Mat mask = objectMasks.get(objectClass);
-         return createRawImageWithMat(mask);
-      }
-
-      totalWatch.start();
-      Mat maskBooleanMat = null;
-      for (YOLOv8DetectionOutput detection : detections)
-      {
-         // Find the detection that matches the query object type
-         if (detection.objectClass().equals(objectClass))
+         if (targetClasses.contains(detection.objectClass()))
          {
-            Mat floatMaskMat = getFloatMaskMat(detection);
-            maskBooleanMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
-            floatMaskMat.close();
+            Mat detectionMask = getDetectionMask(detection);
+            segmentationImages.put(detection, createRawImageWithMat(detectionMask));
          }
       }
-      double totalElapsed = totalWatch.totalElapsed();
-      LogTools.info("Total ellapsed: " + totalElapsed + " | float time: " + floatTime + " | bool time: " + booleanTime);
 
-      if (maskBooleanMat != null)
+      return segmentationImages;
+   }
+
+   public RawImage getSegmentationMatrixForObject(String objectClass)
+   {
+      for (YOLOv8DetectionOutput detection : detections)
       {
-         objectMasks.put(objectClass, maskBooleanMat);
-         return createRawImageWithMat(maskBooleanMat);
+         if (detection.objectClass().equals(objectClass))
+            return createRawImageWithMat(getDetectionMask(detection));
       }
-
-      // Did not find object we're looking for
-      Mat previousValue = objectMasks.putIfAbsent(objectClass, null);
-      if (previousValue != null)
-         previousValue.close();
 
       return null;
    }
@@ -133,9 +98,20 @@ public class YOLOv8DetectionResults
       return detections;
    }
 
+   private Mat getDetectionMask(YOLOv8DetectionOutput detection)
+   {
+      if (objectMasks.containsKey(detection))
+         return objectMasks.get(detection);
+
+      Mat floatMaskMat = getFloatMaskMat(detection);
+      Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat);
+      objectMasks.put(detection, booleanMaskMat);
+      floatMaskMat.close();
+      return booleanMaskMat;
+   }
+
    private Mat getFloatMaskMat(YOLOv8DetectionOutput detection)
    {
-      floatWatch.start();
       Mat floatMaskMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
       Mat multipliedMask = new Mat(maskHeight, maskWidth, maskOpenCVType);
       for (int i = 0; i < numberOfMasks; ++i)
@@ -148,13 +124,11 @@ public class YOLOv8DetectionResults
 
       multipliedMask.close();
 
-      floatTime = floatWatch.totalElapsed();
       return floatMaskMat;
    }
 
-   private Mat getBooleanMaskMat(YOLOv8DetectionOutput detection, Mat maskFloatMat, double maskThreshold)
+   private Mat getBooleanMaskMat(YOLOv8DetectionOutput detection, Mat maskFloatMat)
    {
-      booleanWatch.start();
       // Use the float mat to threshold
       Mat booleanMask = new Mat(maskHeight, maskWidth, opencv_core.CV_32FC1);
       opencv_imgproc.threshold(maskFloatMat, booleanMask, maskThreshold, 1.0, opencv_imgproc.CV_THRESH_BINARY);
@@ -167,7 +141,6 @@ public class YOLOv8DetectionResults
       opencv_core.bitwise_and(booleanMask, boundingBoxMask, booleanMask);
       boundingBoxMask.close();
 
-      booleanTime = booleanWatch.totalElapsed();
       return booleanMask;
    }
 
@@ -176,7 +149,7 @@ public class YOLOv8DetectionResults
       return new RawImage(detectionImage.getSequenceNumber(),
                           detectionImage.getAcquisitionTime(),
                           -1.0f,
-                          mat,
+                          mat.clone(),
                           null,
                           maskFocalLengthX,
                           maskFocalLengthY,
@@ -190,7 +163,7 @@ public class YOLOv8DetectionResults
    {
       for (Mat mat : objectMasks.values())
          if (mat != null && !mat.isNull())
-            mat.release();
+            mat.close();
 
       detectionImage.release();
       outputMasksIndexer.close();
