@@ -34,8 +34,37 @@ public class RDXBuildingExploration extends RDXBehaviorTreeNode<BuildingExplorat
    {
       super.renderNodeSettingsWidgets();
 
-      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_APPROACH, state.getSetStaticForApproachActions());
-      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_GRASP, state.getSetStaticForGraspActions());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_APPROACH_RIGHT_PUSH, state.getSetStaticForApproachAction());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_GRASP_RIGHT_PUSH, state.getSetStaticForGraspAction());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_APPROACH_PUSH, state.getSetStaticForApproachActionPush());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_GRASP_PUSH, state.getSetStaticForGraspActionPush());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_APPROACH_PULL, state.getSetStaticForApproachActionPull());
+      renderNodePresenceStatus(BuildingExplorationState.SET_STATIC_FOR_GRASP_PULL, state.getSetStaticForGraspActionPull());
+
+      renderNodePresenceStatus(BuildingExplorationState.END_FIRST_DOOR, state.getEndFirstDoorAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_SCAN, state.getStartScanAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_SCAN, state.getEndScanAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_PULL_DOOR, state.getStartPullDoorAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_PULL_DOOR, state.getEndPullDoorAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_PUSH_DOOR, state.getStartPushDoorAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_PUSH_DOOR, state.getEndPushDoorAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_TRASHCAN, state.getStartTrashCanAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_TRASHCAN, state.getEndTrashCanAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_COUCH, state.getStartCouchAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_COUCH, state.getEndCouchAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_TABLE_LEFT, state.getStartTableLeftAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_TABLE_LEFT, state.getEndTableLeftAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_TABLE_RIGHT, state.getStartTableRightAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_TABLE_RIGHT, state.getEndTableRightAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_TABLE_RIGHT, state.getEndTableRightAction());
+      renderNodePresenceStatus(BuildingExplorationState.START_SALUTE, state.getStartSaluteAction());
+
+      renderNodePresenceStatus(BuildingExplorationState.WALK_DOOR_A, state.getWalkDoorAAction());
+      renderNodePresenceStatus(BuildingExplorationState.WALK_DOOR_B, state.getWalkDoorBAction());
+      renderNodePresenceStatus(BuildingExplorationState.TURN_DOOR_A, state.getTurnDoorAAction());
+      renderNodePresenceStatus(BuildingExplorationState.TURN_DOOR_B, state.getTurnDoorBAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_WALK_COUCH, state.getWalkCouchAction());
+      renderNodePresenceStatus(BuildingExplorationState.END_DEMO, state.getEndDemoAction());
 
       ImGui.text("Building Exploration Node");
    }

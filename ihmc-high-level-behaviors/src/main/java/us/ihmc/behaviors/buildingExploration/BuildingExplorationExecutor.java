@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -57,13 +56,15 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
 
       updateActionSubtree(this);
 
-      boolean shouldClearStaticHandles = false;
-      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
-      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
+      boolean shouldClearStaticHandle = false;
+      shouldClearStaticHandle |= state.getSetStaticForApproachAction().getIsExecuting();
+      shouldClearStaticHandle |= state.getSetStaticForGraspAction().getIsExecuting();
+      shouldClearStaticHandle |= state.getSetStaticForApproachActionPush().getIsExecuting();
+      shouldClearStaticHandle |= state.getSetStaticForGraspActionPush().getIsExecuting();
+      shouldClearStaticHandle |= state.getSetStaticForApproachActionPull().getIsExecuting();
+      shouldClearStaticHandle |= state.getSetStaticForGraspActionPull().getIsExecuting();
 
-      if (shouldClearStaticHandles)
+      if (shouldClearStaticHandle)
       {
          for (String nodeName : sceneGraph.getNodeNameList())
          {
@@ -109,39 +110,60 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
 
       if (!tomDetected)
       {
-         if (state.getEndFirstDoorAction().getIsNextForExecution())
+         if (state.getEndFirstDoorAction().getIsExecuting())
          {
             doorTraversed.put("First", true);
          }
+
+         if (state.getStartPullDoorAction().getIsExecuting() ||
+             state.getStartPushDoorAction().getIsExecuting() ||
+             state.getStartScanAction().getIsExecuting() ||
+             state.getStartTableLeftAction().getIsExecuting() ||
+             state.getStartTableRightAction().getIsExecuting() ||
+             state.getStartTrashCanAction().getIsExecuting() ||
+             state.getStartCouchAction().getIsExecuting() ||
+             state.getWalkDoorBAction().getIsExecuting() ||
+             state.getTurnDoorAAction().getIsExecuting() ||
+             state.getTurnDoorBAction().getIsExecuting() ||
+             state.getWalkCouchAction().getIsExecuting())
+         {
+            state.getActionSequence().setConcurrencyEnabled(true);
+         }
+
          // PULL DOOR after WALK to pull door
-         if (state.getEndWalkDoorAAction().getIsNextForExecution())
+         if (state.getEndWalkDoorAAction().getIsExecuting())
          {
             doorTraversed.put("A", true);
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
-         if (state.getEndWalkDoorBAction().getIsNextForExecution())
+         if (state.getEndWalkDoorBAction().getIsExecuting())
          {
             doorTraversed.put("B", true);
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
 
          // PULL DOOR after TRASHCAN
-         if (state.getEndTrashCanAction().getIsNextForExecution())
+         if (state.getEndTrashCanAction().getIsExecuting())
          {
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
          // PUSH DOOR after Turn to face door
-         if (state.getEndTurnDoorAAction().getIsNextForExecution() || state.getEndTurnDoorBAction().getIsNextForExecution())
+         if (state.getEndTurnDoorAAction().getIsExecuting() || state.getEndTurnDoorBAction().getIsExecuting())
          {
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPushDoorAction().getActionIndex());
          }
          // SCAN after PULL DOOR
-         if (state.getEndPullDoorAction().getIsNextForExecution())
+         if (state.getEndPullDoorAction().getIsExecuting())
          {
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartScanAction().getActionIndex());
          }
          // after SCAN
-         if (state.getEndScanAction().getIsNextForExecution() && doorTraversed.get("A"))
+         if (state.getEndScanAction().getIsExecuting() && doorTraversed.get("A"))
          {
             boolean isTableDetected = false;
             for (String nodeName : sceneGraph.getNodeNameList())
@@ -158,10 +180,12 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                   // TABLE RIGHT or LEFT according to where the table is
                   if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
                   {
+                     state.getActionSequence().setConcurrencyEnabled(false);
                      state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
                   }
                   else
                   {
+                     state.getActionSequence().setConcurrencyEnabled(false);
                      state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
                   }
                   isTableDetected = true;
@@ -172,20 +196,28 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             if (!isTableDetected)
             {
                if (doorTraversed.get("B"))
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getTurnDoorBAction().getActionIndex());
+               }
                else
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+               }
             }
          }
          // TURN after TABLE
-         if (state.getEndTableRightAction().getIsNextForExecution() || state.getEndTableLeftAction().getIsNextForExecution() )
+         if (state.getEndTableRightAction().getIsExecuting() || state.getEndTableLeftAction().getIsExecuting() )
          {
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getEndTurnDoorAAction().getActionIndex());
          }
 
          //// USING THIS TO EARLY TERMINATION FOR TESTING
-         if (state.getEndPushDoorAction().getIsNextForExecution())
+         if (state.getEndPushDoorAction().getIsExecuting())
          {
+            state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getEndDemoAction().getActionIndex());
          }
          // WALK to DOOR B after PUSH DOOR A

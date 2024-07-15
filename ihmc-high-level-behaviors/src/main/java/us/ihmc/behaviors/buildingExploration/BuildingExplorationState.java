@@ -14,8 +14,13 @@ import java.util.List;
 
 public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
 {
-   public static final String SET_STATIC_FOR_APPROACH = "Set static for approach";
-   public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";
+   public static final String SET_STATIC_FOR_APPROACH_RIGHT_PUSH = "Set static for approach";
+   public static final String SET_STATIC_FOR_GRASP_RIGHT_PUSH = "Set static for grasp";
+
+   public static final String SET_STATIC_FOR_APPROACH_PUSH = "Set static for approach PUSH";
+   public static final String SET_STATIC_FOR_GRASP_PUSH = "Set static for grasp PUSH";
+   public static final String SET_STATIC_FOR_APPROACH_PULL = "Set static for approach PULL";
+   public static final String SET_STATIC_FOR_GRASP_PULL = "Set static for grasp PULL";
 
    public static final String END_FIRST_DOOR = "END FIRST DOOR";
    public static final String START_SCAN = "START SCAN";
@@ -34,11 +39,11 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public static final String END_TABLE_RIGHT= "END TABLE RIGHT";
    public static final String START_SALUTE = "START SALUTE";
 
-   public static final String WALK_DOOR_A = "Walk towards door A";
-   public static final String WALK_DOOR_B = "Walk towards door B";
-   public static final String TURN_DOOR_A = "Turn in place door A back";
-   public static final String TURN_DOOR_B = "Turn in place door B back";
-   public static final String WALK_COUCH = "Walk towards couch";
+   public static final String WALK_DOOR_A = "START walk door A";
+   public static final String WALK_DOOR_B = "START walk door B";
+   public static final String TURN_DOOR_A = "START turn door A";
+   public static final String TURN_DOOR_B = "START turn door B";
+   public static final String WALK_COUCH = "START walk couch";
    public static final String END_WALK_DOOR_A = "END walk door A";
    public static final String END_WALK_DOOR_B = "END walk door B";
    public static final String END_TURN_DOOR_A = "END turn door A";
@@ -51,8 +56,13 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    private final BuildingExplorationDefinition definition;
 
    private BehaviorTreeRootNodeState actionSequence;
-   private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
-   private final List<WaitDurationActionState> setStaticForGraspActions = new ArrayList<>();
+   private WaitDurationActionState setStaticForApproachAction;
+   private WaitDurationActionState setStaticForGraspAction;
+   private WaitDurationActionState setStaticForApproachActionPush;
+   private WaitDurationActionState setStaticForGraspActionPush;
+   private WaitDurationActionState setStaticForApproachActionPull;
+   private WaitDurationActionState setStaticForGraspActionPull;
+
    private WaitDurationActionState endFirstDoorAction;
    private WaitDurationActionState startScanAction;
    private WaitDurationActionState endScanAction;
@@ -95,28 +105,44 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
       super.update();
 
       actionSequence = BehaviorTreeTools.findRootNode(this);
-
       updateActionSubtree(this);
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
-      setStaticForApproachActions.clear();
-      setStaticForGraspActions.clear();
-
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH))
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_RIGHT_PUSH))
             {
-               setStaticForApproachActions.add(waitDurationAction);
+               setStaticForApproachAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP))
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_RIGHT_PUSH))
             {
-               setStaticForGraspActions.add(waitDurationAction);
+               setStaticForGraspAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_PUSH))
+            {
+               setStaticForApproachActionPush = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_PUSH))
+            {
+               setStaticForGraspActionPush = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_PULL))
+            {
+               setStaticForApproachActionPull = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_PULL))
+            {
+               setStaticForGraspActionPull = waitDurationAction;
             }
 
             if (actionNode instanceof WaitDurationActionState waitDurationAction
@@ -282,14 +308,34 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
       return actionSequence;
    }
 
-   public List<WaitDurationActionState> getSetStaticForApproachActions()
+   public WaitDurationActionState getSetStaticForApproachAction()
    {
-      return setStaticForApproachActions;
+      return setStaticForApproachAction;
    }
 
-   public List<WaitDurationActionState> getSetStaticForGraspActions()
+   public WaitDurationActionState getSetStaticForGraspAction()
    {
-      return setStaticForGraspActions;
+      return setStaticForGraspAction;
+   }
+
+   public WaitDurationActionState getSetStaticForApproachActionPush()
+   {
+      return setStaticForApproachActionPush;
+   }
+
+   public WaitDurationActionState getSetStaticForGraspActionPush()
+   {
+      return setStaticForGraspActionPush;
+   }
+
+   public WaitDurationActionState getSetStaticForApproachActionPull()
+   {
+      return setStaticForApproachActionPull;
+   }
+
+   public WaitDurationActionState getSetStaticForGraspActionPull()
+   {
+      return setStaticForGraspActionPull;
    }
 
    public WaitDurationActionState getEndFirstDoorAction()
