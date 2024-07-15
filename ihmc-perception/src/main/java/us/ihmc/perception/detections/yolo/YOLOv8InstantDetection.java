@@ -65,7 +65,7 @@ public class YOLOv8InstantDetection extends InstantDetection
 
    public RawImage getDepthImage()
    {
-      return objectMask;
+      return depthImage;
    }
 
    public RawImage getObjectMask()
