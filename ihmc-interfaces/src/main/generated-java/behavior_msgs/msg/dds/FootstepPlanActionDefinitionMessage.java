@@ -76,6 +76,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             * Whether to use the turn walk turn planner instead of A*
             */
    public boolean planner_use_turn_walk_turn_;
+   /**
+            * The footstep planner parameters
+            */
+   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage planner_parameters_;
 
    public FootstepPlanActionDefinitionMessage()
    {
@@ -84,6 +88,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
       goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
+      planner_parameters_ = new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage();
 
    }
 
@@ -126,6 +131,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       planner_use_turn_walk_turn_ = other.planner_use_turn_walk_turn_;
 
+      ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
    }
 
 
@@ -369,6 +375,15 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    }
 
 
+   /**
+            * The footstep planner parameters
+            */
+   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage getPlannerParameters()
+   {
+      return planner_parameters_;
+   }
+
+
    public static Supplier<FootstepPlanActionDefinitionMessagePubSubType> getPubSubType()
    {
       return FootstepPlanActionDefinitionMessagePubSubType::new;
@@ -422,6 +437,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_use_turn_walk_turn_, other.planner_use_turn_walk_turn_, epsilon)) return false;
 
+      if (!this.planner_parameters_.epsilonEquals(other.planner_parameters_, epsilon)) return false;
 
       return true;
    }
@@ -465,6 +481,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.planner_use_turn_walk_turn_ != otherMyClass.planner_use_turn_walk_turn_) return false;
 
+      if (!this.planner_parameters_.equals(otherMyClass.planner_parameters_)) return false;
 
       return true;
    }
@@ -508,7 +525,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append("planner_initial_stance_side=");
       builder.append(this.planner_initial_stance_side_);      builder.append(", ");
       builder.append("planner_use_turn_walk_turn=");
-      builder.append(this.planner_use_turn_walk_turn_);
+      builder.append(this.planner_use_turn_walk_turn_);      builder.append(", ");
+      builder.append("planner_parameters=");
+      builder.append(this.planner_parameters_);
       builder.append("}");
       return builder.toString();
    }

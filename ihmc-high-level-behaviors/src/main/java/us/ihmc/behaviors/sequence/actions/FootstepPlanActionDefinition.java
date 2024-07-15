@@ -4,8 +4,11 @@ import behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.behaviors.tools.BehaviorStoredPropertySetDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
@@ -13,6 +16,8 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -34,6 +39,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYaws;
    private final CRDTUnidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
    private final CRDTUnidirectionalBoolean plannerUseTurnWalkTurn;
+   private final BehaviorStoredPropertySetDefinition plannerParameters;
 
    // On disk fields
    private double onDiskSwingDuration;
@@ -50,7 +56,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private InitialStanceSide onDiskPlannerInitialStanceSide;
    private boolean onDiskPlannerUseTurnWalkTurn;
 
-   public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FootstepPlanActionDefinition(CRDTInfo crdtInfo,
+                                       WorkspaceResourceDirectory saveFileDirectory,
+                                       DefaultFootstepPlannerParametersBasics initialPlannerParameters)
    {
       super(crdtInfo, saveFileDirectory);
 
@@ -69,6 +77,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0));
       plannerInitialStanceSide = new CRDTUnidirectionalImmutableField<>(ROS2ActorDesignation.OPERATOR, this, InitialStanceSide.AUTO);
       plannerUseTurnWalkTurn = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
+      plannerParameters = new BehaviorStoredPropertySetDefinition(ROS2ActorDesignation.OPERATOR, this, initialPlannerParameters);
    }
 
    @Override
@@ -104,6 +113,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
          jsonNode.put("plannerUseTurnWalkTurn", plannerUseTurnWalkTurn.getValue());
+         plannerParameters.toJSON(jsonNode);
       }
    }
 
@@ -135,10 +145,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             goalFootstepToGoalYs.get(side).setValue(goalFootNode.get("y").asDouble());
             goalFootstepToGoalYaws.get(side).setValue(Math.toRadians(goalFootNode.get("yawInDegrees").asDouble()));
          }
-         if (jsonNode.get("plannerInitialStanceSide") != null)
-            plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(jsonNode.get("plannerInitialStanceSide").textValue()));
-         if (jsonNode.get("plannerUseTurnWalkTurn") != null)
-            plannerUseTurnWalkTurn.setValue(jsonNode.get("plannerUseTurnWalkTurn").asBoolean());
+         if (jsonNode.get("plannerInitialStanceSide") instanceof TextNode textNode)
+            plannerInitialStanceSide.setValue(InitialStanceSide.valueOf(textNode.textValue()));
+         if (jsonNode.get("plannerUseTurnWalkTurn") instanceof BooleanNode booleanNode)
+            plannerUseTurnWalkTurn.setValue(booleanNode.booleanValue());
+         plannerParameters.fromJSON(jsonNode);
       }
    }
 
@@ -166,6 +177,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          manuallyPlacedFootsteps.getValueReadOnly(i).setOnDiskFields();
       onDiskPlannerInitialStanceSide = plannerInitialStanceSide.getValue();
       onDiskPlannerUseTurnWalkTurn = plannerUseTurnWalkTurn.getValue();
+      plannerParameters.setOnDiskFields();
    }
 
    @Override
@@ -194,6 +206,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          manuallyPlacedFootsteps.accessValue().get(i).undoAllNontopologicalChanges();
       plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
       plannerUseTurnWalkTurn.setValue(onDiskPlannerUseTurnWalkTurn);
+      plannerParameters.undoAllNontopologicalChanges();
    }
 
    @Override
@@ -223,6 +236,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             unchanged &= !manuallyPlacedFootsteps.getValueReadOnly(i).hasChanges();
       unchanged &= plannerInitialStanceSide.getValue() == onDiskPlannerInitialStanceSide;
       unchanged &= plannerUseTurnWalkTurn.getValue() == onDiskPlannerUseTurnWalkTurn;
+      unchanged &= plannerParameters.isUnchanged();
 
       return !unchanged;
    }
@@ -252,6 +266,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).toMessage());
       message.setPlannerInitialStanceSide(plannerInitialStanceSide.toMessage().toByte());
       message.setPlannerUseTurnWalkTurn(plannerUseTurnWalkTurn.toMessage());
+      plannerParameters.toMessage(message.getPlannerParameters());
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -282,6 +297,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       goalFootstepToGoalYaws.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYawToGizmo());
       plannerInitialStanceSide.fromMessage(InitialStanceSide.fromByte(message.getPlannerInitialStanceSide()));
       plannerUseTurnWalkTurn.fromMessage(message.getPlannerUseTurnWalkTurn());
+      plannerParameters.fromMessage(message.getPlannerParameters());
    }
 
    public double getSwingDuration()
@@ -372,5 +388,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public CRDTUnidirectionalBoolean getPlannerUseTurnWalkTurn()
    {
       return plannerUseTurnWalkTurn;
+   }
+
+   public DefaultFootstepPlannerParametersReadOnly getPlannerParametersReadOnly()
+   {
+      return (DefaultFootstepPlannerParametersReadOnly) plannerParameters.getStoredPropertySetReadOnly();
+   }
+
+   public DefaultFootstepPlannerParametersBasics accessPlannerParameters()
+   {
+      return (DefaultFootstepPlannerParametersBasics) plannerParameters.accessValue();
    }
 }

@@ -24,7 +24,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -34,6 +33,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -61,6 +61,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
    private final ImBooleanWrapper useTurnWalkTurnPlannerWidget;
+   private final RDXStoredPropertySetTuner plannerParametersWidgets;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
@@ -82,10 +83,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                 RDXBaseUI baseUI,
                                 DRCRobotModel robotModel,
                                 ROS2SyncedRobotModel syncedRobot,
-                                ReferenceFrameLibrary referenceFrameLibrary,
-                                DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
+                                ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
 
       state = getState();
       definition = getDefinition();
@@ -145,10 +145,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       useTurnWalkTurnPlannerWidget = new ImBooleanWrapper(definition.getPlannerUseTurnWalkTurn()::getValue,
                                                           definition.getPlannerUseTurnWalkTurn()::setValue,
                                                           imBoolean -> ImGui.checkbox(labels.get("Use Turn Walk Turn Planner"), imBoolean));
+      plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
+      plannerParametersWidgets.create(definition.accessPlannerParameters(), false);
 
       for (RobotSide side : RobotSide.values)
       {
-         definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(definition.getPlannerParametersReadOnly().getIdealFootstepWidth()));
          state.copyDefinitionToGoalFoostepToGoalTransform(side);
       }
 
@@ -453,6 +455,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             useTurnWalkTurnPlannerWidget.renderImGuiWidget();
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
+
+            if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
+               if (plannerParametersWidgets.renderImGuiWidgetsSimple())
+                  definition.accessPlannerParameters();
          }
       }
    }

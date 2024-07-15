@@ -48,3 +48,6 @@ byte planner_initial_stance_side
 
 # Whether to use the turn walk turn planner instead of A*
 bool planner_use_turn_walk_turn
+
+# The footstep planner parameters
+ihmc_common_msgs/StoredPropertySetPrimitivesMessage planner_parameters

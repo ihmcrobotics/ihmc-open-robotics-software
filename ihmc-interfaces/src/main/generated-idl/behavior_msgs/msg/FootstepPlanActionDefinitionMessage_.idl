@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
+#include "ihmc_common_msgs/msg/./StoredPropertySetPrimitivesMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -82,6 +83,10 @@ module behavior_msgs
          * Whether to use the turn walk turn planner instead of A*
          */
         boolean planner_use_turn_walk_turn;
+        /**
+         * The footstep planner parameters
+         */
+        ihmc_common_msgs::msg::dds::StoredPropertySetPrimitivesMessage planner_parameters;
       };
     };
   };

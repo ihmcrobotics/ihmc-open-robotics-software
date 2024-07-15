@@ -14,7 +14,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,7 +28,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
@@ -65,7 +63,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final FootstepPlanningModule footstepPlanner;
-   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
@@ -81,10 +78,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ControllerStatusTracker controllerStatusTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters,
-                                     FootstepPlanningModule footstepPlanner,
-                                     DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
+                                     FootstepPlanningModule footstepPlanner)
    {
-      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
 
       state = getState();
       definition = getDefinition();
@@ -94,7 +90,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
       this.footstepPlanner = footstepPlanner;
-      this.footstepPlannerParameters = footstepPlannerParameters;
    }
 
    @Override
@@ -335,7 +330,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          footstepPlannerRequest.setPerformAStarSearch(!definition.getPlannerUseTurnWalkTurn().getValue());
          footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
-         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+         footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
 
          if (!previewPlan)
             state.getLogger().info("Planning footsteps...");
