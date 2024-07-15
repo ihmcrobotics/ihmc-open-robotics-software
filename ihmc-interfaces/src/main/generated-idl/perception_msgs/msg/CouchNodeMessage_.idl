@@ -19,6 +19,7 @@ module perception_msgs
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         geometry_msgs::msg::dds::Transform couch_centroid_to_world_transform;
         geometry_msgs::msg::dds::Transform pillow_to_world_transform;
+        geometry_msgs::msg::dds::Transform corner_to_world_transform;
       };
     };
   };

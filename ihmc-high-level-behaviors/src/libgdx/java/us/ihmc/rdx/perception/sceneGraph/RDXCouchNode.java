@@ -13,18 +13,17 @@ import java.util.Set;
 
 public class RDXCouchNode extends RDXDetectableSceneNode
 {
-   private final CouchNode couchNode;
-
    private final RDXReferenceFrameGraphic couchCentroidFrameGraphic = new RDXReferenceFrameGraphic(0.2, Color.BLUE);
    private final RDXReferenceFrameGraphic pillowCentroidFrameGraphic = new RDXReferenceFrameGraphic(0.2, Color.RED);
+   private final RDXReferenceFrameGraphic couchCornerFrameGraphic = new RDXReferenceFrameGraphic(0.2, Color.BLACK);
 
    public RDXCouchNode(CouchNode couchNode)
    {
       super(couchNode);
-      this.couchNode = couchNode;
 
       couchCentroidFrameGraphic.setToReferenceFrame(couchNode.getCouchCentroidFrame());
       pillowCentroidFrameGraphic.setToReferenceFrame(couchNode.getPillowFrame());
+      couchCornerFrameGraphic.setToReferenceFrame(couchNode.getCornerFrame());
    }
 
    @Override
@@ -33,6 +32,7 @@ public class RDXCouchNode extends RDXDetectableSceneNode
       super.update(sceneGraph);
       couchCentroidFrameGraphic.updateFromLastGivenFrame();
       pillowCentroidFrameGraphic.updateFromLastGivenFrame();
+      couchCornerFrameGraphic.updateFromLastGivenFrame();
    }
 
    @Override
@@ -44,5 +44,7 @@ public class RDXCouchNode extends RDXDetectableSceneNode
          couchCentroidFrameGraphic.getRenderables(renderables, pool);
       if (!pillowCentroidFrameGraphic.getFramePose3D().containsNaN())
          pillowCentroidFrameGraphic.getRenderables(renderables, pool);
+      if (!couchCornerFrameGraphic.getFramePose3D().containsNaN())
+         couchCornerFrameGraphic.getRenderables(renderables, pool);
    }
 }

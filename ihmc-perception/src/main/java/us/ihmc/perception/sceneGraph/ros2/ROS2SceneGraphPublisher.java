@@ -195,6 +195,7 @@ public class ROS2SceneGraphPublisher
             CouchNodeMessage couchNodeMessage = sceneGraphMessage.getCouchNodes().add();
             couchNodeMessage.getCouchCentroidToWorldTransform().set(couchNode.getCouchCentroidToWorldTransform());
             couchNodeMessage.getPillowToWorldTransform().set(couchNode.getPillowToWorldTransform());
+            couchNodeMessage.getCornerToWorldTransform().set(couchNode.getCornerToWorldTransform());
             detectableSceneNodeMessage = couchNodeMessage.getDetectableSceneNode();
          }
          else

@@ -14,12 +14,14 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
    public us.ihmc.euclid.transform.QuaternionBasedTransform couch_centroid_to_world_transform_;
    public us.ihmc.euclid.transform.QuaternionBasedTransform pillow_to_world_transform_;
+   public us.ihmc.euclid.transform.QuaternionBasedTransform corner_to_world_transform_;
 
    public CouchNodeMessage()
    {
       detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
       couch_centroid_to_world_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       pillow_to_world_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
+      corner_to_world_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
    }
 
    public CouchNodeMessage(CouchNodeMessage other)
@@ -33,6 +35,7 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.couch_centroid_to_world_transform_, couch_centroid_to_world_transform_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.pillow_to_world_transform_, pillow_to_world_transform_);
+      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.corner_to_world_transform_, corner_to_world_transform_);
    }
 
 
@@ -57,6 +60,12 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
    }
 
 
+   public us.ihmc.euclid.transform.QuaternionBasedTransform getCornerToWorldTransform()
+   {
+      return corner_to_world_transform_;
+   }
+
+
    public static Supplier<CouchNodeMessagePubSubType> getPubSubType()
    {
       return CouchNodeMessagePubSubType::new;
@@ -77,6 +86,7 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
       if (!this.couch_centroid_to_world_transform_.epsilonEquals(other.couch_centroid_to_world_transform_, epsilon)) return false;
       if (!this.pillow_to_world_transform_.epsilonEquals(other.pillow_to_world_transform_, epsilon)) return false;
+      if (!this.corner_to_world_transform_.epsilonEquals(other.corner_to_world_transform_, epsilon)) return false;
 
       return true;
    }
@@ -93,6 +103,7 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
       if (!this.couch_centroid_to_world_transform_.equals(otherMyClass.couch_centroid_to_world_transform_)) return false;
       if (!this.pillow_to_world_transform_.equals(otherMyClass.pillow_to_world_transform_)) return false;
+      if (!this.corner_to_world_transform_.equals(otherMyClass.corner_to_world_transform_)) return false;
 
       return true;
    }
@@ -108,7 +119,9 @@ public class CouchNodeMessage extends Packet<CouchNodeMessage> implements Settab
       builder.append("couch_centroid_to_world_transform=");
       builder.append(this.couch_centroid_to_world_transform_);      builder.append(", ");
       builder.append("pillow_to_world_transform=");
-      builder.append(this.pillow_to_world_transform_);
+      builder.append(this.pillow_to_world_transform_);      builder.append(", ");
+      builder.append("corner_to_world_transform=");
+      builder.append(this.corner_to_world_transform_);
       builder.append("}");
       return builder.toString();
    }

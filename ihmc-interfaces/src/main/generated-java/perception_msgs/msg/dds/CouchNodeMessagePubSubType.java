@@ -15,7 +15,7 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c4d44c24ebc80267adc2b5531a13ec34559d1a272b9ea7eafcbc67080fcf91a1";
+   		return "5ed3c3ef1a148e364da587574e9924e8795ae7439e15235ab5431c1a14685d87";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +79,8 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getPillowToWorldTransform(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getCornerToWorldTransform(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,6 +90,7 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getCouchCentroidToWorldTransform(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getPillowToWorldTransform(), cdr);
+      geometry_msgs.msg.dds.TransformPubSubType.write(data.getCornerToWorldTransform(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.CouchNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -93,6 +98,7 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getCouchCentroidToWorldTransform(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getPillowToWorldTransform(), cdr);	
+      geometry_msgs.msg.dds.TransformPubSubType.read(data.getCornerToWorldTransform(), cdr);	
 
    }
 
@@ -105,6 +111,8 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       ser.write_type_a("pillow_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getPillowToWorldTransform());
 
+      ser.write_type_a("corner_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getCornerToWorldTransform());
+
    }
 
    @Override
@@ -115,6 +123,8 @@ public class CouchNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.read_type_a("couch_centroid_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getCouchCentroidToWorldTransform());
 
       ser.read_type_a("pillow_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getPillowToWorldTransform());
+
+      ser.read_type_a("corner_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getCornerToWorldTransform());
 
    }
 

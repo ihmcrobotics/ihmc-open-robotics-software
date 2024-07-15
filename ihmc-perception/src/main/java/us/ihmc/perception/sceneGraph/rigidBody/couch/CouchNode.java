@@ -8,6 +8,7 @@ import perception_msgs.msg.dds.CouchNodeMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,22 +26,24 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class CouchNode extends DetectableSceneNode
 {
-   private static final Scalar HSV_LOWER_BOUND = new Scalar(0.0, 180.0, 200.0, 0.0);
+   private static final Scalar HSV_LOWER_BOUND = new Scalar(0.0, 180.0, 190.0, 0.0);
    private static final Scalar HSV_UPPER_BOUND = new Scalar(30.0, 220.0, 255.0, 255.0);
 
    private final RigidBodyTransform couchCentroidToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform pillowToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform cornerToWorldTransform = new RigidBodyTransform();
 
    private final PersistentDetection couchDetection;
    private final MutableReferenceFrame couchCentroidFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame pillowFrame = new MutableReferenceFrame();
+   private final MutableReferenceFrame cornerFrame = new MutableReferenceFrame();
 
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
 
@@ -91,6 +94,14 @@ public class CouchNode extends DetectableSceneNode
          // Update node frame
          getNodeToParentFrameTransform().set(couchCentroidFrame.getTransformToParent());
          getNodeFrame().update();
+
+         // If we have the couch centroid frame, we can find the corner frame
+         Point3DReadOnly cornerPoint = findCornerPoint((YOLOv8InstantDetection) couchDetection.getMostRecentDetection());
+         if (!cornerPoint.containsNaN())
+         {
+            cornerToWorldTransform.setTranslationAndIdentityRotation(cornerPoint);
+            cornerToWorldTransform.getRotation().setYawPitchRoll(couchYaw, 0.0, 0.0);
+            cornerFrame.update(transformToWorld -> transformToWorld.set(cornerToWorldTransform));         }
       }
    }
 
@@ -100,6 +111,8 @@ public class CouchNode extends DetectableSceneNode
       pillowToWorldTransform.set(message.getPillowToWorldTransform());
       couchCentroidFrame.update(transformToWorld -> transformToWorld.set(couchCentroidToWorldTransform));
       pillowFrame.update(transformToWorld -> transformToWorld.set(pillowToWorldTransform));
+      cornerToWorldTransform.set(message.getCornerToWorldTransform());
+      cornerFrame.update(transformToWorld -> transformToWorld.set(cornerToWorldTransform));
    }
 
    public RigidBodyTransformReadOnly getPillowToWorldTransform()
@@ -112,6 +125,11 @@ public class CouchNode extends DetectableSceneNode
       return couchCentroidToWorldTransform;
    }
 
+   public RigidBodyTransformReadOnly getCornerToWorldTransform()
+   {
+      return cornerToWorldTransform;
+   }
+
    public ReferenceFrame getCouchCentroidFrame()
    {
       return couchCentroidFrame.getReferenceFrame();
@@ -122,7 +140,12 @@ public class CouchNode extends DetectableSceneNode
       return pillowFrame.getReferenceFrame();
    }
 
-   private Point3D32 computePillowCentroid(YOLOv8InstantDetection yoloDetection)
+   public ReferenceFrame getCornerFrame()
+   {
+      return cornerFrame.getReferenceFrame();
+   }
+
+   private Point3DReadOnly computePillowCentroid(YOLOv8InstantDetection yoloDetection)
    {
       Point3D32 pillowCentroid = new Point3D32();
       pillowCentroid.setToNaN();
@@ -158,18 +181,17 @@ public class CouchNode extends DetectableSceneNode
 
          // Apply the mask to the depth image
          opencv_core.bitwise_and(depthImageMat, depthImageMat, pillowDepth, pillowMask);
-         PerceptionDebugTools.display("handle mask", pillowMask, 1);
 
          // Get the point cloud of the handle
-         RawImage trashCanHandleDepthImage = depthImage.replaceImage(pillowDepth);
-         List<Point3D32> handlePoints = pointCloudExtractor.extractPointCloud(trashCanHandleDepthImage);
-         trashCanHandleDepthImage.release();
+         RawImage pillowDepthImage = depthImage.replaceImage(pillowDepth);
+         List<Point3D32> pillowPoints = pointCloudExtractor.extractPointCloud(pillowDepthImage);
+         pillowDepthImage.release();
 
          // Make sure we have points
-         if (handlePoints.isEmpty() || handlePoints.size() < 32)
+         if (pillowPoints.isEmpty() || pillowPoints.size() < 32)
             return pillowCentroid;
 
-         pillowCentroid = YOLOv8Tools.computeCentroidOfPointCloud(handlePoints, 128);
+         pillowCentroid = YOLOv8Tools.computeCentroidOfPointCloud(pillowPoints, 128);
       }
 
       colorImage.release();
@@ -177,6 +199,30 @@ public class CouchNode extends DetectableSceneNode
       couchMask.release();
 
       return pillowCentroid;
+   }
+
+   private Point3DReadOnly findCornerPoint(YOLOv8InstantDetection yoloDetection)
+   {
+      FramePoint3D cornerFramePoint =
+      yoloDetection.getObjectPointCloud().parallelStream()
+      // Map to FramePoints to get coordinates WRT the couch frame
+      .map(point3D32 -> {
+         FramePoint3D framePoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), point3D32);
+         framePoint.changeFrame(couchCentroidFrame.getReferenceFrame());
+         return framePoint;
+      })
+      // Find the most left-top-front point of the couch
+      .min(Comparator.comparingDouble(point -> point.getX() + point.getY() - point.getZ()))
+      // Default to NaN point
+      .orElseGet(() ->
+      {
+         FramePoint3D framePoint = new FramePoint3D();
+         framePoint.setToNaN();
+         return framePoint;
+      });
+
+      cornerFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      return cornerFramePoint;
    }
 
    @Override
