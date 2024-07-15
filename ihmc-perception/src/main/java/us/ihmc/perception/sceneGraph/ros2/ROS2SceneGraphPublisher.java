@@ -100,6 +100,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getPredefinedRigidBodySceneNodes().size());
             predefinedRigidBodySceneNodeMessage = sceneGraphMessage.getPredefinedRigidBodySceneNodes().add();
+            predefinedRigidBodySceneNodeMessage.setLeftDoor(predefinedRigidBodySceneNode.isLeftDoor());
          }
 
          predefinedRigidBodySceneNodeMessage.setInitialParentId(predefinedRigidBodySceneNode.getInitialParentNodeID());

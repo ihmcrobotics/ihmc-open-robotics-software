@@ -28,6 +28,7 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
@@ -147,6 +148,10 @@ public class ROS2SceneGraphSubscription
       if (localNode instanceof DetectableSceneNode detectableSceneNode)
       {
          detectableSceneNode.setCurrentlyDetected(subscriptionNode.getDetectableSceneNodeMessage().getCurrentlyDetected());
+      }
+      if (localNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
+      {
+         predefinedRigidBodySceneNode.setLeftDoor(subscriptionNode.getPredefinedRigidBodySceneNodeMessage().getLeftDoor());
       }
       if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
