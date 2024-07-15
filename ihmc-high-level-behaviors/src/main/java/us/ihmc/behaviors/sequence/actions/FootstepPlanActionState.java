@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
@@ -38,9 +39,13 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
    private final CRDTStatusFootstepList previewFootsteps;
 
-   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id,
+                                  CRDTInfo crdtInfo,
+                                  WorkspaceResourceDirectory saveFileDirectory,
+                                  ReferenceFrameLibrary referenceFrameLibrary,
+                                  DRCRobotModel robotModel)
    {
-      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
 
       definition = getDefinition();
 

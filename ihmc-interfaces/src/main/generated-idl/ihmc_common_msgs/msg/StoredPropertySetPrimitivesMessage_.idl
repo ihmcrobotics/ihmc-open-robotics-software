@@ -1,0 +1,35 @@
+#ifndef __ihmc_common_msgs__msg__StoredPropertySetPrimitivesMessage__idl__
+#define __ihmc_common_msgs__msg__StoredPropertySetPrimitivesMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * StoredPropertySet data in order but as primitives.
+       * TODO: Replace StoredPropertySetMessage with this
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::StoredPropertySetPrimitivesMessage_")
+      struct StoredPropertySetPrimitivesMessage
+      {
+        /**
+         * The values for the double keys
+         */
+        sequence<double, 200> double_values;
+        /**
+         * The values for the integer keys
+         */
+        sequence<long, 200> integer_values;
+        /**
+         * The values for the boolean keys
+         */
+        sequence<boolean, 200> boolean_values;
+      };
+    };
+  };
+};
+
+#endif
