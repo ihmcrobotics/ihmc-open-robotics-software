@@ -177,14 +177,6 @@ public class RDXVRKinematicsStreamingMode
                                                                    streamToController.set(!streamToController.get());
                                                                 }
 
-                                                                // NOTE: Implement hand open close for controller trigger button.
-                                                                InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                {
-                                                                   HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-                                                                   sendHandCommand(RobotSide.LEFT, handConfiguration);
-                                                                }
-
                                                                 // Check if left joystick is pressed in order to trigger recording or replay of motion
                                                                 InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
                                                                 kinematicsRecorder.processRecordReplayInput(joystickButton);
@@ -198,14 +190,6 @@ public class RDXVRKinematicsStreamingMode
                                                                  if (aButton.bChanged() && !aButton.bState())
                                                                  {
                                                                     setEnabled(!enabled.get());
-                                                                 }
-
-                                                                 // NOTE: Implement hand open close for controller trigger button.
-                                                                 InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                 if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                 { // do not want to close grippers while interacting with the panel
-                                                                    HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-                                                                    sendHandCommand(RobotSide.RIGHT, handConfiguration);
                                                                  }
 
                                                                  InputDigitalActionData bimaniuplationButton = controller.getClickTriggerActionData();
