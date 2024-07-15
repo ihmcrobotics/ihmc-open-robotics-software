@@ -8,11 +8,13 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.Comparator;
@@ -22,7 +24,7 @@ import java.util.Optional;
 public class TrashCanNode extends DetectableSceneNode
 {
    // Sent over ROS2
-   private final RigidBodyTransform trashCanToWorldTransform = new RigidBodyTransform();
+   private final AlphaFilteredRigidBodyTransform trashCanToWorldTransform = new AlphaFilteredRigidBodyTransform();
    private double trashCanYaw = 0.0;
 
    // Not sent over ROS2
@@ -40,6 +42,7 @@ public class TrashCanNode extends DetectableSceneNode
       this.trashCanDetection = trashCanDetection;
 
       // Initially set everything to NaN
+      trashCanToWorldTransform.setAlpha(0.75);
       trashCanToWorldTransform.setToNaN();
       trashCanFrame.update(transformToWorld -> transformToWorld.set(trashCanToWorldTransform));
    }
@@ -64,8 +67,10 @@ public class TrashCanNode extends DetectableSceneNode
       if (closestPointToSensor.isPresent())
       {
          // Update the transforms to world
-         trashCanToWorldTransform.setTranslationAndIdentityRotation(closestPointToSensor.get());
-         trashCanToWorldTransform.getRotation().setYawPitchRoll(trashCanYaw, 0.0, 0.0);
+         RigidBodyTransform closestPointTransform = new RigidBodyTransform();
+         closestPointTransform.setTranslationAndIdentityRotation(closestPointToSensor.get());
+         closestPointTransform.getRotation().setYawPitchRoll(trashCanYaw, 0.0, 0.0);
+         trashCanToWorldTransform.update(closestPointTransform);
 
          // Update the frames
          trashCanFrame.update(transformToWorld -> transformToWorld.set(trashCanToWorldTransform));
