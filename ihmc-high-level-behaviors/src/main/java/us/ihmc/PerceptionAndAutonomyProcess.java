@@ -530,7 +530,7 @@ public class PerceptionAndAutonomyProcess
 
       sceneGraph.updateDetections(detectionManager);
 
-      ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
+      ReferenceFrame sensorFrame = zedFrameSupplier.get();
 
       if (newPlanarRegions.poll())
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
@@ -538,7 +538,7 @@ public class PerceptionAndAutonomyProcess
                doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
 
       // Update general stuff
-      sceneGraph.updateOnRobotOnly(robotPelvisFrame);
+      sceneGraph.updateOnRobotOnly(sensorFrame);
       sceneGraph.updatePublication();
 
       ++sceneGraphUpdateIndex;

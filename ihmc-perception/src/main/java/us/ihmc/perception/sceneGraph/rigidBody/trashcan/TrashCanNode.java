@@ -5,12 +5,19 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 public class TrashCanNode extends DetectableSceneNode
 {
@@ -44,19 +51,29 @@ public class TrashCanNode extends DetectableSceneNode
       super.update(sceneGraph, modificationQueue);
 
       setCurrentlyDetected(trashCanDetection.isStable());
+   }
 
-      Point3DReadOnly trashCanCentroid = trashCanDetection.getMostRecentPosition();
+   public void updateTrashCanFrame(ReferenceFrame sensorFrame)
+   {
+      Point3DReadOnly sensorPoint = new Point3D(sensorFrame.getTransformToWorldFrame().getTranslation());
+      YOLOv8InstantDetection mostRecentDetection = (YOLOv8InstantDetection) trashCanDetection.getMostRecentDetection();
+      List<Point3D32> trashCanPoints = mostRecentDetection.getObjectPointCloud();
 
-      // Update the transforms to world
-      trashCanToWorldTransform.setTranslationAndIdentityRotation(trashCanCentroid);
-      trashCanToWorldTransform.getRotation().setYawPitchRoll(trashCanYaw, 0.0, 0.0);
+      // Find point closest to sensor
+      Optional<Point3D32> closestPointToSensor = trashCanPoints.stream().min(Comparator.comparingDouble(point -> point.distanceSquared(sensorPoint)));
+      if (closestPointToSensor.isPresent())
+      {
+         // Update the transforms to world
+         trashCanToWorldTransform.setTranslationAndIdentityRotation(closestPointToSensor.get());
+         trashCanToWorldTransform.getRotation().setYawPitchRoll(trashCanYaw, 0.0, 0.0);
 
-      // Update the frames
-      trashCanFrame.update(transformToWorld -> transformToWorld.set(trashCanToWorldTransform));
+         // Update the frames
+         trashCanFrame.update(transformToWorld -> transformToWorld.set(trashCanToWorldTransform));
 
-      // Update node frame
-      getNodeToParentFrameTransform().set(trashCanFrame.getTransformToParent());
-      getNodeFrame().update();
+         // Update node frame
+         getNodeToParentFrameTransform().set(trashCanFrame.getTransformToParent());
+         getNodeFrame().update();
+      }
    }
 
    public void updateFromMessage(TrashCanNodeMessage message)
