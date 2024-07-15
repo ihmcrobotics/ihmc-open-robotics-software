@@ -34,6 +34,7 @@ import us.ihmc.ros2.ROS2PublisherBasics;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class YOLOv8DetectionExecutor
 
    // TODO: temp hack
    private int lastRunDetectorIndex = 0;
+   private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new HashMap<>();
+
    private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
@@ -144,6 +147,9 @@ public class YOLOv8DetectionExecutor
             // Run YOLO to get results
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
+            // TODO: temp hack
+            yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
+
             // Get the object masks from the results
             Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>());
 
@@ -192,7 +198,7 @@ public class YOLOv8DetectionExecutor
 
             // If annotated image is demanded, create and publish it
             if (isDemandedSupplier.getAsBoolean())
-               annotateAndPublishImage(yoloResults, colorImage);
+               annotateAndPublishImage(colorImage);
 
             yoloResults.destroy();
             colorImage.release();
@@ -233,11 +239,17 @@ public class YOLOv8DetectionExecutor
       }
    }
 
-   public void annotateAndPublishImage(YOLOv8DetectionResults yoloResults, RawImage colorImage)
+   public void annotateAndPublishImage(RawImage colorImage)
    {
       Mat resultMat = colorImage.get().getCpuImageMat().clone();
 
-      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>());
+      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = new HashMap<>();
+
+      for (YOLOv8DetectionResults value : yoloDetectionResults.values())
+      {
+         detectionMasks.putAll(value.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>()));;
+      }
+
       detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
       {
          YOLOv8DetectionOutput detection = entry.getKey();
