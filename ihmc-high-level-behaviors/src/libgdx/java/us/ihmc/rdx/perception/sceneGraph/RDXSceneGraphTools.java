@@ -6,6 +6,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.couch.CouchNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
@@ -56,6 +57,10 @@ public class RDXSceneGraphTools
       else if (sceneNodeToCopy instanceof TrashCanNode trashCanNode)
       {
          return new RDXTrashCanNode(trashCanNode);
+      }
+      else if (sceneNodeToCopy instanceof CouchNode couchNode)
+      {
+         return new RDXCouchNode(couchNode);
       }
       else
       {

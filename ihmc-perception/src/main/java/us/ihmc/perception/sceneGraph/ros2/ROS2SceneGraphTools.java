@@ -15,6 +15,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.couch.CouchNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
@@ -141,6 +142,12 @@ public class ROS2SceneGraphTools
          TrashCanNode trashCanNode = new TrashCanNode(nodeID, nodeName, crdtInfo);
          trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
          sceneNode = trashCanNode;
+      }
+      else if (nodeType == SceneGraphMessage.COUCH_NODE_TYPE)
+      {
+         CouchNode couchNode = new CouchNode(nodeID, nodeName, crdtInfo);
+         couchNode.updateFromMessage(subscriptionNode.getCouchNodeMessage());
+         sceneNode = couchNode;
       }
       else
       {

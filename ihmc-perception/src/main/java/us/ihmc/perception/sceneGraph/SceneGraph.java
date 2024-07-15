@@ -20,6 +20,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodyNodeTools;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.couch.CouchNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
@@ -230,23 +231,40 @@ public class SceneGraph
       }
 
       Set<PersistentDetection> newlyValidTrashCanDetections = newlyValidDetections.stream()
-                                                                              .filter(RigidBodyNodeTools::detectionIsTrashCan)
-                                                                              .collect(Collectors.toSet());
+                                                                                  .filter(RigidBodyNodeTools::detectionIsTrashCan)
+                                                                                  .collect(Collectors.toSet());
       for (PersistentDetection newlyValidTrashCanDetection : newlyValidTrashCanDetections)
       {
          if (!nodeNameList.contains("TrashCan"))
          {
             modifyTree(modificationQueue ->
-                       {
-                          // Create new trash can node
-                          TrashCanNode trashCanNode = new TrashCanNode(getNextID().getAndIncrement(), "TrashCan", newlyValidTrashCanDetection, getCRDTInfo());
-                          modificationQueue.accept(new SceneGraphNodeAddition(trashCanNode, rootNode));
-                       });
+            {
+               // Create new trash can node
+               TrashCanNode trashCanNode = new TrashCanNode(getNextID().getAndIncrement(), "TrashCan", newlyValidTrashCanDetection, getCRDTInfo());
+               modificationQueue.accept(new SceneGraphNodeAddition(trashCanNode, rootNode));
+            });
+         }
+      }
+
+      Set<PersistentDetection> newlyValidCouchDetections = newlyValidDetections.stream()
+                                                                               .filter(RigidBodyNodeTools::detectionIsCouch)
+                                                                               .collect(Collectors.toSet());
+      for (PersistentDetection newlyValidCouchDetection : newlyValidCouchDetections)
+      {
+         if (!nodeNameList.contains("Couch"))
+         {
+            modifyTree(modificationQueue ->
+            {
+               // Create new couch node
+               CouchNode couchNode = new CouchNode(getNextID().getAndIncrement(), "Couch", newlyValidCouchDetection, getCRDTInfo());
+               modificationQueue.accept(new SceneGraphNodeAddition(couchNode, rootNode));
+            });
          }
       }
 
       newlyValidDetections.removeAll(newlyValidDoorDetections);
       newlyValidDetections.removeAll(newlyValidTrashCanDetections);
+      newlyValidDetections.removeAll(newlyValidCouchDetections);
       for (PersistentDetection newDetection : newlyValidDetections)
          addNodeFromDetection(newDetection);
 

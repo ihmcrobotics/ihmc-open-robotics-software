@@ -1,0 +1,9 @@
+
+# Detectable scene node information
+perception_msgs/DetectableSceneNodeMessage detectable_scene_node
+
+geometry_msgs/Transform couch_centroid_to_world_transform
+
+geometry_msgs/Transform pillow_to_world_transform
+
+

@@ -23,6 +23,8 @@ int8 DOOR_NODE_TYPE=8
 
 int8 TRASH_CAN_NODE_TYPE=9
 
+int8 COUCH_NODE_TYPE=10
+
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
 
@@ -66,5 +68,8 @@ perception_msgs/DoorNodeMessage[] door_scene_nodes
 
 # Trash can scene nodes
 perception_msgs/TrashCanNodeMessage[] trash_can_nodes
+
+# Couch scene nodes
+perception_msgs/CouchNodeMessage[] couch_nodes
 
 

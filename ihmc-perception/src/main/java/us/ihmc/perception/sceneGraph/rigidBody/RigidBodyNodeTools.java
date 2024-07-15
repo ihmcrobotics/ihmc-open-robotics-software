@@ -14,4 +14,14 @@ public class RigidBodyNodeTools
       }
       return false;
    }
+
+   public static boolean detectionIsCouch(PersistentDetection detection)
+   {
+      Class<?> detectionClass = detection.getInstantDetectionClass();
+      if (detectionClass.equals(YOLOv8InstantDetection.class))
+      {
+         return detection.getDetectedObjectName().contains("couch");
+      }
+      return false;
+   }
 }

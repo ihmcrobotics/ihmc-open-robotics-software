@@ -3,6 +3,7 @@
 
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
 #include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
+#include "perception_msgs/msg/./CouchNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./DoorNodeMessage_.idl"
 #include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
@@ -46,6 +47,9 @@ module perception_msgs
 
       const octet TRASH_CAN_NODE_TYPE =
       9;
+
+      const octet COUCH_NODE_TYPE =
+      10;
 
 
       /**
@@ -115,6 +119,10 @@ module perception_msgs
          * Trash can scene nodes
          */
         sequence<perception_msgs::msg::dds::TrashCanNodeMessage, 200> trash_can_nodes;
+        /**
+         * Couch scene nodes
+         */
+        sequence<perception_msgs::msg::dds::CouchNodeMessage, 200> couch_nodes;
       };
     };
   };

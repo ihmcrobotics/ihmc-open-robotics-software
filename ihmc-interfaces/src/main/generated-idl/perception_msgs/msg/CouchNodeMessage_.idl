@@ -1,0 +1,27 @@
+#ifndef __perception_msgs__msg__CouchNodeMessage__idl__
+#define __perception_msgs__msg__CouchNodeMessage__idl__
+
+#include "geometry_msgs/msg/./Transform_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::CouchNodeMessage_")
+      struct CouchNodeMessage
+      {
+        /**
+         * Detectable scene node information
+         */
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        geometry_msgs::msg::dds::Transform couch_centroid_to_world_transform;
+        geometry_msgs::msg::dds::Transform pillow_to_world_transform;
+      };
+    };
+  };
+};
+
+#endif

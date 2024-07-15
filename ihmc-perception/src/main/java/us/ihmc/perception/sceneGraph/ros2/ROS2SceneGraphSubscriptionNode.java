@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.CouchNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
@@ -31,6 +32,7 @@ public class ROS2SceneGraphSubscriptionNode
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
    private DoorNodeMessage doorNodeMessage;
    private TrashCanNodeMessage trashCanNodeMessage;
+   private CouchNodeMessage couchNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -156,6 +158,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setTrashCanNodeMessage(TrashCanNodeMessage trashCanNodeMessage)
    {
       this.trashCanNodeMessage = trashCanNodeMessage;
+   }
+
+   public CouchNodeMessage getCouchNodeMessage()
+   {
+      return couchNodeMessage;
+   }
+
+   public void setCouchNodeMessage(CouchNodeMessage couchNodeMessage)
+   {
+      this.couchNodeMessage = couchNodeMessage;
    }
 
    public List<ROS2SceneGraphSubscriptionNode> getChildren()

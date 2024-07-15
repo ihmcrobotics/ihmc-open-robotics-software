@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.CouchNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
@@ -28,6 +29,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.couch.CouchNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
@@ -70,6 +72,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
       sceneGraphMessage.getDoorSceneNodes().clear();
       sceneGraphMessage.getTrashCanNodes().clear();
+      sceneGraphMessage.getCouchNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode());
 
@@ -184,6 +187,15 @@ public class ROS2SceneGraphPublisher
             trashCanNodeMessage.getTrashCanToWorldTransform().set(trashCanNode.getTrashCanToWorldTransform());
             trashCanNodeMessage.setTrashCanYaw(trashCanNode.getYaw());
             detectableSceneNodeMessage = trashCanNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof CouchNode couchNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.COUCH_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCouchNodes().size());
+            CouchNodeMessage couchNodeMessage = sceneGraphMessage.getCouchNodes().add();
+            couchNodeMessage.getCouchCentroidToWorldTransform().set(couchNode.getCouchCentroidToWorldTransform());
+            couchNodeMessage.getPillowToWorldTransform().set(couchNode.getPillowToWorldTransform());
+            detectableSceneNodeMessage = couchNodeMessage.getDetectableSceneNode();
          }
          else
          {

@@ -13,6 +13,7 @@ byte PRIMITIVE_RIGID_BODY_NODE_TYPE=6
 byte YOLO_NODE_TYPE=7
 byte DOOR_NODE_TYPE=8
 byte TRASH_CAN_NODE_TYPE=9
+byte COUCH_NODE_TYPE=10
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -57,3 +58,6 @@ perception_msgs/DoorNodeMessage[<=200] door_scene_nodes
 
 # Trash can scene nodes
 perception_msgs/TrashCanNodeMessage[<=200] trash_can_nodes
+
+# Couch scene nodes
+perception_msgs/CouchNodeMessage[<=200] couch_nodes

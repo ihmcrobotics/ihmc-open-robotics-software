@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.CouchNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
@@ -29,6 +30,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.couch.CouchNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
@@ -215,6 +217,10 @@ public class ROS2SceneGraphSubscription
          {
             trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
          }
+         if (localNode instanceof CouchNode couchNode)
+         {
+            couchNode.updateFromMessage(subscriptionNode.getCouchNodeMessage());
+         }
 
          if (localParentNode != null) // Parent of root node is null
          {
@@ -324,6 +330,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setTrashCanNodeMessage(trashCanNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.COUCH_NODE_TYPE ->
+         {
+            CouchNodeMessage couchNodeMessage = sceneGraphMessage.getCouchNodes().get(indexInTypesList);
+            subscriptionNode.setCouchNodeMessage(couchNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(couchNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(couchNodeMessage.getDetectableSceneNode().getSceneNode());
          }
       }
 
