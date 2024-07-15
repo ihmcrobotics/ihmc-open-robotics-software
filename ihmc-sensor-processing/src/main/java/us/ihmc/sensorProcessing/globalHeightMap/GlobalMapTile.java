@@ -13,7 +13,7 @@ public class GlobalMapTile extends HeightMapData
 
       this.centerX = GlobalLattice.toIndex(centerX);
       this.centerY = GlobalLattice.toIndex(centerY);
-      hashCode = GlobalLattice.hashCodeOfCell(centerX, centerY);
+      hashCode = GlobalLattice.hashCodeOfTile(centerX, centerY);
    }
 
 
@@ -31,5 +31,14 @@ public class GlobalMapTile extends HeightMapData
    public int getCenterY()
    {
       return centerY;
+   }
+
+   public HeightMapData getHeightMapDataForPublishing()
+   {
+//      HeightMapData heightMapDataForPublishing = new HeightMapData(getGridResolutionXY(),
+//                                                                   getGridSizeXY(), getGridCenter().getX(), getGridCenter().getY());
+//
+//      return heightMapDataForPublishing;
+      return this;
    }
 }

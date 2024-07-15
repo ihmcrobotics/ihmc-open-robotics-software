@@ -18,10 +18,10 @@ public class GlobalLattice
 
    public static int hashCodeOfCell(Point2DReadOnly cellPosition)
    {
-      return hashCodeOfCell(cellPosition.getX(), cellPosition.getY());
+      return hashCodeOfTile(cellPosition.getX(), cellPosition.getY());
    }
 
-   public static int hashCodeOfCell(double xPosition, double yPosition)
+   public static int hashCodeOfTile(double xPosition, double yPosition)
    {
       int x = toIndex(xPosition);
       int y = toIndex(yPosition);

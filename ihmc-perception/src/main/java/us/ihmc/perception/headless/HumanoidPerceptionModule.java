@@ -4,8 +4,8 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.GlobalMapCellEntry;
-import perception_msgs.msg.dds.GlobalMapCellMap;
+import perception_msgs.msg.dds.GlobalMapTileMessage;
+import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -180,7 +180,7 @@ public class HumanoidPerceptionModule
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
 
-                                      publishGlobalHeightMap(ros2Helper, globalHeightMap, null,PerceptionAPI.GLOBAL_HEIGHT_MAP);
+                                      publishGlobalHeightMapTile(ros2Helper, globalHeightMap, null,PerceptionAPI.GLOBAL_HEIGHT_MAP);
 
                                    }
                                 });
@@ -208,32 +208,52 @@ public class HumanoidPerceptionModule
                                                          image.rows(),
                                                          image.cols(),
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+
+
+
+
    }
 
-   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapCellMap> topic) {
 
+
+   private void publishGlobalHeightMapTile (ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
+   {
       // get the modified cells from the globalheightmap
       Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapCells();
-
-      // Full global map cell map
-      GlobalMapCellMap globalHeightMapModifiedCells = new GlobalMapCellMap();
-      List<GlobalMapCellEntry> collectionOfGlobalMapCells = new ArrayList<>();
-
-      for (GlobalMapTile cell: modifiedCells)
-      {
-         GlobalMapCellEntry globalMapCellEntry = new GlobalMapCellEntry();
-         globalMapCellEntry.setKey(cell.hashCode());
-         globalMapCellEntry.setXIndex(cell.getCenterX());
-         globalMapCellEntry.setYIndex(cell.getCenterY());
-         globalMapCellEntry.setResolution(cell.getGridResolutionXY());
-         // Entered a 0 for now as the assumption as this global map cell has only one height
-         globalMapCellEntry.setCellHeight(cell.getHeight(0));
-         collectionOfGlobalMapCells.add(globalMapCellEntry);
+      for (GlobalMapTile tile : modifiedCells){
+         GlobalMapTileMessage globalMapTile = new GlobalMapTileMessage();
+         globalMapTile.setCenterX(tile.getCenterX());
+         globalMapTile.setCenterY(tile.getCenterY());
+         globalMapTile.setHashCodeOfTile(tile.hashCode());
+         globalMapTile.height_map_ = HeightMapMessageTools.toMessage(tile.getHeightMapDataForPublishing());
+         ros2Helper.publish(topic, globalMapTile);
       }
-      globalHeightMapModifiedCells = (GlobalMapCellMap) collectionOfGlobalMapCells;
-
-      ros2Helper.publish(topic, globalHeightMapModifiedCells);
    }
+
+//   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic) {
+//
+//      // get the modified cells from the globalheightmap
+//      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapCells();
+//
+//      // Full global map cell map
+//      GlobalMapCellMap globalHeightMapModifiedCells = new GlobalMapCellMap();
+//      List<GlobalMapCellEntry> collectionOfGlobalMapCells = new ArrayList<>();
+//
+//      for (GlobalMapTile cell: modifiedCells)
+//      {
+//         GlobalMapCellEntry globalMapCellEntry = new GlobalMapCellEntry();
+//         globalMapCellEntry.setKey(cell.hashCode());
+//         globalMapCellEntry.setXIndex(cell.getCenterX());
+//         globalMapCellEntry.setYIndex(cell.getCenterY());
+//         globalMapCellEntry.setResolution(cell.getGridResolutionXY());
+//         // Entered a 0 for now as the assumption as this global map cell has only one height
+//         globalMapCellEntry.setCellHeight(cell.getHeight(0));
+//         collectionOfGlobalMapCells.add(globalMapCellEntry);
+//      }
+//      globalHeightMapModifiedCells = (GlobalMapCellMap) collectionOfGlobalMapCells;
+//
+//      ros2Helper.publish(topic, globalHeightMapModifiedCells);
+//   }
 
 
 

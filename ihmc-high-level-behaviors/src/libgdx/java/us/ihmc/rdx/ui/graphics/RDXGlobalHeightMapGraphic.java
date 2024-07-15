@@ -3,10 +3,11 @@ package us.ihmc.rdx.ui.graphics;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.GlobalMapCellEntry;
-import perception_msgs.msg.dds.GlobalMapCellMap;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapTile;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -32,43 +33,43 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
          mapRenderables.update();
    }
 
-   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
-   {
-      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
-   }
+//   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
+//   {
+//      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
+//   }
+//
+//   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
+//   {
+//      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
+//      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
+//
+//      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
+//      {
+//         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
+//         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
+//
+//         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
+//
+//         graphic.generateMeshesGlobal(globalMapTile);
+//      }
+//   }
 
-   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
-   {
-      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
-      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
-
-      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
+      public void generateMeshesAsync(HeightMapMessage heightMapMessage)
       {
-         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
-         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
-
-         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
-
-         graphic.generateMeshesGlobal(globalMapTile);
+         executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
       }
-   }
 
-   //   public void generateMeshesAsync(HeightMapMessage heightMapMessage)
-   //   {
-   //      executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
-   //   }
+      public void generateMeshes(HeightMapMessage heightMapMessage)
+      {
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+         globalHeightMap.addHeightMap(heightMapData);
 
-   //   public void generateMeshes(HeightMapMessage heightMapMessage)
-   //   {
-   //      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-   //      globalHeightMap.addHeightMap(heightMapData);
-   //
-   //      for (GlobalMapCell globalMapCell : globalHeightMap.getModifiedMapCells())
-   //      {
-   //         RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapCell);
-   //         graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
-   //      }
-   //   }
+         for (GlobalMapTile globalMapTile : globalHeightMap.getModifiedMapCells())
+         {
+            RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapTile);
+            graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
+         }
+      }
 
    private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapTile globalMapTile)
    {
