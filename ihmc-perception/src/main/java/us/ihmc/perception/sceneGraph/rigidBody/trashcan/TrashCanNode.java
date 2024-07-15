@@ -55,8 +55,7 @@ public class TrashCanNode extends DetectableSceneNode
       trashCanFrame.update(transformToWorld -> transformToWorld.set(trashCanToWorldTransform));
 
       // Update node frame
-      getNodeToParentFrameTransform().set(trashCanFrame.getTransformToParent());
-      getNodeFrame().update();
+      setNodeToParentFrameTransformAndUpdate(trashCanFrame.getTransformToParent());
    }
 
    public void updateFromMessage(TrashCanNodeMessage message)
