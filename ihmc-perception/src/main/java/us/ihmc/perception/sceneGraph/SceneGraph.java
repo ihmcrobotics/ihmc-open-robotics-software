@@ -10,15 +10,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
+import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
-import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
@@ -224,8 +227,8 @@ public class SceneGraph
          });
       }
 
-      for (PersistentDetection newDetection : newlyValidDetections)
-         addNodeFromDetection(newDetection);
+//      for (PersistentDetection newDetection : newlyValidDetections)
+//         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }
@@ -296,13 +299,14 @@ public class SceneGraph
       long newNodeID = getNextID().getAndIncrement();
       String newNodeName = detection.getDetectedObjectName() + newNodeID;
 
-      if (detection.getDetectedObjectName().contains("TrashCan"))
-      {
-         detectableNode = new TrashCanNode(newNodeID, newNodeName, detection, getCRDTInfo());
-      }
+      Class<?> detectionClass = detection.getInstantDetectionClass();
+      if (detectionClass.equals(YOLOv8InstantDetection.class))
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, detection, getCRDTInfo());
+      else if (detectionClass.equals(CenterPoseInstantDetection.class))
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else
       {
-         LogTools.error("Logic to handle detections of this object type ({}) has not been implemented", detection.getDetectedObjectName());
+         LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
          detectableNode = null;
       }
 

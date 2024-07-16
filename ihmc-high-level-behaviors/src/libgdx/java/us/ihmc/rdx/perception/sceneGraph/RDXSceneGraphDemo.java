@@ -12,7 +12,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
@@ -59,7 +59,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240627_121511_ZEDRecording_WalkONRCourse2.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -227,7 +227,7 @@ public class RDXSceneGraphDemo
                   }
                   else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
                   {
-                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+                     yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
                   }
                }
 

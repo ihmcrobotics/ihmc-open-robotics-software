@@ -16,7 +16,7 @@ import java.util.UUID;
  *
  * The main subclasses are:
  * <ul>
- *    <li>{@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}</li>
+ *    <li>{@link us.ihmc.perception.detections.yolo.YOLOv8InstantDetection}</li>
  *    <li>{@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}</li>
  * </ul>
  */
@@ -24,7 +24,7 @@ public class InstantDetection
 {
    private static final double EPSILON = 1E-7;
 
-   /** The object's identifying class (e.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass} or simply the ArUco marker number*/
+   /** The object's identifying class (e.g. {@link us.ihmc.perception.detections.yolo.YOLOv8DetectionClass} or simply the ArUco marker number*/
    private final String detectedObjectClass;
    /** Colloquial name of the detected object (e.g. "Shoe", "Door Lever", etc)*/
    private final String detectedObjectName;
