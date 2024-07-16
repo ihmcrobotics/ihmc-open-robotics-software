@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -51,6 +51,15 @@ public class YOLOv8Node extends DetectableSceneNode
       this.confidence = confidence;
       this.objectPointCloud = objectPointCloud;
       yoloDetection = null;
+   }
+
+   // TODO: remove?
+   public YOLOv8Node(long id, String name, CRDTInfo crdtInfo, PersistentDetection detection)
+   {
+      super (id, name, crdtInfo);
+
+      this.yoloDetection = detection;
+      objectPose = new Pose3D();
    }
 
    @Override
