@@ -73,6 +73,11 @@ public class PersistentDetection
     * Clears history items older than {@code now - historyDuration}, except for the most recent detection.
     * @param now Present time instant.
     */
+   public void updateHistory(Instant now)
+   {
+      updateHistory(now, false);
+   }
+   
    public void updateHistory(Instant now, boolean blockNewlyValidDetections)
    {
       // Remove detections that are too old
