@@ -9,8 +9,12 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -85,9 +89,22 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          {
             if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
             {
-               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
                {
-//                  if (staticHandleNode.getIsLeft())
+                  if (!(staticHandleNode.isLeftDoor() && nodeName.contains("pull")))
+                  {
+                     // Remove the door node from the scene graph
+                     sceneGraph.modifyTree(modificationQueue -> {
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
+                     });
+
+                     // Remove the static handle node from the scene graph
+                     sceneGraph.modifyTree(modificationQueue -> {
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     });
+                  }
                }
             }
          }
