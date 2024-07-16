@@ -28,7 +28,6 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
-   private boolean disallowingDoorNodes = false;
    private boolean tomDetected = false;
    private final Map<String, Boolean> doorTraversed = new HashMap<>();
 
@@ -168,19 +167,12 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
 
          if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
          {
-            sceneGraph.setAllowNewDoorNodes(false);
-            disallowingDoorNodes = true;
+            detectionManager.setBlockNewlyValidDetections(true);
          }
 
          if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
          {
-            sceneGraph.setAllowNewDoorNodes(true);
-
-            if (disallowingDoorNodes)
-            {
-               disallowingDoorNodes = false;
-               detectionManager.invalidatePersistentDetections();
-            }
+            detectionManager.setBlockNewlyValidDetections(false);
          }
 
          // PULL DOOR or TRASH CAN after WALK to pull door

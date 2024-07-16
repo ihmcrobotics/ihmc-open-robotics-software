@@ -200,13 +200,6 @@ public class SceneGraph
       }
    }
 
-   private boolean allowNewDoorNodes = true;
-
-   public void setAllowNewDoorNodes(boolean allowNewDoorNodes)
-   {
-      this.allowNewDoorNodes = allowNewDoorNodes;
-   }
-
    public void updateDetections(DetectionManager detectionManager)
    {
       detectionManager.updateDetections();
@@ -225,7 +218,7 @@ public class SceneGraph
             boolean matched = sceneNodesByID.stream()
                                             .filter(sceneNode -> sceneNode instanceof DoorNode)
                                             .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
-            if (!matched && allowNewDoorNodes)
+            if (!matched)
             {
                // Create new door node
                DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
