@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
@@ -301,7 +301,7 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, detection, getCRDTInfo());
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else
