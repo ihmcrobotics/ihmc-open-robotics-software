@@ -167,6 +167,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          // PULL DOOR or TRASH CAN after WALK to pull door
          if (state.getEndWalkDoorAAction().getIsExecuting())
          {
+            boolean isTrashCanPresent = false;
             doorTraversed.put("A", true);
             for (String nodeName : sceneGraph.getNodeNameList())
             {
@@ -174,17 +175,20 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                {
                   state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                  isTrashCanPresent = true;
                   break;
                }
             }
+            if (!isTrashCanPresent)
+            {
+               state.getActionSequence().setConcurrencyEnabled(false);
+               state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+            }
          }
-         else
-         {
-            state.getActionSequence().setConcurrencyEnabled(false);
-            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
-         }
+
          if (state.getEndWalkDoorBAction().getIsExecuting())
          {
+            boolean isTrashCanPresent = false;
             doorTraversed.put("B", true);
             for (String nodeName : sceneGraph.getNodeNameList())
             {
@@ -192,14 +196,15 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                {
                   state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                  isTrashCanPresent = true;
                   break;
                }
             }
-         }
-         else
-         {
-            state.getActionSequence().setConcurrencyEnabled(false);
-            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+            if (!isTrashCanPresent)
+            {
+               state.getActionSequence().setConcurrencyEnabled(false);
+               state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+            }
          }
 
          // PULL DOOR after TRASHCAN
