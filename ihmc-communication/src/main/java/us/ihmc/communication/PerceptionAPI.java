@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
-import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
@@ -237,7 +236,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> OCCUPANCY_GRID_MESSAGE = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("occupancy_grid");
    public static final ROS2Topic<ImageMessage> HEIGHT_MAP_CROPPED = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_cropped_global");
 
-   public static final ROS2Topic<GlobalMapTileMessage> GLOBAL_HEIGHT_MAP = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapTileMessage.class).withSuffix("global_height_map");
+   public static final ROS2Topic<GlobalMapMessage> GLOBAL_HEIGHT_MAP = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapMessage.class).withSuffix("global_height_map");
+   public static final ROS2Topic<GlobalMapTileMessage> GLOBAL_HEIGHT_MAP_TILE = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapTileMessage.class).withSuffix("global_height_map_tile");
 
    public static final ROS2Topic<ImageMessage> HEIGHT_MAP_GLOBAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_global");
    public static final ROS2Topic<ImageMessage> HEIGHT_MAP_LOCAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_local");

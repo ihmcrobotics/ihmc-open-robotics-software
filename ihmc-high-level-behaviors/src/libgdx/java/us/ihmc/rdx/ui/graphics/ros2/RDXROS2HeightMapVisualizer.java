@@ -8,6 +8,7 @@ import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
@@ -25,6 +26,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -90,10 +92,16 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
    }
 
-   public void setupForGlobalHeightMapMessage(ROS2PublishSubscribeAPI ros2)
+   public void setupForGlobalHeightMapTileMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP, this::acceptGlobalMapTileMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE, this::acceptGlobalMapTileMessage);
+   }
+
+   public void setupForGlobalHeightTileMessage(ROS2PublishSubscribeAPI ros2)
+   {
+      this.ros2 = ros2;
+      ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP, this::acceptGlobalMapMessage);
    }
 
    @Override
@@ -112,16 +120,24 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
+   public void acceptGlobalMapMessage(GlobalMapMessage globalMapMessage)
+   {
+      if (enableGlobalHeightMapVisualizer.get())
+      {
+         for (int i = 0; i < globalMapMessage.getGlobalMap().size(); i++)
+         {
+            acceptGlobalMapTileMessage(globalMapMessage.getGlobalMap().get(i));
+         }
+      }
+   }
+
    public void acceptGlobalMapTileMessage(GlobalMapTileMessage globalMapTileMessage)
    {
-
-      executorService.clearQueueAndExecute(() ->
-                                           {
-                                              if (enableGlobalHeightMapVisualizer.get())
-                                              {
-                                                 globalHeightMapGraphic.generateMeshesAsync(globalMapTileMessage.getHeightMap(),globalMapTileMessage.hash_code_of_tile_);
-                                              }
-                                           });
+      if (enableGlobalHeightMapVisualizer.get())
+      {
+         int hashCode = GlobalLattice.hashCodeOfTileIndices(globalMapTileMessage.getCenterX(), globalMapTileMessage.getCenterY());
+         globalHeightMapGraphic.generateMeshesAsync(globalMapTileMessage.getHeightMap(), hashCode);
+      }
    }
 
    private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
@@ -238,6 +254,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (enableGlobalHeightMapVisualizer.get())
       {
          heightMapGraphicNew.update();
+         globalHeightMapGraphic.update();
       }
 
       if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
@@ -269,6 +286,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
          if (enableGlobalHeightMapVisualizer.get())
          {
+            globalHeightMapGraphic.getRenderables(renderables, pool);
             heightMapGraphicNew.getRenderables(renderables, pool);
          }
 

@@ -16,21 +16,21 @@ public class GlobalLattice
       return index * latticeWidth;
    }
 
-   public static int hashCodeOfCell(Point2DReadOnly cellPosition)
+   public static int hashCodeOfTile(Point2DReadOnly cellPosition)
    {
-      return hashCodeOfTile(cellPosition.getX(), cellPosition.getY());
+      return hashCodeOfTilePositions(cellPosition.getX(), cellPosition.getY());
    }
 
-   public static int hashCodeOfTile(double xPosition, double yPosition)
+   public static int hashCodeOfTilePositions(double xPosition, double yPosition)
    {
       int x = toIndex(xPosition);
       int y = toIndex(yPosition);
 
-      return hashCodeOfCell(x, y);
+      return hashCodeOfTileIndices(x, y);
    }
 
-   public static int hashCodeOfCell(int x, int y)
+   public static int hashCodeOfTileIndices(int xIndex, int yIndex)
    {
-      return 13 * x + 17 * y;
+      return 13 * xIndex + 17 * yIndex;
    }
 }

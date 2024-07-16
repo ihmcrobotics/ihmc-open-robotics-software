@@ -13,9 +13,8 @@ public class GlobalMapTile extends HeightMapData
 
       this.centerX = GlobalLattice.toIndex(centerX);
       this.centerY = GlobalLattice.toIndex(centerY);
-      hashCode = GlobalLattice.hashCodeOfTile(centerX, centerY);
+      hashCode = GlobalLattice.hashCodeOfTilePositions(centerX, centerY);
    }
-
 
    @Override
    public int hashCode()

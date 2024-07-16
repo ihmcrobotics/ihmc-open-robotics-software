@@ -61,7 +61,6 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 
 
       // TODO figure out how to calculate the tile key from the ehight map message
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(tileKey);
       graphic.generateMeshesAsync(heightMapMessage);
    }

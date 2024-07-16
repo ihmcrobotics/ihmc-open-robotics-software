@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
@@ -178,15 +179,11 @@ public class HumanoidPerceptionModule
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
 
-                                      publishGlobalHeightMapTile(ros2Helper, globalHeightMap, null,PerceptionAPI.GLOBAL_HEIGHT_MAP);
-
+                                      publishGlobalHeightMapTile(ros2Helper, globalHeightMap, null, PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE);
                                    }
                                 });
       }
    }
-
-
-
 
    public void publishHeightMapImage(ROS2Helper ros2Helper,
                                      Mat image,
@@ -206,25 +203,38 @@ public class HumanoidPerceptionModule
                                                          image.rows(),
                                                          image.cols(),
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
-
-
-
-
    }
 
-   private void publishGlobalHeightMapTile (ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
+   private static void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapMessage> topic)
+   {
+      // get the modified cells from the globalheightmap
+      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
+      GlobalMapMessage globalMapMessage = new GlobalMapMessage();
+      for (GlobalMapTile tile : modifiedCells)
+      {
+         packGlobalMapTileMessage(globalMapMessage.getGlobalMap().add(), tile);
+      }
+      ros2Helper.publish(topic, globalMapMessage);
+   }
+
+   private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
    {
       // get the modified cells from the globalheightmap
       Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
       for (GlobalMapTile tile : modifiedCells)
       {
-         GlobalMapTileMessage globalMapTile = new GlobalMapTileMessage();
-         globalMapTile.setCenterX(tile.getCenterX());
-         globalMapTile.setCenterY(tile.getCenterY());
-         globalMapTile.setHashCodeOfTile(tile.hashCode());
-         globalMapTile.getHeightMap().set(HeightMapMessageTools.toMessage(tile.getHeightMapDataForPublishing()));
-         ros2Helper.publish(topic, globalMapTile);
+         GlobalMapTileMessage globalMapTileMessage = new GlobalMapTileMessage();
+         packGlobalMapTileMessage(globalMapTileMessage, tile);
+         ros2Helper.publish(topic, globalMapTileMessage);
       }
+   }
+
+   private static void packGlobalMapTileMessage(GlobalMapTileMessage messageToPack, GlobalMapTile tile)
+   {
+      messageToPack.setCenterX(tile.getCenterX());
+      messageToPack.setCenterY(tile.getCenterY());
+      messageToPack.setHashCodeOfTile(tile.hashCode());
+      messageToPack.getHeightMap().set(HeightMapMessageTools.toMessage(tile));
    }
 
 //   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic) {

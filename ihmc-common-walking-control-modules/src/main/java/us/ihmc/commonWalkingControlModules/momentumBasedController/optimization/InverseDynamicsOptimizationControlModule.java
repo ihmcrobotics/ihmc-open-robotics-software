@@ -82,7 +82,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final NativeQPInputTypeA motionAndRhoQPInput;
    private final NativeQPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
-   private final WholeBodyControllerBoundCalculator boundCalculator;m
+   private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
 
    private final JointBasics[] jointsToOptimizeFor;

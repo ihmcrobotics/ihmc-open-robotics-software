@@ -47,7 +47,7 @@ public class GlobalHeightMap
       int xIndex = GlobalLattice.toIndex(cellPosition.getX());
       int yIndex = GlobalLattice.toIndex(cellPosition.getY());
 
-      int hashOfMap = GlobalLattice.hashCodeOfCell(xIndex, yIndex);
+      int hashOfMap = GlobalLattice.hashCodeOfTileIndices(xIndex, yIndex);
       GlobalMapTile data = heightMapDataIntMap.get(hashOfMap);
 
       if (data == null)
