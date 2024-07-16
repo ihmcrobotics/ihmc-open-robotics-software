@@ -10,8 +10,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
@@ -33,7 +31,6 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
-import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -89,7 +86,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
-   private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
 
    public RDXHandPoseAction(long id,
                             CRDTInfo crdtInfo,
@@ -319,43 +315,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             highlightModels.get(definition.getSide()).setTransparency(0.5);
          }
       }
-
-      BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
-      if (actionSequence != null)
-      {
-         HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                        getState().getActionIndex(),
-                                                                                        definition.getSide());
-
-         boolean previousHandActionExists = previousHandAction != null;
-         boolean weAreAfterIt = previousHandActionExists && actionSequence.getExecutionNextIndex() > previousHandAction.getActionIndex();
-
-         boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
-         boolean showFromPreviousHand = previousHandActionExists;
-         boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
-
-         ReferenceFrame fromFrame = null;
-         if (showFromPreviousHand)
-         {
-            fromFrame = previousHandAction.getPalmFrame().getReferenceFrame();
-         }
-         if (showFromCurrentHand)
-         {
-            fromFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
-         }
-
-         if (fromFrame != null)
-         {
-            double lineWidth = 0.01;
-            trajectoryGraphic.update(lineWidth,
-                                     fromFrame.getTransformToRoot(),
-                                     getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
-         }
-         else
-         {
-            trajectoryGraphic.clear();
-         }
-      }
    }
 
    private void visualizeIK()
@@ -523,8 +482,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (state.getIsNextForExecution())
             armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
-
-         trajectoryGraphic.getRenderables(renderables, pool);
       }
    }
 
