@@ -432,7 +432,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
 
       // after things have been modified, update the derivative stuff
-      update();
+      update(true);
    }
 
    private void renderTooltipAndContextMenu()
@@ -455,6 +455,11 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    /** Call this instead of calculate3DViewPick and process3DViewInput if the gizmo is deactivated. */
    public void update()
+   {
+      update(false);
+   }
+
+   private void update(boolean updateGraphics)
    {
       if (frameBasedGizmoModification.applyAdjustmentIfNeeded(transformToParent))
       {
@@ -484,18 +489,21 @@ public class RDXPose3DGizmo implements RenderableProvider
       LibGDXTools.toEuclid(camera3D.position, cameraPosition);
       distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
 
-      if (resizeAutomatically.get())
+      if (updateGraphics) // Avoid costly mesh rebuilding unless gizmo is showing
       {
-         if (!EuclidCoreTools.epsilonEquals(lastDistanceToCamera, distanceToCamera, RDXGizmoTools.ZOOM_RESIZE_EPSILON))
+         if (resizeAutomatically.get())
          {
-            lastDistanceToCamera = distanceToCamera;
+            if (!EuclidCoreTools.epsilonEquals(lastDistanceToCamera, distanceToCamera, RDXGizmoTools.ZOOM_RESIZE_EPSILON))
+            {
+               lastDistanceToCamera = distanceToCamera;
+               recreateGraphics();
+            }
+         }
+         if (proportionsNeedUpdate)
+         {
+            proportionsNeedUpdate = false;
             recreateGraphics();
          }
-      }
-      if (proportionsNeedUpdate)
-      {
-         proportionsNeedUpdate = false;
-         recreateGraphics();
       }
    }
 
