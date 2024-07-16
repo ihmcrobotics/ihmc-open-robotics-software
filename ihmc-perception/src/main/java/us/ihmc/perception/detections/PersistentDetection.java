@@ -198,6 +198,11 @@ public class PersistentDetection
       return isValid;
    }
 
+   public void invalidate()
+   {
+      isValid = false;
+   }
+
    public Notification hasBecomeValid()
    {
       return hasBecomeValidNotification;

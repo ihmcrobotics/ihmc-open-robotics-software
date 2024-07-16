@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
@@ -26,7 +27,9 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
-   boolean tomDetected = false;
+   private final DetectionManager detectionManager;
+   private boolean disallowingDoorNodes = false;
+   private boolean tomDetected = false;
    private final Map<String, Boolean> doorTraversed = new HashMap<>();
 
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
@@ -36,7 +39,8 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                                       WorkspaceResourceDirectory saveFileDirectory,
                                       ROS2ControllerHelper ros2ControllerHelper,
                                       ROS2SyncedRobotModel syncedRobot,
-                                      SceneGraph sceneGraph)
+                                      SceneGraph sceneGraph,
+                                      DetectionManager detectionManager)
    {
       super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
 
@@ -46,6 +50,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
+      this.detectionManager = detectionManager;
       doorTraversed.put("First", false);
       doorTraversed.put("A", false);
       doorTraversed.put("B", false);
@@ -164,11 +169,18 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
          {
             sceneGraph.setAllowNewDoorNodes(false);
+            disallowingDoorNodes = true;
          }
 
          if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
          {
             sceneGraph.setAllowNewDoorNodes(true);
+
+            if (disallowingDoorNodes)
+            {
+               disallowingDoorNodes = false;
+               detectionManager.invalidatePersistentDetections();
+            }
          }
 
          // PULL DOOR or TRASH CAN after WALK to pull door

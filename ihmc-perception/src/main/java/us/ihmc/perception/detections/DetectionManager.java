@@ -152,6 +152,14 @@ public class DetectionManager
       newlyValidDetections.clear();
    }
 
+   public void invalidatePersistentDetections()
+   {
+      for (PersistentDetection persistentDetection : persistentDetections)
+      {
+         persistentDetection.invalidate();
+      }
+   }
+
    public void updateDetections()
    {
       updateDetections(Instant.now());
