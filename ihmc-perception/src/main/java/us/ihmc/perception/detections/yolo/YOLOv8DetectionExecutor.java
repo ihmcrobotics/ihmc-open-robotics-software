@@ -35,9 +35,9 @@ import us.ihmc.ros2.ROS2PublisherBasics;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -63,14 +63,14 @@ public class YOLOv8DetectionExecutor
 
    // TODO: temp hack
    private int lastRunDetectorIndex = 0;
-   private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new HashMap<>();
+   private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new ConcurrentHashMap<>();
 
    private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
-   private float yoloSegmentationThreshold = 0.0f;
+   private float yoloMaskThreshold = 0.0f;
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
@@ -88,7 +88,7 @@ public class YOLOv8DetectionExecutor
       {
          yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
-         yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
+         yoloMaskThreshold = parametersMessage.getSegmentationThreshold();
          erosionKernelRadius = parametersMessage.getErosionKernelRadius();
          outlierThreshold = parametersMessage.getOutlierThreshold();
 
@@ -145,13 +145,13 @@ public class YOLOv8DetectionExecutor
             depthImage.get();
 
             // Run YOLO to get results
-            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
+            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
             // TODO: temp hack
             yoloDetectionResults.put(lastRunDetectorIndex, yoloResults);
 
             // Get the object masks from the results
-            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>());
+            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getSegmentationImages();
 
             // Create list of instant detections from results
             List<InstantDetection> yoloInstantDetections = new ArrayList<>();
@@ -247,7 +247,7 @@ public class YOLOv8DetectionExecutor
 
       for (YOLOv8DetectionResults value : yoloDetectionResults.values())
       {
-         detectionMasks.putAll(value.getTargetSegmentationImages(yoloSegmentationThreshold, new HashSet<>()));;
+         detectionMasks.putAll(value.getSegmentationImages());
       }
 
       detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
