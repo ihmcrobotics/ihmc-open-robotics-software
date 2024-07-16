@@ -287,21 +287,23 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFeetGraphics.get(side).setPose(goalFeetGizmos.get(side).getPoseGizmo().getPose());
          }
 
-         if (!definition.getIsManuallyPlaced() && state.getPreviewFootsteps().getSize() > 0)
+         if (state.getIsNextForExecution())
          {
-            ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
-            for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
+            if (!definition.getIsManuallyPlaced() && state.getPreviewFootsteps().getSize() > 0)
             {
-               minimalFootsteps.add(new MinimalFootstep(state.getPreviewFootsteps().getSide(i),
-                                                        new Pose3D(state.getPreviewFootsteps().getPoseReadOnly(i))));
+               ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
+               for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
+               {
+                  minimalFootsteps.add(new MinimalFootstep(state.getPreviewFootsteps().getSide(i), new Pose3D(state.getPreviewFootsteps().getPoseReadOnly(i))));
+               }
+               previewFootstepPlan.generateMeshesAsync(minimalFootsteps);
             }
-            previewFootstepPlan.generateMeshesAsync(minimalFootsteps);
+            else
+            {
+               previewFootstepPlan.clear();
+            }
+            previewFootstepPlan.update();
          }
-         else
-         {
-            previewFootstepPlan.clear();
-         }
-         previewFootstepPlan.update();
       }
    }
 
@@ -512,7 +514,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                goalFeetGraphics.get(side).getRenderables(renderables, pool);
             }
 
-            previewFootstepPlan.getRenderables(renderables, pool);
+            if (state.getIsNextForExecution())
+            {
+               previewFootstepPlan.getRenderables(renderables, pool);
+            }
          }
       }
    }
