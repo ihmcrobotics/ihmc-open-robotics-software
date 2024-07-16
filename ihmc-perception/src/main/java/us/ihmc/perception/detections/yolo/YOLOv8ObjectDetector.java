@@ -88,7 +88,7 @@ public class YOLOv8ObjectDetector
       this.yoloModel = yoloModel;
    }
 
-   public YOLOv8DetectionResults runOnImage(RawImage bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold)
+   public YOLOv8DetectionResults runOnImage(RawImage bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold, float maskThreshold)
    {
       YOLOv8DetectionResults results = null;
 
@@ -108,7 +108,7 @@ public class YOLOv8ObjectDetector
                                                                nonMaximumSuppressionThreshold,
                                                                bgrImage.getImageWidth(),
                                                                bgrImage.getImageHeight());
-         results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
+         results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage, maskThreshold);
 
          blob.release();
          bgrImage.release();

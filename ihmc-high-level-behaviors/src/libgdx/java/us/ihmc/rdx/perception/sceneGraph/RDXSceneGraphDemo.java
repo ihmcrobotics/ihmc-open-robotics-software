@@ -8,7 +8,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -18,7 +17,6 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -49,9 +47,6 @@ import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A self contained demo and development environment for our scene graph functionality.
  */
@@ -64,9 +59,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2")
-                                                                                        .toAbsolutePath()
-                                                                                        .toString();
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -251,55 +244,6 @@ public class RDXSceneGraphDemo
 
                   onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
                   onRobotSceneGraph.updatePublication();
-
-                  List<PredefinedRigidBodySceneNode> doorStaticHandles = new ArrayList<>();
-
-                  for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
-                  {
-                     if (sceneNode.getName().startsWith("doorStaticHandle"))
-                     {
-                        PredefinedRigidBodySceneNode doorStaticHandle = (PredefinedRigidBodySceneNode) sceneNode;
-
-                        doorStaticHandles.add(doorStaticHandle);
-                     }
-                  }
-
-                  boolean skipDoorCheck = false;
-
-                  for (PredefinedRigidBodySceneNode doorStaticHandle : doorStaticHandles)
-                  {
-                     skipDoorCheck |= doorStaticHandle.isLeftDoor();
-                  }
-
-                  if (!skipDoorCheck)
-                  {
-                     for (PredefinedRigidBodySceneNode doorStaticHandle1 : doorStaticHandles)
-                     {
-                        // TODO: remove?
-                        doorStaticHandle1.clearOffset();
-
-                        RigidBodyTransform transformFromSensorToDoorStaticHandle1 = sensorFrame.getReferenceFrame()
-                                                                                               .getTransformToDesiredFrame(doorStaticHandle1.getNodeFrame());
-                        double yaw1 = transformFromSensorToDoorStaticHandle1.getRotation().getYaw();
-
-                        for (PredefinedRigidBodySceneNode doorStaticHandle2 : doorStaticHandles)
-                        {
-                           if (doorStaticHandle2.equals(doorStaticHandle1))
-                              continue;
-
-                           RigidBodyTransform transformFromSensorToDoorStaticHandle2 = sensorFrame.getReferenceFrame()
-                                                                                                  .getTransformToDesiredFrame(doorStaticHandle2.getNodeFrame());
-                           double yaw2 = transformFromSensorToDoorStaticHandle2.getRotation().getYaw();
-
-                           if (yaw2 < yaw1)
-                           {
-                              doorStaticHandle2.setLeftDoor(true);
-
-                              break;
-                           }
-                        }
-                     }
-                  }
                }
             });
             perceptionUpdateThread.start();

@@ -71,8 +71,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          RawImage zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
          RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
-         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
-         RawImage objectMask = results.getSegmentationMatrixForObject("objectClassReplaceMe", MASK_THRESHOLD);
+         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD, MASK_THRESHOLD);
+         RawImage objectMask = results.getSegmentationMatrixForObject("objectClassReplaceMe");
          if (objectMask != null)
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);

@@ -18,11 +18,9 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodyNodeTools;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
-import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
@@ -314,7 +312,8 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, detection, getCRDTInfo());
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
+
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else

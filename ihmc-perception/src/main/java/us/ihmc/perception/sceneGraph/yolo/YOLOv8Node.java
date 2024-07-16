@@ -73,6 +73,15 @@ public class YOLOv8Node extends DetectableSceneNode
       yoloDetection = null;
    }
 
+   // TODO: remove?
+   public YOLOv8Node(long id, String name, CRDTInfo crdtInfo, PersistentDetection detection)
+   {
+      super (id, name, crdtInfo);
+
+      this.yoloDetection = detection;
+      objectPose = new Pose3D();
+   }
+
    @Override
    public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
