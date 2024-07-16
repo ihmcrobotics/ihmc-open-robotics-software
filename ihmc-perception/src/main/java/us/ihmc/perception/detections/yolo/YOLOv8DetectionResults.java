@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -32,6 +33,8 @@ public class YOLOv8DetectionResults
    private final float maskPrincipalPointX;
    private final float maskPrincipalPointY;
 
+   private final Mat zeroMat;
+
    public YOLOv8DetectionResults(Set<YOLOv8DetectionOutput> detections, MatVector outputBlobs, RawImage detectionImage, float maskThreshold)
    {
       this.detections = detections;
@@ -51,6 +54,8 @@ public class YOLOv8DetectionResults
       maskFocalLengthY = yScaleFactor * detectionImage.getFocalLengthY();
       maskPrincipalPointX = xScaleFactor * detectionImage.getPrincipalPointX();
       maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
+
+      zeroMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
    }
 
    public Map<YOLOv8DetectionOutput, RawImage> getSegmentationImages()
@@ -112,19 +117,18 @@ public class YOLOv8DetectionResults
 
    private Mat getFloatMaskMat(YOLOv8DetectionOutput detection)
    {
-      Mat floatMaskMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
-      Mat multipliedMask = new Mat(maskHeight, maskWidth, maskOpenCVType);
+      MatExpr floatMask = new MatExpr(zeroMat);
       for (int i = 0; i < numberOfMasks; ++i)
       {
          Mat mask = outputBlobs.get(1).col(i).reshape(1, maskHeight);
-         mask.convertTo(multipliedMask, maskOpenCVType, detection.maskWeights()[i], 0.0);
-         opencv_core.add(floatMaskMat, multipliedMask, floatMaskMat);
+         MatExpr weightMultipliedMask = opencv_core.multiply(mask, detection.maskWeights()[i]);
+         floatMask = opencv_core.add(weightMultipliedMask, floatMask);
+
          mask.close();
+         weightMultipliedMask.close();
       }
 
-      multipliedMask.close();
-
-      return floatMaskMat;
+      return floatMask.asMat();
    }
 
    private Mat getBooleanMaskMat(YOLOv8DetectionOutput detection, Mat maskFloatMat)
@@ -168,5 +172,6 @@ public class YOLOv8DetectionResults
       detectionImage.release();
       outputMasksIndexer.close();
       outputBlobs.close();
+      zeroMat.close();
    }
 }
