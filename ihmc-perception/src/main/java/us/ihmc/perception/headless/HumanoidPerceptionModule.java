@@ -493,6 +493,7 @@ public class HumanoidPerceptionModule
    public HeightMapData getLatestHeightMapData()
    {
       latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, latestHeightMapData);
+      latestHeightMapData.setEstimatedGroundHeight(0.0);
       return latestHeightMapData;
    }
 

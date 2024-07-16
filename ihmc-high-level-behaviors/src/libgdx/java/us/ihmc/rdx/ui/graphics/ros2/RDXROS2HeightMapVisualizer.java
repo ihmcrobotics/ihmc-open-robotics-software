@@ -115,16 +115,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public void acceptGlobalMapTileMessage(GlobalMapTileMessage globalMapTileMessage)
    {
 
-      if (isActive())
-      {
-         executorService.clearQueueAndExecute(() ->
+      executorService.clearQueueAndExecute(() ->
+                                           {
+                                              if (enableGlobalHeightMapVisualizer.get())
                                               {
-                                                 if (enableGlobalHeightMapVisualizer.get())
-                                                 {
-                                                    globalHeightMapGraphic.generateMeshesAsync(globalMapTileMessage.getHeightMap());
-                                                 }
-                                              });
-      }
+                                                 heightMapGraphicNew.generateMeshesAsync(globalMapTileMessage.getHeightMap());
+                                              }
+                                           });
    }
 
    private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
@@ -238,9 +235,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          heightMapGraphicNew.update();
       }
-      if (isActive && enableGlobalHeightMapVisualizer.get())
+      if (enableGlobalHeightMapVisualizer.get())
       {
-         globalHeightMapGraphic.update();
+         heightMapGraphicNew.update();
       }
 
       if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
@@ -272,7 +269,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
          if (enableGlobalHeightMapVisualizer.get())
          {
-            globalHeightMapGraphic.getRenderables(renderables, pool);
+            heightMapGraphicNew.getRenderables(renderables, pool);
          }
 
          if (enableHeightMapRenderer.get())

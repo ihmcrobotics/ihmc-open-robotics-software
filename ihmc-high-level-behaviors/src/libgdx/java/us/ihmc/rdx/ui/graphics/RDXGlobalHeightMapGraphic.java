@@ -33,43 +33,43 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
          mapRenderables.update();
    }
 
-//   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
-//   {
-//      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
-//   }
-//
-//   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
-//   {
-//      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
-//      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
-//
-//      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
-//      {
-//         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
-//         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
-//
-//         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
-//
-//         graphic.generateMeshesGlobal(globalMapTile);
-//      }
-//   }
+   //   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
+   //   {
+   //      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
+   //   }
+   //
+   //   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
+   //   {
+   //      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
+   //      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
+   //
+   //      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
+   //      {
+   //         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
+   //         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
+   //
+   //         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
+   //
+   //         graphic.generateMeshesGlobal(globalMapTile);
+   //      }
+   //   }
 
-      public void generateMeshesAsync(HeightMapMessage heightMapMessage)
-      {
-         executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
-      }
+   public void generateMeshesAsync(HeightMapMessage heightMapMessage)
+   {
+//      RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
+//      heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
 
-      public void generateMeshes(HeightMapMessage heightMapMessage)
-      {
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-         globalHeightMap.addHeightMap(heightMapData);
 
-         for (GlobalMapTile globalMapTile : globalHeightMap.getModifiedMapCells())
-         {
-            RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapTile);
-            graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
-         }
-      }
+      //         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      //         RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(heightMapData);
+      //         globalHeightMap.addHeightMap(heightMapData);
+      //
+      //         for (GlobalMapTile globalMapTile : globalHeightMap.getModifiedMapCells())
+      //         {
+      //            RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapTile);
+      //            graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
+      //         }
+   }
 
    private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapTile globalMapTile)
    {
