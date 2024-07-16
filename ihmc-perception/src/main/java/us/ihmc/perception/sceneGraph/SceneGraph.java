@@ -229,24 +229,7 @@ public class SceneGraph
          });
       }
 
-      Set<PersistentDetection> newlyValidTrashCanDetections = newlyValidDetections.stream()
-                                                                              .filter(RigidBodyNodeTools::detectionIsTrashCan)
-                                                                              .collect(Collectors.toSet());
-      for (PersistentDetection newlyValidTrashCanDetection : newlyValidTrashCanDetections)
-      {
-         if (!nodeNameList.contains("TrashCan"))
-         {
-            modifyTree(modificationQueue ->
-                       {
-                          // Create new trash can node
-                          TrashCanNode trashCanNode = new TrashCanNode(getNextID().getAndIncrement(), "TrashCan", newlyValidTrashCanDetection, getCRDTInfo());
-                          modificationQueue.accept(new SceneGraphNodeAddition(trashCanNode, rootNode));
-                       });
-         }
-      }
-
       newlyValidDetections.removeAll(newlyValidDoorDetections);
-      newlyValidDetections.removeAll(newlyValidTrashCanDetections);
       for (PersistentDetection newDetection : newlyValidDetections)
          addNodeFromDetection(newDetection);
 
@@ -315,6 +298,9 @@ public class SceneGraph
 
    private void addNodeFromDetection(PersistentDetection detection)
    {
+      if (nodeNameList.stream().anyMatch(name -> name.startsWith(detection.getDetectedObjectName())))
+         return;
+
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();
       String newNodeName = detection.getDetectedObjectName() + newNodeID;

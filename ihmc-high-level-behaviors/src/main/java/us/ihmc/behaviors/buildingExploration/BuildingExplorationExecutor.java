@@ -83,32 +83,6 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          }
       }
 
-      if (state.getEndWalkDoorAAction().getIsExecuting() || state.getEndWalkDoorBAction().getIsExecuting())
-      {
-         // Remove the door nodes
-         sceneGraph.modifyTree(modificationQueue -> {
-            for (String nodeName : sceneGraph.getNodeNameList())
-            {
-               if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
-               {
-                  if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
-                  {
-                     if (!(staticHandleNode.isLeftDoor() && nodeName.contains("pull")))
-                     {
-                        // Remove the door node from the scene graph
-                           modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
-                           modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
-
-                        // Remove the static handle node from the scene graph
-                           modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
-                           modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
-                     }
-                  }
-               }
-            }
-         });
-      }
-
       // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
       if ( (state.getStartDemoAction().getIsExecuting() ||
             state.getEndScanAction().getIsExecuting() ||
@@ -164,6 +138,52 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getActionSequence().setConcurrencyEnabled(true);
          }
 
+         if (state.getStartPullDoorAction().getIsExecuting())
+         {
+            // Remove the door nodes
+            sceneGraph.modifyTree(modificationQueue -> {
+               for (String nodeName : sceneGraph.getNodeNameList())
+               {
+                  if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+                  {
+                     if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
+                     {
+                        // Remove the door node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
+
+                        // Remove the static handle node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     }
+                  }
+               }
+            });
+         }
+
+         if (state.getStartPushDoorAction().getIsExecuting())
+         {
+            // Remove the door nodes
+            sceneGraph.modifyTree(modificationQueue -> {
+               for (String nodeName : sceneGraph.getNodeNameList())
+               {
+                  if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+                  {
+                     if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
+                     {
+                        // Remove the door node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
+
+                        // Remove the static handle node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     }
+                  }
+               }
+            });
+         }
+
          // PULL DOOR or TRASH CAN after WALK to pull door
          if (state.getEndWalkDoorAAction().getIsExecuting())
          {
@@ -171,7 +191,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             doorTraversed.put("A", true);
             for (String nodeName : sceneGraph.getNodeNameList())
             {
-               if (nodeName.startsWith("TrashCan"))
+               if (nodeName.startsWith("trash"))
                {
                   state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
@@ -184,6 +204,25 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                state.getActionSequence().setConcurrencyEnabled(false);
                state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
             }
+            // Remove the door nodes
+            sceneGraph.modifyTree(modificationQueue -> {
+               for (String nodeName : sceneGraph.getNodeNameList())
+               {
+                  if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+                  {
+                     if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
+                     {
+                        // Remove the door node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
+
+                        // Remove the static handle node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     }
+                  }
+               }
+            });
          }
 
          if (state.getEndWalkDoorBAction().getIsExecuting())
@@ -192,7 +231,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             doorTraversed.put("B", true);
             for (String nodeName : sceneGraph.getNodeNameList())
             {
-               if (nodeName.startsWith("TrashCan"))
+               if (nodeName.startsWith("trash"))
                {
                   state.getActionSequence().setConcurrencyEnabled(false);
                   state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
@@ -205,6 +244,25 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                state.getActionSequence().setConcurrencyEnabled(false);
                state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
             }
+            // Remove the door nodes
+            sceneGraph.modifyTree(modificationQueue -> {
+               for (String nodeName : sceneGraph.getNodeNameList())
+               {
+                  if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+                  {
+                     if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
+                     {
+                        // Remove the door node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
+
+                        // Remove the static handle node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     }
+                  }
+               }
+            });
          }
 
          // PULL DOOR after TRASHCAN
