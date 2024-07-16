@@ -60,10 +60,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
-   private final JointDesiredOutputList jointDesiredOutputList;
-
-   private final BooleanParameter[] bypassAccelerationIntegration;
-   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
 
    public RigidBodyJointspaceControlState(String bodyName,
                                           OneDoFJointBasics[] jointsToControl,
@@ -75,14 +71,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
       this.jointsToControl = jointsToControl;
-      this.bypassAccelerationIntegration = new BooleanParameter[jointsToControl.length];
 
-      for (int i = 0; i < jointsToControl.length; i++)
-      {
-         bypassAccelerationIntegration[i] = new BooleanParameter(jointsToControl[i].getName() + "BypassAccelerationIntegration", parentRegistry);
-      }
-
-      jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
       numberOfJoints = jointsToControl.length;
       jointsHomeConfiguration = new double[numberOfJoints];
@@ -112,20 +101,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      boolean bypassAccelerationIntegration = false;
-
-      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
-      {
-         if (this.bypassAccelerationIntegration[jointIdx].getValue())
-         {
-            bypassAccelerationIntegration = true;
-            JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(jointIdx);
-            lowLevelJointData.setDesiredPosition(getJointDesiredPosition(jointIdx));
-            lowLevelJointData.setDesiredVelocity(getJointDesiredVelocity(jointIdx));
-         }
-      }
-
-      return bypassAccelerationIntegration ? jointDesiredOutputList : null;
+      return jointControlHelper.getJointDesiredData();
    }
 
    public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains)
@@ -255,15 +231,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      accelerationIntegrationCommand.clear();
-
-      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
-      {
-         accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(jointsToControl[jointIdx])
-                                       .setDisableAccelerationIntegration(bypassAccelerationIntegration[jointIdx].getValue());
-      }
-
-      return accelerationIntegrationCommand;
+      return jointControlHelper.getAccelerationIntegrationCommand();
    }
 
    @Override

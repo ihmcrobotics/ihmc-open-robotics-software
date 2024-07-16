@@ -64,6 +64,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final RigidBodyLoadBearingControlState loadBearingControlState;
    private final RigidBodyExternalWrenchManager externalWrenchManager;
 
+   private final RigidBodyJointControlHelper jointControlHelper;
    private final double[] initialJointPositions;
    private final FramePose3D homePose;
 
@@ -107,7 +108,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
+      jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
@@ -605,16 +606,14 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      if (stateMachine.getCurrentStateKey() == jointspaceControlState.getControlMode())
+      boolean isInJointspaceMode = stateMachine.getCurrentStateKey() == jointspaceControlState.getControlMode();
+      boolean isInTaskspaceHybridMode = stateMachine.getCurrentStateKey() == taskspaceControlState.getControlMode() && taskspaceControlState.isHybridModeActive();
+      boolean isInLoadbearingHybridMode = loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode() && loadBearingControlState.isJointspaceControlActive();
+
+      if (isInJointspaceMode || isInTaskspaceHybridMode || isInLoadbearingHybridMode)
       {
          for (int i = 0; i < jointsToControl.length; i++)
-            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
-      }
-      else if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
-               && loadBearingControlState.isJointspaceControlActive())
-      {
-         for (int i = 0; i < jointsToControl.length; i++)
-            desiredJointPositionsToPack[i] = loadBearingControlState.getJointDesiredPosition(i);
+            desiredJointPositionsToPack[i] = jointControlHelper.getJointDesiredPosition(i);
       }
       else
       {
