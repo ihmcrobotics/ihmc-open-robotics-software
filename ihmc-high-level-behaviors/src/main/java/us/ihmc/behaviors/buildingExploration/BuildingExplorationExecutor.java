@@ -295,8 +295,8 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          doorTraversed.put("First", false);
          doorTraversed.put("A", false);
          doorTraversed.put("B", false);
+         tomDetected = false;
       }
-      tomDetected = false;
    }
 
    public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)

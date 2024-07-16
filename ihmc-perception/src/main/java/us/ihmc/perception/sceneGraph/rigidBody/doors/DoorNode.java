@@ -265,6 +265,8 @@ public class DoorNode extends DetectableSceneNode
             double roll = 0.0;
             if (openingMechanism.getType() == DoorOpeningMechanismType.LEVER_HANDLE)
                roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
+            else if (openingMechanism.getType() == DoorOpeningMechanismType.PUSH_BAR)
+               roll += doorSide == RobotSide.RIGHT ? Math.PI : 0.0;
             mechanismTransformToWorld.getRotation().setYawPitchRoll(planarRegionYaw, pitch, roll);
             openingMechanism.updateMechanismFrame(mechanismTransformToWorld);
          }
