@@ -16,16 +16,20 @@ public abstract class CRDTUnidirectionalMutableField<T> extends CRDTUnidirection
 {
    private final T value;
 
-   public CRDTUnidirectionalMutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, Supplier<T> valueSupplier)
+   public CRDTUnidirectionalMutableField(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, Supplier<T> valueSupplier)
    {
-      super(sideThatCanModify, crdtInfo);
+      super(sideThatCanModify, requestConfirmFreezable);
 
       value = valueSupplier.get();
    }
 
-   public T getValue()
+   /**
+    * Accessing this freezes the node and assumes a modification will be made.
+    * Only use this if modifying the value.
+    */
+   public T accessValue()
    {
-      checkActorCanModify();
+      checkActorCanModifyAndFreeze();
       return value;
    }
 

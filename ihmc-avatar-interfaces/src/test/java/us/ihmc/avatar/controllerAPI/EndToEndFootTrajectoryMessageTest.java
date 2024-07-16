@@ -2,6 +2,8 @@ package us.ihmc.avatar.controllerAPI;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import org.junit.jupiter.api.AfterEach;
@@ -278,6 +280,37 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
+         initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // First need to pick up the foot:
+         assertTrue(pickupFoot(robotSide, foot));
+
+         // Without forgetting to put the foot back on the ground
+         assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
+      }
+
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      FootstepDataMessage leftStep = footstepDataListMessage.getFootstepDataList().add();
+      FootstepDataMessage rightStep = footstepDataListMessage.getFootstepDataList().add();
+      leftStep.getLocation().set(0.3, 0.12, 0.0);
+      leftStep.setRobotSide(RobotSide.LEFT.toByte());
+      rightStep.getLocation().set(0.3, -0.12, 0.0);
+      rightStep.setRobotSide(RobotSide.RIGHT.toByte());
+      leftStep = footstepDataListMessage.getFootstepDataList().add();
+      rightStep = footstepDataListMessage.getFootstepDataList().add();
+      leftStep.getLocation().set(0.6, 0.12, 0.0);
+      leftStep.setRobotSide(RobotSide.LEFT.toByte());
+      rightStep.getLocation().set(0.6, -0.12, 0.0);
+      rightStep.setRobotSide(RobotSide.RIGHT.toByte());
+
+      simulationTestHelper.publishToController(footstepDataListMessage);
+      simulationTestHelper.simulateNow(5.0);
+
 
       for (RobotSide robotSide : RobotSide.values)
       {

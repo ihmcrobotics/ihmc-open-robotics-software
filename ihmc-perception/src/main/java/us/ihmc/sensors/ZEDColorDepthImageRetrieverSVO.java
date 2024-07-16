@@ -52,15 +52,15 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          throw new RuntimeException("Must specify an SVO file name for playback");
       }
 
-      File svoFile = new File(svoFileName);
+      this.recordMode = recordMode;
+      this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
+
+      File svoFile = new File(this.svoFileName);
 
       if (recordMode == RecordMode.PLAYBACK && !svoFile.exists())
       {
          throw new RuntimeException("SVO file does not exist");
       }
-
-      this.recordMode = recordMode;
-      this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
 
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 ->
       {
@@ -107,15 +107,14 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 
       if (recordMode == RecordMode.RECORD)
       {
-         svoFileName = generateSVOFileName();
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting recording: " + svoFileName);
+         LogTools.info("Starting recording: " + this.svoFileName);
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
       else
       {
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting playback: " + svoFileName);
+         LogTools.info("Starting playback: " + this.svoFileName);
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
    }

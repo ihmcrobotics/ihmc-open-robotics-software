@@ -10,9 +10,9 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 {
    private T value;
 
-   public CRDTUnidirectionalImmutableField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
+   public CRDTUnidirectionalImmutableField(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, T initialValue)
    {
-      super(sideThatCanModify, crdtInfo);
+      super(sideThatCanModify, requestConfirmFreezable);
 
       value = initialValue;
    }
@@ -24,9 +24,12 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 
    public void setValue(T value)
    {
-      checkActorCanModify();
+      if (this.value != value)
+      {
+         checkActorCanModifyAndFreeze();
 
-      this.value = value;
+         this.value = value;
+      }
    }
 
    public T toMessage()
@@ -36,7 +39,7 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 
    public void fromMessage(T value)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          this.value = value;
       }

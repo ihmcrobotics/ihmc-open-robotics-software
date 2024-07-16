@@ -155,8 +155,8 @@ public class YOLOv8DetectionExecutor
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
                                                                                     colorImage,
-                                                                                    depthImage,
                                                                                     erodedObjectMask,
+                                                                                    depthImage,
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
                erodedMask.release();

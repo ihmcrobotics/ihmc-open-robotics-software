@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,17 +16,90 @@ public class PersistentDetectionTest
    {
       Instant startInstant = Instant.now();
 
-      InstantDetection mostRecentDetection = new InstantDetection("TestDetection", 0.5, new Pose3D(), startInstant);
-      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection, 1.0, 0.5, 5.0, 1.0);
+      double confidence = 0.5;
+      double historyDuration = 1.0;
+      Pose3D detectionPose = new Pose3D();
+      InstantDetection mostRecentDetection = new InstantDetection("TestDetection", confidence, detectionPose, startInstant);
+      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection, 1.0, 0.5, 5.0, historyDuration);
       for (int i = 1; i < 10; ++i)
       {
-         InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.minusSeconds(i));
+         confidence = 1.0;
+         // go back in time, and add a detection every second for the last 10 seconds.
+         InstantDetection testDetection = new InstantDetection("TestDetection", confidence, detectionPose, startInstant.minusSeconds(i));
+         assertTrue(testDetection.getDetectionTime().isBefore(mostRecentDetection.getDetectionTime()));
          persistentDetection.addDetection(testDetection);
       }
+      // We know that the original detection should still be the first one, since we added only instants in the past.
       assertEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
 
-      persistentDetection.updateHistory(startInstant.plusSeconds(15));
+      // Check that the history is the expected size, and that it's sorted correctly.
+      assertEquals(10, persistentDetection.getHistorySize());
+      assertEquals(10, persistentDetection.getDetectionHistory().size());
+      for (int i = 0; i < 9; i++)
+      {
+         List<InstantDetection> detectionList = persistentDetection.getDetectionHistory().stream().toList();
+         assertTrue(detectionList.get(i).getDetectionTime().isBefore(detectionList.get(i + 1).getDetectionTime()));
+      }
+
+      // So we want to clear out all the old history, but not all of it
+      Instant instantInFuture = startInstant.plusSeconds(1);
+      persistentDetection.setHistoryDuration(3.0);
+      Instant expectedExpirationTime = instantInFuture.minusSeconds(3);
+
+      persistentDetection.updateHistory(instantInFuture);
       assertEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
+      assertTrue(instantInFuture.isAfter(mostRecentDetection.getDetectionTime()));
+      assertEquals(3, persistentDetection.getHistorySize());
+      // make sure the oldest point isn't before the expiration window.
+      assertEquals(persistentDetection.getDetectionHistory().first(), persistentDetection.getOldestDetection());
+      assertFalse(persistentDetection.getDetectionHistory().first().getDetectionTime().isBefore(expectedExpirationTime));
+
+      // We want to clear out all the old history, but we don't want to remove the most recent detection.
+      instantInFuture = startInstant.plusSeconds(15);
+      persistentDetection.updateHistory(instantInFuture);
+      assertEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
+      assertEquals(mostRecentDetection, persistentDetection.getOldestDetection());
+      assertEquals(1, persistentDetection.getHistorySize());
+      assertEquals(startInstant, mostRecentDetection.getDetectionTime());
+
+      for (int i = 1; i < 10; ++i)
+      {
+         confidence = 1.0;
+         // go forward in time, and add a detection every second for the next 10 seconds.
+         Instant newInstant = startInstant.plusSeconds(i);
+         InstantDetection testDetection = new InstantDetection("TestDetection", confidence, detectionPose, newInstant);
+         persistentDetection.addDetection(testDetection);
+
+         assertEquals(startInstant, mostRecentDetection.getDetectionTime());
+         assertTrue(newInstant.isAfter(startInstant));
+         // We know that each new detection should become the most recent detection, because it occurs after the start instant
+         assertNotEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
+         assertEquals(testDetection, persistentDetection.getMostRecentDetection());
+      }
+
+      // We know the oldest detection should be the first detection, since all the new detections added were after it. THat means that pruning the history
+      // Shouldn't change its length
+      int originalSize = persistentDetection.getHistorySize();
+      persistentDetection.updateHistory(startInstant);
+      assertEquals(originalSize, persistentDetection.getHistorySize());
+      assertEquals(startInstant, persistentDetection.getOldestDetection().getDetectionTime());
+
+
+      // reset to only one detection
+      mostRecentDetection = persistentDetection.getMostRecentDetection();
+      startInstant = mostRecentDetection.getDetectionTime();
+      persistentDetection.setHistoryDuration(0.5);
+      persistentDetection.updateHistory(startInstant);
+      assertEquals(1, persistentDetection.getHistorySize());
+
+
+      // do a tiny time delta to make sure we're tolerant to small differences, too
+      persistentDetection.addDetection(new InstantDetection("TestDetection", confidence, detectionPose, startInstant.minusNanos(1)));
+      assertEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
+
+      InstantDetection mostRecentDetectionExpected = new InstantDetection("TestDetection", confidence, detectionPose, startInstant.plusNanos(1));
+      persistentDetection.addDetection(mostRecentDetectionExpected);
+      assertEquals(mostRecentDetectionExpected, persistentDetection.getMostRecentDetection());
    }
 
    @Test

@@ -62,16 +62,24 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
 
       // Update is next for execution
-      int executionNextIndex = state.getExecutionNextIndex();
-      if (executionNextIndex < state.getActionChildren().size())
+      for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         state.getActionChildren().get(executionNextIndex).setIsNextForExecution(true);
-
-         for (int i = executionNextIndex + 1;
-              i < state.getActionChildren().size()
-              && state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex; i++)
+         int executionNextIndex = state.getExecutionNextIndex();
+         if (i < executionNextIndex)
+         {
+            state.getActionChildren().get(i).setIsNextForExecution(false);
+         }
+         else if (i == executionNextIndex)
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
+         }
+         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex)
+         {
+            state.getActionChildren().get(i).setIsNextForExecution(true);
+         }
+         else
+         {
+            state.getActionChildren().get(i).setIsNextForExecution(false);
          }
       }
 
@@ -124,7 +132,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             {
                currentlyExecutingActions.add(actionNode);
             }
-            actionNode.getState().setIsNextForExecution(false);
          }
          else
          {

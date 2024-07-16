@@ -25,10 +25,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
             */
    public int execution_next_index_;
    /**
-            * Next action rejection tooltip
-            */
-   public java.lang.StringBuilder next_action_rejection_tooltip_;
-   /**
             * Request manual execution of the next action
             */
    public boolean manual_execution_requested_;
@@ -41,7 +37,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.BehaviorTreeRootNodeDefinitionMessage();
-      next_action_rejection_tooltip_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage other)
@@ -57,9 +52,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       automatic_execution_ = other.automatic_execution_;
 
       execution_next_index_ = other.execution_next_index_;
-
-      next_action_rejection_tooltip_.setLength(0);
-      next_action_rejection_tooltip_.append(other.next_action_rejection_tooltip_);
 
       manual_execution_requested_ = other.manual_execution_requested_;
 
@@ -116,30 +108,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
    }
 
    /**
-            * Next action rejection tooltip
-            */
-   public void setNextActionRejectionTooltip(java.lang.String next_action_rejection_tooltip)
-   {
-      next_action_rejection_tooltip_.setLength(0);
-      next_action_rejection_tooltip_.append(next_action_rejection_tooltip);
-   }
-
-   /**
-            * Next action rejection tooltip
-            */
-   public java.lang.String getNextActionRejectionTooltipAsString()
-   {
-      return getNextActionRejectionTooltip().toString();
-   }
-   /**
-            * Next action rejection tooltip
-            */
-   public java.lang.StringBuilder getNextActionRejectionTooltip()
-   {
-      return next_action_rejection_tooltip_;
-   }
-
-   /**
             * Request manual execution of the next action
             */
    public void setManualExecutionRequested(boolean manual_execution_requested)
@@ -193,8 +161,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_next_index_, other.execution_next_index_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.next_action_rejection_tooltip_, other.next_action_rejection_tooltip_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manual_execution_requested_, other.manual_execution_requested_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.concurrency_enabled_, other.concurrency_enabled_, epsilon)) return false;
@@ -218,8 +184,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if(this.execution_next_index_ != otherMyClass.execution_next_index_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.next_action_rejection_tooltip_, otherMyClass.next_action_rejection_tooltip_)) return false;
-
       if(this.manual_execution_requested_ != otherMyClass.manual_execution_requested_) return false;
 
       if(this.concurrency_enabled_ != otherMyClass.concurrency_enabled_) return false;
@@ -242,8 +206,6 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       builder.append(this.automatic_execution_);      builder.append(", ");
       builder.append("execution_next_index=");
       builder.append(this.execution_next_index_);      builder.append(", ");
-      builder.append("next_action_rejection_tooltip=");
-      builder.append(this.next_action_rejection_tooltip_);      builder.append(", ");
       builder.append("manual_execution_requested=");
       builder.append(this.manual_execution_requested_);      builder.append(", ");
       builder.append("concurrency_enabled=");
