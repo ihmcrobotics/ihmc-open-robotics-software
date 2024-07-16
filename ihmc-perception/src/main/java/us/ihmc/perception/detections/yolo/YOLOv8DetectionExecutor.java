@@ -37,16 +37,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class YOLOv8DetectionExecutor
 {
@@ -69,8 +68,10 @@ public class YOLOv8DetectionExecutor
    private int lastRunDetectorIndex = 0;
    private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new HashMap<>();
 
+   private final Map<String, YOLOv8Model> availableYoloModels = new HashMap<>();
+   private volatile Set<YOLOv8Model> requestedYoloModels = new HashSet<>();
+
    private final List<YOLOv8ObjectDetector> yoloObjectDetectors = new ArrayList<>();
-   private final Map<String, YOLOv8Model> modelNameToModelMap = new HashMap<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
 
    private float yoloConfidenceThreshold = 0.5f;
@@ -97,34 +98,20 @@ public class YOLOv8DetectionExecutor
          erosionKernelRadius = parametersMessage.getErosionKernelRadius();
          outlierThreshold = parametersMessage.getOutlierThreshold();
 
-         Set<String> requestedModelNames = new HashSet<>(Arrays.stream(parametersMessage.getModelsToLoad().toStringArray()).toList());
-         // Remove already loaded models from the requested models
-         Iterator<YOLOv8ObjectDetector> detectorIterator = yoloObjectDetectors.iterator();
-         while (detectorIterator.hasNext())
-         {
-            YOLOv8ObjectDetector detector = detectorIterator.next();
-            String loadedModelName = detector.getYoloModel().getModelName();
-            if (!requestedModelNames.remove(loadedModelName))
-            {
-               detector.destroyWhenDone();
-               detectorIterator.remove();
-            }
-         }
-         // Add not-loaded requested models
-         for (String requestedModelName : requestedModelNames)
-         {
-            YOLOv8Model requestedModel = modelNameToModelMap.get(requestedModelName);
-            YOLOv8ObjectDetector newObjectDetector = new YOLOv8ObjectDetector(requestedModel);
-            yoloObjectDetectors.add(newObjectDetector);
-            LogTools.info("Loaded YOLOv8 model: " + requestedModelName);
-            LogTools.info("\t\t\tClasses: " + requestedModel.getDetectionClassNames().size());
-         }
+         requestedYoloModels = Arrays.stream(parametersMessage.getModelsToLoad().toStringArray()).map(availableYoloModels::get).collect(Collectors.toSet());
       });
 
       for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
          YOLOv8Model model = new YOLOv8Model(yoloModelDirectory);
-         modelNameToModelMap.put(model.getModelName(), model);
+         availableYoloModels.put(model.getModelName(), model);
+
+         YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
+
+         LogTools.info("Loaded YOLOv8 model: " + YOLOv8Tools.getONNXFile(yoloModelDirectory));
+         LogTools.info("\t\t\tClasses: " + model.getDetectionClassNames().size());
+
+         yoloObjectDetectors.add(objectDetector);
       }
    }
 
@@ -135,11 +122,30 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
-      if (yoloObjectDetectors.isEmpty())
-         return;
-
       if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
          lastRunDetectorIndex = 0;
+
+      YOLOv8ObjectDetector yoloDetector = yoloObjectDetectors.get(lastRunDetectorIndex++);
+
+      runYOLODetection(yoloDetector, colorImage, depthImage);
+   }
+
+   public void runYOLODetectionOnRequestedModels(RawImage colorImage, RawImage depthImage)
+   {
+      if (++lastRunDetectorIndex >= yoloObjectDetectors.size())
+         lastRunDetectorIndex = 0;
+
+      int startSearchIndex = lastRunDetectorIndex;
+      while (!requestedYoloModels.contains(yoloObjectDetectors.get(lastRunDetectorIndex).getYoloModel()))
+      {
+         lastRunDetectorIndex++;
+
+         if (lastRunDetectorIndex >= yoloObjectDetectors.size())
+            lastRunDetectorIndex = 0;
+
+         if (lastRunDetectorIndex == startSearchIndex)
+            return;
+      }
 
       YOLOv8ObjectDetector yoloDetector = yoloObjectDetectors.get(lastRunDetectorIndex++);
 
