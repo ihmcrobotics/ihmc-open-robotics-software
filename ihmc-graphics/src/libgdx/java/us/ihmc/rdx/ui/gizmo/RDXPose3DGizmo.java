@@ -759,4 +759,9 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       return gizmoModifiedByUser;
    }
+
+   public ImFloat getCenterSphereToTorusRatio()
+   {
+      return centerSphereToTorusRatio;
+   }
 }

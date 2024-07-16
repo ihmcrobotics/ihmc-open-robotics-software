@@ -1,10 +1,13 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
+import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
@@ -24,50 +27,27 @@ public class YOLOv8Node extends DetectableSceneNode
 
    // YOLOv8Node specific variables
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
-   private Pose3D objectPose;
-
-   public YOLOv8Node(long id, String name, PersistentDetection yoloDetection, CRDTInfo crdtInfo)
-   {
-      this(id,
-           name,
-           yoloDetection,
-           new Pose3D(),
-           yoloDetection.getMostRecentDetection().getPose(),
-           crdtInfo);
-   }
-
-   public YOLOv8Node(long id,
-                     String name,
-                     PersistentDetection yoloDetection,
-                     RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose,
-                     CRDTInfo crdtInfo)
-   {
-      super(id, name, crdtInfo);
-
-      this.centroidToObjectTransform.set(centroidToObjectTransform);
-      this.objectPose = objectPose;
-      this.yoloDetection = yoloDetection;
-      confidence = getMostRecentDetection().getConfidence();
-      objectPointCloud = getMostRecentDetection().getObjectPointCloud();
-   }
+   private final Pose3D objectPose;
 
    /**
     * Constructor used when the node does not have access to the persistent detection (e.g. UI side).
     * All values that would typically come from the persistent detection must be synced separately.
+    *
+    * NOTE: the object point cloud is not deep copied. This means any changes to the data contained in the point cloud will affect
+    * this object.
     */
    public YOLOv8Node(long id,
                      String name,
                      double confidence,
                      List<Point3D32> objectPointCloud,
-                     RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose,
+                     RigidBodyTransformReadOnly centroidToObjectTransform,
+                     Pose3DReadOnly objectPose,
                      CRDTInfo crdtInfo)
    {
       super(id, name, crdtInfo);
 
       this.centroidToObjectTransform.set(centroidToObjectTransform);
-      this.objectPose = objectPose;
+      this.objectPose = new Pose3D(objectPose);
       this.confidence = confidence;
       this.objectPointCloud = objectPointCloud;
       yoloDetection = null;
@@ -78,35 +58,20 @@ public class YOLOv8Node extends DetectableSceneNode
    {
       super.update(sceneGraph, modificationQueue);
 
+      YOLOv8InstantDetection mostRecentDetection = (YOLOv8InstantDetection) yoloDetection.getMostRecentDetection();
       setCurrentlyDetected(yoloDetection.isStable());
-      setConfidence(getMostRecentDetection().getConfidence());
-      setObjectPointCloud(getMostRecentDetection().getObjectPointCloud());
+      setConfidence(mostRecentDetection.getConfidence());
+      setObjectPointCloud(mostRecentDetection.getObjectPointCloud());
 
-      objectPose.set(yoloDetection.getMostRecentDetection().getPose());
+      objectPose.set(mostRecentDetection.getPose());
       objectPose.appendTransform(centroidToObjectTransform);
 
-      getNodeToParentFrameTransform().set(objectPose);
-      getNodeFrame().update();
+      setNodeToParentFrameTransformAndUpdate(objectPose);
    }
 
-   public RigidBodyTransform getCentroidToObjectTransform()
+   public RigidBodyTransformReadOnly getCentroidToObjectTransform()
    {
       return centroidToObjectTransform;
-   }
-
-   public void setCentroidToObjectTransform(RigidBodyTransformBasics centroidToObjectTransform)
-   {
-      this.centroidToObjectTransform.set(centroidToObjectTransform);
-   }
-
-   public PersistentDetection getYOLODetection()
-   {
-      return yoloDetection;
-   }
-
-   public YOLOv8InstantDetection getMostRecentDetection()
-   {
-      return (YOLOv8InstantDetection) yoloDetection.getMostRecentDetection();
    }
 
    public double getConfidence()
@@ -114,14 +79,45 @@ public class YOLOv8Node extends DetectableSceneNode
       return confidence;
    }
 
-   public void setConfidence(double confidence)
-   {
-      this.confidence = confidence;
-   }
-
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
+   }
+
+   public Point3DReadOnly getObjectPoint(int index)
+   {
+      return objectPointCloud.get(index);
+   }
+
+   public Pose3DReadOnly getObjectPose()
+   {
+      return objectPose;
+   }
+
+   public void toMessage(YOLOv8NodeMessage message)
+   {
+      message.setConfidence(getConfidence());
+      message.getObjectPointCloud().clear();
+      for (int i = 0; i < message.getObjectPointCloud().getCurrentCapacity() && i < getObjectPointCloud().size(); ++i)
+      {
+         message.getObjectPointCloud().add().set(getObjectPoint(i));
+      }
+      message.getCentroidToObjectTransform().set(getCentroidToObjectTransform());
+      message.getObjectPose().set(getObjectPose());
+      message.getFilteredObjectPose().set(getObjectPose()); // FIXME Maybe set this to something else?
+   }
+
+   public void fromMessage(YOLOv8NodeMessage message)
+   {
+      setConfidence(message.getConfidence());
+      setObjectPointCloud(message.getObjectPointCloud());
+      setCentroidToObjectTransform(message.getCentroidToObjectTransform());
+      setObjectPose(message.getObjectPose());
+   }
+
+   public void setConfidence(double confidence)
+   {
+      this.confidence = confidence;
    }
 
    public void setObjectPointCloud(List<Point3D32> objectPointCloud)
@@ -129,14 +125,14 @@ public class YOLOv8Node extends DetectableSceneNode
       this.objectPointCloud = objectPointCloud;
    }
 
-   public Pose3D getObjectPose()
+   public void setObjectPose(Pose3DReadOnly objectPose)
    {
-      return objectPose;
+      this.objectPose.set(objectPose);
    }
 
-   public void setObjectPose(Pose3D objectPose)
+   public void setCentroidToObjectTransform(RigidBodyTransformReadOnly centroidToObjectTransform)
    {
-      this.objectPose = objectPose;
+      this.centroidToObjectTransform.set(centroidToObjectTransform);
    }
 
    @Override
