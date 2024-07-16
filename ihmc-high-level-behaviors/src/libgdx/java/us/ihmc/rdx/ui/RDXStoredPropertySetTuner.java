@@ -135,6 +135,11 @@ public class RDXStoredPropertySetTuner extends RDXPanel
 
       ImGui.text("(Ctrl + click sliders to set exact and unbounded value.)");
 
+      return renderImGuiWidgetsSimple();
+   }
+
+   public boolean renderImGuiWidgetsSimple()
+   {
       for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
          widget.renderImGuiWidget();

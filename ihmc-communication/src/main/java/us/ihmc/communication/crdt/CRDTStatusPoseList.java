@@ -28,23 +28,23 @@ public class CRDTStatusPoseList extends CRDTStatusMutableField<RecyclingArrayLis
       return getValueInternal().size();
    }
 
-   public void toMessage(IDLSequence.Object<Pose3D> trajectoryMessage)
+   public void toMessage(IDLSequence.Object<Pose3D> message)
    {
-      trajectoryMessage.clear();
+      message.clear();
 
       for (Pose3D pose3D : getValueInternal())
       {
-         trajectoryMessage.add().set(pose3D);
+         message.add().set(pose3D);
       }
    }
 
-   public void fromMessage(IDLSequence.Object<Pose3D> trajectoryMessage)
+   public void fromMessage(IDLSequence.Object<Pose3D> message)
    {
       if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          getValueInternal().clear();
 
-         for (Pose3D pose3D : trajectoryMessage)
+         for (Pose3D pose3D : message)
          {
             getValueInternal().add().set(pose3D);
          }

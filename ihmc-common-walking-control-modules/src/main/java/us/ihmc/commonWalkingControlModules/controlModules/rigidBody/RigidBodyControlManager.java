@@ -692,6 +692,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return taskspaceControlState;
    }
 
+   public RigidBodyJointspaceControlState getJointspaceControlState()
+   {
+      return jointspaceControlState;
+   }
+
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       if (loadBearingControlState != null)

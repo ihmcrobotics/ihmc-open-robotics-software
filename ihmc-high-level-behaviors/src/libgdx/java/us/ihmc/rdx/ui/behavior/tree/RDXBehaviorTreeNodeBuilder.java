@@ -12,7 +12,6 @@ import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
@@ -36,15 +35,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    private final RDXBaseUI baseUI;
    private final RDX3DPanel panel3D;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final DefaultFootstepPlannerParametersBasics footstepPlannerParametersBasics;
 
    public RDXBehaviorTreeNodeBuilder(DRCRobotModel robotModel,
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel selectionCollisionModel,
                                      RDXBaseUI baseUI,
                                      RDX3DPanel panel3D,
-                                     ReferenceFrameLibrary referenceFrameLibrary,
-                                     DefaultFootstepPlannerParametersBasics footstepPlannerParametersBasics)
+                                     ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -52,7 +49,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       this.baseUI = baseUI;
       this.panel3D = panel3D;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      this.footstepPlannerParametersBasics = footstepPlannerParametersBasics;
    }
 
    @Override
@@ -104,8 +100,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                           baseUI,
                                           robotModel,
                                           syncedRobot,
-                                          referenceFrameLibrary,
-                                          footstepPlannerParametersBasics);
+                                          referenceFrameLibrary);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
