@@ -119,7 +119,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                            {
                                               if (enableGlobalHeightMapVisualizer.get())
                                               {
-                                                 heightMapGraphicNew.generateMeshesAsync(globalMapTileMessage.getHeightMap());
+                                                 globalHeightMapGraphic.generateMeshesAsync(globalMapTileMessage.getHeightMap(),globalMapTileMessage.hash_code_of_tile_);
                                               }
                                            });
    }
