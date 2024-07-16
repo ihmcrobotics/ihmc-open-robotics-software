@@ -5,7 +5,6 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
-import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -47,7 +46,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
@@ -214,18 +212,17 @@ public class HumanoidPerceptionModule
 
    }
 
-
-
    private void publishGlobalHeightMapTile (ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
    {
       // get the modified cells from the globalheightmap
-      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapCells();
-      for (GlobalMapTile tile : modifiedCells){
+      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
+      for (GlobalMapTile tile : modifiedCells)
+      {
          GlobalMapTileMessage globalMapTile = new GlobalMapTileMessage();
          globalMapTile.setCenterX(tile.getCenterX());
          globalMapTile.setCenterY(tile.getCenterY());
          globalMapTile.setHashCodeOfTile(tile.hashCode());
-         globalMapTile.height_map_ = HeightMapMessageTools.toMessage(tile.getHeightMapDataForPublishing());
+         globalMapTile.getHeightMap().set(HeightMapMessageTools.toMessage(tile.getHeightMapDataForPublishing()));
          ros2Helper.publish(topic, globalMapTile);
       }
    }

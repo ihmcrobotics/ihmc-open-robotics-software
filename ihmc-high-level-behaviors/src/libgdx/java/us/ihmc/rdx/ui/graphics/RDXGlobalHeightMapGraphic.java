@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
@@ -21,9 +22,8 @@ import java.util.HashMap;
  */
 public class RDXGlobalHeightMapGraphic implements RenderableProvider
 {
-   private final GlobalHeightMap globalHeightMap = new GlobalHeightMap();
-
-   private final HashMap<GlobalMapTile, RDXHeightMapGraphicNew> globalMapRenderables = new HashMap<>();
+   // FIXME turn into an int map using the lattice from the global height map tile structure
+   private final IntMap<RDXHeightMapGraphicNew> globalMapRenderables = new IntMap<>();
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -60,24 +60,19 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 //      heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
 
 
-      //         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-      //         RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(heightMapData);
-      //         globalHeightMap.addHeightMap(heightMapData);
-      //
-      //         for (GlobalMapTile globalMapTile : globalHeightMap.getModifiedMapCells())
-      //         {
-      //            RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(globalMapTile);
-      //            graphic.generateMeshesAsync(HeightMapMessageTools.toMessage(heightMapData));
-      //         }
+      // TODO figure out how to calculate the tile key from the ehight map message
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(heightMapData);
+      graphic.generateMeshesAsync(heightMapMessage);
    }
 
-   private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(GlobalMapTile globalMapTile)
+   private RDXHeightMapGraphicNew getOrCreateHeightMapGraphic(int tileKey)
    {
-      RDXHeightMapGraphicNew graphic = globalMapRenderables.get(globalMapTile);
+      RDXHeightMapGraphicNew graphic = globalMapRenderables.get(tileKey);
       if (graphic == null)
       {
          graphic = new RDXHeightMapGraphicNew();
-         globalMapRenderables.put(globalMapTile, graphic);
+         globalMapRenderables.put(tileKey, graphic);
       }
 
       return graphic;

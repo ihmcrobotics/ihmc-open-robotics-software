@@ -37,7 +37,7 @@ public class GlobalHeightMap
       }
    }
 
-   public Collection<GlobalMapTile> getModifiedMapCells()
+   public Collection<GlobalMapTile> getModifiedMapTiles()
    {
       return modifiedCells;
    }
