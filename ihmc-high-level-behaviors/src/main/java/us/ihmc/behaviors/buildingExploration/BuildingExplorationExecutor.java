@@ -161,12 +161,12 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             });
          }
 
-         if (state.getDisableDoorAction().getIsExecuting())
+         if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
          {
             sceneGraph.setAllowNewDoorNodes(false);
          }
 
-         if (state.getEnableDoorAction().getIsExecuting())
+         if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
          {
             sceneGraph.setAllowNewDoorNodes(true);
          }
