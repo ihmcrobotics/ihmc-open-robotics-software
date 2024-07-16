@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -121,6 +122,13 @@ public class YOLOv8Tools
       centroid.scale(1.0 / numberOfPointsToUse);
 
       return centroid;
+   }
+
+   public static List<YOLOv8Model> getAvailableYOLOModels()
+   {
+      List<YOLOv8Model> availableModels = new ArrayList<>();
+      YOLOv8Tools.getYOLOModelDirectories().forEach(modelDirectoryPath -> availableModels.add(new YOLOv8Model(modelDirectoryPath)));
+      return availableModels;
    }
 
    public static List<Path> getYOLOModelDirectories()

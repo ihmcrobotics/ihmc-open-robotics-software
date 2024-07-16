@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import boofcv.visualize.SingleAxisRgb.Y;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -15,8 +14,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.tools.thread.Throttler;
 
-import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,6 +29,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
    private final ROS2PublishSubscribeAPI ros2;
+   private final YOLOv8ParametersMessage parametersMessage = new YOLOv8ParametersMessage();
 
    private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
@@ -39,7 +37,6 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private final ImFloat outlierRejectionThreshold = new ImFloat(1.0f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
-//   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
    private final Set<YOLOv8Model> availableModels = new TreeSet<>((modelA, modelB) -> modelA.getModelName().compareToIgnoreCase(modelB.getModelName()));
    private final Set<YOLOv8Model> modelsToLoad = new HashSet<>();
 
@@ -58,7 +55,8 @@ public class RDXYOLOv8Settings extends RDXVisualizer
       demandYOLOv8ICPZed = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       demandYOLOv8ICPRealsense = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
 
-      YOLOv8Tools.getYOLOModelDirectories().forEach(modelDirectoryPath -> availableModels.add(new YOLOv8Model(modelDirectoryPath)));
+      availableModels.addAll(YOLOv8Tools.getAvailableYOLOModels());
+      modelsToLoad.addAll(availableModels);
    }
 
    @Override
@@ -119,17 +117,16 @@ public class RDXYOLOv8Settings extends RDXVisualizer
       // Publish a settings message if user changed a setting or enough time has passed since last publication
       if (parametersChanged.poll() || messagePublishThrottler.run())
       {
-         YOLOv8ParametersMessage message = new YOLOv8ParametersMessage();
-         message.setConfidenceThreshold(confidenceThreshold.get());
-         message.setNonMaximumSuppressionThreshold(nmsThreshold.get());
-         message.setSegmentationThreshold(maskThreshold.get());
-         message.setOutlierThreshold(outlierRejectionThreshold.get());
+         parametersMessage.setConfidenceThreshold(confidenceThreshold.get());
+         parametersMessage.setNonMaximumSuppressionThreshold(nmsThreshold.get());
+         parametersMessage.setSegmentationThreshold(maskThreshold.get());
+         parametersMessage.setOutlierThreshold(outlierRejectionThreshold.get());
 
-         message.getModelsToLoad().clear();
+         parametersMessage.getModelsToLoad().clear();
          for (YOLOv8Model yoloModel : modelsToLoad)
-            message.getModelsToLoad().add(yoloModel.getModelName());
+            parametersMessage.getModelsToLoad().add(yoloModel.getModelName());
 
-         ros2.publish(PerceptionAPI.YOLO_PARAMETERS, message);
+         ros2.publish(PerceptionAPI.YOLO_PARAMETERS, parametersMessage);
       }
    }
 
