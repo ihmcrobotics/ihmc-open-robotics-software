@@ -83,31 +83,30 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          }
       }
 
-      if (state.getEndWalkDoorAAction().getIsExecuting())
+      if (state.getEndWalkDoorAAction().getIsExecuting() || state.getEndWalkDoorBAction().getIsExecuting())
       {
-         for (String nodeName : sceneGraph.getNodeNameList())
-         {
-            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+         // Remove the door nodes
+         sceneGraph.modifyTree(modificationQueue -> {
+            for (String nodeName : sceneGraph.getNodeNameList())
             {
-               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
+               if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
                {
-                  if (!(staticHandleNode.isLeftDoor() && nodeName.contains("pull")))
+                  if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof PredefinedRigidBodySceneNode staticHandleNode)
                   {
-                     // Remove the door node from the scene graph
-                     sceneGraph.modifyTree(modificationQueue -> {
-                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
-                        modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
-                     });
+                     if (!(staticHandleNode.isLeftDoor() && nodeName.contains("pull")))
+                     {
+                        // Remove the door node from the scene graph
+                           modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                           modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get( staticHandleNode.getInitialParentNodeID()), sceneGraph));
 
-                     // Remove the static handle node from the scene graph
-                     sceneGraph.modifyTree(modificationQueue -> {
-                        modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
-                        modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
-                     });
+                        // Remove the static handle node from the scene graph
+                           modificationQueue.accept(new SceneGraphClearSubtree(staticHandleNode));
+                           modificationQueue.accept(new SceneGraphNodeRemoval(staticHandleNode, sceneGraph));
+                     }
                   }
                }
             }
-         }
+         });
       }
 
       // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
@@ -165,16 +164,40 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getActionSequence().setConcurrencyEnabled(true);
          }
 
-         // PULL DOOR after WALK to pull door
+         // PULL DOOR or TRASH CAN after WALK to pull door
          if (state.getEndWalkDoorAAction().getIsExecuting())
          {
             doorTraversed.put("A", true);
+            for (String nodeName : sceneGraph.getNodeNameList())
+            {
+               if (nodeName.startsWith("TrashCan"))
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                  break;
+               }
+            }
+         }
+         else
+         {
             state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
          if (state.getEndWalkDoorBAction().getIsExecuting())
          {
             doorTraversed.put("B", true);
+            for (String nodeName : sceneGraph.getNodeNameList())
+            {
+               if (nodeName.startsWith("TrashCan"))
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                  break;
+               }
+            }
+         }
+         else
+         {
             state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
