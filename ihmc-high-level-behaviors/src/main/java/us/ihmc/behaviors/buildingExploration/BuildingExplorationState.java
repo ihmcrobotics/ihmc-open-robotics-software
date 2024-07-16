@@ -50,6 +50,7 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public static final String END_TURN_DOOR_B = "END turn door B";
    public static final String END_WALK_COUCH = "END walk couch";
 
+   public static final String START_DEMO = "START OF DEMO";
    public static final String END_DEMO = "END OF DEMO";
 
 
@@ -90,6 +91,7 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    private WaitDurationActionState endTurnDoorAAction;
    private WaitDurationActionState endTurnDoorBAction;
    private WaitDurationActionState endWalkCouchAction;
+   private WaitDurationActionState startDemoAction;
    private WaitDurationActionState endDemoAction;
 
    public BuildingExplorationState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -275,6 +277,11 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
                 && waitDurationAction.getDefinition().getName().equals(END_WALK_COUCH))
             {
                endWalkCouchAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(START_DEMO))
+            {
+               startDemoAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(END_DEMO))
@@ -466,6 +473,11 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public WaitDurationActionState getEndWalkCouchAction()
    {
       return endWalkCouchAction;
+   }
+
+   public WaitDurationActionState getStartDemoAction()
+   {
+      return startDemoAction;
    }
 
    public WaitDurationActionState getEndDemoAction()

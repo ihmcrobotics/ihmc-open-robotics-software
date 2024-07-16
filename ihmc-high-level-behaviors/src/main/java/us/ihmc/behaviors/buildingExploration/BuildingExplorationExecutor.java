@@ -79,26 +79,43 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          }
       }
 
+      if (state.getEndWalkDoorAAction().getIsExecuting())
+      {
+         for (String nodeName : sceneGraph.getNodeNameList())
+         {
+            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+            {
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
+               {
+//                  if (staticHandleNode.getIsLeft())
+               }
+            }
+         }
+      }
+
       // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
-      if ( (state.getEndScanAction().getIsNextForExecution() ||
-          state.getEndPushDoorAction().getIsNextForExecution() ||
-          state.getEndPullDoorAction().getIsNextForExecution() ||
-          state.getEndTrashCanAction().getIsNextForExecution() ||
-          state.getEndCouchAction().getIsNextForExecution() ||
-          state.getEndTableLeftAction().getIsNextForExecution() ||
-          state.getEndTableRightAction().getIsNextForExecution() ||
-          state.getEndTableRightAction().getIsNextForExecution() ||
-          state.getEndWalkDoorAAction().getIsNextForExecution() ||
-          state.getEndWalkDoorBAction().getIsNextForExecution() ||
-          state.getEndTurnDoorAAction().getIsNextForExecution() ||
-          state.getEndTurnDoorBAction().getIsNextForExecution() ||
-          state.getEndWalkCouchAction().getIsNextForExecution()))
+      if ( (state.getStartDemoAction().getIsExecuting() ||
+            state.getEndScanAction().getIsExecuting() ||
+            state.getEndScanAction().getIsExecuting() ||
+            state.getEndPushDoorAction().getIsExecuting() ||
+            state.getEndPullDoorAction().getIsExecuting() ||
+            state.getEndTrashCanAction().getIsExecuting() ||
+            state.getEndCouchAction().getIsExecuting() ||
+            state.getEndTableLeftAction().getIsExecuting() ||
+            state.getEndTableRightAction().getIsExecuting() ||
+            state.getEndTableRightAction().getIsExecuting() ||
+            state.getEndWalkDoorAAction().getIsExecuting() ||
+            state.getEndWalkDoorBAction().getIsExecuting() ||
+            state.getEndTurnDoorAAction().getIsExecuting() ||
+            state.getEndTurnDoorBAction().getIsExecuting() ||
+            state.getEndWalkCouchAction().getIsExecuting()) )
       {
          for (String nodeName : sceneGraph.getNodeNameList())
          {
             if (nodeName.startsWith("tom"))
             {
                tomDetected = true;
+               state.getActionSequence().setConcurrencyEnabled(false);
                state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
                doorTraversed.put("First", false);
                doorTraversed.put("A", false);
@@ -125,7 +142,8 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
              state.getWalkDoorBAction().getIsExecuting() ||
              state.getTurnDoorAAction().getIsExecuting() ||
              state.getTurnDoorBAction().getIsExecuting() ||
-             state.getWalkCouchAction().getIsExecuting())
+             state.getWalkCouchAction().getIsExecuting() ||
+             state.getStartSaluteAction().getIsExecuting())
          {
             state.getActionSequence().setConcurrencyEnabled(true);
          }
