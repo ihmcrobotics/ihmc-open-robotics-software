@@ -19,7 +19,6 @@ import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXDoorObject;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -50,7 +49,6 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
-   private RDXDoorObject door;
    private final ImBoolean showDetectedDoorGraphic = new ImBoolean(true);
 
    public RDXDoorBehaviorUI(BehaviorHelper helper)
@@ -83,7 +81,6 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      door = new RDXDoorObject();
 
    }
 
@@ -181,8 +178,6 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN() && sceneLevels.contains(RDXSceneLevel.MODEL))
-         door.getCollisionMeshRenderables(renderables, pool);
    }
 
    public String getName()
