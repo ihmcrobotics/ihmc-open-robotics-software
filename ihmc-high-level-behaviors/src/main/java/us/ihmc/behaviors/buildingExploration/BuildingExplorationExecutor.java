@@ -90,7 +90,6 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
       // if any of the behaviors ended and Tom is detected, then jump to salute Tom behavior
       if ( (state.getStartDemoAction().getIsExecuting() ||
             state.getEndScanAction().getIsExecuting() ||
-            state.getEndScanAction().getIsExecuting() ||
             state.getEndPushDoorAction().getIsExecuting() ||
             state.getEndPullDoorAction().getIsExecuting() ||
             state.getEndTrashCanAction().getIsExecuting() ||
