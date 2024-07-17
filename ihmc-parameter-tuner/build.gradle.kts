@@ -23,7 +23,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 
-   var javaFXVersion = "17.0.2"
+   var javaFXVersion = "17.0.9"
    api(ihmc.javaFXModule("base", javaFXVersion))
    api(ihmc.javaFXModule("controls", javaFXVersion))
    api(ihmc.javaFXModule("graphics", javaFXVersion))
