@@ -22,7 +22,6 @@ import java.util.HashMap;
  */
 public class RDXGlobalHeightMapGraphic implements RenderableProvider
 {
-   // FIXME turn into an int map using the lattice from the global height map tile structure
    private final IntMap<RDXHeightMapGraphicNew> globalMapRenderables = new IntMap<>();
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -33,34 +32,9 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
          mapRenderables.update();
    }
 
-   //   public void generateMeshesAsync(GlobalMapCellMap globalMapCellMap)
-   //   {
-   //      executorService.clearQueueAndExecute(() -> generateMeshes(globalMapCellMap));
-   //   }
-   //
-   //   public void generateMeshes(GlobalMapCellMap globalMapCellMap)
-   //   {
-   //      Collection<GlobalMapCellEntry> globalOccupiedMapCells = new ArrayList<>();
-   //      globalOccupiedMapCells = globalMapCellMap.getGlobalMapCells();
-   //
-   //      for (GlobalMapCellEntry globalMapCellEntry : globalOccupiedMapCells)
-   //      {
-   //         GlobalMapTile globalMapTile = new GlobalMapTile(globalMapCellEntry.getResolution(), globalMapCellEntry.getXIndex(), globalMapCellEntry.getYIndex());
-   //         globalMapTile.setHeightAt(0, globalMapCellEntry.getCellHeight());
-   //
-   //         RDXHeightMapGraphicNew graphic =  getOrCreateHeightMapGraphic(globalMapTile);
-   //
-   //         graphic.generateMeshesGlobal(globalMapTile);
-   //      }
-   //   }
-
    public void generateMeshesAsync(HeightMapMessage heightMapMessage, int tileKey)
    {
-//      RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
-//      heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
 
-
-      // TODO figure out how to calculate the tile key from the ehight map message
       RDXHeightMapGraphicNew graphic = getOrCreateHeightMapGraphic(tileKey);
       graphic.generateMeshesAsync(heightMapMessage);
    }

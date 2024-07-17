@@ -98,12 +98,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE, this::acceptGlobalMapTileMessage);
    }
 
-   public void setupForGlobalHeightTileMessage(ROS2PublishSubscribeAPI ros2)
-   {
-      this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP, this::acceptGlobalMapMessage);
-   }
-
    @Override
    public void create()
    {

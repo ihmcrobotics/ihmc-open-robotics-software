@@ -32,12 +32,4 @@ public class GlobalMapTile extends HeightMapData
       return centerY;
    }
 
-   public HeightMapData getHeightMapDataForPublishing()
-   {
-//      HeightMapData heightMapDataForPublishing = new HeightMapData(getGridResolutionXY(),
-//                                                                   getGridSizeXY(), getGridCenter().getX(), getGridCenter().getY());
-//
-//      return heightMapDataForPublishing;
-      return this;
-   }
 }

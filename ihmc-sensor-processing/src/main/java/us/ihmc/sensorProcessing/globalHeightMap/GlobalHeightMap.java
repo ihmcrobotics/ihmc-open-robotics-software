@@ -60,10 +60,3 @@ public class GlobalHeightMap
    }
 }
 
-//# File: GlobalHeightMap.msg
-//float64 grid_resolution_xy   # Resolution of the grid in XY plane
-//float64 grid_size_xy         # Size of the grid in XY plane
-//float64 grid_center_x        # X coordinate of the grid center
-//float64 grid_center_y        # Y coordinate of the grid center
-//float64[] heights            # Array of height values for each cell in the grid
-

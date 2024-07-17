@@ -72,23 +72,6 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
                      heightMapMessage.getEstimatedGroundHeight());
    }
 
-   public void generateMeshesGlobal(GlobalMapTile globalMapTile)
-   {
-      IntToDoubleFunction heightsProvider = globalMapTile::getHeight;
-      IntFunction<Integer> keysProvider = globalMapTile::getKey;
-
-
-      List<RDXMultiColorMeshBuilder> meshBuilders = generateHeightCells(heightsProvider,
-                                                                        keysProvider,
-                                                                        1,
-                                                                        2,
-                                                                        globalMapTile.getGridSizeXY(),
-                                                                        globalMapTile.getCenterX(),
-                                                                        globalMapTile.getCenterY(),
-                                                                        globalMapTile.getHeight(0));
-      latestMeshBuilder.set(meshBuilders);
-   }
-
    private void generateMeshes(IntToDoubleFunction heightsProvider,
                                IntFunction<Integer> keysProvider,
                                int numberOfOccupiedCells,
