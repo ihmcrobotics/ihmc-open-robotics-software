@@ -491,7 +491,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.areFramesInWorld())
       {
-         if (definition.getIsManuallyPlaced())
+         if (definition.getIsManuallyPlaced() && (state.getIsNextForExecution() || getSelected()))
          {
             for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
             {

@@ -177,6 +177,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                {
                   executeAfterActionName = actionStateToCompare.getDefinition().getName();
                   definition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
+                  break;
                }
             }
          }

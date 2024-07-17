@@ -51,7 +51,7 @@ public class RDXSceneGraphTools
       }
       else if (sceneNodeToCopy instanceof DoorNode doorNode)
       {
-         return new RDXDoorNode(doorNode, labels);
+         return new RDXDoorNode(doorNode);
       }
       else if (sceneNodeToCopy instanceof TrashCanNode trashCanNode)
       {
