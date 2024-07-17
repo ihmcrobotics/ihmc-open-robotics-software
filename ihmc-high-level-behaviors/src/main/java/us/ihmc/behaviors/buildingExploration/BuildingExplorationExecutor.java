@@ -108,13 +108,22 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          {
             if (nodeName.startsWith("tom"))
             {
-               tomDetected = true;
-               state.getActionSequence().setConcurrencyEnabled(false);
-               state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
-               doorTraversed.put("First", false);
-               doorTraversed.put("A", false);
-               doorTraversed.put("B", false);
-               break;
+               RigidBodyTransform transformTomToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
+                                                                                   .get(nodeName)
+                                                                                   .getNodeFrame()
+                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                          .getMidFeetZUpFrame());
+               LogTools.info("Transform tom node - midFeetZUp {}", transformTomToRobotMidFeetFrame.getTranslation().norm());
+               if (transformTomToRobotMidFeetFrame.getTranslation().norm() < 2.5)
+               {
+                  tomDetected = true;
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+                  doorTraversed.put("First", false);
+                  doorTraversed.put("A", false);
+                  doorTraversed.put("B", false);
+                  break;
+               }
             }
             else
             {
@@ -189,10 +198,19 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             {
                if (nodeName.startsWith("trash"))
                {
-                  state.getActionSequence().setConcurrencyEnabled(false);
-                  state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
-                  isTrashCanPresent = true;
-                  break;
+                  RigidBodyTransform transformTrashCanToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
+                                                                                      .get(nodeName)
+                                                                                      .getNodeFrame()
+                                                                                      .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                             .getMidFeetZUpFrame());
+                  LogTools.info("Transform trash_can node - midFeetZUp {}", transformTrashCanToRobotMidFeetFrame.getTranslation().norm());
+                  if (transformTrashCanToRobotMidFeetFrame.getTranslation().norm() < 1.0)
+                  {
+                     state.getActionSequence().setConcurrencyEnabled(false);
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                     isTrashCanPresent = true;
+                     break;
+                  }
                }
             }
             if (!isTrashCanPresent)
@@ -229,10 +247,19 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             {
                if (nodeName.startsWith("trash"))
                {
-                  state.getActionSequence().setConcurrencyEnabled(false);
-                  state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
-                  isTrashCanPresent = true;
-                  break;
+                  RigidBodyTransform transformTrashCanToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
+                                                                                   .get(nodeName)
+                                                                                   .getNodeFrame()
+                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                          .getMidFeetZUpFrame());
+                  LogTools.info("Transform trash_can node - midFeetZUp {}", transformTrashCanToRobotMidFeetFrame.getTranslation().norm());
+                  if (transformTrashCanToRobotMidFeetFrame.getTranslation().norm() < 1.5)
+                  {
+                     state.getActionSequence().setConcurrencyEnabled(false);
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
+                     isTrashCanPresent = true;
+                     break;
+                  }
                }
             }
             if (!isTrashCanPresent)
@@ -293,7 +320,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                                                                                    .getNodeFrame()
                                                                                    .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
                                                                                                                           .getMidFeetZUpFrame());
-                  LogTools.info("Transform Table node - midFeetZUp {}", transformTableToRobotMidFeetFrame.getTranslationY());
+                  LogTools.info("Transform table node - midFeetZUp {}", transformTableToRobotMidFeetFrame.getTranslationY());
                   // TABLE RIGHT or LEFT according to where the table is
                   if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
                   {
@@ -349,6 +376,11 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          doorTraversed.put("First", false);
          doorTraversed.put("A", false);
          doorTraversed.put("B", false);
+         tomDetected = false;
+      }
+
+      if (state.getEndDemoAction().getIsExecuting())
+      {
          tomDetected = false;
       }
    }
