@@ -111,7 +111,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.getCurrentPose().getValue().set(syncedChestPose);
+         state.getCurrentPose().accessValue().set(syncedChestPose);
          state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
 
          if (meetsDesiredCompletionCriteria)

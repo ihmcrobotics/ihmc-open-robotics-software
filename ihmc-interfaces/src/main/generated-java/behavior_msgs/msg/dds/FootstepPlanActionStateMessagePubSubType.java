@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1a9f78e39e886450df19270e876d4d4d8b7bd3b23de81a762d9a9783e360586a";
+   		return "9c1addd6c15e3cb00da2d63434167e5bd518d09fcd37135f0422864e4a56bfd9";
    }
    
    @Override
@@ -77,6 +77,9 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -124,6 +127,11 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentRightFootPose(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getPreviewFootsteps().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getCdrSerializedSize(data.getPreviewFootsteps().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -153,6 +161,10 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentLeftFootPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentRightFootPose(), cdr);
+      if(data.getPreviewFootsteps().size() <= 50)
+      cdr.write_type_e(data.getPreviewFootsteps());else
+          throw new RuntimeException("preview_footsteps field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -171,6 +183,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_e(data.getDesiredRightFootsteps());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentLeftFootPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentRightFootPose(), cdr);	
+      cdr.read_type_e(data.getPreviewFootsteps());	
 
    }
 
@@ -193,6 +206,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_a("current_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentRightFootPose());
 
+      ser.write_type_e("preview_footsteps", data.getPreviewFootsteps());
    }
 
    @Override
@@ -214,6 +228,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.read_type_a("current_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentRightFootPose());
 
+      ser.read_type_e("preview_footsteps", data.getPreviewFootsteps());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionStateMessage dest)

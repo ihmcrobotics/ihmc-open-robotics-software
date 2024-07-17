@@ -2,14 +2,16 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
-import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
-import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
-import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
+import us.ihmc.communication.crdt.CRDTStatusEnumField;
+import us.ihmc.communication.crdt.CRDTStatusFootstepList;
+import us.ihmc.communication.crdt.CRDTStatusInteger;
+import us.ihmc.communication.crdt.CRDTStatusPose3D;
+import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,39 +27,45 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
-   private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
+   private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
    private ReferenceFrame parentFrame;
-   private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
-   private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
-   private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
-   private final SideDependentList<CRDTUnidirectionalPose3D> currentFootPoses = new SideDependentList<>();
-   private final CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> executionState;
+   private final CRDTStatusInteger totalNumberOfFootsteps;
+   private final CRDTStatusInteger numberOfIncompleteFootsteps;
+   private final SideDependentList<CRDTStatusSE3Trajectory> desiredFootPoses = new SideDependentList<>();
+   private final SideDependentList<CRDTStatusPose3D> currentFootPoses = new SideDependentList<>();
+   private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
+   private final CRDTStatusFootstepList previewFootsteps;
 
-   public FootstepPlanActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public FootstepPlanActionState(long id,
+                                  CRDTInfo crdtInfo,
+                                  WorkspaceResourceDirectory saveFileDirectory,
+                                  ReferenceFrameLibrary referenceFrameLibrary,
+                                  DRCRobotModel robotModel)
    {
-      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
 
       definition = getDefinition();
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
+      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());
-      footsteps = new RecyclingArrayList<>(() ->
+      manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              definition.getCRDTParentFrameName(),
-                                             RecyclingArrayListTools.getUnsafe(definition.getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
-      totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
-      numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+                                             RecyclingArrayListTools.getUnsafe(definition.getManuallyPlacedFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
+      totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
+      numberOfIncompleteFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       for (RobotSide side : RobotSide.values)
       {
-         desiredFootPoses.set(side, new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo));
-         currentFootPoses.set(side, new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
+         desiredFootPoses.set(side, new CRDTStatusSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo));
+         currentFootPoses.set(side, new CRDTStatusPose3D(ROS2ActorDesignation.ROBOT, crdtInfo));
       }
-      executionState = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+      executionState = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, FootstepPlanActionExecutionState.PLANNING_SUCCEEDED);
+      previewFootsteps = new CRDTStatusFootstepList(ROS2ActorDesignation.ROBOT, crdtInfo);
    }
 
    @Override
@@ -72,12 +80,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       goalFrame.update(definition.getParentFrameName());
       parentFrame = goalFrame.getReferenceFrame().getParent();
 
-      RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps().getSize());
+      RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, definition.getManuallyPlacedFootsteps().getSize());
 
-      for (int i = 0; i < footsteps.size(); i++)
+      for (int i = 0; i < manuallyPlacedFootsteps.size(); i++)
       {
-         footsteps.get(i).setIndex(i);
-         footsteps.get(i).update();
+         manuallyPlacedFootsteps.get(i).setIndex(i);
+         manuallyPlacedFootsteps.get(i).update();
       }
    }
 
@@ -96,6 +104,22 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       definition.getGoalFootstepToGoalYaw(side).setValue(goalFootstepToGoalTransforms.get(side).getRotation().getYaw());
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = super.hasStatus();
+      hasStatus |= totalNumberOfFootsteps.pollHasStatus();
+      hasStatus |= numberOfIncompleteFootsteps.pollHasStatus();
+      for (RobotSide side : RobotSide.values)
+      {
+         hasStatus |= desiredFootPoses.get(side).pollHasStatus();
+         hasStatus |= currentFootPoses.get(side).pollHasStatus();
+      }
+      hasStatus |= executionState.pollHasStatus();
+      hasStatus |= previewFootsteps.pollHasStatus();
+      return hasStatus;
+   }
+
    public void toMessage(FootstepPlanActionStateMessage message)
    {
       definition.toMessage(message.getDefinition());
@@ -111,12 +135,13 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
 
       message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepState footstep : footsteps)
+      for (FootstepPlanActionFootstepState footstep : manuallyPlacedFootsteps)
       {
          footstep.toMessage(message.getFootsteps().add());
       }
 
       message.setExecutionState(executionState.toMessage().toByte());
+      previewFootsteps.toMessage(message.getPreviewFootsteps());
    }
 
    public void fromMessage(FootstepPlanActionStateMessage message)
@@ -133,13 +158,14 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose());
       currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
 
-      footsteps.clear();
+      manuallyPlacedFootsteps.clear();
       for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
       {
-         footsteps.add().fromMessage(footstep);
+         manuallyPlacedFootsteps.add().fromMessage(footstep);
       }
 
       executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
+      previewFootsteps.fromMessage(message.getPreviewFootsteps());
    }
 
    public CRDTBidirectionalRigidBodyTransform getGoalToParentTransform()
@@ -167,9 +193,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       return goalFrame;
    }
 
-   public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
+   public RecyclingArrayList<FootstepPlanActionFootstepState> getManuallyPlacedFootsteps()
    {
-      return footsteps;
+      return manuallyPlacedFootsteps;
    }
 
    public int getTotalNumberOfFootsteps()
@@ -192,18 +218,23 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
    }
 
-   public SideDependentList<CRDTUnidirectionalSE3Trajectory> getDesiredFootPoses()
+   public SideDependentList<CRDTStatusSE3Trajectory> getDesiredFootPoses()
    {
       return desiredFootPoses;
    }
 
-   public SideDependentList<CRDTUnidirectionalPose3D> getCurrentFootPoses()
+   public SideDependentList<CRDTStatusPose3D> getCurrentFootPoses()
    {
       return currentFootPoses;
    }
 
-   public CRDTUnidirectionalEnumField<FootstepPlanActionExecutionState> getExecutionState()
+   public CRDTStatusEnumField<FootstepPlanActionExecutionState> getExecutionState()
    {
       return executionState;
+   }
+
+   public CRDTStatusFootstepList getPreviewFootsteps()
+   {
+      return previewFootsteps;
    }
 }

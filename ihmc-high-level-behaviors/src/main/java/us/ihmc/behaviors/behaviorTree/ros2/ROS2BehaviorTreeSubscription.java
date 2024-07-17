@@ -26,6 +26,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
+   private long outOfOrderCount = 0;
    private int numberOfOnRobotNodes = 0;
    private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
    private final Notification recievedMessageNotification = new Notification();
@@ -48,13 +49,23 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
             messageRecievedCallback.run();
          }
 
-         long nextSequenceID = behaviorTreeStateMessage.getSequenceId();
-         if (previousSequenceID > -1)
+         long receivedSequenceID = behaviorTreeStateMessage.getSequenceId();
+         long expectedSequenceID = previousSequenceID + 1;
+         long difference = receivedSequenceID - expectedSequenceID;
+
+         if (Math.abs(difference) < ROS2BehaviorTreeState.SYNC_FREQUENCY) // Account for restarts
          {
-            long expectedSequenceID = previousSequenceID + 1;
-            messageDropCount += nextSequenceID - expectedSequenceID;
+            if (difference > 0)
+            {
+               messageDropCount += difference;
+            }
+            else if (difference < 0)
+            {
+               outOfOrderCount -= difference;
+            }
          }
-         previousSequenceID = nextSequenceID;
+
+         previousSequenceID = receivedSequenceID;
 
          recievedMessageNotification.set();
       });
@@ -115,13 +126,16 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       T localNode = (T) behaviorTreeState.getTreeRebuilder().getReplacementNode(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
-         Class<?> nodeTypeClass = BehaviorTreeDefinitionRegistry.getNodeStateClass(subscriptionNode.getType());
-         LogTools.info("Replicating node: {}:{} Actor: {}",
+         LogTools.info("Replicating node: %s:%d (%s) Actor: %s".formatted(
                        subscriptionNode.getBehaviorTreeNodeDefinitionMessage().getName(),
                        nodeID,
-                       behaviorTreeState.getCRDTInfo().getActorDesignation().name());
+                       subscriptionNode.getType().getSimpleName(),
+                       behaviorTreeState.getCRDTInfo().getActorDesignation().name()));
          localNode = (T) behaviorTreeState.getNodeStateBuilder()
-                                          .createNode(nodeTypeClass, nodeID, behaviorTreeState.getCRDTInfo(), behaviorTreeState.getSaveFileDirectory());
+                                          .createNode(subscriptionNode.getType(),
+                                                      nodeID,
+                                                      behaviorTreeState.getCRDTInfo(),
+                                                      behaviorTreeState.getSaveFileDirectory());
       }
 
       return localNode;
@@ -144,7 +158,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
       {
-         anAncestorIsFrozen |= localNode.getState().isFrozen();
+         anAncestorIsFrozen |= localNode.getDefinition().isFrozen();
 
          T localChildNode = null;
          if (anAncestorIsFrozen)
@@ -208,9 +222,19 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
+   public long getPreviousSequenceID()
+   {
+      return previousSequenceID;
+   }
+
    public long getMessageDropCount()
    {
-      return messageDropCount;
+      return messageDropCount - outOfOrderCount;
+   }
+
+   public long getOutOfOrderCount()
+   {
+      return outOfOrderCount;
    }
 
    public int getNumberOfOnRobotNodes()

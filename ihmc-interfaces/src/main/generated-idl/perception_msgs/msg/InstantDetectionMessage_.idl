@@ -1,0 +1,49 @@
+#ifndef __perception_msgs__msg__InstantDetectionMessage__idl__
+#define __perception_msgs__msg__InstantDetectionMessage__idl__
+
+#include "geometry_msgs/msg/./Point32_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
+#include "perception_msgs/msg/./ImageMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message representing an InstantDetection of any type.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::InstantDetectionMessage_")
+      struct InstantDetectionMessage
+      {
+        /**
+         * Standard InstantDetection fields:
+         */
+        string detected_object_class;
+        string detected_object_name;
+        double confidence;
+        geometry_msgs::msg::dds::Pose object_pose;
+        ihmc_common_msgs::msg::dds::InstantMessage detection_time;
+        ihmc_common_msgs::msg::dds::UUIDMessage persistent_detection_id;
+        /**
+         * YOLOv8InstantDetection fields:
+         */
+        perception_msgs::msg::dds::ImageMessage yolo_color_image;
+        perception_msgs::msg::dds::ImageMessage yolo_depth_image;
+        perception_msgs::msg::dds::ImageMessage yolo_object_mask;
+        sequence<geometry_msgs::msg::dds::Point32, 511> yolo_object_point_cloud;
+        /**
+         * CenterPoseInstantDetection fields:
+         */
+        geometry_msgs::msg::dds::Point center_pose_bounding_box_2d_vertices[8];
+        geometry_msgs::msg::dds::Point center_pose_bounding_box_vertices[8];
+      };
+    };
+  };
+};
+
+#endif

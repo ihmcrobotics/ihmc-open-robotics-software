@@ -40,6 +40,13 @@ public class ReferenceFrameMissingTools
                                                                              transformToParent);
    }
 
+   public static ReferenceFrame constructFrameWithChangingTransformToParent(ReferenceFrame parentFrame,
+                                                                            RigidBodyTransformReadOnly transformToParent,
+                                                                            String callingClassName)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(computeFrameName(callingClassName), parentFrame, transformToParent);
+   }
+
    public static ReferenceFrame constructARootFrame()
    {
       return ReferenceFrameTools.constructARootFrame(computeFrameName(getCallingClassName()));

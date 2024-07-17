@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4742f4e1db2b627aff97f49f7d618a7716c5ed194c7de39c2418c88170fb2eda";
+   		return "dce1bb69b1de32beb340515f72a9ae797c500a00cdb8187c84878c3494610d88";
    }
    
    @Override
@@ -82,6 +82,12 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -138,6 +144,14 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.getCdrSerializedSize(data.getPlannerParameters(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -175,6 +189,11 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getRightGoalFootYawToGizmo());
 
+      cdr.write_type_9(data.getPlannerInitialStanceSide());
+
+      cdr.write_type_7(data.getPlannerUseTurnWalkTurn());
+
+      ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.write(data.getPlannerParameters(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -204,6 +223,11 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       	
       data.setRightGoalFootYawToGizmo(cdr.read_type_6());
       	
+      data.setPlannerInitialStanceSide(cdr.read_type_9());
+      	
+      data.setPlannerUseTurnWalkTurn(cdr.read_type_7());
+      	
+      ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.read(data.getPlannerParameters(), cdr);	
 
    }
 
@@ -228,6 +252,10 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("right_goal_foot_x_to_gizmo", data.getRightGoalFootXToGizmo());
       ser.write_type_6("right_goal_foot_y_to_gizmo", data.getRightGoalFootYToGizmo());
       ser.write_type_6("right_goal_foot_yaw_to_gizmo", data.getRightGoalFootYawToGizmo());
+      ser.write_type_9("planner_initial_stance_side", data.getPlannerInitialStanceSide());
+      ser.write_type_7("planner_use_turn_walk_turn", data.getPlannerUseTurnWalkTurn());
+      ser.write_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType(), data.getPlannerParameters());
+
    }
 
    @Override
@@ -251,6 +279,10 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setRightGoalFootXToGizmo(ser.read_type_6("right_goal_foot_x_to_gizmo"));
       data.setRightGoalFootYToGizmo(ser.read_type_6("right_goal_foot_y_to_gizmo"));
       data.setRightGoalFootYawToGizmo(ser.read_type_6("right_goal_foot_yaw_to_gizmo"));
+      data.setPlannerInitialStanceSide(ser.read_type_9("planner_initial_stance_side"));
+      data.setPlannerUseTurnWalkTurn(ser.read_type_7("planner_use_turn_walk_turn"));
+      ser.read_type_a("planner_parameters", new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType(), data.getPlannerParameters());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage src, behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage dest)

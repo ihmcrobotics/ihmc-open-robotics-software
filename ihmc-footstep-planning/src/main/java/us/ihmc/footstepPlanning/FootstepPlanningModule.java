@@ -158,6 +158,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
    {
+      return handleRequest(request, false);
+   }
+
+   public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request, boolean quiet)
+   {
       if (isPlanning.getAndSet(true))
       {
          LogTools.info("Received planning request packet but planner is currently running");
@@ -165,7 +170,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else
       {
-         LogTools.info("Handling footstep planner request...");
+         if (!quiet)
+            LogTools.info("Handling footstep planner request...");
       }
 
       stopwatch.start();

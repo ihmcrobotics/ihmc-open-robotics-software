@@ -22,19 +22,11 @@ module perception_msgs
          * Detectable scene node information
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
-        /**
-         * YOLO parameters
-         */
-        long mask_erosion_kernel_radius;
-        double outlier_filter_threshold;
-        float detection_acceptance_threshold;
-        /**
-         * Detection information
-         */
-        string detection_class;
         double confidence;
-        sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
-        geometry_msgs::msg::dds::Point32 object_centroid;
+        sequence<geometry_msgs::msg::dds::Point32, 511> object_point_cloud;
+        /**
+         * YOLOv8Node data
+         */
         geometry_msgs::msg::dds::Transform centroid_to_object_transform;
         geometry_msgs::msg::dds::Pose object_pose;
         geometry_msgs::msg::dds::Pose filtered_object_pose;

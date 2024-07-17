@@ -31,10 +31,10 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
-      footToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
+      footToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
    }
 
    @Override
@@ -45,6 +45,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       jsonNode.put("parentFrame", parentFrameName.getValue());
+      JSONTools.toJSON(jsonNode, footToParentTransform.getValueReadOnly());
    }
 
    @Override
@@ -55,7 +56,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, footToParentTransform.getValue());
+      JSONTools.toEuclid(jsonNode, footToParentTransform.accessValue());
    }
 
    @Override
@@ -77,7 +78,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(onDiskSide);
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       parentFrameName.setValue(onDiskParentFrameName);
-      footToParentTransform.getValue().set(onDiskFootToParentTransform);
+      footToParentTransform.accessValue().set(onDiskFootToParentTransform);
    }
 
    @Override
@@ -115,7 +116,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
    public RotationMatrixBasics getRotation()
    {
-      return footToParentTransform.getValue().getRotation();
+      return footToParentTransform.accessValue().getRotation();
    }
 
    @Override
