@@ -349,15 +349,28 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
          }
 
-         //// USING THIS TO EARLY TERMINATION FOR TESTING
+         // After PUSH DOOR
          if (state.getEndPushDoorAction().getIsExecuting())
+         {
+            // from door B - WALK to COUCH
+            if (doorTraversed.get("B"))
+            {
+               state.getActionSequence().setConcurrencyEnabled(false);
+               state.getActionSequence().setExecutionNextIndex(state.getStartCouchAction().getActionIndex());
+            }
+            else // from door A - WALK to DOOR B
+            {
+               state.getActionSequence().setConcurrencyEnabled(false);
+               state.getActionSequence().setExecutionNextIndex(state.getWalkDoorBAction().getActionIndex());
+            }
+         }
+
+         // After COUCH - END OF DEMO
+         if (state.getEndCouchAction().getIsExecuting())
          {
             state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getEndDemoAction().getActionIndex());
          }
-         // WALK to DOOR B after PUSH DOOR A
-         // WALK TO COUCH after PUSH DOOR B
-         // COUCH after WALK to COUCH
       }
 
       // skip salute if it's next for execution and tom is not detected
@@ -373,6 +386,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
       if (state.getEndDemoAction().getIsExecuting())
       {
          tomDetected = false;
+         state.getActionSequence().setConcurrencyEnabled(true);
       }
    }
 
