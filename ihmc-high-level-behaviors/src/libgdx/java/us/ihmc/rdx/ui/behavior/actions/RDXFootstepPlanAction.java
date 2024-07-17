@@ -530,17 +530,27 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      FramePoint3D frameStancePoint = new FramePoint3D(state.getParentFrame(), definition.getGoalStancePoint().getValueReadOnly());
-      FramePoint3D frameFocalPoint = new FramePoint3D(state.getParentFrame(), definition.getGoalFocalPoint().getValueReadOnly());
-
       definition.setParentFrameName(newParentFrameName);
       // Freeze to prevent the frame from glitching when changing frames
       state.getGoalFrame().changeFrame(newParentFrameName, state.getGoalToParentTransform().getValueAndFreeze());
 
-      // Keep the points in the same place w.r.t common ancestor frames
       ReferenceFrame newParent = state.getGoalFrame().getReferenceFrame().getParent();
-      frameStancePoint.changeFrame(newParent);
-      frameFocalPoint.changeFrame(newParent);
+      FramePoint3D frameStancePoint;
+      FramePoint3D frameFocalPoint;
+      if (newParent.getRootFrame() == state.getParentFrame().getRootFrame())
+      {
+         // Keep the points in the same place w.r.t common ancestor frames
+         frameStancePoint = new FramePoint3D(state.getParentFrame(), definition.getGoalStancePoint().getValueReadOnly());
+         frameFocalPoint = new FramePoint3D(state.getParentFrame(), definition.getGoalFocalPoint().getValueReadOnly());
+         frameStancePoint.changeFrame(newParent);
+         frameFocalPoint.changeFrame(newParent);
+      }
+      else // The frame was detached so we keep the same transform to the new frame
+      {
+         frameStancePoint = new FramePoint3D(newParent, definition.getGoalStancePoint().getValueReadOnly());
+         frameFocalPoint = new FramePoint3D(newParent, definition.getGoalFocalPoint().getValueReadOnly());
+      }
+
       definition.getGoalStancePoint().accessValue().set(frameStancePoint);
       definition.getGoalFocalPoint().accessValue().set(frameFocalPoint);
       goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
