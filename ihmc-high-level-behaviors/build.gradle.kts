@@ -40,10 +40,10 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-definition:17-0.26.0")
    api("us.ihmc:mecano-graphviz:17-0.18.1")
-   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
-   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
-   api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
-   api("com.badlogicgames.gdx:gdx-bullet-platform:1.11.0:natives-desktop")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.3")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3")
+   api("com.badlogicgames.gdx:gdx-bullet:1.12.1")
+   api("com.badlogicgames.gdx:gdx-bullet-platform:1.12.1:natives-desktop")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
 }
 

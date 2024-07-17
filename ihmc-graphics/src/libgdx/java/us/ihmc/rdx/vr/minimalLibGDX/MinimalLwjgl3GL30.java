@@ -49,6 +49,12 @@ public class MinimalLwjgl3GL30 extends MinimalLwjgl3GL20 implements com.badlogic
    }
 
    @Override
+   public void glTexImage2D(int target, int level, int internalformat, int width, int height, int border, int format, int type, int offset)
+   {
+      GL12.glTexImage2D(target, level, internalformat, width, height, border, format, type, offset);
+   }
+
+   @Override
    public void glTexImage3D(int target, int level, int internalformat, int width, int height, int depth, int border, int format, int type, Buffer pixels)
    {
       if (pixels == null)
@@ -72,6 +78,12 @@ public class MinimalLwjgl3GL30 extends MinimalLwjgl3GL20 implements com.badlogic
    public void glTexImage3D(int target, int level, int internalformat, int width, int height, int depth, int border, int format, int type, int offset)
    {
       GL12.glTexImage3D(target, level, internalformat, width, height, depth, border, format, type, offset);
+   }
+
+   @Override
+   public void glTexSubImage2D(int target, int level, int xoffset, int yoffset, int width, int height, int format, int type, int offset)
+   {
+      GL12.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, offset);
    }
 
    @Override
