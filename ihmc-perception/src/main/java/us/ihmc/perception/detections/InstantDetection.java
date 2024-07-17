@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -28,21 +29,22 @@ public class InstantDetection
    /** Colloquial name of the detected object (e.g. "Shoe", "Door Lever", etc)*/
    private final String detectedObjectName;
    private final double confidence;
-   private final Pose3D pose;
+   /** The pose of the object at the time of detection **/
+   private final Pose3DReadOnly pose;
    private final Instant detectionTime;
    private UUID persistentDetectionID = PersistentDetection.NULL_DETECTION_ID;
 
-   public InstantDetection(String detectedObjectClass, double confidence, Pose3D pose, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, double confidence, Pose3DReadOnly currentPoseToCopy, Instant detectionTime)
    {
-      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime);
+      this(detectedObjectClass, detectedObjectClass, confidence, currentPoseToCopy, detectionTime);
    }
 
-   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3D pose, Instant detectionTime)
+   public InstantDetection(String detectedObjectClass, String detectedObjectName, double confidence, Pose3DReadOnly currentPoseToCopy, Instant detectionTime)
    {
       this.detectedObjectClass = detectedObjectClass;
       this.detectedObjectName = detectedObjectName;
       this.confidence = confidence;
-      this.pose = pose;
+      this.pose = new Pose3D(currentPoseToCopy);
       this.detectionTime = detectionTime;
    }
 
@@ -61,7 +63,7 @@ public class InstantDetection
       return confidence;
    }
 
-   public Pose3D getPose()
+   public Pose3DReadOnly getPose()
    {
       return pose;
    }
@@ -99,12 +101,12 @@ public class InstantDetection
 
       if (other instanceof InstantDetection otherDetection)
       {
-         return detectedObjectClass.equals(otherDetection.detectedObjectClass)
+         return detectionTime.equals(otherDetection.detectionTime)
+                && persistentDetectionID.equals(otherDetection.persistentDetectionID)
+                && detectedObjectClass.equals(otherDetection.detectedObjectClass)
                 && detectedObjectName.equals(otherDetection.detectedObjectName)
                 && MathTools.epsilonEquals(confidence, otherDetection.confidence, EPSILON)
-                && pose.epsilonEquals(otherDetection.pose, EPSILON)
-                && detectionTime.equals(otherDetection.detectionTime)
-                && persistentDetectionID.equals(otherDetection.persistentDetectionID);
+                && pose.epsilonEquals(otherDetection.pose, EPSILON);
       }
       else
          return false;

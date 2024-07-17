@@ -95,8 +95,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             if (yoloDoorHandleNode != null)
             {
                double openedDoorHandleDistanceFromStart = getDefinition().getOpenedDoorHandleDistanceFromStart().getValue();
-               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransform().getTranslation()
-                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransform().getTranslation());
+               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransformReadOnly().getTranslation()
+                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransformReadOnly().getTranslation());
                state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
                if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
                {
