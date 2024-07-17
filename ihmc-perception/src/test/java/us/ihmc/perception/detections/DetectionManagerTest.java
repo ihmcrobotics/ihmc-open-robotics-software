@@ -11,8 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 
 import java.time.Duration;
 import java.time.Instant;

@@ -124,20 +124,26 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
          }
 
          poseGizmo.getPoseGizmo().update();
-         highlightModel.setPose(graphicFrame.getReferenceFrame());
+
+         if (!getSelected())
+            poseGizmo.setSelected(false);
 
          if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
             getDefinition().getPelvisToParentTransform().accessValue();
          }
 
-         if (poseGizmo.isSelected() || isMouseHovering)
+         if (state.getIsNextForExecution() || getSelected())
          {
-            highlightModel.setTransparency(0.7);
-         }
-         else
-         {
-            highlightModel.setTransparency(0.5);
+            highlightModel.setPose(graphicFrame.getReferenceFrame());
+            if (poseGizmo.isSelected() || isMouseHovering)
+            {
+               highlightModel.setTransparency(0.7);
+            }
+            else
+            {
+               highlightModel.setTransparency(0.5);
+            }
          }
 
          // compute transform variation from previous pose
@@ -215,7 +221,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getPelvisFrame().isChildOfWorld())
+      if (state.getPelvisFrame().isChildOfWorld() && (state.getIsNextForExecution() || getSelected()))
       {
          highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);

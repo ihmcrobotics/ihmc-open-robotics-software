@@ -27,7 +27,7 @@ import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
@@ -402,7 +402,7 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          if (yoloZEDDemandNode.isDemanded())
-            yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+            yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          if (ballDetectionDemandNode.isDemanded())
             ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
@@ -435,7 +435,7 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          if (yoloRealsenseDemandNode.isDemanded())
-            yolov8DetectionExecutor.runYOLODetection(realsenseColorImage, realsenseDepthImage);
+            yolov8DetectionExecutor.runYOLODetectionOnAllModels(realsenseColorImage, realsenseDepthImage);
 
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 

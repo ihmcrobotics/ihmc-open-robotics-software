@@ -2,7 +2,7 @@ package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -20,15 +20,15 @@ public final class DoorNodeTools
    public static final String DOOR_HELPER_NODE_NAME_PREFIX = "doorStaticHandle";
 
    private static final List<String> doorOpeningMechanismDetectionNames = new ArrayList<>();
-   private static final String doorPanelDetectionName = "YOLODoorPanel";
+   private static final String doorPanelDetectionName = "door_panel";
    private static final List<String> doorComponentDetectionNames = new ArrayList<>();
 
    static
    {
-      doorOpeningMechanismDetectionNames.add("YOLODoorLever");
-      doorOpeningMechanismDetectionNames.add("YOLODoorKnob");
-      doorOpeningMechanismDetectionNames.add("YOLOPushBar");
-      doorOpeningMechanismDetectionNames.add("YOLOPullHandle");
+      doorOpeningMechanismDetectionNames.add("door_lever");
+      doorOpeningMechanismDetectionNames.add("door_knob");
+      doorOpeningMechanismDetectionNames.add("door_push_bar");
+      doorOpeningMechanismDetectionNames.add("door_pull_handle");
 
       doorComponentDetectionNames.addAll(doorOpeningMechanismDetectionNames);
       doorComponentDetectionNames.add(doorPanelDetectionName);

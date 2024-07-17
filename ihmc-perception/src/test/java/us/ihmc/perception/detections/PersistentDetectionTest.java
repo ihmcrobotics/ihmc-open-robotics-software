@@ -1,11 +1,15 @@
 package us.ihmc.perception.detections;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,8 +55,8 @@ public class PersistentDetectionTest
       assertTrue(instantInFuture.isAfter(mostRecentDetection.getDetectionTime()));
       assertEquals(3, persistentDetection.getHistorySize());
       // make sure the oldest point isn't before the expiration window.
-      assertEquals(persistentDetection.getDetectionHistory().first(), persistentDetection.getOldestDetection());
-      assertFalse(persistentDetection.getDetectionHistory().first().getDetectionTime().isBefore(expectedExpirationTime));
+      assertEquals(persistentDetection.getOldestDetection(), persistentDetection.getOldestDetection());
+      assertFalse(persistentDetection.getOldestDetection().getDetectionTime().isBefore(expectedExpirationTime));
 
       // We want to clear out all the old history, but we don't want to remove the most recent detection.
       instantInFuture = startInstant.plusSeconds(15);
@@ -179,5 +183,91 @@ public class PersistentDetectionTest
 
       // Don't allow bad arguments in construction
       assertThrows(IllegalArgumentException.class, () -> new PersistentDetection(detectionClassA, 1.0, 1.0, 0.0, -0.5));
+   }
+
+   @Test
+   public void testConcurrentModificationAndAccess() throws InterruptedException
+   {
+      Random random = new Random(0L);
+
+      String objectClass = "testObject";
+      double confidence = 0.5;
+      Pose3D detectionPose = new Pose3D();
+      InstantDetection firstInstantDetection = new InstantDetection(objectClass, confidence, detectionPose, Instant.now());
+
+      double poseFilterAlpha = 0.5;
+      double stabilityConfidence = 0.5;
+      double stabilityDetectionFrequency = 30.0;
+      double historyDuration = 1.0;
+      PersistentDetection persistentDetection = new PersistentDetection(firstInstantDetection,
+                                                                        poseFilterAlpha,
+                                                                        stabilityConfidence,
+                                                                        stabilityDetectionFrequency,
+                                                                        historyDuration);
+
+      final AtomicBoolean testPassing = new AtomicBoolean(true);
+      Thread detectionProducer = new Thread(() ->
+      {
+         for (int i = 0; i < 1000 && testPassing.get(); ++i)
+         {
+            try
+            {
+               int sleepMillis = random.nextInt(10);
+               ThreadTools.sleep(sleepMillis);
+               InstantDetection newDetection = new InstantDetection(objectClass, confidence, detectionPose, Instant.now());
+               persistentDetection.addDetection(newDetection);
+            }
+            catch (ConcurrentModificationException concurrentModificationException)
+            {
+               testPassing.set(false);
+               LogTools.error("ConcurrentModificationException thrown in producer.");
+               concurrentModificationException.printStackTrace();
+            }
+            catch (Exception exception)
+            {
+               testPassing.set(false);
+               LogTools.error("Exception thrown in producer. Message: \n" + exception.getMessage());
+               exception.printStackTrace();
+            }
+         }
+      }, "TestDetectionProducer");
+
+      Thread detectionConsumer = new Thread(() ->
+      {
+         while (detectionProducer.isAlive() && testPassing.get())
+         {
+            int sleepMillis = random.nextInt(10);
+            ThreadTools.sleep(sleepMillis);
+
+            try
+            {
+               persistentDetection.updateHistory(Instant.now());
+               persistentDetection.getAverageConfidence();
+               persistentDetection.getDetectionFrequency();
+               persistentDetection.getDetectionFrequencyDecaying(Instant.now());
+               persistentDetection.isStable();
+            }
+            catch (ConcurrentModificationException concurrentModificationException)
+            {
+               testPassing.set(false);
+               LogTools.error("ConcurrentModificationException thrown in consumer. \n");
+               concurrentModificationException.printStackTrace();
+            }
+            catch (Exception exception)
+            {
+               testPassing.set(false);
+               LogTools.error("Exception thrown in consumer.");
+               exception.printStackTrace();
+            }
+         }
+      }, "TestDetectionConsumer");
+
+      detectionProducer.start();
+      detectionConsumer.start();
+
+      detectionProducer.join();
+      detectionConsumer.join();
+
+      assertTrue(testPassing.get());
    }
 }

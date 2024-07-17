@@ -15,5 +15,6 @@ int32 erosion_kernel_radius
 
 float32 outlier_threshold
 
+# TODO: Add back?
 # List of YOLOv8DetectionClass values that YOLO should detect
-byte[<=100] target_detection_classes
+# byte[<=100] target_detection_classes
