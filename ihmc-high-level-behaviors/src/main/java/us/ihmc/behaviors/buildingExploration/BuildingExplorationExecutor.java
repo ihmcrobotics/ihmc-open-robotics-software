@@ -103,6 +103,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getEndTurnDoorBAction().getIsExecuting() ||
             state.getEndWalkCouchAction().getIsExecuting()) )
       {
+         tomDetected = false;
          for (String nodeName : sceneGraph.getNodeNameList())
          {
             if (nodeName.startsWith("tom"))
@@ -115,8 +116,13 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                doorTraversed.put("B", false);
                break;
             }
+            else
+            {
+               tomDetected |= false;
+            }
          }
       }
+      LogTools.info("{} {}", doorTraversed, tomDetected);
 
       if (!tomDetected)
       {
@@ -164,12 +170,12 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             });
          }
 
-         if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
+         if (state.getDisableDoorAction().getIsExecuting())
          {
             detectionManager.setBlockNewlyValidDetections(true);
          }
 
-         if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
+         if (state.getEnableDoorAction().getIsExecuting())
          {
             detectionManager.setBlockNewlyValidDetections(false);
          }
@@ -322,7 +328,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          if (state.getEndTableRightAction().getIsExecuting() || state.getEndTableLeftAction().getIsExecuting() )
          {
             state.getActionSequence().setConcurrencyEnabled(false);
-            state.getActionSequence().setExecutionNextIndex(state.getEndTurnDoorAAction().getActionIndex());
+            state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
          }
 
          //// USING THIS TO EARLY TERMINATION FOR TESTING
