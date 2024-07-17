@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.objects.RDXLabFloorObject;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -18,7 +19,7 @@ public class RDXPhysicsEnvironmentDemo
          @Override
          public void create()
          {
-            baseUI.create();
+            baseUI.create(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.MODEL, RDXSceneLevel.VIRTUAL);
 
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder);

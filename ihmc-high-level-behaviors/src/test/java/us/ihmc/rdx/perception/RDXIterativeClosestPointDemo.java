@@ -113,7 +113,7 @@ public class RDXIterativeClosestPointDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
+            environmentBuilder.loadEnvironment("HarderTerrain.json");
 
             // Place sensor in environment
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
