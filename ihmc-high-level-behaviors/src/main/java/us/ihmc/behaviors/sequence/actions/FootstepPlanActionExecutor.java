@@ -62,7 +62,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          TaskspaceTrajectoryTrackingErrorCalculator::new);
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
-   private final FootstepPlanningModule footstepPlanner;
+   private final FootstepPlanningModule previewFootstepPlanner = new FootstepPlanningModule();
+   private final FootstepPlanningModule footstepPlanner = new FootstepPlanningModule();
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
@@ -77,8 +78,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ROS2SyncedRobotModel syncedRobot,
                                      ControllerStatusTracker controllerStatusTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
-                                     WalkingControllerParameters walkingControllerParameters,
-                                     FootstepPlanningModule footstepPlanner)
+                                     WalkingControllerParameters walkingControllerParameters)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
 
@@ -89,7 +89,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.footstepPlanner = footstepPlanner;
    }
 
    @Override
@@ -167,8 +166,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          if (state.getIsNextForExecution())
          {
-            if (!footstepPlanningThread.isExecuting() && previewPlanningThrottler.run())
-               startFootstepPlanningAsync(true);
+            if (!footstepPlanningThread.isExecuting() && previewPlanningThrottler.run() && !footstepPlanner.isPlanning())
+               startFootstepPlanningAsync(previewFootstepPlanner);
 
             if (footstepPlanNotification.poll())
             {
@@ -232,7 +231,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                MissingThreadTools.sleepMillis(10);
             footstepPlanNotification.poll();
 
-            startFootstepPlanningAsync(false);
+            startFootstepPlanningAsync(footstepPlanner);
             state.getExecutionState().setValue(FootstepPlanActionExecutionState.FOOTSTEP_PLANNING);
          }
       }
@@ -296,8 +295,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       }
    }
 
-   private void startFootstepPlanningAsync(boolean previewPlan)
+   private void startFootstepPlanningAsync(FootstepPlanningModule footstepPlanner)
    {
+      // We are separating the preview planner and real one so they don't ever try and plan at the same time
+      boolean isPreviewPlanner = footstepPlanner == previewFootstepPlanner;
+
       for (RobotSide side : RobotSide.values)
       {
          startFootPosesForThread.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
@@ -332,11 +334,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
 
-         if (!previewPlan)
+         if (!isPreviewPlanner)
             state.getLogger().info("Planning footsteps...");
-         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, previewPlan);
+         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest, isPreviewPlanner);
          FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-         if (!previewPlan)
+         if (!isPreviewPlanner)
             state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 
          if (footstepPlan.getNumberOfSteps() < 1) // failed
@@ -365,7 +367,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             footstepPlanNotification.set(new FootstepPlan(footstepPlan)); // Copy of the output to be safe
          }
 
-         if (!previewPlan)
+         if (!isPreviewPlanner)
          {
             FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
             footstepPlannerLogger.logSession();
