@@ -195,92 +195,69 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          usedFirstMode = !usedFirstMode;
       }
 
-      if (ImGui.button(labels.get("Flex")))
-      {
-         double delay = setBothFeetDown(teleoperationParameters.getTrajectoryTime());
-         double moveDuration = 2.0;
-
-         if (usedFirstMode)
-         {
-            System.arraycopy(leftArmFlex1, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex1.length));
-            System.arraycopy(rightArmFlex1, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex1.length));
-         }
-         else
-         {
-            System.arraycopy(leftArmFlex2, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex2.length));
-            System.arraycopy(rightArmFlex2, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex2.length));
-
-            pelvisOrientation.setToPitchOrientation(Math.toRadians(0));
-            pelvisPosition.setZ(1.0);
-         }
-         armsConfiguration.put(RobotSide.LEFT, leftArm);
-         armsConfiguration.put(RobotSide.RIGHT, rightArm);
-
-         for (RobotSide robotSide : RobotSide.values)
-            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), moveDuration, delay);
-         appendChestOrientationToPublish(chestOrientation, moveDuration, delay);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, moveDuration, delay);
-         publishPoses();
-         usedFirstMode = !usedFirstMode;
-      }
+//      if (ImGui.button(labels.get("Flex")))
+//      {
+//         double delay = setBothFeetDown(teleoperationParameters.getTrajectoryTime());
+//         double moveDuration = 2.0;
+//
+//         if (usedFirstMode)
+//         {
+//            System.arraycopy(leftArmFlex1, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex1.length));
+//            System.arraycopy(rightArmFlex1, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex1.length));
+//         }
+//         else
+//         {
+//            System.arraycopy(leftArmFlex2, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex2.length));
+//            System.arraycopy(rightArmFlex2, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex2.length));
+//
+//            pelvisOrientation.setToPitchOrientation(Math.toRadians(0));
+//            pelvisPosition.setZ(1.0);
+//         }
+//         armsConfiguration.put(RobotSide.LEFT, leftArm);
+//         armsConfiguration.put(RobotSide.RIGHT, rightArm);
+//
+//         for (RobotSide robotSide : RobotSide.values)
+//            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), moveDuration, delay);
+//         appendChestOrientationToPublish(chestOrientation, moveDuration, delay);
+//         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, moveDuration, delay);
+//         publishPoses();
+//         usedFirstMode = !usedFirstMode;
+//      }
 
       if (ImGui.button(labels.get("Ballet")))
       {
-         if (usedFirstMode)
-         {
-            System.arraycopy(leftArmBallet1, 0, leftArm, 0, Math.min(leftArm.length, leftArmBallet1.length));
-            System.arraycopy(rightArmBallet1, 0, rightArm, 0, Math.min(rightArm.length, rightArmBallet1.length));
+         System.arraycopy(leftArmBallet1, 0, leftArm, 0, Math.min(leftArm.length, leftArmBallet1.length));
+         System.arraycopy(rightArmBallet1, 0, rightArm, 0, Math.min(rightArm.length, rightArmBallet1.length));
 
-            armsConfiguration.put(RobotSide.LEFT, leftArm);
-            armsConfiguration.put(RobotSide.RIGHT, rightArm);
+         armsConfiguration.put(RobotSide.LEFT, leftArm);
+         armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
-            chestOrientation.setToYawOrientation(Math.toRadians(25));
-            pelvisOrientation.setYaw(Math.toRadians(15));
-            pelvisOrientation.setPitch(Math.toRadians(0));
+         chestOrientation.setToYawOrientation(Math.toRadians(25));
+         pelvisOrientation.setYaw(Math.toRadians(15));
+         pelvisOrientation.setPitch(Math.toRadians(0));
 
-            FramePose3D rightLiftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
-            rightLiftFootPose.getPosition().addZ(0.03);
-            rightLiftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePose3D rightLiftFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+         rightLiftFootPose.getPosition().addZ(0.03);
+         rightLiftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            FramePose3D rightFinalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
-            rightFinalFootPose.setZ(0.2);
-            rightFinalFootPose.setY(-0.5);
-            rightFinalFootPose.appendYawRotation(Math.toRadians(30.0));
-            rightFinalFootPose.appendPitchRotation(Math.toRadians(45.0));
-            rightFinalFootPose.appendRollRotation(Math.toRadians(-25.0));
+         FramePose3D rightFinalFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
+         rightFinalFootPose.setZ(0.2);
+         rightFinalFootPose.setY(-0.5);
+         rightFinalFootPose.appendYawRotation(Math.toRadians(30.0));
+         rightFinalFootPose.appendPitchRotation(Math.toRadians(45.0));
+         rightFinalFootPose.appendRollRotation(Math.toRadians(-25.0));
 
-            double[] durations = new double[] {0.1, teleoperationParameters.getTrajectoryTime()};
-            FramePose3D[] poses = new FramePose3D[] {rightLiftFootPose, rightFinalFootPose};
+         double[] durations = new double[] {0.1, teleoperationParameters.getTrajectoryTime()};
+         FramePose3D[] poses = new FramePose3D[] {rightLiftFootPose, rightFinalFootPose};
 
-            createFootPoseMessage(RobotSide.RIGHT, durations, poses);
+         createFootPoseMessage(RobotSide.RIGHT, durations, poses);
 
-            for (RobotSide robotSide : RobotSide.values)
-               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.1);
-            appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.1);
-            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.1);
-         }
-         else
-         {
-            System.arraycopy(leftArmBallet2, 0, leftArm, 0, Math.min(leftArm.length, leftArmBallet2.length));
-            System.arraycopy(rightArmBallet2, 0, rightArm, 0, Math.min(rightArm.length, rightArmBallet2.length));
-
-            armsConfiguration.put(RobotSide.LEFT, leftArm);
-            armsConfiguration.put(RobotSide.RIGHT, rightArm);
-
-            chestOrientation.setToZero();
-            pelvisOrientation.setToPitchOrientation(Math.toRadians(10));
-            pelvisPosition.setZ(0.90);
-
-            setBothFeetDown(teleoperationParameters.getTrajectoryTime() + 0.25);
-
-            for (RobotSide robotSide : RobotSide.values)
-               appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.25);
-            appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.25);
-            appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.25);
-         }
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), 0.1);
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime(), 0.1);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime(), 0.1);
 
          publishPoses();
-         usedFirstMode = !usedFirstMode;
       }
 
 //      if (ImGui.button(labels.get("Karate Kid")))
