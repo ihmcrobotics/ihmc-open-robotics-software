@@ -100,8 +100,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getEndTableRightAction().getIsExecuting() ||
             state.getEndTableRightAction().getIsExecuting() ||
             state.getEndWalkDoorAAction().getIsExecuting() ||
-            state.getEndWalkDoorBAction().getIsExecuting() ||
-            state.getEndTurnDoorAAction().getIsExecuting()) )
+            state.getEndWalkDoorBAction().getIsExecuting() ) )
       {
          tomDetected = false;
          for (String nodeName : sceneGraph.getNodeNameList())
@@ -151,6 +150,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
              state.getWalkDoorAAction().getIsExecuting() ||
              state.getWalkDoorBAction().getIsExecuting() ||
              state.getTurnDoorAAction().getIsExecuting() ||
+             state.getTurnDoorBAction().getIsExecuting() ||
              state.getStartSaluteAction().getIsExecuting())
          {
             state.getActionSequence().setConcurrencyEnabled(true);
@@ -352,7 +352,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
          // PUSH DOOR after Turn to face door
-         if (state.getEndTurnDoorAAction().getIsExecuting())
+         if (state.getEndTurnDoorAAction().getIsExecuting() || state.getEndTurnDoorBAction().getIsExecuting())
          {
             state.getActionSequence().setConcurrencyEnabled(false);
             state.getActionSequence().setExecutionNextIndex(state.getStartPushDoorAction().getActionIndex());
@@ -396,15 +396,31 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             // TURN if no table
             if (!isTableDetected)
             {
-               state.getActionSequence().setConcurrencyEnabled(false);
-               state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+//               if (doorTraversed.get("B"))
+//               {
+//                  state.getActionSequence().setConcurrencyEnabled(false);
+//                  state.getActionSequence().setExecutionNextIndex(state.getTurnDoorBAction().getActionIndex());
+//               }
+//               else
+//               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+//               }
             }
          }
          // TURN after TABLE
          if (state.getEndTableRightAction().getIsExecuting() || state.getEndTableLeftAction().getIsExecuting() )
          {
-            state.getActionSequence().setConcurrencyEnabled(false);
-            state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+//            if (doorTraversed.get("B"))
+//            {
+//               state.getActionSequence().setConcurrencyEnabled(false);
+//               state.getActionSequence().setExecutionNextIndex(state.getTurnDoorBAction().getActionIndex());
+//            }
+//            else
+//            {
+               state.getActionSequence().setConcurrencyEnabled(false);
+               state.getActionSequence().setExecutionNextIndex(state.getTurnDoorAAction().getActionIndex());
+//            }
          }
 
          // After PUSH DOOR
