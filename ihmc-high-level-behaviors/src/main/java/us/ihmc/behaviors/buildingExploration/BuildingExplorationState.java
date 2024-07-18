@@ -20,6 +20,8 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public static final String ENABLE_DOORS = "Enable";
    public static final String DISABLE_DOORS1 = "Disable1";
    public static final String ENABLE_DOORS1 = "Enable1";
+   public static final String DISABLE_DOORS2 = "Disable2";
+   public static final String ENABLE_DOORS2 = "Enable2";
 
    public static final String SET_STATIC_FOR_APPROACH_TRASHCAN = "Set static for approach TRASHCAN";
    public static final String SET_STATIC_FOR_APPROACH_PUSH = "Set static for approach PUSH";
@@ -72,6 +74,8 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    private WaitDurationActionState enableDoorAction;
    private WaitDurationActionState disableDoorAction1;
    private WaitDurationActionState enableDoorAction1;
+   private WaitDurationActionState disableDoorAction2;
+   private WaitDurationActionState enableDoorAction2;
    private WaitDurationActionState setStaticForApproachActionTrash;
    private WaitDurationActionState setStaticForApproachActionPush;
    private WaitDurationActionState setStaticForGraspActionPush;
@@ -163,6 +167,16 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
                 && waitDurationAction.getDefinition().getName().equals(ENABLE_DOORS1))
             {
                enableDoorAction1 = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(DISABLE_DOORS2))
+            {
+               disableDoorAction2 = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(ENABLE_DOORS2))
+            {
+               enableDoorAction2 = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(GET_CLOSER_DOOR_A))
@@ -411,6 +425,16 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public WaitDurationActionState getEnableDoorAction1()
    {
       return enableDoorAction1;
+   }
+
+   public WaitDurationActionState getDisableDoorAction2()
+   {
+      return disableDoorAction2;
+   }
+
+   public WaitDurationActionState getEnableDoorAction2()
+   {
+      return enableDoorAction2;
    }
 
    public WaitDurationActionState getSetStaticForApproachActionPush()

@@ -179,7 +179,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             });
          }
 
-         if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
+         if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting() || state.getDisableDoorAction2().getIsExecuting())
          {
             detectionManager.setBlockNewlyValidDetections(true);
             sceneGraph.modifyTree(modificationQueue -> {
@@ -218,7 +218,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             });
          }
 
-         if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
+         if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting() || state.getEnableDoorAction2().getIsExecuting())
          {
             detectionManager.setBlockNewlyValidDetections(false);
          }
