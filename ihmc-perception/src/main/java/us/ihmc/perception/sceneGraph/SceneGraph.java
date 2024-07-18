@@ -15,9 +15,12 @@ import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
@@ -296,8 +299,21 @@ public class SceneGraph
 
    private void addNodeFromDetection(PersistentDetection detection)
    {
-      if (nodeNameList.stream().anyMatch(name -> name.startsWith(detection.getDetectedObjectName())))
-         return;
+      // TODO remove
+      // Enforce that there's only a single node of a detected class type in the scene graph
+      modifyTree(sceneGraphModificationQueue -> {
+         for (String name : nodeNameList)
+         {
+            if (name.startsWith(detection.getDetectedObjectName()))
+            {
+               SceneNode node = namesToNodesMap.get(name);
+
+               // Remove the node from the scene graph
+               sceneGraphModificationQueue.accept(new SceneGraphClearSubtree(node));
+               sceneGraphModificationQueue.accept(new SceneGraphNodeRemoval(node, this));
+            }
+         }
+      });
 
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();

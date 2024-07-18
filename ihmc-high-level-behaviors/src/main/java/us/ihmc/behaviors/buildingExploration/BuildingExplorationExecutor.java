@@ -10,11 +10,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -107,21 +109,22 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          {
             if (nodeName.startsWith("tom"))
             {
-               RigidBodyTransform transformTomToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
-                                                                                   .get(nodeName)
-                                                                                   .getNodeFrame()
-                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
-                                                                                                                          .getMidFeetZUpFrame());
-               LogTools.info("Transform tom node - midFeetZUp {} X{}", transformTomToRobotMidFeetFrame.getTranslation().norm(), transformTomToRobotMidFeetFrame.getTranslationX());
-               if (transformTomToRobotMidFeetFrame.getTranslation().norm() < 2.5)
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof YOLOv8Node yoloNode)
                {
-                  tomDetected = true;
-                  state.getActionSequence().setConcurrencyEnabled(false);
-                  state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
-                  doorTraversed.put("First", false);
-                  doorTraversed.put("A", false);
-                  doorTraversed.put("B", false);
-                  break;
+                  RigidBodyTransform transformTomToRobotMidFeetFrame = yoloNode.getNodeFrame()
+                                                                               .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                      .getMidFeetZUpFrame());
+                  LogTools.info("Transform tom node - midFeetZUp {} X{}", transformTomToRobotMidFeetFrame.getTranslation().norm(), transformTomToRobotMidFeetFrame.getTranslationX());
+                  if (transformTomToRobotMidFeetFrame.getTranslation().norm() < 2.5 && yoloNode.getCurrentlyDetected())
+                  {
+                     tomDetected = true;
+                     state.getActionSequence().setConcurrencyEnabled(false);
+                     state.getActionSequence().setExecutionNextIndex(state.getStartSaluteAction().getActionIndex());
+                     doorTraversed.put("First", false);
+                     doorTraversed.put("A", false);
+                     doorTraversed.put("B", false);
+                     break;
+                  }
                }
             }
             else
@@ -203,7 +206,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                                                                                       .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
                                                                                                                              .getMidFeetZUpFrame());
                   LogTools.info("Transform trash_can node - midFeetZUp {}", transformTrashCanToRobotMidFeetFrame.getTranslation().norm());
-                  if (transformTrashCanToRobotMidFeetFrame.getTranslation().norm() < 1.0)
+                  if (transformTrashCanToRobotMidFeetFrame.getTranslation().norm() < 1.5)
                   {
                      state.getActionSequence().setConcurrencyEnabled(false);
                      state.getActionSequence().setExecutionNextIndex(state.getStartTrashCanAction().getActionIndex());
