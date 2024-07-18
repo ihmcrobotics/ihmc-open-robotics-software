@@ -200,15 +200,18 @@ public class YOLOv8ObjectDetector
                maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
             }
             String className = yoloModel.getObjectClassFromIndex(detectedClassIds.get(index));
-            if (className.toLowerCase().contains("door") && detectedConfidences.get(index) > 0.9)
+            if (className.toLowerCase().contains("door_push_bar"))
             {
-               detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
-                                                        detectedConfidences.get(index),
-                                                        detectedBoxes.get(index).x() + shiftWidth,
-                                                        detectedBoxes.get(index).y() + shiftHeight,
-                                                        detectedBoxes.get(index).width(),
-                                                        detectedBoxes.get(index).height(),
-                                                        maskWeights));
+               if (detectedConfidences.get(index) > 0.9)
+               {
+                  detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
+                                                           detectedConfidences.get(index),
+                                                           detectedBoxes.get(index).x() + shiftWidth,
+                                                           detectedBoxes.get(index).y() + shiftHeight,
+                                                           detectedBoxes.get(index).width(),
+                                                           detectedBoxes.get(index).height(),
+                                                           maskWeights));
+               }
             }
             else
             {

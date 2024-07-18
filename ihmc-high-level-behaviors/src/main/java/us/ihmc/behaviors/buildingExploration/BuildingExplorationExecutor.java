@@ -10,11 +10,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -182,6 +182,40 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
          if (state.getDisableDoorAction().getIsExecuting() || state.getDisableDoorAction1().getIsExecuting())
          {
             detectionManager.setBlockNewlyValidDetections(true);
+            sceneGraph.modifyTree(modificationQueue -> {
+               for (String nodeName : sceneGraph.getNodeNameList())
+               {
+                  if (nodeName.startsWith("Door")
+                      && sceneGraph.getNamesToNodesMap().get(nodeName) instanceof DoorNode doorNode
+                      && (doorNode.getDoorPanel().getPlanarRegion().getArea() == 0.0 ||  !doorNode.getCurrentlyDetected())
+                  )
+                  {
+                     // Remove the door node from the scene graph
+                     modificationQueue.accept(new SceneGraphClearSubtree(doorNode));
+                     modificationQueue.accept(new SceneGraphNodeRemoval(sceneGraph.getIDToNodeMap().get(doorNode.getID()),
+                                                                        sceneGraph));
+
+                     PredefinedRigidBodySceneNode coorespondingStaticNode = null;
+                     for (String nodeName2 : sceneGraph.getNodeNameList())
+                     {
+                        if (nodeName2.contains("StaticHandle")
+                            && sceneGraph.getNamesToNodesMap().get(nodeName2) instanceof PredefinedRigidBodySceneNode staticNode
+                            && staticNode.getInitialParentNodeID() == doorNode.getID()
+                        )
+                        {
+                           coorespondingStaticNode = staticNode;
+                        }
+                     }
+
+                     if (coorespondingStaticNode != null)
+                     {
+                        // Remove the static handle node from the scene graph
+                        modificationQueue.accept(new SceneGraphClearSubtree(coorespondingStaticNode));
+                        modificationQueue.accept(new SceneGraphNodeRemoval(coorespondingStaticNode, sceneGraph));
+                     }
+                  }
+               }
+            });
          }
 
          if (state.getEnableDoorAction().getIsExecuting() || state.getEnableDoorAction1().getIsExecuting())
@@ -189,7 +223,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             detectionManager.setBlockNewlyValidDetections(false);
          }
 
-         // PULL DOOR or TRASH CAN after WALK to pull door
+         // GET CLOSER TO DOOR A/B or TRASH CAN after WALK to pull door
          if (state.getEndWalkDoorAAction().getIsExecuting())
          {
             boolean isTrashCanPresent = false;
@@ -215,8 +249,16 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             }
             if (!isTrashCanPresent)
             {
-               state.getActionSequence().setConcurrencyEnabled(false);
-               state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+               if (!doorTraversed.get("B"))
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getGetCloserDoorA().getActionIndex());
+               }
+               else
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getGetCloserDoorB().getActionIndex());
+               }
             }
             // Remove the door nodes
             sceneGraph.modifyTree(modificationQueue -> {
@@ -237,6 +279,13 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                   }
                }
             });
+         }
+
+         // PULL DOOR after get closer
+         if (state.getEndGetCloserDoorA().getIsExecuting() || state.getEndGetCloserDoorB().getIsExecuting())
+         {
+            state.getActionSequence().setConcurrencyEnabled(false);
+            state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
          }
 
          if (state.getEndWalkDoorBAction().getIsExecuting())
@@ -264,8 +313,16 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             }
             if (!isTrashCanPresent)
             {
-               state.getActionSequence().setConcurrencyEnabled(false);
-               state.getActionSequence().setExecutionNextIndex(state.getStartPullDoorAction().getActionIndex());
+               if (!doorTraversed.get("B"))
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getGetCloserDoorA().getActionIndex());
+               }
+               else
+               {
+                  state.getActionSequence().setConcurrencyEnabled(false);
+                  state.getActionSequence().setExecutionNextIndex(state.getGetCloserDoorB().getActionIndex());
+               }
             }
             // Remove the door nodes
             sceneGraph.modifyTree(modificationQueue -> {
@@ -315,31 +372,25 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                // TABLE if there's a Table
                if (nodeName.startsWith("table"))
                {
-                  if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof YOLOv8Node yoloNode)
+                  RigidBodyTransform transformTableToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
+                                                                                   .get(nodeName)
+                                                                                   .getNodeFrame()
+                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                          .getMidFeetZUpFrame());
+                  LogTools.info("Transform table node - midFeetZUp {}", transformTableToRobotMidFeetFrame.getTranslationY());
+                  // TABLE RIGHT or LEFT according to where the table is
+                  if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0 && transformTableToRobotMidFeetFrame.getTranslation().norm() < 3.0)
                   {
-                     if (yoloNode.getCurrentlyDetected())
-                     {
-                        RigidBodyTransform transformTableToRobotMidFeetFrame = yoloNode.getNodeFrame()
-                                                                                       .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
-                                                                                                                              .getMidFeetZUpFrame());
-                        LogTools.info("Transform tom node - midFeetZUp {} Y{}",
-                                      transformTableToRobotMidFeetFrame.getTranslation().norm(),
-                                      transformTableToRobotMidFeetFrame.getTranslationY());
-
-                        if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
-                        {
-                           state.getActionSequence().setConcurrencyEnabled(false);
-                           state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
-                        }
-                        else
-                        {
-                           state.getActionSequence().setConcurrencyEnabled(false);
-                           state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
-                        }
-                        isTableDetected = true;
-                        break;
-                     }
+                     state.getActionSequence().setConcurrencyEnabled(false);
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
                   }
+                  else
+                  {
+                     state.getActionSequence().setConcurrencyEnabled(false);
+                     state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
+                  }
+                  isTableDetected = true;
+                  break;
                }
             }
             // TURN if no table

@@ -54,6 +54,10 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public static final String END_TURN_DOOR_A = "END turn door A";
    public static final String END_TURN_DOOR_B = "END turn door B";
    public static final String END_WALK_COUCH = "END walk couch";
+   public static final String GET_CLOSER_DOOR_A = "GET closer door A";
+   public static final String GET_CLOSER_DOOR_B = "GET closer door B";
+   public static final String END_GET_CLOSER_DOOR_A = "END get closer door A";
+   public static final String END_GET_CLOSER_DOOR_B = "END get closer door B";
 
    public static final String START_DEMO = "START OF DEMO";
    public static final String END_DEMO = "END OF DEMO";
@@ -103,6 +107,10 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    private WaitDurationActionState endWalkCouchAction;
    private WaitDurationActionState startDemoAction;
    private WaitDurationActionState endDemoAction;
+   private WaitDurationActionState getCloserDoorA;
+   private WaitDurationActionState getCloserDoorB;
+   private WaitDurationActionState endGetCloserDoorA;
+   private WaitDurationActionState endGetCloserDoorB;
 
    public BuildingExplorationState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -155,6 +163,26 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
                 && waitDurationAction.getDefinition().getName().equals(ENABLE_DOORS1))
             {
                enableDoorAction1 = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(GET_CLOSER_DOOR_A))
+            {
+               getCloserDoorA = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(GET_CLOSER_DOOR_B))
+            {
+               getCloserDoorB = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_GET_CLOSER_DOOR_A))
+            {
+               endGetCloserDoorA = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(END_GET_CLOSER_DOOR_B))
+            {
+               endGetCloserDoorB = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_TRASHCAN))
@@ -533,6 +561,26 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    public WaitDurationActionState getEndWalkCouchAction()
    {
       return endWalkCouchAction;
+   }
+
+   public WaitDurationActionState getGetCloserDoorA()
+   {
+      return getCloserDoorA;
+   }
+
+   public WaitDurationActionState getGetCloserDoorB()
+   {
+      return getCloserDoorB;
+   }
+
+   public WaitDurationActionState getEndGetCloserDoorA()
+   {
+      return endGetCloserDoorA;
+   }
+
+   public WaitDurationActionState getEndGetCloserDoorB()
+   {
+      return endGetCloserDoorB;
    }
 
    public WaitDurationActionState getStartDemoAction()
