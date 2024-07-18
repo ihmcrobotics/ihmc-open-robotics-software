@@ -133,7 +133,7 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
             {
                double x = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, gridResolutionXY, centerIndex);
                double y = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, gridResolutionXY, centerIndex);
-               vertices[xIndex][yIndex] = new Point3D(x, y, 0.0);
+               vertices[xIndex][yIndex] = new Point3D(x, y, groundHeight);
             }
          }
       }

@@ -176,7 +176,7 @@ public class HumanoidPerceptionModule
                                                             PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
-                                      //publish a global height map
+                                      // Publish a global height map
                                       publishGlobalHeightMapTile(ros2Helper, globalHeightMap, null, PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE);
                                    }
                                 });
@@ -205,7 +205,7 @@ public class HumanoidPerceptionModule
 
    private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
    {
-      //get tiles (made out of modified cells) from the global height map class and publish them in a for loop
+      // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
       Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
       for (GlobalMapTile tile : modifiedCells)
       {
@@ -460,7 +460,6 @@ public class HumanoidPerceptionModule
    public HeightMapData getLatestHeightMapData()
    {
       latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, latestHeightMapData);
-      latestHeightMapData.setEstimatedGroundHeight(0.0);
       return latestHeightMapData;
    }
 

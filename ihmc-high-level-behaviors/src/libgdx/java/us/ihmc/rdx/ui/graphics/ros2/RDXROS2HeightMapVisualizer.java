@@ -194,10 +194,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                     heightMapMessageGenerated = true;
                                                  }
 
-                                                 //              if (displayGlobalHeightMapImage.get())
-                                                 //                 PerceptionDebugTools.displayDepth("Received Global Height Map", heightMapImage, 1);
-                                                 //              else
-                                                 //                 PerceptionDebugTools.clearAllWindows();
                                               });
       }
 
@@ -296,11 +292,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       executorService.destroy();
       heightMapGraphicNew.destroy();
       globalHeightMapGraphic.destroy();
-   }
-
-   public HeightMapMessage getLatestHeightMapMessage()
-   {
-      return latestHeightMapMessage;
    }
 
    public HeightMapData getLatestHeightMapData()
