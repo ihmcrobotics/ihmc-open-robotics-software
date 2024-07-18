@@ -199,13 +199,27 @@ public class YOLOv8ObjectDetector
             {
                maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
             }
-            detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
-                                                     detectedConfidences.get(index),
-                                               detectedBoxes.get(index).x() + shiftWidth,
-                                               detectedBoxes.get(index).y() + shiftHeight,
-                                                     detectedBoxes.get(index).width(),
-                                                     detectedBoxes.get(index).height(),
-                                                     maskWeights));
+            String className = yoloModel.getObjectClassFromIndex(detectedClassIds.get(index));
+            if (className.toLowerCase().contains("door") && detectedConfidences.get(index) > 0.9)
+            {
+               detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
+                                                        detectedConfidences.get(index),
+                                                        detectedBoxes.get(index).x() + shiftWidth,
+                                                        detectedBoxes.get(index).y() + shiftHeight,
+                                                        detectedBoxes.get(index).width(),
+                                                        detectedBoxes.get(index).height(),
+                                                        maskWeights));
+            }
+            else
+            {
+               detections.add(new YOLOv8DetectionOutput(yoloModel.getObjectClassFromIndex(detectedClassIds.get(index)),
+                                                        detectedConfidences.get(index),
+                                                        detectedBoxes.get(index).x() + shiftWidth,
+                                                        detectedBoxes.get(index).y() + shiftHeight,
+                                                        detectedBoxes.get(index).width(),
+                                                        detectedBoxes.get(index).height(),
+                                                        maskWeights));
+            }
          }
 
          confidencesPointer.close();

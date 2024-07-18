@@ -101,8 +101,7 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
             state.getEndTableRightAction().getIsExecuting() ||
             state.getEndWalkDoorAAction().getIsExecuting() ||
             state.getEndWalkDoorBAction().getIsExecuting() ||
-            state.getEndTurnDoorAAction().getIsExecuting() ||
-            state.getEndWalkCouchAction().getIsExecuting()) )
+            state.getEndTurnDoorAAction().getIsExecuting()) )
       {
          tomDetected = false;
          for (String nodeName : sceneGraph.getNodeNameList())
@@ -152,7 +151,6 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
              state.getWalkDoorAAction().getIsExecuting() ||
              state.getWalkDoorBAction().getIsExecuting() ||
              state.getTurnDoorAAction().getIsExecuting() ||
-             state.getWalkCouchAction().getIsExecuting() ||
              state.getStartSaluteAction().getIsExecuting())
          {
             state.getActionSequence().setConcurrencyEnabled(true);
@@ -317,25 +315,31 @@ public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<Buildi
                // TABLE if there's a Table
                if (nodeName.startsWith("table"))
                {
-                  RigidBodyTransform transformTableToRobotMidFeetFrame = sceneGraph.getNamesToNodesMap()
-                                                                                   .get(nodeName)
-                                                                                   .getNodeFrame()
-                                                                                   .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
-                                                                                                                          .getMidFeetZUpFrame());
-                  LogTools.info("Transform table node - midFeetZUp {}", transformTableToRobotMidFeetFrame.getTranslationY());
-                  // TABLE RIGHT or LEFT according to where the table is
-                  if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
+                  if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof YOLOv8Node yoloNode)
                   {
-                     state.getActionSequence().setConcurrencyEnabled(false);
-                     state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
+                     if (yoloNode.getCurrentlyDetected())
+                     {
+                        RigidBodyTransform transformTableToRobotMidFeetFrame = yoloNode.getNodeFrame()
+                                                                                       .getTransformToDesiredFrame(syncedRobot.getReferenceFrames()
+                                                                                                                              .getMidFeetZUpFrame());
+                        LogTools.info("Transform tom node - midFeetZUp {} Y{}",
+                                      transformTableToRobotMidFeetFrame.getTranslation().norm(),
+                                      transformTableToRobotMidFeetFrame.getTranslationY());
+
+                        if (transformTableToRobotMidFeetFrame.getTranslationY() < 0.0)
+                        {
+                           state.getActionSequence().setConcurrencyEnabled(false);
+                           state.getActionSequence().setExecutionNextIndex(state.getStartTableRightAction().getActionIndex());
+                        }
+                        else
+                        {
+                           state.getActionSequence().setConcurrencyEnabled(false);
+                           state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
+                        }
+                        isTableDetected = true;
+                        break;
+                     }
                   }
-                  else
-                  {
-                     state.getActionSequence().setConcurrencyEnabled(false);
-                     state.getActionSequence().setExecutionNextIndex(state.getStartTableLeftAction().getActionIndex());
-                  }
-                  isTableDetected = true;
-                  break;
                }
             }
             // TURN if no table
