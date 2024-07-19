@@ -4,7 +4,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.GlobalMapMessage;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
@@ -164,7 +163,7 @@ public class HumanoidPerceptionModule
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
-                                   //add the current local height map to the global height map
+                                   // Add the current local height map to the global height map
                                    HeightMapData currentLocalHeightMap = getLatestHeightMapData();
                                    globalHeightMap.addHeightMap(currentLocalHeightMap);
 
