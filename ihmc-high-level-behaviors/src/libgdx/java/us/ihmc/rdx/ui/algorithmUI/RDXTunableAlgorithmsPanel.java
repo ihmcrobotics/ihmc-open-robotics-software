@@ -1,9 +1,6 @@
 package us.ihmc.rdx.ui.algorithmUI;
 
 import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.ImGuiPlatformIO;
-import imgui.flag.ImGuiKey;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -12,7 +9,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import java.util.Comparator;
 import java.util.TreeSet;
 
-public class RDXAlgorithmsPanel extends RDXPanel
+public class RDXTunableAlgorithmsPanel extends RDXPanel
 {
    private static final String WINDOW_NAME = "Perception Algorithms";
 
@@ -21,7 +18,7 @@ public class RDXAlgorithmsPanel extends RDXPanel
 
    private final TreeSet<RDXTunableAlgorithm> algorithms = new TreeSet<>(Comparator.comparing(RDXTunableAlgorithm::getTitle));
 
-   public RDXAlgorithmsPanel(RDXBaseUI baseUI)
+   public RDXTunableAlgorithmsPanel(RDXBaseUI baseUI)
    {
       super(WINDOW_NAME);
 
@@ -40,32 +37,16 @@ public class RDXAlgorithmsPanel extends RDXPanel
    {
       for (RDXTunableAlgorithm algorithm : algorithms)
       {
-         if (algorithm.hasHeartbeat())
+         if (algorithm.renderMenuEntry())
          {
-            if (ImGui.checkbox(labels.get("##active"), algorithm.getActive()))
-            {
-               algorithm.updateHeartbeat();
-            }
-            ImGui.sameLine();
-         }
-
-         float preButtonCursorY = ImGui.getCursorPosY();
-         if (ImGui.button(labels.get(algorithm.getTitle()), -1.0f, 0.0f))
-         {
-            if (!algorithm.getIsShowing().get())
+            if (algorithm.isShowing())
             {
                showAlgorithmPanel(algorithm);
             }
             else
+            {
                hideAlgorithmPanel(algorithm);
-         }
-         float postButtonCursorY = ImGui.getCursorPosY();
-
-         if (algorithm.getIsShowing().get())
-         {
-            ImGui.setCursorPosY(preButtonCursorY + (ImGui.getTextLineHeight() / 2) - 2);
-            ImGuiTools.rightAlignText(">> ");
-            ImGui.setCursorPosY(postButtonCursorY);
+            }
          }
       }
    }
@@ -81,7 +62,6 @@ public class RDXAlgorithmsPanel extends RDXPanel
       }
 
       baseUI.getImGuiPanelManager().queueAddPanel(algorithmToShow);
-      algorithmToShow.getIsShowing().set(true);
    }
 
    private void hideAlgorithmPanel(RDXTunableAlgorithm algorithm)
