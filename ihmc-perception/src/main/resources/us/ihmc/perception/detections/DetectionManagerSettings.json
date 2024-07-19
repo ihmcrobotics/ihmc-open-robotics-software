@@ -1,0 +1,9 @@
+{
+  "title" : "DetectionManagerSettings",
+  "Pose Filter Alpha" : 0.2,
+  "Max Match Distance Squared" : 1.0,
+  "Acceptance Average Confidence" : 0.75,
+  "Stability Average Confidence" : 0.4,
+  "Stability Detection Frequency" : 5.0,
+  "Detection History Duration" : 1.0
+}

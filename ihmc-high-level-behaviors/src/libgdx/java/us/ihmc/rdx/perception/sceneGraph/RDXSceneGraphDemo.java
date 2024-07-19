@@ -33,7 +33,6 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -66,7 +65,6 @@ public class RDXSceneGraphDemo
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
-   private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
    private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
    private RDXDetectionManagerSettings detectionManagerSettings;
@@ -379,13 +377,6 @@ public class RDXSceneGraphDemo
       {
          detectionManagerSettings = new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper);
          perceptionVisualizerPanel.addVisualizer(detectionManagerSettings);
-      }
-
-      // Create YOLO settings viz
-      {
-         yoloSettingsVisualizer = new RDXYOLOv8Settings("YOLOv8", ros2Helper);
-         yoloSettingsVisualizer.setActive(true);
-         perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
       }
 
       // Create YOLO annotated image viz

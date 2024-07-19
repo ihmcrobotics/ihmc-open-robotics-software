@@ -16,6 +16,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -71,11 +72,8 @@ public class YOLOv8DetectionExecutor
    private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new ConcurrentHashMap<>();
    private volatile RawImage newestColorImage = null;
 
-   private float yoloConfidenceThreshold = 0.5f;
-   private float yoloNMSThreshold = 0.1f;
-   private float yoloMaskThreshold = 0.0f;
-   private int erosionKernelRadius = 2;
-   private double outlierThreshold = 1.0;
+   private final YOLOv8Settings settings = new YOLOv8Settings();
+   private final ROS2StoredPropertySet<YOLOv8Settings> settingsSync;
 
    // TODO: add back
 //   private Set<String> targetDetections = new HashSet<>();
@@ -86,22 +84,7 @@ public class YOLOv8DetectionExecutor
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
-
-      ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS).addCallback(parametersMessage ->
-      {
-         yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
-         yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
-         yoloMaskThreshold = parametersMessage.getSegmentationThreshold();
-         erosionKernelRadius = parametersMessage.getErosionKernelRadius();
-         outlierThreshold = parametersMessage.getOutlierThreshold();
-
-         // Create a new set of target detections to use
-//         Set<String> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
-//         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
-//            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
-//
-//         targetDetections = newTargetDetections;
-      });
+      settingsSync = new ROS2StoredPropertySet<>(ros2Helper, PerceptionAPI.YOLO_SETTINGS, settings);
 
       for (Path yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
@@ -140,6 +123,8 @@ public class YOLOv8DetectionExecutor
     */
    public void runYOLODetection(YOLOv8ObjectDetector yoloDetector, RawImage colorImage, RawImage depthImage)
    {
+      settingsSync.updateAndPublishThrottledStatus();
+
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
          yoloExecutorService.submit(() ->
@@ -151,7 +136,10 @@ public class YOLOv8DetectionExecutor
             depthImage.get();
 
             // Run YOLO to get results
-            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
+            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage,
+                                                                         (float) settings.getConfidenceThreshold(),
+                                                                         (float) settings.getNMSThreshold(),
+                                                                         (float) settings.getMaskThreshold());
 
             // TODO: temp hack
             if (yoloDetectionResults.containsKey(lastRunDetectorIndex))
@@ -171,6 +159,7 @@ public class YOLOv8DetectionExecutor
 
                // Erode mask to get better segmentation
                Mat erodedMask = new Mat(objectMask.getImageHeight(), objectMask.getImageWidth(), objectMask.getOpenCVType());
+               int erosionKernelRadius = settings.getErosionKernelRadius();
                opencv_imgproc.erode(objectMask.getCpuImageMat(),
                                     erodedMask,
                                     opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
@@ -183,7 +172,7 @@ public class YOLOv8DetectionExecutor
                // Get the point cloud
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
-               pointCloud = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
+               pointCloud = YOLOv8Tools.filterOutliers(pointCloud, settings.getOutlierRejectionThreshold(), 128);
                // Get the centroid of the point cloud
                Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(pointCloud, 128);
                if (centroid.containsNaN())
@@ -268,7 +257,7 @@ public class YOLOv8DetectionExecutor
          detectionMasks.putAll(value.getSegmentationImages());
       }
 
-      detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
+      detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= settings.getConfidenceThreshold()).forEach(entry ->
       {
          YOLOv8DetectionOutput detection = entry.getKey();
          RawImage maskImage = entry.getValue();

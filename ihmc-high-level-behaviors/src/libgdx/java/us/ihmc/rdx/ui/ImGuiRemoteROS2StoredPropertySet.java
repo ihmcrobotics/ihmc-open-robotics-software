@@ -36,13 +36,24 @@ public class ImGuiRemoteROS2StoredPropertySet
                                            StoredPropertySetBasics storedPropertySet,
                                            StoredPropertySetROS2TopicPair topicPair)
    {
+      this (ros2PublishSubscribeAPI,
+            storedPropertySet,
+            topicPair,
+            new RDXStoredPropertySetTuner(storedPropertySet.getTitle()));
+   }
+
+   public ImGuiRemoteROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
+                                           StoredPropertySetBasics storedPropertySet,
+                                           StoredPropertySetROS2TopicPair topicPair,
+                                           RDXStoredPropertySetTuner storedPropertySetTuner)
+   {
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.storedPropertySet = storedPropertySet;
       this.topicPair = topicPair;
       ros2PublishSubscribeAPI.createPublisher(topicPair.getCommandTopic());
 
       storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getStatusTopic(), storedPropertySet);
-      imGuiStoredPropertySetTuner = new RDXStoredPropertySetTuner(storedPropertySet.getTitle());
+      imGuiStoredPropertySetTuner = storedPropertySetTuner;
       imGuiStoredPropertySetTuner.create(storedPropertySet, false, () -> storedPropertySetChangedByImGuiUser = true);
    }
 
