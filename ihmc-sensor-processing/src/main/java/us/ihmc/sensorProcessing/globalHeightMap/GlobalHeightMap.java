@@ -1,5 +1,12 @@
 package us.ihmc.sensorProcessing.globalHeightMap;
 
+import com.esotericsoftware.kryo.util.IntMap;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+
+import java.util.Collection;
+import java.util.HashSet;
+
 /**
  * The GlobalHeightMap class processes local height maps to create a global height map.
  * This class iterates through occupied cells in the local height maps, converts them
@@ -8,15 +15,11 @@ package us.ihmc.sensorProcessing.globalHeightMap;
  * the robot's current position.
  */
 
-import com.esotericsoftware.kryo.util.IntMap;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
-import java.util.Collection;
-import java.util.HashSet;
-
 public class GlobalHeightMap
 {
+   // Zero value in world minus the thickness of the foot
+   private final static double MIN_GLOBAL_HEIGHT_MAP_VALUE = -0.02;
+
    // A map that stores GlobalMapTile objects using their hashed indices.
    private final IntMap<GlobalMapTile> heightMapDataIntMap = new IntMap<>();
    // A set to keep track of modified tiles.
@@ -41,6 +44,12 @@ public class GlobalHeightMap
          Point2DReadOnly occupiedCellPosition = heightMapData.getCellPosition(occupiedCell);
          // Get or create the GlobalMapTile that contains the current cell
          GlobalMapTile globalMapTile = getOrCreateDataContainingCell(occupiedCellPosition, heightMapData.getGridResolutionXY());
+
+         if (Double.isNaN(globalMapTile.getEstimatedGroundHeight()))
+         {
+            globalMapTile.setEstimatedGroundHeight(MIN_GLOBAL_HEIGHT_MAP_VALUE);
+         }
+
          // Set the height of the cell within the global map tile
          globalMapTile.setHeightAt(occupiedCellPosition.getX(), occupiedCellPosition.getY(), cellHeight);
 
