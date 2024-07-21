@@ -32,7 +32,7 @@ public class HumanoidActivePerceptionModule
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {

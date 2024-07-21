@@ -2,7 +2,6 @@ package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -63,11 +62,8 @@ public class PerceptionBasedContinuousHiking
                                                               ros2Helper,
                                                               PerceptionAPI.D455_DEPTH_IMAGE,
                                                               PerceptionAPI.D455_COLOR_IMAGE,
-                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
-
-      //      HumanoidActivePerceptionModule activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,

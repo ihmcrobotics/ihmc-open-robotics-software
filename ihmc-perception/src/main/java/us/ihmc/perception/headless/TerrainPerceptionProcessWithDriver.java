@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
@@ -53,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  * 4. Publishes color images on the color topic
  * 5. Publishes depth images on the depth topic
  * 6. Publishes planar regions on the planar regions topic
- *
+ * <p>
  * Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563, Nadia: F112114, D435: 108522071219, D435: 213522252883, 215122254074, 752112070330
  */
 public class TerrainPerceptionProcessWithDriver
@@ -75,24 +74,18 @@ public class TerrainPerceptionProcessWithDriver
                                                                                                                    getClass(),
                                                                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
 
    private final OpenCLManager openCLManager;
    private final ROS2Helper ros2Helper;
    private final RealsenseDeviceManager realsenseDeviceManager;
-   private final RealsenseConfiguration realsenseConfiguration;
    private final RealsenseDevice realsense;
    private final BytedecoImage depthBytedecoImage;
    private final Runnable syncedRobotUpdater;
-   private final RobotConfigurationData robotConfigurationData;
-   private final FullHumanoidRobotModel fullRobotModel;
-   private final CollisionBoxProvider collisionBoxProvider;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private HumanoidPerceptionModule humanoidPerception;
+   private final HumanoidPerceptionModule humanoidPerception;
 
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
@@ -100,7 +93,7 @@ public class TerrainPerceptionProcessWithDriver
    private Mat sourceDepthImage;
    private Mat sourceColorImage;
 
-   private final double outputPeriod;
+   private final double outputPeriod = UnitConversions.hertzToSeconds(30.0f);
    private volatile boolean running = true;
 
    private final int depthWidth;
@@ -119,28 +112,20 @@ public class TerrainPerceptionProcessWithDriver
                                              ROS2Helper ros2Helper,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
-                                             ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                              HumanoidReferenceFrames referenceFrames,
                                              Runnable syncedRobotUpdater)
    {
       this.syncedRobotUpdater = syncedRobotUpdater;
-      this.ros2PropertySetGroup = ros2PropertySetGroup;
       this.ros2Helper = ros2Helper;
-      this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
-      this.frameRegionsTopic = frameRegionsTopic;
       this.referenceFrames = referenceFrames;
-      this.fullRobotModel = fullRobotModel;
-      this.collisionBoxProvider = collisionBoxProvider;
 
       if (fullRobotModel == null)
          LogTools.info("Creating terrain process with no robot model.");
       if (collisionBoxProvider == null)
          LogTools.info("Creating terrain process with no collision provider.");
 
-      this.robotConfigurationData = new RobotConfigurationData();
-      this.outputPeriod = UnitConversions.hertzToSeconds(30.0f);
       openCLManager = new OpenCLManager();
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
       realtimeROS2Node.spin();
@@ -344,17 +329,18 @@ public class TerrainPerceptionProcessWithDriver
       executorService.destroy();
 
       realtimeROS2Node.destroy();
-      humanoidPerception.destroy();
+      if (humanoidPerception != null)
+      {
+         humanoidPerception.destroy();
+      }
 
       openCLManager.destroy();
-      depthBytedecoImage.destroy(openCLManager);
+      if (depthBytedecoImage != null)
+      {
+         depthBytedecoImage.destroy(openCLManager);
+      }
 
       destroyedNotification.blockingPoll();
-   }
-
-   public PerceptionConfigurationParameters getConfigurationParameters()
-   {
-      return parameters;
    }
 
    public HumanoidPerceptionModule getHumanoidPerceptionModule()

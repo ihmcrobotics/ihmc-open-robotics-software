@@ -48,7 +48,7 @@ public class ContinuousPlanner
    private final AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
    private final FramePose3D walkingStartMidPose = new FramePose3D();
    private final FramePose3D imminentFootstepPose = new FramePose3D();
-   private final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
+   private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final TerrainPlanningDebugger debugger;
    private final ContinuousPlannerStatistics statistics;
    private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
@@ -72,8 +72,6 @@ public class ContinuousPlanner
    private boolean resetMonteCarloFootstepPlanner = false;
    private double previousContinuousHikingSwingTime = 0.0;
 
-   private final SwingPlannerParametersBasics swingPlannerParameters;
-
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames referenceFrames,
                             ContinuousHikingParameters continuousHikingParameters,
@@ -85,16 +83,16 @@ public class ContinuousPlanner
    {
       this.referenceFrames = referenceFrames;
       this.continuousHikingParameters = continuousHikingParameters;
-      this.monteCarloFootstepPlannerParameters = monteCarloPlannerParameters;
+      this.monteCarloPlannerParameters = monteCarloPlannerParameters;
       this.debugger = debugger;
       this.statistics = statistics;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
-      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
-      this.swingPlannerParameters = swingPlannerParameters;
       footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
+
       this.logger = new FootstepPlannerLogger(footstepPlanner);
-      this.monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
+      this.monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(this.monteCarloPlannerParameters,
                                                                      FootstepPlanningModuleLauncher.createFootPolygons(robotModel));
       this.collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
                                                                            swingPlannerParameters,
@@ -267,7 +265,7 @@ public class ContinuousPlanner
    public FootstepPlan generateMonteCarloFootstepPlan()
    {
       MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest = new MonteCarloFootstepPlannerRequest();
-      monteCarloFootstepPlannerRequest.setTimeout(monteCarloFootstepPlannerParameters.getTimeoutDuration());
+      monteCarloFootstepPlannerRequest.setTimeout(monteCarloPlannerParameters.getTimeoutDuration());
       monteCarloFootstepPlannerRequest.setStartFootPose(RobotSide.LEFT, startStancePose.get(RobotSide.LEFT));
       monteCarloFootstepPlannerRequest.setStartFootPose(RobotSide.RIGHT, startStancePose.get(RobotSide.RIGHT));
       monteCarloFootstepPlannerRequest.setGoalFootPose(RobotSide.LEFT, goalStancePose.get(RobotSide.LEFT));
@@ -472,7 +470,6 @@ public class ContinuousPlanner
          footstepPlanner.getSwingPlannerParameters().setMinimumSwingTime(continuousHikingParameters.getSwingTime());
          footstepPlanner.getSwingPlannerParameters().setMaximumSwingTime(continuousHikingParameters.getSwingTime());
          previousContinuousHikingSwingTime = continuousHikingParameters.getSwingTime();
-         swingPlannerParameters.set(footstepPlanner.getSwingPlannerParameters());
       }
    }
 
@@ -539,9 +536,9 @@ public class ContinuousPlanner
       return footstepPlanner.getFootstepPlannerParameters();
    }
 
-   public MonteCarloFootstepPlannerParameters getMonteCarloFootstepPlannerParameters()
+   public MonteCarloFootstepPlannerParameters getMonteCarloPlannerParameters()
    {
-      return monteCarloFootstepPlannerParameters;
+      return monteCarloPlannerParameters;
    }
 
    public SideDependentList<FramePose3D> getGoalStancePose()
