@@ -15,11 +15,9 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.lighting.RDXDirectionalLight;
 import us.ihmc.rdx.lighting.RDXPointLight;
-import us.ihmc.rdx.lighting.RDXShadowManager;
 import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVREye;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -33,12 +31,10 @@ public class RDX3DScene
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
-   private boolean shadowsEnabled = false;
-   private RDXShadowManager shadowManager;
-   private ModelBatch shadowsDisabledModelBatch;
-   private Environment shadowsDisabledEnvironment;
-   private final PointLightsAttribute shadowsDisabledPointLights = new PointLightsAttribute();
-   private final DirectionalLightsAttribute shadowsDisabledDirectionalLights = new DirectionalLightsAttribute();
+   private ModelBatch modelBatch;
+   private Environment environment;
+   private final PointLightsAttribute pointLights = new PointLightsAttribute();
+   private final DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
 
    public void create()
    {
@@ -53,61 +49,31 @@ public class RDX3DScene
       Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
       String vertexShader = shaderStrings.getLeft();
       String fragmentShader = shaderStrings.getRight();
-      shadowsDisabledModelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
-      shadowsDisabledEnvironment = new Environment();
-      shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
-      shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
-      shadowsDisabledEnvironment.set(shadowsDisabledDirectionalLights);
-
-      shadowManager = new RDXShadowManager(RDXBaseUI.ANTI_ALIASING, ambientLight);
+      modelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
+      environment = new Environment();
+      environment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
+      environment.set(pointLights);
+      environment.set(directionalLights);
    }
 
    public void preRender(Camera camera)
    {
-      if (shadowsEnabled)
-      {
-         shadowManager.preRender(camera);
-      }
-      else
-      {
-         shadowsDisabledModelBatch.begin(camera);
-      }
+      modelBatch.begin(camera);
    }
 
    public void render()
    {
-      if (shadowsEnabled)
-      {
-         renderInternal(shadowManager.getShadowSceneBatch(), RDXSceneLevel.MODEL.SINGLETON_SET);
-      }
-      else
-      {
-         renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
-      }
+      renderInternal(modelBatch, sceneLevelsToRender);
    }
 
    public void render(RDXSceneLevel exclusiveSceneLevel)
    {
-      renderInternal(shadowsDisabledModelBatch, exclusiveSceneLevel.SINGLETON_SET);
+      renderInternal(modelBatch, exclusiveSceneLevel.SINGLETON_SET);
    }
 
    public void render(Set<RDXSceneLevel> sceneLevels)
    {
-      renderInternal(shadowsDisabledModelBatch, sceneLevels);
-   }
-
-   // For testing shadows in particular
-   public void renderShadowMap(Camera camera, int x, int y)
-   {
-      if (shadowsEnabled)
-      {
-         for (RDXRenderableAdapter renderable : renderables)
-         {
-            renderable.setSceneLevelsToRender(RDXSceneLevel.MODEL.SINGLETON_SET);
-         }
-
-         shadowManager.renderShadows(camera, renderables, x, y);
-      }
+      renderInternal(modelBatch, sceneLevels);
    }
 
    // For simulated sensors in particular
@@ -132,16 +98,8 @@ public class RDX3DScene
          }
       }
 
-      if (shadowsEnabled)
-      {
-         shadowManager.preRender(camera);
-         renderInternal(shadowManager.getShadowSceneBatch(), RDXSceneLevel.MODEL.SINGLETON_SET);
-      }
-      else
-      {
-         shadowsDisabledModelBatch.begin(camera);
-         renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
-      }
+      modelBatch.begin(camera);
+      renderInternal(modelBatch, sceneLevelsToRender);
 
       if (camera instanceof RDXVREye eye)
       {
@@ -156,7 +114,7 @@ public class RDX3DScene
          }
       }
 
-      postRender(camera, RDXSceneLevel.VIRTUAL.SINGLETON_SET);
+      postRender();
    }
 
    private void renderInternal(ModelBatch modelBatch, Set<RDXSceneLevel> sceneLevelsToRender)
@@ -167,36 +125,13 @@ public class RDX3DScene
       {
          renderable.setSceneLevelsToRender(sceneLevelsToRender);
 
-         if (shadowsEnabled)
-            modelBatch.render(renderable);
-         else
-            modelBatch.render(renderable, shadowsDisabledEnvironment);
+         modelBatch.render(renderable, environment);
       }
    }
 
-   public void postRender(Camera camera, Set<RDXSceneLevel> sceneLevels)
+   public void postRender()
    {
-      if (shadowsEnabled)
-      {
-         shadowManager.postRender();
-      }
-      else
-      {
-         shadowsDisabledModelBatch.end();
-      }
-
-      if (shadowsEnabled && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
-      {
-         // Render all virtual objects using the primary model batch
-         // FIXME: This has a problem where the virtual renderables aren't going to be occluded correctly.
-         shadowsDisabledModelBatch.begin(camera);
-         for (RDXRenderableAdapter renderable : renderables)
-         {
-            renderable.setSceneLevelsToRender(RDXSceneLevel.VIRTUAL.SINGLETON_SET);
-            shadowsDisabledModelBatch.render(renderable);
-         }
-         shadowsDisabledModelBatch.end();
-      }
+      modelBatch.end();
    }
 
    public void dispose()
@@ -206,8 +141,7 @@ public class RDX3DScene
          ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
       }
 
-      shadowManager.dispose();
-      shadowsDisabledModelBatch.dispose();
+      modelBatch.dispose();
    }
 
    public RDXRenderableAdapter addModelInstance(ModelInstance modelInstance)
@@ -298,10 +232,8 @@ public class RDX3DScene
 
    public void clearLights()
    {
-      shadowsDisabledPointLights.lights.clear();
-      shadowsDisabledDirectionalLights.lights.clear();
-      shadowManager.getPointLights().clear();
-      shadowManager.getDirectionalLights().clear();
+      pointLights.lights.clear();
+      directionalLights.lights.clear();
    }
 
    public void addPointLight(RDXPointLight pointLight)
@@ -310,8 +242,7 @@ public class RDX3DScene
                                                                         pointLight.getPosition().getY32(),
                                                                         pointLight.getPosition().getZ32());
       pointLight.setAttribute(pointLightAttribute);
-      shadowsDisabledPointLights.lights.add(pointLightAttribute);
-      shadowManager.getPointLights().add(pointLight);
+      pointLights.lights.add(pointLightAttribute);
    }
 
    public void addDirectionalLight(RDXDirectionalLight directionalLight)
@@ -320,42 +251,28 @@ public class RDX3DScene
                                                                                           directionalLight.getDirection().getY32(),
                                                                                           directionalLight.getDirection().getZ32());
       directionalLight.setAttribute(directionalLightAttribute);
-      shadowsDisabledDirectionalLights.lights.add(directionalLightAttribute);
-      shadowManager.getDirectionalLights().add(directionalLight);
+      directionalLights.lights.add(directionalLightAttribute);
    }
 
    public void removePointLight(RDXPointLight pointLight)
    {
-      shadowsDisabledPointLights.lights.removeValue(pointLight.getAttribute(), true);
-      shadowManager.getPointLights().remove(pointLight);
+      pointLights.lights.removeValue(pointLight.getAttribute(), true);
    }
 
    public void removeDirectionalLight(RDXDirectionalLight directionalLight)
    {
-      shadowsDisabledDirectionalLights.lights.removeValue(directionalLight.getAttribute(), true);
-      shadowManager.getDirectionalLights().remove(directionalLight);
+      directionalLights.lights.removeValue(directionalLight.getAttribute(), true);
    }
 
    public void setAmbientLight(float ambientLight)
    {
       this.ambientLight = ambientLight;
-      shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
-      shadowManager.setAmbientLight(ambientLight);
-   }
-
-   public void setShadowsEnabled(boolean shadowsEnabled)
-   {
-      this.shadowsEnabled = shadowsEnabled;
+      environment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
    }
 
    public float getAmbientLight()
    {
       return ambientLight;
-   }
-
-   public RDXShadowManager getShadowManager()
-   {
-      return shadowManager;
    }
 
    public TreeSet<RDXSceneLevel> getSceneLevelsToRender()
