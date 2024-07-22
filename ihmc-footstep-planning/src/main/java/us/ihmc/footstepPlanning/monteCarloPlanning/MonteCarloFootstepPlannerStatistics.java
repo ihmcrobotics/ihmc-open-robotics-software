@@ -56,7 +56,7 @@ public class MonteCarloFootstepPlannerStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "MonteCarloPlannerLog.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.MONTE_CARLO_FOOTSTEP_PLANNER_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.MONTE_CARLO_FOOTSTEP_PLANNER_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       String filePath = IHMCCommonPaths.MONTE_CARLO_FOOTSTEP_PLANNER_DIRECTORY.resolve(logFileName).toString();
 
       try
