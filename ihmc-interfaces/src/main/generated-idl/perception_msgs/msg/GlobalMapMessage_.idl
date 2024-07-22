@@ -1,0 +1,21 @@
+#ifndef __perception_msgs__msg__GlobalMapMessage__idl__
+#define __perception_msgs__msg__GlobalMapMessage__idl__
+
+#include "perception_msgs/msg/./GlobalMapTileMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::GlobalMapMessage_")
+      struct GlobalMapMessage
+      {
+        sequence<perception_msgs::msg::dds::GlobalMapTileMessage> global_map;
+      };
+    };
+  };
+};
+
+#endif
