@@ -38,7 +38,7 @@ public class DualBlackflyUDPSender
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
    private volatile boolean running;
 
-   private final File propertiesFile = new File(IHMCCommonPaths.VR_DIRECTORY_NAME, getClass().getSimpleName() + ".properties");
+   private final File propertiesFile = IHMCCommonPaths.VR_DIRECTORY.resolve(getClass().getSimpleName() + ".properties").toFile();
 
    public void start()
    {

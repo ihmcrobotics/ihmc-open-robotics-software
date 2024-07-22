@@ -32,7 +32,7 @@ public class TerrainMapStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "TerrainMapStatistics.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       String filePath = IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName).toString();
 
       try
