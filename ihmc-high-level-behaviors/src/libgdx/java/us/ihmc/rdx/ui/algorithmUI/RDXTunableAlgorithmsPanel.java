@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.algorithmUI;
 import imgui.ImGui;
 import imgui.ImGuiTextFilter;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -11,22 +12,24 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.Stack;
+import java.util.LinkedList;
 import java.util.TreeSet;
 
 public class RDXTunableAlgorithmsPanel extends RDXPanel
 {
-   private static final String WINDOW_NAME = "Perception Algorithms";
+   private static final String WINDOW_NAME = "Tunable Algorithms";
 
    private final ROS2PublishSubscribeAPI ros2;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiTextFilter searchFilter = new ImGuiTextFilter();
    private final ImBoolean allowMultiplePanels = new ImBoolean(false);
+   private final ImInt maxPanelsToShow = new ImInt(4);
 
    private final TreeSet<RDXTunableAlgorithm> algorithms = new TreeSet<>(Comparator.comparing(RDXTunableAlgorithm::getTitle));
-   private final Stack<RDXTunableAlgorithm> currentlyShownAlgorithms = new Stack<>();
+   private final Deque<RDXTunableAlgorithm> currentlyShownAlgorithms = new LinkedList<>();
 
    public RDXTunableAlgorithmsPanel(ROS2PublishSubscribeAPI ros2)
    {
@@ -56,9 +59,9 @@ public class RDXTunableAlgorithmsPanel extends RDXPanel
 
       if (ImGuiTools.smallCheckbox(labels.get("Allow Multiple Panels"), allowMultiplePanels))
       {
-         if (!allowMultiplePanels.get() && !currentlyShownAlgorithms.empty())
+         if (!allowMultiplePanels.get() && !currentlyShownAlgorithms.isEmpty())
          {
-            hideAllOtherPanels(currentlyShownAlgorithms.peek());
+            hideAllOtherPanels(currentlyShownAlgorithms.peekLast());
          }
       }
 
@@ -69,24 +72,32 @@ public class RDXTunableAlgorithmsPanel extends RDXPanel
          currentlyShownAlgorithms.clear();
       }
 
+      ImGui.setNextItemWidth(0.5f * ImGui.getColumnWidth());
+      if (ImGuiTools.smallWidget(() -> ImGuiTools.volatileInputInt(labels.get("Max Panels to Show"), maxPanelsToShow)))
+         showNPanelsMax(maxPanelsToShow.get());
+
       ImGui.separator();
 
       for (RDXTunableAlgorithm algorithm : algorithms)
       {
-         if (searchFilter.passFilter(algorithm.getTitle()))
+         // Only show algorithms which pass the filter
+         if (!searchFilter.passFilter(algorithm.getTitle()))
+            continue;
+
+         if (algorithm.renderMenuEntry()) // If the algorithm button is pressed
          {
-            if (algorithm.renderMenuEntry())
+            if (algorithm.isShowing())
             {
-               if (algorithm.isShowing())
-               {
-                  if (!allowMultiplePanels.get())
-                     hideAllOtherPanels(algorithm);
-                  currentlyShownAlgorithms.add(algorithm);
-               }
+               if (allowMultiplePanels.get())
+                  showNPanelsMax(maxPanelsToShow.get() - 1);
                else
-               {
-                  currentlyShownAlgorithms.remove(algorithm);
-               }
+                  hideAllOtherPanels(algorithm);
+
+               currentlyShownAlgorithms.addLast(algorithm);
+            }
+            else
+            {
+               currentlyShownAlgorithms.remove(algorithm);
             }
          }
       }
@@ -104,5 +115,14 @@ public class RDXTunableAlgorithmsPanel extends RDXPanel
          algorithm.getIsShowing().set(false);
          algorithmIterator.remove();
       }
+   }
+
+   private void showNPanelsMax(int maxPanelsToShow)
+   {
+      if (maxPanelsToShow <= 0)
+         return;
+
+      while (currentlyShownAlgorithms.size() > maxPanelsToShow)
+         currentlyShownAlgorithms.removeFirst().getIsShowing().set(false);
    }
 }
