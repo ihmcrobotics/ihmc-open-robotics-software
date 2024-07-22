@@ -28,7 +28,6 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
@@ -40,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 /**
  * Clean up to have lots of different font sizes available by number.
@@ -282,20 +282,25 @@ public class ImGuiTools
 
    public static boolean smallCheckbox(String label, ImBoolean checked)
    {
-      float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
-      float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
-      ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
-      boolean pressed = ImGui.checkbox(label, checked);
-      ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
-      return pressed;
+      return smallWidget(() -> ImGui.checkbox(label, checked));
    }
 
    public static boolean smallCheckbox(String label, boolean checked)
    {
+      return smallWidget(() -> ImGui.checkbox(label, checked));
+   }
+
+   public static boolean smallButton(String label)
+   {
+      return smallWidget(() -> ImGui.button(label));
+   }
+
+   public static boolean smallWidget(BooleanSupplier widgetFunction)
+   {
       float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
       float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
       ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
-      boolean pressed = ImGui.checkbox(label, checked);
+      boolean pressed = widgetFunction.getAsBoolean();
       ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
       return pressed;
    }

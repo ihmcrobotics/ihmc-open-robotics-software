@@ -12,6 +12,8 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class RDXTunableAlgorithm extends RDXPanel
 {
+   private static final String showingText = " >>";
+
    private final String title;
 
    protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -57,17 +59,19 @@ public class RDXTunableAlgorithm extends RDXPanel
    {
       boolean buttonPressed = false;
       float preButtonCursorY = ImGui.getCursorPosY();
-      if (ImGui.button(labels.get(getTitle()), -1.0f, 0.0f))
+      float showingTextWidth = ImGuiTools.calcTextSizeX(showingText);
+      float buttonWidth = ImGui.getColumnWidth() - showingTextWidth;
+      if (ImGui.button(labels.get(getTitle()), buttonWidth, 0.0f))
       {
          getIsShowing().set(!isShowing());
          buttonPressed = true;
       }
       float postButtonCursorY = ImGui.getCursorPosY();
 
-      if (getIsShowing().get())
+      if (isShowing())
       {
          ImGui.setCursorPosY(preButtonCursorY + (ImGui.getTextLineHeight() / 2) - 2);
-         ImGuiTools.rightAlignText(">> ");
+         ImGuiTools.rightAlignText(showingText);
          ImGui.setCursorPosY(postButtonCursorY);
       }
 
