@@ -11,7 +11,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,7 +27,14 @@ public class RDXTunableAlgorithmsPanel extends RDXPanel
    private final ImBoolean allowMultiplePanels = new ImBoolean(false);
    private final ImInt maxPanelsToShow = new ImInt(4);
 
-   private final TreeSet<RDXTunableAlgorithm> algorithms = new TreeSet<>(Comparator.comparing(RDXTunableAlgorithm::getTitle));
+   private final TreeSet<RDXTunableAlgorithm> algorithms = new TreeSet<>((algorithmA, algorithmB) ->
+   {
+      int comparePinned = Boolean.compare(algorithmB.isPinned(), algorithmA.isPinned()); // Pinned algorithms get priority
+      if (comparePinned != 0)
+         return comparePinned;
+
+      return algorithmA.getTitle().compareTo(algorithmB.getTitle()); // Otherwise sort alphabetically by title
+   });
    private final Deque<RDXTunableAlgorithm> currentlyShownAlgorithms = new LinkedList<>();
 
    public RDXTunableAlgorithmsPanel(ROS2PublishSubscribeAPI ros2)
@@ -38,10 +44,15 @@ public class RDXTunableAlgorithmsPanel extends RDXPanel
       this.ros2 = ros2;
       setRenderMethod(this::renderImGuiWidgets);
    }
-
    public void addTunableAlgorithm(StoredPropertySetBasics algorithmPropertySet, StoredPropertySetROS2TopicPair propertySetTopicPair)
    {
+      addTunableAlgorithm(algorithmPropertySet, propertySetTopicPair, false);
+   }
+   public void addTunableAlgorithm(StoredPropertySetBasics algorithmPropertySet, StoredPropertySetROS2TopicPair propertySetTopicPair, boolean pinToTop)
+   {
       RDXTunableAlgorithm tunableAlgorithm = new RDXTunableAlgorithm(algorithmPropertySet, propertySetTopicPair, ros2);
+      if (pinToTop)
+         tunableAlgorithm.pinToTop();
       addAlgorithm(tunableAlgorithm);
    }
 

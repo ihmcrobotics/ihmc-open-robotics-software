@@ -15,6 +15,7 @@ public class RDXTunableAlgorithm extends RDXPanel
    private static final String showingText = " >>";
 
    private final String title;
+   private boolean isPinned = false;
 
    protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -92,6 +93,16 @@ public class RDXTunableAlgorithm extends RDXPanel
    public boolean isShowing()
    {
       return getIsShowing().get();
+   }
+
+   public void pinToTop()
+   {
+      isPinned = true;
+   }
+
+   public boolean isPinned()
+   {
+      return isPinned;
    }
 
    public String getTitle()
