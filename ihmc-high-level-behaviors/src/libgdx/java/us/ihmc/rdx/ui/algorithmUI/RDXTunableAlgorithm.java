@@ -50,12 +50,6 @@ public class RDXTunableAlgorithm extends RDXPanel
          imGuiPropertySet = new ImGuiRemoteROS2StoredPropertySet(ros2, algorithmPropertySet, propertySetTopicPair);
    }
 
-   public void create(RDXStoredPropertySetTuner tunerUI)
-   {
-      if (!isCreated())
-         imGuiPropertySet = new ImGuiRemoteROS2StoredPropertySet(ros2, algorithmPropertySet, propertySetTopicPair, tunerUI);
-   }
-
    public boolean renderMenuEntry()
    {
       boolean buttonPressed = false;
