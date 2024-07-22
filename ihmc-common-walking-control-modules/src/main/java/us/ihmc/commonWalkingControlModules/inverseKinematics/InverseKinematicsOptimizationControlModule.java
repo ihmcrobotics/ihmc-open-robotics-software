@@ -120,6 +120,12 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
 
    public void initialize()
    {
+      reset();
+      qpSolver.notifyResetActiveSet();
+   }
+
+   public void reset()
+   {
       qpSolver.reset();
       motionQPInputCalculator.initialize();
    }

@@ -211,7 +211,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       private final YoFixedFrameSpatialVector estimatedAcceleration;
 
       private final YoFixedFrameSpatialVector correctiveVelocity;
-      private final YoDouble velocityGain;
 
       private final YoDouble lastUpdateTime;
       private final YoLong lastInputTimestamp;
@@ -250,8 +249,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          correctiveVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "CorrectiveAngularVelocity", worldFrame, registry),
                                                             new YoFrameVector3D(namePrefix + "CorrectiveLinearVelocity", worldFrame, registry));
 
-         velocityGain = new YoDouble(namePrefix + "velocityGain", registry);
-
          debugInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "DebugAngularVelocity", worldFrame, registry),
                                                             new YoFrameVector3D(namePrefix + "DebugLinearVelocity", worldFrame, registry));
 
@@ -277,7 +274,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          estimatedVelocity.setToZero();
          estimatedAcceleration.setToZero();
          correctiveVelocity.setToZero();
-         velocityGain.set(0.5);
          debugInputVelocity.setToZero();
          lastUpdateTime.set(Double.NaN);
          lastInputTimestamp.set(Long.MIN_VALUE);
@@ -395,7 +391,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       private void estimateAcceleration(FramePose3D inputPose, YoFixedFrameSpatialVector inputVelocity)
       {
          correctiveVelocity.set(inputVelocity);
-         correctiveVelocity.scale(velocityGain.getDoubleValue());
+         correctiveVelocity.scale(rawVelocityAlpha.getDoubleValue());
 
          //LINEAR FEEDBACK
          positionVectorError.sub(inputPose.getPosition(), estimatedPose.getPosition());
@@ -407,6 +403,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
          //ANGULAR FEEDBACK
          quaternionError.difference(estimatedPose.getOrientation(), inputPose.getOrientation());
+         quaternionError.normalizeAndLimitToPi();
          quaternionError.getRotationVector(rotationVectorErrorBodyFrame); // expressed in body-frame estimated
          angularVelocityErrorBodyFrame.sub(correctiveVelocity.getAngularPart(), estimatedVelocity.getAngularPart()); // Velocities are expressed in world frame
          estimatedPose.inverseTransform(angularVelocityErrorBodyFrame); // This is now in the body-fixed frame

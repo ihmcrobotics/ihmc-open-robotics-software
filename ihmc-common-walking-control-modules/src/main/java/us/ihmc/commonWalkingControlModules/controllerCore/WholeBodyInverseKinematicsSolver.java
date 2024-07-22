@@ -81,9 +81,15 @@ public class WholeBodyInverseKinematicsSolver implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
    }
 
-   public void reset()
+   public void initialize()
    {
       optimizationControlModule.initialize();
+
+   }
+
+   public void reset()
+   {
+      optimizationControlModule.reset();
    }
 
    public void compute()

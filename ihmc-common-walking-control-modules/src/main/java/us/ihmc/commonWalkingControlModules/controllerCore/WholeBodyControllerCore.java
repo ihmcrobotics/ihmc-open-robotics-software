@@ -141,7 +141,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       if (inverseDynamicsSolver != null)
          inverseDynamicsSolver.initialize();
       if (inverseKinematicsSolver != null)
-         inverseKinematicsSolver.reset();
+         inverseKinematicsSolver.initialize();
       if (virtualModelControlSolver != null)
          virtualModelControlSolver.initialize();
       jointDesiredOutputList.clear();

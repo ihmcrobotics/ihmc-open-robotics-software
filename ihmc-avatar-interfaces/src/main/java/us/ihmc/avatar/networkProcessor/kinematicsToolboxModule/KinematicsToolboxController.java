@@ -797,6 +797,7 @@ public class KinematicsToolboxController extends ToolboxController
    protected boolean initializeInternal()
    {
       firstTick = true;
+      controllerCore.initialize();
       resetInternalData();
 
       boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
