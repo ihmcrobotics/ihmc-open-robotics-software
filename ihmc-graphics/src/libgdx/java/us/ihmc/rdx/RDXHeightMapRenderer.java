@@ -31,7 +31,7 @@ import java.nio.FloatBuffer;
  */
 
 /**
- * This has been updated to use {@link us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with
+ * This has been updated to use {@link us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic}, please use that going forward, this implementation has bugs with
  * interacting with collisions
  * from the mouse
  */
