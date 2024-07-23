@@ -256,8 +256,7 @@ public class RDXBaseUI
       // with the contents behind the window displayed for a few seconds, which is really
       // confusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
-      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
-                                                    applicationAdapter);
+      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration, applicationAdapter);
    }
 
    public void create()
