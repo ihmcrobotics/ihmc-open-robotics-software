@@ -35,7 +35,7 @@ import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.rdx.ui.yo.ImPlotYoHelperDoublePlotLine;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -74,7 +74,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXSphereAndArrowGraphic subGoalGraphic = new RDXSphereAndArrowGraphic();
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final RDXPlanarRegionsGraphic receivedRegionsGraphic = new RDXPlanarRegionsGraphic();
-   private final RDXHeightMapGraphicNew heightMapGraphic = new RDXHeightMapGraphicNew();
+   private final RDXHeightMapGraphic heightMapGraphic = new RDXHeightMapGraphic();
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final RDXFootstepPlanGraphic commandedFootstepsGraphic;

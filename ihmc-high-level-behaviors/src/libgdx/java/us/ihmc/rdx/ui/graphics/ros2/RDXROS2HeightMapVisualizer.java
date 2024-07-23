@@ -24,7 +24,7 @@ import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -41,7 +41,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
-   private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
+   private final RDXHeightMapGraphic heightMapGraphicNew = new RDXHeightMapGraphic();
    private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
 

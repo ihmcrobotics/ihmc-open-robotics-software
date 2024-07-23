@@ -87,7 +87,6 @@ public class RDXSteppableRegionCalculatorDemo
 
             heightMapVisualizer.create();
             steppableRegionsVisualizer.create();
-            //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
             perceptionVisualizerPanel.addVisualizer(heightMapVisualizer);
             perceptionVisualizerPanel.addVisualizer(steppableRegionsVisualizer);
 
