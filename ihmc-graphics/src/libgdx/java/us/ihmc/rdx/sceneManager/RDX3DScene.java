@@ -10,8 +10,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.SpotLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Vector3;
@@ -267,30 +265,22 @@ public class RDX3DScene
 
    public void addPointLight(RDXPointLight pointLight)
    {
-      PointLight pointLightAttribute = RDX3DSceneTools.createPointLight(pointLight.getPosition().getX32(),
-                                                                        pointLight.getPosition().getY32(),
-                                                                        pointLight.getPosition().getZ32());
-      pointLight.setAttribute(pointLightAttribute);
-      pointLights.lights.add(pointLightAttribute);
+      environment.add(pointLight.getPointLightEx());
    }
 
    public void addDirectionalLight(RDXDirectionalLight directionalLight)
    {
-      DirectionalLight directionalLightAttribute = RDX3DSceneTools.createDirectionalLight(directionalLight.getDirection().getX32(),
-                                                                                          directionalLight.getDirection().getY32(),
-                                                                                          directionalLight.getDirection().getZ32());
-      directionalLight.setAttribute(directionalLightAttribute);
-      directionalLights.lights.add(directionalLightAttribute);
+      environment.add(directionalLight.getDirectionalLightEx());
    }
 
    public void removePointLight(RDXPointLight pointLight)
    {
-      pointLights.lights.removeValue(pointLight.getAttribute(), true);
+      pointLights.lights.removeValue(pointLight.getPointLightEx(), true);
    }
 
    public void removeDirectionalLight(RDXDirectionalLight directionalLight)
    {
-      directionalLights.lights.removeValue(directionalLight.getAttribute(), true);
+      directionalLights.lights.removeValue(directionalLight.getDirectionalLightEx(), true);
    }
 
    public void setAmbientLightIntensity(float ambientLightIntensity)
