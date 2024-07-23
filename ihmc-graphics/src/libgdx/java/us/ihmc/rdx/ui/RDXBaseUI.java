@@ -23,6 +23,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
+import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -118,6 +119,9 @@ public class RDXBaseUI
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
+   private ImGuiSliderDoubleWrapper ambientLightIntensitySlider;
+   private ImGuiSliderDoubleWrapper pointLightIntensitySlider;
+   private ImGuiSliderDoubleWrapper directionalLightIntensitySlider;
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -285,6 +289,16 @@ public class RDXBaseUI
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+
+      ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 0.05,
+                                                                 () -> primaryScene.getAmbientLightIntensity(),
+                                                                 value -> primaryScene.setAmbientLightIntensity((float) value));
+      pointLightIntensitySlider = new ImGuiSliderDoubleWrapper("Point light intensity", "%.1f", 0.0, 1000.0,
+                                                               () -> primaryScene.getPointLightIntensity(),
+                                                               value -> primaryScene.setPointLightIntensity((float) value));
+      directionalLightIntensitySlider = new ImGuiSliderDoubleWrapper("Directional light intensity", "%.1f", 0.0, 10.0,
+                                                                     () -> primaryScene.getDirectionalLightIntensity(),
+                                                                     value -> primaryScene.setDirectionalLightIntensity((float) value));
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -500,6 +514,10 @@ public class RDXBaseUI
             else
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
+         ImGui.separator();
+         ambientLightIntensitySlider.renderImGuiWidget();
+         pointLightIntensitySlider.renderImGuiWidget();
+         directionalLightIntensitySlider.renderImGuiWidget();
          ImGui.separator(); // Mouse behavior section
          if (ImGui.menuItem(labels.get("Model scene mouse collision enabled"), null, modelSceneMouseCollisionEnabled))
          {
