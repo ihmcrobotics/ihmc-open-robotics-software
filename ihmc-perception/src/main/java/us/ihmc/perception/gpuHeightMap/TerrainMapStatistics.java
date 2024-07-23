@@ -47,7 +47,6 @@ public class TerrainMapStatistics
          }
          if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
          {
-            Files.createFile(Paths.get(filePath));
             file = new File(filePath);
          }
       }

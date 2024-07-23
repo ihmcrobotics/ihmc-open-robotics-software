@@ -39,7 +39,7 @@ public class PerceptionBasedContinuousHiking
 
       // Add Continuous Hiking Parameters to be between the UI and this process
       ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousHikingParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
 
       // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
