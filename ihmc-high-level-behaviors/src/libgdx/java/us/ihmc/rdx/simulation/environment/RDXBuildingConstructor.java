@@ -246,7 +246,7 @@ public class RDXBuildingConstructor extends RDXPanel
       ImGui.separator();
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
-         panel3D.getScene().setAmbientLight(ambientLightAmount.get());
+         panel3D.getScene().setAmbientLightIntensity(ambientLightAmount.get());
       }
       ImGui.separator();
       if (mode == Mode.NONE)
