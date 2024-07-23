@@ -176,6 +176,7 @@ public class RDX3DScene
 
    public RDXRenderableAdapter addModelInstance(ModelInstance modelInstance, RDXSceneLevel sceneLevel)
    {
+
       modelInstances.add(modelInstance);
       return addRenderableProvider(modelInstance, sceneLevel);
    }
@@ -193,14 +194,14 @@ public class RDX3DScene
    public RDXRenderableAdapter addRenderableProvider(RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
       return renderableAdapter;
    }
 
    public RDXRenderableAdapter addRenderableProvider(RDXRenderableProvider renderableProvider)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
       return renderableAdapter;
    }
 
@@ -208,7 +209,7 @@ public class RDX3DScene
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
       renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
    }
 
    public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider)
@@ -220,11 +221,20 @@ public class RDX3DScene
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
       renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
    }
 
    public void addRenderableAdapter(RDXRenderableAdapter renderableAdapter)
    {
+      addRenderableInternal(renderableAdapter);
+   }
+
+   private void addRenderableInternal(RDXRenderableAdapter renderableAdapter)
+   {
+      // Used to debug ClassCastException thrown by PBRShader
+      // System.err.println("Adding %s@%d".formatted(renderableAdapter.getClass().getName(), renderableAdapter.hashCode()));
+      // new Throwable().printStackTrace();
+
       renderables.add(renderableAdapter);
    }
 

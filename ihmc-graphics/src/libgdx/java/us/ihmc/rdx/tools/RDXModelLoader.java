@@ -10,9 +10,11 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.rdx.tools.assimp.RDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
@@ -129,7 +131,7 @@ public class RDXModelLoader
       }
 
       printedWarnings.add(requestedModelFileName);
-     
+
       return modelData;
    }
 
@@ -146,7 +148,7 @@ public class RDXModelLoader
             map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
             map.drawRectangle(0, 0, 100, 100);
 
-            material.set(TextureAttribute.createDiffuse(new Texture(map)));
+            material.set(PBRTextureAttribute.createBaseColorTexture(new Texture(map)));
 
             map.dispose();
          }

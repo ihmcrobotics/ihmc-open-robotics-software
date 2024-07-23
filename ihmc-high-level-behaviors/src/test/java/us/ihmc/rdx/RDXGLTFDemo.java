@@ -1,18 +1,13 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.BoxesDemoModel;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXGLTFDemo
@@ -32,17 +27,19 @@ public class RDXGLTFDemo
          {
             baseUI.create();
 
-//            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
-            ModelBuilder mb = new ModelBuilder();
-            mb.begin();
-            Material material = new Material();
-            material.set(PBRColorAttribute.createBaseColorFactor(new Color(Color.WHITE).fromHsv(15, .9f, .8f)));
-            MeshPartBuilder mpb = mb.part("cube", GL20.GL_TRIANGLES, Usage.Position | Usage.Normal, material);
-            BoxShapeBuilder.build(mpb, 1f, 1f, 1f);
-            Model model = mb.end();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
+            ModelData d455SensorModel = RDXModelLoader.loadModelData("environmentObjects/d455Sensor/D455.g3dj");
+            Model model = new Model(d455SensorModel);
+            RDXModelInstance modelInstance = new RDXModelInstance(model);
+            modelInstance.setPoseInWorldFrame(new Pose3D(0.5, 0.5, 0.5, 0.0, 0.0, 0.0));
+            baseUI.getPrimaryScene().addModelInstance(modelInstance);
+
+            ModelData blackflyModel = RDXModelLoader.loadModelData("environmentObjects/blackflyFujinon/BlackflyFujinon.g3dj");
+            model = new Model(blackflyModel);
+            modelInstance = new RDXModelInstance(model);
+            modelInstance.setPoseInWorldFrame(new Pose3D(0.5, -0.5, 0.5, 0.0, 0.0, 0.0));
+            baseUI.getPrimaryScene().addModelInstance(modelInstance);
 
             baseUI.getImGuiPanelManager().addPanel("Settings", RDXGLTFDemo.this::renderImGuiWidgets);
 

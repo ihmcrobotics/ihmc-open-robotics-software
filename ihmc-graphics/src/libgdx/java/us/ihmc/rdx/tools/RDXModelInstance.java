@@ -1,10 +1,15 @@
 package us.ihmc.rdx.tools;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -25,11 +30,44 @@ public class RDXModelInstance extends ModelInstance
    public RDXModelInstance(Model model)
    {
       super(model);
+
+      convertMaterials();
    }
 
    public RDXModelInstance(ModelInstance modelInstance)
    {
       super(modelInstance);
+
+      convertMaterials();
+   }
+
+   /** Ensures compatibility with the gdx-gltf PBR shader. */
+   private void convertMaterials()
+   {
+      for (int i = 0; i < materials.size; i++)
+      {
+         Material material = materials.get(i);
+
+         ColorAttribute diffuseColor = material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+         TextureAttribute diffuseTexture = material.get(TextureAttribute.class, TextureAttribute.Diffuse);
+
+         boolean diffuseColorNeedsReplacement = diffuseColor != null && !(diffuseColor instanceof PBRColorAttribute);
+         boolean diffuseTextureNeedsReplacement = diffuseTexture != null && !(diffuseTexture instanceof PBRTextureAttribute);
+
+         if (diffuseColorNeedsReplacement || diffuseTextureNeedsReplacement)
+         {
+            material.clear();
+
+            if (diffuseTextureNeedsReplacement)
+            {
+               material.set(PBRTextureAttribute.createBaseColorTexture(diffuseTexture.textureDescription.texture));
+            }
+            else if (diffuseColorNeedsReplacement)
+            {
+               material.set(PBRColorAttribute.createBaseColorFactor(diffuseColor.color));
+            }
+         }
+      }
    }
 
    public void calculateBoundingBox()

@@ -7,13 +7,13 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
@@ -242,10 +242,10 @@ public class RDXPose3DGizmo implements RenderableProvider
       {
          Color color = AXIS_COLORS[axis.ordinal()];
          normalMaterials[axis.ordinal()] = new Material();
-         normalMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
+         normalMaterials[axis.ordinal()].set(PBRTextureAttribute.createBaseColorTexture(RDXMultiColorMeshBuilder.loadPaletteTexture()));
          normalMaterials[axis.ordinal()].set(new BlendingAttribute(true, color.a));
          highlightedMaterials[axis.ordinal()] = new Material();
-         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
+         highlightedMaterials[axis.ordinal()].set(PBRTextureAttribute.createBaseColorTexture(RDXMultiColorMeshBuilder.loadPaletteTexture()));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
 
          arrowModels[axis.ordinal()] = new DynamicLibGDXModel();
