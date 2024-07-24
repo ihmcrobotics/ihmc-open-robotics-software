@@ -58,6 +58,7 @@ public class RDX3DScene
       int maxBones = 0; // We aren't using bones
       PBRShaderConfig pbrColorShaderConfig = new PBRShaderConfig();
       pbrColorShaderConfig.numBones = maxBones;
+      pbrColorShaderConfig.numPointLights = 10; // Increase max
       // pbrColorShaderConfig.numSpotLights = X  <-- Use this to enable spot lights
 
       DepthShader.Config depthShaderConfig = new DepthShader.Config();
@@ -84,6 +85,11 @@ public class RDX3DScene
       colorModelBatch.begin(camera);
    }
 
+   public void preRenderDepth(Camera camera)
+   {
+      depthModelBatch.begin(camera);
+   }
+
    public void render()
    {
       renderInternal(colorModelBatch, sceneLevelsToRender);
@@ -103,6 +109,11 @@ public class RDX3DScene
    public void renderExternalBatch(ModelBatch batch, Set<RDXSceneLevel> sceneLevel)
    {
       renderInternal(batch, sceneLevel);
+   }
+
+   public void renderDepth(Set<RDXSceneLevel> sceneLevel)
+   {
+      renderInternal(depthModelBatch, sceneLevel);
    }
 
    // For VR in particular
@@ -155,6 +166,11 @@ public class RDX3DScene
    public void postRender()
    {
       colorModelBatch.end();
+   }
+
+   public void postRenderDepth()
+   {
+      depthModelBatch.end();
    }
 
    public void dispose()
