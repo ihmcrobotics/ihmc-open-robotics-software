@@ -1,18 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
@@ -62,6 +49,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -70,6 +58,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -94,12 +83,24 @@ import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -404,8 +405,8 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that is about 130kg.
     */
-   private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
-   private final YoDouble linearMomentumWeight = new YoDouble("linearMomentumWeight", registry);
+   private final YoVector3D angularMomentumWeight = new YoVector3D("angularMomentumWeight", registry);
+   private final YoVector3D linearMomentumWeight = new YoVector3D("linearMomentumWeight", registry);
    private final MomentumCommand momentumCommand = new MomentumCommand();
    /**
     * When {@code true}, the solver will add an objective to minimize the overall rate of change of angular momentum generated.
@@ -417,8 +418,8 @@ public class KinematicsToolboxController extends ToolboxController
     * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
     */
    private final YoBoolean minimizeLinearMomentumRate = new YoBoolean("minimizeLinearMomentumRate", registry);
-   private final YoDouble angularMomentumRateWeight = new YoDouble("angularMomentumRateWeight", registry);
-   private final YoDouble linearMomentumRateWeight = new YoDouble("linearMomentumRateWeight", registry);
+   private final YoVector3D angularMomentumRateWeight = new YoVector3D("angularMomentumRateWeight", registry);
+   private final YoVector3D linearMomentumRateWeight = new YoVector3D("linearMomentumRateWeight", registry);
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
    /**
@@ -496,7 +497,7 @@ public class KinematicsToolboxController extends ToolboxController
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
       minimizeAngularMomentum.set(false);
-      angularMomentumWeight.set(0.125);
+      angularMomentumWeight.set(0.125, 0.125, 0.125);
 
       enableSelfCollisionAvoidance.set(true);
       enableStaticCollisionAvoidance.set(true);
@@ -792,6 +793,7 @@ public class KinematicsToolboxController extends ToolboxController
    protected boolean initializeInternal()
    {
       firstTick = true;
+      controllerCore.initialize();
       resetInternalData();
 
       boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
@@ -873,7 +875,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (minimizeAngularMomentum.getValue() || minimizeLinearMomentum.getValue())
       {
-         momentumCommand.setWeight(angularMomentumWeight.getValue(), linearMomentumWeight.getValue());
+         momentumCommand.setWeights(angularMomentumWeight, linearMomentumWeight);
          if (!minimizeAngularMomentum.getValue())
             momentumCommand.setSelectionMatrixForLinearControl();
          else if (!minimizeLinearMomentum.getValue())
@@ -886,7 +888,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (!firstTick && (minimizeAngularMomentumRate.getValue() || minimizeLinearMomentumRate.getValue()))
       {
          // TODO Probably need to scale the weights based on the update DT.
-         momentumCommandForRateMinimization.setWeight(angularMomentumRateWeight.getValue(), linearMomentumRateWeight.getValue());
+         momentumCommandForRateMinimization.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
          if (!minimizeAngularMomentumRate.getValue())
             momentumCommandForRateMinimization.setSelectionMatrixForLinearControl();
          else if (!minimizeLinearMomentumRate.getValue())
@@ -995,6 +997,18 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointVelocityLimitMode(ActivationState.DISABLED);
          if (command.getEnableJointVelocityLimits())
             activeOptimizationSettings.setJointVelocityLimitMode(ActivationState.ENABLED);
+         if (!command.getJointsToDeactivate().isEmpty())
+         {
+            activeOptimizationSettings.getJointsToDeactivate().clear();
+            for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+               activeOptimizationSettings.getJointsToDeactivate().add(command.getJointsToDeactivate().get(i));
+         }
+         if (!command.getJointsToActivate().isEmpty())
+         {
+            activeOptimizationSettings.getJointsToActivate().clear();
+            for (int i = 0; i < command.getJointsToActivate().size(); i++)
+               activeOptimizationSettings.getJointsToActivate().add(command.getJointsToActivate().get(i));
+         }
          if (command.getDisableInputPersistence())
             setPreserveUserCommandHistory(false);
          else if (command.getEnableInputPersistence())
@@ -1042,6 +1056,21 @@ public class KinematicsToolboxController extends ToolboxController
 
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInitialConfigurationCommand.class))
+      {
+         KinematicsToolboxInitialConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxInitialConfigurationCommand.class);
+         Map<String, Double> initialConfigurationMap = new HashMap<>();
+         List<OneDoFJointBasics> joints = command.getJoints();
+         var initialJointAngles = command.getInitialJointAngles();
+         for (int i = 0; i < joints.size(); i++)
+         {
+            String jointName = joints.get(i).getName();
+            double q = initialJointAngles.get(i);
+            initialConfigurationMap.put(jointName, q);
+         }
+         setInitialRobotConfigurationNamedMap(initialConfigurationMap);
       }
    }
 
@@ -1684,18 +1713,18 @@ public class KinematicsToolboxController extends ToolboxController
       minimizeLinearMomentum.set(enable);
    }
 
-   public void setMomentumWeight(double angularWeight, double linearWeight)
+   public void setMomentumWeight(Tuple3DReadOnly angularWeight, Tuple3DReadOnly linearWeight)
    {
       setAngularMomentumWeight(angularWeight);
       setLinearMomentumWeight(linearWeight);
    }
 
-   public void setAngularMomentumWeight(double weight)
+   public void setAngularMomentumWeight(Tuple3DReadOnly weight)
    {
       angularMomentumWeight.set(weight);
    }
 
-   public void setLinearMomentumWeight(double weight)
+   public void setLinearMomentumWeight(Tuple3DReadOnly weight)
    {
       linearMomentumWeight.set(weight);
    }
@@ -1722,12 +1751,28 @@ public class KinematicsToolboxController extends ToolboxController
       setLinearMomentumRateWeight(linearWeight);
    }
 
+   public void setMomentumRateWeight(Tuple3DReadOnly angularWeight, Tuple3DReadOnly linearWeight)
+   {
+      setAngularMomentumRateWeight(angularWeight);
+      setLinearMomentumRateWeight(linearWeight);
+   }
+
    public void setAngularMomentumRateWeight(double weight)
+   {
+      angularMomentumRateWeight.set(weight, weight, weight);
+   }
+
+   public void setAngularMomentumRateWeight(Tuple3DReadOnly weight)
    {
       angularMomentumRateWeight.set(weight);
    }
 
    public void setLinearMomentumRateWeight(double weight)
+   {
+      linearMomentumRateWeight.set(weight, weight, weight);
+   }
+
+   public void setLinearMomentumRateWeight(Tuple3DReadOnly weight)
    {
       linearMomentumRateWeight.set(weight);
    }

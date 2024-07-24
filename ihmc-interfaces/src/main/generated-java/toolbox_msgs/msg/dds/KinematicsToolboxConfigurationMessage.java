@@ -69,9 +69,21 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * When true, this disables the support polygon constraint on the center of mass.
             */
    public boolean disable_support_polygon_constraint_;
+   /**
+            * Hash codes of the joints to be deactivated in the solver
+            */
+   public us.ihmc.idl.IDLSequence.Integer  joints_to_deactivate_;
+   /**
+            * Hash codes of the joints to be re-activated in the solver
+            */
+   public us.ihmc.idl.IDLSequence.Integer  joints_to_activate_;
 
    public KinematicsToolboxConfigurationMessage()
    {
+      joints_to_deactivate_ = new us.ihmc.idl.IDLSequence.Integer (10, "type_2");
+
+      joints_to_activate_ = new us.ihmc.idl.IDLSequence.Integer (10, "type_2");
+
    }
 
    public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage other)
@@ -104,6 +116,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       disable_support_polygon_constraint_ = other.disable_support_polygon_constraint_;
 
+      joints_to_deactivate_.set(other.joints_to_deactivate_);
+      joints_to_activate_.set(other.joints_to_activate_);
    }
 
    /**
@@ -298,6 +312,24 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    }
 
 
+   /**
+            * Hash codes of the joints to be deactivated in the solver
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getJointsToDeactivate()
+   {
+      return joints_to_deactivate_;
+   }
+
+
+   /**
+            * Hash codes of the joints to be re-activated in the solver
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getJointsToActivate()
+   {
+      return joints_to_activate_;
+   }
+
+
    public static Supplier<KinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
       return KinematicsToolboxConfigurationMessagePubSubType::new;
@@ -337,6 +369,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_support_polygon_constraint_, other.disable_support_polygon_constraint_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.joints_to_deactivate_, other.joints_to_deactivate_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.joints_to_activate_, other.joints_to_activate_, epsilon)) return false;
+
 
       return true;
    }
@@ -372,6 +408,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if(this.disable_support_polygon_constraint_ != otherMyClass.disable_support_polygon_constraint_) return false;
 
+      if (!this.joints_to_deactivate_.equals(otherMyClass.joints_to_deactivate_)) return false;
+      if (!this.joints_to_activate_.equals(otherMyClass.joints_to_activate_)) return false;
 
       return true;
    }
@@ -403,7 +441,11 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       builder.append("enable_support_polygon_constraint=");
       builder.append(this.enable_support_polygon_constraint_);      builder.append(", ");
       builder.append("disable_support_polygon_constraint=");
-      builder.append(this.disable_support_polygon_constraint_);
+      builder.append(this.disable_support_polygon_constraint_);      builder.append(", ");
+      builder.append("joints_to_deactivate=");
+      builder.append(this.joints_to_deactivate_);      builder.append(", ");
+      builder.append("joints_to_activate=");
+      builder.append(this.joints_to_activate_);
       builder.append("}");
       return builder.toString();
    }

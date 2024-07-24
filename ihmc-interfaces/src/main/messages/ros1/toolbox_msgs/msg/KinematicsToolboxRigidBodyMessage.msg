@@ -20,13 +20,17 @@ geometry_msgs/Point desired_position_in_world
 # The data is assumed to be expressed in world frame.
 geometry_msgs/Quaternion desired_orientation_in_world
 
-bool has_linear_velocity
+# Whether the desired linear velocity is defined.
+bool has_desired_linear_velocity
 
-geometry_msgs/Vector3 linear_velocity_in_world
+# The desired linear velocity of the control frame's origin.
+geometry_msgs/Vector3 desired_linear_velocity_in_world
 
-bool has_angular_velocity
+# Whether the desired angular velocity is defined.
+bool has_desired_angular_velocity
 
-geometry_msgs/Vector3 angular_velocity_in_world
+# The desired angular velocity of the control frame.
+geometry_msgs/Vector3 desired_angular_velocity_in_world
 
 # This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().
@@ -62,5 +66,17 @@ ihmc_common_msgs/WeightMatrix3DMessage angular_weight_matrix
 
 # Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
 ihmc_common_msgs/WeightMatrix3DMessage linear_weight_matrix
+
+# Constraint on the linear velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 linear_rate_limitation
+
+# Constraint on the angular velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 angular_rate_limitation
 
 

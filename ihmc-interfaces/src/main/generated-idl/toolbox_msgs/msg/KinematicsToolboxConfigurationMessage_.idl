@@ -74,6 +74,14 @@ module toolbox_msgs
          * When true, this disables the support polygon constraint on the center of mass.
          */
         boolean disable_support_polygon_constraint;
+        /**
+         * Hash codes of the joints to be deactivated in the solver
+         */
+        sequence<long, 10> joints_to_deactivate;
+        /**
+         * Hash codes of the joints to be re-activated in the solver
+         */
+        sequence<long, 10> joints_to_activate;
       };
     };
   };

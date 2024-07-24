@@ -40,3 +40,9 @@ bool enable_input_persistence false
 bool enable_support_polygon_constraint
 # When true, this disables the support polygon constraint on the center of mass.
 bool disable_support_polygon_constraint
+
+# Hash codes of the joints to be deactivated in the solver
+int32[<=10] joints_to_deactivate
+# Hash codes of the joints to be re-activated in the solver
+int32[<=10] joints_to_activate
+
