@@ -25,6 +25,7 @@ import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.shader.RDXOutlineShader;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.nio.ByteBuffer;
@@ -78,6 +79,7 @@ public class RDX3DPanel extends RDXPanel
    private float windowPositionX;
    private float windowPositionY;
    private final RDX3DPanelNotificationManager notificationManager = new RDX3DPanelNotificationManager(this);
+   private RDXOutlineShader outlineShader;
 
    public RDX3DPanel(String panelName)
    {
@@ -127,6 +129,8 @@ public class RDX3DPanel extends RDXPanel
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       addImGuiOverlayAddition(notificationManager::render);
+
+      outlineShader = new RDXOutlineShader();
    }
 
    public void render()
@@ -200,6 +204,8 @@ public class RDX3DPanel extends RDXPanel
             GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 
             frameBuffer.end();
+
+            outlineShader.render(frameBuffer.getColorBufferTexture());
          }
 
          // The scene will render twice if both real and virtual environments are showing
