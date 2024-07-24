@@ -1,0 +1,24 @@
+#ifndef __perception_msgs__msg__GlobalMapTileMessage__idl__
+#define __perception_msgs__msg__GlobalMapTileMessage__idl__
+
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::GlobalMapTileMessage_")
+      struct GlobalMapTileMessage
+      {
+        long center_x;
+        long center_y;
+        long hash_code_of_tile;
+        perception_msgs::msg::dds::HeightMapMessage height_map;
+      };
+    };
+  };
+};
+
+#endif

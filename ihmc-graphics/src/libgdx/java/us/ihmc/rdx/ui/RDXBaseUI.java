@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -173,12 +174,22 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
-         int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
-         Gdx.graphics.setWindowedMode(width, height);
-         int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
-         int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
+         // Work around for native crash on Windows
+         new Thread(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               ThreadTools.sleep(1);
+               int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
+               int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
+               Gdx.graphics.setWindowedMode(width, height);
+               int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
+               int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
+               ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
+            }
+         }, getClass().getSimpleName() + "SetWindowSize").start();
+
          return true;
       });
       layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);

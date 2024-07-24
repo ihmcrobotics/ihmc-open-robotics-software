@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -36,6 +37,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapTile;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -43,6 +46,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -59,7 +63,6 @@ public class HumanoidPerceptionModule
    private final ImageMessage globalHeightMapImageMessage = new ImageMessage();
 
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private final BytePointer compressedLocalHeightMapPointer = new BytePointer();
    private final BytePointer compressedInternalHeightMapPointer = new BytePointer();
 
    private RemoteHeightMapUpdater heightMap;
@@ -75,7 +78,7 @@ public class HumanoidPerceptionModule
    private FramePlanarRegionsList sensorFrameRegions;
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
-
+   private final GlobalHeightMap globalHeightMap = new GlobalHeightMap();
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
    private final Notification resetHeightMapRequested = new Notification();
 
@@ -160,6 +163,10 @@ public class HumanoidPerceptionModule
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
+                                   // Add the current local height map to the global height map
+                                   HeightMapData currentLocalHeightMap = getLatestHeightMapData();
+                                   globalHeightMap.addHeightMap(currentLocalHeightMap);
+
                                    if (ros2Helper != null)
                                    {
                                       publishHeightMapImage(ros2Helper,
@@ -168,10 +175,8 @@ public class HumanoidPerceptionModule
                                                             PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
-                                      //               publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
-                                      //                                     localHeightMapImageMessage, acquisitionTime);
-                                      //               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
-                                      //                                     globalHeightMapImageMessage, acquisitionTime);
+                                      // Publish a global height map
+                                      publishGlobalHeightMapTile(ros2Helper, globalHeightMap, null, PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE);
                                    }
                                 });
       }
@@ -196,6 +201,27 @@ public class HumanoidPerceptionModule
                                                          image.cols(),
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
    }
+
+   private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapTileMessage> topic)
+   {
+      // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
+      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
+      for (GlobalMapTile tile : modifiedCells)
+      {
+         GlobalMapTileMessage globalMapTileMessage = new GlobalMapTileMessage();
+         packGlobalMapTileMessage(globalMapTileMessage, tile);
+         ros2Helper.publish(topic, globalMapTileMessage);
+      }
+   }
+
+   private static void packGlobalMapTileMessage(GlobalMapTileMessage messageToPack, GlobalMapTile tile)
+   {
+      messageToPack.setCenterX(tile.getCenterX());
+      messageToPack.setCenterY(tile.getCenterY());
+      messageToPack.setHashCodeOfTile(tile.hashCode());
+      messageToPack.getHeightMap().set(HeightMapMessageTools.toMessage(tile));
+   }
+
 
    public void publishExternalHeightMapImage(ROS2Helper ros2Helper)
    {
