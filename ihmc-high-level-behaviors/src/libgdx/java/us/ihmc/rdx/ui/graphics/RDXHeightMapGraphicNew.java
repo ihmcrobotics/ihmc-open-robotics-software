@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -188,8 +190,8 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
       Material material = new Material();
       if (paletteTexture == null)
          paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
       for (int i = 0; i < meshBuilders.size(); i++)
       {

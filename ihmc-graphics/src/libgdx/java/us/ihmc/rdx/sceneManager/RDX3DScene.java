@@ -1,6 +1,7 @@
 package us.ihmc.rdx.sceneManager;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -8,16 +9,20 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
-import org.apache.commons.lang3.tuple.Pair;
+import com.badlogic.gdx.graphics.g3d.attributes.SpotLightsAttribute;
+import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.math.Vector3;
+import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
+import net.mgsx.gltf.scene3d.lights.PointLightEx;
+import net.mgsx.gltf.scene3d.scene.SceneRenderableSorter;
+import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig;
+import net.mgsx.gltf.scene3d.shaders.PBRShaderProvider;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.lighting.RDXDirectionalLight;
 import us.ihmc.rdx.lighting.RDXPointLight;
-import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVREye;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -30,11 +35,15 @@ public class RDX3DScene
    private final Map<Object, RDXRenderableAdapter> renderableOwnerKeyMap = new HashMap<>();
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
-   private float ambientLight = 0.4f;
-   private ModelBatch modelBatch;
+   private ColorAttribute ambientLight;
+   private float pointLightIntensity = 660.0f;
+   private float directionalLightIntensity = 5.0f;
+   private ModelBatch colorModelBatch;
+   private ModelBatch depthModelBatch;
    private Environment environment;
    private final PointLightsAttribute pointLights = new PointLightsAttribute();
    private final DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
+   private final SpotLightsAttribute spotLights = new SpotLightsAttribute();
 
    public void create()
    {
@@ -46,40 +55,65 @@ public class RDX3DScene
       this.sceneLevelsToRender = new TreeSet<>();
       Collections.addAll(this.sceneLevelsToRender, sceneLevelsToRender);
 
-      Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
-      String vertexShader = shaderStrings.getLeft();
-      String fragmentShader = shaderStrings.getRight();
-      modelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
+      int maxBones = 0; // We aren't using bones
+      PBRShaderConfig pbrColorShaderConfig = new PBRShaderConfig();
+      pbrColorShaderConfig.numBones = maxBones;
+      pbrColorShaderConfig.numPointLights = 10; // Increase max
+      // pbrColorShaderConfig.numSpotLights = X  <-- Use this to enable spot lights
+
+      DepthShader.Config depthShaderConfig = new DepthShader.Config();
+      depthShaderConfig.numBones = maxBones;
+
+      PBRShaderProvider pbrColorShader = PBRShaderProvider.createDefault(pbrColorShaderConfig);
+      DepthShaderProvider pbrDepthShader = PBRShaderProvider.createDefaultDepth(depthShaderConfig);
+      SceneRenderableSorter sceneRenderableSorter = new SceneRenderableSorter();
+
+      colorModelBatch = new ModelBatch(pbrColorShader, sceneRenderableSorter);
+      depthModelBatch = new ModelBatch(pbrDepthShader);
+
       environment = new Environment();
-      environment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
+      float ambientLightIntensity = 0.01f;
+      ambientLight = ColorAttribute.createAmbientLight(ambientLightIntensity, ambientLightIntensity, ambientLightIntensity, 1.0f);
+      environment.set(ambientLight);
       environment.set(pointLights);
       environment.set(directionalLights);
+      environment.set(spotLights);
    }
 
    public void preRender(Camera camera)
    {
-      modelBatch.begin(camera);
+      colorModelBatch.begin(camera);
+   }
+
+   public void preRenderDepth(Camera camera)
+   {
+      depthModelBatch.begin(camera);
    }
 
    public void render()
    {
-      renderInternal(modelBatch, sceneLevelsToRender);
+      renderInternal(colorModelBatch, sceneLevelsToRender);
    }
 
    public void render(RDXSceneLevel exclusiveSceneLevel)
    {
-      renderInternal(modelBatch, exclusiveSceneLevel.SINGLETON_SET);
+      renderInternal(colorModelBatch, exclusiveSceneLevel.SINGLETON_SET);
    }
 
    public void render(Set<RDXSceneLevel> sceneLevels)
    {
-      renderInternal(modelBatch, sceneLevels);
+      renderInternal(colorModelBatch, sceneLevels);
    }
 
    // For simulated sensors in particular
    public void renderExternalBatch(ModelBatch batch, Set<RDXSceneLevel> sceneLevel)
    {
       renderInternal(batch, sceneLevel);
+   }
+
+   public void renderDepth(Set<RDXSceneLevel> sceneLevel)
+   {
+      renderInternal(depthModelBatch, sceneLevel);
    }
 
    // For VR in particular
@@ -98,8 +132,8 @@ public class RDX3DScene
          }
       }
 
-      modelBatch.begin(camera);
-      renderInternal(modelBatch, sceneLevelsToRender);
+      colorModelBatch.begin(camera);
+      renderInternal(colorModelBatch, sceneLevelsToRender);
 
       if (camera instanceof RDXVREye eye)
       {
@@ -131,7 +165,12 @@ public class RDX3DScene
 
    public void postRender()
    {
-      modelBatch.end();
+      colorModelBatch.end();
+   }
+
+   public void postRenderDepth()
+   {
+      depthModelBatch.end();
    }
 
    public void dispose()
@@ -141,7 +180,7 @@ public class RDX3DScene
          ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
       }
 
-      modelBatch.dispose();
+      colorModelBatch.dispose();
    }
 
    public RDXRenderableAdapter addModelInstance(ModelInstance modelInstance)
@@ -151,6 +190,7 @@ public class RDX3DScene
 
    public RDXRenderableAdapter addModelInstance(ModelInstance modelInstance, RDXSceneLevel sceneLevel)
    {
+
       modelInstances.add(modelInstance);
       return addRenderableProvider(modelInstance, sceneLevel);
    }
@@ -168,14 +208,14 @@ public class RDX3DScene
    public RDXRenderableAdapter addRenderableProvider(RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
       return renderableAdapter;
    }
 
    public RDXRenderableAdapter addRenderableProvider(RDXRenderableProvider renderableProvider)
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
       return renderableAdapter;
    }
 
@@ -183,7 +223,7 @@ public class RDX3DScene
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider);
       renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
    }
 
    public void addRenderableProvider(Object ownerKey, RenderableProvider renderableProvider)
@@ -195,11 +235,20 @@ public class RDX3DScene
    {
       RDXRenderableAdapter renderableAdapter = new RDXRenderableAdapter(renderableProvider, sceneLevel);
       renderableOwnerKeyMap.put(ownerKey, renderableAdapter);
-      renderables.add(renderableAdapter);
+      addRenderableInternal(renderableAdapter);
    }
 
    public void addRenderableAdapter(RDXRenderableAdapter renderableAdapter)
    {
+      addRenderableInternal(renderableAdapter);
+   }
+
+   private void addRenderableInternal(RDXRenderableAdapter renderableAdapter)
+   {
+      // Used to debug ClassCastException thrown by PBRShader
+      // System.err.println("Adding %s@%d".formatted(renderableAdapter.getClass().getName(), renderableAdapter.hashCode()));
+      // new Throwable().printStackTrace();
+
       renderables.add(renderableAdapter);
    }
 
@@ -215,19 +264,13 @@ public class RDX3DScene
 
    public void addDefaultLighting()
    {
-      setAmbientLight(0.914f);
-      RDXPointLight pointLight = new RDXPointLight();
-      pointLight.getPosition().set(10.0, 10.0, 10.0);
-      addPointLight(pointLight);
-      pointLight = new RDXPointLight();
-      pointLight.getPosition().set(10.0, -10.0, 10.0);
-      addPointLight(pointLight);
-      pointLight = new RDXPointLight();
-      pointLight.getPosition().set(-10.0, 10.0, 10.0);
-      addPointLight(pointLight);
-      pointLight = new RDXPointLight();
-      pointLight.getPosition().set(-10.0, -10.0, 10.0);
-      addPointLight(pointLight);
+      environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(-1.0f, -4.0f, -2.0f), directionalLightIntensity));
+
+      Float range = null; // infinite range
+      environment.add(new PointLightEx().set(Color.WHITE, new Vector3(10.0f, 10.0f, 10.0f), pointLightIntensity, range));
+      environment.add(new PointLightEx().set(Color.WHITE, new Vector3(10.0f, -10.0f, 10.0f), pointLightIntensity, range));
+      environment.add(new PointLightEx().set(Color.WHITE, new Vector3(-10.0f, 10.0f, 10.0f), pointLightIntensity, range));
+      environment.add(new PointLightEx().set(Color.WHITE, new Vector3(-10.0f, -10.0f, 10.0f), pointLightIntensity, range));
    }
 
    public void clearLights()
@@ -238,41 +281,72 @@ public class RDX3DScene
 
    public void addPointLight(RDXPointLight pointLight)
    {
-      PointLight pointLightAttribute = RDX3DSceneTools.createPointLight(pointLight.getPosition().getX32(),
-                                                                        pointLight.getPosition().getY32(),
-                                                                        pointLight.getPosition().getZ32());
-      pointLight.setAttribute(pointLightAttribute);
-      pointLights.lights.add(pointLightAttribute);
+      environment.add(pointLight.getPointLightEx());
    }
 
    public void addDirectionalLight(RDXDirectionalLight directionalLight)
    {
-      DirectionalLight directionalLightAttribute = RDX3DSceneTools.createDirectionalLight(directionalLight.getDirection().getX32(),
-                                                                                          directionalLight.getDirection().getY32(),
-                                                                                          directionalLight.getDirection().getZ32());
-      directionalLight.setAttribute(directionalLightAttribute);
-      directionalLights.lights.add(directionalLightAttribute);
+      environment.add(directionalLight.getDirectionalLightEx());
    }
 
    public void removePointLight(RDXPointLight pointLight)
    {
-      pointLights.lights.removeValue(pointLight.getAttribute(), true);
+      pointLights.lights.removeValue(pointLight.getPointLightEx(), true);
    }
 
    public void removeDirectionalLight(RDXDirectionalLight directionalLight)
    {
-      directionalLights.lights.removeValue(directionalLight.getAttribute(), true);
+      directionalLights.lights.removeValue(directionalLight.getDirectionalLightEx(), true);
    }
 
-   public void setAmbientLight(float ambientLight)
+   public void setAmbientLightIntensity(float ambientLightIntensity)
    {
-      this.ambientLight = ambientLight;
-      environment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
+      ambientLight.color.r = ambientLightIntensity;
+      ambientLight.color.g = ambientLightIntensity;
+      ambientLight.color.b = ambientLightIntensity;
    }
 
-   public float getAmbientLight()
+   public float getAmbientLightIntensity()
    {
-      return ambientLight;
+      return ambientLight.color.r;
+   }
+
+   public float getPointLightIntensity()
+   {
+      return pointLightIntensity;
+   }
+
+   public void setPointLightIntensity(float pointLightIntensity)
+   {
+      this.pointLightIntensity = pointLightIntensity;
+
+      for (int i = 0; i < pointLights.lights.size; i++)
+      {
+         pointLights.lights.get(i).intensity = pointLightIntensity;
+      }
+   }
+
+   public float getDirectionalLightIntensity()
+   {
+      return directionalLightIntensity;
+   }
+
+   public void setDirectionalLightIntensity(float directionalLightIntensity)
+   {
+      this.directionalLightIntensity = directionalLightIntensity;
+
+      for (int i = 0; i < directionalLights.lights.size; i++)
+      {
+         if (directionalLights.lights.get(i) instanceof DirectionalLightEx directionalLightEx)
+         {
+            directionalLightEx.intensity = directionalLightIntensity;
+         }
+      }
+   }
+
+   public Environment getEnvironment()
+   {
+      return environment;
    }
 
    public TreeSet<RDXSceneLevel> getSceneLevelsToRender()

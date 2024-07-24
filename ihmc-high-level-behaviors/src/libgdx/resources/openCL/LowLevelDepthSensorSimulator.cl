@@ -19,9 +19,9 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float noiseAmplitudeRange = noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
    bool simulateL515Noise = (bool) parameters[28];
    float randomNegativeOneToOne = read_imagef(noiseImage, (int2) (x, y)).x;
-   float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x, y)).x;
+   float normalizedDeviceCoordinateZ = 2.0f * read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x, y)).x - 1.0f;
 
-   bool depthIsZero = normalizedDeviceCoordinateZ == 0.0f;
+   bool depthIsZero = normalizedDeviceCoordinateZ == 1.0f;
    float eyeDepth;
    if (depthIsZero)
    {

@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class BoxesDemoModel
 {
@@ -40,10 +40,13 @@ public class BoxesDemoModel
    {
       Node node = modelBuilder.node();
       node.translation.set(x, y, z);
+      Material material = new Material();
+      PBRColorAttribute colorAttribute = PBRColorAttribute.createBaseColorFactor(color);
+      material.set(colorAttribute);
       MeshPartBuilder partBuilder = modelBuilder.part("box" + partIndex++,
                                                       GL20.GL_TRIANGLES,
                                                       VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
-                                                      new Material(ColorAttribute.createDiffuse(color)));
+                                                      material);
       BoxShapeBuilder.build(partBuilder, boxSize, boxSize, boxSize);
    }
 

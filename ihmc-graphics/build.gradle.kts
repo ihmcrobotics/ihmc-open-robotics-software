@@ -55,6 +55,7 @@ libgdxDependencies {
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
+   api("com.github.mgsx-dev.gdx-gltf:core:2.2.1")
 
    val lwjglVersion = "3.3.3"
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion")
