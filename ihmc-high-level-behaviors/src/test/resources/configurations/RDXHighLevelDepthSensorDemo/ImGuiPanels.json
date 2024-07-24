@@ -3,12 +3,11 @@
   "windows" : {
     "3D View" : true,
     "3D View 2" : true,
-    "Environment###java.lang.Class:Environment" : true,
+    "Environment" : false,
     "Main view depth" : true,
     "Mouse Picking" : true,
     "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : true,
     "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : true,
-    "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : true,
-    "VR Thread Debugger" : false
+    "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : true
   }
 }
