@@ -23,6 +23,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -290,15 +291,19 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
+      ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 0.05,
                                                                  () -> primaryScene.getAmbientLightIntensity(),
                                                                  value -> primaryScene.setAmbientLightIntensity((float) value));
+      ambientLightIntensitySlider.addWidgetAligner(widgetAligner);
       pointLightIntensitySlider = new ImGuiSliderDoubleWrapper("Point light intensity", "%.1f", 0.0, 1000.0,
                                                                () -> primaryScene.getPointLightIntensity(),
                                                                value -> primaryScene.setPointLightIntensity((float) value));
+      pointLightIntensitySlider.addWidgetAligner(widgetAligner);
       directionalLightIntensitySlider = new ImGuiSliderDoubleWrapper("Directional light intensity", "%.1f", 0.0, 10.0,
                                                                      () -> primaryScene.getDirectionalLightIntensity(),
                                                                      value -> primaryScene.setDirectionalLightIntensity((float) value));
+      directionalLightIntensitySlider.addWidgetAligner(widgetAligner);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
