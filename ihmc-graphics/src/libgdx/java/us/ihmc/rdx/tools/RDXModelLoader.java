@@ -14,7 +14,9 @@ import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
+import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import us.ihmc.rdx.tools.assimp.RDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
@@ -92,13 +94,14 @@ public class RDXModelLoader
       {
          modelFileName = useABetterFormatIfAvailable(modelFileName);
 
-         //               if (modelFileName.endsWith(".gltf"))
-         //               {
-         //                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
-         //                  SceneAsset sceneAsset = new GLTFLoader().load(fileHandle);
-         //                  model = sceneAsset.scene.model;
-         //               }
-         if (modelFileName.endsWith(".g3dj"))
+         if (modelFileName.endsWith(".gltf"))
+         {
+            FileHandle fileHandle = Gdx.files.internal(modelFileName);
+            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
+//            model = sceneAsset.scene.model;
+//            sceneAsset.get
+         }
+         else if (modelFileName.endsWith(".g3dj"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             modelData = new G3dModelLoader(new JsonReader()).loadModelData(fileHandle);
