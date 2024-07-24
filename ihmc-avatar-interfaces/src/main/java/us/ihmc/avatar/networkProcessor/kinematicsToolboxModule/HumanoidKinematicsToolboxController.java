@@ -102,11 +102,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final RecyclingArrayList<ContactingRigidBody> contactingRigidBodies = new RecyclingArrayList<>(ContactingRigidBody::new);
    /**
-    * Updated during the initialization phase, this is where the robot's center of mass position is
-    * stored so it can be held in place during the optimization process such that the solution will be
-    * statically reachable.
+    * Desired center of mass position to hold in place during the optimization process.
+    * <p>
+    * It is updated such as it is located in between the feet in the x and y directions.
+    * An offset cna be added to the x and y coordinates to move the center of mass around using the {@link #centerOfMassOffset}.
+    * </p>
     */
    private final YoFramePoint3D centerOfMassPositionToHold = new YoFramePoint3D("centerOfMassPositionToHold", worldFrame, registry);
+   /**
+    * User defined offset to move the center of mass around.
+    * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
+    * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
+    */
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
 
    /**
