@@ -252,6 +252,8 @@ public class RDX3DPanel extends RDXPanel
       if (backgroundRenderer != null)
          backgroundRenderer.run();
 
+//      scene.renderShadows(camera3D);
+
       scene.render(sceneLevels);
       scene.postRender();
 

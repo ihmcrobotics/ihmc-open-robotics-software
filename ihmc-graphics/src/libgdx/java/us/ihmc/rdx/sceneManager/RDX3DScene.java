@@ -13,7 +13,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.SpotLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
+import net.mgsx.gltf.scene3d.lights.DirectionalShadowLight;
 import net.mgsx.gltf.scene3d.lights.PointLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneRenderableSorter;
 import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig;
@@ -48,6 +50,7 @@ public class RDX3DScene
    private final PointLightsAttribute pointLights = new PointLightsAttribute();
    private final DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
    private final SpotLightsAttribute spotLights = new SpotLightsAttribute();
+   private DirectionalShadowLight directionalShadowLight;
 
    public void create()
    {
@@ -89,11 +92,26 @@ public class RDX3DScene
    public void preRender(Camera camera)
    {
       colorModelBatch.begin(camera);
+//      if (directionalShadowLight != null)
+//      {
+//         directionalShadowLight.begin();
+//      }
    }
 
    public void preRenderDepth(Camera camera)
    {
       depthModelBatch.begin(camera);
+   }
+
+   public void renderShadows(Camera camera)
+   {
+      if (directionalShadowLight != null)
+      {
+//         directionalShadowLight.begin();
+         depthModelBatch.begin(camera);
+         renderDepth(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
+         depthModelBatch.end();
+      }
    }
 
    public void render()
@@ -270,6 +288,14 @@ public class RDX3DScene
 
    public void addDefaultLighting()
    {
+
+//      int shadowMapSize = 2048;
+//      directionalShadowLight = new DirectionalShadowLight(shadowMapSize, shadowMapSize);
+//      BoundingBox boundingBox = new BoundingBox(new Vector3(-5.0f, -5.0f, -5.0f), new Vector3(5.0f, 5.0f, 5.0f));
+//      directionalShadowLight.setBounds(boundingBox);
+////      directionalShadowLight.set(Color.WHITE, new Vector3(-1.0f, -4.0f, -2.0f), directionalLightIntensity);
+//      environment.add(directionalShadowLight);
+
       environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(-1.0f, -4.0f, -2.0f), directionalLightIntensity));
       environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(0.0f, 0.0f, 1.0f), directionalLightIntensity));
 
