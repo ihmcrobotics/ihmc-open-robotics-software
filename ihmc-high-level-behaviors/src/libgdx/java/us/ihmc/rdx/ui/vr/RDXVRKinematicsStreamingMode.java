@@ -476,10 +476,20 @@ public class RDXVRKinematicsStreamingMode
       // For updating on the fly TODO Remove me
       for (RobotSide robotSide : RobotSide.values)
       {
-         ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-         ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-         ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-         ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+         if(robotSide == RobotSide.LEFT)
+         {
+            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.05, 0.1);
+            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0, 0.0, -Math.PI);
+            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, -0.15, 0.0);
+            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, -5 * Math.PI / 4);
+         }
+         else if(robotSide == RobotSide.RIGHT)
+         {
+            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.2, 0.0);
+            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, -0.1);
+            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+         }
 
          RigidBodyBasics hand = ghostFullRobotModel.getHand(robotSide);
          if (hand != null)
@@ -572,6 +582,12 @@ public class RDXVRKinematicsStreamingMode
       {
          inputToSend.getInputs().add().set(rigidBodyInput);
       }
+      if(enabled.get())
+      {
+         inputToSend.setStreamToController(streamToController.get());
+      }
+      else
+         inputToSend.setStreamToController(kinematicsRecorder.isReplaying());
       toolboxInputMessagePending.set(inputToSend);
    }
 
@@ -728,6 +744,8 @@ public class RDXVRKinematicsStreamingMode
                                                                                VRTrackedSegmentType.LEFT_HAND.getOrientationWeight());
             message.getControlFramePositionInEndEffector().set(ikHandControlFramePoses.get(VRTrackedSegmentType.LEFT_HAND.getSegmentSide()).getPosition());
             message.getControlFrameOrientationInEndEffector().set(ikHandControlFramePoses.get(VRTrackedSegmentType.LEFT_HAND.getSegmentSide()).getOrientation());
+            message.setHasAngularVelocity(true);
+            message.setHasLinearVelocity(true);
             output.set(message);
          }
          else if(type == 1)
@@ -748,6 +766,8 @@ public class RDXVRKinematicsStreamingMode
                                                                                   VRTrackedSegmentType.LEFT_FOREARM.getOrientationWeight());
                message.getControlFramePositionInEndEffector().set(ikForearmControlFramePoses.get(VRTrackedSegmentType.LEFT_FOREARM.getSegmentSide()).getPosition());
                message.getControlFrameOrientationInEndEffector().set(ikForearmControlFramePoses.get(VRTrackedSegmentType.LEFT_FOREARM.getSegmentSide()).getOrientation());
+               message.setHasAngularVelocity(true);
+               message.setHasLinearVelocity(true);
                output.set(message);
             }
          }
@@ -768,6 +788,8 @@ public class RDXVRKinematicsStreamingMode
                                                                                VRTrackedSegmentType.RIGHT_HAND.getOrientationWeight());
             message.getControlFramePositionInEndEffector().set(ikHandControlFramePoses.get(VRTrackedSegmentType.RIGHT_HAND.getSegmentSide()).getPosition());
             message.getControlFrameOrientationInEndEffector().set(ikHandControlFramePoses.get(VRTrackedSegmentType.RIGHT_HAND.getSegmentSide()).getOrientation());
+            message.setHasAngularVelocity(true);
+            message.setHasLinearVelocity(true);
             output.set(message);
          }
          else if(type == 1)
@@ -788,6 +810,8 @@ public class RDXVRKinematicsStreamingMode
                                                                                   VRTrackedSegmentType.RIGHT_FOREARM.getOrientationWeight());
                message.getControlFramePositionInEndEffector().set(ikForearmControlFramePoses.get(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentSide()).getPosition());
                message.getControlFrameOrientationInEndEffector().set(ikForearmControlFramePoses.get(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentSide()).getOrientation());
+               message.setHasAngularVelocity(true);
+               message.setHasLinearVelocity(true);
                output.set(message);
             }
          }
