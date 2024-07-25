@@ -476,20 +476,10 @@ public class RDXVRKinematicsStreamingMode
       // For updating on the fly TODO Remove me
       for (RobotSide robotSide : RobotSide.values)
       {
-         if(robotSide == RobotSide.LEFT)
-         {
-            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.05, 0.1);
-            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0, 0.0, -Math.PI);
-            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, -0.15, 0.0);
-            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, -5 * Math.PI / 4);
-         }
-         else if(robotSide == RobotSide.RIGHT)
-         {
-            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.2, 0.0);
-            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, -0.1);
-            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-         }
+         ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
+         ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0, Math.PI/4);
+         ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.1);
+         ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(0.0, 0.0, Math.PI/2);
 
          RigidBodyBasics hand = ghostFullRobotModel.getHand(robotSide);
          if (hand != null)
@@ -594,7 +584,7 @@ public class RDXVRKinematicsStreamingMode
    public void renderImGuiWidgets()
    {
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-      
+
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
@@ -797,7 +787,7 @@ public class RDXVRKinematicsStreamingMode
             MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(referenceFrame);
             trackerDesiredControlFrame.getReferenceFrame().update();
             trackedSegmentDesiredFrame.put(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentName(), trackerDesiredControlFrame);
-            trackerFrameGraphics.get(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentName()).setToReferenceFrame(referenceFrame);
+            trackerFrameGraphics.get(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentName()).getReferenceFrame());
             RigidBodyBasics controlledSegment = ghostFullRobotModel.getForearm(RobotSide.RIGHT);
 
             if (controlledSegment != null)
@@ -813,6 +803,9 @@ public class RDXVRKinematicsStreamingMode
                message.setHasAngularVelocity(true);
                message.setHasLinearVelocity(true);
                output.set(message);
+
+
+
             }
          }
       }
