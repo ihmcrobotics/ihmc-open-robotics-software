@@ -7,6 +7,8 @@ import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.BoxesDemoModel;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXGLTFDemo
@@ -24,6 +26,8 @@ public class RDXGLTFDemo
             baseUI.create();
 
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
+
+            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj")));
 
             FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
             SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
