@@ -271,6 +271,7 @@ public class RDX3DScene
    public void addDefaultLighting()
    {
       environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(-1.0f, -4.0f, -2.0f), directionalLightIntensity));
+      environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(0.0f, 0.0f, 1.0f), directionalLightIntensity));
 
       Float range = null; // infinite range
       environment.add(new PointLightEx().set(Color.WHITE, new Vector3(10.0f, 10.0f, 10.0f), pointLightIntensity, range));
