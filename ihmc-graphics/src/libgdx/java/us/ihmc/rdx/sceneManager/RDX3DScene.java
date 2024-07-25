@@ -1,7 +1,13 @@
 package us.ihmc.rdx.sceneManager;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.resolvers.ClasspathFileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cubemap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -10,14 +16,31 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.SpotLightsAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DepthShader;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import net.mgsx.gltf.scene3d.attributes.PBRCubemapAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRMatrixAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.lights.PointLightEx;
+import net.mgsx.gltf.scene3d.lights.SpotLightEx;
+import net.mgsx.gltf.scene3d.scene.CascadeShadowMap;
+import net.mgsx.gltf.scene3d.scene.MirrorSource;
+import net.mgsx.gltf.scene3d.scene.SceneManager;
 import net.mgsx.gltf.scene3d.scene.SceneRenderableSorter;
+import net.mgsx.gltf.scene3d.scene.SceneSkybox;
+import net.mgsx.gltf.scene3d.scene.TransmissionSource;
+import net.mgsx.gltf.scene3d.scene.Updatable;
+import net.mgsx.gltf.scene3d.shaders.PBRCommon;
 import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig;
 import net.mgsx.gltf.scene3d.shaders.PBRShaderProvider;
+import net.mgsx.gltf.scene3d.utils.EnvironmentCache;
+import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.lighting.RDXDirectionalLight;
@@ -30,7 +53,7 @@ import java.util.*;
 
 public class RDX3DScene
 {
-   public static final float DEFAULT_AMBIENT_LIGHT_INTENSITY = 0.0f;
+   public static final float DEFAULT_AMBIENT_LIGHT_INTENSITY = 1.0f;
    public static final float DEFAULT_POINT_LIGHT_INTENSITY = 660.0f;
    public static final float DEFAULT_DIRECTIONAL_LIGHT_INTENSITY = 2.0f;
 
@@ -42,12 +65,24 @@ public class RDX3DScene
    private ColorAttribute ambientLight;
    private float pointLightIntensity = DEFAULT_POINT_LIGHT_INTENSITY;
    private float directionalLightIntensity = DEFAULT_DIRECTIONAL_LIGHT_INTENSITY;
+   private Cubemap diffuseCubemap;
+   private Cubemap environmentCubemap;
+   private Cubemap specularCubemap;
+   private Texture brdfLUT;
    private ModelBatch colorModelBatch;
    private ModelBatch depthModelBatch;
    private Environment environment;
    private final PointLightsAttribute pointLights = new PointLightsAttribute();
    private final DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
    private final SpotLightsAttribute spotLights = new SpotLightsAttribute();
+   private SceneSkybox sceneSkybox;
+   private TransmissionSource transmissionSource;
+   private MirrorSource mirrorSource;
+   private CascadeShadowMap cascadeShadowMap;
+   protected final EnvironmentCache computedEnvironement = new EnvironmentCache();
+
+   private PointLightsAttribute computedPointLights = new PointLightsAttribute();
+   private SpotLightsAttribute computedSpotLights = new SpotLightsAttribute();
 
    public void create()
    {
@@ -84,11 +119,107 @@ public class RDX3DScene
       environment.set(pointLights);
       environment.set(directionalLights);
       environment.set(spotLights);
+
+      diffuseCubemap = EnvironmentUtil.createCubemap(new ClasspathFileHandleResolver(),
+                                                     "cubeMaps/demo1/diffuse/diffuse_", ".jpg",
+                                                     EnvironmentUtil.FACE_NAMES_NEG_POS);
+      environmentCubemap = EnvironmentUtil.createCubemap(new ClasspathFileHandleResolver(),
+                                                         "cubeMaps/demo1/environment/environment_", ".jpg",
+                                                         EnvironmentUtil.FACE_NAMES_NEG_POS);
+      int lods = 10;
+      specularCubemap = EnvironmentUtil.createCubemap(new ClasspathFileHandleResolver(),
+                                                      "cubeMaps/demo1/specular/specular_", "_", ".jpg",
+                                                      lods,
+                                                      EnvironmentUtil.FACE_NAMES_NEG_POS);
+      brdfLUT = new Texture(Gdx.files.classpath("brdfLUT.png"));
+
+      environment.set(PBRCubemapAttribute.createDiffuseEnv(diffuseCubemap));
+      environment.set(PBRCubemapAttribute.createSpecularEnv(specularCubemap));
+      environment.set(new PBRTextureAttribute(PBRTextureAttribute.BRDFLUTTexture, brdfLUT));
+      environment.set(new PBRFloatAttribute(PBRFloatAttribute.ShadowBias, 0f));
+
+      sceneSkybox = new SceneSkybox(environmentCubemap);
+      Matrix4 transform = new Matrix4();
+      transform.rotate(1.0f, 0.0f, 0.0f, -90.0f);
+      PBRMatrixAttribute envRotation = PBRMatrixAttribute.createEnvRotation(transform);
+      environment.set(envRotation);
+      sceneSkybox.setRotation(envRotation.matrix);
    }
 
    public void preRender(Camera camera)
    {
+      float deltaTime = Gdx.graphics.getDeltaTime();
+
+      computedEnvironement.setCache(environment);
+      computedPointLights.lights.clear();
+      computedSpotLights.lights.clear();
+      if (environment != null)
+      {
+         for (Attribute attribute : environment)
+         {
+            if (attribute instanceof PointLightsAttribute pointLightsAttribute)
+            {
+               computedPointLights.lights.addAll(pointLightsAttribute.lights);
+               computedEnvironement.replaceCache(computedPointLights);
+            }
+            else if (attribute instanceof SpotLightsAttribute spotLightsAttribute)
+            {
+               computedSpotLights.lights.addAll(spotLightsAttribute.lights);
+               computedEnvironement.replaceCache(computedSpotLights);
+            }
+            else
+            {
+               computedEnvironement.set(attribute);
+            }
+         }
+      }
+      cullLights(camera);
+
+      for (RDXRenderableAdapter renderable : renderables)
+      {
+         if (renderable instanceof Updatable updatable)
+         {
+            updatable.update(camera, deltaTime);
+         }
+      }
+
+      sceneSkybox.update(camera, deltaTime);
+
+      PBRCommon.enableSeamlessCubemaps();
+
       colorModelBatch.begin(camera);
+   }
+
+   protected void cullLights(Camera camera)
+   {
+      PointLightsAttribute pointLightsAttribute = environment.get(PointLightsAttribute.class, PointLightsAttribute.Type);
+      if (pointLightsAttribute != null)
+      {
+         for (PointLight light : pointLightsAttribute.lights)
+         {
+            if (light instanceof PointLightEx pointLightEx)
+            {
+               if (pointLightEx.range != null && !camera.frustum.sphereInFrustum(pointLightEx.position, pointLightEx.range))
+               {
+                  computedPointLights.lights.removeValue(pointLightEx, true);
+               }
+            }
+         }
+      }
+      SpotLightsAttribute spotLightsAttribute = environment.get(SpotLightsAttribute.class, SpotLightsAttribute.Type);
+      if (spotLightsAttribute != null)
+      {
+         for (SpotLight light : spotLightsAttribute.lights)
+         {
+            if (light instanceof SpotLightEx spotLightEx)
+            {
+               if (spotLightEx.range != null && !camera.frustum.sphereInFrustum(spotLightEx.position, spotLightEx.range))
+               {
+                  computedSpotLights.lights.removeValue(spotLightEx, true);
+               }
+            }
+         }
+      }
    }
 
    public void preRenderDepth(Camera camera)
@@ -165,8 +296,9 @@ public class RDX3DScene
       {
          renderable.setSceneLevelsToRender(sceneLevelsToRender);
 
-         modelBatch.render(renderable, environment);
+         modelBatch.render(renderable, computedEnvironement);
       }
+      modelBatch.render(sceneSkybox);
    }
 
    public void postRender()
@@ -196,7 +328,6 @@ public class RDX3DScene
 
    public RDXRenderableAdapter addModelInstance(ModelInstance modelInstance, RDXSceneLevel sceneLevel)
    {
-
       modelInstances.add(modelInstance);
       return addRenderableProvider(modelInstance, sceneLevel);
    }
