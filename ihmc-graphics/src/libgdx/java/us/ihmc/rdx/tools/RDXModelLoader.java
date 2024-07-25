@@ -10,10 +10,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
+import net.mgsx.gltf.loaders.glb.GLBLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
@@ -46,6 +46,8 @@ public class RDXModelLoader
 
    /**
     * No synchronization and will load data from file every time.
+    *
+    * FIXME: Cannot load GLTF/GLB to ModelData
     */
    public static ModelData loadModelData(String modelFileName)
    {
@@ -59,6 +61,8 @@ public class RDXModelLoader
 
    private Model loadOrGetModel(String modelFileName)
    {
+      String requestedModelFileName = modelFileName;
+
       modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
 
       Object preventLoadingMoreThanOnceSynchronizer = modelLoadingSynchronizers.computeIfAbsent(modelFileName, key -> new Object());
@@ -69,12 +73,58 @@ public class RDXModelLoader
          model = loadedModels.get(modelFileName);
          if (model == null)
          {
-            ModelData modelData = loadModelData(modelFileName);
-            if (modelData != null)
             {
-               model = new Model(modelData);
-               ensureModelHasDiffuseTextureAttribute(modelFileName, model);
-               loadedModels.put(modelFileName, model);
+               String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+               FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".glb");
+               if (potentialFileHandle.exists())
+               {
+                  LogTools.debug("Found GLB file as an alternative for {}", modelFileName);
+                  modelFileName = modelFileNameWithoutExtension + ".glb";
+
+                  SceneAsset sceneAsset = new GLBLoader().load(potentialFileHandle, true);
+                  model = sceneAsset.scene.model;
+               }
+            }
+
+            if (model == null)
+            {
+               String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+               FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
+               if (potentialFileHandle.exists())
+               {
+                  LogTools.debug("Found GLTF file as an alternative for {}", modelFileName);
+                  modelFileName = modelFileNameWithoutExtension + ".gltf";
+
+                  SceneAsset sceneAsset = new GLTFLoader().load(potentialFileHandle, true);
+                  model = sceneAsset.scene.model;
+               }
+            }
+
+            if (model != null)
+            {
+               boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
+
+               long numberOfVertices = LibGDXTools.countVertices(model);
+               LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
+
+               if (shouldPrintWarnings && numberOfVertices > 15000)
+               {
+                  LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
+               }
+
+               printedWarnings.add(requestedModelFileName);
+
+               return model;
+            }
+            else
+            {
+               ModelData modelData = loadModelDataInternal(requestedModelFileName);
+               if (modelData != null)
+               {
+                  model = new Model(modelData);
+                  ensureModelHasDiffuseTextureAttribute(modelFileName, model);
+                  loadedModels.put(modelFileName, model);
+               }
             }
          }
       }
