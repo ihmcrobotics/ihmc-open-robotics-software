@@ -94,14 +94,7 @@ public class RDXModelLoader
       {
          modelFileName = useABetterFormatIfAvailable(modelFileName);
 
-         if (modelFileName.endsWith(".gltf"))
-         {
-            FileHandle fileHandle = Gdx.files.internal(modelFileName);
-            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
-//            model = sceneAsset.scene.model;
-//            sceneAsset.get
-         }
-         else if (modelFileName.endsWith(".g3dj"))
+         if (modelFileName.endsWith(".g3dj"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             modelData = new G3dModelLoader(new JsonReader()).loadModelData(fileHandle);
@@ -160,23 +153,8 @@ public class RDXModelLoader
 
    private String useABetterFormatIfAvailable(String modelFileName)
    {
-      boolean gltfExists = false;
-      // TODO: Possibly figure out msgx's gltf support
-      //  api("com.github.mgsx-dev.rdx-gltf:gltf:2.0.0-rc.1")
-      // if (!modelFileName.endsWith(".gltf"))
-      // {
-      //    String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-      //    FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
-      //    if (potentialFileHandle.exists())
-      //    {
-      //       LogTools.debug("Found glTF 2.0 file as an alternative for {}", modelFileName);
-      //       modelFileName = modelFileNameWithoutExtension + ".gltf";
-      //       gltfExists = true;
-      //    }
-      // }
-
       boolean g3dbExists = false;
-      if (!gltfExists && !modelFileName.endsWith(".g3db"))
+      if (!modelFileName.endsWith(".g3db"))
       {
          String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3db");
@@ -188,7 +166,7 @@ public class RDXModelLoader
          }
       }
 
-      if (!gltfExists && !g3dbExists && !modelFileName.endsWith(".g3dj"))
+      if (!g3dbExists && !modelFileName.endsWith(".g3dj"))
       {
          String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
