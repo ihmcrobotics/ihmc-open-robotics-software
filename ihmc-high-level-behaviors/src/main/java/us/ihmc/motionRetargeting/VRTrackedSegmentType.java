@@ -4,11 +4,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum VRTrackedSegmentType
 {
-   LEFT_HAND("leftHand", RobotSide.LEFT, 20.0, 1), // Defaults are 20 and 1. Reduce the orientation for the knob arms
-   RIGHT_HAND("rightHand", RobotSide.RIGHT, 20.0, 1),
-   LEFT_FOREARM("leftForeArm", RobotSide.LEFT, 1.0, 0),
-   RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, 1.0, 0),
-   CHEST("chest", null,0.0, 10);
+   LEFT_HAND("leftHand", RobotSide.LEFT, 0.0, 1.0), // Defaults are 20 and 1. Reduce the orientation for the knob arms
+   RIGHT_HAND("rightHand", RobotSide.RIGHT, 0.0, 1.0),
+   LEFT_UPPERARM("leftUpperArm", RobotSide.LEFT, 0.0, 1.0),
+   RIGHT_UPPERARM("rightUpperArm", RobotSide.RIGHT, 0.0, 1.0),
+   LEFT_FOREARM("leftForeArm", RobotSide.LEFT, 0.0, 1.0),
+   RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, 0.0, 1.0),
+   CHEST("chest", null, 0.0, 10);
 
    private String segmentName;
    private RobotSide robotSide;
@@ -41,5 +43,25 @@ public enum VRTrackedSegmentType
    public double getOrientationWeight()
    {
       return orientationWeight;
+   }
+
+   public static VRTrackedSegmentType toHand(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND;
+   }
+
+   public static VRTrackedSegmentType toForearm(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? LEFT_FOREARM : RIGHT_FOREARM;
+   }
+
+   public static VRTrackedSegmentType toUpperArm(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? LEFT_UPPERARM : RIGHT_UPPERARM;
+   }
+
+   public static VRTrackedSegmentType toChest()
+   {
+      return CHEST;
    }
 }

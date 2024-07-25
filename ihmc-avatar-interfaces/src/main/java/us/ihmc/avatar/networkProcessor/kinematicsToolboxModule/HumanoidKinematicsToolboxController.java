@@ -33,6 +33,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -273,6 +274,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getForearm(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
+         // TODO FIXME!!!!
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getPredecessor());
       }
 
       // Some robots may not have some the bodies.
