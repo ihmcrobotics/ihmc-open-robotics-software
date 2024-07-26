@@ -148,8 +148,6 @@ public class ContinuousPlannerSchedulingTask
     */
    private void tickStateMachine()
    {
-      continuousPlanner.syncParametersCallback();
-
       stateMachine.doActionAndTransition();
    }
 
@@ -162,11 +160,6 @@ public class ContinuousPlannerSchedulingTask
    {
       this.terrainMap = new TerrainMapData(terrainMapData);
       this.continuousPlanner.setLatestTerrainMapData(terrainMapData);
-   }
-
-   public ContinuousPlanner getContinuousPlanner()
-   {
-      return continuousPlanner;
    }
 
    public void destroy()
