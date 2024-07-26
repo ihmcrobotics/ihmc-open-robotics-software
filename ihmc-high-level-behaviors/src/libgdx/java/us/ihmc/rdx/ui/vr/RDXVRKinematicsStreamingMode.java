@@ -1001,7 +1001,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                                             .getReferenceFrame(),
                                                                                   chest.getSegmentName(),
                                                                                   0.0,
-                                                                                  1.0);
+                                                                                  10);
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
                MessageTools.packSelectionMatrix3DMessage(true, false, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikChestControlFramePoses.getPosition());
