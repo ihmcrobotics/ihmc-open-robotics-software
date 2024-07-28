@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -145,15 +146,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
-            yoloNodeMessage.getObjectPointCloud().clear();
-            for (int i = 0; i < yoloNodeMessage.getObjectPointCloud().getCurrentCapacity() && i < yoloNode.getObjectPointCloud().size(); ++i)
-            {
-               Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
-               point.set(yoloNode.getObjectPointCloud().get(i));
-            }            yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
-            yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
-            yoloNodeMessage.getFilteredObjectPose().set(yoloNode.getObjectPose()); // FIXME Maybe set this to something else?
+            yoloNode.fromMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }

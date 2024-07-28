@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -69,16 +70,14 @@ public class PerceptionMessageTools
                                                   ROS2Topic<ImageMessage> topic,
                                                   ImageMessage depthImageMessage,
                                                   ROS2PublishSubscribeAPI helper,
-                                                  FramePose3D cameraPose,
-                                                  Instant aquisitionTime,
+                                                  Pose3DReadOnly cameraPose,
+                                                  Instant acquisitionTime,
                                                   long sequenceNumber,
                                                   int height,
                                                   int width,
                                                   float depthToMetersRatio)
    {
-      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+      packCompressedDepthImage(compressedDepthPointer, depthImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       helper.publish(topic, depthImageMessage);
    }
 
@@ -86,15 +85,14 @@ public class PerceptionMessageTools
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
                                                      ROS2Helper helper,
-                                                     FramePose3D cameraPose,
-                                                     Instant aquisitionTime,
+                                                     Pose3DReadOnly cameraPose,
+                                                     Instant acquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
                                                      int width,
                                                      float depthToMetersRatio)
    {
-      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
+      packJPGCompressedColorImage(compressedColorPointer, colorImageMessage, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       helper.publish(topic, colorImageMessage);
    }
 
@@ -129,9 +127,35 @@ public class PerceptionMessageTools
       }
    }
 
+   public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
+                                               ImageMessage depthImageMessage,
+                                               Pose3DReadOnly cameraPose,
+                                               Instant aquisitionTime,
+                                               long sequenceNumber,
+                                               int height,
+                                               int width,
+                                               float depthToMetersRatio)
+   {
+      packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+   }
+
+   public static void packJPGCompressedColorImage(BytePointer compressedColorPointer,
+                                                  ImageMessage colorImageMessage,
+                                                  Pose3DReadOnly cameraPose,
+                                                  Instant aquisitionTime,
+                                                  long sequenceNumber,
+                                                  int height,
+                                                  int width,
+                                                  float depthToMetersRatio)
+   {
+      packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
+      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
+   }
+
    public static void packImageMessage(ImageMessage imageMessage,
                                        BytePointer dataBytePointer,
-                                       FramePose3D cameraPose,
+                                       Pose3DReadOnly cameraPose,
                                        Instant aquisitionTime,
                                        long sequenceNumber,
                                        int height,
@@ -228,6 +252,37 @@ public class PerceptionMessageTools
          }
       }
    }
+
+   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, float widthInMeters, float cellSizeInMeters)
+   {
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      // Create a new Mat object to hold the height map data
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            double cellHeight = heightMapData.getHeightAt(key);
+
+            // Reverse the height calculation to get the raw height value
+            int height = (int) ((cellHeight + (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset())
+                                * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+
+            // Store the height value in the Mat object
+            heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
+
+         }
+      }
+
+      return heightMapMat;
+   }
+
+
+
 
    public static void convertToHeightMapImage(ImageMessage imageMessage,
                                               Mat heightMapImageToPack,

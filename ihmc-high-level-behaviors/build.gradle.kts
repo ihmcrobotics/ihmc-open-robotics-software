@@ -40,10 +40,8 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-definition:17-0.26.0")
    api("us.ihmc:mecano-graphviz:17-0.18.1")
-   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
-   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
-   api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
-   api("com.badlogicgames.gdx:gdx-bullet-platform:1.11.0:natives-desktop")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.3")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
 }
 
@@ -52,7 +50,6 @@ testDependencies {
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
-   api("com.github.stephengold:Libbulletjme:12.6.0")
    api("us.ihmc:scs2-examples:17-0.26.0")
    api("us.ihmc:scs2-bullet-simulation-test:17-0.26.0")
    api("us.ihmc:example-simulations:source")

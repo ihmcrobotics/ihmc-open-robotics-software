@@ -6,6 +6,8 @@ import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -51,7 +53,10 @@ public class ContinuousPlannerSchedulingTask
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousHikingParameters continuousHikingParameters)
+                                          ContinuousHikingParameters continuousHikingParameters,
+                                          MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters,
+                                          DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
+                                          SwingPlannerParametersBasics swingPlannerParameters)
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
 
@@ -59,10 +64,16 @@ public class ContinuousPlannerSchedulingTask
       AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
-      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters, planningMode);
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters, planningMode);
       ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger, statistics);
+      continuousPlanner = new ContinuousPlanner(robotModel,
+                                                referenceFrames,
+                                                continuousHikingParameters,
+                                                monteCarloFootstepPlannerParameters,
+                                                footstepPlannerParameters,
+                                                swingPlannerParameters,
+                                                debugger,
+                                                statistics);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -137,8 +148,6 @@ public class ContinuousPlannerSchedulingTask
     */
    private void tickStateMachine()
    {
-      continuousPlanner.syncParametersCallback();
-
       stateMachine.doActionAndTransition();
    }
 
@@ -151,11 +160,6 @@ public class ContinuousPlannerSchedulingTask
    {
       this.terrainMap = new TerrainMapData(terrainMapData);
       this.continuousPlanner.setLatestTerrainMapData(terrainMapData);
-   }
-
-   public ContinuousPlanner getContinuousPlanner()
-   {
-      return continuousPlanner;
    }
 
    public void destroy()

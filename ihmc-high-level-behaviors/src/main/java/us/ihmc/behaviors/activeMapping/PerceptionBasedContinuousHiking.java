@@ -2,13 +2,14 @@ package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
-import us.ihmc.perception.HumanoidActivePerceptionModule;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -22,7 +23,7 @@ public class PerceptionBasedContinuousHiking
 {
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final TerrainPerceptionProcessWithDriver perceptionTask;
-   private final HumanoidActivePerceptionModule activePerceptionModule;
+   private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
@@ -32,36 +33,52 @@ public class PerceptionBasedContinuousHiking
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
+
+      // Add Continuous Hiking Parameters to be between the UI and this process
+      ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
+
+      // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
+      MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
+
+      // Add A* Footstep Planner Parameters to be between the UI and this process
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
+
+      // Add Swing Planner Parameters to be synced between the UI and this process
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
+
       perceptionTask = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
                                                               robotModel.getSimpleRobotName(),
                                                               robotModel.getCollisionBoxProvider(),
                                                               robotModel.createFullRobotModel(),
                                                               RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                              ros2PropertySetGroup, ros2Helper,
+                                                              ros2PropertySetGroup,
+                                                              ros2Helper,
                                                               PerceptionAPI.D455_DEPTH_IMAGE,
                                                               PerceptionAPI.D455_COLOR_IMAGE,
-                                                              PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
 
-      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
-      ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
-      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters);
-
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getSwingPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getMonteCarloFootstepPlannerParameters());
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
+                                                                            ros2Node,
+                                                                            syncedRobot.getReferenceFrames(),
+                                                                            continuousHikingParameters,
+                                                                            monteCarloPlannerParameters,
+                                                                            footstepPlannerParameters,
+                                                                            swingPlannerParameters);
 
       perceptionTask.run();
 
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
+
       // Add initial delay to get things going in the right order
       executorService.scheduleAtFixedRate(this::update, 500, 100, TimeUnit.MILLISECONDS);
-
-      ThreadTools.sleepForever();
    }
 
    public void update()
@@ -74,10 +91,15 @@ public class PerceptionBasedContinuousHiking
       if (perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData() != null)
       {
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(true);
-         activePerceptionModule.getContinuousPlannerSchedulingTask().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
-         activePerceptionModule.getContinuousPlannerSchedulingTask().setTerrainMapData(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor()
-                                                                                                     .getTerrainMapData());
+         continuousPlannerSchedulingTask.setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
+         continuousPlannerSchedulingTask.setTerrainMapData(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor().getTerrainMapData());
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(false);
       }
+   }
+
+   public void destroy()
+   {
+      if (continuousPlannerSchedulingTask != null)
+         continuousPlannerSchedulingTask.destroy();
    }
 }

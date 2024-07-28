@@ -50,7 +50,6 @@ public class RDXOusterBlackflyProjectionTest
          {
             baseUI.create();
 
-            worldFrameGraphic = new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3));
             LibGDXTools.setOpacity(worldFrameGraphic, 0.6f);
 
             userTransformToParent = new RigidBodyTransform();

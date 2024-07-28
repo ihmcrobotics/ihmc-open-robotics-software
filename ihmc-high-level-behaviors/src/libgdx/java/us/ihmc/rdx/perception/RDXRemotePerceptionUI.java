@@ -59,7 +59,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(continuousHikingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(continuousHikingParameters, ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(monteCarloFootstepPlannerParameters, ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS);
 

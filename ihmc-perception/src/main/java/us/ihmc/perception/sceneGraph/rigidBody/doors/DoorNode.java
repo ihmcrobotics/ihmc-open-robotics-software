@@ -272,8 +272,7 @@ public class DoorNode extends DetectableSceneNode
          }
 
          // Update the scene node reference frame
-         getNodeToParentFrameTransform().set(getLatestUpdatedOpeningMechanism().getMechanismFrame().getTransformToWorldFrame());
-         getNodeFrame().update();
+         setNodeToParentFrameTransformAndUpdate(getLatestUpdatedOpeningMechanism().getMechanismFrame().getTransformToWorldFrame());
       }
    }
 

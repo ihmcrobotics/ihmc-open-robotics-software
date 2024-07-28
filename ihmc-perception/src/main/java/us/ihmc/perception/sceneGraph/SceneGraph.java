@@ -322,7 +322,6 @@ public class SceneGraph
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
          detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
-
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else
