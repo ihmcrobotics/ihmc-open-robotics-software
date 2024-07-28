@@ -67,6 +67,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final Throttler previewPlanningThrottler = new Throttler().setPeriod(1.0);
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
+   private final TypedNotification<FootstepPlan> previewFootstepPlanNotification = new TypedNotification<>();
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -169,9 +170,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             if (!footstepPlanningThread.isExecuting() && previewPlanningThrottler.run() && !footstepPlanner.isPlanning())
                startFootstepPlanningAsync(previewFootstepPlanner);
 
-            if (footstepPlanNotification.poll())
+            if (previewFootstepPlanNotification.poll())
             {
-               FootstepPlan footstepPlan = footstepPlanNotification.read();
+               FootstepPlan footstepPlan = previewFootstepPlanNotification.read();
 
                var footstepsMessage = state.getPreviewFootsteps().accessValue();
                footstepsMessage.clear();
@@ -299,6 +300,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       // We are separating the preview planner and real one so they don't ever try and plan at the same time
       boolean isPreviewPlanner = footstepPlanner == previewFootstepPlanner;
+      TypedNotification<FootstepPlan> footstepPlanNotification = isPreviewPlanner ? previewFootstepPlanNotification : this.footstepPlanNotification;
 
       for (RobotSide side : RobotSide.values)
       {
