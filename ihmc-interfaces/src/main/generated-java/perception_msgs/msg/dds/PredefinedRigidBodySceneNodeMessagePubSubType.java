@@ -15,7 +15,7 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fd136397e2e15c38157baf57c2f8dde2ee093936cc739d8674a122e0cb20546c";
+   		return "03a2b621d6c5176fcc8a29a43b58fb5787dccd6fdf6c0d514b7d632dbf1c4175";
    }
    
    @Override
@@ -61,6 +61,8 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +87,9 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getVisualTransformToParent(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -100,6 +105,8 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
           throw new RuntimeException("visual_model_file_path field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getVisualTransformToParent(), cdr);
+      cdr.write_type_7(data.getLeftDoor());
+
    }
 
    public static void read(perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -110,6 +117,8 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getInitialTransformToParent(), cdr);	
       cdr.read_type_d(data.getVisualModelFilePath());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getVisualTransformToParent(), cdr);	
+      data.setLeftDoor(cdr.read_type_7());
+      	
 
    }
 
@@ -124,6 +133,7 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       ser.write_type_d("visual_model_file_path", data.getVisualModelFilePath());
       ser.write_type_a("visual_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getVisualTransformToParent());
 
+      ser.write_type_7("left_door", data.getLeftDoor());
    }
 
    @Override
@@ -137,6 +147,7 @@ public class PredefinedRigidBodySceneNodeMessagePubSubType implements us.ihmc.pu
       ser.read_type_d("visual_model_file_path", data.getVisualModelFilePath());
       ser.read_type_a("visual_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getVisualTransformToParent());
 
+      data.setLeftDoor(ser.read_type_7("left_door"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage src, perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage dest)

@@ -18,6 +18,7 @@ import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -34,18 +35,21 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SceneGraph sceneGraph;
+   private final DetectionManager detectionManager;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
-                                          SceneGraph sceneGraph)
+                                          SceneGraph sceneGraph,
+                                          DetectionManager detectionManager)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.detectionManager = detectionManager;
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
@@ -78,7 +82,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {
-         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph, detectionManager);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {

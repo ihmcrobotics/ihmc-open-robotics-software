@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImDouble;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
@@ -56,5 +57,7 @@ public class RDXTrashCanNode extends RDXDetectableSceneNode
 
       if (!trashCanFrameGraphic.getFramePose3D().containsNaN())
          trashCanFrameGraphic.getRenderables(renderables, pool);
+      else
+         LogTools.warn("TrashCan Node pose not valid");
    }
 }

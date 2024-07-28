@@ -16,4 +16,6 @@ string visual_model_file_path
 # The visual transform to parent
 controller_msgs/RigidBodyTransformMessage visual_transform_to_parent
 
+bool left_door
+
 

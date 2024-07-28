@@ -23,6 +23,7 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
 {
    private final String visualModelFilePath;
    private final RigidBodyTransform visualModelToNodeFrameTransform;
+   private boolean leftDoor;
 
    public PredefinedRigidBodySceneNode(long id,
                                        String name,
@@ -46,5 +47,15 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
    public RigidBodyTransform getVisualModelToNodeFrameTransform()
    {
       return visualModelToNodeFrameTransform;
+   }
+
+   public boolean isLeftDoor()
+   {
+      return leftDoor;
+   }
+
+   public void setLeftDoor(boolean leftDoor)
+   {
+      this.leftDoor = leftDoor;
    }
 }

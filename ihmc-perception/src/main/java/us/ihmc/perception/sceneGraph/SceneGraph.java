@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
@@ -227,8 +227,9 @@ public class SceneGraph
          });
       }
 
-//      for (PersistentDetection newDetection : newlyValidDetections)
-//         addNodeFromDetection(newDetection);
+      newlyValidDetections.removeAll(newlyValidDoorDetections);
+      for (PersistentDetection newDetection : newlyValidDetections)
+         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }
@@ -295,6 +296,9 @@ public class SceneGraph
 
    private void addNodeFromDetection(PersistentDetection detection)
    {
+      if (nodeNameList.stream().anyMatch(name -> name.startsWith(detection.getDetectedObjectName())))
+         return;
+
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();
       String newNodeName = detection.getDetectedObjectName() + newNodeID;

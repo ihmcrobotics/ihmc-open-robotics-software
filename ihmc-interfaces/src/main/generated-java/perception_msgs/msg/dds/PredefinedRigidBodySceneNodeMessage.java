@@ -32,6 +32,7 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
             * The visual transform to parent
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage visual_transform_to_parent_;
+   public boolean left_door_;
 
    public PredefinedRigidBodySceneNodeMessage()
    {
@@ -57,6 +58,8 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
       visual_model_file_path_.append(other.visual_model_file_path_);
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.visual_transform_to_parent_, visual_transform_to_parent_);
+      left_door_ = other.left_door_;
+
    }
 
 
@@ -125,6 +128,15 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
       return visual_transform_to_parent_;
    }
 
+   public void setLeftDoor(boolean left_door)
+   {
+      left_door_ = left_door;
+   }
+   public boolean getLeftDoor()
+   {
+      return left_door_;
+   }
+
 
    public static Supplier<PredefinedRigidBodySceneNodeMessagePubSubType> getPubSubType()
    {
@@ -150,6 +162,8 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.visual_model_file_path_, other.visual_model_file_path_, epsilon)) return false;
 
       if (!this.visual_transform_to_parent_.epsilonEquals(other.visual_transform_to_parent_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.left_door_, other.left_door_, epsilon)) return false;
+
 
       return true;
    }
@@ -170,6 +184,8 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
       if (!us.ihmc.idl.IDLTools.equals(this.visual_model_file_path_, otherMyClass.visual_model_file_path_)) return false;
 
       if (!this.visual_transform_to_parent_.equals(otherMyClass.visual_transform_to_parent_)) return false;
+      if(this.left_door_ != otherMyClass.left_door_) return false;
+
 
       return true;
    }
@@ -189,7 +205,9 @@ public class PredefinedRigidBodySceneNodeMessage extends Packet<PredefinedRigidB
       builder.append("visual_model_file_path=");
       builder.append(this.visual_model_file_path_);      builder.append(", ");
       builder.append("visual_transform_to_parent=");
-      builder.append(this.visual_transform_to_parent_);
+      builder.append(this.visual_transform_to_parent_);      builder.append(", ");
+      builder.append("left_door=");
+      builder.append(this.left_door_);
       builder.append("}");
       return builder.toString();
    }

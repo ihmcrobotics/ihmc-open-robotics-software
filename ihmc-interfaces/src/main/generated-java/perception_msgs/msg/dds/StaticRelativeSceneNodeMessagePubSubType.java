@@ -15,7 +15,7 @@ public class StaticRelativeSceneNodeMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cbb45461b618915bccb62c93b71c6b8b251f27503b12d0ffff7035fda3d2b16d";
+   		return "3084b5997cc9d139cb38e33da6a6973968057ad3faeff657104b039b209bf548";
    }
    
    @Override
