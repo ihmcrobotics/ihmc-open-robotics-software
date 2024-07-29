@@ -17,7 +17,6 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -30,7 +29,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingFootstepTracker footstepTracker;
-   private final FootstepPlanningModule footstepPlanner;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SceneGraph sceneGraph;
@@ -49,7 +47,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
-      footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
    }
 
@@ -93,8 +90,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                syncedRobot,
                                                controllerStatusTracker,
                                                referenceFrameLibrary,
-                                               walkingControllerParameters,
-                                               footstepPlanner);
+                                               walkingControllerParameters);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
