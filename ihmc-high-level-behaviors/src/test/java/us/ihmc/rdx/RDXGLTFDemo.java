@@ -1,9 +1,10 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import net.mgsx.gltf.loaders.gltf.GLTFLoader;
+import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -14,9 +15,6 @@ public class RDXGLTFDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGuiSliderDoubleWrapper ambientLightIntensitySlider;
-   private ImGuiSliderDoubleWrapper pointLightIntensitySlider;
-   private ImGuiSliderDoubleWrapper directionalLightIntensitySlider;
 
    public RDXGLTFDemo()
    {
@@ -29,29 +27,18 @@ public class RDXGLTFDemo
 
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
-            ModelData d455SensorModel = RDXModelLoader.loadModelData("environmentObjects/d455Sensor/D455.g3dj");
-            Model model = new Model(d455SensorModel);
-            RDXModelInstance modelInstance = new RDXModelInstance(model);
-            modelInstance.setPoseInWorldFrame(new Pose3D(0.5, 0.5, 0.5, 0.0, 0.0, 0.0));
-            baseUI.getPrimaryScene().addModelInstance(modelInstance);
+            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj")));
 
-            ModelData blackflyModel = RDXModelLoader.loadModelData("environmentObjects/blackflyFujinon/BlackflyFujinon.g3dj");
-            model = new Model(blackflyModel);
-            modelInstance = new RDXModelInstance(model);
-            modelInstance.setPoseInWorldFrame(new Pose3D(0.5, -0.5, 0.5, 0.0, 0.0, 0.0));
+            FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
+            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
+            ModelInstance modelInstance = new ModelInstance(sceneAsset.scene.model);
+            modelInstance.transform.setToRotationRad(1.0f, 0.0f, 0.0f, (float) Math.PI / 2.0f);
+            modelInstance.transform.translate(0.2f, 0.2f, 0.2f);
+            modelInstance.transform.scale(20.0f, 20.0f, 20.0f);
             baseUI.getPrimaryScene().addModelInstance(modelInstance);
 
             baseUI.getImGuiPanelManager().addPanel("Settings", RDXGLTFDemo.this::renderImGuiWidgets);
 
-            ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 0.05,
-                                                                       () -> baseUI.getPrimaryScene().getAmbientLightIntensity(),
-                                                                       value -> baseUI.getPrimaryScene().setAmbientLightIntensity((float) value));
-            pointLightIntensitySlider = new ImGuiSliderDoubleWrapper("Point light intensity", "%.1f", 0.0, 1000.0,
-                                                                       () -> baseUI.getPrimaryScene().getPointLightIntensity(),
-                                                                       value -> baseUI.getPrimaryScene().setPointLightIntensity((float) value));
-            directionalLightIntensitySlider = new ImGuiSliderDoubleWrapper("Directional light intensity", "%.1f", 0.0, 10.0,
-                                                                           () -> baseUI.getPrimaryScene().getDirectionalLightIntensity(),
-                                                                           value -> baseUI.getPrimaryScene().setDirectionalLightIntensity((float) value));
          }
 
          @Override
@@ -71,9 +58,7 @@ public class RDXGLTFDemo
 
    private void renderImGuiWidgets()
    {
-      ambientLightIntensitySlider.renderImGuiWidget();
-      pointLightIntensitySlider.renderImGuiWidget();
-      directionalLightIntensitySlider.renderImGuiWidget();
+
    }
 
    public static void main(String[] args)

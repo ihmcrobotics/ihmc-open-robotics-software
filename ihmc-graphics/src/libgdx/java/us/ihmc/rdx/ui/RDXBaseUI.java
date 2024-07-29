@@ -292,7 +292,7 @@ public class RDXBaseUI
       ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
-      ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 0.05,
+      ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 1.0,
                                                                  () -> primaryScene.getAmbientLightIntensity(),
                                                                  value -> primaryScene.setAmbientLightIntensity((float) value));
       ambientLightIntensitySlider.addWidgetAligner(widgetAligner);
