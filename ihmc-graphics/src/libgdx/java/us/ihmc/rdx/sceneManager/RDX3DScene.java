@@ -30,14 +30,18 @@ import java.util.*;
 
 public class RDX3DScene
 {
+   public static final float DEFAULT_AMBIENT_LIGHT_INTENSITY = 0.0f;
+   public static final float DEFAULT_POINT_LIGHT_INTENSITY = 660.0f;
+   public static final float DEFAULT_DIRECTIONAL_LIGHT_INTENSITY = 2.0f;
+
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final Set<RDXRenderableAdapter> renderables = new HashSet<>();
    private final Map<Object, RDXRenderableAdapter> renderableOwnerKeyMap = new HashMap<>();
 
    private TreeSet<RDXSceneLevel> sceneLevelsToRender;
    private ColorAttribute ambientLight;
-   private float pointLightIntensity = 660.0f;
-   private float directionalLightIntensity = 5.0f;
+   private float pointLightIntensity = DEFAULT_POINT_LIGHT_INTENSITY;
+   private float directionalLightIntensity = DEFAULT_DIRECTIONAL_LIGHT_INTENSITY;
    private ModelBatch colorModelBatch;
    private ModelBatch depthModelBatch;
    private Environment environment;
@@ -72,8 +76,10 @@ public class RDX3DScene
       depthModelBatch = new ModelBatch(pbrDepthShader);
 
       environment = new Environment();
-      float ambientLightIntensity = 0.01f;
-      ambientLight = ColorAttribute.createAmbientLight(ambientLightIntensity, ambientLightIntensity, ambientLightIntensity, 1.0f);
+      ambientLight = ColorAttribute.createAmbientLight(DEFAULT_AMBIENT_LIGHT_INTENSITY,
+                                                       DEFAULT_AMBIENT_LIGHT_INTENSITY,
+                                                       DEFAULT_AMBIENT_LIGHT_INTENSITY,
+                                                       1.0f);
       environment.set(ambientLight);
       environment.set(pointLights);
       environment.set(directionalLights);
@@ -265,6 +271,7 @@ public class RDX3DScene
    public void addDefaultLighting()
    {
       environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(-1.0f, -4.0f, -2.0f), directionalLightIntensity));
+      environment.add(new DirectionalLightEx().set(Color.WHITE, new Vector3(0.0f, 0.0f, 1.0f), directionalLightIntensity));
 
       Float range = null; // infinite range
       environment.add(new PointLightEx().set(Color.WHITE, new Vector3(10.0f, 10.0f, 10.0f), pointLightIntensity, range));
