@@ -3,7 +3,7 @@ package us.ihmc.rdx.simulation.environment;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class RDXModelHighlighting
 {
@@ -22,7 +22,7 @@ public class RDXModelHighlighting
          if (highlightedMaterial == null)
          {
             highlightedMaterial = new Material();
-            highlightedMaterial.set(ColorAttribute.createDiffuse(Color.ORANGE));
+            highlightedMaterial.set(PBRColorAttribute.createBaseColorFactor(Color.ORANGE));
          }
 
          modelInstance.materials.get(0).set(highlightedMaterial);

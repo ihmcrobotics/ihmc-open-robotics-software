@@ -4,12 +4,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -98,8 +98,8 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          com.badlogic.gdx.graphics.g3d.Material material = new Material();
          if (paletteTexture == null)
             paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-         material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
+         material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+         material.set(PBRColorAttribute.createBaseColorFactor(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
          modelBuilder.part(meshPart, material);
          if (lastModel != null)
             lastModel.dispose();

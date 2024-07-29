@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,48 +28,52 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
-   private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private static final boolean DEBUG_WITH_MORE_PRINTS = true;
    private final HumanoidReferenceFrames referenceFrames;
-
-   private final AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
-   private final FramePose3D walkingStartMidPose = new FramePose3D();
-   private final FramePose3D imminentFootstepPose = new FramePose3D();
-   private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final TerrainPlanningDebugger debugger;
    private final ContinuousPlannerStatistics statistics;
    private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
-   private final ContinuousHikingParameters continuousHikingParameters;
-   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
-   private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger logger;
+
+   private final FootstepPlanningModule footstepPlanner;
+   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
+   private final AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
+   private FootstepPlan monteCarloReferencePlan;
+   private FootstepPlan previousFootstepPlan;
+   private FootstepPlan latestFootstepPlan;
+   private FootstepPlanningResult footstepPlanningResult;
+
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
+
+   private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final FramePose3D walkingStartMidPose = new FramePose3D();
+   private final FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
+
    private ContinuousWalkingCommandMessage command;
    private AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private List<QueuedFootstepStatusMessage> controllerQueue = new ArrayList<>();
-   private FootstepPlanningResult footstepPlanningResult;
-   private FootstepPlan monteCarloReferencePlan;
+
    private TerrainMapData latestTerrainMapData;
    private HeightMapData latestHeightMapData;
-   private FootstepPlan previousFootstepPlan;
-   private FootstepPlan latestFootstepPlan;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
    private boolean resetMonteCarloFootstepPlanner = false;
-   private double previousContinuousHikingSwingTime = 0.0;
 
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames referenceFrames,
@@ -84,12 +87,12 @@ public class ContinuousPlanner
       this.referenceFrames = referenceFrames;
       this.continuousHikingParameters = continuousHikingParameters;
       this.monteCarloPlannerParameters = monteCarloPlannerParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      this.swingPlannerParameters = swingPlannerParameters;
       this.debugger = debugger;
       this.statistics = statistics;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
-      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
 
       this.logger = new FootstepPlannerLogger(footstepPlanner);
       this.monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(this.monteCarloPlannerParameters,
@@ -232,6 +235,18 @@ public class ContinuousPlanner
          request.setTimeout(continuousHikingParameters.getPlanningWithoutReferenceTimeout());
       }
 
+      // Setting these parameters right before using them ensures that we have the most recent parameters
+      // We want the swing time from ContinuousHikingParameters to be used, so we need to set the swing parameters accordingly
+      swingPlannerParameters.setMinimumSwingTime(continuousHikingParameters.getSwingTime());
+      swingPlannerParameters.setMaximumSwingTime(continuousHikingParameters.getSwingTime());
+      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      footstepPlanner.getSwingPlannerParameters().set(swingPlannerParameters);
+
+      if (DEBUG_WITH_MORE_PRINTS)
+      {
+         LogTools.info("Swing Planner: {}", swingPlannerParameters);
+      }
+
       FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(request);
 
       if (plannerOutput != null)
@@ -300,7 +315,6 @@ public class ContinuousPlanner
                                             monteCarloFootstepPlanner.getVisitedNodes().size(),
                                             MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));
 
-      //debugger.plotFootstepPlan(latestMonteCarloPlan);
       return latestMonteCarloPlan;
    }
 
@@ -384,8 +398,6 @@ public class ContinuousPlanner
          {
             updateImminentStance(leftSolePose, rightSolePose, robotSide);
          }
-
-         //         planFromRobot = false;
       }
    }
 
@@ -463,27 +475,15 @@ public class ContinuousPlanner
       }
    }
 
-   public void syncParametersCallback()
-   {
-      if (previousContinuousHikingSwingTime != continuousHikingParameters.getSwingTime())
-      {
-         footstepPlanner.getSwingPlannerParameters().setMinimumSwingTime(continuousHikingParameters.getSwingTime());
-         footstepPlanner.getSwingPlannerParameters().setMaximumSwingTime(continuousHikingParameters.getSwingTime());
-         previousContinuousHikingSwingTime = continuousHikingParameters.getSwingTime();
-      }
-   }
-
-   /*
+   /**
     * This method both generates the swing trajectories and packs the footstep plan with optimized waypoints
     */
-   public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeSwingTrajectories(HeightMapData heightMapData, FootstepPlan footstepPlan)
+   public void computeSwingTrajectories(HeightMapData heightMapData, FootstepPlan footstepPlan)
    {
       collisionFreeSwingCalculator.setHeightMapData(heightMapData);
 
-      // this also packs the footstep plan with optimized waypoints
+      // This also packs the footstep plan with optimized waypoints
       collisionFreeSwingCalculator.computeSwingTrajectories(startStancePose, footstepPlan);
-
-      return collisionFreeSwingCalculator.getSwingTrajectories();
    }
 
    public MonteCarloFootstepPlanner getMonteCarloFootstepPlanner()
@@ -534,11 +534,6 @@ public class ContinuousPlanner
    public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlanner.getFootstepPlannerParameters();
-   }
-
-   public MonteCarloFootstepPlannerParameters getMonteCarloPlannerParameters()
-   {
-      return monteCarloPlannerParameters;
    }
 
    public SideDependentList<FramePose3D> getGoalStancePose()

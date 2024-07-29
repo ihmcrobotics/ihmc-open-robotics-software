@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -15,6 +16,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -210,6 +212,32 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       }
 
       return orientationHelper.getFeedbackControlCommand();
+   }
+
+   @Override
+   public JointDesiredOutputListReadOnly getJointDesiredData()
+   {
+      if (hybridModeActive.getValue())
+      {
+         return jointControlHelper.getJointDesiredData();
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      if (hybridModeActive.getValue())
+      {
+         return jointControlHelper.getAccelerationIntegrationCommand();
+      }
+      else
+      {
+         return null;
+      }
    }
 
    public FrameQuaternionReadOnly getDesiredOrientation()

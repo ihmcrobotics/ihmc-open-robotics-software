@@ -64,19 +64,15 @@ mainDependencies {
    api("org.bytedeco:librealsense2:$librealsense2Version:linux-x86_64")
    api("org.bytedeco:librealsense2:$librealsense2Version:linux-arm64")
    api("org.bytedeco:librealsense2:$librealsense2Version:windows-x86_64")
-   // Spinnaker released under us.ihmc for arm64 support
-   val spinnakerVersion = "3.0.0.118-1.5.9-ihmc1"
-   api("us.ihmc:spinnaker:$spinnakerVersion") {
-      exclude(group = "us.ihmc", module = "javacpp")
+   val spinnakerVersion = "3.0.0.118-1.5.9"
+   api("org.bytedeco:spinnaker:$spinnakerVersion") {
+      exclude(group = "org.bytedeco", module = "javacpp")
    }
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64") {
-      exclude(group = "us.ihmc", module = "javacpp")
+   api("org.bytedeco:spinnaker:$spinnakerVersion:linux-x86_64") {
+      exclude(group = "org.bytedeco", module = "javacpp")
    }
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-arm64") {
-      exclude(group = "us.ihmc", module = "javacpp")
-   }
-   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64") {
-      exclude(group = "us.ihmc", module = "javacpp")
+   api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64") {
+      exclude(group = "org.bytedeco", module = "javacpp")
    }
    api("us.ihmc:zed-java-api:4.1.2") {
       exclude(group = "org.bytedeco")
@@ -86,11 +82,19 @@ mainDependencies {
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
    // No arm64 version
    api("org.bytedeco:hdf5:$hdf5Version:windows-x86_64")
-   val cudaVersion = "12.1-8.9-1.5.9"
-   api("org.bytedeco:cuda:$cudaVersion")
-   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
-   api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
-   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
+   val cudaVersion = "12.3-8.9-1.5.10"
+   api("org.bytedeco:cuda:$cudaVersion") {
+      exclude(group = "org.bytedeco", module = "javacpp")
+   }
+   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64") {
+      exclude(group = "org.bytedeco", module = "javacpp")
+   }
+   api("org.bytedeco:cuda:$cudaVersion:linux-arm64") {
+      exclude(group = "org.bytedeco", module = "javacpp")
+   }
+   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64") {
+      exclude(group = "org.bytedeco", module = "javacpp")
+   }
 
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:simulation-construction-set:0.25.1")

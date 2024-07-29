@@ -13,6 +13,8 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -109,8 +111,8 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
          Material material = new Material();
          if (paletteTexture == null)
             paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-         material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
+         material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+         material.set(PBRColorAttribute.createBaseColorFactor(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
          for (RDXMultiColorMeshBuilder meshBuilder : meshBuilders)
          {
