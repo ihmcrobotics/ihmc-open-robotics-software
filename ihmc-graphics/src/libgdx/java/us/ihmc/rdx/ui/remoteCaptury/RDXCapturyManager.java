@@ -1,9 +1,7 @@
-package us.ihmc.rdx.Captury;
+package us.ihmc.rdx.ui.remoteCaptury;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import org.apache.commons.lang3.StringUtils;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
