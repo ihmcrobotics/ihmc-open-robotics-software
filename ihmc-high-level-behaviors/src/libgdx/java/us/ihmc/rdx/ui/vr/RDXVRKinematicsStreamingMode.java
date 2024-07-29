@@ -1003,7 +1003,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                   0.0,
                                                                                   10);
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
-               MessageTools.packSelectionMatrix3DMessage(true, false, true, null, message.getAngularSelectionMatrix());
+               MessageTools.packSelectionMatrix3DMessage(true, true, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikChestControlFramePoses.getPosition());
                message.getControlFrameOrientationInEndEffector()
                       .set(ikChestControlFramePoses.getOrientation());
