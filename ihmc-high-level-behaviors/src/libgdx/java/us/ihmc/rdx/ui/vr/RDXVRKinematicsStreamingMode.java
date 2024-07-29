@@ -600,6 +600,7 @@ public class RDXVRKinematicsStreamingMode
             ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
          }
 
+
          RigidBodyBasics hand = ghostFullRobotModel.getHand(robotSide);
          if (hand != null)
          {
