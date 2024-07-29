@@ -814,12 +814,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
-                          intrinsics.getWidth(),
-                          intrinsics.getHeight(),
                           0.0f,
                           bgr8Mat,
                           null,
-                          opencv_core.CV_8UC3, // BGR
                           (float) intrinsics.getFx(),
                           (float) intrinsics.getFy(),
                           (float) intrinsics.getCx(),
@@ -837,12 +834,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
-                          intrinsics.getWidth(),
-                          intrinsics.getHeight(),
                           discretization,
                           depthDiscretizedMat,
                           null,
-                          opencv_core.CV_16UC1,
                           (float) intrinsics.getFx(),
                           (float) intrinsics.getFy(),
                           (float) intrinsics.getCx(),
