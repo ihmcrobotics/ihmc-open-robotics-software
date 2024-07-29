@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -72,7 +72,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       renderable = new Renderable();
       renderable.meshPart.primitiveType = GL41.GL_POINTS;
       renderable.meshPart.offset = 0;
-      renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+      renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
       totalCells = numberOfCells;
       if (renderable.meshPart.mesh != null)

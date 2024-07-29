@@ -87,6 +87,7 @@ public class RDXLoggingDevelopmentUI
          {
             baseUI.create();
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();

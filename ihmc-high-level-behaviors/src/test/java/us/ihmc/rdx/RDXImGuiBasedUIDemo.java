@@ -19,7 +19,7 @@ import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXUIDemo
+public class RDXImGuiBasedUIDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
@@ -32,7 +32,7 @@ public class RDXUIDemo
    private RDX3DPanelToolbarButton flyingCarButton;
    private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
-   public RDXUIDemo()
+   public RDXImGuiBasedUIDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -41,11 +41,12 @@ public class RDXUIDemo
          {
             baseUI.create();
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addPanel("Window 1", RDXUIDemo.this::renderWindow1);
-            baseUI.getImGuiPanelManager().addPanel("Window 2", RDXUIDemo.this::renderWindow2);
-            baseUI.getImGuiPanelManager().addPanel("Window 3", RDXUIDemo.this::renderWindow3);
+            baseUI.getImGuiPanelManager().addPanel("Window 1", RDXImGuiBasedUIDemo.this::renderWindow1);
+            baseUI.getImGuiPanelManager().addPanel("Window 2", RDXImGuiBasedUIDemo.this::renderWindow2);
+            baseUI.getImGuiPanelManager().addPanel("Window 3", RDXImGuiBasedUIDemo.this::renderWindow3);
 
             baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
             {
@@ -148,6 +149,6 @@ public class RDXUIDemo
 
    public static void main(String[] args)
    {
-      new RDXUIDemo();
+      new RDXImGuiBasedUIDemo();
    }
 }

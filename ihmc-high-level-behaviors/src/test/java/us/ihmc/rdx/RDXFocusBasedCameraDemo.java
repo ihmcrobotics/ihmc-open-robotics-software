@@ -29,6 +29,8 @@ public class RDXFocusBasedCameraDemo
             focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
             focusBasedCamera.changeCameraPosition(5.0, 5.0, 5.0);
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+
             cameraFrameGraphic = new RDXReferenceFrameGraphic(0.3, Color.SKY);
             baseUI.getPrimaryScene().addRenderableProvider(cameraFrameGraphic);
             cameraPoseGraphic = new RDXReferenceFrameGraphic(0.25, Color.OLIVE);

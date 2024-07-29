@@ -1,5 +1,5 @@
 {
-  "ambientLight" : 0.01,
+  "ambientLight" : 0.914,
   "objects" : [ {
     "type" : "RDXPointLightObject",
     "x" : 10.0,

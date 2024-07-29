@@ -1,5 +1,5 @@
 {
-  "ambientLight" : 0.01,
+  "ambientLight" : 0.914,
   "objects" : [ {
     "type" : "RDXPalletObject",
     "x" : -0.33671803672431627,

@@ -1,8 +1,10 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
 
@@ -19,6 +21,7 @@ public class RDXEdgeDefinedPolygonDemo
          public void create()
          {
             baseUI.create();
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             Point3D[] spline1 = new Point3D[] {new Point3D(0.1, 0.6, 0.1), new Point3D(0.2, 0.5, 0.1), new Point3D(0.3, 0.5, 0.2)};
             Point3D[] spline2 = new Point3D[] {new Point3D(0.1, 0.1, 0.1), new Point3D(0.3, 0.3, 0.2), new Point3D(0.5, 0.3, 0.3)};

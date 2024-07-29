@@ -39,6 +39,8 @@ public class RDXPlanarRegionLoggingDevelopmentUI
          {
             baseUI.create();
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+
             panel = new RDXPlanarRegionLoggingPanel();
             panel.create();
             baseUI.getImGuiPanelManager().addPanel(panel.getWindowName(), panel::renderImGuiWidgets);

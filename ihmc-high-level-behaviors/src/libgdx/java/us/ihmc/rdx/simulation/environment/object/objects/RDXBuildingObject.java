@@ -3,7 +3,6 @@ package us.ihmc.rdx.simulation.environment.object.objects;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +26,7 @@ public class RDXBuildingObject
    private final ArrayList<RDXSimpleObject> allObjects = new ArrayList<>();
    private final RigidBodyTransform translationTransform = new RigidBodyTransform();
    private final HashMap<ComponentType, ArrayList<RDXSimpleObject>> components = new HashMap<>();
-   private final ColorAttribute highlightColor = PBRColorAttribute.createBaseColorFactor(new Color(0.3f, 0.8f, 0.4f, 1.0f));
+   private final ColorAttribute highlightColor = ColorAttribute.createDiffuse(0.3f, 0.8f, 0.4f, 1.0f);
 
    private float height = 2.5f;
 

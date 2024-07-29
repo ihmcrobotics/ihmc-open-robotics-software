@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
@@ -59,7 +58,7 @@ public class RDXVRHandPlacedFootstepMode
          String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(footBody.getName()));
 
          footModels.put(side, RDXModelLoader.load(modelFileName));
-//         unplacedFadeInFootsteps.set(side, new RDXModelInstance(footModels.get(side)));
+//         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
       }
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)
@@ -96,7 +95,7 @@ public class RDXVRHandPlacedFootstepMode
 
                if (triggerClick.bChanged() && triggerClick.bState())
                {
-                  ModelInstance footModelInstance = new RDXModelInstance(footModels.get(side));
+                  ModelInstance footModelInstance = new ModelInstance(footModels.get(side));
                   LibGDXTools.setDiffuseColor(footModelInstance, RDXFootstepGraphic.FOOT_COLORS.get(side));
                   feetBeingPlaced.put(side, footModelInstance);
                }

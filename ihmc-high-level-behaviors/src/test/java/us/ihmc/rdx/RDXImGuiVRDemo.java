@@ -76,6 +76,7 @@ public class RDXImGuiVRDemo
             rightEyeZUpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
             rightEyeZBackFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);

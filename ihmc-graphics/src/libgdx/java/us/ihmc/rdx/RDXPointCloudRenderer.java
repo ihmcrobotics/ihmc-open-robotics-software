@@ -2,11 +2,11 @@ package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -89,7 +89,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
       renderable = new Renderable();
       renderable.meshPart.primitiveType = GL41.GL_POINTS;
       renderable.meshPart.offset = 0;
-      renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+      renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
       maxPoints = pointsPerSegment * numberOfSegments;
       vertices = new float[maxPoints * floatsPerVertex];

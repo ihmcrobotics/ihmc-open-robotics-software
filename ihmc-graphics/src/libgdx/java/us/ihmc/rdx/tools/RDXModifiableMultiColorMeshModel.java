@@ -9,8 +9,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
@@ -23,8 +21,8 @@ public class RDXModifiableMultiColorMeshModel
    private Model model;
    private final Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
    private final Material material = new Material();
-   private final TextureAttribute diffuseTexture = PBRTextureAttribute.createBaseColorTexture(paletteTexture);
-   private final ColorAttribute diffuseColor = PBRColorAttribute.createBaseColorFactor(Color.WHITE);
+   private final TextureAttribute diffuseTexture = TextureAttribute.createDiffuse(paletteTexture);
+   private final ColorAttribute diffuseColor = ColorAttribute.createDiffuse(Color.WHITE);
    private Mesh mesh;
 
    public RDXModifiableMultiColorMeshModel()

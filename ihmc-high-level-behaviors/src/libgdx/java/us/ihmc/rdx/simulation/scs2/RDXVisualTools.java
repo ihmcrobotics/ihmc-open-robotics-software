@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import gnu.trove.map.hash.TDoubleObjectHashMap;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -171,7 +171,7 @@ public class RDXVisualTools
          for (Material material : modelInstance.materials)
          {
             Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
-            material.set(PBRColorAttribute.createBaseColorFactor(color));
+            material.set(ColorAttribute.createDiffuse(color));
             if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
             {
                material.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
@@ -184,11 +184,11 @@ public class RDXVisualTools
    public static Material toMaterial(MaterialDefinition materialDefinition)
    {
       if (materialDefinition == null)
-         return new Material(PBRColorAttribute.createBaseColorFactor(DEFAULT_COLOR));
+         return new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
 
       Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
 
-      Material attributes = new Material(PBRColorAttribute.createBaseColorFactor(color));
+      Material attributes = new Material(ColorAttribute.createDiffuse(color));
 
       if (materialDefinition.getDiffuseColor() != null && materialDefinition.getDiffuseColor().getAlpha() < 1.0)
       {
@@ -198,7 +198,7 @@ public class RDXVisualTools
       if (materialDefinition.getDiffuseMap() != null && materialDefinition.getDiffuseMap().getFilename() != null)
       {
          Texture textureFromFile = new Texture(materialDefinition.getDiffuseMap().getFilename());
-         attributes.set(PBRTextureAttribute.createBaseColorTexture(textureFromFile));
+         attributes.set(TextureAttribute.createDiffuse(textureFromFile));
       }
 
       return attributes;

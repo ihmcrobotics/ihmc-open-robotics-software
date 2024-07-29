@@ -176,7 +176,7 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
       ImGui.separator();
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
-         panel3D.getScene().setAmbientLightIntensity(ambientLightAmount.get());
+         panel3D.getScene().setAmbientLight(ambientLightAmount.get());
       }
 
       ImGui.separator();
@@ -290,7 +290,7 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
          {
             float ambientValue = (float) ambientLightNode.asDouble();
             ambientLightAmount.set(ambientValue);
-            panel3D.getScene().setAmbientLightIntensity(ambientLightAmount.get());
+            panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
          JSONTools.forEachArrayElement(node, "objects", objectNode ->
          {

@@ -1,5 +1,5 @@
 {
-  "ambientLight" : 0.01,
+  "ambientLight" : 0.4,
   "objects" : [ {
     "type" : "RDXSmallCinderBlockRoughed",
     "x" : -0.09169199023263275,

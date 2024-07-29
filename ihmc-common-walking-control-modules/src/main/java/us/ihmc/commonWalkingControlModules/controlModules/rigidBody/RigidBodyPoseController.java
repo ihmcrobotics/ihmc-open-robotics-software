@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -24,7 +23,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -363,32 +361,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
          feedbackControlCommandList.addCommand(jointControlHelper.getJointspaceCommand());
       }
       return feedbackControlCommandList;
-   }
-
-   @Override
-   public JointDesiredOutputListReadOnly getJointDesiredData()
-   {
-      if (hybridModeActive.getValue())
-      {
-         return jointControlHelper.getJointDesiredData();
-      }
-      else
-      {
-         return null;
-      }
-   }
-
-   @Override
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      if (hybridModeActive.getValue())
-      {
-         return jointControlHelper.getAccelerationIntegrationCommand();
-      }
-      else
-      {
-         return null;
-      }
    }
 
    @Override

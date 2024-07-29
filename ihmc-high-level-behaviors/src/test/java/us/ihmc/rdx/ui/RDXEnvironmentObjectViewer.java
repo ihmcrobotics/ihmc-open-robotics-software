@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 
 /**
@@ -25,7 +25,7 @@ public class RDXEnvironmentObjectViewer
 
             // Swap out this string to load different models
             Model model = RDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj");
-            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(model));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
          }
 
          @Override

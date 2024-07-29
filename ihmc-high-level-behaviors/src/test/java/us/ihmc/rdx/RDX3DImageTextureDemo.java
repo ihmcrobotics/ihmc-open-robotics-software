@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -71,8 +71,8 @@ public class RDX3DImageTextureDemo
             TextureProvider.FileTextureProvider fileTextureProvider = new TextureProvider.FileTextureProvider();
             Texture debugImageTexture = fileTextureProvider.load("debugImageTexture.jpg");
 
-            material.set(PBRTextureAttribute.createBaseColorTexture(debugImageTexture));
-            material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
+            material.set(TextureAttribute.createDiffuse(debugImageTexture));
+            material.set(ColorAttribute.createDiffuse(Color.WHITE));
             modelBuilder.part(meshPart, material);
 
             Model model = modelBuilder.end();

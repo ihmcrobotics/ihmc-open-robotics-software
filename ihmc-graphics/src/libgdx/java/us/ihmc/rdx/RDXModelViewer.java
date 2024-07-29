@@ -1,7 +1,7 @@
 package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import us.ihmc.rdx.tools.RDXModelInstance;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
@@ -19,7 +19,7 @@ public class RDXModelViewer
             baseUI.getPrimaryScene().addCoordinateFrame(1.0);
 
             Model model = RDXModelLoader.load(modelFileName);
-            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(model));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
          }
 
          @Override

@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.*;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 
 public class DepthSensorDemoObjectsModel
 {
@@ -43,7 +43,7 @@ public class DepthSensorDemoObjectsModel
       MeshPartBuilder partBuilder = modelBuilder.part("box" + partIndex++,
                                                       GL20.GL_TRIANGLES,
                                                       VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
-                                                      new Material(PBRColorAttribute.createBaseColorFactor(Color.YELLOW)));
+                                                      new Material(ColorAttribute.createDiffuse(Color.YELLOW)));
       CylinderShapeBuilder.build(partBuilder, boxSize, boxSize, boxSize, 50);
       return new ModelInstance(modelBuilder.end());
    }
@@ -55,7 +55,7 @@ public class DepthSensorDemoObjectsModel
       MeshPartBuilder partBuilder = modelBuilder.part("box" + partIndex++,
                                                       GL20.GL_TRIANGLES,
                                                       VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
-                                                      new Material(PBRColorAttribute.createBaseColorFactor(color)));
+                                                      new Material(ColorAttribute.createDiffuse(color)));
       if (x > 0)
       {
          if (y > 0)

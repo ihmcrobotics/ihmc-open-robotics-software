@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.sensors;
 
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.math.Matrix4;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -25,6 +27,7 @@ import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
+import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -69,7 +72,8 @@ public class RDXLowLevelDepthSensorSimulator
 
    /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;
-   private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
+   private RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
+   private ModelBatch modelBatch;
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
    private boolean depthEnabled = true;
@@ -106,8 +110,8 @@ public class RDXLowLevelDepthSensorSimulator
                                           double noiseAmplitudeAtMaxRange,
                                           boolean simulateL515Noise)
    {
-      depthWindowName = labels.get(sensorName + " Depth");
-      colorWindowName = labels.get(sensorName + " Color");
+      depthWindowName = ImGuiTools.uniqueLabel(sensorName + " Depth");
+      colorWindowName = ImGuiTools.uniqueLabel(sensorName + " Color");
       this.fieldOfViewY.set((float) fieldOfViewY);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -137,9 +141,15 @@ public class RDXLowLevelDepthSensorSimulator
       camera.far = farPlaneDistance.get();
       viewport = new ScreenViewport(camera);
 
+      Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
+      String vertexShader = shaderStrings.getLeft();
+      String fragmentShader = shaderStrings.getRight();
+      modelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
+
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addColorTextureAttachment(GL41.GL_RGBA8, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE);
       frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
+      frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
       openCLManager = new OpenCLManager();
@@ -202,10 +212,12 @@ public class RDXLowLevelDepthSensorSimulator
          frustumVisualizer.generateMesh(camera.frustum);
          frustumVisualizer.update();
       }
-      scene.preRender(camera);
+      modelBatch.begin(camera);
       GL41.glViewport(0, 0, imageWidth, imageHeight);
-      scene.render(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
-      scene.postRender();
+
+      scene.renderExternalBatch(modelBatch, RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
+
+      modelBatch.end();
 
       GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
@@ -217,15 +229,10 @@ public class RDXLowLevelDepthSensorSimulator
 
       if (depthEnabled)
       {
-         scene.preRenderDepth(camera);
-         GL41.glViewport(0, 0, imageWidth, imageHeight);
-         scene.renderDepth(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
-         scene.postRenderDepth();
-
          normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind(); // SIGSEV otherwise
-         GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
+         GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
          GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
-         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer());
+         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer());
          GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
       }
 
@@ -331,6 +338,7 @@ public class RDXLowLevelDepthSensorSimulator
    public void dispose()
    {
       frameBuffer.dispose();
+      modelBatch.dispose();
       // TODO: There's a lot more to dispose here, probably
       openCLManager.destroy();
    }

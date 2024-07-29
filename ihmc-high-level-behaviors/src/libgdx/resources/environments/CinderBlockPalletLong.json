@@ -1,5 +1,5 @@
 {
-  "ambientLight" : 0.01,
+  "ambientLight" : 0.914,
   "objects" : [ {
     "type" : "RDXLabFloorObject",
     "x" : 7.993576526641846,

@@ -6,9 +6,9 @@ import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class ImGuiRemoteROS2StoredPropertySet
@@ -64,10 +64,6 @@ public class ImGuiRemoteROS2StoredPropertySet
             storedPropertySetROS2Input.setToAcceptUpdate();
          }
       }
-      else if (storedPropertySetROS2Input.getWaitingForUpdate())
-      {
-         ImGuiTools.textColored(YELLOW, "[!] Waiting for updated values from remote.");
-      }
       else if (storedPropertySetROS2Input.getIsExpired())
       {
          ImGuiTools.textColored(DARK_RED, "[!] Parameters have expired.");
@@ -84,10 +80,16 @@ public class ImGuiRemoteROS2StoredPropertySet
    {
       storedPropertySetROS2Input.update();
 
-      ImGui.beginDisabled(storedPropertySetROS2Input.getWaitingForUpdate());
-      imGuiStoredPropertySetTuner.renderImGuiWidgets();
-      publishIfNecessary();
-      ImGui.endDisabled();
+      if (storedPropertySetROS2Input.getWaitingForUpdate())
+      {
+         ImGui.text(storedPropertySet.getTitle());
+         ImGui.text("Waiting for updated values from remote...");
+      }
+      else
+      {
+         imGuiStoredPropertySetTuner.renderImGuiWidgets();
+         publishIfNecessary();
+      }
    }
 
    private void publishIfNecessary()

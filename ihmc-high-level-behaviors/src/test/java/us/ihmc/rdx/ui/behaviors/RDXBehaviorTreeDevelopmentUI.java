@@ -136,6 +136,7 @@ public class RDXBehaviorTreeDevelopmentUI
          public void create()
          {
             baseUI.create();
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getImGuiPanelManager().addPanel("Tree Control", this::renderPanel);
             baseUI.getImGuiPanelManager().addPanel("Behavior Tree Panel", () -> {
                treeGui.syncTree(tree);

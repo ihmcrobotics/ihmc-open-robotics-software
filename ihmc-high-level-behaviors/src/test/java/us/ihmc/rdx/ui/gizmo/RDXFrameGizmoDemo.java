@@ -22,6 +22,8 @@ public class RDXFrameGizmoDemo
          {
             baseUI.create();
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+
             RigidBodyTransform transform = new RigidBodyTransform();
             ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), transform);
             transform.getTranslation().addX(0.5);

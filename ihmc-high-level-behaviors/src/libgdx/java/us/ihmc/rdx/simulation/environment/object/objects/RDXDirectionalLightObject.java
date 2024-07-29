@@ -48,7 +48,9 @@ public class RDXDirectionalLightObject extends RDXEnvironmentObject
       Vector3D rotation = new Vector3D();
       this.getObjectTransform().getRotation().getRotationVector(rotation);
 
-      light.setDirection(rotation);
+      light.getPosition().set(position.getX32(), position.getY32(), position.getZ32());
+      light.getDirection().set(rotation.getX32(), rotation.getY32(), rotation.getZ32());
+      light.update();
    }
 
    public RDXDirectionalLight getLight()

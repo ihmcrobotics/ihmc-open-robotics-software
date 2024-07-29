@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -252,7 +251,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private Material createAlphaPaletteMaterial(float alpha)
    {
       Material material = new Material();
-      material.set(PBRTextureAttribute.createBaseColorTexture(RDXMultiColorMeshBuilder.loadPaletteTexture()));
+      material.set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
       material.set(new BlendingAttribute(true, alpha));
       return material;
    }

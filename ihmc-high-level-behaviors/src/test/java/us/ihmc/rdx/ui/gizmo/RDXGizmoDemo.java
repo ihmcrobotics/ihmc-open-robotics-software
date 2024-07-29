@@ -30,6 +30,8 @@ public class RDXGizmoDemo
             baseUI.create();
             focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
 
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
+
             clockHandTip = new ModelInstance(RDXModelBuilder.createSphere(0.1f, Color.RED));
             baseUI.getPrimaryScene().addModelInstance(clockHandTip);
             clockCenter = new ModelInstance(RDXModelBuilder.createSphere(0.1f, Color.BLUE));

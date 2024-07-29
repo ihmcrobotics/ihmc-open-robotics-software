@@ -1,6 +1,8 @@
 package us.ihmc.rdx.ui.affordances.editor;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXAffordanceTemplateEditorDemo
@@ -16,6 +18,7 @@ public class RDXAffordanceTemplateEditorDemo
          public void create()
          {
             baseUI.create();
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             editor = new RDXAffordanceTemplateEditorUI(baseUI);
          }
 

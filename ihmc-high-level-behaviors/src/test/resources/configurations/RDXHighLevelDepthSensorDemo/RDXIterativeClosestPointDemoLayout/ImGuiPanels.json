@@ -9,6 +9,7 @@
     "Stepping L515 Simulator###java.lang.Integer:Stepping L515 Simulator" : true,
     "Stepping L515 Color###GlobalWidgetIndex:1:Stepping L515 Color" : true,
     "Stepping L515 Depth###GlobalWidgetIndex:0:Stepping L515 Depth" : true,
+    "VR Settings" : false,
     "VR Thread Debugger" : false
   }
 }
