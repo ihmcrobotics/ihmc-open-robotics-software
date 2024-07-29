@@ -1,0 +1,33 @@
+#ifndef __exoskeleton_msgs__msg__EvaBodyDimensionsMessage__idl__
+#define __exoskeleton_msgs__msg__EvaBodyDimensionsMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message used for syncing the body dimension config files in eva's resources with eva's local config files
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::EvaBodyDimensionsMessage_")
+      struct EvaBodyDimensionsMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        sequence<octet, 2048> file_name;
+        /**
+         * This is the wrench at the foot, with respect to the sole frame
+         */
+        double thigh_length;
+        double shank_length;
+        unsigned long shoe_size_oridinal;
+      };
+    };
+  };
+};
+
+#endif
