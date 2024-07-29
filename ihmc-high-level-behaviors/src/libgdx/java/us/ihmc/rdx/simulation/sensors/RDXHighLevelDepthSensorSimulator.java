@@ -170,7 +170,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final Color pointColorFromPicker = new Color();
-   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final ImFloat pointSizeScale = new ImFloat(1.0f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
    private final ImInt segmentationDivisor = new ImInt(8);
    private final List<Point3D> pointCloud = new ArrayList<>();
@@ -368,7 +368,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             {
                LibGDXTools.toLibGDX(color, pointColorFromPicker);
                Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-               depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
+               depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSizeScale.get());
                pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
             }
             else
@@ -582,7 +582,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       ImGui.checkbox("Use Sensor Color", useSensorColor);
       ImGui.sameLine();
       ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
-      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
+      ImGui.sliderFloat("Point scale", pointSizeScale.getData(), 0.0f, 2.0f);
       if (ImGui.collapsingHeader(labels.get("Color tuner")))
       {
          ImGui.colorPicker4("Color", color);
@@ -853,9 +853,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
-   public void setPointSize(double size)
+   public void setPointSizeScale(double size)
    {
-      pointSize.set((float) size);
+      pointSizeScale.set((float) size);
    }
 
    public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)

@@ -146,6 +146,6 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       pointCloudRenderingBuffer[pointStartIndex + 4] = pointColorG;
       pointCloudRenderingBuffer[pointStartIndex + 5] = pointColorB;
       pointCloudRenderingBuffer[pointStartIndex + 6] = pointColorA;
-      pointCloudRenderingBuffer[pointStartIndex + 7] = pointSize;
+      pointCloudRenderingBuffer[pointStartIndex + 7] = pointSize * eyeDepth;
    }
 }

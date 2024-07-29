@@ -179,10 +179,10 @@ public class RDXLowLevelDepthSensorSimulator
 
    public void render(RDX3DScene scene)
    {
-      render(scene, true, null, 0.01f);
+      render(scene, true, null, 1.0f);
    }
 
-   public void render(RDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSize)
+   public void render(RDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSizeScale)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -249,6 +249,7 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(5, calculatePointCloud);
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, imageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, imageHeight);
+      float pointSize = pointSizeScale / focalLengthPixels.get();
       parametersBuffer.getBytedecoFloatBufferPointer().put(8, pointSize);
       parametersBuffer.getBytedecoFloatBufferPointer().put(9, colorBasedOnWorldZ ? 1.0f : 0.0f);
       parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.r);
