@@ -287,7 +287,8 @@ public class PerceptionAndAutonomyProcess
                                                           robotModel,
                                                           behaviorTreeSyncedRobot,
                                                           behaviorTreeReferenceFrameLibrary,
-                                                          sceneGraph);
+                                                          sceneGraph,
+                                                          detectionManager);
    }
 
    public void startAutonomyThread()
