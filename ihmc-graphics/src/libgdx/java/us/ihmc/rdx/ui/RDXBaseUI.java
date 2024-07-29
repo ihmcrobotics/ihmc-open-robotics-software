@@ -19,6 +19,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.Captury.RDXCapturyManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
@@ -100,6 +101,7 @@ public class RDXBaseUI
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
+   private final RDXCapturyManager capturyManager = new RDXCapturyManager();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -521,6 +523,7 @@ public class RDXBaseUI
       }
 
       vrManager.renderMenuBar();
+      capturyManager.renderMenuBar();
 
       frameRateDisplay.ping();
 
@@ -617,6 +620,11 @@ public class RDXBaseUI
    public RDXVRManager getVRManager()
    {
       return vrManager;
+   }
+
+   public RDXCapturyManager getCapturyManager()
+   {
+      return capturyManager;
    }
 
    public RDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
