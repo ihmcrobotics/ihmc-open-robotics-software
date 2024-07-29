@@ -37,6 +37,7 @@ module perception_msgs
          * The visual transform to parent
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage visual_transform_to_parent;
+        boolean left_door;
       };
     };
   };

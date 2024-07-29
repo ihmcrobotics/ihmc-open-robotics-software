@@ -75,6 +75,11 @@ public class PersistentDetection
     */
    public void updateHistory(Instant now)
    {
+      updateHistory(now, false);
+   }
+   
+   public void updateHistory(Instant now, boolean blockNewlyValidDetections)
+   {
       // Remove detections that are too old
       Iterator<InstantDetection> historyIterator = detectionHistory.iterator();
       while (historyIterator.hasNext())
@@ -87,7 +92,7 @@ public class PersistentDetection
          }
       }
 
-      if (!isValid)
+      if (!isValid && !blockNewlyValidDetections)
       {
          if (isOldEnough(now))
          {
@@ -190,12 +195,17 @@ public class PersistentDetection
 
    public boolean isStable(Instant now)
    {
-      return getDetectionFrequencyDecaying(now) > stabilityDetectionFrequency && getAverageConfidence() > stabilityConfidenceThreshold;
+      return  getAverageConfidence() > stabilityConfidenceThreshold;
    }
 
    public boolean isValid()
    {
       return isValid;
+   }
+
+   public void invalidate()
+   {
+      isValid = false;
    }
 
    public Notification hasBecomeValid()

@@ -71,7 +71,7 @@ public class YOLOv8DetectionExecutor
    private final Map<Integer, YOLOv8DetectionResults> yoloDetectionResults = new ConcurrentHashMap<>();
    private volatile RawImage newestColorImage = null;
 
-   private float yoloConfidenceThreshold = 0.5f;
+   private float yoloConfidenceThreshold = 0.75f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloMaskThreshold = 0.0f;
    private int erosionKernelRadius = 2;

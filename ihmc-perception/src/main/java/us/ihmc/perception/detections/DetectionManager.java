@@ -22,6 +22,7 @@ public class DetectionManager
    /** Set of detections that have become valid for the first time. Only accessed by the SceneGraph*/
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
+   private boolean blockNewlyValidDetections = false;
 
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
    private final ROS2StoredPropertySet<DetectionManagerSettings> settingsSync;
@@ -175,7 +176,7 @@ public class DetectionManager
             }
             else
             {
-               detection.updateHistory(now);
+               detection.updateHistory(now, blockNewlyValidDetections);
                if (detection.hasBecomeValid().poll())
                {
                   detection.setStabilityConfidenceThreshold(settings.getStabilityAverageConfidence());
@@ -219,5 +220,10 @@ public class DetectionManager
    public void setDetectionHistoryDuration(Duration historyDuration)
    {
       settings.setDetectionHistoryDuration(TimeTools.toDoubleSeconds(historyDuration));
+   }
+
+   public void setBlockNewlyValidDetections(boolean blockNewlyValidDetections)
+   {
+      this.blockNewlyValidDetections = blockNewlyValidDetections;
    }
 }

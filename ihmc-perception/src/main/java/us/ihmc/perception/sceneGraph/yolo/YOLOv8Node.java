@@ -14,6 +14,7 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +69,8 @@ public class YOLOv8Node extends DetectableSceneNode
       super.update(sceneGraph, modificationQueue);
 
       YOLOv8InstantDetection mostRecentDetection = (YOLOv8InstantDetection) yoloDetection.getMostRecentDetection();
-      setCurrentlyDetected(yoloDetection.isStable());
+      Instant secondsAgo = Instant.now().minusSeconds(1);
+      setCurrentlyDetected(mostRecentDetection.getDetectionTime().isAfter(secondsAgo));
       setConfidence(mostRecentDetection.getConfidence());
       setObjectPointCloud(mostRecentDetection.getObjectPointCloud());
 
