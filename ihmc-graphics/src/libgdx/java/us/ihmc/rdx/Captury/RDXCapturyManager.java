@@ -33,12 +33,7 @@ public class RDXCapturyManager
          if (capturyEnabled.get())
          {
             RDXBaseUI.pushNotification("Enabling Remote Captury...");
-
-            ThreadTools.startAThread(() ->
-                                     {
-                                        ThreadTools.sleep(5000);
-                                        RDXBaseUI.pushNotification("Remote Captury enabled");
-                                     }, getClass().getName() + "CapturyEnableMonitor");
+            RDXBaseUI.pushNotification("Remote Captury enabled");
          }
          else
          {
