@@ -80,6 +80,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private final boolean useGPU;
 
+   public FootstepPlanningModule()
+   {
+      this(FootstepPlanningModule.class.getSimpleName());
+   }
+
    public FootstepPlanningModule(String name)
    {
       this(name,
