@@ -15,6 +15,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.vr.RDXVRStereoVision;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -30,6 +31,7 @@ public class RDXCapturyModeManager
    private boolean wasStreamingWithStereo = false;
    private boolean wasCapturyReady = false;
    private static final String PANEL_NAME = "Captury mode controls";
+   private RDXVRStereoVision stereoVision;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -71,6 +73,7 @@ public class RDXCapturyModeManager
          kinematicsStreamingMode = new RDXCapturyKinematicsStreaming(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext(), createKinematicsStreamingToolboxModule);
       }
+      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -98,7 +101,7 @@ public class RDXCapturyModeManager
 
 
       // fade robot graphics if in stereo vision mode
-      boolean streamingWithStereo = kinematicsStreamingMode.isStreaming();
+      boolean streamingWithStereo = kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled();
       boolean changed = streamingWithStereo != wasStreamingWithStereo;
       wasStreamingWithStereo = streamingWithStereo;
       if (changed)
@@ -162,8 +165,9 @@ public class RDXCapturyModeManager
 
    public void destroy()
    {
-   if (kinematicsStreamingMode != null)
-      kinematicsStreamingMode.destroy();
+      if (kinematicsStreamingMode != null)
+         kinematicsStreamingMode.destroy();
+      stereoVision.getDualBlackflySphericalProjection().shutdown();
    }
 
    public RDXCapturyMode getMode()
