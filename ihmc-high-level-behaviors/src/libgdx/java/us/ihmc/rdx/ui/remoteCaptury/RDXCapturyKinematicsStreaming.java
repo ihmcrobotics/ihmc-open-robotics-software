@@ -42,8 +42,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
-import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -119,7 +117,6 @@ public class RDXCapturyKinematicsStreaming
                                                            HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    private final AtomicReference<KinematicsStreamingToolboxInputMessage> toolboxInputMessagePending = new AtomicReference<>(
          null);
@@ -136,7 +133,7 @@ public class RDXCapturyKinematicsStreaming
       this.sceneGraph = sceneGraph;
    }
 
-   public void create(RDXVRContext vrContext, boolean createToolbox)
+   public void create(boolean createToolbox)
    {
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934")
@@ -162,8 +159,7 @@ public class RDXCapturyKinematicsStreaming
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          handDesiredControlFrames.put(side,
-                                      new MutableReferenceFrame(vrContext.getController(side)
-                                                                         .getXForwardZUpControllerFrame()));
+                                      new MutableReferenceFrame(ReferenceFrame.getWorldFrame()));
 
          ikHandControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
          ikUpperArmControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
@@ -300,8 +296,8 @@ public class RDXCapturyKinematicsStreaming
          //         toolboxInputMessage.setTimestamp();
 
          toolboxInputMessagePending.set(toolboxInputMessage);
-
-         outputFrequencyPlot.recordEvent();
+//
+//         outputFrequencyPlot.recordEvent();
       }
    }
 
@@ -473,34 +469,39 @@ public class RDXCapturyKinematicsStreaming
 
    public void addIKRigidBodyInputs(List<KinematicsToolboxRigidBodyMessage> rigidBodyInputs)
    {
-      KinematicsStreamingToolboxInputMessage inputToSend = toolboxInputMessagePending.getAndSet(null);
-      if (inputToSend == null)
-         return;
+      if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
+      {
+         KinematicsStreamingToolboxInputMessage inputToSend = toolboxInputMessagePending.getAndSet(null);
+         if (inputToSend == null)
+            return;
 
-      TLongObjectHashMap<KinematicsToolboxRigidBodyMessage> hashCodeToRibitBodyInputMap = new TLongObjectHashMap<>();
-      for (int i = 0; i < inputToSend.getInputs().size(); i++)
-      {
-         KinematicsToolboxRigidBodyMessage rigidBodyInput = inputToSend.getInputs().get(i);
-         hashCodeToRibitBodyInputMap.put(rigidBodyInput.getEndEffectorHashCode(), rigidBodyInput);
-      }
+         TLongObjectHashMap<KinematicsToolboxRigidBodyMessage> hashCodeToRibitBodyInputMap = new TLongObjectHashMap<>();
+         for (int i = 0; i < inputToSend.getInputs().size(); i++)
+         {
+            KinematicsToolboxRigidBodyMessage rigidBodyInput = inputToSend.getInputs().get(i);
+            hashCodeToRibitBodyInputMap.put(rigidBodyInput.getEndEffectorHashCode(), rigidBodyInput);
+         }
 
-      // Add the new inputs after to give them priority
-      for (KinematicsToolboxRigidBodyMessage rigidBodyInput : rigidBodyInputs)
-      {
-         hashCodeToRibitBodyInputMap.put(rigidBodyInput.getEndEffectorHashCode(), rigidBodyInput);
+         // Add the new inputs after to give them priority
+         for (KinematicsToolboxRigidBodyMessage rigidBodyInput : rigidBodyInputs)
+         {
+            hashCodeToRibitBodyInputMap.put(rigidBodyInput.getEndEffectorHashCode(), rigidBodyInput);
+         }
+         inputToSend.getInputs().clear();
+         for (KinematicsToolboxRigidBodyMessage rigidBodyInput : hashCodeToRibitBodyInputMap.valueCollection())
+         {
+            inputToSend.getInputs().add().set(rigidBodyInput);
+         }
+         if (enabled.get())
+         {
+            inputToSend.setStreamToController(streamToController.get());
+         }
+         else
+            inputToSend.setStreamToController(kinematicsRecorder.isReplaying());
+         toolboxInputMessagePending.set(inputToSend);
+
+         outputFrequencyPlot.recordEvent();
       }
-      inputToSend.getInputs().clear();
-      for (KinematicsToolboxRigidBodyMessage rigidBodyInput : hashCodeToRibitBodyInputMap.valueCollection())
-      {
-         inputToSend.getInputs().add().set(rigidBodyInput);
-      }
-      if (enabled.get())
-      {
-         inputToSend.setStreamToController(streamToController.get());
-      }
-      else
-         inputToSend.setStreamToController(kinematicsRecorder.isReplaying());
-      toolboxInputMessagePending.set(inputToSend);
    }
 
    public void renderImGuiWidgets()
@@ -521,18 +522,6 @@ public class RDXCapturyKinematicsStreaming
       }
 
       ghostRobotGraphic.renderImGuiWidgets();
-      // add widgets for recording/replaying motion in VR
-      ImGui.text("Press Left Joystick - Start/Stop recording");
-      kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Press Left Joystick - Start/Stop replay");
-      kinematicsRecorder.renderReplayWidgets(labels);
-      kinematicsRecorder.renderReferenceFrameSelection(labels);
-      ImGui.text("Output:");
-      ImGui.sameLine();
-      outputFrequencyPlot.renderImGuiWidgets();
-      ImGui.text("Status:");
-      ImGui.sameLine();
-      statusFrequencyPlot.renderImGuiWidgets();
 
       ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
    }

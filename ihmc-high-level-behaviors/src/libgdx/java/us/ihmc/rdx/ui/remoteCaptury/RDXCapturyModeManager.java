@@ -71,7 +71,7 @@ public class RDXCapturyModeManager
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
       {
          kinematicsStreamingMode = new RDXCapturyKinematicsStreaming(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
-         kinematicsStreamingMode.create(baseUI.getVRManager().getContext(), createKinematicsStreamingToolboxModule);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
    }
