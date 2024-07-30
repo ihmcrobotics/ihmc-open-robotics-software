@@ -247,4 +247,31 @@ public class RDXSimulatedSensorFactory
       highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
       return highLevelDepthSensorSimulator;
    }
+
+   public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames,
+                                                                                    LongSupplier timeSupplier,
+                                                                                    PubSubImplementation pubSubImplementation)
+   {
+      double publishRateHz = 20.0;
+      double verticalFOV = 70.0;
+      int imageWidth = 1280;
+      int imageHeight = 720;
+      double minRange = 0.2;
+      double maxRange = 40.0;
+      RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator
+            = new RDXHighLevelDepthSensorSimulator("Blackfly Right for Object Detection",
+                                                   referenceFrames.getExperimentalCameraFrame(),
+                                                   timeSupplier,
+                                                   verticalFOV,
+                                                   imageWidth,
+                                                   imageHeight,
+                                                   minRange,
+                                                   maxRange,
+                                                   0.01,
+                                                   0.01,
+                                                   false,
+                                                   publishRateHz);
+      highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+      return highLevelDepthSensorSimulator;
+   }
 }
