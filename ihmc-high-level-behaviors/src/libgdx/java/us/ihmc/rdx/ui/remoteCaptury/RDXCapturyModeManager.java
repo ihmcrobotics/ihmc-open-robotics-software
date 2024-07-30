@@ -17,7 +17,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.vr.RDXVRStereoVision;
-import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -77,13 +76,6 @@ public class RDXCapturyModeManager
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
    }
 
-   public void processVRInput(ImGui3DViewInput input)
-   {
-      if(kinematicsStreamingMode != null)
-      {
-         kinematicsStreamingMode.processCapturyInput();
-      }
-   }
    public void update()
    {
       RDXBaseUI baseUI = RDXBaseUI.getInstance();

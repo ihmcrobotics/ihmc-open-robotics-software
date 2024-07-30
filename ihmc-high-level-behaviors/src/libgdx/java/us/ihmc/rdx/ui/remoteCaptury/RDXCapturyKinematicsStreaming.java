@@ -283,24 +283,6 @@ public class RDXCapturyKinematicsStreaming
       return initialConfigurationMap;
    }
 
-   public void processCapturyInput()
-   {
-      if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
-      {
-         KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
-
-         if (enabled.get())
-            toolboxInputMessage.setStreamToController(streamToController.get());
-         else
-            toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-         //         toolboxInputMessage.setTimestamp();
-
-         toolboxInputMessagePending.set(toolboxInputMessage);
-//
-//         outputFrequencyPlot.recordEvent();
-      }
-   }
-
    private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
                                                                     ReferenceFrame desiredControlFrame,
                                                                     String frameName,
@@ -473,7 +455,18 @@ public class RDXCapturyKinematicsStreaming
       {
          KinematicsStreamingToolboxInputMessage inputToSend = toolboxInputMessagePending.getAndSet(null);
          if (inputToSend == null)
-            return;
+         {
+            KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
+
+            if (enabled.get())
+               toolboxInputMessage.setStreamToController(streamToController.get());
+            else
+               toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
+            //         toolboxInputMessage.setTimestamp();
+
+            toolboxInputMessagePending.set(toolboxInputMessage);
+            inputToSend = toolboxInputMessagePending.getAndSet(null);
+         }
 
          TLongObjectHashMap<KinematicsToolboxRigidBodyMessage> hashCodeToRibitBodyInputMap = new TLongObjectHashMap<>();
          for (int i = 0; i < inputToSend.getInputs().size(); i++)
