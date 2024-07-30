@@ -66,7 +66,7 @@ public class RDXPanel extends RDXPanelSizeHandler
       }
    }
 
-   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<RDXDockspacePanel> dockIDMap)
+   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<RDXDockspacePanel> dockIDMap, boolean lockPanelsWithinViewports)
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
@@ -85,17 +85,20 @@ public class RDXPanel extends RDXPanelSizeHandler
       {
          handleSizeBeforeBegin();
 
-         // Keep regular panels from being able to create new viewports
-         // Calling setNextWindowViewport essentially locks the next panel
-         // to that viewport and it can't leave other than being dragged all
-         // the way to a dockspace position on another dockspace window.
-         if (isOnMainViewport)
+         if (lockPanelsWithinViewports)
          {
-            ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
-         }
-         else if (parentDockspacePanel != null)
-         {
-            ImGui.setNextWindowViewport(parentDockspacePanel.getWindowViewportID());
+            // Keep regular panels from being able to create new viewports
+            // Calling setNextWindowViewport essentially locks the next panel
+            // to that viewport and it can't leave other than being dragged all
+            // the way to a dockspace position on another dockspace window.
+            if (isOnMainViewport)
+            {
+               ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
+            }
+            else if (parentDockspacePanel != null)
+            {
+               ImGui.setNextWindowViewport(parentDockspacePanel.getWindowViewportID());
+            }
          }
 
          int windowFlags = ImGuiWindowFlags.None;
@@ -113,7 +116,7 @@ public class RDXPanel extends RDXPanelSizeHandler
 
       for (RDXPanel child : children)
       {
-         child.renderPanelAndChildren(dockIDMap);
+         child.renderPanelAndChildren(dockIDMap, lockPanelsWithinViewports);
       }
    }
 
