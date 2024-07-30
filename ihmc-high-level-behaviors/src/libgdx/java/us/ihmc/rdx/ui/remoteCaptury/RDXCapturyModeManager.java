@@ -80,7 +80,7 @@ public class RDXCapturyModeManager
    {
       if(kinematicsStreamingMode != null)
       {
-         kinematicsStreamingMode.processVRInput(vrContext);
+         kinematicsStreamingMode.processCapturyInput();
       }
    }
    public void update()
