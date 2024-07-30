@@ -139,7 +139,7 @@ public class RDXImGuiWindowAndDockSystem
       beforeWindowManagement(true);
    }
 
-   public void beforeWindowManagement(boolean lockPanelsWithinViewports)
+   public void beforeWindowManagement(boolean lockPanelsWithinWindows)
    {
       ImGuiTools.setCurrentContext(context);
 
@@ -163,7 +163,7 @@ public class RDXImGuiWindowAndDockSystem
          dockIDMap.put(dockspacePanel.getDockspaceID(), dockspacePanel);
       }
 
-      panelManager.renderPanels(dockIDMap, lockPanelsWithinViewports);
+      panelManager.renderPanels(dockIDMap, lockPanelsWithinWindows);
    }
 
    public void renderMenuDockPanelItems()

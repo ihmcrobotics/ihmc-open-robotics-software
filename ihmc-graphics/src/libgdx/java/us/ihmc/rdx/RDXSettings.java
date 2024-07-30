@@ -27,7 +27,7 @@ public class RDXSettings
 
    private boolean plotFrameRate = false;
    private boolean vsync = false;
-   private boolean lockPanelsWithinViewports = true;
+   private boolean lockPanelsWithinWindows = true;
    private int foregroundFPSLimit = 240;
    private int libGDXLogLevel = 2;
    private int fontSize = ImGuiTools.DEFAULT_FONT_SIZE;
@@ -56,14 +56,14 @@ public class RDXSettings
       saveAsync();
    }
 
-   public boolean getLockPanelsWithinViewports()
+   public boolean getlockPanelsWithinWindows()
    {
-      return lockPanelsWithinViewports;
+      return lockPanelsWithinWindows;
    }
 
-   public void setLockPanelsWithinViewports(boolean lockPanelsWithinViewports)
+   public void setlockPanelsWithinWindows(boolean lockPanelsWithinWindows)
    {
-      this.lockPanelsWithinViewports = lockPanelsWithinViewports;
+      this.lockPanelsWithinWindows = lockPanelsWithinWindows;
       saveAsync();
    }
 
@@ -136,7 +136,7 @@ public class RDXSettings
       Properties properties = new Properties();
       properties.setProperty("plotFrameRate", String.valueOf(plotFrameRate));
       properties.setProperty("vsync", String.valueOf(vsync));
-      properties.setProperty("lockPanelsWithinViewports", String.valueOf(lockPanelsWithinViewports));
+      properties.setProperty("lockPanelsWithinWindows", String.valueOf(lockPanelsWithinWindows));
       properties.setProperty("foregroundFPSLimit", String.valueOf(foregroundFPSLimit));
       properties.setProperty("libgdxLogLevel", String.valueOf(libGDXLogLevel));
       properties.setProperty("fontSize", String.valueOf(fontSize));
@@ -184,7 +184,7 @@ public class RDXSettings
       {
          plotFrameRate = Boolean.parseBoolean(properties.getProperty("plotFrameRate"));
          vsync = Boolean.parseBoolean(properties.getProperty("vsync"));
-         lockPanelsWithinViewports = Boolean.parseBoolean(properties.getProperty("lockPanelsWithinViewports", "true"));
+         lockPanelsWithinWindows = Boolean.parseBoolean(properties.getProperty("lockPanelsWithinWindows", "true"));
          foregroundFPSLimit = Integer.parseInt(properties.getProperty("foregroundFPSLimit"));
          libGDXLogLevel = Integer.parseInt(properties.getProperty("libgdxLogLevel"));
          fontSize = Integer.parseInt(properties.getProperty("fontSize"));

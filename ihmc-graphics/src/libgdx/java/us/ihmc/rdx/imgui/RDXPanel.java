@@ -66,7 +66,7 @@ public class RDXPanel extends RDXPanelSizeHandler
       }
    }
 
-   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<RDXDockspacePanel> dockIDMap, boolean lockPanelsWithinViewports)
+   /* package-private */ void renderPanelAndChildren(TIntObjectHashMap<RDXDockspacePanel> dockIDMap, boolean lockPanelsWithinWindows)
    {
       while (!removalQueue.isEmpty())
          children.remove(removalQueue.poll());
@@ -85,7 +85,7 @@ public class RDXPanel extends RDXPanelSizeHandler
       {
          handleSizeBeforeBegin();
 
-         if (lockPanelsWithinViewports)
+         if (lockPanelsWithinWindows)
          {
             // Keep regular panels from being able to create new viewports
             // Calling setNextWindowViewport essentially locks the next panel
@@ -116,7 +116,7 @@ public class RDXPanel extends RDXPanelSizeHandler
 
       for (RDXPanel child : children)
       {
-         child.renderPanelAndChildren(dockIDMap, lockPanelsWithinViewports);
+         child.renderPanelAndChildren(dockIDMap, lockPanelsWithinWindows);
       }
    }
 

@@ -51,7 +51,7 @@ public class RDXPanelManager
       }
    }
 
-   public void renderPanels(TIntObjectHashMap<RDXDockspacePanel> dockIDMap, boolean lockPanelsWithinViewports)
+   public void renderPanels(TIntObjectHashMap<RDXDockspacePanel> dockIDMap, boolean lockPanelsWithinWindows)
    {
       while (!removalQueue.isEmpty())
          panels.remove(removalQueue.poll());
@@ -61,7 +61,7 @@ public class RDXPanelManager
 
       for (RDXPanel panel : panels)
       {
-         panel.renderPanelAndChildren(dockIDMap, lockPanelsWithinViewports);
+         panel.renderPanelAndChildren(dockIDMap, lockPanelsWithinWindows);
       }
    }
 

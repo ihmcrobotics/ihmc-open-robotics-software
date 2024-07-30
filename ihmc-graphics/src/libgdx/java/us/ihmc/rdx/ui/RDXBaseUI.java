@@ -115,7 +115,7 @@ public class RDXBaseUI
    private final ImInt foregroundFPSLimit = new ImInt(240);
    private final ImBoolean plotFrameRate = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
-   private final ImBoolean lockPanelsWithinViewports = new ImBoolean(true);
+   private final ImBoolean lockPanelsWithinWindows = new ImBoolean(true);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
@@ -233,7 +233,7 @@ public class RDXBaseUI
       }
       plotFrameRate.set(settings.plotFrameRateEnabled());
       setVsync(settings.vsyncEnabled());
-      lockPanelsWithinViewports.set(settings.getLockPanelsWithinViewports());
+      lockPanelsWithinWindows.set(settings.getlockPanelsWithinWindows());
       setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
       imguiFontSize.set(settings.getFontSize());
@@ -323,7 +323,7 @@ public class RDXBaseUI
    {
       vrManager.pollEventsAndRender(this, primaryScene);
       Gdx.graphics.setTitle(windowTitle);
-      imGuiWindowAndDockSystem.beforeWindowManagement(settings.getLockPanelsWithinViewports());
+      imGuiWindowAndDockSystem.beforeWindowManagement(settings.getlockPanelsWithinWindows());
       primary3DPanel.render();
       for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
@@ -495,9 +495,9 @@ public class RDXBaseUI
             Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
             Gdx.graphics.setVSync(vsync.get());
          }
-         if (ImGui.menuItem(labels.get("Lock panels within viewports"), null, lockPanelsWithinViewports))
+         if (ImGui.menuItem(labels.get("Lock panels within windows"), null, lockPanelsWithinWindows))
          {
-            settings.setLockPanelsWithinViewports(lockPanelsWithinViewports.get());
+            settings.setlockPanelsWithinWindows(lockPanelsWithinWindows.get());
          }
 
          ImGui.separator(); // Environment section
