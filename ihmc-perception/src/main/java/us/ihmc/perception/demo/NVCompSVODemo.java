@@ -2,8 +2,14 @@ package us.ihmc.perception.demo;
 
 import org.bytedeco.cuda.nvcomp.PimplManager;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -30,6 +36,7 @@ import java.util.TreeMap;
 
 import static org.bytedeco.cuda.global.cudart.cudaFreeHost;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static us.ihmc.perception.cuda.CUDATools.checkError;
 
 public class NVCompSVODemo extends NVCompDemo
 {
@@ -279,6 +286,22 @@ public class NVCompSVODemo extends NVCompDemo
       compressedImage.close();
       decompressedImage.close();
    }
+
+//   private void testDepthCompression(RawImage depthImage)
+//   {
+//      GpuMat gpuDepth = depthImage.getGpuImageMat();
+//      GpuMat depthMSB = new GpuMat();
+//      GpuMat depthLSB = new GpuMat();
+//
+//      GpuMat msbExtractor = new GpuMat(gpuDepth.size(), gpuDepth.type(), new Scalar(65280.0));
+//      GpuMat lsbExtractor = new GpuMat(gpuDepth.size(), gpuDepth.type(), new Scalar(255.0));
+//
+//      opencv_cudaarithm.bitwise_and(gpuDepth, msbExtractor, depthMSB);
+//      opencv_cudaarithm.bitwise_and(gpuDepth, lsbExtractor, depthLSB);
+//
+//      depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 255.0, 0.0);
+//      depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
+//   }
 
    private void saveDataToFile(String filePath) throws IOException
    {

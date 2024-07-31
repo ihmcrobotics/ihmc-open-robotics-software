@@ -33,6 +33,7 @@ import java.util.TreeMap;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvcomp.*;
+import static us.ihmc.perception.cuda.CUDATools.checkError;
 
 public class NVCompDemo
 {
@@ -237,18 +238,6 @@ public class NVCompDemo
 
       bitcompOptions.close();
       bitcompManager.close();
-   }
-
-   protected void checkError(int errorCode)
-   {
-      if (errorCode != CUDA_SUCCESS)
-      {
-         try (BytePointer errorName = cudaGetErrorName(errorCode);
-              BytePointer errorString = cudaGetErrorString(errorCode))
-         {
-            LogTools.error("CUDA Error ({}): {}", errorName.getString(), errorString.getString());
-         }
-      }
    }
 
    public static void main(String[] args)
