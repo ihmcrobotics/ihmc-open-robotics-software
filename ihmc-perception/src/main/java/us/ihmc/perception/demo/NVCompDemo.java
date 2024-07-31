@@ -36,45 +36,45 @@ import static org.bytedeco.cuda.global.nvcomp.*;
 
 public class NVCompDemo
 {
-   private static final String FILE_PATH = "/home/tbialek/Documents/ZED/ZED_ColorImage.png";
-   private static final int DATA_TYPE = NVCOMP_TYPE_CHAR;
+   protected static final String FILE_PATH = "/home/tbialek/Documents/ZED/ZED_DepthImage.png";
+   protected static final int DATA_TYPE = NVCOMP_TYPE_SHORT;
 
-   private final CUstream_st stream;
-   private final long chunkSize = 1 << 16;
+   protected final CUstream_st stream;
+   protected final long chunkSize = 1 << 16;
 
    // LZ4
-   private final LZ4Manager lz4Manager;
-   private final nvcompBatchedLZ4Opts_t lz4Options;
+   protected final LZ4Manager lz4Manager;
+   protected final nvcompBatchedLZ4Opts_t lz4Options;
 
    // Snappy
-   private final SnappyManager snappyManager;
-   private final nvcompBatchedSnappyOpts_t snappyOptions;
+   protected final SnappyManager snappyManager;
+   protected final nvcompBatchedSnappyOpts_t snappyOptions;
 
    // Deflate
-   private final DeflateManager deflateManager;
-   private final nvcompBatchedDeflateOpts_t deflateOptions;
+   protected final DeflateManager deflateManager;
+   protected final nvcompBatchedDeflateOpts_t deflateOptions;
 
    // GDeflate
-   private final GdeflateManager gDeflateManager;
-   private final nvcompBatchedGdeflateOpts_t gDeflateOptions;
+   protected final GdeflateManager gDeflateManager;
+   protected final nvcompBatchedGdeflateOpts_t gDeflateOptions;
 
    // ZSTD
-   private final ZstdManager zstdManager;
-   private final nvcompBatchedZstdOpts_t zstdOptions;
+   protected final ZstdManager zstdManager;
+   protected final nvcompBatchedZstdOpts_t zstdOptions;
 
    // ANS
-   private final ANSManager ansManager;
-   private final nvcompBatchedANSOpts_t ansOptions;
+   protected final ANSManager ansManager;
+   protected final nvcompBatchedANSOpts_t ansOptions;
 
    // Bitcomp
-   private final BitcompManager bitcompManager;
-   private final nvcompBatchedBitcompFormatOpts bitcompOptions;
+   protected final BitcompManager bitcompManager;
+   protected final nvcompBatchedBitcompFormatOpts bitcompOptions;
 
-   private final Map<String, PimplManager> compressionManagers = new TreeMap<>();
+   protected final Map<String, PimplManager> compressionManagers = new TreeMap<>();
 
-   private NVCompDemo()
+   protected NVCompDemo()
    {
-      System.out.println("Chunk Size: " + chunkSize);
+      LogTools.info("Chunk Size: " + chunkSize);
 
       stream = new CUstream_st();
       checkError(cudaStreamCreate(stream));
@@ -91,7 +91,7 @@ public class NVCompDemo
       compressionManagers.put("Snappy", snappyManager);
 
       // Deflate
-      deflateOptions = nvcomp.nvcompBatchedDeflateDefaultOpts();
+      deflateOptions = new nvcompBatchedDeflateOpts_t();
       deflateManager = new DeflateManager(chunkSize, deflateOptions, stream, 0, NoComputeNoVerify);
       compressionManagers.put("Deflate", deflateManager);
 
@@ -118,7 +118,7 @@ public class NVCompDemo
       compressionManagers.put("Bitcomp", bitcompManager);
    }
 
-   private void runDemo()
+   protected void runDemo()
    {
       // Read an image from a file
       Mat image = opencv_imgcodecs.imread(FILE_PATH);
@@ -146,7 +146,7 @@ public class NVCompDemo
       }
    }
 
-   private long compress(Mat image, BytePointer compressedImageData, PimplManager compressionManager)
+   protected long compress(Mat image, BytePointer compressedImageData, PimplManager compressionManager)
    {
       long decompressedBufferSize = image.elemSize() * image.total();
       BytePointer decompressedDeviceBuffer = allocateToDevice(image);
@@ -171,7 +171,7 @@ public class NVCompDemo
       return compressedBufferSize;
    }
 
-   private void decompressImage(BytePointer compressedHostBuffer, long compressedBufferSize, Mat matToPack)
+   protected void decompressImage(BytePointer compressedHostBuffer, long compressedBufferSize, Mat matToPack)
    {
       BytePointer compressedDeviceBuffer = new BytePointer();
       checkError(cudaMallocAsync(compressedDeviceBuffer, compressedBufferSize, stream));
@@ -201,7 +201,7 @@ public class NVCompDemo
       decompressionManager.close();
    }
 
-   private BytePointer allocateToDevice(Mat image)
+   protected BytePointer allocateToDevice(Mat image)
    {
       long imageDataSize = image.elemSize() * image.total();
 
@@ -212,7 +212,7 @@ public class NVCompDemo
       return deviceMemoryPointer;
    }
 
-   private void destroy()
+   protected void destroy()
    {
       checkError(cudaStreamSynchronize(stream));
       checkError(cudaStreamDestroy(stream));
@@ -239,7 +239,7 @@ public class NVCompDemo
       bitcompManager.close();
    }
 
-   private void checkError(int errorCode)
+   protected void checkError(int errorCode)
    {
       if (errorCode != CUDA_SUCCESS)
       {
@@ -255,6 +255,8 @@ public class NVCompDemo
    {
       Loader.load(nvcomp.class);
 
-      new NVCompDemo().runDemo();
+      NVCompDemo demo = new NVCompDemo();
+      demo.runDemo();
+      demo.destroy();
    }
 }
