@@ -6,12 +6,18 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RDXCapturyManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean capturyEnabled = new ImBoolean(false);
    private final ImBoolean actorDeleted = new ImBoolean(false);
    private final ImBoolean snapActor = new ImBoolean(false);
+   private List<Integer> actorArray = new ArrayList<>();
+   private int selectedIndex = 0;
+   private int selectedActorID = 0;
    public void renderMenuBar()
    {
       ImGui.setNextWindowSize(350.0f, 250.0f);
@@ -28,6 +34,24 @@ public class RDXCapturyManager
 
    public void renderEnableCheckbox()
    {
+      if(actorArray.size() > 0)
+      {
+         if (ImGui.beginCombo(labels.get("Select Actor"), String.valueOf(actorArray.get(selectedIndex))))
+         {
+            for (int i = 0; i < actorArray.size(); i++)
+            {
+               int actorID = actorArray.get(i);
+               if (ImGui.selectable(String.valueOf(actorID), selectedIndex == i))
+               {
+                  selectedIndex = i;
+                  selectedActorID = actorID;
+               }
+            }
+            ImGui.endCombo();
+         }
+      }
+
+
       if (imgui.internal.ImGui.menuItem(labels.get("Remote Captury Enabled"), "", capturyEnabled))
       {
          if (capturyEnabled.get())
@@ -58,6 +82,7 @@ public class RDXCapturyManager
             RDXBaseUI.pushNotification("Snapping Actor...");
          }
       }
+
    }
 
    public ImBoolean getCapturyEnabled()
@@ -81,5 +106,20 @@ public class RDXCapturyManager
    public void setSnapActor(boolean snapActor)
    {
       this.snapActor.set(snapActor);
+   }
+
+   public void addToActorArray(int Actor_ID)
+   {
+      actorArray.add(Actor_ID);
+
+   }
+
+   public int getSelectedActorID()
+   {
+      return selectedActorID;
+   }
+   public boolean checkContain(int Actor_ID)
+   {
+      return actorArray.contains(Actor_ID);
    }
 }
