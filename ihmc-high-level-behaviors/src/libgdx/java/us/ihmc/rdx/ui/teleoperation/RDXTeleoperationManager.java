@@ -304,8 +304,10 @@ public class RDXTeleoperationManager extends RDXPanel
 
          wholeBodyIKManager.setInteractables(interactableHands, interactableFeet, interactableChest, interactablePelvis);
 
-         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
-         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
+         // If this is uncommented, we will need to disable squeeze selection or risk sending unwanted messages during VR teleop.
+         //         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+         //         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
+
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
@@ -518,7 +520,8 @@ public class RDXTeleoperationManager extends RDXPanel
          ImGui.unindent();
       }
 
-      wholeBodyIKManager.renderImGuiWidgets();
+      // Commenting this guy out until we are using it.
+      // wholeBodyIKManager.renderImGuiWidgets();
 
       ImGui.text("Show collisions:");
       ImGui.sameLine();

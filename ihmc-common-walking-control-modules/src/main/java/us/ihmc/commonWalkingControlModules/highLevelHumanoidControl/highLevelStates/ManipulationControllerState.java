@@ -342,6 +342,8 @@ public class ManipulationControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      controllerCoreCommand.clear();
+
       centerOfMassFrame.update();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -399,7 +401,8 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       /* Bimanual module */
       bimanualManipulationManager.update();
-      if (bimanualManipulationManager.isEnabled())
+//      if (bimanualManipulationManager.isEnabled())
+      if (bimanualManipulationManager != null)
       {
          controllerCoreCommand.addInverseDynamicsCommand(bimanualManipulationManager.getCommand());
       }

@@ -3,8 +3,10 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.BimanualManipulationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -82,6 +84,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
+   //private final RDXReferenceFrameGraphic midHandFrameGraphic = new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH);
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
@@ -101,6 +104,11 @@ public class RDXVRKinematicsStreamingMode
    private int leftIndex = -1;
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+
+   private RDXBiManualManipulationManager rdxBiManipulationManager = new RDXBiManualManipulationManager();
+   private boolean hasSentSqueezeMessage = false;
+   private ImDouble objectMass = new ImDouble(0.0);
+   private ImDouble squeezeForce = new ImDouble(0.0);
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -169,14 +177,6 @@ public class RDXVRKinematicsStreamingMode
                                                                    streamToController.set(!streamToController.get());
                                                                 }
 
-                                                                // NOTE: Implement hand open close for controller trigger button.
-                                                                InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                {
-                                                                   HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
-                                                                   sendHandCommand(RobotSide.LEFT, handConfiguration);
-                                                                }
-
                                                                 // Check if left joystick is pressed in order to trigger recording or replay of motion
                                                                 InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
                                                                 kinematicsRecorder.processRecordReplayInput(joystickButton);
@@ -192,12 +192,21 @@ public class RDXVRKinematicsStreamingMode
                                                                     setEnabled(!enabled.get());
                                                                  }
 
-                                                                 // NOTE: Implement hand open close for controller trigger button.
-                                                                 InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-                                                                 if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-                                                                 { // do not want to close grippers while interacting with the panel
-                                                                    HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-                                                                    sendHandCommand(RobotSide.RIGHT, handConfiguration);
+                                                                 InputDigitalActionData bimaniuplationButton = controller.getClickTriggerActionData();
+                                                                 if (bimaniuplationButton.bChanged() && !bimaniuplationButton.bState())
+                                                                 {
+                                                                    rdxBiManipulationManager.toggleBiManualManipulationMode();
+                                                                    hasSentSqueezeMessage = false;
+
+                                                                    if (!rdxBiManipulationManager.getEnableBiManualManipulationMode())
+                                                                    {
+                                                                       // Disable the bimanual message on the controller side
+                                                                       BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
+                                                                       message.setDisable(true);
+                                                                       message.setObjectMass(0.0);
+                                                                       message.setSqueezeForce(0.0);
+                                                                       ros2ControllerHelper.publishToController(message);
+                                                                    }
                                                                  }
                                                               });
 
@@ -205,8 +214,12 @@ public class RDXVRKinematicsStreamingMode
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
+
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
+
+         //TODO: (CD) This is not yet used. Use to back out orientation-adjusted hand frames or remove
+         // midHandFrameGraphic.setToReferenceFrame(rdxBiManipulationManager.getMidHandFrame());
 
          if (controlArmsOnly.get())
          {
@@ -253,6 +266,17 @@ public class RDXVRKinematicsStreamingMode
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       toolboxInputMessage);
+
+         if (!hasSentSqueezeMessage && rdxBiManipulationManager.getEnableBiManualManipulationMode())
+         {
+            BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
+            message.setDisable(false);
+            message.setObjectMass(objectMass.get());
+            message.setSqueezeForce(squeezeForce.get());
+            ros2ControllerHelper.publishToController(message);
+            hasSentSqueezeMessage = true;
+         }
+
          outputFrequencyPlot.recordEvent();
       }
    }
@@ -402,6 +426,9 @@ public class RDXVRKinematicsStreamingMode
          if (!enabled.get())
             streamToController.set(false);
 
+         if (!streamToController.get())
+            rdxBiManipulationManager.setEnableBiManualManipulationMode(false);
+
          if (enabled.get() || kinematicsRecorder.isReplaying())
          {
             if (status.getMessageNotification().poll())
@@ -449,6 +476,15 @@ public class RDXVRKinematicsStreamingMode
          setEnabled(enabled.get());
       }
 
+      ImGui.text("Right Trigger");
+      ImGui.sameLine();
+      if (ImGui.checkbox(labels.get("enableBimanipulation"), rdxBiManipulationManager.getEnableBiManualManipulationMode()))
+      {
+         rdxBiManipulationManager.toggleBiManualManipulationMode();
+         hasSentSqueezeMessage = false;
+      }
+      ImGui.checkbox(labels.get("hasSentSqueezeMessage"), hasSentSqueezeMessage);
+
       // TODO (CD): Add this back in when we have a torso
       // if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       // {
@@ -474,6 +510,9 @@ public class RDXVRKinematicsStreamingMode
       statusFrequencyPlot.renderImGuiWidgets();
 
       ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
+
+      ImGui.inputDouble("objectMass", objectMass);
+      ImGui.inputDouble("squeezeForce", squeezeForce);
    }
 
    public void setEnabled(boolean enabled)

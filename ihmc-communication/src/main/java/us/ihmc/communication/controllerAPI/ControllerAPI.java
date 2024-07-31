@@ -59,6 +59,7 @@ public final class ControllerAPI
       inputMessageClasses.add(MomentumTrajectoryMessage.class);
       inputMessageClasses.add(CenterOfMassTrajectoryMessage.class);
       inputMessageClasses.add(HandWrenchTrajectoryMessage.class);
+      inputMessageClasses.add(BimanualManipulationMessage.class);
 
       // Commands supported by the fast-walking controller, not in this repo
       inputMessageClasses.add(DirectionalControlInputMessage.class);
@@ -85,6 +86,10 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
       inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
       inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
+
+      
+      // Commands supported by the BiManual Manipulation ControlS State
+      inputMessageClasses.add(BimanualManipulationMessage.class);
 
       // Commands supported by the kinematics streaming toolbox
       inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
