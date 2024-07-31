@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import net.mgsx.gltf.scene3d.lights.PointLightEx;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 public class RDXPointLight
@@ -12,7 +13,7 @@ public class RDXPointLight
 
    public RDXPointLight()
    {
-      float pointLightIntensity = 660.0f;
+      float pointLightIntensity = RDX3DScene.DEFAULT_POINT_LIGHT_INTENSITY;
       Float range = null; // infinite range
       Vector3 position = new Vector3(0.0f, 0.0f, 0.0f);
       pointLightEx.set(Color.WHITE, position, pointLightIntensity, range);
