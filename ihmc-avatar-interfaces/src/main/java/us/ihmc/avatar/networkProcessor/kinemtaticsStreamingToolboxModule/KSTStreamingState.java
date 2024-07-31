@@ -330,9 +330,17 @@ public class KSTStreamingState implements State
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
 
       tools.resetUserInvalidInputFlag();
-      tools.getParameters().getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
-      tools.getParameters().getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
-      ikCommandInputManager.submitMessage(tools.getParameters().getDefaultSolverConfiguration());
+      KinematicsStreamingToolboxParameters kstParameters = tools.getParameters();
+      kstParameters.getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
+      kstParameters.getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
+      ikCommandInputManager.submitMessage(kstParameters.getDefaultSolverConfiguration());
+
+      if (kstParameters.getSolverNullspaceAlpha() > 0.0 && Double.isFinite(kstParameters.getSolverNullspaceAlpha()))
+         ikController.setPrivilegedNullspaceAlpha(kstParameters.getSolverNullspaceAlpha(), true);
+      if (kstParameters.getSolverPrivilegedDefaultWeight() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultWeight()))
+         ikController.setPrivilegedWeight(kstParameters.getSolverPrivilegedDefaultWeight(), true);
+      if (kstParameters.getSolverPrivilegedDefaultGain() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultGain()))
+         ikController.setPrivilegedConfigurationGain(kstParameters.getSolverPrivilegedDefaultGain(), true);
 
       /*
        * The desiredFullRobotModel can either be at the current configuration or at a configuration

@@ -222,14 +222,14 @@ public class KinematicsToolboxController extends ToolboxController
     * neighborhood (for the arms, the elbows will resist going straight).
     */
    private final YoDouble privilegedNullspaceAlpha = new YoDouble("privilegedNullspaceAlpha", registry);
-   private final double defaultPrivilegedNullspaceAlpha;
+   private double defaultPrivilegedNullspaceAlpha;
    /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
     * current privileged configuration can be changed at any time by sending a
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
-   private final double defaultPrivilegedWeight;
+   private double defaultPrivilegedWeight;
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
     * compute for each joint a privileged velocity based on the difference between the privileged angle
@@ -237,14 +237,14 @@ public class KinematicsToolboxController extends ToolboxController
     * optimization problem in such way that they don't interfere with the user commands.
     */
    private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
-   private final double defaultPrivilegedConfigurationGain;
+   private double defaultPrivilegedConfigurationGain;
    /**
     * Cap used to limit the magnitude of the privileged joint velocities computed in the controller
     * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution converges
     * quicker.
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
-   private final double defaultPrivilegedMaxVelocity;
+   private double defaultPrivilegedMaxVelocity;
    /**
     * Defines a robot configuration that this IK start from and also defines the privileged joint
     * configuration.
@@ -1791,6 +1791,66 @@ public class KinematicsToolboxController extends ToolboxController
    public void setEnableStaticCollisionAvoidance(boolean enableStaticCollisionAvoidance)
    {
       this.enableStaticCollisionAvoidance.set(enableStaticCollisionAvoidance);
+   }
+
+   public void setPrivilegedNullspaceAlpha(double privilegedNullspaceAlpha, boolean updateDefaultValue)
+   {
+      if (privilegedNullspaceAlpha < 0.0 || !Double.isFinite(privilegedNullspaceAlpha))
+      {
+         LogTools.error("Privileged nullspace alpha must be a positive finite number. Requested value: " + privilegedNullspaceAlpha);
+         return;
+      }
+
+      if (updateDefaultValue)
+         this.defaultPrivilegedNullspaceAlpha = privilegedNullspaceAlpha;
+      this.privilegedNullspaceAlpha.set(privilegedNullspaceAlpha);
+      privilegedConfigurationCommand.setNullspaceAlpha(privilegedNullspaceAlpha);
+      submitPrivilegedConfigurationCommand = true;
+   }
+
+   public void setPrivilegedWeight(double privilegedWeight, boolean updateDefaultValue)
+   {
+      if (privilegedWeight < 0.0 || !Double.isFinite(privilegedWeight))
+      {
+         LogTools.error("Privileged weight must be a positive finite number. Requested value: " + privilegedWeight);
+         return;
+      }
+
+      if (updateDefaultValue)
+         this.defaultPrivilegedWeight = privilegedWeight;
+      this.privilegedWeight.set(privilegedWeight);
+      privilegedConfigurationCommand.setDefaultWeight(privilegedWeight);
+      submitPrivilegedConfigurationCommand = true;
+   }
+
+   public void setPrivilegedConfigurationGain(double privilegedConfigurationGain, boolean updateDefaultValue)
+   {
+      if (privilegedConfigurationGain < 0.0 || !Double.isFinite(privilegedConfigurationGain))
+      {
+         LogTools.error("Privileged configuration gain must be a positive finite number. Requested value: " + privilegedConfigurationGain);
+         return;
+      }
+
+      if (updateDefaultValue)
+         this.defaultPrivilegedConfigurationGain = privilegedConfigurationGain;
+      this.privilegedConfigurationGain.set(privilegedConfigurationGain);
+      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain);
+      submitPrivilegedConfigurationCommand = true;
+   }
+
+   public void setPrivilegedMaxVelocity(double privilegedMaxVelocity, boolean updateDefaultValue)
+   {
+      if (privilegedMaxVelocity < 0.0 || !Double.isFinite(privilegedMaxVelocity))
+      {
+         LogTools.error("Privileged max velocity must be a positive finite number. Requested value: " + privilegedMaxVelocity);
+         return;
+      }
+      
+      if (updateDefaultValue)
+         this.defaultPrivilegedMaxVelocity = privilegedMaxVelocity;
+      this.privilegedMaxVelocity.set(privilegedMaxVelocity);
+      privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity);
+      submitPrivilegedConfigurationCommand = true;
    }
 
    public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()
