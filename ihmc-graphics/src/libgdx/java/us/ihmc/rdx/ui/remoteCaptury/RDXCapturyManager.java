@@ -136,7 +136,10 @@ public class RDXCapturyManager
    public void addToActorArray(int Actor_ID)
    {
       actorArray.add(Actor_ID);
-
+   }
+   public int getLastActorArray()
+   {
+      return actorArray.get(actorArray.size()-1);
    }
 
    public int getSelectedActorID()
