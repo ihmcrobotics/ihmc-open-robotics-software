@@ -37,7 +37,7 @@ import static org.bytedeco.cuda.global.nvcomp.*;
 public class NVCompDemo
 {
    protected static final String FILE_PATH = "/home/tbialek/Documents/ZED/ZED_DepthImage.png";
-   protected static final int DATA_TYPE = NVCOMP_TYPE_SHORT;
+   protected static final int DATA_TYPE = NVCOMP_TYPE_CHAR;
 
    protected final CUstream_st stream;
    protected final long chunkSize = 1 << 16;
