@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PrivilegedConfigurationCommand
       implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
@@ -31,6 +31,11 @@ public class PrivilegedConfigurationCommand
                                                                                                                                      OneDoFJointPrivilegedConfigurationParameters.class);
 
    /**
+    * Alpha value for the damped least square solver used to compute the nullspace projection.
+    */
+   private double nullspaceAlpha;
+
+   /**
     * Creates an empty command.
     */
    public PrivilegedConfigurationCommand()
@@ -48,6 +53,7 @@ public class PrivilegedConfigurationCommand
       defaultParameters.clear();
       joints.clear();
       jointSpecificParameters.clear();
+      nullspaceAlpha = -1.0;
    }
 
    /**
@@ -69,6 +75,8 @@ public class PrivilegedConfigurationCommand
          joints.add(other.joints.get(jointIndex));
          jointSpecificParameters.add().set(other.jointSpecificParameters.get(jointIndex));
       }
+
+      nullspaceAlpha = other.nullspaceAlpha;
    }
 
    public void disable()
@@ -255,6 +263,11 @@ public class PrivilegedConfigurationCommand
          setMaxAcceleration(jointIndex, maxAcceleration);
    }
 
+   public void setNullspaceAlpha(double nullspaceAlpha)
+   {
+      this.nullspaceAlpha = nullspaceAlpha;
+   }
+
    /**
     * Checks whether or not the privileged configuration is to be used.
     *
@@ -283,6 +296,11 @@ public class PrivilegedConfigurationCommand
    public int getNumberOfJoints()
    {
       return jointSpecificParameters.size();
+   }
+
+   public double getNullspaceAlpha()
+   {
+      return nullspaceAlpha;
    }
 
    @Override
@@ -328,6 +346,9 @@ public class PrivilegedConfigurationCommand
                return false;
          }
          if (!jointSpecificParameters.equals(other.jointSpecificParameters))
+            return false;
+
+         if (nullspaceAlpha != other.nullspaceAlpha)
             return false;
 
          return true;

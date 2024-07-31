@@ -31,7 +31,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
@@ -59,9 +58,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 public class KSTTools
@@ -315,21 +312,6 @@ public class KSTTools
       else
       {
          hasNewInputCommand.set(false);
-      }
-
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInitialConfigurationCommand.class))
-      {
-         KinematicsToolboxInitialConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxInitialConfigurationCommand.class);
-         Map<String, Double> initialConfigurationMap = new HashMap<>();
-         List<OneDoFJointBasics> joints = command.getJoints();
-         var initialJointAngles = command.getInitialJointAngles();
-         for (int i = 0; i < joints.size(); i++)
-         {
-            String jointName = joints.get(i).getName();
-            double q = initialJointAngles.get(i);
-            initialConfigurationMap.put(jointName, q);
-         }
-         ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
       }
    }
 

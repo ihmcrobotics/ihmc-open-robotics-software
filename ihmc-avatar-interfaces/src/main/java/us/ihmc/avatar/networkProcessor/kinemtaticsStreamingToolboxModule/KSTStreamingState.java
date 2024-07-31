@@ -289,7 +289,7 @@ public class KSTStreamingState implements State
       inputWeightDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / parameters.getInputWeightDecayDuration(),
                                                                                                  toolboxControllerPeriod));
 
-      Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
+      Collection<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
       activeInputStateEstimator.set(parameters.getInputStateEstimatorType());
       inputStateEstimatorsMap.put(InputStateEstimatorType.FIRST_ORDER_LPF,
                                   new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry));
@@ -490,7 +490,7 @@ public class KSTStreamingState implements State
 
          // Reset the list to keep track of the bodies that are not controlled
          uncontrolledRigidBodies.clear();
-         List<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
+         List<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
 
          for (int i = 0; i < controllableRigidBodies.size(); i++)
          {
@@ -642,7 +642,7 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      tools.getIKController().updateInternal();
+      ikController.updateInternal();
 
       // Updating some statistics
       if (tools.hasNewInputCommand())

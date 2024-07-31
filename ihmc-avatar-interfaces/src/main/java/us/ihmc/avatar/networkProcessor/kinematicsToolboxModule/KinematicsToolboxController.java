@@ -7,6 +7,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -118,8 +119,6 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
-   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
 
    /**
     * Indicates the duration of a control tick. It should match the thread period in
@@ -216,11 +215,21 @@ public class KinematicsToolboxController extends ToolboxController
    private final FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList();
 
    /**
+    * Specifies the value for the alpha parameter of the nullspace projection.
+    * The nullspace projection is computed using a damped least square solver which the alpha parameter is for.
+    * The alpha value controls the size of the singularity neighborhood that is used to project the privileged configuration.
+    * A small value will result in a small neighborhood (for the arms, the elbows will more easily go straight), and a large value will result in a large
+    * neighborhood (for the arms, the elbows will resist going straight).
+    */
+   private final YoDouble privilegedNullspaceAlpha = new YoDouble("privilegedNullspaceAlpha", registry);
+   private final double defaultPrivilegedNullspaceAlpha;
+   /**
     * Weight indicating the priority for getting closer to the current privileged configuration. The
     * current privileged configuration can be changed at any time by sending a
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
+   private final double defaultPrivilegedWeight;
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
     * compute for each joint a privileged velocity based on the difference between the privileged angle
@@ -228,12 +237,14 @@ public class KinematicsToolboxController extends ToolboxController
     * optimization problem in such way that they don't interfere with the user commands.
     */
    private final YoDouble privilegedConfigurationGain = new YoDouble("privilegedConfigurationGain", registry);
+   private final double defaultPrivilegedConfigurationGain;
    /**
     * Cap used to limit the magnitude of the privileged joint velocities computed in the controller
     * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution converges
     * quicker.
     */
    private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
+   private final double defaultPrivilegedMaxVelocity;
    /**
     * Defines a robot configuration that this IK start from and also defines the privileged joint
     * configuration.
@@ -462,7 +473,9 @@ public class KinematicsToolboxController extends ToolboxController
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
       controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
-      controllerCore = createControllerCore(controllableRigidBodies);
+
+      KinematicsToolboxPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new KinematicsToolboxPrivilegedConfigurationParameters();
+      controllerCore = createControllerCore(controllableRigidBodies, jointPrivilegedConfigurationParameters);
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
@@ -479,9 +492,14 @@ public class KinematicsToolboxController extends ToolboxController
       jointGains.setKp(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
-      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+      defaultPrivilegedNullspaceAlpha = jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha();
+      defaultPrivilegedWeight = jointPrivilegedConfigurationParameters.getDefaultWeight();
+      defaultPrivilegedConfigurationGain = jointPrivilegedConfigurationParameters.getDefaultConfigurationGain();
+      defaultPrivilegedMaxVelocity = jointPrivilegedConfigurationParameters.getDefaultMaxVelocity();
+      privilegedNullspaceAlpha.set(defaultPrivilegedNullspaceAlpha);
+      privilegedWeight.set(defaultPrivilegedWeight);
+      privilegedConfigurationGain.set(defaultPrivilegedConfigurationGain);
+      privilegedMaxVelocity.set(defaultPrivilegedMaxVelocity);
 
       yoDesiredCenterOfMass = new YoFramePoint3D("desiredCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
       yoCurrentCenterOfMass = new YoFramePoint3D("currentCenterOfMass", ReferenceFrame.getWorldFrame(), registry);
@@ -700,10 +718,10 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Creating the controller core which is the main piece of this solver.
     *
-    * @param controllableRigidBodies
     * @return the controller core that will run for the desired robot model in {@link #desiredOneDoFJoints}.
     */
-   private WholeBodyControllerCore createControllerCore(Collection<? extends RigidBodyBasics> controllableRigidBodies)
+   private WholeBodyControllerCore createControllerCore(Collection<? extends RigidBodyBasics> controllableRigidBodies,
+                                                        JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
    {
       JointBasics[] controlledJoints;
       if (rootJoint != null)
@@ -724,7 +742,7 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             optimizationSettings,
                                                                             null,
                                                                             registry);
-      toolbox.setJointPrivilegedConfigurationParameters(new KinematicsToolboxPrivilegedConfigurationParameters());
+      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());
       jointTorqueMinimizationWeightCalculator.setParameters(0.0, 0.001, 0.10);
       toolbox.setupForInverseKinematicsSolver(jointTorqueMinimizationWeightCalculator);
@@ -835,8 +853,6 @@ public class KinematicsToolboxController extends ToolboxController
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
       inverseKinematicsSolution.getSupportRegion().clear();
-      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
    }
 
    /**
@@ -1009,6 +1025,7 @@ public class KinematicsToolboxController extends ToolboxController
             for (int i = 0; i < command.getJointsToActivate().size(); i++)
                activeOptimizationSettings.getJointsToActivate().add(command.getJointsToActivate().get(i));
          }
+
          if (command.getDisableInputPersistence())
             setPreserveUserCommandHistory(false);
          else if (command.getEnableInputPersistence())
@@ -1032,27 +1049,16 @@ public class KinematicsToolboxController extends ToolboxController
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
             robotConfigurationReinitialized();
 
-         if (command.getPrivilegedWeight() < 0.0)
-         {
-            privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         }
-         else
-         {
-            privilegedWeight.set(command.getPrivilegedWeight());
-            privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getValue());
-            submitPrivilegedConfigurationCommand = true;
-         }
+         privilegedNullspaceAlpha.set(command.hasNullspaceAlpha() ? defaultPrivilegedNullspaceAlpha : command.getNullspaceAlpha());
+         privilegedWeight.set(command.hasPrivilegedWeight() ? defaultPrivilegedWeight : command.getPrivilegedWeight());
+         privilegedConfigurationGain.set(command.hasPrivilegedGain() ? defaultPrivilegedConfigurationGain : command.getPrivilegedGain());
+         privilegedConfigurationCommand.setNullspaceAlpha(privilegedNullspaceAlpha.getDoubleValue());
+         privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
+         privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+         privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
 
-         if (command.getPrivilegedGain() < 0.0)
-         {
-            privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
-         }
-         else
-         {
-            privilegedConfigurationGain.set(command.getPrivilegedGain());
-            privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getValue());
+         if (command.hasNullspaceAlpha() || command.hasPrivilegedWeight() || command.hasPrivilegedGain())
             submitPrivilegedConfigurationCommand = true;
-         }
 
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();

@@ -114,6 +114,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
     * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
     */
+   // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
 
    /**
@@ -384,6 +385,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
       updateCoMPositionAndFootPoses();
+      // TODO Add API to switch between the two methods for deciding what CoM position to hold.
+      //  Method1:
+      //   Initialize the CoM position to the current position and keep it constant during the run.
+      //   The first issue was that the CoM wouldn't update when the robot feet were slipping.
+      //   The second issue was that the CoM wouldn't start from a stable position, e.g. to much forward or backward.
+      //      centerOfMassPositionToHold.setFromReferenceFrame(centerOfMassFrame); // This is method 1.
+      //  Method2:
+      //   Initialize the CoM position to be in between the feet and keep updating it so it moves with the feet.
+      //   Add an offset to control the stability of the CoM.
+      updateCoMPositionToHold();
 
       // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
       holdSupportRigidBodies.set(true);
@@ -530,24 +541,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
          initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
-      updateCoMPositionToHold();
    }
 
-   private final FramePoint3D tempMidFeet = new FramePoint3D();
+   private final Point3D tempMidFeet = new Point3D();
    private final Vector2D tempOffset = new Vector2D();
 
    protected void updateCoMPositionToHold()
    {
-      centerOfMassPositionToHold.setFromReferenceFrame(centerOfMassFrame);
-
-      tempMidFeet.setToZero(worldFrame);
-
       if (shrunkSupportPolygon.isUpToDate() && !shrunkSupportPolygon.isEmpty())
       {
          tempMidFeet.set(shrunkSupportPolygon.getCentroid(), 0.0);
       }
       else
       {
+         tempMidFeet.setToZero();
+
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyTransform soleFramePose = desiredFullRobotModel.getSoleFrame(robotSide).getTransformToRoot();

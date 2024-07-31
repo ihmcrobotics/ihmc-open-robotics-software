@@ -5,15 +5,16 @@ import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -26,6 +27,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.List;
 import java.util.Map;
 
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
@@ -67,6 +69,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
+   private final Class[] commandTypesToForward;
+
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager,
                                                KinematicsStreamingToolboxParameters parameters,
@@ -103,6 +107,10 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
       if (parameters.getInitialConfigurationMap() != null)
          setInitialRobotConfigurationNamedMap(parameters.getInitialConfigurationMap());
+
+      // All the commands that are supported by the IK solver will automatically be forwarded to the IK solver.
+      List<Class<? extends Command<?, ?>>> ikSolverCommands = KinematicsToolboxModule.supportedCommands();
+      commandTypesToForward = commandInputManager.getListOfSupportedCommands().stream().filter(ikSolverCommands::contains).toArray(Class[]::new);
    }
 
    /**
@@ -175,10 +183,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
          timeProvider.update();
          time.set(timeProvider.getTime());
 
-         if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
-         { // Forwarding commands for the IK to the IK.
-            tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(KinematicsToolboxConfigurationCommand.class));
-         }
+         forwardCommandsToIKSolver();
          tools.update();
          stateMachine.doActionAndTransition();
       }
@@ -200,6 +205,18 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       finally
       {
          executionTimer.stopMeasurement();
+      }
+   }
+
+   @SuppressWarnings("unchecked")
+   private void forwardCommandsToIKSolver()
+   {
+      for (Class commandType : commandTypesToForward)
+      {
+         if (tools.getCommandInputManager().isNewCommandAvailable(commandType))
+         { // Forwarding commands for the IK to the IK.
+            tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(commandType));
+         }
       }
    }
 
