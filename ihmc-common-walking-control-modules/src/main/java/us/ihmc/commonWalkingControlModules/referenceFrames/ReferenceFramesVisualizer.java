@@ -18,7 +18,7 @@ public class ReferenceFramesVisualizer implements SCS2YoGraphicHolder
 {
    private static final double DEFAULT_SIZE = 0.2;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry;
 
    private final String groupName;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -27,9 +27,15 @@ public class ReferenceFramesVisualizer implements SCS2YoGraphicHolder
 
    public ReferenceFramesVisualizer(String groupName, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
+      this("", groupName, yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public ReferenceFramesVisualizer(String namespacePrefix, String groupName, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   {
       this.groupName = groupName;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      registry = new YoRegistry(namespacePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
    }
 
@@ -87,13 +93,15 @@ public class ReferenceFramesVisualizer implements SCS2YoGraphicHolder
          {
             pose = null;
             poseUsingYawPitchRoll = new YoFramePoseUsingYawPitchRoll(frame.getName(), ReferenceFrame.getWorldFrame(), registry);
-            yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicCoordinateSystem(frame.getName(), poseUsingYawPitchRoll, size));
+            if (yoGraphicsListRegistry != null)
+               yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicCoordinateSystem(frame.getName(), poseUsingYawPitchRoll, size));
          }
          else
          {
             pose = new YoFramePose3D(frame.getName(), ReferenceFrame.getWorldFrame(), registry);
             poseUsingYawPitchRoll = null;
-            yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicCoordinateSystem(frame.getName(), pose, size));
+            if (yoGraphicsListRegistry != null)
+               yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicCoordinateSystem(frame.getName(), pose, size));
          }
       }
 
