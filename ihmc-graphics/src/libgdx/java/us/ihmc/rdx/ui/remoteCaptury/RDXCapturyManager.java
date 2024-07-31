@@ -10,6 +10,8 @@ public class RDXCapturyManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean capturyEnabled = new ImBoolean(false);
+   private final ImBoolean actorDeleted = new ImBoolean(false);
+   private final ImBoolean snapActor = new ImBoolean(false);
    public void renderMenuBar()
    {
       ImGui.setNextWindowSize(350.0f, 250.0f);
@@ -42,10 +44,42 @@ public class RDXCapturyManager
       {
          imgui.internal.ImGui.setTooltip("Be ready to connect to Captury Live before turning on.");
       }
+      if (imgui.internal.ImGui.menuItem(labels.get("Delete Actor"), "", actorDeleted))
+      {
+         if(actorDeleted.get())
+         {
+            RDXBaseUI.pushNotification("Deleting Current Actor...");
+         }
+      }
+      if (imgui.internal.ImGui.menuItem(labels.get("Snap new Actor"), "", snapActor))
+      {
+         if(snapActor.get())
+         {
+            RDXBaseUI.pushNotification("Snapping Actor...");
+         }
+      }
    }
 
    public ImBoolean getCapturyEnabled()
    {
       return capturyEnabled;
+   }
+
+   public ImBoolean getActorDeleted()
+   {
+      return actorDeleted;
+   }
+
+   public ImBoolean getSnapActor()
+   {
+      return snapActor;
+   }
+   public void setActorDeleted(boolean actorDeleted)
+   {
+      this.actorDeleted.set(actorDeleted);
+   }
+   public void setSnapActor(boolean snapActor)
+   {
+      this.snapActor.set(snapActor);
    }
 }
