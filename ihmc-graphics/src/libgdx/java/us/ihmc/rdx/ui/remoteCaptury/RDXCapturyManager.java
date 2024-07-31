@@ -17,7 +17,7 @@ public class RDXCapturyManager
    private final ImBoolean hideFingers = new ImBoolean(false);
    private final ImBoolean hideAll = new ImBoolean(false);
    private final ImBoolean snapActor = new ImBoolean(false);
-   private List<Integer> actorArray = new ArrayList<>();
+   private final List<Integer> actorArray = new ArrayList<>();
    private int selectedIndex = 0;
    private int selectedActorID = 0;
    public void renderMenuBar()
@@ -36,7 +36,7 @@ public class RDXCapturyManager
 
    public void renderEnableCheckbox()
    {
-      if(actorArray.size() > 0)
+      if(!actorArray.isEmpty())
       {
          if (ImGui.beginCombo(labels.get("Select Actor"), String.valueOf(actorArray.get(selectedIndex))))
          {

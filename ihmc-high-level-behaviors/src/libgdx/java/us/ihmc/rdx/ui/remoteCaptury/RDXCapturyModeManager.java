@@ -12,7 +12,6 @@ import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
@@ -145,13 +144,10 @@ public class RDXCapturyModeManager
    {
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         switch (mode)
+         if (mode == RDXCapturyMode.WHOLE_BODY_IK_STREAMING)
          {
-            case WHOLE_BODY_IK_STREAMING ->
-            {
-               if (kinematicsStreamingMode != null)
-                  kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
-            }
+            if (kinematicsStreamingMode != null)
+               kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
          }
       }
    }
