@@ -7,7 +7,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class CUDATools
 {
-   public static void checkError(int errorCode)
+   public static void checkCUDAError(int errorCode)
    {
       if (errorCode != CUDA_SUCCESS)
       {

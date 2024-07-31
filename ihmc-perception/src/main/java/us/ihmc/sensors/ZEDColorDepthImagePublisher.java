@@ -29,7 +29,7 @@ public class ZEDColorDepthImagePublisher
    private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final ROS2PublisherBasics<ImageMessage> ros2CutOutDepthImagePublisher;
 
-   private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
+   private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
 
    private long lastDepthSequenceNumber = -1L;
    private long lastCutOutDepthSequenceNumber = -1L;
@@ -218,17 +218,13 @@ public class ZEDColorDepthImagePublisher
       // Perform safety checks
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumbers.get(side))
       {
-         if (imageEncoders.get(side) == null)
-            imageEncoders.put(side, new CUDAImageEncoder());
-
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoders.get(side)
-                      .encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                 colorJPEGPointer,
-                                 colorImageToPublish.getImageWidth(),
-                                 colorImageToPublish.getImageHeight(),
-                                 colorImageToPublish.getGpuImageMat().step());
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
+                                colorJPEGPointer,
+                                colorImageToPublish.getImageWidth(),
+                                colorImageToPublish.getImageHeight(),
+                                colorImageToPublish.getGpuImageMat().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
@@ -301,8 +297,7 @@ public class ZEDColorDepthImagePublisher
             colorPublishLocks.get(side).unlock();
          }
          publishColorThreads.get(side).blockingStop();
-         if (imageEncoders.get(side) != null)
-            imageEncoders.get(side).destroy();
+         imageEncoder.destroy();
          if (nextGpuColorImages.get(side) != null)
             nextGpuColorImages.get(side).release();
          ros2ColorImagePublishers.get(side).remove();

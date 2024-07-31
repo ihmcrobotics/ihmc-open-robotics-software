@@ -1,6 +1,5 @@
 package us.ihmc.perception.cuda;
 
-import org.bytedeco.cuda.cudart.CUctx_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.nvjpeg.nvjpegEncoderParams;
 import org.bytedeco.cuda.nvjpeg.nvjpegEncoderState;
@@ -16,23 +15,12 @@ import static org.bytedeco.cuda.global.nvjpeg.*;
 /**
  * Used for encoding images using CUDA.
  * Ensure that the computer has CUDA available before using this class. Most all Nvidia graphics cards should have CUDA available.
- * Easy check whether computer has an Nvidia graphics card:
- *    try
- *    {
- *       ProcessTools.execSimpleCommand("nvidia-smi");
- *       hasNvidiaGPU = true;
- *    }
- *    catch (IOException | InterruptedException ignored)
- *    {
- *       hasNvidiaGPU = false;
- *    }
  *
  * This class has been adapted from the SampleJpegEncoder of bytedeco:
  *    https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java
  */
 public class CUDAImageEncoder
 {
-   private final CUctx_st cudaContext;
    private final CUstream_st cudaStream;
    private final nvjpegHandle nvjpegHandle;
    private final nvjpegEncoderState encoderState;
@@ -44,14 +32,8 @@ public class CUDAImageEncoder
     */
    public CUDAImageEncoder()
    {
-      // Initialize context
-      cudaContext = new CUctx_st();
-      checkCUDA("cuInit", cuInit(0));
-      checkCUDA("cuCtxCreate", cuCtxCreate(cudaContext, CU_CTX_SCHED_BLOCKING_SYNC, 0));
-
       // Initialize stream
-      cudaStream = new CUstream_st();
-      checkCUDA("cuStreamCreate", cuStreamCreate(cudaStream, NVJPEG_FLAGS_DEFAULT));
+      cudaStream = CUDAStream.getStream();
 
       // Initialize handle
       nvjpegHandle = new nvjpegHandle();
@@ -81,8 +63,6 @@ public class CUDAImageEncoder
       int frameSize = imageWidth * imageHeight;
       long quarterOfFrameSize = ((frameSize % 4 == 0) ? (frameSize / 4) : (frameSize / 4 + 1)); // ensure integer math goes well
       long halfOfImageWidth = ((imageWidth % 2 == 0) ? (imageWidth / 2) : (imageWidth / 2 + 1));
-
-      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
 
       // Set params to correct sampling factor
       checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
@@ -156,8 +136,6 @@ public class CUDAImageEncoder
       long rowSize = 3L * imageWidth;
       long frameSize = 3L * imageWidth * imageHeight;
 
-      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
-
       // Set params to correct sampling factor
       checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
 
@@ -212,8 +190,6 @@ public class CUDAImageEncoder
       long rowSize = 3L * imageWidth;
       long frameSize = 3L * imageWidth * imageHeight;
 
-      checkCUDA("cuCtxSetCurrent", cuCtxSetCurrent(cudaContext));
-
       // Set params to correct sampling factor
       checkNVJPEG("nvjpegEncoderParamsSetSamplingFactors", nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
 
@@ -259,7 +235,7 @@ public class CUDAImageEncoder
       checkNVJPEG("nvjpegEncoderStateDestroy", nvjpegEncoderStateDestroy(encoderState));
       checkNVJPEG("nvjpegDestroy", nvjpegDestroy(nvjpegHandle));
       checkCUDA("cuStreamDestroy", cuStreamDestroy(cudaStream));
-      checkCUDA("cuCtxDestroy", cuCtxDestroy(cudaContext));
+      CUDAStream.releaseStream(cudaStream);
    }
 
    /**

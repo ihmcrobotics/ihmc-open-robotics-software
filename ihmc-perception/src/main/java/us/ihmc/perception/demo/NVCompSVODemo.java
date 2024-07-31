@@ -2,14 +2,8 @@ package us.ihmc.perception.demo;
 
 import org.bytedeco.cuda.nvcomp.PimplManager;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -36,7 +30,7 @@ import java.util.TreeMap;
 
 import static org.bytedeco.cuda.global.cudart.cudaFreeHost;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
-import static us.ihmc.perception.cuda.CUDATools.checkError;
+import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 
 public class NVCompSVODemo extends NVCompDemo
 {
@@ -171,8 +165,8 @@ public class NVCompSVODemo extends NVCompDemo
          managerToCompressionTimeMapColor.get(managerEntry.getKey()).add(compressionTime);
          managerToDecompressionTimeMapColor.get(managerEntry.getKey()).add(decompressionTime);
 
-         checkError(cudaStreamSynchronize(stream));
-         checkError(cudaFreeHost(compressedImageData));
+         checkCUDAError(cudaStreamSynchronize(stream));
+         checkCUDAError(cudaFreeHost(compressedImageData));
          compressedImageData.close();
          decompressedImage.close();
       }
@@ -199,8 +193,8 @@ public class NVCompSVODemo extends NVCompDemo
          managerToCompressionTimeMapDepth.get(managerEntry.getKey()).add(compressionTime);
          managerToDecompressionTimeMapDepth.get(managerEntry.getKey()).add(decompressionTime);
 
-         checkError(cudaStreamSynchronize(stream));
-         checkError(cudaFreeHost(compressedImageData));
+         checkCUDAError(cudaStreamSynchronize(stream));
+         checkCUDAError(cudaFreeHost(compressedImageData));
          decompressedImage.close();
       }
    }
