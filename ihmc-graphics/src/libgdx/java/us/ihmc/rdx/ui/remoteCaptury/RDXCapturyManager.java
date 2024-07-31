@@ -14,6 +14,7 @@ public class RDXCapturyManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean capturyEnabled = new ImBoolean(false);
    private final ImBoolean actorDeleted = new ImBoolean(false);
+   private final ImBoolean hideFingers = new ImBoolean(false);
    private final ImBoolean snapActor = new ImBoolean(false);
    private List<Integer> actorArray = new ArrayList<>();
    private int selectedIndex = 0;
@@ -82,6 +83,14 @@ public class RDXCapturyManager
             RDXBaseUI.pushNotification("Snapping Actor...");
          }
       }
+      if (imgui.internal.ImGui.menuItem(labels.get("Hide Fingers"), "", hideFingers))
+      {
+         if(hideFingers.get())
+         {
+            RDXBaseUI.pushNotification("Hidding Fingers...");
+         }
+      }
+
 
    }
 
@@ -102,6 +111,10 @@ public class RDXCapturyManager
    public void setActorDeleted(boolean actorDeleted)
    {
       this.actorDeleted.set(actorDeleted);
+   }
+   public ImBoolean getHideFingers()
+   {
+      return hideFingers;
    }
    public void setSnapActor(boolean snapActor)
    {
