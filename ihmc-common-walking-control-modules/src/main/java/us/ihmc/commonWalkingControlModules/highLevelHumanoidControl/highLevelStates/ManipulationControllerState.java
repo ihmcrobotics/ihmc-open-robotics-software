@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -73,10 +74,12 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ManipulationControllerState extends HighLevelControllerState
@@ -127,6 +130,11 @@ public class ManipulationControllerState extends HighLevelControllerState
    private double controlDT;
    private final BimanualManipulationManager bimanualManipulationManager;
 
+   private final boolean deactivateAccelerationIntegrationInWBC;
+
+   private boolean requestIntegratorReset = false;
+   private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
+
    public ManipulationControllerState(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusMessageOutputManager,
                                       double controlDT,
@@ -148,6 +156,7 @@ public class ManipulationControllerState extends HighLevelControllerState
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       bimanualManipulationManager = new BimanualManipulationManager(fullRobotModel, controlDT, registry);
+      deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
       referenceFrameHashCodeResolver.put(fullRobotModel.getRootBody().getBodyFixedFrame());
@@ -337,6 +346,8 @@ public class ManipulationControllerState extends HighLevelControllerState
       {
          handManagers.get(robotSide).initialize();
       }
+
+      requestIntegratorReset = true;
    }
 
    @Override
@@ -408,6 +419,23 @@ public class ManipulationControllerState extends HighLevelControllerState
       }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
+
+      if (requestIntegratorReset)
+      {
+         stateSpecificJointSettings.requestIntegratorReset();
+         requestIntegratorReset = false;
+         yoRequestingIntegratorReset.set(true);
+      }
+      else
+      {
+         yoRequestingIntegratorReset.set(false);
+      }
+
+      JointAccelerationIntegrationCommand accelerationIntegrationCommand = getAccelerationIntegrationCommand();
+      if (!deactivateAccelerationIntegrationInWBC)
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
