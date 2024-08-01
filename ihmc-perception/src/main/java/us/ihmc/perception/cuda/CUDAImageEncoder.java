@@ -12,6 +12,7 @@ import us.ihmc.log.LogTools;
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
+import static us.ihmc.perception.cuda.CUDATools.checkNVJPEGError;
 
 /**
  * Used for encoding images using CUDA.
@@ -37,15 +38,15 @@ public class CUDAImageEncoder
 
       // Initialize handle
       nvjpegHandle = new nvjpegHandle();
-      checkNVJPEG(nvjpegCreateSimple(nvjpegHandle));
+      checkNVJPEGError(nvjpegCreateSimple(nvjpegHandle));
 
       // Initialize encoder state
       encoderState = new nvjpegEncoderState();
-      checkNVJPEG(nvjpegEncoderStateCreate(nvjpegHandle, encoderState, cudaStream));
+      checkNVJPEGError(nvjpegEncoderStateCreate(nvjpegHandle, encoderState, cudaStream));
 
       // Initialize encoder parameters
       encoderParameters = new nvjpegEncoderParams();
-      checkNVJPEG(nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
    }
 
    /**
@@ -62,7 +63,7 @@ public class CUDAImageEncoder
       long halfOfImageWidth = ((imageWidth % 2 == 0) ? (imageWidth / 2) : (imageWidth / 2 + 1));
 
       // Set params to correct sampling factor
-      checkNVJPEG(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_420, cudaStream));
 
       // Get Y plane data
       BytePointer yPlanePointer = new BytePointer(); // create a pointer for the Y plane
@@ -90,15 +91,15 @@ public class CUDAImageEncoder
       nvjpegImage.channel(2, vPlanePointer);
 
       // Encode image (mem)
-      checkNVJPEG(nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
+      checkNVJPEGError(nvjpegEncodeYUV(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_CSS_420, imageWidth, imageHeight, cudaStream));
 
       // Get compressed size
       SizeTPointer jpegSize = new SizeTPointer(1);
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
       outputImagePointer.limit(jpegSize.get());
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
       checkCUDAError(cudaFree(yPlanePointer));
@@ -127,7 +128,7 @@ public class CUDAImageEncoder
       long frameSize = 3L * imageWidth * imageHeight;
 
       // Set params to correct sampling factor
-      checkNVJPEG(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
 
       // Upload image data
       BytePointer devicePointer = new BytePointer();
@@ -139,15 +140,15 @@ public class CUDAImageEncoder
       nvjpegImage.channel(0, devicePointer);
 
       // Encode the image
-      checkNVJPEG(nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_BGRI, imageWidth, imageHeight, cudaStream));
+      checkNVJPEGError(nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_BGRI, imageWidth, imageHeight, cudaStream));
 
       // Get compressed size
       SizeTPointer jpegSize = new SizeTPointer(1);
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
       outputImagePointer.limit(jpegSize.get());
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
       checkCUDAError(cudaFree(devicePointer));
@@ -173,7 +174,7 @@ public class CUDAImageEncoder
       long frameSize = 3L * imageWidth * imageHeight;
 
       // Set params to correct sampling factor
-      checkNVJPEG(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_444, cudaStream));
 
       // Get B plane data
       BytePointer devicePointer = new BytePointer();
@@ -185,15 +186,15 @@ public class CUDAImageEncoder
       nvjpegImage.channel(0, devicePointer);
 
       // Encode the image
-      checkNVJPEG(nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_RGBI, imageWidth, imageHeight, cudaStream));
+      checkNVJPEGError(nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_RGBI, imageWidth, imageHeight, cudaStream));
 
       // Get compressed size
       SizeTPointer jpegSize = new SizeTPointer(1);
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
 
       // Retrieve bitstream
       outputImagePointer.limit(jpegSize.get());
-      checkNVJPEG(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
       checkCUDAError(cudaFree(devicePointer));
@@ -205,36 +206,8 @@ public class CUDAImageEncoder
 
    public void destroy()
    {
-      checkNVJPEG(nvjpegEncoderParamsDestroy(encoderParameters));
-      checkNVJPEG(nvjpegEncoderStateDestroy(encoderState));
-      checkNVJPEG(nvjpegDestroy(nvjpegHandle));
-   }
-
-   /**
-    * Helper function for nvjpeg error checking.
-    * Example use:
-    *    CHECK_NVJPEG(nvjpegCreateSimple(handle));
-    * @param result the returned error code from the function called. An nvjpeg function should be called for this parameter
-    */
-   private static void checkNVJPEG(int result)
-   {
-      if (result != NVJPEG_STATUS_SUCCESS)
-      {
-         String errorName = switch (result)
-         {
-            case 1 -> "NVJPEG_STATUS_NOT_INITIALIZED";
-            case 2 -> "NVJPEG_STATUS_INVALID_PARAMETER";
-            case 3 -> "NVJPEG_STATUS_BAD_JPEG";
-            case 4 -> "NVJPEG_STATUS_JPEG_NOT_SUPPORTED";
-            case 5 -> "NVJPEG_STATUS_ALLOCATOR_FAILURE";
-            case 6 -> "NVJPEG_STATUS_EXECUTION_FAILED";
-            case 7 -> "NVJPEG_STATUS_ARCH_MISMATCH";
-            case 8 -> "NVJPEG_STATUS_INTERNAL_ERROR";
-            case 9 -> "NVJPEG_STATUS_IMPLEMENTATION_NOT_SUPPORTED";
-            case 10 -> "NVJPEG_STATUS_INCOMPLETE_BITSTREAM";
-            default -> "UNKNOWN";
-         };
-         LogTools.error("NVJPEG Error ({}): {}", result, errorName);
-      }
+      checkNVJPEGError(nvjpegEncoderParamsDestroy(encoderParameters));
+      checkNVJPEGError(nvjpegEncoderStateDestroy(encoderState));
+      checkNVJPEGError(nvjpegDestroy(nvjpegHandle));
    }
 }
