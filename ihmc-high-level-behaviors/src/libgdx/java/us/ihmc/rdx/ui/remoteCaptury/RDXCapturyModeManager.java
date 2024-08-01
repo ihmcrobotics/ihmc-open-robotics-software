@@ -54,7 +54,13 @@ public class RDXCapturyModeManager
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule)
    {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule);
+      create(baseUI,
+             syncedRobot,
+             robotVisualizer,
+             controllerHelper,
+             retargetingParameters,
+             new SceneGraph(),
+             createKinematicsStreamingToolboxModule);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -67,9 +73,14 @@ public class RDXCapturyModeManager
    {
       this.robotVisualizer = robotVisualizer;
 
-      if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
+      if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel()
+                                                                                             .getRobotVersion()
+                                                                                             .hasArm(RobotSide.RIGHT))
       {
-         kinematicsStreamingMode = new RDXCapturyKinematicsStreaming(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
+         kinematicsStreamingMode = new RDXCapturyKinematicsStreaming(syncedRobot,
+                                                                     controllerHelper,
+                                                                     retargetingParameters,
+                                                                     sceneGraph);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
@@ -79,7 +90,7 @@ public class RDXCapturyModeManager
    {
       RDXBaseUI baseUI = RDXBaseUI.getInstance();
       boolean isCapturyReady = baseUI.getCapturyManager().getCapturyEnabled().get();
-      if(isCapturyReady && !wasCapturyReady)
+      if (isCapturyReady && !wasCapturyReady)
       {
          baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::renderImGuiWidgets);
       }
@@ -90,7 +101,6 @@ public class RDXCapturyModeManager
       wasCapturyReady = isCapturyReady;
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.update(mode == RDXCapturyMode.WHOLE_BODY_IK_STREAMING);
-
 
       // fade robot graphics if in stereo vision mode
       boolean streamingWithStereo = kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled();
@@ -113,7 +123,8 @@ public class RDXCapturyModeManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get(RDXCapturyMode.INPUTS_DISABLED.getReadableName()), mode == RDXCapturyMode.INPUTS_DISABLED))
+      if (ImGui.radioButton(labels.get(RDXCapturyMode.INPUTS_DISABLED.getReadableName()),
+                            mode == RDXCapturyMode.INPUTS_DISABLED))
       {
          mode = RDXCapturyMode.INPUTS_DISABLED;
       }
@@ -121,12 +132,13 @@ public class RDXCapturyModeManager
       {
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
       }
-      if (ImGui.radioButton(labels.get(RDXCapturyMode.WHOLE_BODY_IK_STREAMING.getReadableName()), mode == RDXCapturyMode.WHOLE_BODY_IK_STREAMING))
+      if (ImGui.radioButton(labels.get(RDXCapturyMode.WHOLE_BODY_IK_STREAMING.getReadableName()),
+                            mode == RDXCapturyMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXCapturyMode.WHOLE_BODY_IK_STREAMING;
       }
 
-      if(getMode() == RDXCapturyMode.WHOLE_BODY_IK_STREAMING)
+      if (getMode() == RDXCapturyMode.WHOLE_BODY_IK_STREAMING)
       {
          ImGuiTools.separatorText(getMode().getReadableName() + " options");
          if (getKinematicsStreamingMode() != null)
@@ -169,5 +181,4 @@ public class RDXCapturyModeManager
    {
       return kinematicsStreamingMode;
    }
-   
 }

@@ -94,7 +94,8 @@ public class RDXCapturyKinematicsStreaming
    private final SideDependentList<RDXReferenceFrameGraphic> ikHandControlFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> ikUpperArmControlFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> ikForearmControlFrameGraphics = new SideDependentList<>();
-   private final RDXReferenceFrameGraphic ikChestControlFrameGraphics = new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH);
+   private final RDXReferenceFrameGraphic ikChestControlFrameGraphics = new RDXReferenceFrameGraphic(
+         1.25 * FRAME_AXIS_GRAPHICS_LENGTH);
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
@@ -122,9 +123,9 @@ public class RDXCapturyKinematicsStreaming
          null);
 
    public RDXCapturyKinematicsStreaming(ROS2SyncedRobotModel syncedRobot,
-                                       ROS2ControllerHelper ros2ControllerHelper,
-                                       RetargetingParameters retargetingParameters,
-                                       SceneGraph sceneGraph)
+                                        ROS2ControllerHelper ros2ControllerHelper,
+                                        RetargetingParameters retargetingParameters,
+                                        SceneGraph sceneGraph)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -158,8 +159,7 @@ public class RDXCapturyKinematicsStreaming
 
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-         handDesiredControlFrames.put(side,
-                                      new MutableReferenceFrame(ReferenceFrame.getWorldFrame()));
+         handDesiredControlFrames.put(side, new MutableReferenceFrame(ReferenceFrame.getWorldFrame()));
 
          ikHandControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
          ikUpperArmControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
@@ -343,11 +343,11 @@ public class RDXCapturyKinematicsStreaming
          if (robotSide == RobotSide.LEFT)
          {
             ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3*Math.PI/2, 0, Math.PI/2);
+            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
             ikUpperArmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, Math.PI/2);
+            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, Math.PI / 2);
             ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.1);
-            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3*Math.PI/2, 0, Math.PI/2);
+            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
             ikChestControlFramePoses.getPosition().set(0.4, 0.0, 0.1);
             ikChestControlFramePoses.getOrientation().setYawPitchRoll(0.0, Math.PI, Math.PI);
          }
@@ -356,7 +356,7 @@ public class RDXCapturyKinematicsStreaming
             ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
             ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
             ikUpperArmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI/2);
+            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
             ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.1);
             ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
          }
@@ -389,7 +389,7 @@ public class RDXCapturyKinematicsStreaming
          }
 
          RigidBodyBasics chest = ghostFullRobotModel.getChest();
-         if(chest != null)
+         if (chest != null)
          {
             RDXReferenceFrameGraphic chestControlFrameGraphic = ikChestControlFrameGraphics;
             chestControlFrameGraphic.getFramePose3D().setToZero(chest.getBodyFixedFrame());
@@ -770,8 +770,7 @@ public class RDXCapturyKinematicsStreaming
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
                MessageTools.packSelectionMatrix3DMessage(true, true, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikChestControlFramePoses.getPosition());
-               message.getControlFrameOrientationInEndEffector()
-                      .set(ikChestControlFramePoses.getOrientation());
+               message.getControlFrameOrientationInEndEffector().set(ikChestControlFramePoses.getOrientation());
                message.setHasAngularVelocity(true);
                message.setHasLinearVelocity(true);
                output.set(message);

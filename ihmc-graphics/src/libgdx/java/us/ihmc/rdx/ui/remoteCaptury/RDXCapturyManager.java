@@ -22,24 +22,25 @@ public class RDXCapturyManager
    private int selectedActorID = 0;
    private String ipAddress;
    private int port;
+
    public void renderMenuBar()
    {
       ImGui.setNextWindowSize(350.0f, 250.0f);
-      if (imgui.internal.ImGui.beginMenu(labels.get("Captury")))
+      if (ImGui.beginMenu(labels.get("Captury")))
       {
          ImGuiTools.separatorText("Controls");
          renderEnableCheckbox();
 
          ImGuiTools.separatorText("Status");
-         imgui.internal.ImGui.text("Connected Computer IP: " + (capturyEnabled.get() ? ipAddress : "None"));
-         imgui.internal.ImGui.text("Connected Computer Port: " + (capturyEnabled.get() ? port : "None"));
-         imgui.internal.ImGui.endMenu();
+         ImGui.text("Connected Computer IP: " + (capturyEnabled.get() ? ipAddress : "None"));
+         ImGui.text("Connected Computer Port: " + (capturyEnabled.get() ? port : "None"));
+         ImGui.endMenu();
       }
    }
 
    public void renderEnableCheckbox()
    {
-      if(!actorArray.isEmpty())
+      if (!actorArray.isEmpty())
       {
          if (ImGui.beginCombo(labels.get("Select Actor"), String.valueOf(actorArray.get(selectedIndex))))
          {
@@ -56,55 +57,53 @@ public class RDXCapturyManager
          }
       }
 
-
-      if (imgui.internal.ImGui.menuItem(labels.get("Remote Captury Enabled"), "", capturyEnabled))
+      if (ImGui.menuItem(labels.get("Remote Captury Enabled"), "", capturyEnabled))
       {
          if (capturyEnabled.get())
          {
             RDXBaseUI.pushNotification("Enabling Remote Captury...");
             RDXBaseUI.pushNotification("Remote Captury enabled");
-
          }
          else
          {
             RDXBaseUI.pushNotification("Remote Captury disabled");
          }
       }
-      if (imgui.internal.ImGui.menuItem(labels.get("Delete Actor"), "", actorDeleted))
+      if (capturyEnabled.get())
       {
-         if(actorDeleted.get())
+         if (ImGui.menuItem(labels.get("Delete Actor"), "", actorDeleted))
          {
-            RDXBaseUI.pushNotification("Deleting Current Actor...");
+            if (actorDeleted.get())
+            {
+               RDXBaseUI.pushNotification("Deleting Current Actor...");
+            }
+         }
+         if (ImGui.menuItem(labels.get("Snap new Actor"), "", snapActor))
+         {
+            if (snapActor.get())
+            {
+               RDXBaseUI.pushNotification("Snapping Actor...");
+            }
+         }
+         if (ImGui.menuItem(labels.get("Hide Fingers"), "", hideFingers))
+         {
+            if (hideFingers.get())
+            {
+               RDXBaseUI.pushNotification("Hiding Fingers...");
+            }
+         }
+         if (ImGui.menuItem(labels.get("Hide All Frames"), "", hideAll))
+         {
+            if (hideAll.get())
+            {
+               RDXBaseUI.pushNotification("Hiding All Frames...");
+            }
          }
       }
-      if (imgui.internal.ImGui.menuItem(labels.get("Snap new Actor"), "", snapActor))
+      if (ImGui.isItemHovered())
       {
-         if(snapActor.get())
-         {
-            RDXBaseUI.pushNotification("Snapping Actor...");
-         }
+         ImGui.setTooltip("Be ready to connect to Captury Live before turning on.");
       }
-      if (imgui.internal.ImGui.menuItem(labels.get("Hide Fingers"), "", hideFingers))
-      {
-         if(hideFingers.get())
-         {
-            RDXBaseUI.pushNotification("Hidding Fingers...");
-         }
-      }
-      if (imgui.internal.ImGui.menuItem(labels.get("Hide All Frames"), "", hideAll))
-      {
-         if(hideAll.get())
-         {
-            RDXBaseUI.pushNotification("Hidding All Frames...");
-         }
-      }
-      if (imgui.internal.ImGui.isItemHovered())
-      {
-         imgui.internal.ImGui.setTooltip("Be ready to connect to Captury Live before turning on.");
-      }
-
-
-
    }
 
    public ImBoolean getCapturyEnabled()
@@ -121,30 +120,35 @@ public class RDXCapturyManager
    {
       return snapActor;
    }
+
    public void setActorDeleted(boolean actorDeleted)
    {
       this.actorDeleted.set(actorDeleted);
    }
+
    public ImBoolean getHideFingers()
    {
       return hideFingers;
    }
+
    public ImBoolean getHideAll()
    {
       return hideAll;
    }
+
    public void setSnapActor(boolean snapActor)
    {
       this.snapActor.set(snapActor);
    }
 
-   public void addToActorArray(int Actor_ID)
+   public void addToActorArray(int actorID)
    {
-      actorArray.add(Actor_ID);
+      actorArray.add(actorID);
    }
+
    public int getLastActorArray()
    {
-      return actorArray.get(actorArray.size()-1);
+      return actorArray.get(actorArray.size() - 1);
    }
 
    public int getSelectedActorID()
@@ -156,12 +160,14 @@ public class RDXCapturyManager
    {
       this.ipAddress = ipAddress;
    }
+
    public void setPort(int port)
    {
       this.port = port;
    }
-   public boolean checkContain(int Actor_ID)
+
+   public boolean checkContain(int actorID)
    {
-      return actorArray.contains(Actor_ID);
+      return actorArray.contains(actorID);
    }
 }
