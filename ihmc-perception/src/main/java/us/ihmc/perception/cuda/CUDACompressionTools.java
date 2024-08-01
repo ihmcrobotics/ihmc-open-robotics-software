@@ -26,7 +26,7 @@ public class CUDACompressionTools
 
    public CUDACompressionTools()
    {
-      stream = CUDAStream.getStream();
+      stream = CUDAStreamManager.getStream();
 
       zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
       compressionManager = new ZstdManager(CHUNK_SIZE, zstdOptions, stream, 0, nvcomp.NoComputeNoVerify);
@@ -34,7 +34,6 @@ public class CUDACompressionTools
 
    public void destroy()
    {
-      CUDAStream.releaseStream(stream);
       compressionManager.close();
    }
 

@@ -34,7 +34,7 @@ public class CUDAImageEncoder
    public CUDAImageEncoder()
    {
       // Initialize stream
-      cudaStream = CUDAStream.getStream();
+      cudaStream = CUDAStreamManager.getStream();
 
       // Initialize handle
       nvjpegHandle = new nvjpegHandle();
@@ -233,7 +233,6 @@ public class CUDAImageEncoder
       checkNVJPEG(nvjpegEncoderStateDestroy(encoderState));
       checkNVJPEG(nvjpegDestroy(nvjpegHandle));
       checkCUDAError(cuStreamDestroy(cudaStream));
-      CUDAStream.releaseStream(cudaStream);
    }
 
    /**
