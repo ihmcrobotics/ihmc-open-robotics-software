@@ -67,8 +67,8 @@ public class CUDAImageEncoder
 
       // Get Y plane data
       BytePointer yPlanePointer = new BytePointer(); // create a pointer for the Y plane
-      checkCUDAError(cudaMalloc(yPlanePointer, frameSize)); // allocate Y plane memory
-      checkCUDAError(cudaMemcpy(yPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice)); // copy Y plane data to device memory
+      checkCUDAError(cudaMallocAsync(yPlanePointer, frameSize, cudaStream)); // allocate Y plane memory
+      checkCUDAError(cudaMemcpyAsync(yPlanePointer, sourceImage, frameSize, cudaMemcpyHostToDevice, cudaStream)); // copy Y plane data to device memory
 
       nvjpegImage_t nvjpegImage = new nvjpegImage_t();
       nvjpegImage.pitch(0, imageWidth); // set the pitch
@@ -77,16 +77,16 @@ public class CUDAImageEncoder
 
       // Get U plane data
       BytePointer uPlanePointer = new BytePointer();
-      checkCUDAError(cudaMalloc(uPlanePointer, quarterOfFrameSize));
-      checkCUDAError(cudaMemcpy(uPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      checkCUDAError(cudaMallocAsync(uPlanePointer, quarterOfFrameSize, cudaStream));
+      checkCUDAError(cudaMemcpyAsync(uPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice, cudaStream));
       nvjpegImage.pitch(1, halfOfImageWidth);
       nvjpegImage.channel(1, uPlanePointer);
       sourceImage.position(sourceImage.position() + quarterOfFrameSize);
 
       // Get V plane data
       BytePointer vPlanePointer = new BytePointer();
-      checkCUDAError(cudaMalloc(vPlanePointer, quarterOfFrameSize));
-      checkCUDAError(cudaMemcpy(vPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice));
+      checkCUDAError(cudaMallocAsync(vPlanePointer, quarterOfFrameSize, cudaStream));
+      checkCUDAError(cudaMemcpyAsync(vPlanePointer, sourceImage, quarterOfFrameSize, cudaMemcpyHostToDevice, cudaStream));
       nvjpegImage.pitch(2, halfOfImageWidth);
       nvjpegImage.channel(2, vPlanePointer);
 
@@ -102,9 +102,9 @@ public class CUDAImageEncoder
       checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
-      checkCUDAError(cudaFree(yPlanePointer));
-      checkCUDAError(cudaFree(uPlanePointer));
-      checkCUDAError(cudaFree(vPlanePointer));
+      checkCUDAError(cudaFreeAsync(yPlanePointer, cudaStream));
+      checkCUDAError(cudaFreeAsync(uPlanePointer, cudaStream));
+      checkCUDAError(cudaFreeAsync(vPlanePointer, cudaStream));
 
       // Close pointers
       yPlanePointer.close();
@@ -151,7 +151,7 @@ public class CUDAImageEncoder
       checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
-      checkCUDAError(cudaFree(devicePointer));
+      checkCUDAError(cudaFreeAsync(devicePointer, cudaStream));
 
       // Close pointers
       jpegSize.close();
@@ -178,8 +178,8 @@ public class CUDAImageEncoder
 
       // Get B plane data
       BytePointer devicePointer = new BytePointer();
-      checkCUDAError(cudaMalloc(devicePointer, frameSize)); // allocate GPU memory
-      checkCUDAError(cudaMemcpy2D(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDefault));
+      checkCUDAError(cudaMallocAsync(devicePointer, frameSize, cudaStream)); // allocate GPU memory
+      checkCUDAError(cudaMemcpy2DAsync(devicePointer, rowSize, sourceImage, sourceImagePitch, rowSize, imageHeight, cudaMemcpyDefault, cudaStream));
 
       nvjpegImage_t nvjpegImage = new nvjpegImage_t();
       nvjpegImage.pitch(0, rowSize);
@@ -197,7 +197,7 @@ public class CUDAImageEncoder
       checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
 
       // Free GPU memory
-      checkCUDAError(cudaFree(devicePointer));
+      checkCUDAError(cudaFreeAsync(devicePointer, cudaStream));
 
       // Close pointers
       jpegSize.close();
