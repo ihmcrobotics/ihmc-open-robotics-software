@@ -8,6 +8,11 @@ import java.util.List;
 
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 
+/**
+ * Limits the number of CUDA streams created to (ideally) the number of device connections.
+ * It seems that having more streams than number of device connections is not beneficial.
+ * See: https://forums.developer.nvidia.com/t/how-many-streams-maximum-number-of-streams/6571/17
+ */
 public class CUDAStreamManager
 {
    static
