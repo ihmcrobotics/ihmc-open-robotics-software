@@ -63,38 +63,39 @@ public class RDXCapturyManager
          {
             RDXBaseUI.pushNotification("Enabling Remote Captury...");
             RDXBaseUI.pushNotification("Remote Captury enabled");
-            if (imgui.internal.ImGui.menuItem(labels.get("Delete Actor"), "", actorDeleted))
-            {
-               if(actorDeleted.get())
-               {
-                  RDXBaseUI.pushNotification("Deleting Current Actor...");
-               }
-            }
-            if (imgui.internal.ImGui.menuItem(labels.get("Snap new Actor"), "", snapActor))
-            {
-               if(snapActor.get())
-               {
-                  RDXBaseUI.pushNotification("Snapping Actor...");
-               }
-            }
-            if (imgui.internal.ImGui.menuItem(labels.get("Hide Fingers"), "", hideFingers))
-            {
-               if(hideFingers.get())
-               {
-                  RDXBaseUI.pushNotification("Hidding Fingers...");
-               }
-            }
-            if (imgui.internal.ImGui.menuItem(labels.get("Hide All Frames"), "", hideAll))
-            {
-               if(hideAll.get())
-               {
-                  RDXBaseUI.pushNotification("Hidding All Frames...");
-               }
-            }
+
          }
          else
          {
             RDXBaseUI.pushNotification("Remote Captury disabled");
+         }
+      }
+      if (imgui.internal.ImGui.menuItem(labels.get("Delete Actor"), "", actorDeleted))
+      {
+         if(actorDeleted.get())
+         {
+            RDXBaseUI.pushNotification("Deleting Current Actor...");
+         }
+      }
+      if (imgui.internal.ImGui.menuItem(labels.get("Snap new Actor"), "", snapActor))
+      {
+         if(snapActor.get())
+         {
+            RDXBaseUI.pushNotification("Snapping Actor...");
+         }
+      }
+      if (imgui.internal.ImGui.menuItem(labels.get("Hide Fingers"), "", hideFingers))
+      {
+         if(hideFingers.get())
+         {
+            RDXBaseUI.pushNotification("Hidding Fingers...");
+         }
+      }
+      if (imgui.internal.ImGui.menuItem(labels.get("Hide All Frames"), "", hideAll))
+      {
+         if(hideAll.get())
+         {
+            RDXBaseUI.pushNotification("Hidding All Frames...");
          }
       }
       if (imgui.internal.ImGui.isItemHovered())
