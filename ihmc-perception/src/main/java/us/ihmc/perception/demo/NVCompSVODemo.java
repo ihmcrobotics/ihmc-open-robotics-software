@@ -9,6 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,10 +55,10 @@ public class NVCompSVODemo extends NVCompDemo
    private final Map<String, List<Double>> managerToDecompressionTimeMapDepth = new TreeMap<>();
 
    // FIXME: Using the CUDAImageEncoder messes up the nvcomp algorithms
-//   private final CUDAImageEncoder cudaImageEncoder = new CUDAImageEncoder();
-//   private final List<Double> cudaImageEncoderCompressionRatios = new ArrayList<>();
-//   private final List<Double> cudaImageEncoderCompressionTimes = new ArrayList<>();
-//   private final List<Double> cudaImageEncoderDecompressionTimes = new ArrayList<>();
+   private final CUDAImageEncoder cudaImageEncoder = new CUDAImageEncoder();
+   private final List<Double> cudaImageEncoderCompressionRatios = new ArrayList<>();
+   private final List<Double> cudaImageEncoderCompressionTimes = new ArrayList<>();
+   private final List<Double> cudaImageEncoderDecompressionTimes = new ArrayList<>();
 
    private final List<Double> opencvToolsColorCompressionRatios = new ArrayList<>();
    private final List<Double> opencvToolsColorCompressionTimes = new ArrayList<>();
@@ -110,7 +111,7 @@ public class NVCompSVODemo extends NVCompDemo
          colorImage.getGpuImageMat();
 
          collectColorData(colorImage);
-//         collectCUDAImageEncoderData(colorImage);
+         collectCUDAImageEncoderData(colorImage);
          collectOpenCVToolsColorData(colorImage);
 
          collectDepthData(depthImage);
@@ -199,35 +200,35 @@ public class NVCompSVODemo extends NVCompDemo
       }
    }
 
-//   private void collectCUDAImageEncoderData(RawImage rawImage)
-//   {
-//      Stopwatch stopwatch = new Stopwatch();
-//      Mat image = rawImage.getCpuImageMat();
-//      long imageSize = image.elemSize() * image.total();
-//
-//      BytePointer compressedImageData = new BytePointer(imageSize);
-//      stopwatch.start();
-//      cudaImageEncoder.encodeBGR(rawImage.getGpuImageMat().data(),
-//                                 compressedImageData,
-//                                 rawImage.getImageWidth(),
-//                                 rawImage.getImageHeight(),
-//                                 rawImage.getGpuImageMat().step());
-//      double compressionTime = stopwatch.lap();
-//      Mat compressedImage = new Mat(compressedImageData);
-//      Mat decompressedImage = new Mat(image.size(), image.type());
-//      opencv_imgcodecs.imdecode(compressedImage, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
-//      double decompressionTime = stopwatch.lap();
-//
-//      double compressionRatio = (double) imageSize / compressedImageData.limit();
-//
-//      cudaImageEncoderCompressionRatios.add(compressionRatio);
-//      cudaImageEncoderCompressionTimes.add(compressionTime);
-//      cudaImageEncoderDecompressionTimes.add(decompressionTime);
-//
-//      compressedImageData.close();
-//      compressedImage.close();
-//      decompressedImage.close();
-//   }
+   private void collectCUDAImageEncoderData(RawImage rawImage)
+   {
+      Stopwatch stopwatch = new Stopwatch();
+      Mat image = rawImage.getCpuImageMat();
+      long imageSize = image.elemSize() * image.total();
+
+      BytePointer compressedImageData = new BytePointer(imageSize);
+      stopwatch.start();
+      cudaImageEncoder.encodeBGR(rawImage.getGpuImageMat().data(),
+                                 compressedImageData,
+                                 rawImage.getImageWidth(),
+                                 rawImage.getImageHeight(),
+                                 rawImage.getGpuImageMat().step());
+      double compressionTime = stopwatch.lap();
+      Mat compressedImage = new Mat(compressedImageData);
+      Mat decompressedImage = new Mat(image.size(), image.type());
+      opencv_imgcodecs.imdecode(compressedImage, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
+      double decompressionTime = stopwatch.lap();
+
+      double compressionRatio = (double) imageSize / compressedImageData.limit();
+
+      cudaImageEncoderCompressionRatios.add(compressionRatio);
+      cudaImageEncoderCompressionTimes.add(compressionTime);
+      cudaImageEncoderDecompressionTimes.add(decompressionTime);
+
+      compressedImageData.close();
+      compressedImage.close();
+      decompressedImage.close();
+   }
 
    private void collectOpenCVToolsColorData(RawImage rawImage)
    {
@@ -345,15 +346,15 @@ public class NVCompSVODemo extends NVCompDemo
                                  opencvToolsAverageDepthCompressionTimes,
                                  opencvToolsAverageDepthDecompressionTimes));
 
-//      double averageCUDACompressionRatio = getAverage(cudaImageEncoderCompressionRatios);
-//      double averageCUDACompressionTime = getAverage(cudaImageEncoderCompressionTimes);
-//      double averageCUDADecompressionTime = getAverage(cudaImageEncoderDecompressionTimes);
-//
-//      writer.write(String.format("%s,%f,%f,%f,,,\n",
-//                   "CUDAImageEncoder",
-//                   averageCUDACompressionRatio,
-//                   averageCUDACompressionTime,
-//                   averageCUDADecompressionTime));
+      double averageCUDACompressionRatio = getAverage(cudaImageEncoderCompressionRatios);
+      double averageCUDACompressionTime = getAverage(cudaImageEncoderCompressionTimes);
+      double averageCUDADecompressionTime = getAverage(cudaImageEncoderDecompressionTimes);
+
+      writer.write(String.format("%s,%f,%f,%f,,,\n",
+                   "CUDAImageEncoder",
+                   averageCUDACompressionRatio,
+                   averageCUDACompressionTime,
+                   averageCUDADecompressionTime));
 
       writer.close();
    }

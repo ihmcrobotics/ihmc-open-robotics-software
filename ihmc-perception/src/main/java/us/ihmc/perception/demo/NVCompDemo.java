@@ -26,6 +26,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.cuda.CUDAStreamManager;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -40,7 +41,7 @@ public class NVCompDemo
    protected static final String FILE_PATH = "/home/tbialek/Documents/ZED/ZED_ColorImage.png";
    protected static final int DATA_TYPE = NVCOMP_TYPE_CHAR;
 
-   protected final CUstream_st stream;
+   protected final CUstream_st stream = CUDAStreamManager.getStream();
    protected final long chunkSize = 1 << 16;
 
    // LZ4
@@ -76,9 +77,6 @@ public class NVCompDemo
    protected NVCompDemo()
    {
       LogTools.info("Chunk Size: " + chunkSize);
-
-      stream = new CUstream_st();
-      checkCUDAError(cudaStreamCreate(stream));
 
       // LZ4
       lz4Options = new nvcompBatchedLZ4Opts_t();
@@ -216,7 +214,7 @@ public class NVCompDemo
    protected void destroy()
    {
       checkCUDAError(cudaStreamSynchronize(stream));
-      checkCUDAError(cudaStreamDestroy(stream));
+      CUDAStreamManager.releaseStream(stream);
 
       lz4Manager.close();
       lz4Options.close();
