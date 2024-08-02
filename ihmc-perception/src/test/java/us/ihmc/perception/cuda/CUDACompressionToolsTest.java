@@ -2,6 +2,7 @@ package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class CUDACompressionToolsTest
       long originalDataSize = colorImageData.length;
       BytePointer originalData = new BytePointer(colorImageData);
 
-      testCompression(originalData, originalDataSize);
+      testCPUCompression(originalData, originalDataSize);
 
       originalData.close();
    }
@@ -40,10 +41,10 @@ public class CUDACompressionToolsTest
       // Read ZED depth image data
       byte[] depthImageData = Files.readAllBytes(zedDepth16UFile.getFilesystemFile());
       long originalDataSize = depthImageData.length;
-      Mat depthImage = new Mat(depthImageData);
+      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16U, new BytePointer(depthImageData));
 
       // Test compression on the data
-      testCompression(depthImage.data(), originalDataSize);
+      testCPUCompression(depthImage.data(), originalDataSize);
 
       depthImage.close();
    }
@@ -54,18 +55,18 @@ public class CUDACompressionToolsTest
       // Read ZED depth image data
       byte[] depthImageData = Files.readAllBytes(zedDepth16UFile.getFilesystemFile());
       long originalDataSize = depthImageData.length;
-      Mat depthImage = new Mat(depthImageData);
-      GpuMat gpuDepthImage = new GpuMat();
+      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16U, new BytePointer(depthImageData));
+      GpuMat gpuDepthImage = new GpuMat(depthImage.size(), depthImage.type());
       gpuDepthImage.upload(depthImage);
 
       // Test compression on GPU data
-      testCompression(gpuDepthImage.data(), originalDataSize);
+      testGPUCompression(gpuDepthImage.data(), depthImage.data(), originalDataSize);
 
       depthImage.close();
       gpuDepthImage.close();
    }
 
-   private void testCompression(BytePointer originalData, long originalDataSize)
+   private void testCPUCompression(BytePointer originalData, long originalDataSize)
    {
       CUDACompressionTools compressionTools = new CUDACompressionTools();
 
@@ -84,6 +85,34 @@ public class CUDACompressionToolsTest
       assertEquals(originalDataSize, decompressedDataSize);
       // Lossless compression; decompressed data should be the same as original
       assertTrue(dataEquals(originalData, decompressedData, decompressedDataSize));
+
+      // Free everything
+      checkCUDAError(cudart.cudaFreeHost(compressedData));
+      compressedData.close();
+      checkCUDAError(cudart.cudaFreeHost(decompressedData));
+      decompressedData.close();
+      compressionTools.destroy();
+   }
+
+   private void testGPUCompression(BytePointer originalGPUData, BytePointer originalCPUData, long originalDataSize)
+   {
+      CUDACompressionTools compressionTools = new CUDACompressionTools();
+
+      // Compress the data
+      BytePointer compressedData = new BytePointer();
+      long compressedDataSize = compressionTools.compress(originalGPUData, originalDataSize, compressedData);
+
+      // Compressed data should be smaller than original
+      assertTrue(compressedDataSize <= originalDataSize);
+
+      // Decompress the data
+      BytePointer decompressedData = new BytePointer();
+      long decompressedDataSize = compressionTools.decompress(compressedData, compressedDataSize, decompressedData);
+
+      // Decompressed data should be same size as original
+      assertEquals(originalDataSize, decompressedDataSize);
+      // Lossless compression; decompressed data should be the same as original
+      assertTrue(dataEquals(originalCPUData, decompressedData, decompressedDataSize));
 
       // Free everything
       checkCUDAError(cudart.cudaFreeHost(compressedData));
