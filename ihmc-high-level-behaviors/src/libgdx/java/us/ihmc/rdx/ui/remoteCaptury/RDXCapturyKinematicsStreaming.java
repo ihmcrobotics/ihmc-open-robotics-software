@@ -165,47 +165,32 @@ public class RDXCapturyKinematicsStreaming
          ikUpperArmControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
          ikForearmControlFrameGraphics.put(side, new RDXReferenceFrameGraphic(1.25 * FRAME_AXIS_GRAPHICS_LENGTH));
 
-         Pose3D ikControlFramePose = new Pose3D();
-         if (side == RobotSide.LEFT)
-         {
-            ikControlFramePose.getPosition()
-                              .setAndNegate(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation()
-                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
-         }
-         else
-         {
-            ikControlFramePose.getPosition()
-                              .setAndNegate(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation()
-                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
-         }
-         ikHandControlFramePoses.put(side, ikControlFramePose);
-
          // TODO Figure out how to set this up with NadiaRetargetingParameters
+         Pose3D ikControlFramePose = new Pose3D();
          Pose3D ikUpperArmControlFramePose = new Pose3D();
          Pose3D ikForearmControlFramePose = new Pose3D();
+         ikHandControlFramePoses.put(side, ikControlFramePose);
          ikUpperArmControlFramePoses.put(side, ikUpperArmControlFramePose);
          ikForearmControlFramePoses.put(side, ikForearmControlFramePose);
          if(side == RobotSide.LEFT)
          {
-            ikHandControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
-            ikHandControlFramePoses.get(side).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
-            ikUpperArmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, Math.PI / 2);
-            ikForearmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.1);
-            ikForearmControlFramePoses.get(side).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
-            ikChestControlFramePoses.getPosition().set(0.4, 0.0, 0.1);
-            ikChestControlFramePoses.getOrientation().setYawPitchRoll(0.0, Math.PI, Math.PI);
+            ikHandControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
+            ikHandControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
+            ikUpperArmControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.LEFT_UPPERARM));
+            ikUpperArmControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.LEFT_UPPERARM));
+            ikForearmControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.LEFT_FOREARM));
+            ikForearmControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.LEFT_FOREARM));
+            ikChestControlFramePoses.getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.CHEST));
+            ikChestControlFramePoses.getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.CHEST));
          }
          else
          {
-            ikHandControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
-            ikHandControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
-            ikUpperArmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
-            ikForearmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.1);
-            ikForearmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
+            ikHandControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
+            ikHandControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
+            ikUpperArmControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.RIGHT_UPPERARM));
+            ikUpperArmControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.RIGHT_UPPERARM));
+            ikForearmControlFramePoses.get(side).getPosition().set(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.RIGHT_FOREARM));
+            ikForearmControlFramePoses.get(side).getOrientation().set(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.RIGHT_FOREARM));
          }
 
       }
