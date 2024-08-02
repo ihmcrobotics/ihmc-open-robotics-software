@@ -106,7 +106,7 @@ public class RDXBaseUI
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
-   private final ArrayList<RDXCapturyManager> additionalMenuItems = new ArrayList<>();
+   private final ArrayList<Runnable> runnableMenuItem = new ArrayList<>();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -554,9 +554,9 @@ public class RDXBaseUI
       }
 
       vrManager.renderMenuBar();
-      for(RDXCapturyManager menus : additionalMenuItems)
+      for(Runnable runnable : runnableMenuItem)
       {
-         menus.renderMenuBar();
+         runnable.run();
       }
 
       frameRateDisplay.ping();
@@ -590,10 +590,9 @@ public class RDXBaseUI
       instance = null;
    }
 
-   //Should be able to add anything but for now is set to RDXCapturyManager
-   public void addToMenuBar(RDXCapturyManager newMenuItem)
+   public void addToMenuBar(Runnable renderImGuiMenu)
    {
-      additionalMenuItems.add(newMenuItem);
+      runnableMenuItem.add(renderImGuiMenu);
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
