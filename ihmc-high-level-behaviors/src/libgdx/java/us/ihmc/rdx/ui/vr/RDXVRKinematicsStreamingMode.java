@@ -254,21 +254,21 @@ public class RDXVRKinematicsStreamingMode
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-         {
-            InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (aButton.bChanged() && !aButton.bState())
-            {
-               setEnabled(!enabled.get());
-            }
+        {
+           InputDigitalActionData aButton = controller.getAButtonActionData();
+           if (aButton.bChanged() && !aButton.bState())
+           {
+              setEnabled(!enabled.get());
+           }
 
-            // NOTE: Implement hand open close for controller trigger button.
-            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-            { // do not want to close grippers while interacting with the panel
-               HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-               sendHandCommand(RobotSide.RIGHT, handConfiguration);
-            }
-         });
+           // NOTE: Implement hand open close for controller trigger button.
+           InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+           { // do not want to close grippers while interacting with the panel
+              HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+              sendHandCommand(RobotSide.RIGHT, handConfiguration);
+           }
+        });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
