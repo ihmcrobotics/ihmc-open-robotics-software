@@ -32,7 +32,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
-import us.ihmc.motionRetargeting.VRTrackedSegmentType;
+import us.ihmc.motionRetargeting.CapturyTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
@@ -169,16 +169,16 @@ public class RDXCapturyKinematicsStreaming
          if (side == RobotSide.LEFT)
          {
             ikControlFramePose.getPosition()
-                              .setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
+                              .setAndNegate(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
             ikControlFramePose.getOrientation()
-                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.LEFT_HAND));
          }
          else
          {
             ikControlFramePose.getPosition()
-                              .setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+                              .setAndNegate(retargetingParameters.getTranslationFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
             ikControlFramePose.getOrientation()
-                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
+                              .setAndInvert(retargetingParameters.getYawPitchRollFromTracker(CapturyTrackedSegmentType.RIGHT_HAND));
          }
          ikHandControlFramePoses.put(side, ikControlFramePose);
 
@@ -641,16 +641,16 @@ public class RDXCapturyKinematicsStreaming
       RobotSide side = handSideInteger == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
 
       KinematicsToolboxRigidBodyMessage output = new KinematicsToolboxRigidBodyMessage();
-      trackerFrameGraphics.put(VRTrackedSegmentType.LEFT_FOREARM.getSegmentName(),
+      trackerFrameGraphics.put(CapturyTrackedSegmentType.LEFT_FOREARM.getSegmentName(),
                                new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-      trackerFrameGraphics.put(VRTrackedSegmentType.RIGHT_FOREARM.getSegmentName(),
+      trackerFrameGraphics.put(CapturyTrackedSegmentType.RIGHT_FOREARM.getSegmentName(),
                                new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
 
       switch (marker)
       {
          case HAND:
          {
-            VRTrackedSegmentType hand = VRTrackedSegmentType.toHand(side);
+            CapturyTrackedSegmentType hand = CapturyTrackedSegmentType.toHand(side);
             handDesiredControlFrames.put(side, new MutableReferenceFrame(referenceFrame));
             MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
             controllerFrameGraphics.get(side).setToReferenceFrame(referenceFrame);
@@ -673,7 +673,7 @@ public class RDXCapturyKinematicsStreaming
          }
          case SHOULDER:
          {
-            VRTrackedSegmentType upperArm = VRTrackedSegmentType.toUpperArm(side);
+            CapturyTrackedSegmentType upperArm = CapturyTrackedSegmentType.toUpperArm(side);
 
             MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(referenceFrame);
             trackerDesiredControlFrame.getReferenceFrame().update();
@@ -710,7 +710,7 @@ public class RDXCapturyKinematicsStreaming
          }
          case ELBOW:
          {
-            VRTrackedSegmentType forearm = VRTrackedSegmentType.toForearm(side);
+            CapturyTrackedSegmentType forearm = CapturyTrackedSegmentType.toForearm(side);
 
             MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(referenceFrame);
             trackerDesiredControlFrame.getReferenceFrame().update();
@@ -741,7 +741,7 @@ public class RDXCapturyKinematicsStreaming
          }
          case CHEST:
          {
-            VRTrackedSegmentType chest = VRTrackedSegmentType.toChest();
+            CapturyTrackedSegmentType chest = CapturyTrackedSegmentType.toChest();
 
             MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(referenceFrame);
             trackerDesiredControlFrame.getReferenceFrame().update();

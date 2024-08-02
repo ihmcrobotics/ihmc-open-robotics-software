@@ -14,4 +14,14 @@ public abstract class RetargetingParameters
    {
       return new YawPitchRoll();
    }
+
+   public Point3D getTranslationFromTracker(CapturyTrackedSegmentType tracker)
+   {
+      return new Point3D();
+   }
+
+   public YawPitchRoll getYawPitchRollFromTracker(CapturyTrackedSegmentType tracker)
+   {
+      return new YawPitchRoll();
+   }
 }
