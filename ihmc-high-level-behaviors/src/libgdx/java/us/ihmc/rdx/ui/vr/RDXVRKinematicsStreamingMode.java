@@ -254,21 +254,21 @@ public class RDXVRKinematicsStreamingMode
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-      {
-         InputDigitalActionData aButton = controller.getAButtonActionData();
-         if (aButton.bChanged() && !aButton.bState())
          {
-            setEnabled(!enabled.get());
-         }
+            InputDigitalActionData aButton = controller.getAButtonActionData();
+            if (aButton.bChanged() && !aButton.bState())
+            {
+               setEnabled(!enabled.get());
+            }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-         { // do not want to close grippers while interacting with the panel
-            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-            sendHandCommand(RobotSide.RIGHT, handConfiguration);
-         }
-      });
+            // NOTE: Implement hand open close for controller trigger button.
+            InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            { // do not want to close grippers while interacting with the panel
+               HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+               sendHandCommand(RobotSide.RIGHT, handConfiguration);
+            }
+         });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
@@ -347,13 +347,13 @@ public class RDXVRKinematicsStreamingMode
             }
             trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
             RigidBodyBasics controlledSegment = switch (segmentType)
-            {
-               case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
-               case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
-               case CHEST -> ghostFullRobotModel.getChest();
-               default -> throw new IllegalStateException(
-                     "Unexpected VR-tracked segment: " + segmentType);
-            };
+                  {
+                     case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
+                     case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
+                     case CHEST -> ghostFullRobotModel.getChest();
+                     default -> throw new IllegalStateException(
+                           "Unexpected VR-tracked segment: " + segmentType);
+                  };
             if (controlledSegment != null)
             {
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
@@ -392,7 +392,7 @@ public class RDXVRKinematicsStreamingMode
             message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
             message.setHasAngularVelocity(true);
             message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
-            //            message.getDesiredOrientationInWorld().transform(message.getAngularVelocityInWorld());
+//            message.getDesiredOrientationInWorld().transform(message.getAngularVelocityInWorld());
 
             toolboxInputMessage.getInputs().add().set(message);
             toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
@@ -591,7 +591,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
-      //      toolbox.closeAndDispose();
+//      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {
