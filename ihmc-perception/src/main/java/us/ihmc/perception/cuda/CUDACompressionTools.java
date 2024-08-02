@@ -34,6 +34,8 @@ public class CUDACompressionTools
 
    public void destroy()
    {
+      checkCUDAError(cudaStreamSynchronize(stream));
+      CUDAStreamManager.releaseStream(stream);
       compressionManager.close();
    }
 
