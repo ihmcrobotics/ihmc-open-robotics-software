@@ -498,7 +498,7 @@ public class RDXVRKinematicsStreamingMode
    public void renderImGuiWidgets()
    {
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-
+      
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
