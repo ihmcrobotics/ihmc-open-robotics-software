@@ -54,7 +54,6 @@ public class NVCompSVODemo extends NVCompDemo
    private final Map<String, List<Double>> managerToCompressionTimeMapDepth = new TreeMap<>();
    private final Map<String, List<Double>> managerToDecompressionTimeMapDepth = new TreeMap<>();
 
-   // FIXME: Using the CUDAImageEncoder messes up the nvcomp algorithms
    private final CUDAImageEncoder cudaImageEncoder = new CUDAImageEncoder();
    private final List<Double> cudaImageEncoderCompressionRatios = new ArrayList<>();
    private final List<Double> cudaImageEncoderCompressionTimes = new ArrayList<>();
@@ -281,22 +280,6 @@ public class NVCompSVODemo extends NVCompDemo
       compressedImage.close();
       decompressedImage.close();
    }
-
-//   private void testDepthCompression(RawImage depthImage)
-//   {
-//      GpuMat gpuDepth = depthImage.getGpuImageMat();
-//      GpuMat depthMSB = new GpuMat();
-//      GpuMat depthLSB = new GpuMat();
-//
-//      GpuMat msbExtractor = new GpuMat(gpuDepth.size(), gpuDepth.type(), new Scalar(65280.0));
-//      GpuMat lsbExtractor = new GpuMat(gpuDepth.size(), gpuDepth.type(), new Scalar(255.0));
-//
-//      opencv_cudaarithm.bitwise_and(gpuDepth, msbExtractor, depthMSB);
-//      opencv_cudaarithm.bitwise_and(gpuDepth, lsbExtractor, depthLSB);
-//
-//      depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 255.0, 0.0);
-//      depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
-//   }
 
    private void saveDataToFile(String filePath) throws IOException
    {
