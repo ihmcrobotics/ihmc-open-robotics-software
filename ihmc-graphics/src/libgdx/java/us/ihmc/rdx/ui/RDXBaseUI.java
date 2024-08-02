@@ -30,6 +30,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
+import us.ihmc.rdx.sceneManager.RDX2DSceneManager;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -42,7 +43,9 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridResourceDirectory;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Method call order:
@@ -103,7 +106,7 @@ public class RDXBaseUI
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
-   private final RDXCapturyManager capturyManager = new RDXCapturyManager();
+   private final ArrayList<RDXCapturyManager> additionalMenuItems = new ArrayList<>();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -551,7 +554,10 @@ public class RDXBaseUI
       }
 
       vrManager.renderMenuBar();
-      capturyManager.renderMenuBar();
+      for(RDXCapturyManager menus : additionalMenuItems)
+      {
+         menus.renderMenuBar();
+      }
 
       frameRateDisplay.ping();
 
@@ -582,6 +588,12 @@ public class RDXBaseUI
       primaryScene.dispose();
 
       instance = null;
+   }
+
+   //Should be able to add anything but for now is set to RDXCapturyManager
+   public void addToMenuBar(RDXCapturyManager newMenuItem)
+   {
+      additionalMenuItems.add(newMenuItem);
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
@@ -648,11 +660,6 @@ public class RDXBaseUI
    public RDXVRManager getVRManager()
    {
       return vrManager;
-   }
-
-   public RDXCapturyManager getCapturyManager()
-   {
-      return capturyManager;
    }
 
    public RDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()

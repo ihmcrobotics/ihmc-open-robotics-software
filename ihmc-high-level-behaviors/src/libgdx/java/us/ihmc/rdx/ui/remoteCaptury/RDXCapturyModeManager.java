@@ -86,10 +86,10 @@ public class RDXCapturyModeManager
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
    }
 
-   public void update()
+   public void update(RDXCapturyManager capturyManager)
    {
       RDXBaseUI baseUI = RDXBaseUI.getInstance();
-      boolean isCapturyReady = baseUI.getCapturyManager().getCapturyEnabled().get();
+      boolean isCapturyReady = capturyManager.getCapturyEnabled().get();
       if (isCapturyReady && !wasCapturyReady)
       {
          baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::renderImGuiWidgets);
