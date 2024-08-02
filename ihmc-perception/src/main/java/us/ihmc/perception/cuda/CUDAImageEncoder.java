@@ -7,7 +7,6 @@ import org.bytedeco.cuda.nvjpeg.nvjpegHandle;
 import org.bytedeco.cuda.nvjpeg.nvjpegImage_t;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import us.ihmc.log.LogTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
@@ -209,5 +208,6 @@ public class CUDAImageEncoder
       checkNVJPEGError(nvjpegEncoderParamsDestroy(encoderParameters));
       checkNVJPEGError(nvjpegEncoderStateDestroy(encoderState));
       checkNVJPEGError(nvjpegDestroy(nvjpegHandle));
+      CUDAStreamManager.releaseStream(cudaStream);
    }
 }
