@@ -182,10 +182,32 @@ public class RDXCapturyKinematicsStreaming
          }
          ikHandControlFramePoses.put(side, ikControlFramePose);
 
+         // TODO Figure out how to set this up with NadiaRetargetingParameters
          Pose3D ikUpperArmControlFramePose = new Pose3D();
-         ikUpperArmControlFramePoses.put(side, ikUpperArmControlFramePose);
          Pose3D ikForearmControlFramePose = new Pose3D();
+         ikUpperArmControlFramePoses.put(side, ikUpperArmControlFramePose);
          ikForearmControlFramePoses.put(side, ikForearmControlFramePose);
+         if(side == RobotSide.LEFT)
+         {
+            ikHandControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
+            ikHandControlFramePoses.get(side).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
+            ikUpperArmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
+            ikUpperArmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, Math.PI / 2);
+            ikForearmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.1);
+            ikForearmControlFramePoses.get(side).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
+            ikChestControlFramePoses.getPosition().set(0.4, 0.0, 0.1);
+            ikChestControlFramePoses.getOrientation().setYawPitchRoll(0.0, Math.PI, Math.PI);
+         }
+         else
+         {
+            ikHandControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
+            ikHandControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
+            ikUpperArmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.0);
+            ikUpperArmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
+            ikForearmControlFramePoses.get(side).getPosition().set(0.0, 0.0, 0.1);
+            ikForearmControlFramePoses.get(side).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
+         }
+
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel()
@@ -337,69 +359,6 @@ public class RDXCapturyKinematicsStreaming
 
    public void update(boolean ikStreamingModeEnabled)
    {
-      // For updating on the fly TODO Remove me
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (robotSide == RobotSide.LEFT)
-         {
-            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
-            ikUpperArmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, Math.PI / 2);
-            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.1);
-            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(3 * Math.PI / 2, 0, Math.PI / 2);
-            ikChestControlFramePoses.getPosition().set(0.4, 0.0, 0.1);
-            ikChestControlFramePoses.getOrientation().setYawPitchRoll(0.0, Math.PI, Math.PI);
-         }
-         else if (robotSide == RobotSide.RIGHT)
-         {
-            ikHandControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikHandControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
-            ikUpperArmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.0);
-            ikUpperArmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
-            ikForearmControlFramePoses.get(robotSide).getPosition().set(0.0, 0.0, 0.1);
-            ikForearmControlFramePoses.get(robotSide).getOrientation().setYawPitchRoll(Math.PI, 0, -Math.PI / 2);
-         }
-
-         RigidBodyBasics hand = ghostFullRobotModel.getHand(robotSide);
-         if (hand != null)
-         {
-            RDXReferenceFrameGraphic handControlFrameGraphic = ikHandControlFrameGraphics.get(robotSide);
-            handControlFrameGraphic.getFramePose3D().setToZero(hand.getBodyFixedFrame());
-            handControlFrameGraphic.getFramePose3D().appendTransform(ikHandControlFramePoses.get(robotSide));
-            handControlFrameGraphic.updateFromFramePose();
-         }
-
-         RigidBodyBasics forearm = ghostFullRobotModel.getForearm(robotSide);
-         if (forearm != null)
-         {
-            RDXReferenceFrameGraphic forearmControlFrameGraphic = ikForearmControlFrameGraphics.get(robotSide);
-            forearmControlFrameGraphic.getFramePose3D().setToZero(forearm.getBodyFixedFrame());
-            forearmControlFrameGraphic.getFramePose3D().appendTransform(ikForearmControlFramePoses.get(robotSide));
-            forearmControlFrameGraphic.updateFromFramePose();
-         }
-
-         RigidBodyBasics upperArm = ghostUpperArms.get(robotSide);
-         if (upperArm != null)
-         {
-            RDXReferenceFrameGraphic upperArmControlFrameGraphic = ikUpperArmControlFrameGraphics.get(robotSide);
-            upperArmControlFrameGraphic.getFramePose3D().setToZero(upperArm.getBodyFixedFrame());
-            upperArmControlFrameGraphic.getFramePose3D().appendTransform(ikUpperArmControlFramePoses.get(robotSide));
-            upperArmControlFrameGraphic.updateFromFramePose();
-         }
-
-         RigidBodyBasics chest = ghostFullRobotModel.getChest();
-         if (chest != null)
-         {
-            RDXReferenceFrameGraphic chestControlFrameGraphic = ikChestControlFrameGraphics;
-            chestControlFrameGraphic.getFramePose3D().setToZero(chest.getBodyFixedFrame());
-            chestControlFrameGraphic.getFramePose3D().appendTransform(ikChestControlFramePoses);
-            chestControlFrameGraphic.updateFromFramePose();
-         }
-      }
-
-      // ------------------------------------------------------------- End of Remove me
-
       // Safety features!
       if (!ikStreamingModeEnabled)
          streamToController.set(false);
