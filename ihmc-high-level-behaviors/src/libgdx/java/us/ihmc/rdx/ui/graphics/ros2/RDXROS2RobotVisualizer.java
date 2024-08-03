@@ -54,6 +54,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final Point3D robotTranslationDifference = new Point3D();
    private final String chestName;
    private final ROS2SyncedRobotModel syncedRobot;
+   private HumanoidReferenceFrames referenceFramesToUseForSensors;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSliderFloat opacitySlider = new ImGuiSliderFloat("Opacity", "%.2f", 1.0f);
    private RDXInteractableOuster interactableOuster;
@@ -82,6 +83,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       this.ros2 = ros2;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
+
+      referenceFramesToUseForSensors = syncedRobot.getReferenceFrames();
+
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
       previousRobotMidFeetUnderPelvis.setToNaN();
       chestName = syncedRobot.getRobotModel().getJointMap().getChestName();
@@ -89,6 +93,12 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       footstepHistoryGraphic.setOpacity(0.7f);
       footstepHistoryGraphic.setColor(RobotSide.LEFT, Color.SKY);
       footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
+   }
+
+   /** In simulation we want to use the ground truth frames rather than state estimator frames. */
+   public void setReferenceFramesToUseForSensors(HumanoidReferenceFrames referenceFramesToUseForSensors)
+   {
+      this.referenceFramesToUseForSensors = referenceFramesToUseForSensors;
    }
 
    @Override
@@ -102,21 +112,21 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       getMultiBodyGraphic().loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
 
       interactableOuster = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
-                                                     syncedRobot.getReferenceFrames().getOusterLidarFrame(),
+                                                     referenceFramesToUseForSensors.getOusterLidarFrame(),
                                                      syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
       interactableOuster.getInteractableFrameModel()
                         .addRemoteTuning(ros2,
                                          PerceptionAPI.OUSTER_TO_CHEST_TUNING,
                                          syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
       interactableRealsenseD455 = new RDXInteractableRealsenseD455(baseUI.getPrimary3DPanel(),
-                                                                   syncedRobot.getReferenceFrames().getSteppingCameraFrame(),
+                                                                   referenceFramesToUseForSensors.getSteppingCameraFrame(),
                                                                    syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
       interactableRealsenseD455.getInteractableFrameModel()
                                .addRemoteTuning(ros2,
                                                 PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
                                                 syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
       RDXInteractableBlackflyFujinon interactableBlackflyLeftFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
-                                                                                                          syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.LEFT),
+                                                                                                          referenceFramesToUseForSensors.getSituationalAwarenessCameraFrame(RobotSide.LEFT),
                                                                                                           syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
       interactableBlackflyLeftFujinon.getInteractableFrameModel()
                                      .addRemoteTuning(ros2,
@@ -125,7 +135,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       interactableBlackflyFujinons.set(RobotSide.LEFT, interactableBlackflyLeftFujinon);
 
       RDXInteractableBlackflyFujinon interactableBlackflyRightFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
-                                                                                                           syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
+                                                                                                           referenceFramesToUseForSensors.getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
                                                                                                            syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
       interactableBlackflyRightFujinon.getInteractableFrameModel()
                                       .addRemoteTuning(ros2,
@@ -134,7 +144,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       interactableBlackflyFujinons.set(RobotSide.RIGHT, interactableBlackflyRightFujinon);
 
       interactableZED2i = new RDXInteractableZED2i(baseUI.getPrimary3DPanel(),
-                                                   syncedRobot.getReferenceFrames().getExperimentalCameraFrame(),
+                                                   referenceFramesToUseForSensors.getExperimentalCameraFrame(),
                                                    syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
       interactableZED2i.getInteractableFrameModel().addRemoteTuning(ros2,
                                                                     PerceptionAPI.EXPERIMENTAL_CAMERA_TO_PARENT_TUNING,

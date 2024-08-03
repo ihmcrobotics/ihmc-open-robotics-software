@@ -65,7 +65,9 @@ public class YOLOv8DetectionResults
       for (YOLOv8DetectionOutput detection : detections)
       {
          Mat detectionMask = getDetectionMask(detection);
-         segmentationImages.put(detection, createRawImageWithMat(detectionMask));
+         
+         if (detectionMask != null) // FIXME: This can be NULL
+            segmentationImages.put(detection, createRawImageWithMat(detectionMask));
       }
 
       return segmentationImages;
