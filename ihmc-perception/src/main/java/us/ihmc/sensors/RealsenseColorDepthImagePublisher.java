@@ -147,11 +147,7 @@ public class RealsenseColorDepthImagePublisher
 
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                colorJPEGPointer,
-                                colorImageToPublish.getImageWidth(),
-                                colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMat().step());
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();

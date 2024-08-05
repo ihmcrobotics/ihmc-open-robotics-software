@@ -223,12 +223,7 @@ public class ZEDColorDepthImagePublisher
 
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoders.get(side)
-                      .encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                 colorJPEGPointer,
-                                 colorImageToPublish.getImageWidth(),
-                                 colorImageToPublish.getImageHeight(),
-                                 colorImageToPublish.getGpuImageMat().step());
+         imageEncoders.get(side).encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
