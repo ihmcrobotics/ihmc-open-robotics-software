@@ -7,6 +7,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.perception.RawImageTest;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -21,6 +22,28 @@ public class CUDACompressionToolsTest
    private static final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(RawImageTest.class);
    private static final WorkspaceFile zedColorBGRFile = new WorkspaceFile(resourceDirectory, "zedColorBGR.raw");
    private static final WorkspaceFile zedDepth16UFile = new WorkspaceFile(resourceDirectory, "zedDepth16U.raw");
+
+   @Test
+   public void testDepthCompressionDecompression() throws IOException
+   {
+      byte[] depthBytes = Files.readAllBytes(zedDepth16UFile.getFilesystemFile());
+      long originalDataSize = depthBytes.length;
+      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1, new BytePointer(depthBytes));
+
+      CUDACompressionTools compressor = new CUDACompressionTools();
+      BytePointer compressedLSBData = new BytePointer();
+      BytePointer compressedMSBData = new BytePointer();
+      compressor.compressDepth(depthImage, compressedLSBData, compressedMSBData);
+
+      // Sum of data size should be less than original data
+      assertTrue(compressedLSBData.limit() + compressedMSBData.limit() < originalDataSize);
+
+      Mat decompressedDepth = new Mat(depthImage.size(), depthImage.type());
+      compressor.decompressDepth(compressedLSBData, compressedMSBData, compressedMSBData.limit(), decompressedDepth);
+
+      PerceptionDebugTools.display("Original", depthImage, 30000);
+      PerceptionDebugTools.display("Decompressed", decompressedDepth, 30000);
+   }
 
    @Test
    public void testBasicCompression() throws IOException
@@ -68,18 +91,18 @@ public class CUDACompressionToolsTest
 
    private void testCPUCompression(BytePointer originalData, long originalDataSize)
    {
-      CUDACompressionTools compressionTools = new CUDACompressionTools();
+      CUDACompressionTools compressor = new CUDACompressionTools();
 
       // Compress the data
       BytePointer compressedData = new BytePointer();
-      long compressedDataSize = compressionTools.compress(originalData, originalDataSize, compressedData);
+      long compressedDataSize = compressor.compress(originalData, originalDataSize, compressedData);
 
       // Compressed data should be smaller than original
       assertTrue(compressedDataSize <= originalDataSize);
 
       // Decompress the data
       BytePointer decompressedData = new BytePointer();
-      long decompressedDataSize = compressionTools.decompress(compressedData, compressedDataSize, decompressedData);
+      long decompressedDataSize = compressor.decompress(compressedData, compressedDataSize, decompressedData);
 
       // Decompressed data should be same size as original
       assertEquals(originalDataSize, decompressedDataSize);
@@ -91,23 +114,23 @@ public class CUDACompressionToolsTest
       compressedData.close();
       checkCUDAError(cudart.cudaFreeHost(decompressedData));
       decompressedData.close();
-      compressionTools.destroy();
+      compressor.destroy();
    }
 
    private void testGPUCompression(BytePointer originalGPUData, BytePointer originalCPUData, long originalDataSize)
    {
-      CUDACompressionTools compressionTools = new CUDACompressionTools();
+      CUDACompressionTools compressor = new CUDACompressionTools();
 
       // Compress the data
       BytePointer compressedData = new BytePointer();
-      long compressedDataSize = compressionTools.compress(originalGPUData, originalDataSize, compressedData);
+      long compressedDataSize = compressor.compress(originalGPUData, originalDataSize, compressedData);
 
       // Compressed data should be smaller than original
       assertTrue(compressedDataSize <= originalDataSize);
 
       // Decompress the data
       BytePointer decompressedData = new BytePointer();
-      long decompressedDataSize = compressionTools.decompress(compressedData, compressedDataSize, decompressedData);
+      long decompressedDataSize = compressor.decompress(compressedData, compressedDataSize, decompressedData);
 
       // Decompressed data should be same size as original
       assertEquals(originalDataSize, decompressedDataSize);
@@ -119,7 +142,7 @@ public class CUDACompressionToolsTest
       compressedData.close();
       checkCUDAError(cudart.cudaFreeHost(decompressedData));
       decompressedData.close();
-      compressionTools.destroy();
+      compressor.destroy();
    }
 
    private boolean dataEquals(BytePointer dataA, BytePointer dataB, long dataSize)

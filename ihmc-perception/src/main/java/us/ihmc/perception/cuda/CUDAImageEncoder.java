@@ -203,6 +203,40 @@ public class CUDAImageEncoder
       nvjpegImage.close();
    }
 
+   public void encodeGray(BytePointer sourceImage, BytePointer outputImagePointer, int imageWidth, int imageHeight, long sourceImagePitch)
+   {
+      long frameSize = imageWidth * imageHeight;
+
+      // Set params to correct sampling factor
+      checkNVJPEGError(nvjpegEncoderParamsSetSamplingFactors(encoderParameters, NVJPEG_CSS_GRAY, cudaStream));
+
+      // Upload image data
+      BytePointer devicePointer = new BytePointer();
+      checkCUDAError(cudaMallocAsync(devicePointer, frameSize, cudaStream));
+      checkCUDAError(cudaMemcpy2DAsync(devicePointer, imageWidth, sourceImage, sourceImagePitch, imageWidth, imageHeight, cudaMemcpyDefault, cudaStream));
+
+      nvjpegImage_t nvjpegImage = new nvjpegImage_t();
+      nvjpegImage.pitch(0, imageWidth);
+      nvjpegImage.channel(0, devicePointer);
+
+      // Encode the image
+      checkNVJPEGError(nvjpegEncodeImage(nvjpegHandle, encoderState, encoderParameters, nvjpegImage, NVJPEG_INPUT_BGR, imageWidth, imageHeight, cudaStream));
+
+      // Get compressed image size
+      SizeTPointer jpegSize = new SizeTPointer(1);
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, (BytePointer) null, jpegSize, cudaStream));
+
+      // Retrieve bitstream
+      outputImagePointer.limit(jpegSize.get());
+      checkNVJPEGError(nvjpegEncodeRetrieveBitstream(nvjpegHandle, encoderState, outputImagePointer, jpegSize, cudaStream));
+
+      // Free GPU memory
+      checkCUDAError(cudaFreeAsync(devicePointer, cudaStream));
+
+      jpegSize.close();
+      nvjpegImage.close();
+   }
+
    public void destroy()
    {
       checkNVJPEGError(nvjpegEncoderParamsDestroy(encoderParameters));
