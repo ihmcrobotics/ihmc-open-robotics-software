@@ -258,7 +258,7 @@ public class CUDAImageEncoder
       checkCUDAError(cudaMallocHost(decodedData, decodedImageSize));
 
       // Decode the image, packing result into Mat data
-      decodeBGR(encodedImage, encodedImageSize, imageInfo, decodedData);
+      decodeToBGR(encodedImage, encodedImageSize, imageInfo, decodedData);
 
       // Pack the result into the output Mat
       Mat decodingResult = new Mat(imageInfo.heights[0], imageInfo.widths[0], opencv_core.CV_8UC3, decodedData);
@@ -268,6 +268,30 @@ public class CUDAImageEncoder
       checkCUDAError(cudaFreeHost(decodedData));
       decodingResult.close();
    }
+
+   public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, NVJPEGImageInfo decodedImageInfo, BytePointer decodedImage)
+   {
+      // Allocate device memory for decoded image
+      BytePointer decodedDeviceImage = new BytePointer();
+      long decodedImageSize = 3L * decodedImageInfo.widths[0] * decodedImageInfo.heights[0];
+      checkCUDAError(cudaMallocAsync(decodedDeviceImage, decodedImageSize, cudaStream));
+
+      // Create NVJPEG image
+      nvjpegImage_t nvjpegDecodedImage = new nvjpegImage_t();
+      nvjpegDecodedImage.pitch(0, 3L * decodedImageInfo.widths[0]);
+      nvjpegDecodedImage.channel(0, decodedDeviceImage);
+
+      // Decode the image
+      checkNVJPEGError(nvjpegDecode(nvjpegHandle, nvjpegState, encodedImage, encodedImageSize, NVJPEG_OUTPUT_BGRI, nvjpegDecodedImage, cudaStream));
+
+      // Copy data to output pointer
+      checkCUDAError(cudaMemcpyAsync(decodedImage, decodedDeviceImage, decodedImageSize, cudaMemcpyDefault, cudaStream));
+      checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+      checkCUDAError(cudaFreeAsync(decodedDeviceImage, cudaStream));
+      decodedDeviceImage.close();
+   }
+
 
    public NVJPEGImageInfo getImageData(BytePointer encodedImage, long encodedImageSize)
    {
@@ -313,29 +337,6 @@ public class CUDAImageEncoder
 
          return imageInfo;
       }
-   }
-
-   public void decodeBGR(BytePointer encodedImage, long encodedImageSize, NVJPEGImageInfo decodedImageInfo, BytePointer decodedImage)
-   {
-      // Allocate device memory for decoded image
-      BytePointer decodedDeviceImage = new BytePointer();
-      long decodedImageSize = 3L * decodedImageInfo.widths[0] * decodedImageInfo.heights[0];
-      checkCUDAError(cudaMallocAsync(decodedDeviceImage, decodedImageSize, cudaStream));
-
-      // Create NVJPEG image
-      nvjpegImage_t nvjpegDecodedImage = new nvjpegImage_t();
-      nvjpegDecodedImage.pitch(0, 3L * decodedImageInfo.widths[0]);
-      nvjpegDecodedImage.channel(0, decodedDeviceImage);
-
-      // Decode the image
-      checkNVJPEGError(nvjpegDecode(nvjpegHandle, nvjpegState, encodedImage, encodedImageSize, NVJPEG_OUTPUT_BGRI, nvjpegDecodedImage, cudaStream));
-
-      // Copy data to output pointer
-      checkCUDAError(cudaMemcpyAsync(decodedImage, decodedDeviceImage, decodedImageSize, cudaMemcpyDefault, cudaStream));
-      checkCUDAError(cudaStreamSynchronize(cudaStream));
-
-      checkCUDAError(cudaFreeAsync(decodedDeviceImage, cudaStream));
-      decodedDeviceImage.close();
    }
 
    private record NVJPEGImageInfo(int numberOfComponents, int[] subSamplingTypes, int[] widths, int[] heights)
