@@ -12,6 +12,8 @@ import org.bytedeco.cuda.nvcomp.nvcompManagerBase;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaarithm;
+import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -36,6 +38,8 @@ public class CUDACompressionTools
    private final PimplManager compressionManager;
    private final nvcompBatchedZstdOpts_t zstdOptions;
 
+   private final CUDAImageEncoder jpegEncoder = new CUDAImageEncoder();
+
    CUDAImageEncoder lossyImageEncoder = new CUDAImageEncoder();
 
    public CUDACompressionTools()
@@ -57,6 +61,27 @@ public class CUDACompressionTools
       depthLSBExtractorCPU.close();
       depthMSBExtractorGPU.close();
       depthLSBExtractorGPU.close();
+   }
+
+   public long compress(Mat mat, BytePointer compressedData)
+   {
+      return compress(mat.data(), mat.elemSize() * mat.total(), compressedData);
+   }
+
+   public long compress(GpuMat gpuMat, BytePointer compressedData)
+   {
+      long rowSize = gpuMat.elemSize() * gpuMat.cols();
+
+      BytePointer gpuMatData = new BytePointer();
+      checkCUDAError(cudaMallocAsync(gpuMatData, gpuMat.elemSize() * gpuMat.rows() * gpuMat.cols(), stream));
+      checkCUDAError(cudaMemcpy2DAsync(gpuMatData, rowSize, gpuMat.data(), gpuMat.step(), rowSize, gpuMat.rows(), cudaMemcpyDefault, stream));
+
+      long compressedSize = compress(gpuMatData, OpenCVTools.dataSize(gpuMat), compressedData);
+
+      checkCUDAError(cudaFreeAsync(gpuMatData, stream));
+      gpuMatData.close();
+
+      return compressedSize;
    }
 
    /**
@@ -88,7 +113,6 @@ public class CUDACompressionTools
       try (Mat depthLSB = new Mat(depthImage.size(), opencv_core.CV_16UC1);
            Mat depthMSB = new Mat(depthImage.size(), opencv_core.CV_16UC1))
       {
-
          // Ensure extractor dimensions match
          if (!OpenCVTools.dimensionsMatch(depthImage, depthLSBExtractorCPU))
             opencv_imgproc.resize(depthLSBExtractorCPU, depthLSBExtractorCPU, depthImage.size());
@@ -104,12 +128,33 @@ public class CUDACompressionTools
          depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
 
          // Use lossless compression for MSB
-         long msbDataSize = compress(depthMSB.data(), OpenCVTools.dataSize(depthMSB), compressedMSBData);
+         compress(depthMSB, compressedMSBData);
 
          // Use lossy compression for LSB
          opencv_imgcodecs.imencode(".jpg", depthLSB, compressedLSBData);
 
          checkCUDAError(cudaFreeHost(compressedMSBData));
+      }
+   }
+
+   public void compressDepth(GpuMat depthImage, BytePointer compressedLSBData, BytePointer compressedMSBData)
+   {
+      try (GpuMat depthLSB = new GpuMat(depthImage.size(), opencv_core.CV_16UC1);
+           GpuMat depthMSB = new GpuMat(depthImage.size(), opencv_core.CV_16UC1))
+      {
+         if (!OpenCVTools.dimensionsMatch(depthImage, depthLSBExtractorGPU))
+            opencv_cudawarping.resize(depthLSBExtractorGPU, depthLSBExtractorGPU, depthImage.size());
+         if (!OpenCVTools.dimensionsMatch(depthImage, depthMSBExtractorGPU))
+            opencv_cudawarping.resize(depthMSBExtractorGPU, depthMSBExtractorGPU, depthImage.size());
+
+         opencv_cudaarithm.bitwise_and(depthImage, depthLSBExtractorGPU, depthLSB);
+         opencv_cudaarithm.bitwise_and(depthImage, depthMSBExtractorGPU, depthMSB);
+
+         depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
+         depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1);
+
+         //jpegEncoder.encodeGray(depthLSB, compressedLSBData);
+         compress(depthMSB, compressedMSBData);
       }
    }
 
@@ -119,7 +164,7 @@ public class CUDACompressionTools
            Mat compressedLSBMat = new Mat(compressedLSBData);
            Mat decompressedLSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1))
       {
-         opencv_imgcodecs.imdecode(compressedLSBMat, opencv_imgcodecs.IMREAD_GRAYSCALE, decompressedLSBMat);
+         opencv_imgcodecs.imdecode(compressedLSBMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedLSBMat);
 
          decompress(compressedMSBData, msbDataSize, decompressedMSBData);
          Mat decompressedMSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
@@ -135,7 +180,7 @@ public class CUDACompressionTools
 
    /**
     * Compresses data using the provided compression manager.
-    * @param data INPUT: Pointer to data to be compressed (can point to host or device memory)
+    * @param data INPUT: Pointer to data to be compressed (can point to host or device memory, must be continuous)
     * @param dataSize INPUT: Size of data to compress, in bytes
     * @param compressedData OUTPUT: Pointer to compressed data (must be a host pointer). MUST BE FREED USING {@link cudart#cudaFreeHost(Pointer)}.
     * @param compressionManager INPUT: Compression manager to use
@@ -163,6 +208,7 @@ public class CUDACompressionTools
          compressedData.limit(compressedDataSize);
          checkCUDAError(cudaMallocHost(compressedData, compressedDataSize));
          checkCUDAError(cudaMemcpyAsync(compressedData, compressedDeviceBuffer, compressedDataSize, cudart.cudaMemcpyDeviceToHost, cudaStream));
+         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          // Free GPU memory
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
@@ -204,6 +250,7 @@ public class CUDACompressionTools
          decompressedData.limit(decompressedDataSize);
          checkCUDAError(cudaMallocHost(decompressedData, decompressedDataSize));
          checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudart.cudaMemcpyDeviceToHost, cudaStream));
+         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
