@@ -6,15 +6,23 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public abstract class AbstractPDController
+public class AbstractPDController
 {
-   private final YoDouble positionError;
-   private final YoDouble rateError;
-   private final YoDouble actionP;
-   private final YoDouble actionD;
+   protected final YoDouble positionError;
+   protected final YoDouble rateError;
+   protected final YoDouble actionP;
+   protected final YoDouble actionD;
 
-   protected AbstractPDController(String suffix, YoRegistry registry)
+   protected final DoubleProvider proportionalGain;
+   protected final DoubleProvider derivativeGain;
+   protected final DoubleProvider positionDeadband;
+
+   protected AbstractPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider positionDeadband, String suffix, YoRegistry registry)
    {
+      this.proportionalGain = proportionalGain;
+      this.derivativeGain = derivativeGain;
+      this.positionDeadband = positionDeadband;
+
       positionError = new YoDouble("positionError_" + suffix, registry);
       positionError.set(0.0);
 
@@ -28,11 +36,20 @@ public abstract class AbstractPDController
       actionD.set(0.0);
    }
 
-   public abstract double getProportionalGain();
+   public double getProportionalGain()
+   {
+      return proportionalGain.getValue();
+   }
 
-   public abstract double getDerivativeGain();
+   public double getDerivativeGain()
+   {
+      return derivativeGain.getValue();
+   }
 
-   public abstract double getPositionDeadband();
+   public double getPositionDeadband()
+   {
+      return positionDeadband.getValue();
+   }
 
    public double getPositionError()
    {
@@ -46,11 +63,11 @@ public abstract class AbstractPDController
 
    public double compute(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
-      positionError.set(DeadbandTools.applyDeadband(getPositionDeadband(), desiredPosition - currentPosition));
+      positionError.set(DeadbandTools.applyDeadband(positionDeadband.getValue(), desiredPosition - currentPosition));
       rateError.set(desiredRate - currentRate);
 
-      actionP.set(getProportionalGain() * positionError.getDoubleValue());
-      actionD.set(getDerivativeGain() * rateError.getDoubleValue());
+      actionP.set(proportionalGain.getValue() * positionError.getDoubleValue());
+      actionD.set(derivativeGain.getValue() * rateError.getDoubleValue());
 
       return actionP.getDoubleValue() + actionD.getDoubleValue();
    }
@@ -58,37 +75,12 @@ public abstract class AbstractPDController
    public double computeForAngles(double currentPosition, double desiredPosition, double currentRate, double desiredRate)
    {
       //      System.out.println("PGain: " + proportionalGain.getDoubleValue() + "DGain: " + derivativeGain.getDoubleValue());
-      this.positionError.set(DeadbandTools.applyDeadband(getPositionDeadband(), AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition)));
+      this.positionError.set(DeadbandTools.applyDeadband(positionDeadband.getValue(), AngleTools.computeAngleDifferenceMinusPiToPi(desiredPosition, currentPosition)));
       rateError.set(desiredRate - currentRate);
 
-      actionP.set(getProportionalGain() * positionError.getDoubleValue());
-      actionD.set(getDerivativeGain() * rateError.getDoubleValue());
+      actionP.set(proportionalGain.getValue() * positionError.getDoubleValue());
+      actionD.set(derivativeGain.getValue() * rateError.getDoubleValue());
 
       return actionP.getDoubleValue() + actionD.getDoubleValue();
-   }
-
-   public static AbstractPDController createPDController(String suffix, DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider deadband,
-                                                         YoRegistry registry)
-   {
-      return new AbstractPDController(suffix, registry)
-      {
-         @Override
-         public double getProportionalGain()
-         {
-            return proportionalGain.getValue();
-         }
-
-         @Override
-         public double getPositionDeadband()
-         {
-            return deadband.getValue();
-         }
-
-         @Override
-         public double getDerivativeGain()
-         {
-            return derivativeGain.getValue();
-         }
-      };
    }
 }
