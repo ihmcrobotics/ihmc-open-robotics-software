@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
@@ -32,13 +33,14 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DynamicsMatrixCalculatorTest
 {
@@ -83,7 +85,7 @@ public class DynamicsMatrixCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
@@ -111,7 +113,7 @@ public class DynamicsMatrixCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
 
          int rhoSize = wrenchMatrixCalculator.getRhoSize();
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, rhoSize, 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
@@ -207,7 +209,7 @@ public class DynamicsMatrixCalculatorTest
          dynamicsMatrixCalculator.reset();
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
@@ -234,7 +236,7 @@ public class DynamicsMatrixCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
@@ -261,7 +263,7 @@ public class DynamicsMatrixCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
@@ -287,7 +289,7 @@ public class DynamicsMatrixCalculatorTest
          dynamicsMatrixCalculator.reset();
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          solveAndCompare(qddotSolution, rhoSolution, false);
@@ -311,7 +313,7 @@ public class DynamicsMatrixCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
-         DMatrixRMaj rhoSolution = RandomGeometry.nextDenseMatrix64F(random, wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho);
+         DMatrixRMaj rhoSolution = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, maxRho, random);
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          solveAndCompare(qddotSolution, rhoSolution, false);
@@ -404,7 +406,7 @@ public class DynamicsMatrixCalculatorTest
       dynamicsMatrixCalculator.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
 
       if (checkRigidBodyDynamics)
-         Assert.assertTrue(dynamicsMatrixCalculator.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
+         assertTrue(dynamicsMatrixCalculator.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
 
       for(int i = 0; i < inverseDynamicsTauSolution.getNumRows(); i++)
       {
@@ -420,13 +422,13 @@ public class DynamicsMatrixCalculatorTest
 
    private void checkTestQuality(DMatrixRMaj qddotSolution, DMatrixRMaj rhoSolution, DMatrixRMaj inverseDynamicsSolution, DMatrixRMaj matrixSolution)
    {
-      Assert.assertTrue(CommonOps_DDRM.elementMin(rhoSolution) > -0.000001);
+      assertTrue(CommonOps_DDRM.elementMin(rhoSolution) > -0.000001);
 
-      Assert.assertTrue(CommonOps_DDRM.elementMax(qddotSolution) < maxQddot);
-      Assert.assertTrue(CommonOps_DDRM.elementMin(qddotSolution) > -maxQddot);
+      assertTrue(CommonOps_DDRM.elementMax(qddotSolution) < maxQddot);
+      assertTrue(CommonOps_DDRM.elementMin(qddotSolution) > -maxQddot);
 
-      Assert.assertTrue(!MatrixTools.isEmptyMatrix(inverseDynamicsSolution));
-      Assert.assertTrue(!MatrixTools.isEmptyMatrix(matrixSolution));
+      assertFalse(MatrixTools.isEmptyMatrix(inverseDynamicsSolution));
+      assertFalse(MatrixTools.isEmptyMatrix(matrixSolution));
    }
 
    public static class GeneralMomentumOptimizationSettings implements ControllerCoreOptimizationSettings

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -38,9 +39,9 @@ public class SimpleReactionDynamicsTest
       FrameVector3D desiredAngularAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), 5.5, 6.5, 7.5);
 
       Random random = new Random(1738L);
-      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(stateVectorSize, 1, random);
+      DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(controlVectorSize, 1, random);
+      DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(constantVectorSize, 1, random);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       currentControl.set(x, 0, desiredLinearAcceleration.getX() * mass);
@@ -110,9 +111,9 @@ public class SimpleReactionDynamicsTest
       inertia.scale(mass / 12.0);
 
       Random random = new Random(1738L);
-      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(stateVectorSize, 1, random);
+      DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(controlVectorSize, 1, random);
+      DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(constantVectorSize, 1, random);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DMatrixRMaj gradient = new DMatrixRMaj(stateVectorSize, stateVectorSize);
@@ -174,9 +175,9 @@ public class SimpleReactionDynamicsTest
       inertia.scale(mass / 12.0);
 
       Random random = new Random(1738L);
-      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(stateVectorSize, 1, random);
+      DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(controlVectorSize, 1, random);
+      DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(constantVectorSize, 1, random);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       DMatrixRMaj gradient = new DMatrixRMaj(stateVectorSize, controlVectorSize);

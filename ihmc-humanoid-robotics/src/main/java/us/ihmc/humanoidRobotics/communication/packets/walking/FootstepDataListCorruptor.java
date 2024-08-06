@@ -9,6 +9,8 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -68,9 +70,9 @@ public class FootstepDataListCorruptor
       orientation.multiply(corruption);
    }
 
-   private void corruptLocationVector(Point3D location)
+   private void corruptLocationVector(Point3DBasics location)
    {
-      Vector3D randomVector = RandomGeometry.nextVector3D(random, minLocationCorruption, maxLocationCorruption);
+      Vector3DReadOnly randomVector = EuclidCoreRandomTools.nextVector3D(random, minLocationCorruption, maxLocationCorruption);
       location.add(randomVector);
    }
    

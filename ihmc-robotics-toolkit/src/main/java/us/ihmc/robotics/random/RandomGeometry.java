@@ -38,16 +38,6 @@ public class RandomGeometry
       return new Vector3D(x, y, z);
    }
 
-   public static Vector3D nextVector3D(Random random, Tuple3DReadOnly boundary1, Tuple3DReadOnly boundary2)
-   {
-      Vector3D ret = new Vector3D();
-
-      ret.setX(RandomNumbers.nextDouble(random, boundary1.getX(), boundary2.getX()));
-      ret.setY(RandomNumbers.nextDouble(random, boundary1.getY(), boundary2.getY()));
-      ret.setZ(RandomNumbers.nextDouble(random, boundary1.getZ(), boundary2.getZ()));
-
-      return ret;
-   }
 
    public static Vector3D nextVector3D(Random random)
    {
@@ -61,40 +51,5 @@ public class RandomGeometry
       ret.scale(length);
 
       return ret;
-   }
-
-   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns)
-   {
-      return nextDenseMatrix64F(random, numberOfRows, numberOfColumns, 1.0);
-   }
-
-   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double maxAbsoluteValue)
-   {
-      DMatrixRMaj matrixToReturn = new DMatrixRMaj(numberOfRows, numberOfColumns);
-
-      for (int row = 0; row < numberOfRows; row++)
-      {
-         for (int column = 0; column < numberOfColumns; column++)
-         {
-            double value = RandomNumbers.nextDouble(random, maxAbsoluteValue);
-            matrixToReturn.set(row, column, value);
-         }
-      }
-      return matrixToReturn;
-   }
-
-   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numberOfRows, int numberOfColumns, double boundaryOne, double boundaryTwo)
-   {
-      DMatrixRMaj matrixToReturn = new DMatrixRMaj(numberOfRows, numberOfColumns);
-
-      for (int row = 0; row < numberOfRows; row++)
-      {
-         for (int column = 0; column < numberOfColumns; column++)
-         {
-            double value = RandomNumbers.nextDouble(random, boundaryOne, boundaryTwo);
-            matrixToReturn.set(row, column, value);
-         }
-      }
-      return matrixToReturn;
    }
 }

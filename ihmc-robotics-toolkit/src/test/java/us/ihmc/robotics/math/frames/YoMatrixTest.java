@@ -1,18 +1,17 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class YoMatrixTest
 {
@@ -33,7 +32,7 @@ public class YoMatrixTest
 
       Random random = new Random(1984L);
 
-      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomMatrices_DDRM.rectangle(maxNumberOfRows, maxNumberOfColumns, random);
       yoMatrix.set(randomMatrix);
 
       DMatrixRMaj checkMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
@@ -41,7 +40,7 @@ public class YoMatrixTest
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      assertEquals(registry.findVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
+      assertEquals(registry.findVariable("testMatrix00").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
    @Test
@@ -77,7 +76,7 @@ public class YoMatrixTest
 
       Random random = new Random(1984L);
 
-      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomMatrices_DDRM.rectangle(maxNumberOfRows, maxNumberOfColumns, random);
       yoMatrix.set(randomMatrix);
 
       DMatrixRMaj checkMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
@@ -85,7 +84,7 @@ public class YoMatrixTest
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      DMatrixRMaj smallerMatrix = RandomGeometry.nextDenseMatrix64F(random, smallerRows, smallerColumns);
+      DMatrixRMaj smallerMatrix = RandomMatrices_DDRM.rectangle(smallerRows, smallerColumns, random);
       yoMatrix.set(smallerMatrix);
 
       assertEquals(smallerRows, smallerMatrix.getNumRows());
@@ -114,7 +113,7 @@ public class YoMatrixTest
       
       Random random = new Random(1984L);
 
-      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomMatrices_DDRM.rectangle(maxNumberOfRows, maxNumberOfColumns, random);
       yoMatrix.set(randomMatrix);
       
       int numberOfRows = 2;
@@ -122,6 +121,7 @@ public class YoMatrixTest
       yoMatrix.zero();
       
       DMatrixRMaj zeroMatrix = new DMatrixRMaj(numberOfRows, numberOfColumns);
+      zeroMatrix.zero();
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
    }
    
@@ -192,7 +192,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.findVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.findVariable(name +  row +  column);
 
             if ((row < smallerRows) && (column < smallerColumns))
             {
@@ -213,7 +213,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.findVariable(name + "_" + row + "_" + column);
+            YoDouble variable = (YoDouble) registry.findVariable(name + row + column);
             assertTrue(Double.isNaN(variable.getDoubleValue()));
          }
       }
