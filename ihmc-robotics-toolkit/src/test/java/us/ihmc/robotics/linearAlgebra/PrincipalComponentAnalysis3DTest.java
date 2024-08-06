@@ -1,7 +1,5 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,12 +10,16 @@ import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PrincipalComponentAnalysis3DTest
 {
@@ -36,7 +38,7 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+         Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          double pointScatteringAmplitude = 5.0;
          Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
@@ -109,7 +111,7 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Error for the principal axis: " + errorPrincipalAxis);
          }
 
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_HIGH_PRECISION);
 
          if (DEBUG)
          {
@@ -118,7 +120,7 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Error for the mean: " + errorMean);
          }
 
-         assertTrue(expectedMean.epsilonEquals(estimatedMean, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedMean, estimatedMean, EPSILON_HIGH_PRECISION);
 
          // Test orthogonality between the principal axes:
          assertEquals(0.0, estimatedPrincipalAxis.dot(estimatedSecondaryAxis), EPSILON_HIGH_PRECISION);
@@ -144,12 +146,12 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(0.0, estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVarianceAlongPrincipalAxis, estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVarianceAlongPrincipalAxis, estimatedScaledPrincipalVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledSecondaryVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledThirdVector.norm(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION);
 
          RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
@@ -158,7 +160,7 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
          assertTrue(rotationMatrix.isRotationMatrix());
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_HIGH_PRECISION);
       }
    }
 
@@ -173,7 +175,7 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+         Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector2D pointScatteringAmplitude = new Vector2D(15.0, 1.0);
          Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
@@ -278,15 +280,15 @@ public class PrincipalComponentAnalysis3DTest
 
             Vector3D errorPrincipalAxis = new Vector3D();
             errorPrincipalAxis.sub(expectedPrincipalAxis, estimatedPrincipalAxis);
-            System.out.println("Error magnitude for the principal axis: " + errorPrincipalAxis.length());
+            System.out.println("Error magnitude for the principal axis: " + errorPrincipalAxis.norm());
 
             Vector3D errorSecondaryAxis = new Vector3D();
             errorSecondaryAxis.sub(expectedSecondaryAxis, estimatedSecondaryAxis);
-            System.out.println("Error magnitude for the secondary axis: " + errorSecondaryAxis.length());
+            System.out.println("Error magnitude for the secondary axis: " + errorSecondaryAxis.norm());
 
             Vector3D errorThirdAxis = new Vector3D();
             errorThirdAxis.sub(expectedThirdAxis, estimatedThirdAxis);
-            System.out.println("Error magnitude for the third axis: " + errorThirdAxis.length());
+            System.out.println("Error magnitude for the third axis: " + errorThirdAxis.norm());
 
             Vector3D errorMean = new Vector3D();
             errorMean.sub(expectedMean, estimatedMean);
@@ -301,11 +303,11 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Estimated standard deviation: " + estimatedStandardDeviation);
          }
 
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
-         assertTrue(expectedThirdAxis.epsilonEquals(estimatedThirdAxis, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedSecondaryAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedThirdAxis, estimatedThirdAxis, EPSILON_HIGH_PRECISION);
 
-         assertTrue(expectedMean.epsilonEquals(estimatedMean, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedMean, estimatedMean, EPSILON_HIGH_PRECISION);
 
          // Test orthogonality between the principal axes:
          assertEquals(0.0, estimatedPrincipalAxis.dot(estimatedSecondaryAxis), EPSILON_HIGH_PRECISION);
@@ -320,16 +322,16 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedScaledThirdVector.norm(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION);
          estimatedScaledSecondaryVector.normalize();
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION);
 
          RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
@@ -338,10 +340,10 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
          assertTrue(rotationMatrix.isRotationMatrix());
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
-         assertTrue(estimatedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedSecondaryAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION);
       }
    }
 
@@ -356,7 +358,7 @@ public class PrincipalComponentAnalysis3DTest
          {
             System.out.println("----------- Iteration #" + trialNumber + " ---------------------------");
          }
-         Point3D origin = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+         Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector3D pointScatteringAmplitude = new Vector3D(15.0, 1.0, 0.2);
          Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
@@ -493,11 +495,11 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Estimated standard deviation: " + estimatedStandardDeviation);
          }
 
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
-         assertTrue(expectedThirdAxis.epsilonEquals(estimatedThirdAxis, EPSILON_LOW_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedSecondaryAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedThirdAxis, estimatedThirdAxis, EPSILON_LOW_PRECISION);
 
-         assertTrue(expectedMean.epsilonEquals(estimatedMean, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedMean, estimatedMean, EPSILON_HIGH_PRECISION);
 
          // Test orthogonality between the principal axes:
          assertEquals(0.0, estimatedPrincipalAxis.dot(estimatedSecondaryAxis), EPSILON_HIGH_PRECISION);
@@ -512,19 +514,19 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
          assertEquals(expectedVariance.getZ(), estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.length(), EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.getZ(), estimatedScaledThirdVector.length(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedScaledPrincipalVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedScaledSecondaryVector.norm(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getZ(), estimatedScaledThirdVector.norm(), EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION);
          estimatedScaledSecondaryVector.normalize();
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION);
          estimatedScaledThirdVector.normalize();
-         assertTrue(expectedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedThirdAxis, estimatedScaledThirdVector, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedThirdAxis, estimatedScaledThirdVector, EPSILON_HIGH_PRECISION);
 
          RotationMatrix rotationMatrix = new RotationMatrix();
          pca.getPrincipalFrameRotationMatrix(rotationMatrix);
@@ -533,12 +535,12 @@ public class PrincipalComponentAnalysis3DTest
          rotationMatrix.getColumn(2, estimatedThirdAxis);
 
          assertTrue(rotationMatrix.isRotationMatrix());
-         assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedPrincipalAxis, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION));
-         assertTrue(expectedSecondaryAxis.epsilonEquals(estimatedSecondaryAxis, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedSecondaryAxis.epsilonEquals(estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION));
-         assertTrue(expectedThirdAxis.epsilonEquals(estimatedThirdAxis, EPSILON_LOW_PRECISION));
-         assertTrue(estimatedThirdAxis.epsilonEquals(estimatedScaledThirdVector, EPSILON_HIGH_PRECISION));
+         EuclidCoreTestTools.assertEquals(expectedPrincipalAxis, estimatedPrincipalAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedPrincipalAxis, estimatedScaledPrincipalVector, EPSILON_HIGH_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedSecondaryAxis, estimatedSecondaryAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedSecondaryAxis, estimatedScaledSecondaryVector, EPSILON_HIGH_PRECISION);
+         EuclidCoreTestTools.assertEquals(expectedThirdAxis, estimatedThirdAxis, EPSILON_LOW_PRECISION);
+         EuclidCoreTestTools.assertEquals(estimatedThirdAxis, estimatedScaledThirdVector, EPSILON_HIGH_PRECISION);
       }
    }
 
@@ -564,7 +566,7 @@ public class PrincipalComponentAnalysis3DTest
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
-	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(EuclidCoreRandomTools.nextPoint3D(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	}
@@ -579,8 +581,8 @@ public class PrincipalComponentAnalysis3DTest
 
 	   PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 	   ArrayList<Point3D> listOfPoints = new ArrayList<>();
-	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
-	   listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(EuclidCoreRandomTools.nextPoint3D(random, 10.0, 10.0, 10.0));
+	   listOfPoints.add(EuclidCoreRandomTools.nextPoint3D(random, 10.0, 10.0, 10.0));
 	   pca.setPointCloud(listOfPoints);
 	   pca.compute();
 	}
@@ -612,7 +614,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	   pca.getPrincipalVector(estimatedPrincipalAxis);
 
-	   assertEquals(estimatedPrincipalAxis.length(), 1.0, EPSILON_HIGH_PRECISION);
+	   assertEquals(estimatedPrincipalAxis.norm(), 1.0, EPSILON_HIGH_PRECISION);
 	   double dotProduct = Math.abs(estimatedPrincipalAxis.dot(direction));
 	   assertEquals(1.0, dotProduct, EPSILON_HIGH_PRECISION);
 	}

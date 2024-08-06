@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -16,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,6 +24,8 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CenterOfPressureResolverTest
 {
@@ -108,16 +109,17 @@ public class CenterOfPressureResolverTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3D groundPoint = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.2);
+         Point3D groundPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 0.2);
 
-         Vector3D groundNormal = RandomGeometry.nextVector3D(random);
+         Vector3D groundNormal = EuclidCoreRandomTools.nextVector3D(random, 0.5);
          groundNormal.setZ(1.0);
          groundNormal.normalize();
 
-         Point3D centerOfMassPoint = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.2);
+         Point3D centerOfMassPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 0.2);
          centerOfMassPoint.setZ(1.2);
 
-         Vector3D centerOfMassForce = RandomGeometry.nextVector3D(random, 100.0);
+         Vector3D centerOfMassForce = EuclidCoreRandomTools.nextVector3D(random);
+         centerOfMassForce.scale(100.0);
          centerOfMassForce.setZ(127.0);
 
          Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);
@@ -167,8 +169,7 @@ public class CenterOfPressureResolverTest
             && Double.isNaN(expectedCenterOfPressureFramePoint.getZ()))
          assertTrue(Double.isNaN(centerOfPressure.getX()) && Double.isNaN(centerOfPressure.getY()));
       else
-         assertTrue("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure,
-               expectedCenterOfPressureFramePoint.epsilonEquals(centerOfPressure, 1e-7));
+         EuclidFrameTestTools.assertEquals("expectedCenterOfPressureFramePoint = " + expectedCenterOfPressureFramePoint + ", centerOfPressure = " + centerOfPressure, expectedCenterOfPressureFramePoint, centerOfPressure, 1e-7);
 
       assertEquals(expectedNormalTorque, normalTorque, 1e-7);
    }

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,9 +10,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.random.RandomGeometry;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by agrabertilton on 1/20/15.
@@ -51,7 +50,7 @@ public class ConvexHullFootstepSnapperTest
       double maxY = 10;
       int numPoints = 100;
       for (int i = 0; i < numPoints; i++){
-         pointsToCrop.add(RandomGeometry.nextPoint2D(random, maxX, maxY));
+         pointsToCrop.add(EuclidCoreRandomTools.nextPoint2D(random, maxX, maxY));
       }
 
       ConvexPolygon2D startPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointsToCrop));

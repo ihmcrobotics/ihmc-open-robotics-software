@@ -423,8 +423,8 @@ public class PlanarRegionTest
 
       for (int iteration = 0; iteration < 10; iteration++)
       {
-         Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
-         Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
+         Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(45.0));
+         Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
          ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
