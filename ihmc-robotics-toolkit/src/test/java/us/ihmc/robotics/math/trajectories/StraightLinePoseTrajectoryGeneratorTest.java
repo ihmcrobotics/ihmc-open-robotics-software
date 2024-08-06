@@ -1,28 +1,19 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.robotics.math.trajectories;
 
-import java.util.Random;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
-import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +22,10 @@ public class StraightLinePoseTrajectoryGeneratorTest
    private static final Random random = new Random(1516351L);
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final ReferenceFrame frameA = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameA", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
+   private static final ReferenceFrame frameA = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameA",
+                                                                                                                  worldFrame,
+                                                                                                                  EuclidCoreRandomTools.nextRigidBodyTransform(
+                                                                                                                        random));
 
    private String namePrefix = "namePrefixTEST";
    private static double trajectoryTime = 10.0;
@@ -220,7 +214,6 @@ public class StraightLinePoseTrajectoryGeneratorTest
       Polynomial interpolationPolynomial = new Polynomial(6);
       interpolationPolynomial.setQuintic(0.0, trajectoryTimeProvider.getValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
-
       trajToTest.setInitialPose(initialPosition, initialOrientation);
       trajToTest.setFinalPose(new FramePose3D(finalPosition, finalOrientation));
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
@@ -385,7 +378,6 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-
    @Test
    public void testIsDone()
    {
@@ -398,10 +390,10 @@ public class StraightLinePoseTrajectoryGeneratorTest
       generator.setTrajectoryTime(trajectoryTime);
       generator.initialize();
       generator.compute(5.0);
-      assertFalse(generator.isDone());
+      Assertions.assertFalse(generator.isDone());
 
       generator.compute(trajectoryTime + EPSILON);
-      assertTrue(generator.isDone());
+      Assertions.assertTrue(generator.isDone());
    }
 
    @Test
@@ -410,7 +402,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
       ReferenceFrame referenceFrame = createTestFrame();
 
       StraightLinePoseTrajectoryGenerator generator = new StraightLinePoseTrajectoryGenerator(namePrefix, referenceFrame, new YoRegistry("test"));
-      assertEquals(referenceFrame, generator.getOrientation().getReferenceFrame());
+      Assertions.assertEquals(referenceFrame, generator.getOrientation().getReferenceFrame());
    }
 
    @Test
@@ -459,6 +451,119 @@ public class StraightLinePoseTrajectoryGeneratorTest
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getZ(), EPSILON);
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
+   }
+
+   @Test
+   public void testPackVelocity()
+   {
+
+      ReferenceFrame referenceFrame = createTestFrame();
+
+      StraightLinePoseTrajectoryGenerator generator = new StraightLinePoseTrajectoryGenerator(namePrefix, referenceFrame, new YoRegistry("test"));
+
+      double xValue = Math.random();
+      double yValue = Math.random();
+      double zValue = Math.random();
+
+      FramePoint3D position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
+      FrameQuaternion orientation = new FrameQuaternion(referenceFrame);
+      generator.setInitialPose(position, orientation);
+      generator.setFinalPose(position, orientation);
+      generator.setTrajectoryTime(trajectoryTime);
+
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+
+      assertNotEquals(referenceFrame, velocityToPack.getReferenceFrame());
+
+      velocityToPack.setIncludingFrame(generator.getVelocity());
+
+      assertEquals(0.0, velocityToPack.getX(), EPSILON);
+      assertEquals(0.0, velocityToPack.getY(), EPSILON);
+      assertEquals(0.0, velocityToPack.getZ(), EPSILON);
+      assertSame(referenceFrame, velocityToPack.getReferenceFrame());
+   }
+
+   @Test
+   public void testPackAcceleration()
+   {
+      ReferenceFrame referenceFrame = createTestFrame();
+
+      StraightLinePoseTrajectoryGenerator generator = new StraightLinePoseTrajectoryGenerator(namePrefix, referenceFrame, new YoRegistry("test"));
+
+      double xValue = Math.random();
+      double yValue = Math.random();
+      double zValue = Math.random();
+
+      FramePoint3D position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
+      FrameQuaternion orientation = new FrameQuaternion(referenceFrame);
+      generator.setInitialPose(position, orientation);
+      generator.setFinalPose(position, orientation);
+      generator.setTrajectoryTime(trajectoryTime);
+
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+
+      assertNotEquals(referenceFrame, accelerationToPack.getReferenceFrame());
+
+      accelerationToPack.setIncludingFrame(generator.getAcceleration());
+
+      assertEquals(0.0, accelerationToPack.getX(), EPSILON);
+      assertEquals(0.0, accelerationToPack.getY(), EPSILON);
+      assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
+      assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
+   }
+
+   @Test
+   public void testPackLinearData()
+   {
+      ReferenceFrame referenceFrame = createTestFrame();
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
+      positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+
+      StraightLinePoseTrajectoryGenerator generator = new StraightLinePoseTrajectoryGenerator(namePrefix, referenceFrame, new YoRegistry("test"));
+
+      double xValue = Math.random();
+      double yValue = Math.random();
+      double zValue = Math.random();
+
+      FramePoint3D position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
+      FrameQuaternion orientation = new FrameQuaternion(referenceFrame);
+      generator.setInitialPose(position, orientation);
+      generator.setFinalPose(position, orientation);
+      generator.setTrajectoryTime(trajectoryTime);
+
+      positionToPack.setIncludingFrame(generator.getPosition());
+
+      assertEquals(referenceFrame, positionToPack.getReferenceFrame());
+
+      positionToPack.setIncludingFrame(generator.getPosition());
+
+      assertEquals(referenceFrame, positionToPack.getReferenceFrame());
+
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+
+      assertNotEquals(referenceFrame, velocityToPack.getReferenceFrame());
+      assertEquals(ReferenceFrame.getWorldFrame(), velocityToPack.getReferenceFrame());
+
+      assertNotEquals(referenceFrame, accelerationToPack.getReferenceFrame());
+      assertEquals(ReferenceFrame.getWorldFrame(), accelerationToPack.getReferenceFrame());
+
+      generator.getLinearData(positionToPack, velocityToPack, accelerationToPack);
+
+      assertEquals(0.0, positionToPack.getX(), EPSILON);
+      assertEquals(0.0, positionToPack.getY(), EPSILON);
+      assertEquals(0.0, positionToPack.getZ(), EPSILON);
+      assertSame(referenceFrame, positionToPack.getReferenceFrame());
+
+      assertEquals(0.0, velocityToPack.getX(), EPSILON);
+      assertEquals(0.0, velocityToPack.getY(), EPSILON);
+      assertEquals(0.0, velocityToPack.getZ(), EPSILON);
+      assertSame(referenceFrame, velocityToPack.getReferenceFrame());
+
+      assertEquals(0.0, accelerationToPack.getX(), EPSILON);
+      assertEquals(0.0, accelerationToPack.getY(), EPSILON);
+      assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
+      assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
    private static ReferenceFrame createTestFrame()

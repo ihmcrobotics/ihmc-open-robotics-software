@@ -1,17 +1,18 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -31,21 +32,22 @@ public class SimpleOrientationTrajectoryGeneratorTest
       YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", worldFrame, registry);
 
-      DoubleProvider trajectoryTimeProvider = () -> 10.0;
+      double trajectoryTime = 10.0;
 
       FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
-      OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation", worldFrame,
-            trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+      StraightLinePoseTrajectoryGenerator trajectoryGenerator = new StraightLinePoseTrajectoryGenerator("orientation", worldFrame, registry);
+      trajectoryGenerator.setInitialPose(new FramePoint3D(worldFrame), initialOrientation);
+      trajectoryGenerator.setFinalPose(new FramePoint3D(worldFrame), finalOrientation);
+      trajectoryGenerator.setTrajectoryTime(trajectoryTime);
+
 
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
-      trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
+      trajToTest.setTrajectoryTime(trajectoryTime);
 
-      originalOrientation.initialize();
+      trajectoryGenerator.initialize();
       trajToTest.initialize();
 
       double dt = 1.0e-3;
@@ -57,18 +59,18 @@ public class SimpleOrientationTrajectoryGeneratorTest
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
-      for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
+      for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
-         originalOrientation.compute(t);
+         trajectoryGenerator.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajectoryGenerator.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidCoreTestTools.assertEquals(orientation1, orientation2, EPSILON);
+         EuclidCoreTestTools.assertEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidCoreTestTools.assertEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
    }
 
@@ -100,9 +102,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-      assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-      assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-      assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+      EuclidFrameTestTools.assertEquals(orientation1, orientation2, EPSILON);
+      EuclidFrameTestTools.assertEquals(angularVelocity1, angularVelocity2, EPSILON);
+      EuclidFrameTestTools.assertEquals(angularAcceleration1, angularAcceleration2, EPSILON);
    }
 
 	@Test
@@ -133,9 +135,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-      assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-      assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-      assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+      EuclidFrameTestTools.assertEquals(orientation1, orientation2, EPSILON);
+      EuclidFrameTestTools.assertEquals(angularVelocity1, angularVelocity2, EPSILON);
+      EuclidFrameTestTools.assertEquals(angularAcceleration1, angularAcceleration2, EPSILON);
    }
 
 	@Test
@@ -144,21 +146,25 @@ public class SimpleOrientationTrajectoryGeneratorTest
       YoRegistry registry = new YoRegistry("youpiloup");
       SimpleOrientationTrajectoryGenerator trajToTest = new SimpleOrientationTrajectoryGenerator("blop", true, worldFrame, registry);
 
-      DoubleProvider trajectoryTimeProvider = () -> 10.0;
+      double trajectoryTime = 10.0;
+      DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
 
       final FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       final FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
-      OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation1", worldFrame,
-            trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+      StraightLinePoseTrajectoryGenerator trajectoryGenerator = new StraightLinePoseTrajectoryGenerator("orientation", worldFrame, registry);
+      trajectoryGenerator.setInitialPose(new FramePoint3D(worldFrame), initialOrientation);
+      trajectoryGenerator.setFinalPose(new FramePoint3D(worldFrame), finalOrientation);
+      trajectoryGenerator.setTrajectoryTime(trajectoryTime);
+
 
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
-      trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
+      trajToTest.setTrajectoryTime(trajectoryTime);
 
-      originalOrientation.initialize();
+      trajectoryGenerator.initialize();
       trajToTest.initialize();
 
       double dt = 1.0e-3;
@@ -170,18 +176,18 @@ public class SimpleOrientationTrajectoryGeneratorTest
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
-      for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
+      for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
-         originalOrientation.compute(t);
+         trajectoryGenerator.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajectoryGenerator.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidFrameTestTools.assertEquals(orientation1, orientation2, EPSILON);
+         EuclidFrameTestTools.assertEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidFrameTestTools.assertEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
 
       // Do the same in another frame
@@ -189,29 +195,31 @@ public class SimpleOrientationTrajectoryGeneratorTest
       initialOrientation.setIncludingFrame(EuclidFrameRandomTools.nextFrameQuaternion(random, frameA));
       finalOrientation.setIncludingFrame(EuclidFrameRandomTools.nextFrameQuaternion(random, frameA));
 
-      originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA,
-            trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+      trajectoryGenerator = new StraightLinePoseTrajectoryGenerator("orientation2", frameA, registry);
+      trajectoryGenerator.setInitialPose(new FramePoint3D(frameA), initialOrientation);
+      trajectoryGenerator.setFinalPose(new FramePoint3D(frameA), finalOrientation);
+      trajectoryGenerator.setTrajectoryTime(trajectoryTime);
 
       trajToTest.setReferenceFrame(frameA);
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
       trajToTest.setTrajectoryTime(trajectoryTimeProvider.getValue());
 
-      originalOrientation.initialize();
+      trajectoryGenerator.initialize();
       trajToTest.initialize();
 
-      for (double t = 0.0; t <= trajectoryTimeProvider.getValue(); t += dt)
+      for (double t = 0.0; t <= trajectoryTime; t += dt)
       {
-         originalOrientation.compute(t);
+         trajectoryGenerator.compute(t);
          trajToTest.compute(t);
 
-         originalOrientation.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
+         trajectoryGenerator.getAngularData(orientation1, angularVelocity1, angularAcceleration1);
 
          trajToTest.getAngularData(orientation2, angularVelocity2, angularAcceleration2);
 
-         assertTrue(orientation1.epsilonEquals(orientation2, EPSILON));
-         assertTrue(angularVelocity1.epsilonEquals(angularVelocity2, EPSILON));
-         assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
+         EuclidFrameTestTools.assertEquals(orientation1, orientation2, EPSILON);
+         EuclidFrameTestTools.assertEquals(angularVelocity1, angularVelocity2, EPSILON);
+         EuclidFrameTestTools.assertEquals(angularAcceleration1, angularAcceleration2, EPSILON);
       }
    }
 }
