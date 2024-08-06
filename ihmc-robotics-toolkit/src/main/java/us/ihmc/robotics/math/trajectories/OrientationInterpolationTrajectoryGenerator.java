@@ -16,6 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Deprecated
 public class OrientationInterpolationTrajectoryGenerator implements FixedFrameOrientationTrajectoryGenerator
 {
    private final YoRegistry registry;
