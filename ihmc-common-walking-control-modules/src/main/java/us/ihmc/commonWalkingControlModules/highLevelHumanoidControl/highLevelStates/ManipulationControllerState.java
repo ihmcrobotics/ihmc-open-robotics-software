@@ -249,7 +249,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
                                                            graphicsListRegistry,
                                                            registry);
-
+      controlCoreToolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
 
       if (chestManager != null)
