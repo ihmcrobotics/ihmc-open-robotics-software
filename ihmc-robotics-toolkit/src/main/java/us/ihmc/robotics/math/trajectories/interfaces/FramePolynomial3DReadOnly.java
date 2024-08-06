@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
-public interface FramePolynomial3DReadOnly extends Polynomial3DReadOnly, ReferenceFrameHolder, FixedFramePositionTrajectoryGenerator
+public interface FramePolynomial3DReadOnly extends Polynomial3DReadOnly, FixedFramePositionTrajectoryGenerator
 {
    @Override
    FramePoint3DReadOnly getPosition();

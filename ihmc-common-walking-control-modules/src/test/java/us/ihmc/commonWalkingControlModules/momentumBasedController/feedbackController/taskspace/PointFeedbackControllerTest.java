@@ -42,10 +42,8 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -106,7 +104,7 @@ public final class PointFeedbackControllerTest
       {
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
-         Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
+         assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
 
          // Need to do a fine grain integration since the point we care about will be the center of rotation of the body and we need
@@ -208,7 +206,7 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
@@ -331,7 +329,7 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;

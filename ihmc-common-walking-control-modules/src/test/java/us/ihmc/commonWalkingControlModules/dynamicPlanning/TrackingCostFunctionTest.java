@@ -7,7 +7,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 public abstract class TrackingCostFunctionTest<E extends Enum<E>>

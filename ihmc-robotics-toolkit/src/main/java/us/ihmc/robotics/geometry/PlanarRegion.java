@@ -24,7 +24,6 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.random.RandomGeometry;
 
 import java.util.ArrayList;
 import java.util.List;

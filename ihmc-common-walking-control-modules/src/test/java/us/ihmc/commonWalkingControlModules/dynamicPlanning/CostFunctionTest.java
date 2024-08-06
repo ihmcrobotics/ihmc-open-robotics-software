@@ -6,7 +6,6 @@ import org.ejml.data.DMatrixRMaj;
 
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 public abstract class CostFunctionTest<E extends Enum<E>>

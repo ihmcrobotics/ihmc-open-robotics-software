@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQTrackingCostFunction;
 
 import static org.junit.jupiter.api.Assertions.*;

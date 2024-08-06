@@ -35,8 +35,6 @@ import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.random.RandomGeometry;
 
 import static org.junit.jupiter.api.Assertions.*;
 

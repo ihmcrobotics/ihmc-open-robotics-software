@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class ContinuousSimpleReactionDynamicsTest
 {

@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTrajectoryControllerCommand, WrenchTrajectoryMessage>

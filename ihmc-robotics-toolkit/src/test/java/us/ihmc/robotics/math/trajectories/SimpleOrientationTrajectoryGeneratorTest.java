@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -150,9 +149,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
 
       final FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      FrameOrientationProvider initialOrientationProvider = () -> initialOrientation;
       final FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-      FrameOrientationProvider finalOrientationProvider = () -> finalOrientation;
 
       StraightLinePoseTrajectoryGenerator trajectoryGenerator = new StraightLinePoseTrajectoryGenerator("orientation", worldFrame, registry);
       trajectoryGenerator.setInitialPose(new FramePoint3D(worldFrame), initialOrientation);

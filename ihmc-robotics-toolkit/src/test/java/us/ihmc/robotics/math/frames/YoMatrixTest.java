@@ -7,7 +7,6 @@ import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
