@@ -41,12 +41,12 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -382,7 +382,7 @@ public class QuadrupedSimulationFactory
 
       sdfRobot.get().initializeState();
 
-      double totalMass = TotalMassCalculator.computeSubTreeMass(sdfRobot.get().getRootBody());
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(sdfRobot.get().getRootBody());
 
       if (useStateEstimator.get())
       {

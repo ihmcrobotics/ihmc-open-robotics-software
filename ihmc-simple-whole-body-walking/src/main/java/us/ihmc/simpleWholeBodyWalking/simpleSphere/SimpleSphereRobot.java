@@ -24,9 +24,9 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -139,7 +139,7 @@ public class SimpleSphereRobot
       scsRobot.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scsRobot.update();
 
-      totalMass = TotalMassCalculator.computeSubTreeMass(body);
+      totalMass = MultiBodySystemMissingTools.computeSubTreeMass(body);
       
       soleFrames = new SideDependentList<>();
       soleFrames.putAll(soleFramesForModifying);

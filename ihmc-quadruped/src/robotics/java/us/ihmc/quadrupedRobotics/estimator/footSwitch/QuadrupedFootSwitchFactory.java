@@ -15,11 +15,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalculator.JointTorqueProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
@@ -190,7 +190,7 @@ public class QuadrupedFootSwitchFactory
 
       QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = new QuadrantDependentList<>();
       double gravityMagnitude = Math.abs(gravity.get());
-      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.get().getElevator()) * gravityMagnitude;
+      double totalRobotWeight = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.get().getElevator()) * gravityMagnitude;
 
       switch (footSwitchType.get())
       {

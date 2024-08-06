@@ -2,6 +2,8 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -69,7 +71,7 @@ public class AtlasPhysicalProperties implements RobotPhysicalProperties
       // TODO Auto-generated constructor stub
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyTransform soleToAnkleFrame = TransformTools.createTranslationTransform(footLengthForControl / 2.0 - footBackForControl, 0.0, -ankleHeight);
+         RigidBodyTransform soleToAnkleFrame = new RigidBodyTransform(new Quaternion(), new Vector3D(footLengthForControl / 2.0 - footBackForControl, 0.0, -ankleHeight));
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
 
          double y = robotSide.negateIfRightSide(0.1);
