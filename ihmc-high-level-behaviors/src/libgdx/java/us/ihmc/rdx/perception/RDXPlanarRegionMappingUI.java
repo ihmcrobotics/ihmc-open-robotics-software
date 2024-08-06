@@ -19,7 +19,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.PlanarLandmarkList;
+import us.ihmc.perception.geometry.PlanarLandmarkList;
 
 import java.util.ArrayList;
 
