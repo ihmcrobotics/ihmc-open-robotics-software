@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -50,12 +51,12 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       int randomNumberOfPoints = random.nextInt(16) + 1;
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
-         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), RandomGeometry.nextPoint3D(random, -1.0, 1.0),
+         trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), EuclidCoreRandomTools.nextPoint3D(random, -1.0, 1.0),
                                                 RandomGeometry.nextVector3D(random));
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
-      controlFramePoseInBodyFrame.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), RandomGeometry.nextVector3D(random));
       useCustomControlFrame = random.nextBoolean();
    }
 

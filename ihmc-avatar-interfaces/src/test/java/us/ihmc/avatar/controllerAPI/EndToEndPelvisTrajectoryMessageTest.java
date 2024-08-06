@@ -42,6 +42,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -1214,8 +1215,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.15);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
@@ -1712,8 +1713,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    protected FramePose3D getRandomPelvisPose(Random random, RigidBodyBasics pelvis)
    {
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 0.05, 0.05, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() + getZOffset());
       return desiredRandomPelvisPose;
    }

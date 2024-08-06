@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBased
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -58,7 +59,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
-      controlFramePoseInBodyFrame.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), RandomGeometry.nextVector3D(random));
       useCustomControlFrame = random.nextBoolean();
    }
 
