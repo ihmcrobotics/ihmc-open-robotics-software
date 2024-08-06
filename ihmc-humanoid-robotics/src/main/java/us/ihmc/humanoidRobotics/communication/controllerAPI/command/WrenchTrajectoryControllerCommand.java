@@ -59,7 +59,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
-      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), EuclidCoreRandomTools.nextVector3D(random, 0.5));
       useCustomControlFrame = random.nextBoolean();
    }
 

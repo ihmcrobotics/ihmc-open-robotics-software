@@ -338,7 +338,7 @@ public class GeometryToolsTest
          GeometryTools.normalizeSafelyZUp(actualVector);
          EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
-         actualVector = RandomGeometry.nextVector3D(random, 0.999 * Epsilons.ONE_TRILLIONTH);
+         actualVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 0.999 * Epsilons.ONE_TRILLIONTH);
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
          EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);

@@ -47,11 +47,11 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
          trajectoryPointList.addTrajectoryPoint(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01), EuclidCoreRandomTools.nextQuaternion(random),
-                                                RandomGeometry.nextVector3D(random));
+                                                EuclidCoreRandomTools.nextVector3D(random, 0.5));
       }
 
       trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
-      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), RandomGeometry.nextVector3D(random));
+      controlFramePoseInBodyFrame.set(EuclidCoreRandomTools.nextQuaternion(random), EuclidCoreRandomTools.nextVector3D(random, 0.5));
       useCustomControlFrame = random.nextBoolean();
    }
 

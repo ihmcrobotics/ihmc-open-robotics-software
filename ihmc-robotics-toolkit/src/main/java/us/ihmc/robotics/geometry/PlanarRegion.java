@@ -1447,7 +1447,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
-      Vector3D randomTranslation = RandomGeometry.nextVector3D(random, 10.0);
+      Vector3D randomTranslation = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 10.0);
       Quaternion randomOrientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(45.0));
       RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
 

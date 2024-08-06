@@ -101,7 +101,7 @@ public class LeastSquaresZPlaneFitterTest
       for (int i = 0; i < numberOfTests; i++)
       {
          Point3D planePoint = EuclidCoreRandomTools.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
          if (planeNormal.getZ() < 0.0)
             planeNormal.scale(-1.0);

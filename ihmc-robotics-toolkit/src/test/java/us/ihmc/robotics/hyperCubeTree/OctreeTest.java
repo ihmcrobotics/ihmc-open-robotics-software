@@ -1,7 +1,5 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +8,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OctreeTest
 {

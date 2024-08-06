@@ -58,7 +58,7 @@ public class FootstepDataListCorruptor
    
    private void corruptOrientation(Quaternion orientation)
    {
-      Vector3D axis = RandomGeometry.nextVector3D(random);
+      Vector3D axis = EuclidCoreRandomTools.nextVector3D(random);
       double angle = RandomNumbers.nextDouble(random, -maxRotationCorruption, maxRotationCorruption);
       
       AxisAngle axisAngle4d = new AxisAngle();

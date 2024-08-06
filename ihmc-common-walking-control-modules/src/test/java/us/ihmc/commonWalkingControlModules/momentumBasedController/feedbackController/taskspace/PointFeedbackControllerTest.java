@@ -135,7 +135,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -223,7 +223,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);

@@ -41,7 +41,7 @@ public class PrincipalComponentAnalysis3DTest
          Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          double pointScatteringAmplitude = 5.0;
-         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D expectedPrincipalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
          double expectedVarianceAlongPrincipalAxis = 0.0;
          double expectedStandardDeviationAlongPrincipalAxis = 0.0;
 
@@ -178,9 +178,9 @@ public class PrincipalComponentAnalysis3DTest
          Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector2D pointScatteringAmplitude = new Vector2D(15.0, 1.0);
-         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D expectedPrincipalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3D randomVector = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
          Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();
@@ -361,9 +361,9 @@ public class PrincipalComponentAnalysis3DTest
          Point3D origin = EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0);
          Point3D expectedMean = new Point3D();
          Vector3D pointScatteringAmplitude = new Vector3D(15.0, 1.0, 0.2);
-         Vector3D expectedPrincipalAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D expectedPrincipalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
          // Build the secondary vector such as it is orthogonal to the principal axis
-         Vector3D randomVector = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
          Vector3D expectedSecondaryAxis = new Vector3D();
          expectedSecondaryAxis.cross(expectedPrincipalAxis, randomVector);
          expectedSecondaryAxis.normalize();

@@ -150,8 +150,8 @@ public final class RandomHumanoidMessages
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
       next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
       next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      next.getLinearVelocity().set(RandomGeometry.nextVector3D(random));
-      next.getAngularVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getAngularVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -243,7 +243,7 @@ public final class RandomHumanoidMessages
       SO3TrajectoryPointMessage next = new SO3TrajectoryPointMessage();
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
       next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      next.getAngularVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getAngularVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -541,7 +541,7 @@ public final class RandomHumanoidMessages
       EuclideanTrajectoryPointMessage next = new EuclideanTrajectoryPointMessage();
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
       next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
-      next.getLinearVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 

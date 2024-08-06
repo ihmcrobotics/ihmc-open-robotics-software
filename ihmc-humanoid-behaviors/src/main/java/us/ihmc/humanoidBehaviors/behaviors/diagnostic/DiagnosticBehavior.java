@@ -2707,7 +2707,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             pelvisTransformInPast_Rotation.getTranslation().setToZero();
 
             Quaternion orientationOffset = EuclidCoreRandomTools.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
-            Vector3D translationOffset = RandomGeometry.nextVector3D(random, minMaxIcpTranslationOffset.getDoubleValue());
+            Vector3D translationOffset = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, minMaxIcpTranslationOffset.getDoubleValue());
 
             RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
             RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);
