@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.robotics.math.trajectories;
 
 import java.util.ArrayList;
 import java.util.List;

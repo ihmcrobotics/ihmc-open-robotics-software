@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.EuclidGeometryMissingTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -710,7 +711,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
       for (RobotQuadrant[] legPair : getLegPairs())
       {
-         radius = GeometryTools.distanceFromPointToLine2d(inCircleCenterToPack, getFootstep(legPair[0]), getFootstep(legPair[1]));
+         radius = EuclidGeometryMissingTools.distanceXYFromPoint3DToLine3D(inCircleCenterToPack, getFootstep(legPair[0]), getFootstep(legPair[1]));
 
          if (radius < minimumRadius)
          {

@@ -14,6 +14,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
@@ -335,7 +336,7 @@ public abstract class SDFRobotWriter
       Vector3D com = new Vector3D();
       scsLink.getComOffset(com);
 
-      RigidBodyTransform comOffset = TransformTools.createTranslationTransform(com);
+      RigidBodyTransform comOffset = new RigidBodyTransform(new Quaternion(), com);
       comOffsetInWorld.multiply(comOffset);
 
       sdfInertial.setPose(getPoseFromTransform3D(comOffsetInWorld));

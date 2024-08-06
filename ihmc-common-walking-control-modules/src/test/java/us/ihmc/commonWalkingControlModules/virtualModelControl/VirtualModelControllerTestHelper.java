@@ -351,10 +351,10 @@ public class VirtualModelControllerTestHelper
       RigidBodyBasics leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
       RigidBodyBasics rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
 
-      RigidBodyTransform leftSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
-            toFootCenterY, -ankleHeight);
-      RigidBodyTransform rightSoleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack + toFootCenterX,
-            -toFootCenterY, -ankleHeight);
+      RigidBodyTransform leftSoleToAnkleFrame = new RigidBodyTransform(new Quaternion(), new Vector3D(footLength / 2.0 - footBack + toFootCenterX,
+            toFootCenterY, -ankleHeight));
+      RigidBodyTransform rightSoleToAnkleFrame = new RigidBodyTransform(new Quaternion(), new Vector3D(footLength / 2.0 - footBack + toFootCenterX,
+            -toFootCenterY, -ankleHeight));
       MovingReferenceFrame leftSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Left_Sole",
             leftFootBody.getBodyFixedFrame(), leftSoleToAnkleFrame);
       MovingReferenceFrame rightSoleFrame = MovingReferenceFrame.constructFrameFixedInParent("Right_Sole",

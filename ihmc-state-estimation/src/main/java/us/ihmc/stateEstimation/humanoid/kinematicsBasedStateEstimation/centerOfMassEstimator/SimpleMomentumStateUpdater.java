@@ -19,8 +19,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -92,7 +92,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       MovingReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       RigidBodyReadOnly elevator = rootJoint.getPredecessor();
 
-      robotMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
+      robotMass.set(MultiBodySystemMissingTools.computeSubTreeMass(elevator));
 
       useGroundReactionForcesToComputeCenterOfMassVelocity = new BooleanParameter("useGRFToComputeCoMVelocity",
                                                                                   registry,

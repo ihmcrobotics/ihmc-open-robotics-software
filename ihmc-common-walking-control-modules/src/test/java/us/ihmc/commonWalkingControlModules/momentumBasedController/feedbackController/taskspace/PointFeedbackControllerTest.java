@@ -1,15 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Random;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.MatrixFeatures_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
@@ -46,11 +42,11 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class PointFeedbackControllerTest
 {
@@ -108,7 +104,7 @@ public final class PointFeedbackControllerTest
       {
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
-         Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
+         assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
 
          // Need to do a fine grain integration since the point we care about will be the center of rotation of the body and we need
@@ -137,7 +133,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -210,7 +206,7 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
@@ -225,7 +221,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -333,7 +329,7 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
@@ -438,13 +434,6 @@ public final class PointFeedbackControllerTest
 
    private static void assertEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)
    {
-      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures_DDRM.isEquals(expected, actual, epsilon));
-   }
-
-   private static String assertErrorMessage(DMatrixRMaj expected, DMatrixRMaj actual)
-   {
-      DMatrixRMaj diff = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
-      CommonOps_DDRM.subtract(expected, actual, diff);
-      return "Expected:\n" + expected + "\nActual:\n" + actual + ", difference: " + NormOps_DDRM.normP2(diff);
+      EjmlUnitTests.assertEquals(actual, expected, epsilon);
    }
 }

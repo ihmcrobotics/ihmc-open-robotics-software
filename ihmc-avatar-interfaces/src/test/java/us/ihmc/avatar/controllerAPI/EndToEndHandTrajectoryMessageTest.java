@@ -80,7 +80,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -1301,7 +1301,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D desiredRandomHandPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          desiredRandomHandPose.changeFrame(worldFrame);
-         desiredRandomHandPose.prependTranslation(RandomGeometry.nextVector3D(random, 0.2));
+         desiredRandomHandPose.prependTranslation(EuclidCoreRandomTools.nextVector3D(random, 0.2));
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();

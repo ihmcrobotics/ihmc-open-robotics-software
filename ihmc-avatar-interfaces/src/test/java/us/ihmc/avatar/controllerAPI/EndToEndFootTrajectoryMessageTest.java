@@ -55,7 +55,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
@@ -78,8 +77,6 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -193,7 +190,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String bodyName = foot.getName();
 
       FramePose3D desiredRandomFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredRandomFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.3));
+      desiredRandomFootPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.3));
       desiredRandomFootPose.getPosition().set(getRandomPositionInSphere(random, robotSide));
       desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -504,7 +501,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String namePrefix = fullRobotModel.getFoot(robotSide).getName();
       String className = WorkspaceLimiterControlModule.class.getSimpleName();
       YoBoolean singularityEscape = (YoBoolean) simulationTestHelper.findVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
-      assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
+      assertFalse(singularityEscape.getBooleanValue(), "Singularity escape should not be active.");
 
       // TODO GITHUB WORKFLOWS
 //      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);

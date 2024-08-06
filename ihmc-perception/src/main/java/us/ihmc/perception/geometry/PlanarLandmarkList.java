@@ -1,6 +1,8 @@
-package us.ihmc.robotics.geometry;
+package us.ihmc.perception.geometry;
 
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
 

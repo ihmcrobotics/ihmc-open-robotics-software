@@ -28,7 +28,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -124,7 +123,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
       //      robotConfigurationData.setRootTranslation(RandomTools.generateRandomVector(random, random.nextDouble() * 1000.0));
       robotConfigurationData.getRootPosition().set(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
       //      robotConfigurationData.setRootTranslation(new Vector3d(0.0, 0.0, 1.0));
-      robotConfigurationData.getRootOrientation().set(RandomGeometry.nextQuaternion(random));
+      robotConfigurationData.getRootOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
 
       for (int sensorNumber = 0; sensorNumber < forceSensorDefinitions.length; sensorNumber++)
       {

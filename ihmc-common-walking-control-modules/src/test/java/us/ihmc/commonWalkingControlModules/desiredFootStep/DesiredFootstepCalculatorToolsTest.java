@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,8 +12,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DesiredFootstepCalculatorToolsTest
 {
@@ -46,7 +46,7 @@ public class DesiredFootstepCalculatorToolsTest
          double maxLength = 5.0;
          for (int j = 0; j < nPointsIn; j++)
          {
-            input.add(new FramePoint3D(worldFrame, RandomGeometry.nextVector3D(random, maxLength)));
+            input.add(new FramePoint3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, maxLength)));
          }
 
          FrameVector3D minusYDirection = new FrameVector3D(worldFrame, 0.0, -1.0, 0.0);
