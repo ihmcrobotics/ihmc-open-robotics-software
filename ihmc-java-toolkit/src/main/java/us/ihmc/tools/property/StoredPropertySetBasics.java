@@ -44,7 +44,7 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void save();
 
-   StoredPropertyKeyListReadOnly getKeyList();
+   StoredPropertyKeyListBasics getKeyList();
 
    Path findSaveFileDirectory();
 
