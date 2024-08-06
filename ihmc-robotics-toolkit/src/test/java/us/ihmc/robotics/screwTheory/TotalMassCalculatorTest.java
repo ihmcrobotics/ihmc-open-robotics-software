@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -17,7 +15,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TotalMassCalculatorTest
 {
@@ -50,13 +50,13 @@ public class TotalMassCalculatorTest
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
+         Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
          totalMass += mass;
-         Vector3D comOffset = RandomGeometry.nextVector3D(random);
+         Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
 
 
 

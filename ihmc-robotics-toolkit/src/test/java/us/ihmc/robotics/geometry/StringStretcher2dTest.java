@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,11 +9,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StringStretcher2dTest
 {
@@ -76,7 +77,7 @@ public class StringStretcher2dTest
 
       assertEquals(1, waypoints.size());
 
-      assertTrue(maxPoint.epsilonEquals(waypoints.get(0), 1e-6));
+      EuclidCoreTestTools.assertEquals(maxPoint, waypoints.get(0), 1e-6);
    }
 
 	@Test
@@ -110,11 +111,9 @@ public class StringStretcher2dTest
 
       assertEquals(3, waypoints.size());
 
-      assertTrue(minPoint1.epsilonEquals(waypoints.get(0), 1e-8));
-      assertTrue(maxPoint3.epsilonEquals(waypoints.get(1), 1e-8));
-      assertTrue(minPoint2.epsilonEquals(waypoints.get(2), 1e-8));
-
-
+      EuclidCoreTestTools.assertEquals(minPoint1, waypoints.get(0), 1e-8);
+      EuclidCoreTestTools.assertEquals(minPoint3, waypoints.get(1), 1e-8);
+      EuclidCoreTestTools.assertEquals(minPoint2, waypoints.get(2), 1e-8);
    }
 
 	@Test
@@ -151,7 +150,7 @@ public class StringStretcher2dTest
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2D point = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D point = EuclidCoreRandomTools.nextPoint2D(random, -10.0, 10.0, -10.0, 10.0);
          Point2D otherPoint = new Point2D(point);
          otherPoint.setY(RandomNumbers.nextDouble(random, -10.0, 10.0));
 
