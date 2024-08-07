@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.IDLSequence;
 
 public class StereoVisionPointCloudMessageSerializer extends Serializer<StereoVisionPointCloudMessage>
 {
@@ -41,8 +42,8 @@ public class StereoVisionPointCloudMessageSerializer extends Serializer<StereoVi
       output.writeDouble(pointCloudCenter.getZ());
       output.writeDouble(object.getResolution());
       output.writeInt(object.getNumberOfPoints(), true);
-      writeTByteList(object.getPointCloud());
-      writeTByteList(object.getColors());
+      writeByteSequence(object.getPointCloud());
+      writeByteSequence(object.getColors());
       output.writeBoolean(object.getLz4Compressed());
    }
 
@@ -62,14 +63,11 @@ public class StereoVisionPointCloudMessageSerializer extends Serializer<StereoVi
       message.getPointCloudCenter().set(input.readDouble(), input.readDouble(), input.readDouble());
       message.setResolution(input.readDouble());
       message.setNumberOfPoints(input.readInt(true));
-      readTByteList(message.getPointCloud());
-      readTByteList(message.getColors());
+      readByteSequence(message.getPointCloud());
+      readByteSequence(message.getColors());
       message.setLz4Compressed(input.readBoolean());
       return message;
    }
-
-   private final Field tByteArrayListDataField = getField("_data");
-   private final Field tByteArrayListPosField = getField("_pos");
 
    private static Field getField(String fieldName)
    {
@@ -86,13 +84,12 @@ public class StereoVisionPointCloudMessageSerializer extends Serializer<StereoVi
       }
    }
 
-   private void writeTByteList(TByteArrayList list)
+   private void writeByteSequence(IDLSequence.Byte byteSequence)
    {
-      output.writeInt(list.size(), true);
+      output.writeInt(byteSequence.size(), true);
       try
       {
-         byte[] data = (byte[]) tByteArrayListDataField.get(list);
-         output.write(data, 0, list.size());
+         output.write(byteSequence.getBuffer().array(), 0, byteSequence.size());
       }
       catch (Exception e)
       {
@@ -100,16 +97,13 @@ public class StereoVisionPointCloudMessageSerializer extends Serializer<StereoVi
       }
    }
 
-   private void readTByteList(TByteArrayList list)
+   private void readByteSequence(IDLSequence.Byte byteSequence)
    {
-      list.resetQuick();
+      byteSequence.resetQuick();
       int size = input.readInt(true);
-      list.ensureCapacity(size);
       try
       {
-         byte[] data = (byte[]) tByteArrayListDataField.get(list);
-         input.read(data, 0, size);
-         tByteArrayListPosField.set(list, size);
+         input.read(byteSequence.getBuffer().array(), 0, size);
       }
       catch (Exception e)
       {

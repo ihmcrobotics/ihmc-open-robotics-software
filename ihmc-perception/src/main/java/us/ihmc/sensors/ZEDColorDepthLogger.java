@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.pubsub.DomainFactory;
@@ -63,7 +64,8 @@ public class ZEDColorDepthLogger
       subscriber.takeNextData(imageMessage, sampleInfo);
 
       byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
+      Byte aByte = imageMessage.getData();
+      System.arraycopy(aByte.copyArray(), 0, heapArray, 0, imageMessage.getData().size());
 
       BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
       bytePointer.put(heapArray, 0, imageMessage.getData().size());
@@ -82,7 +84,8 @@ public class ZEDColorDepthLogger
       subscriber.takeNextData(imageMessage, sampleInfo);
 
       byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
+      Byte aByte = imageMessage.getData();
+      System.arraycopy(aByte.copyArray(), 0, heapArray, 0, imageMessage.getData().size());
 
       synchronized (colorBytePointerSyncObject)
       {

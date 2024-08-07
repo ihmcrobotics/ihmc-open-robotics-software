@@ -504,7 +504,7 @@ public class PerceptionDataLogger
 
       byte[] heapArray = byteArrays.get(namespace);
       IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-      imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size());
+      imageEncodedTByteArrayList.copyArray();
 
       BytePointer bytePointer = channels.get(namespace).getBytePointer();
       bytePointer.put(heapArray, 0, packet.getData().size());

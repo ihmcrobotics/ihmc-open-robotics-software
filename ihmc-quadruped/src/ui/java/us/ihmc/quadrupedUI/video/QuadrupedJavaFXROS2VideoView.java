@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -79,7 +80,8 @@ public class QuadrupedJavaFXROS2VideoView extends ImageView
          executorService.submit(() ->
          {
             // decompress and pack writableimage
-            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().toArray());
+            Byte aByte = message.getData();
+            BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray());
             LogTools.trace("res x: {}, y: {}", bufferedImage.getWidth(), bufferedImage.getHeight());
 
             WritableImage nextImage = writableImageBuffer.next();

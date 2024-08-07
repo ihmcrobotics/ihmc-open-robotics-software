@@ -16,6 +16,7 @@ import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -180,7 +181,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       public void queueVideoPacket(VideoPacket packet)
       {
-         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
+         Byte aByte = packet.getData();
+         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray()));
 
          if (waiting)
          {

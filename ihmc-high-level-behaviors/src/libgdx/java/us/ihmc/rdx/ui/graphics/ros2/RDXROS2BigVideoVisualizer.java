@@ -71,7 +71,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
             {
                IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
                int numberOfBytes = imageEncodedTByteArrayList.size();
-               imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+               imageEncodedTByteArrayList.copyArray();
                messageEncodedBytePointer.put(messageDataHeapArray, 0, numberOfBytes);
                messageEncodedBytePointer.limit(numberOfBytes);
 

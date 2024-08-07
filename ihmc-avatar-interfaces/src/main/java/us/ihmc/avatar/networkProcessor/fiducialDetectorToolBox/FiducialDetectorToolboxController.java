@@ -37,6 +37,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -137,7 +138,8 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private void detectFromVideoPacket(VideoPacket videoPacket)
    {
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+      Byte aByte = videoPacket.getData();
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray());
       detect(bufferedImage,
              videoPacket.getPosition(),
              videoPacket.getOrientation(),

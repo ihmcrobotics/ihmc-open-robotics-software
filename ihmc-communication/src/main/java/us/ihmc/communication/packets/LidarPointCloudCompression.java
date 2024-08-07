@@ -1,9 +1,9 @@
 package us.ihmc.communication.packets;
 
 import perception_msgs.msg.dds.LidarScanMessage;
-import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.communication.compression.LZ4CompressionImplementation;
+import us.ihmc.idl.IDLSequence;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -69,11 +69,11 @@ public class LidarPointCloudCompression
       messageToPack.setNumberOfPoints(pointCloudSize);
    }
 
-   public static void decompressPointCloud(TByteArrayList compressedPointCloud,
+   public static void decompressPointCloud(IDLSequence.Byte compressedPointCloud,
                                            int numberOfPoints,
                                            LidarPointConsumer pointCoordinateConsumer)
    {
-      ByteBuffer compressedPointCloudByteBuffer = ByteBuffer.wrap(compressedPointCloud.toArray());
+      ByteBuffer compressedPointCloudByteBuffer = compressedPointCloud.copyByteBuffer();
       int numberOfDecompressedBytes = numberOfPoints * 4 * 3;
       ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(numberOfDecompressedBytes);
       compressorThreadLocal.get().decompress(compressedPointCloudByteBuffer, decompressedPointCloudByteBuffer, numberOfDecompressedBytes);

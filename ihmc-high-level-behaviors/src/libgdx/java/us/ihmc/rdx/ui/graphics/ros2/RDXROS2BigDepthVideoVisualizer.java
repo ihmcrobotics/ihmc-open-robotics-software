@@ -75,7 +75,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
                   messageBytePointer = new BytePointer(imageTByteArrayList.size());
                }
 
-               imageTByteArrayList.toArray(messageDataHeapArray);
+               imageTByteArrayList.copyArray();
                messageBytePointer.position(0);
                messageBytePointer.put(messageDataHeapArray, 0, imageTByteArrayList.size());
                messageBytePointer.limit(imageTByteArrayList.size());
