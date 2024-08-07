@@ -10,11 +10,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -24,7 +33,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,7 +62,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FBVector6D yoDesiredVelocity;
    protected final FBVector6D yoCurrentVelocity;
    protected final FBVector6D yoErrorVelocity;
-   protected final FBAlphaFilteredVector6D yoFilteredErrorVelocity;
+   protected final FilterVector3D angularVelocityErrorFilter;
+   protected final FilterVector3D linearVelocityErrorFilter;
    protected final FBVector6D yoFeedForwardVelocity;
    protected final FBVector6D yoFeedbackVelocity;
    protected final FBRateLimitedVector6D rateLimitedFeedbackVelocity;
@@ -214,24 +223,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          yoCurrentVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, CURRENT, VELOCITY, isEnabled, true);
          yoErrorVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, VELOCITY, isEnabled, false);
-
-         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
-         if (breakFrequency != null)
-         {
-            yoFilteredErrorVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData6D(endEffector,
-                                                                                     controllerIndex,
-                                                                                     ERROR,
-                                                                                     VELOCITY,
-                                                                                     dt,
-                                                                                     breakFrequency,
-                                                                                     breakFrequency,
-                                                                                     isEnabled,
-                                                                                     false);
-         }
-         else
-         {
-            yoFilteredErrorVelocity = null;
-         }
+         angularVelocityErrorFilter = fbToolbox.getOrCreateAngularVelocityErrorFilter(endEffector, controllerIndex, dt);
+         linearVelocityErrorFilter = fbToolbox.getOrCreateLinearVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
@@ -293,7 +286,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentVelocity = null;
          yoErrorVelocity = null;
-         yoFilteredErrorVelocity = null;
+         angularVelocityErrorFilter = null;
+         linearVelocityErrorFilter = null;
 
          yoDesiredAcceleration = null;
          yoFeedForwardAcceleration = null;
@@ -405,10 +399,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackVelocity.setToZero(worldFrame);
          rateLimitedFeedbackVelocity.reset();
       }
-      if (yoFilteredErrorVelocity != null)
+      if (angularVelocityErrorFilter != null)
       {
-         yoFilteredErrorVelocity.setToZero(worldFrame);
-         yoFilteredErrorVelocity.reset();
+         angularVelocityErrorFilter.reset();
       }
       if (yoErrorPositionIntegrated != null)
       {
@@ -745,38 +738,20 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearFeedbackTermToPack.clipToMaxNorm(positionGains.getMaximumDerivativeError());
       angularFeedbackTermToPack.clipToMaxNorm(orientationGains.getMaximumDerivativeError());
 
-      if (yoFilteredErrorVelocity != null)
-      {
-         // If the trajectory frame changed reset the filter.
-         if (yoFilteredErrorVelocity.getReferenceFrame() != trajectoryFrame)
-         {
-            yoFilteredErrorVelocity.setReferenceFrame(trajectoryFrame);
-            yoFilteredErrorVelocity.reset();
-         }
-         linearFeedbackTermToPack.changeFrame(trajectoryFrame);
-         angularFeedbackTermToPack.changeFrame(trajectoryFrame);
-         yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
-         yoFilteredErrorVelocity.update();
-         yoFilteredErrorVelocity.setCommandId(currentCommandId);
-         linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
-         angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
-      }
-      else
-      {
-         yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
-      }
-      yoErrorVelocity.changeFrame(trajectoryFrame);
+      linearFeedbackTermToPack.changeFrame(trajectoryFrame);
+      angularFeedbackTermToPack.changeFrame(trajectoryFrame);
+      yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
+
+      if (linearVelocityErrorFilter != null)
+         linearVelocityErrorFilter.apply(linearFeedbackTermToPack, linearFeedbackTermToPack);
+
+      if (angularVelocityErrorFilter != null)
+         angularVelocityErrorFilter.apply(angularFeedbackTermToPack, angularFeedbackTermToPack);
+
       yoErrorVelocity.setCommandId(currentCommandId);
 
-      if (linearGainsFrame != null)
-         linearFeedbackTermToPack.changeFrame(linearGainsFrame);
-      else
-         linearFeedbackTermToPack.changeFrame(controlFrame);
-
-      if (angularGainsFrame != null)
-         angularFeedbackTermToPack.changeFrame(angularGainsFrame);
-      else
-         angularFeedbackTermToPack.changeFrame(controlFrame);
+      linearFeedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
+      angularFeedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(linearFeedbackTermToPack);
