@@ -16,6 +16,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -363,7 +364,9 @@ public class CUDAImageEncoder
    }
 
    /**
-    * Decodes a jpeg encoded image, leaving the original image's format as is.
+    * Decodes a jpeg encoded image, leaving the jpeg's format as is.
+    * If the jpeg has multiple channels, the output format is likely to be YUV.
+    * If the jpeg has a single channel, the output format will be gray scale.
     * @param encodedImage INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
     * @param decodedImage OUTPUT: The decoded image.
@@ -391,7 +394,7 @@ public class CUDAImageEncoder
       for (int i = 0; i < numberOfDecodedChannels; ++i)
       {
          Mat channelMat = new Mat(imageInfo.maxHeight(), imageInfo.maxWidth(), opencv_core.CV_8UC1, decodedChannels.get(i));
-         decodedChannelMats.put(channelMat);
+         decodedChannelMats.push_back(channelMat);
       }
 
       // Combine the channels into 1 Mat, pack into output image
@@ -406,7 +409,9 @@ public class CUDAImageEncoder
    }
 
    /**
-    * Decodes a jpeg encoded image, leaving the original image's format as is.
+    * Decodes a jpeg encoded image, leaving the jpeg's format as is.
+    * If the jpeg has multiple channels, the output format is likely to be YUV.
+    * If the jpeg has a single channel, the output format will be gray scale.
     * @param encodedImage INPUT: An encoded multi-channel image.
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
     * @param decodedImage OUTPUT: The decoded image.
@@ -434,7 +439,7 @@ public class CUDAImageEncoder
       for (int i = 0; i < numberOfDecodedChannels; ++i)
       {
          GpuMat channelMat = new GpuMat(imageInfo.maxHeight(), imageInfo.maxWidth(), opencv_core.CV_8UC1, decodedChannels.get(i));
-         decodedChannelMats.put(channelMat);
+         decodedChannelMats.push_back(channelMat);
       }
 
       // Combine the channels into 1 Mat, pack into output image

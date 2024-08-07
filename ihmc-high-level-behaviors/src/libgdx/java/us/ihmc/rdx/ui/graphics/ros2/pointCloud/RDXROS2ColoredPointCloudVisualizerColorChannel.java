@@ -11,6 +11,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -19,7 +20,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
-   private CUDAImageEncoder jpegDecoder = new CUDAImageEncoder();
+   private final CUDAImageEncoder jpegDecoder = new CUDAImageEncoder();
    private Mat imageFromMessage;
    private SwapReference<BytedecoImage> color8UC4ImageSwapReference;
 
@@ -38,12 +39,12 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
          default -> LogTools.error("Visualization attempted using unimplemented color format.");
       }
       color8UC4ImageSwapReference = new SwapReference<>(() ->
-      {
-         BytedecoImage color8UC4Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-         color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-         getFrequencyText().ping();
-         return color8UC4Image;
-      });
+                                                        {
+                                                           BytedecoImage color8UC4Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+                                                           color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+                                                           getFrequencyText().ping();
+                                                           return color8UC4Image;
+                                                        });
    }
 
    @Override
@@ -52,20 +53,23 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
       synchronized (decompressionInputSwapReference)
       {
          BytePointer decompressionInputData = decompressionInputSwapReference.getForThreadTwo().getInputBytePointer();
-         jpegDecoder.decodeToBGR(decompressionInputData, decompressionInputData.limit(), imageFromMessage);
+         switch (ImageMessageFormat.getFormat(imageMessage))
+         {
+            case COLOR_JPEG_BGR8 -> jpegDecoder.decodeToBGR(decompressionInputData, decompressionInputData.limit(), imageFromMessage);
+            case COLOR_JPEG_YUVI420 -> jpegDecoder.decodeUnchanged(decompressionInputData, decompressionInputData.limit(), imageFromMessage);
+            default -> LogTools.error("Visualization attempted using unimplemented color format.");
+         }
       }
-
-      opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
 
       switch (ImageMessageFormat.getFormat(imageMessage))
       {
+         case COLOR_JPEG_BGR8 ->
+         {
+            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+         }
          case COLOR_JPEG_YUVI420 ->
          {
             opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
-         }
-         case COLOR_JPEG_BGR8 ->
-         {
-            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
          }
          default -> LogTools.error("Visualization attempted using unimplemented color format.");
       }
@@ -77,6 +81,13 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
    protected Object getDecompressionAccessSyncObject()
    {
       return color8UC4ImageSwapReference;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      jpegDecoder.destroy();
    }
 
    public BytedecoImage getColor8UC4Image()
