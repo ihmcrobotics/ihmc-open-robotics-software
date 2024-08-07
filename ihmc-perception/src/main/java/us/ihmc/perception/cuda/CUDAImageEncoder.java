@@ -13,6 +13,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 
@@ -282,6 +283,12 @@ public class CUDAImageEncoder
       decodingResult.close();
    }
 
+   /**
+    * Decodes a jpeg encoded image to BGR format.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImage OUTPUT: The decoded image.
+    */
    public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
    {
       // Get decoded image info
@@ -394,6 +401,49 @@ public class CUDAImageEncoder
       for (int i = 0; i < numberOfDecodedChannels; ++i)
       {
          checkCUDAError(cudaFreeHost(decodedChannels.get(i)));
+         decodedChannels.get(i).close();
+      }
+   }
+
+   /**
+    * Decodes a jpeg encoded image, leaving the original image's format as is.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImage OUTPUT: The decoded image.
+    */
+   public void decodeUnchanged(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
+   {
+      // Get decoded image info
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
+
+      // Allocate host memory for the decoded image channels
+      int numberOfDecodedChannels = imageInfo.numberOfComponents();
+      long[] decodedChannelSizes = getOutputChannelSizes(NVJPEG_OUTPUT_UNCHANGED, imageInfo);
+      List<BytePointer> decodedChannels = new ArrayList<>(numberOfDecodedChannels);
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         decodedChannels.add(new BytePointer());
+         checkCUDAError(cudaMallocAsync(decodedChannels.get(i), decodedChannelSizes[i], cudaStream));
+      }
+
+      // Decode the image, packing result into the allocated buffers.
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_UNCHANGED, decodedChannels);
+
+      // Put all channels into a MatVector
+      GpuMatVector decodedChannelMats = new GpuMatVector();
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         GpuMat channelMat = new GpuMat(imageInfo.maxHeight(), imageInfo.maxWidth(), opencv_core.CV_8UC1, decodedChannels.get(i));
+         decodedChannelMats.put(channelMat);
+      }
+
+      // Combine the channels into 1 Mat, pack into output image
+      opencv_cudaarithm.merge(decodedChannelMats, decodedImage);
+
+      // Free all memory
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         checkCUDAError(cudaFreeAsync(decodedChannels.get(i), cudaStream));
          decodedChannels.get(i).close();
       }
    }
