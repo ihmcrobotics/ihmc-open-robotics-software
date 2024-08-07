@@ -11,6 +11,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
+import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.GpuMatVector;
@@ -186,8 +187,8 @@ public class CUDAJPEGProcessor
    public void encodeGray(GpuMat imageToEncode, BytePointer encodedImage)
    {
       GpuMat bgrImage = new GpuMat();
-      opencv_imgproc.cvtColor(imageToEncode, bgrImage, opencv_imgproc.CV_GRAY2BGR);
-      encodeInterleaved(bgrImage.data(), bgrImage.cols(), bgrImage.rows(), bgrImage.elemSize(), bgrImage.step(), NVJPEG_INPUT_BGRI, encodedImage);
+      opencv_cudaimgproc.cvtColor(imageToEncode, bgrImage, opencv_imgproc.CV_GRAY2BGR);
+      encodeBGR(bgrImage, encodedImage);
       bgrImage.close();
    }
 
