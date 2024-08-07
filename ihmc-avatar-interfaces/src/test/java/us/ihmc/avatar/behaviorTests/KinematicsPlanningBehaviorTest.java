@@ -36,7 +36,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.ValkyrieEODObstacleCourseEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -87,7 +87,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    @Test
    public void testReachToDoorKnob()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
       doorLocation = envrionment.getDoorLocation();
@@ -165,13 +165,13 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
       assertTrue(orientationDistance < 0.1 || orientationDistanceRotation < 0.1, "orientation Distance: " + orientationDistance);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSingleKeyFrameInput()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
       doorLocation = envrionment.getDoorLocation();
@@ -250,7 +250,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
       assertTrue(orientationDistance < 0.1 || orientationDistanceRotation < 0.1, "orientation Distance: " + orientationDistance);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void defineDesiredFramePoseToDoorKnob(ValkyrieEODObstacleCourseEnvironment envrionment)

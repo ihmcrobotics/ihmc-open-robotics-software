@@ -1,21 +1,15 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.ArrayList;
-import java.util.Random;
-
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -40,6 +34,11 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
@@ -82,7 +81,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    @Test
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
@@ -176,7 +175,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    @Test
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 10.0;
@@ -306,7 +305,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    @Test
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 40.0;
@@ -355,7 +354,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       createVideo(scs);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, YoBoolean walk)
@@ -370,7 +369,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    {
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
+         // TODO GITHUB WORKFLOWS
       }
    }
 

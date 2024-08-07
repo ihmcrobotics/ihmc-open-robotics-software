@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -57,7 +57,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    public void testWalkingOntoRocks()
    {
       setupTestingParameters(simulationTestingParameters);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
@@ -83,7 +83,8 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          success = success && simulationTestHelper.simulateNow(6.0);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue("Caught Exception: " + simulationTestHelper.getLastThrownException(), success);
@@ -93,7 +94,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOntoRocks()

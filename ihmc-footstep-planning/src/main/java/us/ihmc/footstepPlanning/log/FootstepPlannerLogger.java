@@ -54,12 +54,13 @@ public class FootstepPlannerLogger
 
    static
    {
-      String incomingLogsDirectory;
+      String incomingLogsDirectory = "";
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
-         incomingLogsDirectory =
-               System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "bamboo-logs" + File.separator + System.getenv("bamboo_planKey")
-               + File.separator + System.getenv("bamboo_buildResultKey") + File.separator;
+         // TODO GITHUB WORKFLOWS
+//         incomingLogsDirectory =
+//               System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "bamboo-logs" + File.separator + System.getenv("bamboo_planKey")
+//               + File.separator + System.getenv("bamboo_buildResultKey") + File.separator;
       }
       else
       {

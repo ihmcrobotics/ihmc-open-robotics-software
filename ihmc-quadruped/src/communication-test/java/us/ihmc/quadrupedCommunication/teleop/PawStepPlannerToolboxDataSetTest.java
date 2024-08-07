@@ -62,7 +62,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 
 public abstract class PawStepPlannerToolboxDataSetTest
 {
-   protected static final double bambooTimeScaling = 4.0;
+   protected static final double ciTimeScaling = 4.0;
    private static final double defaultBestEffortTimeout = 1.0;
 //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = Double.POSITIVE_INFINITY;
@@ -325,7 +325,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
 
       PlannerInput plannerInput = dataset.getPlannerInput();
 
-      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? ciTimeScaling : 1.0;
       double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
 
       messager.submitMessage(PawStepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());

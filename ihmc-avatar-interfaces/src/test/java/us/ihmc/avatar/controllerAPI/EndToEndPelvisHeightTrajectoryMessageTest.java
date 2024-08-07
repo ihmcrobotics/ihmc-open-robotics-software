@@ -38,7 +38,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -59,7 +59,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    @Test
    public void testSingleWaypoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -129,12 +129,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
                                                         1.0e-3,
                                                         controllerDT);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testSingleWaypointWithControlFrame() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -176,7 +177,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    public void testSingleWaypointInUserMode() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -214,12 +215,13 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testSingleWaypointThenManualChange() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
@@ -268,7 +270,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
     */
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -311,7 +313,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

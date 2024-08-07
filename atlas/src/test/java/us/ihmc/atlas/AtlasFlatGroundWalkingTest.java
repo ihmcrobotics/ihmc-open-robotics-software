@@ -9,7 +9,7 @@ import org.opentest4j.TestAbortedException;
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
@@ -70,8 +70,8 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    {
       try
       {
-         Assumptions.assumeTrue(BambooTools.isNightlyBuild());
-         BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
+         Assumptions.assumeTrue(CITools.isNightlyBuild());
+         CITools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
          robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
@@ -92,6 +92,6 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 }

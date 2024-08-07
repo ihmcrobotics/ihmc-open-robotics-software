@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -57,7 +57,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    @Test
    public void testSimpleFlatGroundScript()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
 
@@ -74,7 +74,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(20.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -84,13 +85,13 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingUpToRampWithLongSteps()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
 
@@ -109,7 +110,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       success = success && simulationTestHelper.simulateNow(10.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -119,7 +121,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingUpToRamp()

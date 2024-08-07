@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CUDAStreamManagerTest
 {
+   private static boolean cudaWarningPrinted = false;
+
    @Test
    public void testCreateAndRelease()
    {
@@ -63,6 +65,14 @@ public class CUDAStreamManagerTest
                CUstream_st stream = CUDAStreamManager.getStream();
                ThreadTools.sleep(random.nextLong(10L));
                CUDAStreamManager.releaseStream(stream);
+            }
+            catch (UnsatisfiedLinkError error)
+            {
+               if (!cudaWarningPrinted)
+               {
+                  LogTools.error("Could not load CUDA library");
+                  cudaWarningPrinted = true;
+               }
             }
             catch (Exception exception)
             {

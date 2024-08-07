@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,7 +58,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    @Test
    public void testStepOnCinderBlocks()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
 
@@ -87,7 +87,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       success = success && simulationTestHelper.simulateNow(9.5);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -97,7 +98,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    // We don't need step on/off two layer CinderBlocks anymore
@@ -105,7 +106,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    @Test
    public void testStepOnAndOffCinderBlocks()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
@@ -169,7 +170,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       simulationTestHelper.publishToController(footstepDataListMessage2);
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -181,13 +183,13 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testStepOnCinderBlocksSlowlyWithDisturbance()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest_slow.xml";
 
@@ -212,7 +214,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       ThreadTools.sleep(0);
       assertTrue(simulationTestHelper.simulateNow(6.0));
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       Point3D center = new Point3D(13.10268850797296, 14.090724695197087, 1.146368436759061);
@@ -220,7 +223,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOverCinderBlocks()
