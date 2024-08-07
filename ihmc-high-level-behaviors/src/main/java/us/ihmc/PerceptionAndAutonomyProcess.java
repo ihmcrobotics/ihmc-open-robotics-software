@@ -45,6 +45,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -236,7 +237,7 @@ public class PerceptionAndAutonomyProcess
       realsenseProcessAndPublishThread.start();
 
       ouster = new OusterNetServer();
-//      ouster.start();
+      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
                                                                 ousterFrameSupplier,
                                                                 ousterLidarScanDemandNode::isDemanded,
@@ -454,7 +455,7 @@ public class PerceptionAndAutonomyProcess
    {
       if (ousterDepthDemandNode.isDemanded())
       {
-//         ouster.start();
+         ouster.start();
          ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
          if (ousterDepthImage == null)
             return;
@@ -553,28 +554,25 @@ public class PerceptionAndAutonomyProcess
 
    private void updatePlanarRegions()
    {
-      if (zedDepthImage != null && zedDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
+      if (ousterDepthImage != null && ousterDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
-         RawImage latestZEDDepthImage = zedDepthImage.get();
+         RawImage latestOusterDepthImage = ousterDepthImage.get();
 
          if (planarRegionsExtractor == null)
          {
-            int imageHeight = latestZEDDepthImage.getImageHeight();
-            int imageWidth = latestZEDDepthImage.getImageWidth();
-            double fx = latestZEDDepthImage.getFocalLengthX();
-            double fy = latestZEDDepthImage.getFocalLengthY();
-            double cx = latestZEDDepthImage.getPrincipalPointX();
-            double cy = latestZEDDepthImage.getPrincipalPointY();
+            int imageHeight = latestOusterDepthImage.getImageHeight();
+            int imageWidth = latestOusterDepthImage.getImageWidth();
+//            double fx = latestOusterDepthImage.getFocalLengthX();
+//            double fy = latestOusterDepthImage.getFocalLengthY();
+//            double cx = latestOusterDepthImage.getPrincipalPointX();
+//            double cy = latestOusterDepthImage.getPrincipalPointY();
             planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                     openCLManager.loadProgram("RapidRegionsExtractor"),
                                                                      imageHeight,
-                                                                     imageWidth,
-                                                                     fx,
-                                                                     fy,
-                                                                     cx,
-                                                                     cy);
-            planarRegionsExtractor.getDebugger().setEnabled(false);
+                                                                     imageWidth);
+//            planarRegionsExtractor.getDebugger().setEnabled(true);
 
-            planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, planarRegionsExtractor.getParameters());
+            planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper, PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, planarRegionsExtractor.getParameters());
          }
 
          planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
@@ -582,20 +580,20 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat().clone());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestOusterDepthImage.getCpuImageMat().clone());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
+         planarRegionsExtractor.update(bytedecoImage, ousterFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
          bytedecoImage.destroy(openCLManager);
 
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
-         planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
+         planarRegionsInWorldFrame.applyTransform(ousterFrameSupplier.get().getTransformToWorldFrame());
 
          newPlanarRegions.set(planarRegionsInWorldFrame);
 
-         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
 
-         latestZEDDepthImage.release();
+         latestOusterDepthImage.release();
       }
    }
 
