@@ -10,9 +10,14 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.*;
@@ -247,53 +252,280 @@ public class CUDAImageEncoder
       nvjpegImage.close();
    }
 
+   /**
+    * Decodes a jpeg encoded image to BGR format.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImage OUTPUT: The decoded image.
+    */
    public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
    {
       // Get decoded image info
-      NVJPEGImageInfo imageInfo = getImageData(encodedImage, encodedImageSize);
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
 
-      // Create appropriately sized Mat & allocate host memory for the Mat
-      long decodedImageSize = 3L * imageInfo.widths[0] * imageInfo.heights[0];
-      BytePointer decodedData = new BytePointer();
-      checkCUDAError(cudaMallocHost(decodedData, decodedImageSize));
+      // Allocate host memory for the decoded image
+      long decodedImageSize = getOutputChannelSizes(NVJPEG_OUTPUT_BGRI, imageInfo)[0];
+      List<BytePointer> decodedData = new ArrayList<>();
+      decodedData.add(new BytePointer());
+      checkCUDAError(cudaMallocHost(decodedData.get(0), decodedImageSize));
 
-      // Decode the image, packing result into Mat data
-      decodeToBGR(encodedImage, encodedImageSize, imageInfo, decodedData);
+      // Decode the image, packing result into the allocated buffer.
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_BGRI, decodedData);
 
       // Pack the result into the output Mat
-      Mat decodingResult = new Mat(imageInfo.heights[0], imageInfo.widths[0], opencv_core.CV_8UC3, decodedData);
+      Mat decodingResult = new Mat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC3, decodedData.get(0));
       decodingResult.copyTo(decodedImage);
 
       // Free all memory
-      checkCUDAError(cudaFreeHost(decodedData));
+      checkCUDAError(cudaFreeHost(decodedData.get(0)));
+      decodedData.get(0).close();
       decodingResult.close();
    }
 
-   public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, NVJPEGImageInfo decodedImageInfo, BytePointer decodedImage)
+   public void decodeToBGR(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
    {
-      // Allocate device memory for decoded image
-      BytePointer decodedDeviceImage = new BytePointer();
-      long decodedImageSize = 3L * decodedImageInfo.widths[0] * decodedImageInfo.heights[0];
-      checkCUDAError(cudaMallocAsync(decodedDeviceImage, decodedImageSize, cudaStream));
+      // Get decoded image info
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
 
-      // Create NVJPEG image
-      nvjpegImage_t nvjpegDecodedImage = new nvjpegImage_t();
-      nvjpegDecodedImage.pitch(0, 3L * decodedImageInfo.widths[0]);
-      nvjpegDecodedImage.channel(0, decodedDeviceImage);
+      // Allocate device memory for the decoded image
+      long decodedImageSize = getOutputChannelSizes(NVJPEG_OUTPUT_BGRI, imageInfo)[0];
+      List<BytePointer> decodedData = new ArrayList<>();
+      decodedData.add(new BytePointer());
+      checkCUDAError(cudaMallocAsync(decodedData.get(0), decodedImageSize, cudaStream));
 
-      // Decode the image
-      checkNVJPEGError(nvjpegDecode(nvjpegHandle, nvjpegState, encodedImage, encodedImageSize, NVJPEG_OUTPUT_BGRI, nvjpegDecodedImage, cudaStream));
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_BGRI, decodedData);
 
-      // Copy data to output pointer
-      checkCUDAError(cudaMemcpyAsync(decodedImage, decodedDeviceImage, decodedImageSize, cudaMemcpyDefault, cudaStream));
-      checkCUDAError(cudaStreamSynchronize(cudaStream));
+      GpuMat decodingResult = new GpuMat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC3, decodedData.get(0));
+      decodingResult.copyTo(decodedImage);
 
-      checkCUDAError(cudaFreeAsync(decodedDeviceImage, cudaStream));
-      decodedDeviceImage.close();
+      // Free all memory
+      checkCUDAError(cudaFreeAsync(decodedData.get(0), cudaStream));
+      decodedData.get(0).close();
+      decodingResult.close();
    }
 
+   /**
+    * Decodes a jpeg encoded image to YUV I420 format.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImage OUTPUT: The decoded image.
+    * @apiNote Despite the name, this method does not work when the passed in encoded image is in an OpenCV YUV format.
+    * To decode an OpenCV YUV_I420 image, use {@link CUDAImageEncoder#decodeUnchanged(BytePointer, long, Mat)}.
+    * While this method returns an image when the input is an OpenCV YUV image, the colors are incorrect.
+    * TODO: Find out why the colors are incorrect when providing an OpenCV YUV image.
+    */
+   public void decodeToYUV(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
+   {
+      // Get decoded image info
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
 
-   public NVJPEGImageInfo getImageData(BytePointer encodedImage, long encodedImageSize)
+      // Allocate host memory for the decoded image channels (Y, U, and V)
+      int numberOfDecodedChannels = getNumberOfOutputChannels(NVJPEG_OUTPUT_YUV, imageInfo);
+      long[] decodedChannelSizes = getOutputChannelSizes(NVJPEG_OUTPUT_YUV, imageInfo);
+      List<BytePointer> decodedChannels = new ArrayList<>(numberOfDecodedChannels);
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         decodedChannels.add(new BytePointer());
+         checkCUDAError(cudaMallocHost(decodedChannels.get(i), decodedChannelSizes[i]));
+      }
+
+      // Decode the image, packing result into the allocated buffers.
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_YUV, decodedChannels);
+
+      // Create Mats representing each Y, U, and V plane
+      try (Mat yPlane = new Mat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC1, decodedChannels.get(0));
+           Mat uPlane = new Mat(imageInfo.height(1), imageInfo.width(1), opencv_core.CV_8UC1, decodedChannels.get(1));
+           Mat vPlane = new Mat(imageInfo.height(2), imageInfo.width(2), opencv_core.CV_8UC1, decodedChannels.get(2));
+           Mat yuvI420CombinedImage = new Mat(imageInfo.height(0) + imageInfo.height(1), imageInfo.width(0), opencv_core.CV_8UC1))
+      {
+         // Pack the YUV planes into their respective locations
+         yPlane.copyTo(yuvI420CombinedImage.rowRange(0, imageInfo.height(0)));
+         uPlane.copyTo(yuvI420CombinedImage.rowRange(imageInfo.height(0), imageInfo.height(0) + imageInfo.height(1)).colRange(0, imageInfo.width(1)));
+         vPlane.copyTo(yuvI420CombinedImage.rowRange(imageInfo.height(0), imageInfo.height(0) + imageInfo.height(2))
+                                           .colRange(imageInfo.width(1), imageInfo.width(1) + imageInfo.width(2)));
+         // Copy the YUV image into the output image
+         yuvI420CombinedImage.copyTo(decodedImage);
+      }
+
+      // Free all memory
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         checkCUDAError(cudaFreeHost(decodedChannels.get(i)));
+         decodedChannels.get(i).close();
+      }
+   }
+
+   /**
+    * Decodes a jpeg encoded image, leaving the original image's format as is.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImage OUTPUT: The decoded image.
+    */
+   public void decodeUnchanged(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
+   {
+      // Get decoded image info
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
+
+      // Allocate host memory for the decoded image channels
+      int numberOfDecodedChannels = imageInfo.numberOfComponents();
+      long[] decodedChannelSizes = getOutputChannelSizes(NVJPEG_OUTPUT_UNCHANGED, imageInfo);
+      List<BytePointer> decodedChannels = new ArrayList<>(numberOfDecodedChannels);
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         decodedChannels.add(new BytePointer());
+         checkCUDAError(cudaMallocHost(decodedChannels.get(i), decodedChannelSizes[i]));
+      }
+
+      // Decode the image, packing result into the allocated buffers.
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_UNCHANGED, decodedChannels);
+
+      // Put all channels into a MatVector
+      MatVector decodedChannelMats = new MatVector();
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         Mat channelMat = new Mat(imageInfo.maxHeight(), imageInfo.maxWidth(), opencv_core.CV_8UC1, decodedChannels.get(i));
+         decodedChannelMats.put(channelMat);
+      }
+
+      // Combine the channels into 1 Mat, pack into output image
+      opencv_core.merge(decodedChannelMats, decodedImage);
+
+      // Free all memory
+      for (int i = 0; i < numberOfDecodedChannels; ++i)
+      {
+         checkCUDAError(cudaFreeHost(decodedChannels.get(i)));
+         decodedChannels.get(i).close();
+      }
+   }
+
+   /**
+    * Decodes a jpeg encoded image into the specified output type.
+    * @param encodedImage INPUT: An encoded multi-channel image.
+    * @param encodedImageSize INPUT: Number of bytes of the encoded image.
+    * @param decodedImageInfo INPUT: {@link NVJPEGImageInfo} about the passed in image
+    * @param nvjpegOutputType INPUT: One of NVJPEG_OUTPUT_* types
+    * @param decodedChannels OUTPUT: List of decoded image channels. Memory must be pre-allocated. This method does not allocate memory for the output pointers.
+    */
+   private void decodeImage(BytePointer encodedImage,
+                           long encodedImageSize,
+                           NVJPEGImageInfo decodedImageInfo,
+                           int nvjpegOutputType,
+                           List<BytePointer> decodedChannels)
+   {
+      // Create NVJPEG image and allocate memory for decoded image
+      int channelsToDecode = getNumberOfOutputChannels(nvjpegOutputType, decodedImageInfo);
+      long[] decodedChannelSizes = getOutputChannelSizes(nvjpegOutputType, decodedImageInfo);
+      long[] channelPitches = getOutputChannelPitches(nvjpegOutputType, decodedImageInfo);
+
+      nvjpegImage_t nvjpegDecodedImage = new nvjpegImage_t();
+      BytePointer[] decodedDeviceChannels = new BytePointer[channelsToDecode];
+
+      for (int i = 0; i < channelsToDecode; ++i)
+      {
+         decodedDeviceChannels[i] = new BytePointer();
+         checkCUDAError(cudaMallocAsync(decodedDeviceChannels[i], decodedChannelSizes[i], cudaStream));
+         nvjpegDecodedImage.pitch(i, channelPitches[i]);
+         nvjpegDecodedImage.channel(i, decodedDeviceChannels[i]);
+      }
+
+      if (decodedChannels.size() < channelsToDecode)
+         throw new IllegalArgumentException("Too few pointers provided (must be greater than or equal to number of channels being decoded).");
+
+      // Decode the image
+      checkNVJPEGError(nvjpegDecode(nvjpegHandle, nvjpegState, encodedImage, encodedImageSize, nvjpegOutputType, nvjpegDecodedImage, cudaStream));
+
+      // Copy data to output pointers
+      for (int i = 0; i < channelsToDecode; ++i)
+      {
+         checkCUDAError(cudaMemcpyAsync(decodedChannels.get(i), decodedDeviceChannels[i], decodedChannelSizes[i], cudaMemcpyDefault, cudaStream));
+      }
+      checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+      // Free all memory
+      for (int i = 0; i < channelsToDecode; ++i)
+      {
+         checkCUDAError(cudaFreeAsync(decodedDeviceChannels[i], cudaStream));
+         decodedDeviceChannels[i].close();
+      }
+   }
+
+   private int getNumberOfOutputChannels(int nvjpegOutputType, NVJPEGImageInfo imageInfo)
+   {
+      int channelsToDecode;
+      switch (nvjpegOutputType)
+      {
+         case NVJPEG_OUTPUT_Y, NVJPEG_OUTPUT_RGBI, NVJPEG_OUTPUT_BGRI -> channelsToDecode = 1;
+         case NVJPEG_OUTPUT_YUV, NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR -> channelsToDecode = 3;
+         case NVJPEG_OUTPUT_UNCHANGED -> channelsToDecode = imageInfo.numberOfComponents();
+         case NVJPEG_OUTPUT_UNCHANGEDI_U16 ->
+               throw new UnsupportedOperationException("NVJPEG_OUTPUT_UNCHANGEDI_U16 is currently unsupported. Please feel free to implement it!");
+         default -> throw new IllegalArgumentException("The provided nvjpegOutputType is unknown.");
+      }
+
+      return channelsToDecode;
+   }
+
+   private long[] getOutputChannelSizes(int nvjpegOutputType, NVJPEGImageInfo imageInfo)
+   {
+      int channelsToDecode = getNumberOfOutputChannels(nvjpegOutputType, imageInfo);
+
+      if (imageInfo.widths.length < channelsToDecode || imageInfo.heights.length < channelsToDecode)
+         throw new UnsupportedOperationException("Oops, we don't know how to deal with this :(");
+
+      long[] decodedChannelSizes = new long[channelsToDecode];
+      switch (nvjpegOutputType)
+      {
+         case NVJPEG_OUTPUT_Y -> decodedChannelSizes[0] = imageInfo.width(0) * imageInfo.height(0);
+         case NVJPEG_OUTPUT_YUV, NVJPEG_OUTPUT_UNCHANGED ->
+         {
+            for (int i = 0; i < channelsToDecode; ++i)
+               decodedChannelSizes[i] = imageInfo.width(i) * imageInfo.height(i);
+         }
+         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR ->
+         {
+            for (int i = 0; i < channelsToDecode; ++i)
+               decodedChannelSizes[i] = imageInfo.width(0) * imageInfo.height(0);
+         }
+         case NVJPEG_OUTPUT_RGBI, NVJPEG_OUTPUT_BGRI -> decodedChannelSizes[0] = 3L * imageInfo.width(0) * imageInfo.height(0);
+         case NVJPEG_OUTPUT_UNCHANGEDI_U16 ->
+               throw new UnsupportedOperationException("NVJPEG_OUTPUT_UNCHANGEDI_U16 is currently unsupported. Please feel free to implement it!");
+         default -> throw new IllegalArgumentException("The provided nvjpegOutputType is unknown.");
+      }
+
+      return decodedChannelSizes;
+   }
+
+   private long[] getOutputChannelPitches(int nvjpegOutputType, NVJPEGImageInfo imageInfo)
+   {
+      int channelsToDecode = getNumberOfOutputChannels(nvjpegOutputType, imageInfo);
+
+      if (imageInfo.widths.length < channelsToDecode || imageInfo.heights.length < channelsToDecode)
+         throw new UnsupportedOperationException("Oops, we don't know how to deal with this :(");
+
+      long[] channelPitches = new long[channelsToDecode];
+      switch (nvjpegOutputType)
+      {
+         case NVJPEG_OUTPUT_Y -> channelPitches[0] = imageInfo.width(0);
+         case NVJPEG_OUTPUT_YUV, NVJPEG_OUTPUT_UNCHANGED ->
+         {
+            for (int i = 0; i < channelsToDecode; ++i)
+               channelPitches[i] = imageInfo.width(i);
+         }
+         case NVJPEG_OUTPUT_RGB, NVJPEG_OUTPUT_BGR ->
+         {
+            for (int i = 0; i < channelsToDecode; ++i)
+               channelPitches[i] = imageInfo.width(0);
+         }
+         case NVJPEG_OUTPUT_RGBI, NVJPEG_OUTPUT_BGRI -> channelPitches[0] = 3L * imageInfo.width(0);
+         case NVJPEG_OUTPUT_UNCHANGEDI_U16 ->
+               throw new UnsupportedOperationException("NVJPEG_OUTPUT_UNCHANGEDI_U16 is currently unsupported. Please feel free to implement it!");
+         default -> throw new IllegalArgumentException("The provided nvjpegOutputType is unknown.");
+      }
+
+      return channelPitches;
+   }
+
+   private NVJPEGImageInfo getImageInfo(BytePointer encodedImage, long encodedImageSize)
    {
       try (IntPointer numberOfComponents = new IntPointer();
            IntPointer subSamplingsPointer = new IntPointer();
@@ -339,8 +571,61 @@ public class CUDAImageEncoder
       }
    }
 
-   private record NVJPEGImageInfo(int numberOfComponents, int[] subSamplingTypes, int[] widths, int[] heights)
+   /**
+    * Helper class for storing and passing around data obtained through nvjpegGetImageInfo().
+    */
+   private class NVJPEGImageInfo
    {
+      private final int numberOfComponents;
+      private final int[] subSamplingTypes;
+      private final int[] widths;
+      private final int[] heights;
+
+      private NVJPEGImageInfo(int numberOfComponents, int[] subSamplingTypes, int[] widths, int[] heights)
+      {
+         this.numberOfComponents = numberOfComponents;
+         this.subSamplingTypes = subSamplingTypes;
+         this.widths = widths;
+         this.heights = heights;
+      }
+
+      private int numberOfComponents()
+      {
+         return numberOfComponents;
+      }
+
+      private int subSamplingType(int channel)
+      {
+         return subSamplingTypes[channel];
+      }
+
+      private int width(int channel)
+      {
+         return widths[channel];
+      }
+
+      private int maxWidth()
+      {
+         int maxWidth = width(0);
+         for (int i = 1; i < numberOfComponents; ++i)
+            if (width(i) > maxWidth)
+               maxWidth = width(i);
+         return maxWidth;
+      }
+
+      private int height(int channel)
+      {
+         return heights[channel];
+      }
+
+      private int maxHeight()
+      {
+         int maxHeight = height(0);
+         for (int i = 1; i < numberOfComponents; ++i)
+            if (height(i) > maxHeight)
+               maxHeight = height(i);
+         return maxHeight;
+      }
    }
 
    public void destroy()

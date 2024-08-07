@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -50,12 +51,24 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
    {
       synchronized (decompressionInputSwapReference)
       {
-         Mat decompressionInputMat = decompressionInputSwapReference.getForThreadTwo().getInputMat();
-         long decompressionInputDataSize = decompressionInputMat.elemSize() * decompressionInputMat.total();
-         jpegDecoder.decodeToBGR(decompressionInputMat.data(), decompressionInputDataSize, imageFromMessage);
+         BytePointer decompressionInputData = decompressionInputSwapReference.getForThreadTwo().getInputBytePointer();
+         jpegDecoder.decodeToBGR(decompressionInputData, decompressionInputData.limit(), imageFromMessage);
       }
 
       opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
+
+      switch (ImageMessageFormat.getFormat(imageMessage))
+      {
+         case COLOR_JPEG_YUVI420 ->
+         {
+            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+         }
+         case COLOR_JPEG_BGR8 ->
+         {
+            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
+         }
+         default -> LogTools.error("Visualization attempted using unimplemented color format.");
+      }
 
       color8UC4ImageSwapReference.swap();
    }
