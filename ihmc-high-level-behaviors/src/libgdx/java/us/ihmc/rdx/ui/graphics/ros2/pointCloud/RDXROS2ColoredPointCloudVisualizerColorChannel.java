@@ -65,7 +65,7 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
       {
          case COLOR_JPEG_BGR8 ->
          {
-            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+            opencv_imgproc.cvtColor(imageFromMessage, color8UC4ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
          }
          case COLOR_JPEG_YUVI420 ->
          {
