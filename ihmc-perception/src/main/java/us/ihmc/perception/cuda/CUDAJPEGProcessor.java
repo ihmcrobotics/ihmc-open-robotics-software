@@ -16,7 +16,6 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +32,7 @@ import static us.ihmc.perception.cuda.CUDATools.checkNVJPEGError;
  * This class has been adapted from the SampleJpegEncoder of bytedeco:
  * https://github.com/bytedeco/javacpp-presets/blob/master/cuda/samples/SampleJpegEncoder.java
  */
-public class CUDAImageEncoder
+public class CUDAJPEGProcessor
 {
    private final CUstream_st cudaStream;
    private final nvjpegHandle nvjpegHandle;
@@ -44,7 +43,7 @@ public class CUDAImageEncoder
    /**
     * Initialize necessary CUDA components
     */
-   public CUDAImageEncoder()
+   public CUDAJPEGProcessor()
    {
       // Initialize stream
       cudaStream = CUDAStreamManager.getStream();
@@ -318,7 +317,7 @@ public class CUDAImageEncoder
     * @param encodedImageSize INPUT: Number of bytes of the encoded image.
     * @param decodedImage OUTPUT: The decoded image.
     * @apiNote Despite the name, this method does not work when the passed in encoded image is in an OpenCV YUV format.
-    * To decode an OpenCV YUV_I420 image, use {@link CUDAImageEncoder#decodeUnchanged(BytePointer, long, Mat)}.
+    * To decode an OpenCV YUV_I420 image, use {@link CUDAJPEGProcessor#decodeUnchanged(BytePointer, long, Mat)}.
     * While this method returns an image when the input is an OpenCV YUV image, the colors are incorrect.
     * TODO: Find out why the colors are incorrect when providing an OpenCV YUV image.
     */

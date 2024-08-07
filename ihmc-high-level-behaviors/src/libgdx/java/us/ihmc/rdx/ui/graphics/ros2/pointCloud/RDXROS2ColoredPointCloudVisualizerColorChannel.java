@@ -9,9 +9,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -20,7 +19,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
-   private final CUDAImageEncoder jpegDecoder = new CUDAImageEncoder();
+   private final CUDAJPEGProcessor jpegDecoder = new CUDAJPEGProcessor();
    private Mat imageFromMessage;
    private SwapReference<BytedecoImage> color8UC4ImageSwapReference;
 
