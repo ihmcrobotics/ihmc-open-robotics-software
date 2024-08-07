@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import gnu.trove.list.TByteList;
+import us.ihmc.idl.IDLSequence;
 
 public enum ConfigurationSpaceName
 {
@@ -87,7 +87,7 @@ public enum ConfigurationSpaceName
       return byteArray;
    }
 
-   public static ConfigurationSpaceName[] fromBytes(TByteList enumListAsBytes)
+   public static ConfigurationSpaceName[] fromBytes(IDLSequence.Byte enumListAsBytes)
    {
       if (enumListAsBytes == null)
          return null;

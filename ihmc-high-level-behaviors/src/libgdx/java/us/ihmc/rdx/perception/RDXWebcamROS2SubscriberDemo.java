@@ -124,7 +124,7 @@ public class RDXWebcamROS2SubscriberDemo
                   }
 
                   IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
-                  imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+                  imageEncodedTByteArrayList.copyArray();
                   messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
                   messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
 

@@ -9,6 +9,7 @@ import org.opencv.core.Scalar;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
@@ -58,7 +59,8 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
          videoTimestamp = robotConfigurationData.getMonotonicTime();
 
-         latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+         Byte aByte = videoPacket.getData();
+         latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray());
 
 //         openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
 //         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();

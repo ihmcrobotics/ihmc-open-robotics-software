@@ -690,7 +690,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
             lz4Compressor.compress(discretizedIntBuffer.getBackingDirectByteBuffer(), compressedPointCloudBuffer);
             compressedPointCloudBuffer.flip();
-            outputFusedROS2Message.getScan().clear();
+            outputFusedROS2Message.getScan().resetQuick();
             for (int j = 0; j < compressedPointCloudBuffer.limit(); j++)
             {
                outputFusedROS2Message.getScan().add(compressedPointCloudBuffer.get());

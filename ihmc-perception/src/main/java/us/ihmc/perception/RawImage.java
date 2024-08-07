@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.perception.camera.CameraIntrinsics;
 
 import javax.annotation.Nullable;
@@ -111,7 +112,8 @@ public class RawImage
       try (BytePointer compressedImageData = new BytePointer(imageMessage.getData().size());
            Mat compressedImageMat = new Mat(1, imageMessage.getData().size(), opencv_core.CV_8UC1))
       {
-         compressedImageData.put(imageMessage.getData().toArray());
+         Byte aByte = imageMessage.getData();
+         compressedImageData.put(aByte.copyArray());
          compressedImageMat.data(compressedImageData);
          Mat imageMat = new Mat();
          opencv_imgcodecs.imdecode(compressedImageMat, opencv_imgcodecs.IMREAD_UNCHANGED, imageMat);

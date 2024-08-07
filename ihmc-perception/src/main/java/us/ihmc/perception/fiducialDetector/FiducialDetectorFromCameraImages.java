@@ -34,6 +34,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -187,7 +188,8 @@ public class FiducialDetectorFromCameraImages
 
    public void detect(VideoPacket videoPacket)
    {
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+      Byte aByte = videoPacket.getData();
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray());
       detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
              HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
 

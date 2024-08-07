@@ -23,7 +23,7 @@ public class ROS2BehaviorTreeMessageTools
 {
    public static void clearLists(BehaviorTreeStateMessage treeStateMessage)
    {
-      treeStateMessage.getBehaviorTreeTypes().clear();
+      treeStateMessage.getBehaviorTreeTypes().resetQuick();
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getRootNodes().clear();
       treeStateMessage.getBasicNodes().clear();
