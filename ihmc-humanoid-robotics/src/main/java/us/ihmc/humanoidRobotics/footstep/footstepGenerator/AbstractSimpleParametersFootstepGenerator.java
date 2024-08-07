@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,6 +11,9 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class AbstractSimpleParametersFootstepGenerator extends AbstractFootstepGenerator
 {
@@ -204,7 +204,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
       OverheadPath path = getPath();
       FramePose2D planningPose;
       if(path instanceof CompositeOverheadPath)
-         planningPose = ((CompositeOverheadPath) path).getPoseAtS(pathSParameter,subPathIndex);
+         planningPose = ((CompositeOverheadPath) path).getPoseAtS(pathSParameter, subPathIndex);
       else
          planningPose = path.getPoseAtS(pathSParameter);
       FramePoint2D footstepPosition2d = new FramePoint2D(planningPose.getPosition());

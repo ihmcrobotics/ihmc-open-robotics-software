@@ -12,7 +12,6 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarStereoREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
@@ -87,8 +86,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupRosModule();
       if (parameters.isUseSensorModule())
          humanoidNetworkProcessor.setupSensorModule();
-      if (parameters.isUseHeightQuadTreeToolboxModule())
-         humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
+//      if (parameters.isUseHeightQuadTreeToolboxModule())
+//         humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
       if (parameters.isUseFiducialDetectorToolboxModule())
          humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
       if (parameters.isUseObjectDetectorToolboxModule())
@@ -373,26 +372,26 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          return null;
       }
    }
-
-   public HeightQuadTreeToolboxModule setupHeightQuadTreeToolboxModule()
-   {
-      checkIfModuleCanBeCreated(HeightQuadTreeToolboxModule.class);
-
-      try
-      {
-         HeightQuadTreeToolboxModule module = new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(),
-                                                                              robotModel.createFullRobotModel(),
-                                                                              robotModel.getLogModelProvider(),
-                                                                              pubSubImplementation);
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
+//
+//   public HeightQuadTreeToolboxModule setupHeightQuadTreeToolboxModule()
+//   {
+//      checkIfModuleCanBeCreated(HeightQuadTreeToolboxModule.class);
+//
+//      try
+//      {
+//         HeightQuadTreeToolboxModule module = new HeightQuadTreeToolboxModule(robotModel.getSimpleRobotName(),
+//                                                                              robotModel.createFullRobotModel(),
+//                                                                              robotModel.getLogModelProvider(),
+//                                                                              pubSubImplementation);
+//         modulesToClose.add(module);
+//         return module;
+//      }
+//      catch (Throwable e)
+//      {
+//         reportFailure(e);
+//         return null;
+//      }
+//   }
 
    public FiducialDetectorToolboxModule setupFiducialDetectorToolboxModule()
    {
