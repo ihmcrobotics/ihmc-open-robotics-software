@@ -30,11 +30,11 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1,  -1.0, 1.0, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, -1.0, 1.0, random);
 
          DMatrixRMaj costGradient = new DMatrixRMaj(getStateVectorSize(), 1);
          DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getStateVectorSize(), 1);
@@ -69,11 +69,11 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, -1.0, 1.0, random);
 
          DMatrixRMaj costGradient = new DMatrixRMaj(getControlVectorSize(), 1);
          DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getControlVectorSize(), 1);
@@ -109,11 +109,11 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
-         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
-         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj desiredControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, -1.0, 1.0, random);
+         DMatrixRMaj constant = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, -1.0, 1.0, random);
 
          DMatrixRMaj costHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
          DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
