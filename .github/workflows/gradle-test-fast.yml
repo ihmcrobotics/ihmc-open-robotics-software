@@ -98,7 +98,7 @@ jobs:
       subproject: 'ihmc-path-planning'
       test-category: 'fast'
   ihmc-perception:
-    uses: ./.github/workflows/gradle-base-nvidia.yml
+    uses: ./.github/workflows/gradle-base.yml
     with:
       subproject: 'ihmc-perception'
       test-category: 'fast'
