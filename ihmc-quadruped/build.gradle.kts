@@ -14,15 +14,6 @@ ihmc {
 }
 
 basicsDependencies {
-   api("org.ejml:ejml-core:0.39")
-   api("org.ejml:ejml-ddense:0.39")
-
-   api("us.ihmc:jinput:2.0.6-ihmc2")
-   api("us.ihmc:euclid-frame:0.21.0")
-   api("us.ihmc:euclid-frame-shape:0.21.0")
-   api("us.ihmc:euclid-shape:0.21.0")
-   api("us.ihmc:ihmc-robot-description:0.25.1")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
