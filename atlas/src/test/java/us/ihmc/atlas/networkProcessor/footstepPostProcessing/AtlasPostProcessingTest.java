@@ -12,7 +12,7 @@ import us.ihmc.avatar.networkProcessor.footstepPostProcessing.AvatarPostProcessi
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasPostProcessingTest extends AvatarPostProcessingTests
 {
@@ -77,6 +77,6 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 }

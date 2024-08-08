@@ -23,7 +23,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -75,7 +75,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    @Test
    public void testCloseHand()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -96,13 +96,13 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       assertTrue(fingerJointQFinal > fingerJointQInitial);
       assertTrue(behavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testStopCloseHand()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Simulation");
       boolean success = behaviorTestHelper.simulateNow(1.0);
@@ -137,13 +137,13 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       assertTrue(Math.abs(fingerJointQFinal - fingerJointQAtStop) < 3.0);
       assertTrue(!behavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testPauseAndResumeCloseHand()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Simulation");
       boolean success = behaviorTestHelper.simulateNow(1.0);
@@ -187,7 +187,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       assertTrue(Math.abs(fingerJointQAtResume - fingerJointQAtPause) < 3.0);
       assertTrue(fingerJointQFinal > fingerJointQAtResume);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private double getTotalFingerJointQ(RobotSide robotSide)

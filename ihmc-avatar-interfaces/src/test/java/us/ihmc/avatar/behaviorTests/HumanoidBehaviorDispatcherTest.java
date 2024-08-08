@@ -56,7 +56,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -210,7 +210,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    @Test
    public void testDispatchPelvisPoseBehavior()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -247,13 +247,13 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(pelvisOrientationTrajectoryBehavior.isDone());
       assertOrientationsAreWithinThresholds(desiredPelvisPose, getCurrentPelvisPose());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testDispatchWalkToLocationBehavior()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -307,13 +307,13 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
       assertTrue(walkToLocationBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testDispatchKarateKidDiagnosticBehavior()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -368,13 +368,13 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       assertTrue(diagnosticBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testDispatchWalkToLocationBehaviorAndStop()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -422,13 +422,13 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testDispatchWalkToLocationBehaviorPauseAndResume()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -492,7 +492,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       targetMidFeetPose.changeFrame(worldFrame);
       assertPosesAreWithinThresholds(targetMidFeetPose, finalMidFeetPose);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FramePose2D offsetCurrentRobotMidFeetZUpPose(double walkDistance)

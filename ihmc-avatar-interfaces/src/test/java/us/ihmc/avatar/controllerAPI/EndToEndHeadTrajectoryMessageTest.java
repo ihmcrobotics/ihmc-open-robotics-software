@@ -23,7 +23,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -32,7 +31,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -84,7 +83,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       assertSingleWaypointExecuted(desiredRandomChestOrientation, head.getName(), simulationTestHelper);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void testLookingLeftAndRight()
@@ -139,12 +139,13 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       simulationTestHelper.publishToController(lookStraightAheadMessage);
       assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.1));
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    private void setupTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), environment, simulationTestingParameters);
       simulationTestHelper.start();

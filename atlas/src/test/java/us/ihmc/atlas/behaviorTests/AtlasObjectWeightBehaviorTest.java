@@ -9,7 +9,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.DRCObjectWeightBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-behaviors-slow")
 public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
@@ -45,6 +45,6 @@ public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 }

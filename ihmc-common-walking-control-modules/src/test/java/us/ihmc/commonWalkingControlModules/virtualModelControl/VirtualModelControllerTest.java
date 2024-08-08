@@ -7,6 +7,7 @@ import java.util.Random;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
@@ -581,6 +582,10 @@ public class VirtualModelControllerTest
       VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has a hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testVMCWithArm() throws Exception
    {
@@ -619,6 +624,10 @@ public class VirtualModelControllerTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has a hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testVMCWithPlanarArm() throws Exception
    {

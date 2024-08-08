@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Disabled;
 @Tag("gui-slow")
 public class GhostMousePlaybackTest
 {
-   private final boolean PLAY_IT_BACK = false;    // Keep false in SVN so we don't mess up Bamboo. Set to true when manually testing...
+   private final boolean PLAY_IT_BACK = false;    // Keep false in SVN so we don't mess up CI. Set to true when manually testing...
 
 	@Test
    public void testGhostMousePlayback() throws AWTException

@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -53,7 +53,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
    {
       try
       {
-         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+         CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
@@ -73,7 +73,8 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
 
          success = success && simulationTestHelper.simulateNow(13.0);
 
-         simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+         // TODO GITHUB WORKFLOWS
+//         simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
          //         simulationTestHelper.checkNothingChanged();
 
          assertTrue(success);
@@ -83,7 +84,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
          BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
          simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+         CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       }
       catch (Throwable throwable)
       {

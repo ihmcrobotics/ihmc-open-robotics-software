@@ -46,7 +46,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -81,7 +81,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -152,7 +152,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             getRobotModel().getControllerDT());
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public void createSimulationTestHelper()
@@ -166,7 +167,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -244,13 +245,14 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             1.0e-12,
                                                             getRobotModel().getControllerDT());
       }
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -371,7 +373,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                             controllerDT);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -379,7 +382,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       Random random = new Random(34536);
       simulationTestingParameters.setRunMultiThreaded(false);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       createSimulationTestHelper();
       simulationTestHelper.start();
@@ -464,7 +467,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testQueuedMessages() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -592,8 +595,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                                                                     desiredJointPositions,
                                                                     desiredJointVelocities,
                                                                     epsilon,
+
                                                                     simulationTestHelper);
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       assertEquals(2 * armTrajectoryMessages.size(), statusMessages.size());
 
@@ -633,7 +638,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 
@@ -757,7 +762,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -897,7 +902,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       createSimulationTestHelper();
       simulationTestHelper.start();
@@ -947,7 +952,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(54651);
 

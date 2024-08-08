@@ -27,7 +27,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterface
@@ -65,7 +65,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
    @Test
    public void testSquattingDown() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -96,13 +96,14 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(5.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testWalkingOffOfLargePlatform()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM;
 
@@ -125,7 +126,8 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       assertTrue(success);
 
@@ -134,13 +136,13 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testPitchingChestSuperFar()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
@@ -180,13 +182,14 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testHighFoot()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
@@ -213,7 +216,8 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       success = simulationTestHelper.simulateNow(4.0 + trajectoryTime);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    private void setupCameraForWalkingOffOfLargePlatform()

@@ -33,7 +33,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -73,7 +73,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
    public void testTrialsTerrainSlopeScript(double offsetHeight)
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -96,7 +96,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes();
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(21.0);
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
 
@@ -105,13 +106,13 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testTrialsTerrainSlopeScriptRandomFootSlip()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -141,7 +142,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && simulationTestHelper.simulateNow(20.0);
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
 
@@ -150,13 +152,13 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testTrialsTerrainZigzagHurdlesScript()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -172,20 +174,21 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOverHurdles();
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(8.0);
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(4.437597506324034, 5.699204748831417, 0.8376763465412774);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), environment, simulationTestingParameters);
@@ -210,20 +213,21 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && simulationTestHelper.simulateNow(6.5);
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(4.433273741150176, 5.75375933959496, 0.8417057558698022);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOntoAndOverSlopesSideways()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), environment, simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
@@ -245,14 +249,15 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = simulationTestHelper.simulateNow(footstepDataList.getFootstepDataList().size() * stepTime + 2.0);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);
       Point3D center = new Point3D(3.3267919256794363, 3.355608873842678, 0.9247970191596047);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOntoSlopes()

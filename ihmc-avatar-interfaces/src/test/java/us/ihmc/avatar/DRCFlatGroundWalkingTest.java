@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.Assert;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.MeshTerrainObjectFactory;
@@ -40,7 +40,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private static final double yawingTimeDuration = 0.5;
    private static final double standingTimeDuration = RigidBodyControlManager.INITIAL_GO_HOME_TIME;
-   private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
+   private static final double defaultWalkingTimeDuration = CITools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static String physicsEngineName;
 
@@ -98,7 +98,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    public void runMeshTerrainWalking(boolean useBulletPhysicsEngine)
    {
       boolean doPelvisWarmup = doPelvisWarmup();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
       simulationTestingParameters.setKeepSCSUp(true);
 
@@ -123,14 +123,15 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       simulateAndAssertGoodWalking(simulationTestHelper, doPelvisWarmup);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
    }
    public void runFlatGroundWalking(boolean useBulletPhysicsEngine)
    {
       boolean doPelvisWarmup = doPelvisWarmup();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -157,14 +158,15 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       //      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       //         simulationTestHelper.checkNothingChanged();
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testReset()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -284,7 +286,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       checkSimulationRunsSameWayTwice(verifier);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private SCS2AvatarTestingSimulation setupFlatGroundSimulationTrackForSameWayTwiceVerifier(DRCRobotModel robotModel)

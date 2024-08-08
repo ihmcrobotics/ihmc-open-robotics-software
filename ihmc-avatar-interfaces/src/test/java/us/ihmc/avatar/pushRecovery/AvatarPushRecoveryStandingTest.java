@@ -28,7 +28,7 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -70,7 +70,7 @@ public abstract class AvatarPushRecoveryStandingTest
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -87,7 +87,7 @@ public abstract class AvatarPushRecoveryStandingTest
       singleSupportStartConditions = null;
       doubleSupportStartConditions = null;
       pushRobotController = null;
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    protected abstract DRCRobotModel getRobotModel();

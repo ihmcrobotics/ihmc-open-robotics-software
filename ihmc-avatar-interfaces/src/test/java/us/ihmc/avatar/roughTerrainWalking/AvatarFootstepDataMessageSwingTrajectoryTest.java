@@ -40,7 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -327,7 +327,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    public void showMemoryUsageBeforeTest()
    {
       pushAndAdjust = null;
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -340,7 +340,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
       pushAndAdjust = null;
    }

@@ -36,7 +36,7 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -313,7 +313,8 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       max.add(epsilon);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -368,7 +369,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -381,7 +382,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
    }
 

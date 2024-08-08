@@ -28,7 +28,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -171,7 +171,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -184,7 +184,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
    }
 }

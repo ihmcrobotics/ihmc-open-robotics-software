@@ -36,7 +36,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -88,7 +88,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    @Test
    public void testTwoStepsForwards()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Sim");
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -140,13 +140,13 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSideStepping()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Sim");
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -199,13 +199,13 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          assertPosesAreWithinThresholds(desiredFootPoses.get(robotSide), finalFootPose);
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testStepLongerThanMaxStepLength()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Sim");
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -283,7 +283,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    @Test
    public void testStop()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       LogTools.info("Initializing Sim");
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -357,7 +357,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!footstepListBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FramePose2D createFootPoseOffsetFromCurrent(RobotSide robotSide, double xOffset, double yOffset)

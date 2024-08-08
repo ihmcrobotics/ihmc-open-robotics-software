@@ -44,7 +44,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -82,7 +82,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    @Test
    public void testWalkingUpRampUsingSnapFootsteps()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest();
 
       Point3D center = new Point3D(7.579638943201888, 0.020725665285290903, 1.46537366331119);
@@ -90,7 +90,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void doUpRampTest()
@@ -208,7 +208,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       // Check for success
       success = success && simulationTestHelper.simulateNow(16.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       // simulationTestHelper.checkNothingChanged();
       assertTrue(success);
