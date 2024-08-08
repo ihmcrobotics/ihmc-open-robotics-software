@@ -26,12 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-        id: setup-gradle
-        with:
-          gradle-version: 8.5
+      - name: Check nvidia-smi
+        run: |
+          nvidia-smi
 
       - name: Gradle test - ${{ inputs.test-category }}
         run: |
