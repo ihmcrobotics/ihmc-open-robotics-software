@@ -37,7 +37,6 @@ mainDependencies {
    api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-simple-whole-body-walking:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-avatar-interfaces-visualizers:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
