@@ -7,25 +7,26 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * StoredPropertySet data in order but as primitives.
-       * TODO: Replace StoredPropertySetMessage with this
+       * Ordered vector of data as primitives
+       * The number and ordering of values is assumed to be defined ahead of time
+       * so it is not necessary to send indicies.
        */
-public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySetPrimitivesMessage> implements Settable<StoredPropertySetPrimitivesMessage>, EpsilonComparable<StoredPropertySetPrimitivesMessage>
+public class PrimitiveDataVectorMessage extends Packet<PrimitiveDataVectorMessage> implements Settable<PrimitiveDataVectorMessage>, EpsilonComparable<PrimitiveDataVectorMessage>
 {
    /**
-            * The values for the double keys
+            * double values
             */
    public us.ihmc.idl.IDLSequence.Double  double_values_;
    /**
-            * The values for the integer keys
+            * integer values
             */
    public us.ihmc.idl.IDLSequence.Integer  integer_values_;
    /**
-            * The values for the boolean keys
+            * boolean values
             */
    public us.ihmc.idl.IDLSequence.Boolean  boolean_values_;
 
-   public StoredPropertySetPrimitivesMessage()
+   public PrimitiveDataVectorMessage()
    {
       double_values_ = new us.ihmc.idl.IDLSequence.Double (200, "type_6");
 
@@ -35,13 +36,13 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
 
    }
 
-   public StoredPropertySetPrimitivesMessage(StoredPropertySetPrimitivesMessage other)
+   public PrimitiveDataVectorMessage(PrimitiveDataVectorMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(StoredPropertySetPrimitivesMessage other)
+   public void set(PrimitiveDataVectorMessage other)
    {
       double_values_.set(other.double_values_);
       integer_values_.set(other.integer_values_);
@@ -50,7 +51,7 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
 
 
    /**
-            * The values for the double keys
+            * double values
             */
    public us.ihmc.idl.IDLSequence.Double  getDoubleValues()
    {
@@ -59,7 +60,7 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
 
 
    /**
-            * The values for the integer keys
+            * integer values
             */
    public us.ihmc.idl.IDLSequence.Integer  getIntegerValues()
    {
@@ -68,7 +69,7 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
 
 
    /**
-            * The values for the boolean keys
+            * boolean values
             */
    public us.ihmc.idl.IDLSequence.Boolean  getBooleanValues()
    {
@@ -76,19 +77,19 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
    }
 
 
-   public static Supplier<StoredPropertySetPrimitivesMessagePubSubType> getPubSubType()
+   public static Supplier<PrimitiveDataVectorMessagePubSubType> getPubSubType()
    {
-      return StoredPropertySetPrimitivesMessagePubSubType::new;
+      return PrimitiveDataVectorMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return StoredPropertySetPrimitivesMessagePubSubType::new;
+      return PrimitiveDataVectorMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(StoredPropertySetPrimitivesMessage other, double epsilon)
+   public boolean epsilonEquals(PrimitiveDataVectorMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -108,9 +109,9 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof StoredPropertySetPrimitivesMessage)) return false;
+      if(!(other instanceof PrimitiveDataVectorMessage)) return false;
 
-      StoredPropertySetPrimitivesMessage otherMyClass = (StoredPropertySetPrimitivesMessage) other;
+      PrimitiveDataVectorMessage otherMyClass = (PrimitiveDataVectorMessage) other;
 
       if (!this.double_values_.equals(otherMyClass.double_values_)) return false;
       if (!this.integer_values_.equals(otherMyClass.integer_values_)) return false;
@@ -124,7 +125,7 @@ public class StoredPropertySetPrimitivesMessage extends Packet<StoredPropertySet
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("StoredPropertySetPrimitivesMessage {");
+      builder.append("PrimitiveDataVectorMessage {");
       builder.append("double_values=");
       builder.append(this.double_values_);      builder.append(", ");
       builder.append("integer_values=");

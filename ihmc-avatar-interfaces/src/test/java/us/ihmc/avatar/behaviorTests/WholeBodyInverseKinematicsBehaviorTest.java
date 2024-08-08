@@ -34,7 +34,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -91,7 +91,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    @Test
    public void testSolvingForAHandPose()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // simulate for a while to make sure the robot is still so small time differences between frame changes in the
       // controller and the unit test will not affect the outcome too much.
@@ -173,13 +173,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       assertTrue(positionDifference < positionEpsilon, "Position difference: " + positionDifference);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForBothHandPoses()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // simulate for a while to make sure the robot is still so small time differences between frame changes in the
       // controller and the unit test will not affect the outcome too much.
@@ -262,13 +262,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertTrue(rightDifference < positionEpsilon, "Position difference: " + rightDifference);
       assertTrue(leftDifference < positionEpsilon, "Position difference: " + leftDifference);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForHandSelectionMatrix()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // simulate for a while to make sure the robot is still so small time differences between frame changes in the
       // controller and the unit test will not affect the outcome too much.
@@ -351,13 +351,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       assertTrue(positionDifference < positionEpsilon, "Position difference: " + positionDifference);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForHandAngularLinearControl()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // simulate for a while to make sure the robot is still so small time differences between frame changes in the
       // controller and the unit test will not affect the outcome too much.
@@ -460,13 +460,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertTrue(rightDifference < positionEpsilon, "Position difference: " + rightDifference);
       assertTrue(leftDifference < positionEpsilon, "Position difference: " + leftDifference);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForHandRollConstraint()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // simulate for a while to make sure the robot is still so small time differences between frame changes in the
       // controller and the unit test will not affect the outcome too much.
@@ -542,13 +542,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       assertTrue(positionDifference < positionEpsilon, "Position difference: " + positionDifference);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForChestAngularControl()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -608,13 +608,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertEquals(initialChestYaw, currentChestYaw, angleEpsilon, "Expected: " + initialChestYaw + " Received: " + currentChestYaw);
       assertEquals(initialChestPitch, currentChestPitch, angleEpsilon, "Expected: " + initialChestPitch + " Received: " + currentChestPitch);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSolvingForPelvisAngularControl()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -674,7 +674,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertEquals(initialPelvisYaw, currentPelvisYaw, angleEpsilon, "Expected: " + initialPelvisYaw + " Received: " + currentPelvisYaw);
       assertEquals(initialPelvisPitch, currentPelvisPitch, angleEpsilon, "Expected: " + initialPelvisPitch + " Received: " + currentPelvisPitch);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private boolean isOrientationEqual(QuaternionReadOnly initialQuat, QuaternionReadOnly finalQuat, double angleEpsilon)

@@ -13,59 +13,36 @@ public class PDController extends AbstractPDController
 
    public PDController(String suffix, YoRegistry registry)
    {
-      super(suffix, registry);
-      proportionalGain = new YoDouble("kp_" + suffix, registry);
+      this(new YoDouble("kp_" + suffix, registry),
+           new YoDouble("kd_" + suffix, registry),
+           new YoDouble("positionDeadband_" + suffix, registry),
+           suffix,
+           registry);
+
       proportionalGain.set(0.0);
-
-      derivativeGain = new YoDouble("kd_" + suffix, registry);
       derivativeGain.set(0.0);
-
-      positionDeadband = new YoDouble("positionDeadband_" + suffix, registry);
       positionDeadband.set(0.0);
    }
 
    public PDController(YoDouble proportionalGain, YoDouble derivativeGain, String suffix, YoRegistry registry)
    {
-      super(suffix, registry);
-      this.proportionalGain = proportionalGain;
-      this.derivativeGain = derivativeGain;
+      this(proportionalGain, derivativeGain, new YoDouble("positionDeadband_" + suffix, registry), suffix, registry);
 
-      positionDeadband = new YoDouble("positionDeadband_" + suffix, registry);
       positionDeadband.set(0.0);
-   }
-
-   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, YoDouble positionDeadband, String suffix, YoRegistry registry)
-   {
-      super(suffix, registry);
-      this.proportionalGain = proportionalGain;
-      this.derivativeGain = derivativeGain;
-      this.positionDeadband = positionDeadband;
    }
 
    public PDController(YoPDGains pdGains, String suffix, YoRegistry registry)
    {
-      super(suffix, registry);
-      this.proportionalGain = pdGains.getYoKp();
-      this.derivativeGain = pdGains.getYoKd();
-      this.positionDeadband = pdGains.getYoPositionDeadband();
+      this(pdGains.getYoKp(), pdGains.getYoKd(), pdGains.getYoPositionDeadband(), suffix, registry);
    }
 
-   @Override
-   public double getProportionalGain()
+   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, YoDouble positionDeadband, String suffix, YoRegistry registry)
    {
-      return proportionalGain.getValue();
-   }
+      super(proportionalGain, derivativeGain, positionDeadband, suffix, registry);
 
-   @Override
-   public double getDerivativeGain()
-   {
-      return derivativeGain.getValue();
-   }
-
-   @Override
-   public double getPositionDeadband()
-   {
-      return positionDeadband.getValue();
+      this.proportionalGain = (YoDouble) super.proportionalGain;
+      this.derivativeGain = (YoDouble) super.derivativeGain;
+      this.positionDeadband = (YoDouble) super.positionDeadband;
    }
 
    public void setGains(PDGainsReadOnly gains)

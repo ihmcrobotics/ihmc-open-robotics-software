@@ -2,20 +2,20 @@ package ihmc_common_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "StoredPropertySetPrimitivesMessage" defined in "StoredPropertySetPrimitivesMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "PrimitiveDataVectorMessage" defined in "PrimitiveDataVectorMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from StoredPropertySetPrimitivesMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit StoredPropertySetPrimitivesMessage_.idl instead.
+* This file was automatically generated from PrimitiveDataVectorMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PrimitiveDataVectorMessage_.idl instead.
 *
 */
-public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage>
+public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage>
 {
-   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::StoredPropertySetPrimitivesMessage_";
+   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::PrimitiveDataVectorMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c2fdee7dc789618373ee51a559c297c540c14f42d48b82c7009a8677ed7d26c4";
+   		return "09642cb7ad6c5f27a8b441af43d779a48af661d1096d33a0520f5a32c8d9a52d";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -62,12 +62,12 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -87,7 +87,7 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
       return current_alignment - initial_alignment;
    }
 
-   public static void write(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.CDR cdr)
    {
       if(data.getDoubleValues().size() <= 200)
       cdr.write_type_e(data.getDoubleValues());else
@@ -103,7 +103,7 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
 
    }
 
-   public static void read(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_e(data.getDoubleValues());	
       cdr.read_type_e(data.getIntegerValues());	
@@ -112,7 +112,7 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public final void serialize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_e("double_values", data.getDoubleValues());
       ser.write_type_e("integer_values", data.getIntegerValues());
@@ -120,22 +120,22 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data)
    {
       ser.read_type_e("double_values", data.getDoubleValues());
       ser.read_type_e("integer_values", data.getIntegerValues());
       ser.read_type_e("boolean_values", data.getBooleanValues());
    }
 
-   public static void staticCopy(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage src, ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage dest)
+   public static void staticCopy(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage src, ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage createData()
+   public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage createData()
    {
-      return new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage();
+      return new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage();
    }
    @Override
    public int getTypeSize()
@@ -149,24 +149,24 @@ public class StoredPropertySetPrimitivesMessagePubSubType implements us.ihmc.pub
       return name;
    }
    
-   public void serialize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage src, ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage dest)
+   public void copy(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage src, ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public StoredPropertySetPrimitivesMessagePubSubType newInstance()
+   public PrimitiveDataVectorMessagePubSubType newInstance()
    {
-      return new StoredPropertySetPrimitivesMessagePubSubType();
+      return new PrimitiveDataVectorMessagePubSubType();
    }
 }

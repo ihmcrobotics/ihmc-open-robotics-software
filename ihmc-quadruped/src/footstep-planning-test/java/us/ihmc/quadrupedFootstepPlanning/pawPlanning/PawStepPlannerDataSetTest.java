@@ -51,7 +51,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public abstract class PawStepPlannerDataSetTest
 {
    private static final double defaultBestEffortTimeout = 1.0;
-   protected static final double bambooTimeScaling = 4.0;
+   protected static final double ciTimeScaling = 4.0;
    private static final double defaultHorizonLength = 100.0;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
@@ -320,7 +320,7 @@ public abstract class PawStepPlannerDataSetTest
       if(plannerInput.getHasQuadrupedGoalYaw())
          goalPose.getOrientation().set(new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
 
-      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? ciTimeScaling : 1.0;
       double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
 
       PawStepPlannerStart start = new PawStepPlannerStart();

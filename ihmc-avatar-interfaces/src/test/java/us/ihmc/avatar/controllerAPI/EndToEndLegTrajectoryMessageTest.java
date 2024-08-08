@@ -34,7 +34,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -66,7 +66,7 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
    @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
@@ -162,7 +162,8 @@ public abstract class EndToEndLegTrajectoryMessageTest implements MultiRobotTest
          assertTrue(EndToEndFootTrajectoryMessageTest.putFootOnGround(robotSide, foot, initialFootPosition, simulationTestHelper));
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    static boolean prepFootForLoadBearing(RobotSide robotSide, RigidBodyBasics foot, FramePose3D desiredPose, SCS2AvatarTestingSimulation simulationTestHelper)

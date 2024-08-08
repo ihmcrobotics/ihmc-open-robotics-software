@@ -35,7 +35,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
@@ -71,7 +71,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       simulationTestingParameters.setRunMultiThreaded(false);
@@ -146,14 +146,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       simulationTestHelper1.finishTest();
       simulationTestHelper2.finishTest();
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOverSmallPlatformQuickly()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -178,7 +178,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue("Robot had an exception, probably fell.", success);
@@ -188,14 +189,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSidestepOverSmallPlatform()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -224,7 +225,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(11.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -234,14 +236,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSidestepOverSmallWall()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_WALL;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -260,7 +262,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(11.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -270,14 +273,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOverSmallPlatform()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -304,7 +307,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          success = success && simulationTestHelper.simulateNow(4.0);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -314,14 +318,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOntoMediumPlatformToesTouching()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -340,7 +344,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -350,7 +355,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -358,7 +363,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -379,7 +384,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -389,14 +395,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOffOfMediumPlatformSlowSteps()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -441,7 +447,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(7.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -451,14 +458,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOffOfLargePlatform()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM;
 
@@ -480,7 +487,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -490,14 +498,14 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingOntoLargePlatform()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.LARGE_PLATFORM;
 
@@ -519,7 +527,8 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       // simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -529,7 +538,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupCameraForWalkingOverSmallPlatform()

@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -87,7 +87,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    @Test
    public void testUnknownStepDownTwoFeetOnEachStep()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 1.0;
       double transferTime = 0.2;
@@ -164,13 +164,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testUnknownStepDownOneFootOnEachStepLong()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 1.0;
       double transferTime = 0.2;
@@ -241,13 +241,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testUnknownStepDownOneFootOnEachStep()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 1.0;
       double transferTime = 0.2;
@@ -318,13 +318,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 1.0;
       double transferTime = 0.2;
@@ -397,7 +397,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -407,7 +407,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double maxStepHeight = 0.04;
       double minStepHeight = -0.10;
 
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(10);
 
       double swingTime = 1.0;
@@ -517,13 +517,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testDropOffsWhileWalking()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double swingTime = 1.0;
       double transferTime = 0.2;
@@ -619,7 +619,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       success = success && simulationTestHelper.simulateNow(timeOverrunFactor * (executionDuration + transferTime));
 
       assertTrue("Robot had an exception, probably fell.", success);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep)

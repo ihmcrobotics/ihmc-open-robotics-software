@@ -64,7 +64,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -148,7 +148,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    {
       double dt = 0.02;
       setup(dt);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       RobotDefinition robotDefinition = getRobotModel().getRobotDefinition();
       robotDefinition.ignoreAllJoints();
@@ -231,7 +231,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       toolboxUpdater = createToolboxUpdater(ghost);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -321,7 +321,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.04, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    /**
@@ -345,7 +345,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       createGhostRobot();
       simulationTestingParameters.setRunMultiThreaded(false);
       simulationTestingParameters.setUsePefectSensors(true);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       toolboxUpdater = createToolboxUpdater(ghost);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -506,7 +506,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.05, 0.3, 0.1, 0.15); // I wonder if the tracking is off because the control is in joint-space.
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
