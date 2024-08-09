@@ -21,7 +21,7 @@ mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
 
    api("us.ihmc:ihmc-realtime:1.6.0")
-   api("us.ihmc:ihmc-native-library-loader:2.0.2")
+   api("us.ihmc:ihmc-native-library-loader:2.0.3")
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-robot-models:source")

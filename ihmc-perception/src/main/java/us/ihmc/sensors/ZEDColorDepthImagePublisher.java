@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
@@ -29,7 +29,7 @@ public class ZEDColorDepthImagePublisher
    private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final ROS2PublisherBasics<ImageMessage> ros2CutOutDepthImagePublisher;
 
-   private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
+   private final SideDependentList<CUDAJPEGProcessor> imageEncoders = new SideDependentList<>();
 
    private long lastDepthSequenceNumber = -1L;
    private long lastCutOutDepthSequenceNumber = -1L;
@@ -219,16 +219,11 @@ public class ZEDColorDepthImagePublisher
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumbers.get(side))
       {
          if (imageEncoders.get(side) == null)
-            imageEncoders.put(side, new CUDAImageEncoder());
+            imageEncoders.put(side, new CUDAJPEGProcessor());
 
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoders.get(side)
-                      .encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                 colorJPEGPointer,
-                                 colorImageToPublish.getImageWidth(),
-                                 colorImageToPublish.getImageHeight(),
-                                 colorImageToPublish.getGpuImageMat().step());
+         imageEncoders.get(side).encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
