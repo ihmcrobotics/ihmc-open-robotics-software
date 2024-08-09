@@ -23,9 +23,9 @@ public class ImageMessageDecompressionInput
 
    public void extract(ImageMessage imageMessage)
    {
-      decompressionInputBytePointer.put(imageMessage.getData().toArray());
-
       int numberOfBytes = imageMessage.getData().size();
+      PerceptionMessageTools.copyToBytePointer(imageMessage.getData(), decompressionInputBytePointer);
+
       decompressionInputMat.cols(numberOfBytes);
       decompressionInputMat.data(decompressionInputBytePointer);
    }
@@ -33,10 +33,5 @@ public class ImageMessageDecompressionInput
    public Mat getInputMat()
    {
       return decompressionInputMat;
-   }
-
-   public BytePointer getInputBytePointer()
-   {
-      return decompressionInputBytePointer;
    }
 }
