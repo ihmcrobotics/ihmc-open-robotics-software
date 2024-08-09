@@ -3,12 +3,14 @@ package us.ihmc.perception.demo;
 import org.bytedeco.cuda.nvcomp.PimplManager;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -55,9 +57,14 @@ public class NVCompSVODemo extends NVCompDemo
    private final Map<String, List<Double>> managerToDecompressionTimeMapDepth = new TreeMap<>();
 
    private final CUDAJPEGProcessor CUDAJPEGProcessor = new CUDAJPEGProcessor();
-   private final List<Double> CUDAJPEGProcessorCompressionRatios = new ArrayList<>();
-   private final List<Double> CUDAJPEGProcessorCompressionTimes = new ArrayList<>();
-   private final List<Double> CUDAJPEGProcessorDecompressionTimes = new ArrayList<>();
+   private final List<Double> cudaJPEGProcessorCompressionRatios = new ArrayList<>();
+   private final List<Double> cudaJPEGProcessorCompressionTimes = new ArrayList<>();
+   private final List<Double> cudaJPEGProcessorDecompressionTimes = new ArrayList<>();
+
+   private final CUDACompressionTools compressionTools = new CUDACompressionTools();
+   private final List<Double> nvCOMPCompressionRatios = new ArrayList<>();
+   private final List<Double> nvCOMPCompressionTimes = new ArrayList<>();
+   private final List<Double> nvCOMPDecompressionTimes = new ArrayList<>();
 
    private final List<Double> opencvToolsColorCompressionRatios = new ArrayList<>();
    private final List<Double> opencvToolsColorCompressionTimes = new ArrayList<>();
@@ -114,6 +121,7 @@ public class NVCompSVODemo extends NVCompDemo
          collectOpenCVToolsColorData(colorImage);
 
          collectDepthData(depthImage);
+         collectHybridDepthData(depthImage);
          collectOpenCVToolsDepthData(depthImage);
 
          colorImage.release();
@@ -216,12 +224,38 @@ public class NVCompSVODemo extends NVCompDemo
 
       double compressionRatio = (double) imageSize / compressedImageData.limit();
 
-      CUDAJPEGProcessorCompressionRatios.add(compressionRatio);
-      CUDAJPEGProcessorCompressionTimes.add(compressionTime);
-      CUDAJPEGProcessorDecompressionTimes.add(decompressionTime);
+      cudaJPEGProcessorCompressionRatios.add(compressionRatio);
+      cudaJPEGProcessorCompressionTimes.add(compressionTime);
+      cudaJPEGProcessorDecompressionTimes.add(decompressionTime);
 
       compressedImageData.close();
       compressedImage.close();
+      decompressedImage.close();
+   }
+
+   private void collectHybridDepthData(RawImage depthImage)
+   {
+      Stopwatch stopwatch = new Stopwatch();
+      Mat image = depthImage.getCpuImageMat();
+      long imageSize = image.elemSize() * image.total();
+
+      BytePointer compressedMSBData = new BytePointer(imageSize);
+      BytePointer compressedLSBData = new BytePointer(imageSize);
+      stopwatch.start();
+      compressionTools.compressDepth(depthImage.getGpuImageMat(), compressedLSBData, compressedMSBData);
+      double compressionTime = stopwatch.lap();
+      GpuMat decompressedImage = new GpuMat(image.size(), image.type());
+      compressionTools.decompressDepth(compressedLSBData, compressedLSBData.limit(), compressedMSBData, compressedMSBData.limit(), decompressedImage);
+      double decompressionTime = stopwatch.lap();
+
+      double compressionRatio = (double) imageSize / compressedMSBData.limit();
+
+      nvCOMPCompressionRatios.add(compressionRatio);
+      nvCOMPCompressionTimes.add(compressionTime);
+      nvCOMPDecompressionTimes.add(decompressionTime);
+
+      compressedMSBData.close();
+      compressedLSBData.close();
       decompressedImage.close();
    }
 
@@ -325,15 +359,25 @@ public class NVCompSVODemo extends NVCompDemo
                                  opencvToolsAverageDepthCompressionTimes,
                                  opencvToolsAverageDepthDecompressionTimes));
 
-      double averageCUDACompressionRatio = getAverage(CUDAJPEGProcessorCompressionRatios);
-      double averageCUDACompressionTime = getAverage(CUDAJPEGProcessorCompressionTimes);
-      double averageCUDADecompressionTime = getAverage(CUDAJPEGProcessorDecompressionTimes);
+      double averageCUDACompressionRatio = getAverage(cudaJPEGProcessorCompressionRatios);
+      double averageCUDACompressionTime = getAverage(cudaJPEGProcessorCompressionTimes);
+      double averageCUDADecompressionTime = getAverage(cudaJPEGProcessorDecompressionTimes);
 
       writer.write(String.format("%s,%f,%f,%f,,,\n",
                    "CUDAJPEGProcessor",
                    averageCUDACompressionRatio,
                    averageCUDACompressionTime,
                    averageCUDADecompressionTime));
+
+      double averageNVCOMPCompressionRatio = getAverage(nvCOMPCompressionRatios);
+      double averageNVCOMPCompressionTime = getAverage(nvCOMPCompressionTimes);
+      double averageNVCOMPDecompressionTime = getAverage(nvCOMPDecompressionTimes);
+
+      writer.write(String.format("%s,,,,%f,%f,%f\n",
+                                 "nvCOMP Hybrid Depth",
+                                 averageNVCOMPCompressionRatio,
+                                 averageNVCOMPCompressionTime,
+                                 averageNVCOMPDecompressionTime));
 
       writer.close();
    }
