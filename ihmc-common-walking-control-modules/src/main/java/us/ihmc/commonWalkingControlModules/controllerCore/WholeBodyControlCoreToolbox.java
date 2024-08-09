@@ -84,6 +84,10 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     */
    private ContactWrenchMatrixCalculator contactWrenchMatrixCalculator;
 
+   /**
+    * This is the base body, i.e. the rigid-body directly after the floating root joint.
+    * For instance, the pelvis for a humanoid robot, or the main body for a quadruped.
+    */
    private RigidBodyBasics vmcMainBody;
 
    private List<? extends ContactablePlaneBody> contactablePlaneBodies;

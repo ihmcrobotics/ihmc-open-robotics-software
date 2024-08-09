@@ -191,7 +191,7 @@ public class WholeBodyInverseKinematicsSolver implements SCS2YoGraphicHolder
                break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
-               recordMomentumRate((MomentumCommand) command);
+               recordMomentum((MomentumCommand) command);
                break;
             case MOMENTUM_CONVEX_CONSTRAINT:
                optimizationControlModule.submitLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) command);
@@ -221,7 +221,7 @@ public class WholeBodyInverseKinematicsSolver implements SCS2YoGraphicHolder
       inverseKinematicsCommandList.clear();
    }
 
-   private void recordMomentumRate(MomentumCommand command)
+   private void recordMomentum(MomentumCommand command)
    {
       DMatrixRMaj momentumRate = command.getMomentum();
       yoDesiredMomentumAngular.set(0, momentumRate);

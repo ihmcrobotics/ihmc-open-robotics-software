@@ -1,28 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ejml.data.DMatrixRMaj;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointTorqueAndPowerConstraintHandler;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -43,12 +23,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -64,6 +39,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 {
@@ -342,11 +321,9 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
       if (rootJoint != null)
       {
-         residualRootJointWrench.setIncludingFrame(rootJoint.getJointWrench());
-         residualRootJointTorque.setIncludingFrame(residualRootJointWrench.getAngularPart());
-         residualRootJointForce.setIncludingFrame(residualRootJointWrench.getLinearPart());
-         yoResidualRootJointForce.setMatchingFrame(residualRootJointForce);
-         yoResidualRootJointTorque.setMatchingFrame(residualRootJointTorque);
+         residualRootJointWrench.setIncludingFrame(inverseDynamicsCalculator.getComputedJointWrench(rootJoint));
+         yoResidualRootJointForce.setMatchingFrame(residualRootJointWrench.getAngularPart());
+         yoResidualRootJointTorque.setMatchingFrame(residualRootJointWrench.getLinearPart());
       }
 
       for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
@@ -465,8 +442,11 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             case EXTERNAL_WRENCH:
                optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
                if (useDynamicMatrixCalculatorForInverseDynamics.getValue())
+               {
+                  // TODO This command needs to processed BEFORE we call dynamicsMatrixCalculator.compute() which happens earlier.
                   dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(),
                                                              ((ExternalWrenchCommand) command).getExternalWrench());
+               }
                break;
             case CONTACT_WRENCH:
                optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);

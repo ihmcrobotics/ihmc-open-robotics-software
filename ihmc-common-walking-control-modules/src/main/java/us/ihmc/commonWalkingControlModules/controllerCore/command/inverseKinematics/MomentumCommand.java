@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -20,6 +17,8 @@ import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
+
+import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
 /**
  * {@link MomentumCommand} is a command meant to be submitted to the {@link WholeBodyControllerCore}
@@ -519,7 +518,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     *                          Modified.
     * @param linearPartToPack  frame vector to pack the desired linear momentum. Modified.
     */
-   public void getMomentumRate(FrameVector3DBasics angularPartToPack, FrameVector3DBasics linearPartToPack)
+   public void getMomentum(FrameVector3DBasics angularPartToPack, FrameVector3DBasics linearPartToPack)
    {
       angularPartToPack.setIncludingFrame(worldFrame, 0, momentum);
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentum);

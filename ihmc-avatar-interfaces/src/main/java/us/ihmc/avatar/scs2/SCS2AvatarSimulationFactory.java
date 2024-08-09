@@ -355,6 +355,8 @@ public class SCS2AvatarSimulationFactory
 
    private void setupKinematicsSimulationOutputWriter()
    {
+      // This is only for kinematics simulation (no physics engine, only double integration of the WBCC joint accelerations).
+      // This only works with default output writer.
       if (kinematicsSimulation.get() && simulationOutputWriter instanceof SCS2KinematicsSimulationOutputWriter kinematicsSimulationOutputWriter)
       {
          RootJointDesiredConfigurationDataReadOnly outputForRootJoint = highLevelHumanoidControllerFactory.get()

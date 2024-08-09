@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -895,7 +894,7 @@ public class MotionQPInputCalculator
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
-      commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
+      commandToConvert.getMomentum(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
       linearMomentum.changeFrame(centerOfMassFrame);
       angularMomentum.get(0, tempTaskObjective);
@@ -1109,6 +1108,9 @@ public class MotionQPInputCalculator
    /**
     * Sets up an objective for matching a desired set of joint torques. <br>
     * Given a desired torque vector tau_d, this task is: <br>
+    * <img src=
+    *  "https://latex.codecogs.com/png.latex?%5Cdpi%7B300%7D%20%5Cbegin%7Bbmatrix%7DM%5C%5C%28-J%5ET%20%5Cbeta%29%5Cend%7Bbmatrix%7D%5Cbegin%7Bbmatrix%7D%5Cddot%7Bq%7D%5C%5C%5Crho%5Cend%7Bbmatrix%7D%3D%5Ctau_d&plus;%28C%5Cdot%7Bq%7D&plus;G%29"
+    *  width=150px/>
     * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G) <br>
     *
     * @param jointTorqueCommand                 desired joint torque command to convert

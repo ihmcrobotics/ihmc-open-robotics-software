@@ -130,7 +130,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final RigidBodyTwistProvider rigidBodyTwistProvider;
    protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
-   protected final RigidBodyBasics rootBody;
    protected RigidBodyBasics base;
    protected ReferenceFrame controlBaseFrame;
    protected ReferenceFrame angularGainsFrame;
@@ -140,6 +139,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoSE3OffsetFrame controlFrame;
 
    protected final double dt;
+   /**
+    * This is to identify if this feedback controller is for the VMC root body, which is the direct successor of the floating root joint.
+    */
    protected final boolean isRootBody;
    protected final boolean computeIntegralTerm;
 
@@ -170,13 +172,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (ccToolbox.getRootJoint() != null)
       {
-         this.rootBody = ccToolbox.getRootJoint().getSuccessor();
+         RigidBodyBasics rootBody = ccToolbox.getRootJoint().getSuccessor();
          isRootBody = this.endEffector.getName().equals(rootBody.getName());
       }
       else
       {
          isRootBody = false;
-         rootBody = null;
       }
 
       rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
@@ -660,7 +661,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoCurrentRotationVector.setCommandId(currentCommandId);
 
       desiredPose.setIncludingFrame(yoDesiredPose);
-      desiredPose.changeFrame(controlFrame);
+      desiredPose.changeFrame(controlFrame); // From here, desiredPose actually contains the error
 
       desiredPose.getOrientation().normalizeAndLimitToPi();
       linearFeedbackTermToPack.setIncludingFrame(desiredPose.getPosition());

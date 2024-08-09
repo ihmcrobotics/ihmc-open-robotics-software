@@ -104,11 +104,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame angularGainsFrame;
 
-   private final RigidBodyBasics rootBody;
    private final RigidBodyBasics endEffector;
    private final YoOrientationFrame controlFrame;
 
    private final double dt;
+   /**
+    * This is to identify if this feedback controller is for the VMC root body, which is the direct successor of the floating root joint.
+    */
    private final boolean isRootBody;
    private final boolean computeIntegralTerm;
 
@@ -139,13 +141,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       if (ccToolbox.getRootJoint() != null)
       {
-         this.rootBody = ccToolbox.getRootJoint().getSuccessor();
+         RigidBodyBasics rootBody = ccToolbox.getRootJoint().getSuccessor();
          isRootBody = this.endEffector.getName().equals(rootBody.getName());
       }
       else
       {
          isRootBody = false;
-         rootBody = null;
       }
 
       rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();

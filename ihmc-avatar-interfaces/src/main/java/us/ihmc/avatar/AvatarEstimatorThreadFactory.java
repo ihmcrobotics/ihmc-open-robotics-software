@@ -1,12 +1,5 @@
 package us.ihmc.avatar;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -20,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,11 +26,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.sensors.*;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -70,6 +59,13 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class AvatarEstimatorThreadFactory
 {
@@ -169,13 +165,25 @@ public class AvatarEstimatorThreadFactory
     * </ul>
     *
     * @param robotModel        the robot model used to configure this factory.
-    * @param robotInitialSetup
     */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
       configureWithDRCRobotModel(robotModel, null);
    }
 
+   /**
+    * Configure this factory as follows:
+    * <ul>
+    * <li>Set the full-robot model using {@link DRCRobotModel#createFullRobotModel()}.
+    * <li>Set the controller parameters using {@link DRCRobotModel}.
+    * <li>Set the state estimator parameters using {@link DRCRobotModel#getStateEstimatorParameters()}.
+    * <li>Set the sensor information using {@link DRCRobotModel#getSensorInformation()}.
+    * <li>Set the contact point parameters using {@link DRCRobotModel#getContactPointParameters()}.
+    * </ul>
+    *
+    * @param robotModel        the robot model used to configure this factory.
+    * @param robotInitialSetup used to initialize the robot configuration. Can be {@code null}.
+    */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel, RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       configureWithWholeBodyControllerParameters(robotModel);

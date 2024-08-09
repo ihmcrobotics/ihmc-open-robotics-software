@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
@@ -22,7 +19,9 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OnToesState extends AbstractFootControlState
 {
@@ -45,9 +44,6 @@ public class OnToesState extends AbstractFootControlState
    private final DoubleParameter maxContactPointRate;
 
    private final YoBoolean usePointContact;
-   private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
-   private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
-
    private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final FrameLineSegment2D toeOffContactLine2d = new FrameLineSegment2D();
 
@@ -74,13 +70,6 @@ public class OnToesState extends AbstractFootControlState
 
       usePointContact = new YoBoolean(namePrefix + "UsePointContact", registry);
 
-      toeOffDesiredPitchAngle = new YoDouble(namePrefix + "ToeOffDesiredPitchAngle", registry);
-      toeOffDesiredPitchVelocity = new YoDouble(namePrefix + "ToeOffDesiredPitchVelocity", registry);
-      toeOffDesiredPitchAcceleration = new YoDouble(namePrefix + "ToeOffDesiredPitchAcceleration", registry);
-
-      toeOffCurrentPitchAngle = new YoDouble(namePrefix + "ToeOffCurrentPitchAngle", registry);
-      toeOffCurrentPitchVelocity = new YoDouble(namePrefix + "ToeOffCurrentPitchVelocity", registry);
-
       maxContactPointRate = new DoubleParameter("maxContactPointRate", registry, Double.POSITIVE_INFINITY);
       for (YoContactPoint contactPoint : contactPoints)
       {
@@ -91,13 +80,6 @@ public class OnToesState extends AbstractFootControlState
                                                                  controllerToolbox.getControlDT(),
                                                                  contactPoint.getReferenceFrame()));
       }
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
-
-      toeOffCurrentPitchAngle.set(Double.NaN);
-      toeOffCurrentPitchVelocity.set(Double.NaN);
 
       toeOffFrame = new TranslationReferenceFrame(namePrefix + "ToeOffFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
 
@@ -185,13 +167,7 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(soleZUpFrame);
       tempYawPitchRoll.set(desiredOrientation);
       // the current pitch can become NaN when it approaches pi/2
-      double currentPitch = tempYawPitchRoll.getPitch();
-      if (!Double.isNaN(currentPitch))
-      {
-         toeOffCurrentPitchAngle.set(tempYawPitchRoll.getPitch());
-      }
       contactableFoot.getFrameAfterParentJoint().getTwistOfFrame(footTwist);
-      toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
    }
 
    private void updateToeSlippingDetector()
@@ -199,12 +175,6 @@ public class OnToesState extends AbstractFootControlState
       ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
       if (toeSlippingDetector != null)
          toeSlippingDetector.update();
-   }
-
-   public void getDesireds(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
-   {
-      desiredOrientationToPack.setIncludingFrame(desiredOrientation);
-      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
    }
 
    private void setupSingleContactPoint()
@@ -295,13 +265,6 @@ public class OnToesState extends AbstractFootControlState
    public void onExit(double timeInState)
    {
       super.onExit(timeInState);
-
-      toeOffDesiredPitchAngle.set(Double.NaN);
-      toeOffDesiredPitchVelocity.set(Double.NaN);
-      toeOffDesiredPitchAcceleration.set(Double.NaN);
-
-      toeOffCurrentPitchAngle.set(Double.NaN);
-      toeOffCurrentPitchVelocity.set(Double.NaN);
 
       toeOffCalculator.clear();
 
