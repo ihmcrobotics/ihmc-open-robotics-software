@@ -14,7 +14,6 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
-   api("us.ihmc:ihmc-graphics-description:0.25.1")
 }
 
 testDependencies {

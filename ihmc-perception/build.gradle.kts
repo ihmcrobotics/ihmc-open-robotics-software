@@ -26,7 +26,6 @@ mainDependencies {
 
    api("org.georegression:georegression:0.22")
    api("net.java.dev.jna:jna:4.1.0")
-   api("org.boofcv:boofcv-geo:0.36")
    api("org.boofcv:boofcv-ip:0.36")
    api("org.boofcv:boofcv-swing:0.36")
    api("org.boofcv:boofcv-io:0.36")

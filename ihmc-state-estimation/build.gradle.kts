@@ -18,7 +18,6 @@ mainDependencies {
 
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ekf:0.7.7")
-   api("us.ihmc:ihmc-lord-microstrain-drivers:17-0.0.7")
 }
 
 testDependencies {

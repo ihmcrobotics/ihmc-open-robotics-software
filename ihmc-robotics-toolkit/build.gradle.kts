@@ -21,8 +21,6 @@ mainDependencies {
    api("org.apache.commons:commons-math3:3.6.1")
    api("jgraph:jgraph:5.13.0.0")
    api("org.ejml:ejml-zdense:0.39")
-   api("org.ejml:ejml-core:0.39")
-   api("org.ejml:ejml-ddense:0.39")
    api("org.javassist:javassist:3.18.1-GA")
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11

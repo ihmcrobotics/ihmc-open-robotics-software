@@ -13,9 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("javax.vecmath:vecmath:1.5.2")
-   api("org.georegression:georegression:0.22")
-
    api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:ihmc-whole-body-controller:source")
 }

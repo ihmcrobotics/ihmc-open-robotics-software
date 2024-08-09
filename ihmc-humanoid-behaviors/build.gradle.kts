@@ -13,12 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.thoughtworks.xstream:xstream:1.4.19")
-   api("org.georegression:georegression:0.22")
-   api("org.boofcv:boofcv-geo:0.36")
-   api("org.boofcv:boofcv-ip:0.36")
-   api("org.boofcv:boofcv-io:0.36")
-   api("org.boofcv:boofcv-recognition:0.36")
    api("org.postgresql:postgresql:42.2.5")
 
    api("us.ihmc:ihmc-manipulation-planning:source")

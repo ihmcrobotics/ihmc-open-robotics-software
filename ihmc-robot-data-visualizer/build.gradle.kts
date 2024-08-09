@@ -17,8 +17,6 @@ mainDependencies {
    api("com.martiansoftware:jsap:2.1")
    api("net.sourceforge.jmatio:jmatio:1.0")
 
-   api("us.ihmc:ihmc-video-codecs:2.1.6")
-   api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")

@@ -15,9 +15,7 @@ ihmc {
 
 mainDependencies {
    api("io.netty:netty:3.5.8.Final")
-   api("com.google.guava:guava:18.0")
    api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
-   api("org.reflections:reflections:0.9.10")
 
    api("org.apache.logging.log4j:log4j-1.2-api:2.17.0") // required for rosjava to log stuff
    api("org.ros.rosjava_core:rosjava:0.2.1") {
