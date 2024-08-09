@@ -21,13 +21,7 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.postgresql:postgresql:42.2.5")
 
-   api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:ihmc-manipulation-planning:source")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.1")
-   api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-perception:source")
    api("us.ihmc:ihmc-footstep-planning:source")
 }
 

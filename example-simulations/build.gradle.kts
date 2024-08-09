@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-quadruped-robotics:source")
 }
 

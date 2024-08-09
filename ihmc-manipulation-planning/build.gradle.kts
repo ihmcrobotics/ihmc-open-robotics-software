@@ -17,10 +17,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
 
    api("us.ihmc:simulation-construction-set:0.25.1")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
 testDependencies {

@@ -23,7 +23,6 @@ mainDependencies {
 }
 
 missionControlDependencies {
-   api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:ihmc-communication:source")
 }
 
@@ -32,9 +31,6 @@ libgdxDependencies {
    api(ihmc.sourceSetProject("mission-control"))
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-definition:17-0.26.0")
-   api("us.ihmc:mecano-graphviz:17-0.18.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
@@ -48,12 +44,6 @@ testDependencies {
    api("us.ihmc:scs2-examples:17-0.26.0")
    api("us.ihmc:scs2-bullet-simulation-test:17-0.26.0")
    api("us.ihmc:example-simulations:source")
-
-   api("us.ihmc:ihmc-avatar-interfaces:source") {
-      exclude(group = "org.openjfx")
-      exclude(group = "org.jmonkeyengine")
-      exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
-   }
 }
 
 app.entrypoint(ihmc.sourceSetProject("mission-control"),

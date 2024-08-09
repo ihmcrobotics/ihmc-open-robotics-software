@@ -25,8 +25,6 @@ mainDependencies {
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
    api("org.georegression:georegression:0.22")
-   api("org.ejml:ejml-core:0.39")
-   api("org.ejml:ejml-ddense:0.39")
    api("net.java.dev.jna:jna:4.1.0")
    api("org.boofcv:boofcv-geo:0.36")
    api("org.boofcv:boofcv-ip:0.36")
@@ -34,7 +32,6 @@ mainDependencies {
    api("org.boofcv:boofcv-io:0.36")
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.boofcv:boofcv-calibration:0.36")
-   api("org.ddogleg:ddogleg:0.18")
 
    api("org.bytedeco:javacpp:1.5.9")
    val openblasVersion = "0.3.23-1.5.9"
@@ -96,7 +93,6 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:robot-environment-awareness:source")
 
@@ -105,8 +101,6 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.32.0")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
