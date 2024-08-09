@@ -13,23 +13,11 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-humanoid-robotics:source")
-
-   api("us.ihmc:robot-environment-awareness:source")
-   api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robot-data-logger:0.29.1")
-   api("us.ihmc:ihmc-path-planning:source")
-
-   api("us.ihmc:ihmc-path-planning-data-sets:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-
-   api("us.ihmc:ihmc-quadruped-robotics:source")
-
    api("us.ihmc:ihmc-whole-body-controller:source")
 
-   api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
-   api("us.ihmc:ihmc-system-identification:source")
 }
 
 testDependencies {
