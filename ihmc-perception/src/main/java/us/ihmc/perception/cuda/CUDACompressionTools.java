@@ -39,7 +39,7 @@ public class CUDACompressionTools
 
    private final CUDAJPEGProcessor jpegEncoder = new CUDAJPEGProcessor();
 
-   CUDAJPEGProcessor lossyImageEncoder = new CUDAJPEGProcessor();
+   CUDAJPEGProcessor lossyImageEncoder = new CUDAJPEGProcessor(95);
 
    public CUDACompressionTools()
    {

@@ -41,10 +41,16 @@ public class CUDAJPEGProcessor
    private final nvjpegEncoderState encoderState;
    private final nvjpegEncoderParams encoderParameters;
 
+   public CUDAJPEGProcessor()
+   {
+      this(75);
+   }
+
    /**
     * Initialize necessary CUDA components
+    * @param quality value between 1 and 100 representing the quality of the jpeg image. 1 will result in the lowest quality, but highest compression.
     */
-   public CUDAJPEGProcessor()
+   public CUDAJPEGProcessor(int quality)
    {
       // Initialize stream
       cudaStream = CUDAStreamManager.getStream();
@@ -64,7 +70,7 @@ public class CUDAJPEGProcessor
       // Initialize encoder parameters
       encoderParameters = new nvjpegEncoderParams();
       checkNVJPEGError(nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
-      checkNVJPEGError(nvjpegEncoderParamsSetQuality(encoderParameters, 95, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsSetQuality(encoderParameters, quality, cudaStream));
    }
 
    /**
