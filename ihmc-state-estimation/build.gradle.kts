@@ -14,7 +14,7 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ekf:0.7.7")
+   api("us.ihmc:ekf:0.7.8")
 }
 
 testDependencies {
