@@ -16,9 +16,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("commons-net:commons-net:3.3")
-   api("org.yaml:snakeyaml:1.17") //1.11
-   api("org.apache.commons:commons-math3:3.6.1")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-robot-data-logger:0.29.1") {

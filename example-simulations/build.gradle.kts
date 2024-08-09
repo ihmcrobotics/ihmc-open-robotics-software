@@ -13,12 +13,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-quadruped-robotics:source")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-quadruped-robotics-test:source")
    api("us.ihmc:ihmc-quadruped-planning-test:source")

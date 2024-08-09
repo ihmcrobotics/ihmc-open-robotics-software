@@ -18,10 +18,8 @@ mainDependencies {
 
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ekf:0.7.7")
-   api("us.ihmc:ihmc-lord-microstrain-drivers:17-0.0.7")
 }
 
 testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

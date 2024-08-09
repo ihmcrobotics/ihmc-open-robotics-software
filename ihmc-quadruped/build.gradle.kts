@@ -59,8 +59,6 @@ footstepPlanningTestDependencies {
 
 communicationDependencies {
    api(ihmc.sourceSetProject("footstep-planning"))
-
-   api("us.ihmc:euclid-geometry:0.21.0")
 }
 
 communicationTestDependencies {
@@ -71,7 +69,8 @@ communicationTestDependencies {
 roboticsDependencies {
    api(ihmc.sourceSetProject("communication"))
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.19")
+   api("us.ihmc:ihmc-whole-body-controller:source")
+
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-system-identification:source")
@@ -81,7 +80,6 @@ roboticsTestDependencies {
    api(ihmc.sourceSetProject("robotics"))
    api(ihmc.sourceSetProject("basics-test"))
 
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-communication-test:source")
 }
