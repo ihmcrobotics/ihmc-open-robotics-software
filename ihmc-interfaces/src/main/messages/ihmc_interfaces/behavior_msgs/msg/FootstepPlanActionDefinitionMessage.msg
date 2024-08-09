@@ -50,4 +50,4 @@ byte planner_initial_stance_side
 bool planner_use_turn_walk_turn
 
 # The footstep planner parameters
-ihmc_common_msgs/StoredPropertySetPrimitivesMessage planner_parameters
+ihmc_common_msgs/PrimitiveDataVectorMessage planner_parameters

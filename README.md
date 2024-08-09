@@ -2,8 +2,8 @@
 
 ## Robots
 
-- [Nadia](https://boardwalkrobotics.com/Nadia.html)
-- [Alex](https://boardwalkrobotics.com/Alex.html)
+- [Nadia](https://boardwalkrobotics.com/)
+- [Alex](https://boardwalkrobotics.com/)
 
 ## Licensing
 

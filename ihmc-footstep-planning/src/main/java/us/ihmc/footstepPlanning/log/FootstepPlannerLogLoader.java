@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
@@ -41,7 +41,7 @@ public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
+   private final JSONSerializer<PrimitiveDataVectorMessage> bodyPathParametersSerializer = new JSONSerializer<>(new PrimitiveDataVectorMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 

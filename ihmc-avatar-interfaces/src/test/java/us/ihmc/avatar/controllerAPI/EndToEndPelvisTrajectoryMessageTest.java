@@ -75,7 +75,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -103,9 +103,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testSingleWaypoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       runSingleWaypointTest();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void runSingleWaypointTest()
@@ -212,7 +212,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testSingleWaypointAndAbort() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       runSingleWaypointTest();
 
       StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
@@ -221,13 +221,13 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testSingleWaypointAndWalk() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -340,7 +340,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testPelvisTranslationContinuityForResetting() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(564574L);
 
       DRCRobotModel robotModel = getRobotModel();
@@ -413,7 +413,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(453563);
 
@@ -617,7 +617,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
 
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
@@ -751,7 +751,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
 
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
@@ -973,7 +973,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testSixDoFMovementsOfPelvis()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              new FlatGroundEnvironment(),
@@ -1039,7 +1039,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testMultipleWaypoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -1195,7 +1195,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @SuppressWarnings("unchecked")
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -1281,7 +1281,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testSingleWaypointThenManualChange() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -1335,7 +1335,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

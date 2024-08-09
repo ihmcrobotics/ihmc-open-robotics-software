@@ -1,0 +1,42 @@
+name: _gradle_base_nvidia
+
+on:
+  workflow_call:
+    inputs:
+      subproject:
+        description: 'Subproject'
+        required: true
+        type: string
+        default: 'atlas'
+      test-category:
+        description: 'Test category'
+        required: false
+        type: string
+        default: 'fast'
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: [self-hosted, Linux, nvidia]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check nvidia-smi
+        run: |
+          nvidia-smi
+
+      - name: Gradle test - ${{ inputs.test-category }}
+        run: |
+          cd ${{ inputs.subproject }}
+          gradle test -Pcategory=${{ inputs.test-category }} --info --no-daemon -PrunningOnCIServer=true
+      - name: Publish Test Report - ${{ inputs.test-category }}
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          detailed_summary: true

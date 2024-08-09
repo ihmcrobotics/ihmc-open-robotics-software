@@ -79,7 +79,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * The footstep planner parameters
             */
-   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage planner_parameters_;
+   public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage planner_parameters_;
 
    public FootstepPlanActionDefinitionMessage()
    {
@@ -88,7 +88,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
       goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      planner_parameters_ = new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage();
+      planner_parameters_ = new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage();
 
    }
 
@@ -131,7 +131,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       planner_use_turn_walk_turn_ = other.planner_use_turn_walk_turn_;
 
-      ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
+      ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
    }
 
 
@@ -378,7 +378,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    /**
             * The footstep planner parameters
             */
-   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage getPlannerParameters()
+   public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage getPlannerParameters()
    {
       return planner_parameters_;
    }

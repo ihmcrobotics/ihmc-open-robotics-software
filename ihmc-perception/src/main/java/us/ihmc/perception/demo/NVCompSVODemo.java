@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,10 +54,10 @@ public class NVCompSVODemo extends NVCompDemo
    private final Map<String, List<Double>> managerToCompressionTimeMapDepth = new TreeMap<>();
    private final Map<String, List<Double>> managerToDecompressionTimeMapDepth = new TreeMap<>();
 
-   private final CUDAImageEncoder cudaImageEncoder = new CUDAImageEncoder();
-   private final List<Double> cudaImageEncoderCompressionRatios = new ArrayList<>();
-   private final List<Double> cudaImageEncoderCompressionTimes = new ArrayList<>();
-   private final List<Double> cudaImageEncoderDecompressionTimes = new ArrayList<>();
+   private final CUDAJPEGProcessor CUDAJPEGProcessor = new CUDAJPEGProcessor();
+   private final List<Double> CUDAJPEGProcessorCompressionRatios = new ArrayList<>();
+   private final List<Double> CUDAJPEGProcessorCompressionTimes = new ArrayList<>();
+   private final List<Double> CUDAJPEGProcessorDecompressionTimes = new ArrayList<>();
 
    private final List<Double> opencvToolsColorCompressionRatios = new ArrayList<>();
    private final List<Double> opencvToolsColorCompressionTimes = new ArrayList<>();
@@ -110,7 +110,7 @@ public class NVCompSVODemo extends NVCompDemo
          colorImage.getGpuImageMat();
 
          collectColorData(colorImage);
-         collectCUDAImageEncoderData(colorImage);
+         collectCUDAJPEGProcessorData(colorImage);
          collectOpenCVToolsColorData(colorImage);
 
          collectDepthData(depthImage);
@@ -199,7 +199,7 @@ public class NVCompSVODemo extends NVCompDemo
       }
    }
 
-   private void collectCUDAImageEncoderData(RawImage rawImage)
+   private void collectCUDAJPEGProcessorData(RawImage rawImage)
    {
       Stopwatch stopwatch = new Stopwatch();
       Mat image = rawImage.getCpuImageMat();
@@ -207,11 +207,7 @@ public class NVCompSVODemo extends NVCompDemo
 
       BytePointer compressedImageData = new BytePointer(imageSize);
       stopwatch.start();
-      cudaImageEncoder.encodeBGR(rawImage.getGpuImageMat().data(),
-                                 compressedImageData,
-                                 rawImage.getImageWidth(),
-                                 rawImage.getImageHeight(),
-                                 rawImage.getGpuImageMat().step());
+      CUDAJPEGProcessor.encodeBGR(rawImage.getGpuImageMat(), compressedImageData);
       double compressionTime = stopwatch.lap();
       Mat compressedImage = new Mat(compressedImageData);
       Mat decompressedImage = new Mat(image.size(), image.type());
@@ -220,9 +216,9 @@ public class NVCompSVODemo extends NVCompDemo
 
       double compressionRatio = (double) imageSize / compressedImageData.limit();
 
-      cudaImageEncoderCompressionRatios.add(compressionRatio);
-      cudaImageEncoderCompressionTimes.add(compressionTime);
-      cudaImageEncoderDecompressionTimes.add(decompressionTime);
+      CUDAJPEGProcessorCompressionRatios.add(compressionRatio);
+      CUDAJPEGProcessorCompressionTimes.add(compressionTime);
+      CUDAJPEGProcessorDecompressionTimes.add(decompressionTime);
 
       compressedImageData.close();
       compressedImage.close();
@@ -329,12 +325,12 @@ public class NVCompSVODemo extends NVCompDemo
                                  opencvToolsAverageDepthCompressionTimes,
                                  opencvToolsAverageDepthDecompressionTimes));
 
-      double averageCUDACompressionRatio = getAverage(cudaImageEncoderCompressionRatios);
-      double averageCUDACompressionTime = getAverage(cudaImageEncoderCompressionTimes);
-      double averageCUDADecompressionTime = getAverage(cudaImageEncoderDecompressionTimes);
+      double averageCUDACompressionRatio = getAverage(CUDAJPEGProcessorCompressionRatios);
+      double averageCUDACompressionTime = getAverage(CUDAJPEGProcessorCompressionTimes);
+      double averageCUDADecompressionTime = getAverage(CUDAJPEGProcessorDecompressionTimes);
 
       writer.write(String.format("%s,%f,%f,%f,,,\n",
-                   "CUDAImageEncoder",
+                   "CUDAJPEGProcessor",
                    averageCUDACompressionRatio,
                    averageCUDACompressionTime,
                    averageCUDADecompressionTime));

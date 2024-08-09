@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class StoredPropertySetROS2Input
 {
-   private final TypedNotification<StoredPropertySetMessage> receptionNotification = new TypedNotification<>();
+   private final TypedNotification<PrimitiveDataVectorMessage> receptionNotification = new TypedNotification<>();
    private boolean waitingForUpdate = true;
    private boolean isUpdateAvailable = false;
    private final StoredPropertySetBasics storedPropertySetToUpdate;
@@ -34,14 +34,14 @@ public class StoredPropertySetROS2Input
    private long numberOfMessagesReceived = 0;
 
    public StoredPropertySetROS2Input(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
-                                     ROS2Topic<StoredPropertySetMessage> inputTopic,
+                                     ROS2Topic<PrimitiveDataVectorMessage> inputTopic,
                                      StoredPropertySetBasics storedPropertySetToUpdate)
    {
       this.storedPropertySetToUpdate = storedPropertySetToUpdate;
       ros2PublishSubscribeAPI.subscribeViaCallback(inputTopic, this::acceptMessage);
    }
 
-   private void acceptMessage(StoredPropertySetMessage message)
+   private void acceptMessage(PrimitiveDataVectorMessage message)
    {
       receptionNotification.set(message);
       ++numberOfMessagesReceived;

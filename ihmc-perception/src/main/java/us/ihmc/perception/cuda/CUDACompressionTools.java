@@ -38,9 +38,9 @@ public class CUDACompressionTools
    private final PimplManager compressionManager;
    private final nvcompBatchedZstdOpts_t zstdOptions;
 
-   private final CUDAImageEncoder jpegEncoder = new CUDAImageEncoder();
+   private final CUDAJPEGProcessor jpegEncoder = new CUDAJPEGProcessor();
 
-   CUDAImageEncoder lossyImageEncoder = new CUDAImageEncoder();
+   CUDAJPEGProcessor lossyImageEncoder = new CUDAJPEGProcessor();
 
    public CUDACompressionTools()
    {

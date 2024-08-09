@@ -4,7 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
-#include "ihmc_common_msgs/msg/./StoredPropertySetPrimitivesMessage_.idl"
+#include "ihmc_common_msgs/msg/./PrimitiveDataVectorMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -86,7 +86,7 @@ module behavior_msgs
         /**
          * The footstep planner parameters
          */
-        ihmc_common_msgs::msg::dds::StoredPropertySetPrimitivesMessage planner_parameters;
+        ihmc_common_msgs::msg::dds::PrimitiveDataVectorMessage planner_parameters;
       };
     };
   };

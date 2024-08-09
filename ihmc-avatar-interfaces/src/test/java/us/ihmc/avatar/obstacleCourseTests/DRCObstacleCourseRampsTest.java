@@ -35,7 +35,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimFloatingJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -72,7 +72,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    @Test
    public void testWalkingUpRampWithShortSteps()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.SHORT);
 
       Point3D center = new Point3D(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
@@ -80,13 +80,13 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingDownRampWithMediumSteps()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_TOP;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -112,7 +112,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && simulationTestHelper.simulateNow(totalDuration);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -122,13 +123,13 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingUpRampWithMediumSteps()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.MEDIUM);
 
       Point3D center = new Point3D(7.579638943201888, 0.020725665285290903, 1.46537366331119);
@@ -136,13 +137,13 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooHigh()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3D minLocationCorruption = new Vector3D(0.0, 0.0, 0.0);
       Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.04);
@@ -156,13 +157,13 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testWalkingUpRampWithShortStepsALittleTooLow()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3D minLocationCorruption = new Vector3D(0.0, 0.0, -0.06);
       Vector3D maxLocationCorruption = new Vector3D(0.0, 0.0, 0.0);
@@ -176,7 +177,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private enum StepLength
@@ -186,7 +187,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
    public void testHeightReinitialization()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setRunMultiThreaded(true);
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
@@ -289,7 +290,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && simulationTestHelper.simulateNow(totalDuration);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
 //      simulationTestHelper.checkNothingChanged();
       assertTrue(success);

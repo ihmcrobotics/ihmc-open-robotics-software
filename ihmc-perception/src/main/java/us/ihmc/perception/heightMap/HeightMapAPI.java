@@ -1,7 +1,5 @@
 package us.ihmc.perception.heightMap;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
-import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.ros2.ROS2Topic;
