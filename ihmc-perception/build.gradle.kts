@@ -96,17 +96,8 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:euclid:0.21.0")
-   api("us.ihmc:simulation-construction-set:0.25.1")
-   api("us.ihmc:ihmc-native-library-loader:2.0.3")
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-sensor-processing:source")
-   api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
 
    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")

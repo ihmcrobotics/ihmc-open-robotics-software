@@ -27,11 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
-   api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.19")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-java-toolkit:source")
-//   api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
 }

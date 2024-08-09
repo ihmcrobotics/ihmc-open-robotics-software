@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.21.0")
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:simulation-construction-set:0.25.1")

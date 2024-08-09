@@ -23,12 +23,7 @@ mainDependencies {
 }
 
 missionControlDependencies {
-   api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.24.2")
-   api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-communication:source")
 }
 
@@ -86,7 +81,7 @@ tasks.create("deploy") {
          // Delete mission-control-2 if it's still around
          exec("sudo systemctl stop mission-control-2")
          exec("sudo systemctl disable mission-control-2")
-         exec("sudo rm -rf /etc/systemd/system/mission-control-2.service");
+         exec("sudo rm -rf /etc/systemd/system/mission-control-2.service")
 
          exec("sudo systemctl stop mission-control-3")
 
