@@ -5,10 +5,11 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.junit.jupiter.api.Disabled;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -24,7 +25,6 @@ public class CUDACompressionToolsTest
    private static final WorkspaceFile zedColorBGRFile = new WorkspaceFile(resourceDirectory, "zedColorBGR.raw");
    private static final WorkspaceFile zedDepth16UFile = new WorkspaceFile(resourceDirectory, "zedDepth16U.raw");
 
-   @Disabled
    @Test
    public void testCPUDepthCompressionDecompression() throws IOException
    {
@@ -43,11 +43,11 @@ public class CUDACompressionToolsTest
       Mat decompressedDepth = new Mat(depthImage.size(), depthImage.type());
       compressor.decompressDepth(compressedLSBData, compressedMSBData, compressedMSBData.limit(), decompressedDepth);
 
-      PerceptionDebugTools.display("Original", depthImage, 30000);
-      PerceptionDebugTools.display("Decompressed", decompressedDepth, 30000);
+      double averageDifference = averagePixelDifference(depthImage, decompressedDepth);
+      LogTools.info("Difference Ratio: {}", averageDifference);
+      assertTrue(averageDifference < 1.0); // On average, decoded pixels differ less than 1mm from the original
    }
 
-   @Disabled
    @Test
    public void testGPUDepthCompressionDecompression() throws IOException
    {
@@ -58,20 +58,23 @@ public class CUDACompressionToolsTest
       gpuDepthImage.upload(depthImage);
 
       CUDACompressionTools compressor = new CUDACompressionTools();
-      BytePointer compressedLSBData = new BytePointer();
+      BytePointer compressedLSBData = new BytePointer(originalDataSize);
       BytePointer compressedMSBData = new BytePointer();
       compressor.compressDepth(gpuDepthImage, compressedLSBData, compressedMSBData);
 
       // Sum of data size should be less than original data
       assertTrue(compressedLSBData.limit() + compressedMSBData.limit() < originalDataSize);
 
-      Mat decompressedDepth = new Mat(depthImage.size(), depthImage.type());
-      compressor.decompressDepth(compressedLSBData, compressedMSBData, compressedMSBData.limit(), decompressedDepth);
+      GpuMat decompressedDepth = new GpuMat(depthImage.size(), depthImage.type());
+      compressor.decompressDepth(compressedLSBData, compressedLSBData.limit(), compressedMSBData, compressedMSBData.limit(), decompressedDepth);
 
-      PerceptionDebugTools.display("Original", depthImage, 30000);
-      PerceptionDebugTools.display("Decompressed", decompressedDepth, 30000);
+      Mat cpuDecompressedDepth = new Mat(720, 1280, opencv_core.CV_16UC1, new Scalar(0.0));
+      decompressedDepth.download(cpuDecompressedDepth);
+      double averageDifference = averagePixelDifference(depthImage, cpuDecompressedDepth);
+      LogTools.info("Difference Ratio: {}", averageDifference);
+      assertTrue(averageDifference < 1.0); // On average, decoded pixels differ less than 1mm from the original
+
    }
-
 
    @Test
    public void testBasicCompression() throws IOException
@@ -193,5 +196,27 @@ public class CUDACompressionToolsTest
       }
 
       return true;
+   }
+
+   private double averagePixelDifference(Mat matA, Mat matB)
+   {
+      if (!OpenCVTools.dimensionsMatch(matA, matB))
+         return 1.0;
+
+      if (OpenCVTools.dataSize(matA) != OpenCVTools.dataSize(matB))
+         return 1.0;
+
+      try (Mat differenceMat = new Mat();)
+      {
+         // Find absolute difference for each element
+         opencv_core.absdiff(matA, matB, differenceMat);
+
+         // Find the sum of the differences
+         double totalDifference = opencv_core.sumElems(differenceMat).get();
+
+         // Divide total difference by max difference (255 * total elements)
+         double differenceRatio = totalDifference / matA.total();
+         return differenceRatio;
+      }
    }
 }

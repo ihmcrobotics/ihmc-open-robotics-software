@@ -64,6 +64,7 @@ public class CUDAJPEGProcessor
       // Initialize encoder parameters
       encoderParameters = new nvjpegEncoderParams();
       checkNVJPEGError(nvjpegEncoderParamsCreate(nvjpegHandle, encoderParameters, cudaStream));
+      checkNVJPEGError(nvjpegEncoderParamsSetQuality(encoderParameters, 95, cudaStream));
    }
 
    /**
@@ -198,7 +199,6 @@ public class CUDAJPEGProcessor
     * @param imageToEncode          the BGR image to encode
     * @param imageWidth             width of the source image
     * @param imageHeight            height of the source image
-    * @param elementSize            element size (in bytes) of the source image
     * @param imagePitch             pitch (aka step in OpenCV land) of the source image
     * @param interleavedInputFormat either NVJPEG_INPUT_BGRI or NVJPEG_INPUT_RGBI
     * @param encodedImage           output pointer for encoded data
@@ -361,6 +361,52 @@ public class CUDAJPEGProcessor
          checkCUDAError(cudaFreeHost(decodedChannels.get(i)));
          decodedChannels.get(i).close();
       }
+   }
+
+   public void decodeToGray(BytePointer encodedImage, long encodedImageSize, Mat decodedImage)
+   {
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
+
+      // Allocate host memory for the decoded image
+      long decodedImageSize = getOutputChannelSizes(NVJPEG_OUTPUT_Y, imageInfo)[0];
+      List<BytePointer> decodedData = new ArrayList<>();
+      decodedData.add(new BytePointer());
+      checkCUDAError(cudaMallocHost(decodedData.get(0), decodedImageSize));
+
+      // Decode only Y plane (luminosity)
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_Y, decodedData);
+
+      // Copy result into output image
+      Mat decodingResult = new Mat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC1, decodedData.get(0));
+      decodingResult.copyTo(decodedImage);
+
+      // Free all memory
+      checkCUDAError(cudaFreeHost(decodedData.get(0)));
+      decodedData.get(0).close();
+      decodingResult.close();
+   }
+
+   public void decodeToGray(BytePointer encodedImage, long encodedImageSize, GpuMat decodedImage)
+   {
+      NVJPEGImageInfo imageInfo = getImageInfo(encodedImage, encodedImageSize);
+
+      // Allocate host memory for the decoded image
+      long decodedImageSize = getOutputChannelSizes(NVJPEG_OUTPUT_Y, imageInfo)[0];
+      List<BytePointer> decodedData = new ArrayList<>();
+      decodedData.add(new BytePointer());
+      checkCUDAError(cudaMallocAsync(decodedData.get(0), decodedImageSize, cudaStream));
+
+      // Decode only Y plane (luminosity)
+      decodeImage(encodedImage, encodedImageSize, imageInfo, NVJPEG_OUTPUT_Y, decodedData);
+
+      // Copy result into output image
+      GpuMat decodingResult = new GpuMat(imageInfo.height(0), imageInfo.width(0), opencv_core.CV_8UC1, decodedData.get(0));
+      decodingResult.copyTo(decodedImage);
+
+      // Free all memory
+      checkCUDAError(cudaFreeAsync(decodedData.get(0), cudaStream));
+      decodedData.get(0).close();
+      decodingResult.close();
    }
 
    /**
