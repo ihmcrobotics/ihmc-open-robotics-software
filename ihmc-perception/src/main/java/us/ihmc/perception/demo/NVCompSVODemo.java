@@ -239,23 +239,20 @@ public class NVCompSVODemo extends NVCompDemo
       Mat image = depthImage.getCpuImageMat();
       long imageSize = image.elemSize() * image.total();
 
-      BytePointer compressedMSBData = new BytePointer(imageSize);
-      BytePointer compressedLSBData = new BytePointer(imageSize);
       stopwatch.start();
-      compressionTools.compressDepth(depthImage.getGpuImageMat(), compressedLSBData, compressedMSBData);
+      BytePointer compressedDepth = compressionTools.compressDepth(depthImage.getGpuImageMat());
       double compressionTime = stopwatch.lap();
       GpuMat decompressedImage = new GpuMat(image.size(), image.type());
-      compressionTools.decompressDepth(compressedLSBData, compressedLSBData.limit(), compressedMSBData, compressedMSBData.limit(), decompressedImage);
+      compressionTools.decompressDepth(compressedDepth, decompressedImage);
       double decompressionTime = stopwatch.lap();
 
-      double compressionRatio = (double) imageSize / (compressedMSBData.limit() + compressedLSBData.limit());
+      double compressionRatio = (double) imageSize / compressedDepth.limit();
 
       nvCOMPCompressionRatios.add(compressionRatio);
       nvCOMPCompressionTimes.add(compressionTime);
       nvCOMPDecompressionTimes.add(decompressionTime);
 
-      compressedMSBData.close();
-      compressedLSBData.close();
+      compressedDepth.close();
       decompressedImage.close();
    }
 

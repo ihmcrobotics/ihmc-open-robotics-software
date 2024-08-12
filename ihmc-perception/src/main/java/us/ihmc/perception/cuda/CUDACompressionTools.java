@@ -16,7 +16,6 @@ import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -36,17 +35,14 @@ public class CUDACompressionTools
    private final CUstream_st stream;
 
    private final PimplManager compressionManager;
-   private final nvcompBatchedZstdOpts_t zstdOptions;
 
-   private final CUDAJPEGProcessor jpegEncoder = new CUDAJPEGProcessor();
-
-   CUDAJPEGProcessor lossyImageEncoder = new CUDAJPEGProcessor(95);
+   private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(95);
 
    public CUDACompressionTools()
    {
       stream = CUDAStreamManager.getStream();
 
-      zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
+      nvcompBatchedZstdOpts_t zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
       compressionManager = new ZstdManager(CHUNK_SIZE, zstdOptions, stream, 0, nvcomp.NoComputeNoVerify);
 
       depthMSBExtractorGPU.upload(depthMSBExtractorCPU);
@@ -58,7 +54,7 @@ public class CUDACompressionTools
       checkCUDAError(cudaStreamSynchronize(stream));
       CUDAStreamManager.releaseStream(stream);
       compressionManager.close();
-      lossyImageEncoder.destroy();
+      jpegProcessor.destroy();
 
       depthMSBExtractorCPU.close();
       depthLSBExtractorCPU.close();
@@ -66,12 +62,12 @@ public class CUDACompressionTools
       depthLSBExtractorGPU.close();
    }
 
-   public long compress(Mat mat, BytePointer compressedData)
+   public BytePointer compress(Mat mat)
    {
-      return compress(mat.data(), OpenCVTools.dataSize(mat), compressedData);
+      return compress(mat.data(), OpenCVTools.dataSize(mat));
    }
 
-   public long compress(GpuMat gpuMat, BytePointer compressedData)
+   public BytePointer compress(GpuMat gpuMat)
    {
       long rowSize = gpuMat.elemSize() * gpuMat.cols();
 
@@ -79,88 +75,142 @@ public class CUDACompressionTools
       checkCUDAError(cudaMallocAsync(gpuMatData, OpenCVTools.dataSize(gpuMat), stream));
       checkCUDAError(cudaMemcpy2DAsync(gpuMatData, rowSize, gpuMat.data(), gpuMat.step(), rowSize, gpuMat.rows(), cudaMemcpyDefault, stream));
 
-      long compressedSize = compress(gpuMatData, OpenCVTools.dataSize(gpuMat), compressedData);
+      BytePointer compressedData = compress(gpuMatData, OpenCVTools.dataSize(gpuMat));
 
       checkCUDAError(cudaFreeAsync(gpuMatData, stream));
       gpuMatData.close();
 
-      return compressedSize;
+      return compressedData;
    }
 
    /**
-    * Compresses data using the provided compression manager.
-    * @param data INPUT: Pointer to data to be compressed (can point to host or device memory)
-    * @param dataSize INPUT: Size of data to compress, in bytes
-    * @param compressedData OUTPUT: Pointer to compressed data (must be a host pointer). MUST BE FREED USING {@link cudart#cudaFreeHost(Pointer)}.
-    * @return Size of compressed data, in bytes.
+    * Compresses data using a lossless method
+    * @param data Pointer to data to be compressed (can point to host or device memory)
+    * @param dataSize Size of data to compress, in bytes
+    * @return BytePointer to compressed data, with limit set as the size of the compressed data.
     */
-   public long compress(BytePointer data, long dataSize, BytePointer compressedData)
+   public BytePointer compress(BytePointer data, long dataSize)
    {
-      return compress(data, dataSize, compressedData, compressionManager, stream);
+      return compress(data, dataSize, compressionManager, stream);
    }
 
    /**
-    * Decompresses data using a new compression manager.
-    * @param compressedData INPUT: Pointer to compressed data (can point to host or device memory)
-    * @param compressedDataSize INPUT: Size of the compressed data, in bytes
-    * @param decompressedData OUTPUT: Pointer to decompressed data (must be a host pointer). MUST BE FREED USING {@link cudart#cudaFreeHost(Pointer)}.
-    * @return Size of decompressed data, in bytes.
+    * Decompress data which was compressed using nvCOMP
+    * @param compressedData Pointer to compressed data (can point to host or device memory)
+    * @param compressedDataSize Size of the compressed data, in bytes
+    * @return BytePointer to decompressed data, with limit set as the size of the decompressed data
     */
-   public long decompress(BytePointer compressedData, long compressedDataSize, BytePointer decompressedData)
+   public BytePointer decompress(BytePointer compressedData, long compressedDataSize)
    {
-      return decompress(compressedData, compressedDataSize, decompressedData, stream);
+      return decompress(compressedData, compressedDataSize, false, stream);
    }
 
-   public void compressDepth(Mat depthImage, BytePointer compressedLSBData, BytePointer compressedMSBData)
+   /**
+    * Compresses depth using a half lossy, half lossless method.
+    * Given a 16 bit depth image, the 8 most significant bits are compressed using a lossless method
+    * and the 8 least significant bits are compressed using a lossy method.
+    * This allows for a higher compression ratio, while maintaining a reasonably high quality of depth data.
+    * @param depthImage The depth image to compress
+    * @return BytePointer to compressed depth data.
+    */
+   public BytePointer compressDepth(Mat depthImage)
    {
-      try (Mat depthLSB = new Mat(depthImage.size(), opencv_core.CV_16UC1);
-           Mat depthMSB = new Mat(depthImage.size(), opencv_core.CV_16UC1))
+      try (Mat depthLSB = extractDepthLSB(depthImage);
+           Mat depthMSB = extractDepthMSB(depthImage);
+           BytePointer compressedMSBData = compress(depthMSB);
+           BytePointer compressedLSBData = new BytePointer())
       {
-         // Ensure extractor dimensions match
-         if (!OpenCVTools.dimensionsMatch(depthImage, depthLSBExtractorCPU))
-            opencv_imgproc.resize(depthLSBExtractorCPU, depthLSBExtractorCPU, depthImage.size());
-         if (!OpenCVTools.dimensionsMatch(depthImage, depthMSBExtractorCPU))
-            opencv_imgproc.resize(depthMSBExtractorCPU, depthMSBExtractorCPU, depthImage.size());
-
-         // Bitwise and to leave only wanted bits
-         opencv_core.bitwise_and(depthImage, depthLSBExtractorCPU, depthLSB);
-         opencv_core.bitwise_and(depthImage, depthMSBExtractorCPU, depthMSB);
-
-         // Convert to 8 bit type
-         depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
-         depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
-
-         // Use lossless compression for MSB
-         compress(depthMSB, compressedMSBData);
-
-         // Use lossy compression for LSB
          opencv_imgcodecs.imencode(".jpg", depthLSB, compressedLSBData);
 
-         checkCUDAError(cudaFreeHost(compressedMSBData));
+         return packCompressedDepth(compressedMSBData, compressedLSBData);
       }
    }
 
-   public void compressDepth(GpuMat depthImage, BytePointer compressedLSBData, BytePointer compressedMSBData)
-   {
-      try (GpuMat depthLSB = extractDepthLSB(depthImage);
-           GpuMat depthMSB = extractDepthMSB(depthImage))
-      {
-         compress(depthMSB, compressedMSBData);
-         jpegEncoder.encodeGray(depthLSB, compressedLSBData);
-         checkCUDAError(cudaFreeHost(compressedMSBData));
-      }
-   }
-
-   public void compressDepthLossy(GpuMat depthImage, BytePointer compressedDepthData)
+   /**
+    * Compresses depth using a half lossy, half lossless method.
+    * Given a 16 bit depth image, the 8 most significant bits are compressed using a lossless method
+    * and the 8 least significant bits are compressed using a lossy method.
+    * This allows for a higher compression ratio, while maintaining a reasonably high quality of depth data.
+    * @param depthImage The depth image to compress
+    * @return BytePointer to compressed depth data.
+    */
+   public BytePointer compressDepth(GpuMat depthImage)
    {
       try (GpuMat depthLSB = extractDepthLSB(depthImage);
            GpuMat depthMSB = extractDepthMSB(depthImage);
-           GpuMat zeros = new GpuMat(depthImage.size(), opencv_core.CV_8UC1, new Scalar(0.0));
-           GpuMat bgrDepth = new GpuMat(depthImage.size(), opencv_core.CV_8UC3);)
+           BytePointer compressedMSBData = compress(depthMSB);
+           BytePointer compressedLSBData = new BytePointer(OpenCVTools.dataSize(depthLSB)))
       {
-         opencv_cudaarithm.merge(new GpuMatVector(depthMSB, depthLSB, zeros), bgrDepth);
-         jpegEncoder.encodeBGR(bgrDepth, compressedDepthData);
+         jpegProcessor.encodeGray(depthLSB, compressedLSBData);
+
+         return packCompressedDepth(compressedMSBData, compressedLSBData);
       }
+   }
+
+   /**
+    * Given compressed depth data acquired through {@link #compressDepth(Mat)}, decompresses the data into a depth image
+    * @param compressedDepthData Compressed depth data acquired through {@link #compressDepth(Mat)}.
+    * @param decompressedDepth Mat into which decompressed depth is packed. Must be allocated with correct dimensions.
+    */
+   public void decompressDepth(BytePointer compressedDepthData, Mat decompressedDepth)
+   {
+      BytePointer[] depthData = unpackCompressedDepth(compressedDepthData);
+      try (Mat compressedLSBMat = new Mat(depthData[1]);
+           BytePointer decompressedMSBData = decompress(depthData[0], depthData[0].limit());
+           Mat decompressedLSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1))
+      {
+         opencv_imgcodecs.imdecode(compressedLSBMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedLSBMat);
+
+         Mat decompressedMSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
+
+         decompressedLSBMat.convertTo(decompressedLSBMat, opencv_core.CV_16UC1);
+         decompressedMSBMat.convertTo(decompressedMSBMat, opencv_core.CV_16UC1, 256.0, 0.0);
+
+         opencv_core.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
+
+         decompressedMSBMat.close();
+      }
+
+      for (BytePointer data : depthData)
+         data.close();
+   }
+
+   /**
+    * Given compressed depth data acquired through {@link #compressDepth(Mat)}, decompresses the data into a depth image
+    * @param compressedDepthData Compressed depth data acquired through {@link #compressDepth(Mat)}.
+    * @param decompressedDepth GpuMat into which decompressed depth is packed. Must be allocated with correct dimensions.
+    */
+   public void decompressDepth(BytePointer compressedDepthData, GpuMat decompressedDepth)
+   {
+      BytePointer[] depthData = unpackCompressedDepth(compressedDepthData);
+
+      try (BytePointer decompressedMSBData = decompress(depthData[0], depthData[0].limit(), true, stream);
+           GpuMat decompressedMSBMat = new GpuMat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
+           GpuMat decompressedLSBMat = new GpuMat(decompressedDepth.size(), opencv_core.CV_8UC1))
+      {
+         jpegProcessor.decodeToGray(depthData[1], depthData[1].limit(), decompressedLSBMat);
+
+         decompressedLSBMat.convertTo(decompressedLSBMat, opencv_core.CV_16UC1);
+         decompressedMSBMat.convertTo(decompressedMSBMat, opencv_core.CV_16UC1, 256.0, 0.0);
+
+         opencv_cudaarithm.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
+
+         cudaFreeAsync(decompressedMSBData, stream);
+      }
+
+      for (BytePointer data : depthData)
+         data.close();
+   }
+
+   private Mat extractDepthLSB(Mat depthImage)
+   {
+      if (!OpenCVTools.dimensionsMatch(depthLSBExtractorCPU, depthImage))
+         opencv_imgproc.resize(depthLSBExtractorCPU, depthLSBExtractorCPU, depthImage.size());
+
+      Mat depthLSB = new Mat();
+      opencv_core.bitwise_and(depthImage, depthLSBExtractorCPU, depthLSB);
+      depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
+      return depthLSB;
    }
 
    private GpuMat extractDepthLSB(GpuMat depthImage)
@@ -178,6 +228,17 @@ public class CUDACompressionTools
       return depthLSB;
    }
 
+   private Mat extractDepthMSB(Mat depthImage)
+   {
+      if (!OpenCVTools.dimensionsMatch(depthMSBExtractorCPU, depthImage))
+         opencv_imgproc.resize(depthMSBExtractorCPU, depthMSBExtractorCPU, depthImage.size());
+
+      Mat depthMSB = new Mat();
+      opencv_core.bitwise_and(depthImage, depthMSBExtractorCPU, depthMSB);
+      depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
+      return depthMSB;
+   }
+
    private GpuMat extractDepthMSB(GpuMat depthImage)
    {
       if (!OpenCVTools.dimensionsMatch(depthMSBExtractorCPU, depthImage))
@@ -189,62 +250,68 @@ public class CUDACompressionTools
       GpuMat depthMSB = new GpuMat();
       opencv_cudaarithm.bitwise_and(depthImage, depthMSBExtractorGPU, depthMSB);
       depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
-
       return depthMSB;
    }
 
-   public void decompressDepth(BytePointer compressedLSBData, BytePointer compressedMSBData, long msbDataSize, Mat decompressedDepth)
+   private BytePointer packCompressedDepth(BytePointer depthMSB, BytePointer depthLSB)
    {
-      try (BytePointer decompressedMSBData = new BytePointer();
-           Mat compressedLSBMat = new Mat(compressedLSBData);
-           Mat decompressedLSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1))
-      {
-         opencv_imgcodecs.imdecode(compressedLSBMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedLSBMat);
-         decompress(compressedMSBData, msbDataSize, decompressedMSBData);
+      long dataSize = 2 * Long.BYTES + depthMSB.limit() + depthLSB.limit();
+      BytePointer packedBuffer = new BytePointer(dataSize);
+      long offset = 0;
+      packedBuffer.putLong(depthMSB.limit());
+      offset += Long.BYTES;
 
-         Mat decompressedMSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
-         cudaFreeHost(decompressedMSBData);
+      packedBuffer.position(offset);
+      packedBuffer.putLong(depthLSB.limit());
+      offset += Long.BYTES;
 
-         decompressedLSBMat.convertTo(decompressedLSBMat, opencv_core.CV_16UC1);
-         decompressedMSBMat.convertTo(decompressedMSBMat, opencv_core.CV_16UC1, 256.0, 0.0);
+      packedBuffer.position(offset);
+      BytePointer.memcpy(packedBuffer, depthMSB, depthMSB.limit());
+      offset += depthMSB.limit();
 
-         opencv_core.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
+      packedBuffer.position(offset);
+      BytePointer.memcpy(packedBuffer, depthLSB, depthLSB.limit());
 
-         decompressedMSBMat.close();
-      }
+      packedBuffer.position(0);
+      packedBuffer.limit(dataSize);
+
+      return packedBuffer;
    }
 
-   // TODO: Add decompression for lossy depth
-   public void decompressDepth(BytePointer compressedLSBData, long lsbDataSize, BytePointer compressedMSBData, long msbDataSize, GpuMat decompressedDepth)
+   private BytePointer[] unpackCompressedDepth(BytePointer packedBuffer)
    {
-      try (BytePointer decompressedMSBData = new BytePointer();
-           GpuMat decompressedLSBMat = new GpuMat(decompressedDepth.size(), opencv_core.CV_8UC1))
-      {
-         decompress(compressedMSBData, msbDataSize, decompressedMSBData);
-         jpegEncoder.decodeToGray(compressedLSBData, lsbDataSize, decompressedLSBMat);
+      long offset = 0;
+      packedBuffer.position(offset);
+      long msbDataSize = packedBuffer.getLong();
+      offset += Long.BYTES;
 
-         GpuMat decompressedMSBMat = new GpuMat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
-         cudaFreeHost(decompressedMSBData);
+      packedBuffer.position(offset);
+      long lsbDataSize = packedBuffer.getLong();
+      offset += Long.BYTES;
 
-         decompressedLSBMat.convertTo(decompressedLSBMat, opencv_core.CV_16UC1);
-         decompressedMSBMat.convertTo(decompressedMSBMat, opencv_core.CV_16UC1, 256.0, 0.0);
+      BytePointer[] unpackedData = new BytePointer[2];
+      unpackedData[0] = new BytePointer(msbDataSize);
+      unpackedData[1] = new BytePointer(lsbDataSize);
 
-         opencv_cudaarithm.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
+      packedBuffer.position(offset);
+      BytePointer.memcpy(unpackedData[0], packedBuffer, msbDataSize);
+      offset += msbDataSize;
 
-         decompressedMSBMat.close();
-      }
+      packedBuffer.position(offset);
+      BytePointer.memcpy(unpackedData[1], packedBuffer, lsbDataSize);
+
+      return unpackedData;
    }
 
    /**
     * Compresses data using the provided compression manager.
-    * @param data INPUT: Pointer to data to be compressed (can point to host or device memory, must be continuous)
-    * @param dataSize INPUT: Size of data to compress, in bytes
-    * @param compressedData OUTPUT: Pointer to compressed data (must be a host pointer). MUST BE FREED USING {@link cudart#cudaFreeHost(Pointer)}.
+    * @param data Pointer to data to be compressed (can point to host or device memory, must be continuous)
+    * @param dataSize Size of data to compress, in bytes
     * @param compressionManager INPUT: Compression manager to use
-    * @param cudaStream INPUT: CUDA stream to use
-    * @return Size of compressed data, in bytes.
+    * @param cudaStream CUDA stream to use
+    * @return BytePointer to compressed data, with limit set as the size of the compressed data.
     */
-   public static long compress(BytePointer data, long dataSize, BytePointer compressedData, PimplManager compressionManager, CUstream_st cudaStream)
+   public static BytePointer compress(BytePointer data, long dataSize, PimplManager compressionManager, CUstream_st cudaStream)
    {
       try (BytePointer uncompressedDeviceBuffer = new BytePointer();
            BytePointer compressedDeviceBuffer = new BytePointer();
@@ -262,8 +329,8 @@ public class CUDACompressionTools
          long compressedDataSize = compressionManager.get_compressed_output_size(compressedDeviceBuffer);
 
          // Download compressed data to host
+         BytePointer compressedData = new BytePointer(compressedDataSize);
          compressedData.limit(compressedDataSize);
-         checkCUDAError(cudaMallocHost(compressedData, compressedDataSize));
          checkCUDAError(cudaMemcpyAsync(compressedData, compressedDeviceBuffer, compressedDataSize, cudart.cudaMemcpyDeviceToHost, cudaStream));
          checkCUDAError(cudaStreamSynchronize(cudaStream));
 
@@ -271,19 +338,19 @@ public class CUDACompressionTools
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(uncompressedDeviceBuffer, cudaStream));
 
-         return compressedDataSize;
+         return compressedData;
       }
    }
 
    /**
     * Decompresses data using a new compression manager.
-    * @param compressedData INPUT: Pointer to compressed data (can point to host or device memory)
-    * @param compressedDataSize INPUT: Size of the compressed data, in bytes
-    * @param decompressedData OUTPUT: Pointer to decompressed data (must be a host pointer). MUST BE FREED USING {@link cudart#cudaFreeHost(Pointer)}.
-    * @param cudaStream INPUT: CUDA stream to use
-    * @return Size of decompressed data, in bytes.
+    * @param compressedData Pointer to compressed data (can point to host or device memory)
+    * @param compressedDataSize Size of the compressed data, in bytes
+    * @param outputToDevice Whether to output decompressed data to device (MUST CALL {@link cudart#cudaFree(Pointer)} ON OUTPUT IF SET TO {@code true})
+    * @param cudaStream CUDA stream to use
+    * @return BytePointer to decompressed data, either on host or device memory depending on the {@code outputToDevice} parameter.
     */
-   public static long decompress(BytePointer compressedData, long compressedDataSize, BytePointer decompressedData, CUstream_st cudaStream)
+   public static BytePointer decompress(BytePointer compressedData, long compressedDataSize, boolean outputToDevice, CUstream_st cudaStream)
    {
       try (BytePointer compressedDeviceBuffer = new BytePointer();
            BytePointer decompressedDeviceBuffer = new BytePointer())
@@ -303,16 +370,24 @@ public class CUDACompressionTools
          // Decompress the data
          decompressionManager.decompress(decompressedDeviceBuffer, compressedDeviceBuffer, decompressionConfig);
 
-         // Download decompressed data to host
-         decompressedData.limit(decompressedDataSize);
-         checkCUDAError(cudaMallocHost(decompressedData, decompressedDataSize));
-         checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudart.cudaMemcpyDeviceToHost, cudaStream));
+         BytePointer decompressedData;
+         if (outputToDevice) // Copy data to output pointer on device
+         {
+            decompressedData = new BytePointer();
+            cudaMallocAsync(decompressedData, decompressedDataSize, cudaStream);
+         }
+         else // Download decompressed data to host
+         {
+            decompressedData = new BytePointer(decompressedDataSize);
+            decompressedData.limit(decompressedDataSize);
+         }
+         checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudaMemcpyDefault, cudaStream));
          checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
 
-         return decompressedDataSize;
+         return decompressedData;
       }
    }
 }
