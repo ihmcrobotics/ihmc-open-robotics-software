@@ -27,6 +27,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAStreamManager;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,7 +40,9 @@ import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 
 public class NVCompDemo
 {
-   protected static final String FILE_PATH = "/home/tbialek/Documents/ZED/ZED_ColorImage.png";
+   private static final WorkspaceResourceDirectory RESOURCE_DIRECTORY = new WorkspaceResourceDirectory(NVCompDemo.class);
+   private static final WorkspaceResourceFile IMAGE_FILE = new WorkspaceResourceFile(RESOURCE_DIRECTORY, "ZED_ColorImage.png");
+
    protected static final int DATA_TYPE = NVCOMP_TYPE_CHAR;
 
    protected final CUstream_st stream = CUDAStreamManager.getStream();
@@ -120,7 +124,7 @@ public class NVCompDemo
    protected void runDemo()
    {
       // Read an image from a file
-      Mat image = opencv_imgcodecs.imread(FILE_PATH);
+      Mat image = opencv_imgcodecs.imread(IMAGE_FILE.getClasspathResource().getFile());
       long imageSize = image.elemSize() * image.total();
 
       Stopwatch stopwatch = new Stopwatch();
