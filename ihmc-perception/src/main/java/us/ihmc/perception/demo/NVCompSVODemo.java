@@ -31,10 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import static org.bytedeco.cuda.global.cudart.cudaFreeHost;
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-
 public class NVCompSVODemo extends NVCompDemo
 {
    private static final String RESULT_FILE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
@@ -159,12 +155,12 @@ public class NVCompSVODemo extends NVCompDemo
       // NVCOMP Managers
       for (Entry<String, PimplManager> managerEntry : compressionManagers.entrySet())
       {
-         BytePointer compressedImageData = new BytePointer();
          stopwatch.start();
-         long compressedSize = compress(image, compressedImageData, managerEntry.getValue());
+         BytePointer compressedImageData = CUDACompressionTools.compress(image.data(), imageSize, managerEntry.getValue(), stream);
+         long compressedSize = compressedImageData.limit();
          double compressionTime = stopwatch.lap();
-         Mat decompressedImage = new Mat(image.size(), image.type());
-         decompressImage(compressedImageData, compressedSize, decompressedImage);
+         BytePointer decompressedImageData = CUDACompressionTools.decompress(compressedImageData, compressedSize, false, stream);
+         Mat decompressedImage = new Mat(image.size(), image.type(), decompressedImageData);
          double decompressionTime = stopwatch.lap();
 
          double compressionRatio = (double) imageSize / compressedSize;
@@ -173,10 +169,9 @@ public class NVCompSVODemo extends NVCompDemo
          managerToCompressionTimeMapColor.get(managerEntry.getKey()).add(compressionTime);
          managerToDecompressionTimeMapColor.get(managerEntry.getKey()).add(decompressionTime);
 
-         checkCUDAError(cudaStreamSynchronize(stream));
-         checkCUDAError(cudaFreeHost(compressedImageData));
          compressedImageData.close();
          decompressedImage.close();
+         decompressedImageData.close();
       }
    }
 
@@ -188,11 +183,11 @@ public class NVCompSVODemo extends NVCompDemo
       for (Entry<String, PimplManager> managerEntry : compressionManagers.entrySet())
       {
          stopwatch.start();
-         BytePointer compressedImageData = new BytePointer();
-         long compressedSize = compress(image, compressedImageData, managerEntry.getValue());
+         BytePointer compressedImageData = CUDACompressionTools.compress(image.data(), imageSize, managerEntry.getValue(), stream);
+         long compressedSize = compressedImageData.limit();
          double compressionTime = stopwatch.lap();
-         Mat decompressedImage = new Mat(image.size(), image.type());
-         decompressImage(compressedImageData, compressedSize, decompressedImage);
+         BytePointer decompressedImageData = CUDACompressionTools.decompress(compressedImageData, compressedSize, false, stream);
+         Mat decompressedImage = new Mat(image.size(), image.type(), decompressedImageData);
          double decompressionTime = stopwatch.lap();
 
          double compressionRatio = (double) imageSize / compressedSize;
@@ -201,9 +196,8 @@ public class NVCompSVODemo extends NVCompDemo
          managerToCompressionTimeMapDepth.get(managerEntry.getKey()).add(compressionTime);
          managerToDecompressionTimeMapDepth.get(managerEntry.getKey()).add(decompressionTime);
 
-         checkCUDAError(cudaStreamSynchronize(stream));
-         checkCUDAError(cudaFreeHost(compressedImageData));
          decompressedImage.close();
+         decompressedImageData.close();
       }
    }
 

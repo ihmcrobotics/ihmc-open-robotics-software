@@ -4,8 +4,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.nvcomp.ANSManager;
 import org.bytedeco.cuda.nvcomp.BitcompManager;
-import org.bytedeco.cuda.nvcomp.CompressionConfig;
-import org.bytedeco.cuda.nvcomp.DecompressionConfig;
 import org.bytedeco.cuda.nvcomp.DeflateManager;
 import org.bytedeco.cuda.nvcomp.GdeflateManager;
 import org.bytedeco.cuda.nvcomp.LZ4Manager;
@@ -19,13 +17,13 @@ import org.bytedeco.cuda.nvcomp.nvcompBatchedGdeflateOpts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedLZ4Opts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedSnappyOpts_t;
 import org.bytedeco.cuda.nvcomp.nvcompBatchedZstdOpts_t;
-import org.bytedeco.cuda.nvcomp.nvcompManagerBase;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -34,7 +32,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import static org.bytedeco.cuda.global.cudart.*;
+import static org.bytedeco.cuda.global.cudart.cudaFreeHost;
+import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 import static org.bytedeco.cuda.global.nvcomp.*;
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 
@@ -131,11 +130,11 @@ public class NVCompDemo
       for (Entry<String, PimplManager> managerEntry : compressionManagers.entrySet())
       {
          stopwatch.start();
-         BytePointer compressedImageData = new BytePointer();
-         long compressedSize = compress(image, compressedImageData, managerEntry.getValue());
+         BytePointer compressedImageData = CUDACompressionTools.compress(image.data(), imageSize, managerEntry.getValue(), stream);
+         long compressedSize = compressedImageData.limit();
          double compressionTime = stopwatch.lap();
-         Mat decompressedImage = new Mat(image.size(), image.type());
-         decompressImage(compressedImageData, compressedSize, decompressedImage);
+         BytePointer decompressedImageData = CUDACompressionTools.decompress(compressedImageData, compressedSize, false, stream);
+         Mat decompressedImage = new Mat(image.size(), image.type(), decompressedImageData);
          double decompressionTime = stopwatch.lap();
 
          System.out.println(managerEntry.getKey() + ": ");
@@ -147,72 +146,6 @@ public class NVCompDemo
          checkCUDAError(cudaFreeHost(compressedImageData));
          decompressedImage.close();
       }
-   }
-
-   protected long compress(Mat image, BytePointer compressedImageData, PimplManager compressionManager)
-   {
-      long decompressedBufferSize = image.elemSize() * image.total();
-      BytePointer decompressedDeviceBuffer = allocateToDevice(image);
-
-      BytePointer compressedDeviceBuffer = new BytePointer();
-      CompressionConfig compressionConfig = compressionManager.configure_compression(decompressedBufferSize);
-      checkCUDAError(cudaMallocAsync(compressedDeviceBuffer, compressionConfig.max_compressed_buffer_size(), stream));
-
-      compressionManager.compress(decompressedDeviceBuffer, compressedDeviceBuffer, compressionConfig);
-      long compressedBufferSize = compressionManager.get_compressed_output_size(compressedDeviceBuffer);
-
-      checkCUDAError(cudaStreamSynchronize(stream));
-      cudaMallocHost(compressedImageData, compressedBufferSize);
-      checkCUDAError(cudaMemcpyAsync(compressedImageData, compressedDeviceBuffer, compressedBufferSize, cudaMemcpyDeviceToHost, stream));
-
-      checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, stream));
-      checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, stream));
-      decompressedDeviceBuffer.close();
-      compressedDeviceBuffer.close();
-      compressionConfig.close();
-
-      return compressedBufferSize;
-   }
-
-   protected void decompressImage(BytePointer compressedHostBuffer, long compressedBufferSize, Mat matToPack)
-   {
-      BytePointer compressedDeviceBuffer = new BytePointer();
-      checkCUDAError(cudaMallocAsync(compressedDeviceBuffer, compressedBufferSize, stream));
-      checkCUDAError(cudaMemcpyAsync(compressedDeviceBuffer, compressedHostBuffer, compressedBufferSize, cudaMemcpyDefault, stream));
-
-      nvcompManagerBase decompressionManager = create_manager(compressedDeviceBuffer, stream, 0, NoComputeNoVerify);
-      DecompressionConfig decompressionConfig = decompressionManager.configure_decompression(compressedDeviceBuffer);
-
-      BytePointer decompressedDeviceBuffer = new BytePointer();
-      checkCUDAError(cudaMallocAsync(decompressedDeviceBuffer, decompressionConfig.decomp_data_size(), stream));
-
-      decompressionManager.decompress(decompressedDeviceBuffer, compressedDeviceBuffer, decompressionConfig);
-
-      BytePointer decompressedHostBuffer = new BytePointer();
-      checkCUDAError(cudaStreamSynchronize(stream));
-      checkCUDAError(cudaMallocHost(decompressedHostBuffer, decompressionConfig.decomp_data_size()));
-      checkCUDAError(cudaMemcpyAsync(decompressedHostBuffer, decompressedDeviceBuffer, decompressionConfig.decomp_data_size(), cudaMemcpyDeviceToHost, stream));
-
-      matToPack.data(decompressedHostBuffer);
-
-      checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, stream));
-      checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, stream));
-
-      compressedDeviceBuffer.close();
-      decompressedDeviceBuffer.close();
-      decompressionConfig.close();
-      decompressionManager.close();
-   }
-
-   protected BytePointer allocateToDevice(Mat image)
-   {
-      long imageDataSize = image.elemSize() * image.total();
-
-      BytePointer deviceMemoryPointer = new BytePointer();
-      checkCUDAError(cudaMallocAsync(deviceMemoryPointer, imageDataSize, stream));
-      checkCUDAError(cudaMemcpyAsync(deviceMemoryPointer, image.data(), imageDataSize, cudaMemcpyDefault, stream));
-
-      return deviceMemoryPointer;
    }
 
    protected void destroy()
