@@ -22,9 +22,11 @@ import us.ihmc.perception.opencv.OpenCVTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
+import static us.ihmc.perception.cuda.CUDATools.hasCUDADevice;
 
 public class CUDACompressionTools
 {
+   private static final boolean CUDA_AVAILABLE = hasCUDADevice();
    private static final long CHUNK_SIZE = 1 << 16;
 
    private final Mat depthMSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(65280.0));
@@ -36,7 +38,7 @@ public class CUDACompressionTools
 
    private final PimplManager compressionManager;
 
-   private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(75);
+   private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(40);
 
    public CUDACompressionTools()
    {
@@ -115,6 +117,9 @@ public class CUDACompressionTools
     */
    public BytePointer compressDepth(Mat depthImage)
    {
+      if (!CUDA_AVAILABLE)
+         return new BytePointer(1);
+
       try (Mat depthLSB = extractDepthLSB(depthImage);
            Mat depthMSB = extractDepthMSB(depthImage);
            BytePointer compressedMSBData = compress(depthMSB);
@@ -136,6 +141,9 @@ public class CUDACompressionTools
     */
    public BytePointer compressDepth(GpuMat depthImage)
    {
+      if (!CUDA_AVAILABLE)
+         return new BytePointer(1);
+
       try (GpuMat depthLSB = extractDepthLSB(depthImage);
            GpuMat depthMSB = extractDepthMSB(depthImage);
            BytePointer compressedMSBData = compress(depthMSB);
@@ -154,25 +162,10 @@ public class CUDACompressionTools
     */
    public void decompressDepth(BytePointer compressedDepthData, Mat decompressedDepth)
    {
-      BytePointer[] depthData = unpackCompressedDepth(compressedDepthData);
-      try (Mat compressedLSBMat = new Mat(depthData[1]);
-           BytePointer decompressedMSBData = decompress(depthData[0], depthData[0].limit());
-           Mat decompressedLSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1))
-      {
-         opencv_imgcodecs.imdecode(compressedLSBMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedLSBMat);
-
-         Mat decompressedMSBMat = new Mat(decompressedDepth.size(), opencv_core.CV_8UC1, decompressedMSBData);
-
-         decompressedLSBMat.convertTo(decompressedLSBMat, opencv_core.CV_16UC1);
-         decompressedMSBMat.convertTo(decompressedMSBMat, opencv_core.CV_16UC1, 256.0, 0.0);
-
-         opencv_core.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
-
-         decompressedMSBMat.close();
-      }
-
-      for (BytePointer data : depthData)
-         data.close();
+      GpuMat decompressedDepthGPU = new GpuMat(decompressedDepth.size(), opencv_core.CV_16UC1);
+      decompressDepth(compressedDepthData, decompressedDepthGPU);
+      decompressedDepthGPU.download(decompressedDepth);
+      decompressedDepthGPU.close();
    }
 
    /**
@@ -182,6 +175,9 @@ public class CUDACompressionTools
     */
    public void decompressDepth(BytePointer compressedDepthData, GpuMat decompressedDepth)
    {
+      if (!CUDA_AVAILABLE)
+         return;
+
       BytePointer[] depthData = unpackCompressedDepth(compressedDepthData);
 
       try (BytePointer decompressedMSBData = decompress(depthData[0], depthData[0].limit(), true, stream);
@@ -195,7 +191,7 @@ public class CUDACompressionTools
 
          opencv_cudaarithm.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
 
-         cudaFreeAsync(decompressedMSBData, stream);
+         checkCUDAError(cudaFreeAsync(decompressedMSBData, stream));
       }
 
       for (BytePointer data : depthData)
@@ -313,6 +309,9 @@ public class CUDACompressionTools
     */
    public static BytePointer compress(BytePointer data, long dataSize, PimplManager compressionManager, CUstream_st cudaStream)
    {
+      if (!CUDA_AVAILABLE)
+         return new BytePointer(1);
+
       try (BytePointer uncompressedDeviceBuffer = new BytePointer();
            BytePointer compressedDeviceBuffer = new BytePointer();
            CompressionConfig compressionConfig = compressionManager.configure_compression(dataSize))
@@ -352,6 +351,9 @@ public class CUDACompressionTools
     */
    public static BytePointer decompress(BytePointer compressedData, long compressedDataSize, boolean outputToDevice, CUstream_st cudaStream)
    {
+      if (!CUDA_AVAILABLE)
+         return new BytePointer(1);
+
       try (BytePointer compressedDeviceBuffer = new BytePointer();
            BytePointer decompressedDeviceBuffer = new BytePointer())
       {
@@ -386,6 +388,8 @@ public class CUDACompressionTools
 
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
+         decompressionManager.close();
+         decompressionConfig.close();
 
          return decompressedData;
       }

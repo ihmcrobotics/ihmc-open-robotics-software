@@ -34,4 +34,9 @@ public class ImageMessageDecompressionInput
    {
       return decompressionInputMat;
    }
+
+   public BytePointer getInputPointer()
+   {
+      return decompressionInputBytePointer;
+   }
 }
