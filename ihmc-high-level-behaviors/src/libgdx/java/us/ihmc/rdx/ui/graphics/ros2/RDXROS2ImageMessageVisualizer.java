@@ -107,36 +107,28 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
 
             if (incomingCompressedImageBuffer == null)
             {
-               switch (ImageMessageFormat.getFormat(imageMessage))
+               ImageMessageFormat imageMessageFormat = ImageMessageFormat.getFormat(imageMessage);
+               LogTools.info("Creating Image Message Visualizer for {} with type {}", topic.getName(), imageMessageFormat.name());
+
+               bytesIfUncompressed = imageMessageFormat.getBytesPerPixel() * numberOfPixels;
+               incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+               incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+               switch (imageMessageFormat)
                {
                   case GRAY_PNG_8UC1 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type PNG_8UC1", topic.getName());
-                     bytesIfUncompressed = numberOfPixels;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
                   }
                   case DEPTH_PNG_16UC1 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_16UC1", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 2;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                   }
                   case DEPTH_HYBRID_ZSTD_JPEG_16UC1 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_HYBRID_16UC1", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 2;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
 
@@ -144,21 +136,11 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
                   }
                   case COLOR_JPEG_YUVI420 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_YUVI420", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 3;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
                   case COLOR_JPEG_BGR8 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with the type COLOR_JPEG_BGR8", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 3;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
