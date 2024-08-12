@@ -54,7 +54,7 @@ public class CUDACompressionToolsTest
 
       double averageDifference = averagePixelDifference(depthImage, decompressedDepth);
       LogTools.info("Difference Ratio: {}", averageDifference);
-      assertTrue(averageDifference < 1.0); // On average, decoded pixels differ less than 1mm from the original
+      assertTrue(averageDifference < 5.0); // On average, decoded pixels differ less than 5mm from the original
 
       compressor.destroy();
       depthImage.close();
@@ -84,7 +84,7 @@ public class CUDACompressionToolsTest
       decompressedDepth.download(cpuDecompressedDepth);
       double averageDifference = averagePixelDifference(depthImage, cpuDecompressedDepth);
       LogTools.info("Difference Ratio: {}", averageDifference);
-      assertTrue(averageDifference < 1.0); // On average, decoded pixels differ less than 1mm from the original
+      assertTrue(averageDifference < 5.0); // On average, decoded pixels differ less than 5mm from the original
 
       compressor.destroy();
       depthImage.close();

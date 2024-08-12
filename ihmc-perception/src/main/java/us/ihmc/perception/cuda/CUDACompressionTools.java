@@ -36,7 +36,7 @@ public class CUDACompressionTools
 
    private final PimplManager compressionManager;
 
-   private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(95);
+   private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(75);
 
    public CUDACompressionTools()
    {
