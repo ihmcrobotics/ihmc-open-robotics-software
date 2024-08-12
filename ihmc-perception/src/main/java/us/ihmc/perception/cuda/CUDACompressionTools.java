@@ -16,6 +16,7 @@ import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -141,31 +142,55 @@ public class CUDACompressionTools
 
    public void compressDepth(GpuMat depthImage, BytePointer compressedLSBData, BytePointer compressedMSBData)
    {
-      try (GpuMat depthLSB = new GpuMat(depthImage.size(), opencv_core.CV_16UC1);
-           GpuMat depthMSB = new GpuMat(depthImage.size(), opencv_core.CV_16UC1))
+      try (GpuMat depthLSB = extractDepthLSB(depthImage);
+           GpuMat depthMSB = extractDepthMSB(depthImage))
       {
-         // Ensure extractor dimensions match
-         if (!OpenCVTools.dimensionsMatch(depthLSBExtractorCPU, depthImage))
-         {
-            opencv_imgproc.resize(depthLSBExtractorCPU, depthLSBExtractorCPU, depthImage.size());
-            depthLSBExtractorGPU.upload(depthLSBExtractorCPU);
-         }
-         if (!OpenCVTools.dimensionsMatch(depthMSBExtractorCPU, depthImage))
-         {
-            opencv_imgproc.resize(depthMSBExtractorCPU, depthMSBExtractorCPU, depthImage.size());
-            depthMSBExtractorGPU.upload(depthMSBExtractorCPU);
-         }
-
-         opencv_cudaarithm.bitwise_and(depthImage, depthLSBExtractorGPU, depthLSB);
-         opencv_cudaarithm.bitwise_and(depthImage, depthMSBExtractorGPU, depthMSB);
-
-         depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
-         depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
-
          compress(depthMSB, compressedMSBData);
          jpegEncoder.encodeGray(depthLSB, compressedLSBData);
          checkCUDAError(cudaFreeHost(compressedMSBData));
       }
+   }
+
+   public void compressDepthLossy(GpuMat depthImage, BytePointer compressedDepthData)
+   {
+      try (GpuMat depthLSB = extractDepthLSB(depthImage);
+           GpuMat depthMSB = extractDepthMSB(depthImage);
+           GpuMat zeros = new GpuMat(depthImage.size(), opencv_core.CV_8UC1, new Scalar(0.0));
+           GpuMat bgrDepth = new GpuMat(depthImage.size(), opencv_core.CV_8UC3);)
+      {
+         opencv_cudaarithm.merge(new GpuMatVector(depthMSB, depthLSB, zeros), bgrDepth);
+         jpegEncoder.encodeBGR(bgrDepth, compressedDepthData);
+      }
+   }
+
+   private GpuMat extractDepthLSB(GpuMat depthImage)
+   {
+      // Ensure extractor dimensions match
+      if (!OpenCVTools.dimensionsMatch(depthLSBExtractorCPU, depthImage))
+      {
+         opencv_imgproc.resize(depthLSBExtractorCPU, depthLSBExtractorCPU, depthImage.size());
+         depthLSBExtractorGPU.upload(depthLSBExtractorCPU);
+      }
+
+      GpuMat depthLSB = new GpuMat();
+      opencv_cudaarithm.bitwise_and(depthImage, depthLSBExtractorGPU, depthLSB);
+      depthLSB.convertTo(depthLSB, opencv_core.CV_8UC1);
+      return depthLSB;
+   }
+
+   private GpuMat extractDepthMSB(GpuMat depthImage)
+   {
+      if (!OpenCVTools.dimensionsMatch(depthMSBExtractorCPU, depthImage))
+      {
+         opencv_imgproc.resize(depthMSBExtractorCPU, depthMSBExtractorCPU, depthImage.size());
+         depthMSBExtractorGPU.upload(depthMSBExtractorCPU);
+      }
+
+      GpuMat depthMSB = new GpuMat();
+      opencv_cudaarithm.bitwise_and(depthImage, depthMSBExtractorGPU, depthMSB);
+      depthMSB.convertTo(depthMSB, opencv_core.CV_8UC1, 1.0 / 256.0, 0.0);
+
+      return depthMSB;
    }
 
    public void decompressDepth(BytePointer compressedLSBData, BytePointer compressedMSBData, long msbDataSize, Mat decompressedDepth)
@@ -189,6 +214,7 @@ public class CUDACompressionTools
       }
    }
 
+   // TODO: Add decompression for lossy depth
    public void decompressDepth(BytePointer compressedLSBData, long lsbDataSize, BytePointer compressedMSBData, long msbDataSize, GpuMat decompressedDepth)
    {
       try (BytePointer decompressedMSBData = new BytePointer();

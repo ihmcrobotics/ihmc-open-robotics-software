@@ -248,7 +248,7 @@ public class NVCompSVODemo extends NVCompDemo
       compressionTools.decompressDepth(compressedLSBData, compressedLSBData.limit(), compressedMSBData, compressedMSBData.limit(), decompressedImage);
       double decompressionTime = stopwatch.lap();
 
-      double compressionRatio = (double) imageSize / compressedMSBData.limit();
+      double compressionRatio = (double) imageSize / (compressedMSBData.limit() + compressedLSBData.limit());
 
       nvCOMPCompressionRatios.add(compressionRatio);
       nvCOMPCompressionTimes.add(compressionTime);
