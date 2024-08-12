@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry;
+package us.ihmc.perception.geometry;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Plane3D;

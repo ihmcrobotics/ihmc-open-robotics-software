@@ -29,7 +29,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-pub-sub:0.19.1")
    api("us.ihmc:ros2-common-interfaces:0.24.2") {

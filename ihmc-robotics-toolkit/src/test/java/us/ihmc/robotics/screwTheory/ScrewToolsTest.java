@@ -1,10 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -36,10 +31,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.random.RandomGeometry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ScrewToolsTest
 {
@@ -160,12 +157,12 @@ public class ScrewToolsTest
 
       String jointName = "joint";
       RigidBodyBasics parentBody = bodiesArray[bodiesArray.length - 1];
-      Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random, 5.0);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random, 5.0);
 
       RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, jointOffset, jointAxis);
 
-      assertEquals("Should be equal", jointName, joint.getName());
+      assertEquals(jointName, joint.getName(), "Should be equal");
       assertTrue(parentBody.equals(joint.getPredecessor()));
       assertTrue(jointAxis.equals(joint.getJointAxis()));
    }
@@ -176,11 +173,11 @@ public class ScrewToolsTest
       String jointName = "joint";
       RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random, 5.0);
 
       RevoluteJoint joint = new RevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
 
-      assertEquals("Should be equal", jointName, joint.getName());
+      assertEquals(jointName, joint.getName(), "Should be equal");
       assertTrue(parentBody.equals(joint.getPredecessor()));
       assertTrue(jointAxis.equals(joint.getJointAxis()));
    }
@@ -190,12 +187,12 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
-      Vector3D jointOffset = RandomGeometry.nextVector3D(random, 5.0);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random, 5.0);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random, 5.0);
 
       PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, jointOffset, jointAxis);
 
-      assertEquals("Should be equal", jointName, joint.getName());
+      assertEquals(jointName, joint.getName(), "Should be equal");
       assertTrue(parentBody.equals(joint.getPredecessor()));
    }
 
@@ -205,11 +202,11 @@ public class ScrewToolsTest
       String jointName = "joint";
       RigidBodyBasics parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
       RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random, 5.0);
 
       PrismaticJoint joint = new PrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
 
-      assertEquals("Should be equal", jointName, joint.getName());
+      assertEquals(jointName, joint.getName(), "Should be equal");
       assertTrue(parentBody.equals(joint.getPredecessor()));
    }
 
@@ -224,7 +221,7 @@ public class ScrewToolsTest
 
       RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, X);
 
-      assertEquals("Should be equal", name, body.getName());
+      assertEquals(name, body.getName(), "Should be equal");
       assertTrue(parentJoint.equals(body.getParentJoint()));
    }
 
@@ -240,7 +237,7 @@ public class ScrewToolsTest
 
       RigidBodyBasics body = new RigidBody(name, parentJoint, momentOfInertia, mass, inertiaPose);
 
-      assertEquals("Should be equal", name, body.getName());
+      assertEquals(name, body.getName(), "Should be equal");
       assertTrue(parentJoint.equals(body.getParentJoint()));
    }
 
@@ -258,7 +255,7 @@ public class ScrewToolsTest
 
       RigidBodyBasics[] bodies = MultiBodySystemTools.collectSuccessors(joints1);
 
-      assertEquals("Should be equal", bodyArray.length, bodies.length);
+      assertEquals(bodyArray.length, bodies.length, "Should be equal");
       for(int i = 0; i < bodies.length; i++)
       {
          assertTrue(bodies[i].equals(bodyArray[i]));
@@ -314,7 +311,7 @@ public class ScrewToolsTest
       JointBasics[] fromBodies = MultiBodySystemTools.collectSubtreeJoints(elevator, elevator);
       JointReadOnly[] fromBodiesList = MultiBodySystemTools.collectSubtreeJoints(bodies);
 
-      assertEquals("These should be equal", fromBodies.length, fromBodiesList.length);
+      assertEquals(fromBodies.length, fromBodiesList.length, "These should be equal");
       for(int i = 0; i < fromBodies.length; i++)
       {
          assertTrue(fromBodies[i].equals(fromBodiesList[i]));
@@ -407,7 +404,7 @@ public class ScrewToolsTest
       MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
-         assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
+         assertEquals(originalVelocities.get(i), newVelocities.get(i), epsilon, "Should be equal velocities");
       }
    }
 
@@ -434,7 +431,7 @@ public class ScrewToolsTest
       MultiBodySystemTools.extractJointsState(jointsList, JointStateType.VELOCITY, newVelocities);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
-         assertEquals("Should be equal velocities", originalVelocities.get(i), newVelocities.get(i), epsilon);
+         assertEquals(originalVelocities.get(i), newVelocities.get(i), epsilon, "Should be equal velocities");
       }
    }
 
@@ -456,7 +453,7 @@ public class ScrewToolsTest
       MultiBodySystemTools.extractJointsState(jointsArray, JointStateType.ACCELERATION, newAccelerations);//pack new matrix
       for(int i = 0; i < jointsArray.length; i++)
       {
-         assertEquals("Should be equal velocities", originalAccel.get(i), newAccelerations.get(i), epsilon);
+         assertEquals(originalAccel.get(i), newAccelerations.get(i), epsilon, "Should be equal velocities");
       }
    }
 
@@ -543,7 +540,7 @@ public class ScrewToolsTest
       jointsArray[0].getJointAcceleration(0, sixDoFAccel);
       for(int i = 0; i < 6; i++)
       {
-         assertEquals("Should be equal accelerations", jointAccelerations.get(i), sixDoFAccel.get(i), epsilon);
+         assertEquals(jointAccelerations.get(i), sixDoFAccel.get(i), epsilon, "Should be equal accelerations");
       }
 
       OneDoFJointBasics joint;
@@ -551,7 +548,7 @@ public class ScrewToolsTest
       for(int i = 6; i < jointAccelerations.getNumRows() * jointAccelerations.getNumCols(); i++)
       {
          joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
-         assertEquals("Should be equal accelerations", jointAccelerations.get(i), joint.getQdd(), epsilon);
+         assertEquals(jointAccelerations.get(i), joint.getQdd(), epsilon, "Should be equal accelerations");
       }
    }
 
@@ -574,7 +571,7 @@ public class ScrewToolsTest
       jointsArray[0].getJointVelocity(0, sixDoFVeloc);
       for(int i = 0; i < 6; i++)
       {
-         assertEquals("Should be equal velocitiess", jointVelocities.get(i), sixDoFVeloc.get(i), epsilon);
+         assertEquals(jointVelocities.get(i), sixDoFVeloc.get(i), epsilon, "Should be equal velocitiess");
       }
 
       OneDoFJointBasics joint;
@@ -582,7 +579,7 @@ public class ScrewToolsTest
       for(int i = 6; i < jointVelocities.getNumRows() * jointVelocities.getNumCols(); i++)
       {
          joint = (OneDoFJointBasics)jointsArray[i - 5]; //1 - 6
-         assertEquals("Should be equal velocities", jointVelocities.get(i), joint.getQd(), epsilon);
+         assertEquals(jointVelocities.get(i), joint.getQd(), epsilon, "Should be equal velocities");
       }
    }
 

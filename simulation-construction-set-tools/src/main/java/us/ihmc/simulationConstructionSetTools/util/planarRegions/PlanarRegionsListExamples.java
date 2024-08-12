@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -401,10 +401,10 @@ public class PlanarRegionsListExamples
       {
          generator.identity();
 
-         Vector3D translationVector = RandomGeometry.nextVector3D(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
+         Vector3D translationVector = EuclidCoreRandomTools.nextVector3D(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
          generator.translate(translationVector);
 
-         Quaternion rotation = RandomGeometry.nextQuaternion(random);
+         Quaternion rotation = EuclidCoreRandomTools.nextQuaternion(random);
          generator.rotate(rotation);
 
          generator.addCubeReferencedAtBottomMiddle(length, width, height);

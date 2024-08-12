@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -41,7 +40,7 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJoi
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class TwistCalculatorTest
 {
@@ -54,7 +53,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testWithChainComposedOfPrismaticJoints() throws Exception
+   public void testWithChainComposedOfPrismaticJoints()
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
@@ -90,7 +89,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testWithChainComposedOfRevoluteJointsAssertAngularVelocityOnly() throws Exception
+   public void testWithChainComposedOfRevoluteJointsAssertAngularVelocityOnly()
    {
       Random random = new Random(234234L);
       int numberOfJoints = 20;
@@ -122,13 +121,13 @@ public class TwistCalculatorTest
 
             expectedTwist.checkReferenceFrameMatch(actualTwist);
 
-            assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
+            EuclidFrameTestTools.assertEquals(expectedTwist.getAngularPart(), actualTwist.getAngularPart(), 1e-12);
          }
       }
    }
 
    @Test
-   public void testWithTreeComposedOfPrismaticJoints() throws Exception
+   public void testWithTreeComposedOfPrismaticJoints()
    {
       Random random = new Random(234234L);
       int numberOfJoints = 100;
@@ -171,7 +170,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testWithTreeComposedOfRevoluteJointsAssertAngularVelocity() throws Exception
+   public void testWithTreeComposedOfRevoluteJointsAssertAngularVelocity()
    {
       Random random = new Random(234234L);
       int numberOfJoints = 100;
@@ -210,13 +209,13 @@ public class TwistCalculatorTest
 
             expectedTwist.checkReferenceFrameMatch(actualTwist);
 
-            assertTrue(expectedTwist.getAngularPart().epsilonEquals(actualTwist.getAngularPart(), 1.0e-12));
+            EuclidFrameTestTools.assertEquals(expectedTwist.getAngularPart(), actualTwist.getAngularPart(), 1e-12);
          }
       }
    }
 
    @Test
-   public void testWithChainRobotAgainstFiniteDifference() throws Exception
+   public void testWithChainRobotAgainstFiniteDifference()
    {
       Random random = new Random(234234L);
 
@@ -261,7 +260,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testWithTreeRobotAgainstFiniteDifference() throws Exception
+   public void testWithTreeRobotAgainstFiniteDifference()
    {
       Random random = new Random(234234L);
 
@@ -308,7 +307,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testWithFloatingJointRobotAgainstFiniteDifference() throws Exception
+   public void testWithFloatingJointRobotAgainstFiniteDifference()
    {
       Random random = new Random(435345L);
 
@@ -329,8 +328,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         floatingJoint.setJointPosition(EuclidCoreRandomTools.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
@@ -387,7 +386,7 @@ public class TwistCalculatorTest
    }
 
    @Test
-   public void testRelativeTwistWithFloatingJointRobotAgainstFiniteDifference() throws Exception
+   public void testRelativeTwistWithFloatingJointRobotAgainstFiniteDifference()
    {
       Random random = new Random(435345L);
 
@@ -408,8 +407,8 @@ public class TwistCalculatorTest
 
       for (int i = 0; i < 50; i++)
       {
-         floatingJoint.setJointOrientation(RandomGeometry.nextQuaternion(random));
-         floatingJoint.setJointPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         floatingJoint.setJointOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         floatingJoint.setJointPosition(EuclidCoreRandomTools.nextPoint3D(random, -10.0, 10.0));
          Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
                                                                 floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);

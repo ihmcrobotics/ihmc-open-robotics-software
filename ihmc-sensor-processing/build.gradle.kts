@@ -15,22 +15,12 @@ ihmc {
 
 mainDependencies {
    api("commons-collections:commons-collections:3.2.1")
-   api("org.georegression:georegression:0.22")
-   api("org.ddogleg:ddogleg:0.18")
-   api("org.apache.commons:commons-math3:3.6.1")
    api("com.thoughtworks.xstream:xstream:1.4.19")
    api("org.jgrapht:jgrapht-core:0.9.0")
    api("org.jgrapht:jgrapht-ext:0.9.0")
    api("com.github.wendykierp:JTransforms:3.1")
-   api("org.ejml:ejml-ddense:0.39")
-   api("org.ejml:ejml-core:0.39")
-   api("jgraph:jgraph:5.13.0.0")
-   api("org.boofcv:boofcv-geo:0.36")
 
-   api("us.ihmc:euclid-frame:0.21.0")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
 }
 
