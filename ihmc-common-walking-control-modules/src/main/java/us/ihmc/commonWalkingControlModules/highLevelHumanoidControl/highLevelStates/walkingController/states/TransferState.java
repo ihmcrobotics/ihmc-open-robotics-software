@@ -217,8 +217,8 @@ public abstract class TransferState extends WalkingState
 
    protected void initializeWalkingTrajectoryPath()
    {
-      walkingTrajectoryPath.clearFootsteps();
-      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      if (isInitialTransfer())
+         walkingTrajectoryPath.reset();
       walkingTrajectoryPath.initializeDoubleSupport();
    }
 

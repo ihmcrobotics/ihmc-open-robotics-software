@@ -75,7 +75,6 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
-   public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
    public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_PATH_FRAME_NAME.hashCode();
 
    private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
@@ -196,7 +195,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
                                            registry,
                                            MAX_NUMBER_OF_FOOTSTEPS + 1);
 
-      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 0.5);
+      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 0.0);
 
       reset();
       clearWaypoints();
@@ -332,7 +331,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          firstWaypointInSupportFootFrame.changeFrame(soleFrames.get(supportSide));
       }
 
-      updateFootstepsInternal();
+//      updateFootstepsInternal();
    }
 
    public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
@@ -341,7 +340,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
       updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
       updateFootstepsInternal();
-      updateWaypoints();
+//      updateWaypoints();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
 
