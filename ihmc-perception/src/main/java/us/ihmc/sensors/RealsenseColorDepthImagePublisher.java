@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
@@ -26,7 +26,7 @@ public class RealsenseColorDepthImagePublisher
    private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final ROS2PublisherBasics<ImageMessage> ros2ColorImagePublisher;
 
-   private CUDAImageEncoder imageEncoder;
+   private CUDAJPEGProcessor imageEncoder;
 
    private long lastDepthSequenceNumber = -1L;
    private long lastColorSequenceNumber = -1L;
@@ -143,15 +143,11 @@ public class RealsenseColorDepthImagePublisher
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumber)
       {
          if (imageEncoder == null)
-            imageEncoder = new CUDAImageEncoder();
+            imageEncoder = new CUDAJPEGProcessor();
 
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                colorJPEGPointer,
-                                colorImageToPublish.getImageWidth(),
-                                colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMat().step());
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();

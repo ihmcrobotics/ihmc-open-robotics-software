@@ -132,11 +132,6 @@ jobs:
     with:
       subproject: 'ihmc-sensor-processing'
       test-category: 'fast'
-  ihmc-simple-whole-body-walking:
-    uses: ./.github/workflows/gradle-base.yml
-    with:
-      subproject: 'ihmc-simple-whole-body-walking'
-      test-category: 'fast'
   ihmc-simulation-toolkit:
     uses: ./.github/workflows/gradle-base.yml
     with:

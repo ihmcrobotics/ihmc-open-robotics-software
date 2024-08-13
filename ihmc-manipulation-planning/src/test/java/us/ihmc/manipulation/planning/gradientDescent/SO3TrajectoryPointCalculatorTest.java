@@ -11,7 +11,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class SO3TrajectoryPointCalculatorTest
 {
@@ -30,7 +30,7 @@ public class SO3TrajectoryPointCalculatorTest
          if (useGentleRandomGeneration)
             qt = createRandomOrientationFromPrevious(orientations.get(i - 1), Math.PI * 0.25);
          else
-            qt = RandomGeometry.nextQuaternion(new Random());
+            qt = EuclidCoreRandomTools.nextQuaternion(new Random());
          orientations.add(qt);
          times.add(trajectoryTime / (numberOfPoints - 1) * (i));
       }

@@ -26,7 +26,6 @@ import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.tools.containers.ContainerTools;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -43,8 +42,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final MovingReferenceFrame pelvisFrame;
    private final MovingZUpFrame pelvisZUpFrame;
 
-   private final EnumMap<SpineJointName, MovingReferenceFrame> spineReferenceFrames = ContainerTools.createEnumMap(SpineJointName.class);
-   private final EnumMap<NeckJointName, MovingReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
+   private final EnumMap<SpineJointName, MovingReferenceFrame> spineReferenceFrames = new EnumMap<>(SpineJointName.class);
+   private final EnumMap<NeckJointName, MovingReferenceFrame> neckReferenceFrames = new EnumMap<>(NeckJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, MovingReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final SideDependentList<EnumMap<LegJointName, MovingReferenceFrame>> legJointFrames = SideDependentList.createListOfEnumMaps(LegJointName.class);
 

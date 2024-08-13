@@ -2,9 +2,9 @@ package us.ihmc.robotics.hyperCubeTree;
 
 import java.util.Random;
 
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class HyperCubeTreeStaticTestingUtilities
 {
@@ -19,7 +19,7 @@ public class HyperCubeTreeStaticTestingUtilities
       double radiusToShootFrom = shootingDistance;
       for (int k = 0; k < numberOfLidarBullets; k++)
       {
-         Vector3D vector3d = RandomGeometry.nextVector3D(rand, 1.0);
+         Vector3D vector3d = EuclidCoreRandomTools.nextVector3DWithFixedLength(rand, 1.0);
          vector3d.get(vectorAsArray);
          for (int j = 0; j < 3; j++)
          {

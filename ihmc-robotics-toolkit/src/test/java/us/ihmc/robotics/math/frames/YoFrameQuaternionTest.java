@@ -1,8 +1,5 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -14,15 +11,18 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class YoFrameQuaternionTest
 {
@@ -46,20 +46,20 @@ public class YoFrameQuaternionTest
 
       Quaternion quat4dActual = new Quaternion(yoFrameQuaternion);
       Quaternion quat4dExpected = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      assertTrue(quat4dActual.epsilonEquals(quat4dExpected, EPS));
+      EuclidCoreTestTools.assertEquals(quat4dExpected, quat4dActual, EPS);
 
       AxisAngle axisAngle4dActual = new AxisAngle(yoFrameQuaternion);
       AxisAngle axisAngle4dExpected = new AxisAngle(1.0, 0.0, 0.0, 0.0);
-      assertTrue(axisAngle4dActual.epsilonEquals(axisAngle4dExpected, EPS));
+      EuclidCoreTestTools.assertEquals(axisAngle4dExpected, axisAngle4dActual, EPS);
 
       RotationMatrix matrix3dActual = new RotationMatrix(yoFrameQuaternion);
       RotationMatrix matrix3dExpected = new RotationMatrix();
       matrix3dExpected.setIdentity();
-      assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
+      EuclidCoreTestTools.assertEquals(matrix3dExpected, matrix3dActual, EPS);
 
       FrameQuaternion frameOrientationActual = new FrameQuaternion(yoFrameQuaternion);
       FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
-      assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
+      EuclidFrameTestTools.assertEquals(frameOrientationExpected, frameOrientationActual, EPS);
 
       YawPitchRoll yawPitchRollActual = new YawPitchRoll(yoFrameQuaternion);
       YawPitchRoll yawPitchRollExpected = new YawPitchRoll();
@@ -77,26 +77,26 @@ public class YoFrameQuaternionTest
       RotationMatrix matrix3dExpected = new RotationMatrix();
       RotationMatrix matrix3dActual = new RotationMatrix();
 
-      Quaternion quat4dExpected = RandomGeometry.nextQuaternion(random);
+      Quaternion quat4dExpected = EuclidCoreRandomTools.nextQuaternion(random);
       yoFrameQuaternion.set(quat4dExpected);
       Quaternion quat4dActual = new Quaternion(yoFrameQuaternion);
-      assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
+      EuclidCoreTestTools.assertEquals(quat4dExpected, quat4dActual, EPS);
 
-      AxisAngle axisAngle4dExpected = RandomGeometry.nextAxisAngle(random);
+      AxisAngle axisAngle4dExpected = EuclidCoreRandomTools.nextAxisAngle(random);
       yoFrameQuaternion.set(axisAngle4dExpected);
       AxisAngle axisAngle4dActual = new AxisAngle(yoFrameQuaternion);
       assertTrue(RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngle4dExpected, axisAngle4dActual, EPS));
 
-      matrix3dExpected.set(RandomGeometry.nextAxisAngle(random));
+      matrix3dExpected.set(EuclidCoreRandomTools.nextAxisAngle(random));
       yoFrameQuaternion.set(matrix3dExpected);
       matrix3dActual.set(yoFrameQuaternion);
-      assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
+      EuclidCoreTestTools.assertGeometricallyEquals(matrix3dExpected, matrix3dActual, EPS);
 
       FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
-      frameOrientationExpected.set(RandomGeometry.nextQuaternion(random));
+      frameOrientationExpected.set(EuclidCoreRandomTools.nextQuaternion(random));
       yoFrameQuaternion.set(frameOrientationExpected);
       FrameQuaternion frameOrientationActual = new FrameQuaternion(yoFrameQuaternion);
-      assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
+      EuclidFrameTestTools.assertEquals(frameOrientationExpected, frameOrientationActual, EPS);
 
       YawPitchRoll yawPitchRollExpected = EuclidCoreRandomTools.nextYawPitchRoll(random);
       yoFrameQuaternion.set(yawPitchRollExpected);
@@ -106,7 +106,7 @@ public class YoFrameQuaternionTest
       matrix3dActual.set(yawPitchRollActual);
       matrix3dExpected.set(yawPitchRollExpected);
 
-      assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
+      EuclidCoreTestTools.assertEquals(matrix3dExpected, matrix3dActual, EPS);
    }
 
    @Test
@@ -158,21 +158,20 @@ public class YoFrameQuaternionTest
 
       for (int i = 0; i < 1000; i++)
       {
-         quat4dA = RandomGeometry.nextQuaternion(random);
-         quat4dB = RandomGeometry.nextQuaternion(random);
+         quat4dA = EuclidCoreRandomTools.nextQuaternion(random);
+         quat4dB = EuclidCoreRandomTools.nextQuaternion(random);
          quat4dExpected.multiply(quat4dA, quat4dB);
 
          yoFrameQuaternion.set(quat4dA);
          yoFrameQuaternion.multiply(quat4dB);
          quat4dActual.set(yoFrameQuaternion);
-         assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
+         EuclidCoreTestTools.assertEquals(quat4dExpected, quat4dActual, EPS);
 
          yoFrameQuaternion.set(quat4dA);
          frameOrientation.set(quat4dB);
          yoFrameQuaternion.multiply(frameOrientation);
          quat4dActual.set(yoFrameQuaternion);
-         assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
-
+         EuclidCoreTestTools.assertEquals(quat4dExpected, quat4dActual, EPS);
       }
    }
 
@@ -200,7 +199,7 @@ public class YoFrameQuaternionTest
          interpolatedYoFrameQuaternion.interpolate(initialYoFrameQuaternion, finalYoFrameQuaternion, alpha);
          temp.setIncludingFrame(interpolatedYoFrameQuaternion);
 
-         assertTrue(interpolatedFrameOrientation.epsilonEquals(temp, EPS));
+         EuclidFrameTestTools.assertEquals(interpolatedFrameOrientation, temp, EPS);
       }
    }
 }

@@ -14,16 +14,9 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.martiansoftware:jsap:2.1")
    api("net.wimpi:jamod:1.2")
-   api("commons-collections:commons-collections:3.2.1")
 
-   api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
 testDependencies {

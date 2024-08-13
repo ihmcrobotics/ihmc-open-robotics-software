@@ -705,7 +705,7 @@ public class VirtualModelControllerTest
             desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test

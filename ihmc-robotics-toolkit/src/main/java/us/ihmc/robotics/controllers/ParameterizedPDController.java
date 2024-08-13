@@ -4,6 +4,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+@Deprecated
 public class ParameterizedPDController extends AbstractPDController
 {
    public ParameterizedPDController(String suffix, YoRegistry registry)

@@ -37,7 +37,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.EuclidGeometryMissingTools;
 
 public class GeometryToolsTest
 {
@@ -331,13 +331,13 @@ public class GeometryToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         actualVector = RandomGeometry.nextVector3D(random, RandomNumbers.nextDouble(random, Epsilons.ONE_TRILLIONTH, 10.0));
+         actualVector = EuclidCoreRandomTools.nextVector3D(random, RandomNumbers.nextDouble(random, Epsilons.ONE_TRILLIONTH, 10.0));
 
          expectedVector.setAndNormalize(actualVector);
          GeometryTools.normalizeSafelyZUp(actualVector);
          EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
-         actualVector = RandomGeometry.nextVector3D(random, 0.999 * Epsilons.ONE_TRILLIONTH);
+         actualVector = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 0.999 * Epsilons.ONE_TRILLIONTH);
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
          EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
@@ -611,74 +611,6 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
-   public void testArePoint3DsSameSideOfPlane3D()
-   {
-      Random random = new Random(435234657);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      { // Create the queries such that they're on the same side of the plane.
-         Point3D firstPointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
-         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
-         Vector3D firstPlaneTangent = EuclidCoreRandomTools.nextOrthogonalVector3D(random, planeNormal, true);
-         Vector3D secondPlaneTangent = new Vector3D();
-         secondPlaneTangent.cross(planeNormal, firstPlaneTangent);
-
-         Point3D secondPointOnPlane = EuclidGeometryTools.orthogonalProjectionOnPlane3D(EuclidCoreRandomTools.nextPoint3D(random, 10.0),
-                                                                                        firstPointOnPlane,
-                                                                                        planeNormal);
-
-         // Used to determine the side of the plane
-         double sign = random.nextBoolean() ? -1.0 : 1.0;
-
-         Point3D firstQuery = new Point3D(firstPointOnPlane);
-         // Shifting the query to the side of the plane
-         firstQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, firstQuery);
-         // Shifting the query without changing side w.r.t. the plane
-         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, firstQuery);
-         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, firstQuery);
-
-         Point3D secondQuery = new Point3D(firstPointOnPlane);
-         // Shifting the query to the side of the plane
-         secondQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, secondQuery);
-         // Shifting the query without changing side w.r.t. the plane
-         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, secondQuery);
-         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, secondQuery);
-
-         assertTrue(GeometryTools.arePoint3DsSameSideOfPlane3D(firstQuery, secondQuery, firstPointOnPlane, secondPointOnPlane, firstPlaneTangent));
-      }
-      for (int i = 0; i < ITERATIONS; i++)
-      { // Create the queries such that they're each side of the plane.
-         Point3D firstPointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
-         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
-         Vector3D firstPlaneTangent = EuclidCoreRandomTools.nextOrthogonalVector3D(random, planeNormal, true);
-         Vector3D secondPlaneTangent = new Vector3D();
-         secondPlaneTangent.cross(planeNormal, firstPlaneTangent);
-
-         Point3D secondPointOnPlane = EuclidGeometryTools.orthogonalProjectionOnPlane3D(EuclidCoreRandomTools.nextPoint3D(random, 10.0),
-                                                                                        firstPointOnPlane,
-                                                                                        planeNormal);
-
-         // Used to determine the side of the plane
-         double sign = random.nextBoolean() ? -1.0 : 1.0;
-
-         Point3D firstQuery = new Point3D(firstPointOnPlane);
-         // Shifting the query to the side of the plane
-         firstQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, firstQuery);
-         // Shifting the query without changing side w.r.t. the plane
-         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, firstQuery);
-         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, firstQuery);
-
-         Point3D secondQuery = new Point3D(firstPointOnPlane);
-         // Shifting the query to the other side of the plane
-         secondQuery.scaleAdd(-sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, secondQuery);
-         // Shifting the query without changing side w.r.t. the plane
-         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, secondQuery);
-         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, secondQuery);
-
-         assertFalse(GeometryTools.arePoint3DsSameSideOfPlane3D(firstQuery, secondQuery, firstPointOnPlane, secondPointOnPlane, firstPlaneTangent));
-      }
-   }
 
    @Test
    public void testComputeBoundingBoxIntersection3D()
@@ -686,15 +618,15 @@ public class GeometryToolsTest
       BoundingBox3D boundingBox1 = new BoundingBox3D(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
       BoundingBox3D boundingBox2 = new BoundingBox3D(0.5, 0.0, 0.0, 1.5, 1.0, 1.0);
 
-      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox1), EPSILON, "[FAILED] Volume should be 1.0");
-      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
+      assertEquals(1.0, EuclidGeometryMissingTools.computeBoundingBoxVolume3D(boundingBox1), EPSILON, "[FAILED] Volume should be 1.0");
+      assertEquals(1.0, EuclidGeometryMissingTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
 
       assertEquals(1/3.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
       assertEquals(0.5, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 0.5");
 
       boundingBox2 = new BoundingBox3D(0.5, 0.5, 0.5, 1.5, 1.5, 1.5);
 
-      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
+      assertEquals(1.0, EuclidGeometryMissingTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
 
       assertEquals(1/15.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
       assertEquals( 1/8.0, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 1/15.0");

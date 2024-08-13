@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundReaderAndWriter
 {
@@ -123,7 +123,7 @@ public class QuadTreeForGroundReaderAndWriter
          {
             if (noiseAmplitudeForReading > 0.0)
             {
-               point.add(RandomGeometry.nextPoint3D(random, noiseAmplitudeForReading, noiseAmplitudeForReading, noiseAmplitudeForReading));
+               point.add(EuclidCoreRandomTools.nextPoint3D(random, noiseAmplitudeForReading, noiseAmplitudeForReading, noiseAmplitudeForReading));
             }
 
             points.add(point);

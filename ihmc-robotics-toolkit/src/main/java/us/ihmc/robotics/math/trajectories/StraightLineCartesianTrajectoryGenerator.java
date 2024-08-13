@@ -15,6 +15,7 @@ import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.Alph
 /**
  * WARNING this is super not realtime safe and makes a ton of garbage.
  */
+@Deprecated
 public class StraightLineCartesianTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private final YoRegistry registry;
