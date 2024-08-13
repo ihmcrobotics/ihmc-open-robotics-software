@@ -96,8 +96,6 @@ public abstract class SingleSupportState extends WalkingState
 
    public void initializeWalkingTrajectoryPath()
    {
-      walkingTrajectoryPath.clearFootsteps();
-      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
       walkingTrajectoryPath.initializeSingleSupport(supportSide);
    }
 }
