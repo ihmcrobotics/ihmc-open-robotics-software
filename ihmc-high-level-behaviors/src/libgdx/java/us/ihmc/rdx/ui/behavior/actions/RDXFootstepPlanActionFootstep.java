@@ -60,7 +60,7 @@ public class RDXFootstepPlanActionFootstep
 
          if (getGizmo().getGizmoModifiedByUser().poll())
          {
-            definition.getSoleToPlanFrameTransform().getValue().set(getGizmo().getTransformToParent()); // Update action data based on user input
+            definition.getSoleToPlanFrameTransform().accessValue().set(getGizmo().getTransformToParent()); // Update action data based on user input
          }
          else
          {

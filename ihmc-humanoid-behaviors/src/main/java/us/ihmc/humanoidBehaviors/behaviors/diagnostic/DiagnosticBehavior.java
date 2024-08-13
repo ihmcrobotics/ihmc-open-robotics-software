@@ -49,7 +49,7 @@ import us.ihmc.robotics.math.trajectories.generators.OneDoFTrajectoryPointCalcul
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -2705,8 +2705,8 @@ public class DiagnosticBehavior extends AbstractBehavior
             pelvisTransformInPast_Translation.getRotation().setToZero();
             pelvisTransformInPast_Rotation.getTranslation().setToZero();
 
-            Quaternion orientationOffset = RandomGeometry.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
-            Vector3D translationOffset = RandomGeometry.nextVector3D(random, minMaxIcpTranslationOffset.getDoubleValue());
+            Quaternion orientationOffset = EuclidCoreRandomTools.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
+            Vector3D translationOffset = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, minMaxIcpTranslationOffset.getDoubleValue());
 
             RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
             RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);

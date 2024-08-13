@@ -25,7 +25,7 @@ public class SwingPlannerStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
 
       try

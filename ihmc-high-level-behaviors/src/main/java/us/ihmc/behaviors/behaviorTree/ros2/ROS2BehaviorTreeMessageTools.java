@@ -2,10 +2,15 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.*;
 
@@ -39,91 +44,106 @@ public class ROS2BehaviorTreeMessageTools
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
    {
-      if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
+      boolean packBasicNode = false;
+
+      // Only allow packing full node types if we have updated data
+      if (nodeState.getDefinition().isFrozen() || nodeState.hasStatus())
       {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getRootNodes().size());
-         rootNodeState.toMessage(treeStateMessage.getRootNodes().add());
-      }
-      else if (nodeState instanceof ActionSequenceState actionSequenceState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ACTION_SEQUENCE);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
-         actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
-      }
-      else if (nodeState instanceof DoorTraversalState doorTraversalState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
-         doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
-      }
-      else if (nodeState instanceof TrashCanInteractionState trashCanInteractionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.TRASH_CAN_INTERACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getTrashCanInteractions().size());
-         trashCanInteractionState.toMessage(treeStateMessage.getTrashCanInteractions().add());
-      }
-      else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
-         buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
-      }
-      else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getChestOrientationActions().size());
-         chestOrientationActionState.toMessage(treeStateMessage.getChestOrientationActions().add());
-      }
-      else if (nodeState instanceof FootstepPlanActionState footstepPlanActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootstepPlanActions().size());
-         footstepPlanActionState.toMessage(treeStateMessage.getFootstepPlanActions().add());
-      }
-      else if (nodeState instanceof SakeHandCommandActionState sakeHandCommandActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSakeHandCommandActions().size());
-         sakeHandCommandActionState.toMessage(treeStateMessage.getSakeHandCommandActions().add());
-      }
-      else if (nodeState instanceof HandPoseActionState handPoseActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HAND_POSE_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandPoseActions().size());
-         handPoseActionState.toMessage(treeStateMessage.getHandPoseActions().add());
-      }
-      else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HAND_WRENCH_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandWrenchActions().size());
-         handWrenchActionState.toMessage(treeStateMessage.getHandWrenchActions().add());
-      }
-      else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getScrewPrimitiveActions().size());
-         screwPrimitiveActionState.toMessage(treeStateMessage.getScrewPrimitiveActions().add());
-      }
-      else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisHeightActions().size());
-         pelvisHeightActionState.toMessage(treeStateMessage.getPelvisHeightActions().add());
-      }
-      else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WAIT_DURATION_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
-         waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
-      }
-      else if (nodeState instanceof FootPoseActionState footPoseActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOT_POSE_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootPoseActions().size());
-         footPoseActionState.toMessage(treeStateMessage.getFootPoseActions().add());
+         if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getRootNodes().size());
+            rootNodeState.toMessage(treeStateMessage.getRootNodes().add());
+         }
+         else if (nodeState instanceof ActionSequenceState actionSequenceState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ACTION_SEQUENCE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
+            actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
+         }
+         else if (nodeState instanceof DoorTraversalState doorTraversalState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+            doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
+         }
+         else if (nodeState instanceof TrashCanInteractionState trashCanInteractionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.TRASH_CAN_INTERACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getTrashCanInteractions().size());
+            trashCanInteractionState.toMessage(treeStateMessage.getTrashCanInteractions().add());
+         }
+         else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+            buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
+         }
+         else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getChestOrientationActions().size());
+            chestOrientationActionState.toMessage(treeStateMessage.getChestOrientationActions().add());
+         }
+         else if (nodeState instanceof FootstepPlanActionState footstepPlanActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootstepPlanActions().size());
+            footstepPlanActionState.toMessage(treeStateMessage.getFootstepPlanActions().add());
+         }
+         else if (nodeState instanceof SakeHandCommandActionState sakeHandCommandActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSakeHandCommandActions().size());
+            sakeHandCommandActionState.toMessage(treeStateMessage.getSakeHandCommandActions().add());
+         }
+         else if (nodeState instanceof HandPoseActionState handPoseActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HAND_POSE_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandPoseActions().size());
+            handPoseActionState.toMessage(treeStateMessage.getHandPoseActions().add());
+         }
+         else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.HAND_WRENCH_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getHandWrenchActions().size());
+            handWrenchActionState.toMessage(treeStateMessage.getHandWrenchActions().add());
+         }
+         else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getScrewPrimitiveActions().size());
+            screwPrimitiveActionState.toMessage(treeStateMessage.getScrewPrimitiveActions().add());
+         }
+         else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisHeightActions().size());
+            pelvisHeightActionState.toMessage(treeStateMessage.getPelvisHeightActions().add());
+         }
+         else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WAIT_DURATION_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
+            waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
+         }
+         else if (nodeState instanceof FootPoseActionState footPoseActionState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOT_POSE_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootPoseActions().size());
+            footPoseActionState.toMessage(treeStateMessage.getFootPoseActions().add());
+         }
+         else
+         {
+            packBasicNode = true;
+         }
       }
       else
+      {
+         packBasicNode = true;
+      }
+
+      if (packBasicNode)
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getBasicNodes().size());
@@ -135,65 +155,68 @@ public class ROS2BehaviorTreeMessageTools
 
    public static void fromMessage(ROS2BehaviorTreeSubscriptionNode subscriptionNode, BehaviorTreeNodeState<?> nodeState)
    {
-      if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
+      // Here we check that the incoming data has the full type data as well as that the local node is of that type
+      // When the full data is not necessary to send, we only send the basic node information
+      if (subscriptionNode.getType() == BehaviorTreeRootNodeDefinition.class && nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
       {
          rootNodeState.fromMessage(subscriptionNode.getBehaviorTreeRootNodeStateMessage());
       }
-      else if (nodeState instanceof ActionSequenceState actionSequenceState)
+      else if (subscriptionNode.getType() == ActionSequenceDefinition.class && nodeState instanceof ActionSequenceState actionSequenceState)
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
-      else if (nodeState instanceof DoorTraversalState doorTraversalState)
+      else if (subscriptionNode.getType() == DoorTraversalDefinition.class && nodeState instanceof DoorTraversalState doorTraversalState)
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
       }
-      else if (nodeState instanceof TrashCanInteractionState trashCanInteractionState)
+      else if (subscriptionNode.getType() == TrashCanInteractionDefinition.class && nodeState instanceof TrashCanInteractionState trashCanInteractionState)
       {
          trashCanInteractionState.fromMessage(subscriptionNode.getTrashCanInteractionStateMessage());
       }
-      else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
+      else if (subscriptionNode.getType() == BuildingExplorationDefinition.class && nodeState instanceof BuildingExplorationState buildingExplorationState)
       {
          buildingExplorationState.fromMessage(subscriptionNode.getBuildingExplorationStateMessage());
       }
-      else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
+      else if (subscriptionNode.getType() == ChestOrientationActionDefinition.class && nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
          chestOrientationActionState.fromMessage(subscriptionNode.getChestOrientationActionStateMessage());
       }
-      else if (nodeState instanceof FootstepPlanActionState footstepPlanActionState)
+      else if (subscriptionNode.getType() == FootstepPlanActionDefinition.class && nodeState instanceof FootstepPlanActionState footstepPlanActionState)
       {
          footstepPlanActionState.fromMessage(subscriptionNode.getFootstepPlanActionStateMessage());
       }
-      else if (nodeState instanceof SakeHandCommandActionState sakeHandCommandActionState)
+      else if (subscriptionNode.getType() == SakeHandCommandActionDefinition.class && nodeState instanceof SakeHandCommandActionState sakeHandCommandActionState)
       {
          sakeHandCommandActionState.fromMessage(subscriptionNode.getSakeHandCommandActionStateMessage());
       }
-      else if (nodeState instanceof HandPoseActionState handPoseActionState)
+      else if (subscriptionNode.getType() == HandPoseActionDefinition.class && nodeState instanceof HandPoseActionState handPoseActionState)
       {
          handPoseActionState.fromMessage(subscriptionNode.getHandPoseActionStateMessage());
       }
-      else if (nodeState instanceof HandWrenchActionState handWrenchActionState)
+      else if (subscriptionNode.getType() == HandWrenchActionDefinition.class && nodeState instanceof HandWrenchActionState handWrenchActionState)
       {
          handWrenchActionState.fromMessage(subscriptionNode.getHandWrenchActionStateMessage());
       }
-      else if (nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
+      else if (subscriptionNode.getType() == ScrewPrimitiveActionDefinition.class && nodeState instanceof ScrewPrimitiveActionState screwPrimitiveActionState)
       {
          screwPrimitiveActionState.fromMessage(subscriptionNode.getScrewPrimitiveActionStateMessage());
       }
-      else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
+      else if (subscriptionNode.getType() == PelvisHeightOrientationActionDefinition.class && nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
       {
          pelvisHeightActionState.fromMessage(subscriptionNode.getPelvisHeightOrientationActionStateMessage());
       }
-      else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
+      else if (subscriptionNode.getType() == WaitDurationActionDefinition.class && nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
       }
-      else if (nodeState instanceof FootPoseActionState footPoseActionState)
+      else if (subscriptionNode.getType() == FootPoseActionDefinition.class && nodeState instanceof FootPoseActionState footPoseActionState)
       {
          footPoseActionState.fromMessage(subscriptionNode.getFootPoseActionStateMessage());
       }
       else
       {
          nodeState.fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
+         nodeState.getDefinition().fromMessage(subscriptionNode.getBehaviorTreeNodeDefinitionMessage());
       }
    }
 

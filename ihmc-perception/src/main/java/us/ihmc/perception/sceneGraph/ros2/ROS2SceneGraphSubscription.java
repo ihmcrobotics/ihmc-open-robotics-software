@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -32,6 +33,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -175,10 +177,7 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
-            yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
-            yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
-            yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
+            yoloNode.fromMessage(subscriptionNode.getYOLONodeMessage());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
@@ -208,6 +207,10 @@ public class ROS2SceneGraphSubscription
                   }
                }
             }
+         }
+         if (localNode instanceof TrashCanNode trashCanNode)
+         {
+            trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
          }
 
          if (localParentNode != null) // Parent of root node is null
@@ -311,6 +314,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setDoorNodeMessage(doorNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(doorNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(doorNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.TRASH_CAN_NODE_TYPE ->
+         {
+            TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().get(indexInTypesList);
+            subscriptionNode.setTrashCanNodeMessage(trashCanNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode().getSceneNode());
          }
       }
 

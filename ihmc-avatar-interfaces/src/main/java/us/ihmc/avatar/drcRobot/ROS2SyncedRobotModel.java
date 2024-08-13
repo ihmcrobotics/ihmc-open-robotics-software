@@ -1,8 +1,10 @@
 package us.ihmc.avatar.drcRobot;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -16,6 +18,7 @@ import java.util.function.Consumer;
 public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
+   private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
    private final SideDependentList<ROS2Input<HandJointAnglePacket>> handJointAnglePacketInputs = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
 
@@ -37,6 +40,9 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
                                                        return true;
                                                     });
       robotConfigurationDataInput.addCallback(message -> resetDataReceptionTimer());
+      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node,
+                                                      CapturabilityBasedStatus.class,
+                                                      HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotModel.getSimpleRobotName()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -52,6 +58,11 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    public RobotConfigurationData getLatestRobotConfigurationData()
    {
       return robotConfigurationDataInput.getLatest();
+   }
+
+   public CapturabilityBasedStatus getLatestCapturabilityBasedStatus()
+   {
+      return capturabilityBasedStatusInput.getLatest();
    }
 
    @Override

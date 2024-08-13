@@ -20,7 +20,7 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      waitDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
+      waitDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
    }
 
    @Override

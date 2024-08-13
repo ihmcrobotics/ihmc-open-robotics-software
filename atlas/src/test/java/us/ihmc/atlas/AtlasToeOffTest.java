@@ -11,7 +11,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarToeOffTest;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasToeOffTest extends AvatarToeOffTest
 {
@@ -116,6 +116,6 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     @Override
     public String getSimpleRobotName()
     {
-        return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+        return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
     }
 }

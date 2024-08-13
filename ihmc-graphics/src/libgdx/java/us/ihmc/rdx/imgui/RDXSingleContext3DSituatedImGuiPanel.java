@@ -6,8 +6,6 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -22,6 +20,8 @@ import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.Axis3D;
@@ -149,9 +149,9 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
       frameBuffer = frameBufferBuilder.build();
       Texture colorBufferTexture = frameBuffer.getColorBufferTexture();
-      material.set(TextureAttribute.createDiffuse(colorBufferTexture));
+      material.set(PBRTextureAttribute.createBaseColorTexture(colorBufferTexture));
 
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
+      material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
       modelBuilder.part(meshPart, material);
 
       Model model = modelBuilder.end();

@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  */
 public class CRDTUnidirectionalPoint3D extends CRDTUnidirectionalMutableField<Point3D>
 {
-   public CRDTUnidirectionalPoint3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalPoint3D(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, Point3D::new);
+      super(sideThatCanModify, requestConfirmFreezable, Point3D::new);
    }
 
    public Point3DReadOnly getValueReadOnly()
@@ -28,7 +28,7 @@ public class CRDTUnidirectionalPoint3D extends CRDTUnidirectionalMutableField<Po
 
    public void fromMessage(Point3D message)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().set(message);
       }

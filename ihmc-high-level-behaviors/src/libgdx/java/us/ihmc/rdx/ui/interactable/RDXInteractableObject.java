@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -76,8 +77,7 @@ public class RDXInteractableObject implements RenderableProvider
       if (modelInstance != null)
          modelInstance.getRenderables(renderables, pool);
 
-      if (selectablePose3DGizmo.getSelected().get())
-         selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
    public RigidBodyTransform getTransformToWorld()
@@ -112,7 +112,7 @@ public class RDXInteractableObject implements RenderableProvider
       initialObjectPose.set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
    }
 
-   public void setPose(RigidBodyTransform transformToWorld)
+   public void setPose(RigidBodyTransformReadOnly transformToWorld)
    {
       initialObjectPose.set(transformToWorld);
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(initialObjectPose);

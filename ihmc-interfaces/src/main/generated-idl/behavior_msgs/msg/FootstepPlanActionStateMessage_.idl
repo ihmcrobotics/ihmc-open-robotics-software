@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
@@ -73,6 +74,10 @@ module behavior_msgs
          * Current right pose
          */
         geometry_msgs::msg::dds::Pose current_right_foot_pose;
+        /**
+         * Preview footstep plan, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> preview_footsteps;
       };
     };
   };

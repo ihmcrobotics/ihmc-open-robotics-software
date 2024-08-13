@@ -2,17 +2,15 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
-import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
-import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
-import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
-import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
+import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
+import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
+import us.ihmc.communication.crdt.CRDTStatusPose3D;
+import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
+import us.ihmc.communication.crdt.CRDTStatusBoolean;
+import us.ihmc.communication.crdt.CRDTStatusDouble;
+import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -22,19 +20,19 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    private final D definition;
 
-   private final CRDTUnidirectionalBoolean isNextForExecution;
-   private final CRDTUnidirectionalInteger concurrencyRank;
-   private final CRDTUnidirectionalBoolean canExecute;
-   private final CRDTUnidirectionalBoolean isExecuting;
-   private final CRDTUnidirectionalBoolean failed;
-   private final CRDTUnidirectionalDouble nominalExecutionDuration;
-   private final CRDTUnidirectionalDouble elapsedExecutionTime;
-   private final CRDTUnidirectionalSE3Trajectory commandedTrajectory;
-   private final CRDTUnidirectionalPose3D currentPose;
-   private final CRDTUnidirectionalOneDoFJointTrajectoryList commandedJointTrajectories;
-   private final CRDTUnidirectionalDoubleArray currentJointAngles;
-   private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
-   private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
+   private final CRDTStatusBoolean isNextForExecution;
+   private final CRDTStatusInteger concurrencyRank;
+   private final CRDTStatusBoolean canExecute;
+   private final CRDTStatusBoolean isExecuting;
+   private final CRDTStatusBoolean failed;
+   private final CRDTStatusDouble nominalExecutionDuration;
+   private final CRDTStatusDouble elapsedExecutionTime;
+   private final CRDTStatusSE3Trajectory commandedTrajectory;
+   private final CRDTStatusPose3D currentPose;
+   private final CRDTStatusOneDoFJointTrajectoryList commandedJointTrajectories;
+   private final CRDTStatusDoubleArray currentJointAngles;
+   private final CRDTStatusDouble positionDistanceToGoalTolerance;
+   private final CRDTStatusDouble orientationDistanceToGoalTolerance;
 
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
@@ -45,19 +43,39 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
       this.definition = definition;
 
-      isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
-      canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
-      isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      commandedTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
-      currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      commandedJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
-      currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
-      positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      isNextForExecution = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      concurrencyRank = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
+      canExecute = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
+      isExecuting = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      nominalExecutionDuration = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      elapsedExecutionTime = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      commandedTrajectory = new CRDTStatusSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
+      currentPose = new CRDTStatusPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      commandedJointTrajectories = new CRDTStatusOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      currentJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
+      positionDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      orientationDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+   }
+
+   @Override
+   public boolean hasStatus()
+   {
+      boolean hasStatus = false;
+      hasStatus |= isNextForExecution.pollHasStatus();
+      hasStatus |= concurrencyRank.pollHasStatus();
+      hasStatus |= canExecute.pollHasStatus();
+      hasStatus |= isExecuting.pollHasStatus();
+      hasStatus |= failed.pollHasStatus();
+      hasStatus |= nominalExecutionDuration.pollHasStatus();
+      hasStatus |= elapsedExecutionTime.pollHasStatus();
+      hasStatus |= commandedTrajectory.pollHasStatus();
+      hasStatus |= currentPose.pollHasStatus();
+      hasStatus |= commandedJointTrajectories.pollHasStatus();
+      hasStatus |= currentJointAngles.pollHasStatus();
+      hasStatus |= positionDistanceToGoalTolerance.pollHasStatus();
+      hasStatus |= orientationDistanceToGoalTolerance.pollHasStatus();
+      return hasStatus;
    }
 
    public void toMessage(ActionNodeStateMessage message)
@@ -184,22 +202,22 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return elapsedExecutionTime.getValue();
    }
 
-   public CRDTUnidirectionalSE3Trajectory getCommandedTrajectory()
+   public CRDTStatusSE3Trajectory getCommandedTrajectory()
    {
       return commandedTrajectory;
    }
 
-   public CRDTUnidirectionalPose3D getCurrentPose()
+   public CRDTStatusPose3D getCurrentPose()
    {
       return currentPose;
    }
 
-   public CRDTUnidirectionalOneDoFJointTrajectoryList getCommandedJointTrajectories()
+   public CRDTStatusOneDoFJointTrajectoryList getCommandedJointTrajectories()
    {
       return commandedJointTrajectories;
    }
 
-   public CRDTUnidirectionalDoubleArray getCurrentJointAngles()
+   public CRDTStatusDoubleArray getCurrentJointAngles()
    {
       return currentJointAngles;
    }

@@ -35,3 +35,6 @@ geometry_msgs/Pose current_left_foot_pose
 
 # Current right pose
 geometry_msgs/Pose current_right_foot_pose
+
+# Preview footstep plan, with a maximum of 50
+behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] preview_footsteps

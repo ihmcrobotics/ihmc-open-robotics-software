@@ -105,7 +105,7 @@ public class RDXIterativeClosestPointReverseDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
+            environmentBuilder.loadEnvironment("HarderTerrain.json");
             realBox = environmentBuilder.getAllObjects().get(3);
             // Place sensor in environment
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());

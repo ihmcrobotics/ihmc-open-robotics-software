@@ -5,12 +5,9 @@ import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.physics.bullet.collision.btConvexHullShape;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.convexPolytope.Vertex3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -90,15 +87,15 @@ public class RDXRockObject extends RDXEnvironmentObject
          meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(rock), getCenterOfMassInModelFrame(), color);
       });
 
-      btConvexHullShape convexHullShape = new btConvexHullShape();
-      Vector3 vector = new Vector3();
-      for (Vertex3D vertix : rock.getVertices())
-      {
-         vector.set((float) vertix.getX(), (float) vertix.getY(), (float) vertix.getZ());
-         convexHullShape.addPoint(vector);
-      }
-
-      setBtCollisionShape(convexHullShape);
+//      btConvexHullShape convexHullShape = new btConvexHullShape();
+//      Vector3 vector = new Vector3();
+//      for (Vertex3D vertix : rock.getVertices())
+//      {
+//         vector.set((float) vertix.getX(), (float) vertix.getY(), (float) vertix.getZ());
+//         convexHullShape.addPoint(vector);
+//      }
+//
+//      setBtCollisionShape(convexHullShape);
       setCollisionGeometryObject(collisionBox);
    }
 }

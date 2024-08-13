@@ -3,9 +3,9 @@ package us.ihmc.rdx.ui.graphics;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.ui.gizmo.DynamicLibGDXModel;
@@ -31,7 +31,7 @@ public class RDXArrowGraphic
          meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, arrowBodyLength), color);
       });
       Material material = new Material();
-      material.set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
+      material.set(PBRTextureAttribute.createBaseColorTexture(RDXMultiColorMeshBuilder.loadPaletteTexture()));
       dynamicArrowModel.setMaterial(material);
    }
 

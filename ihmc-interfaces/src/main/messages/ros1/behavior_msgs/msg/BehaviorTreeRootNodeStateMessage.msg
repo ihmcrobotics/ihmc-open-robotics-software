@@ -11,9 +11,6 @@ bool automatic_execution
 # The index of the action that is set to execute next
 uint16 execution_next_index
 
-# Next action rejection tooltip
-string next_action_rejection_tooltip
-
 # Request manual execution of the next action
 bool manual_execution_requested
 

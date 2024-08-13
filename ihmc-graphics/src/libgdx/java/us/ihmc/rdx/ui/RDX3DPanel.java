@@ -182,7 +182,6 @@ public class RDX3DPanel extends RDXPanel
          }
 
          setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
-         renderShadowMap(Gdx.graphics.getWidth() * antiAliasing, Gdx.graphics.getHeight() * antiAliasing);
 
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
@@ -246,16 +245,6 @@ public class RDX3DPanel extends RDXPanel
       }
    }
 
-   private void renderShadowMap()
-   {
-      renderShadowMap(width, height);
-   }
-
-   private void renderShadowMap(int x, int y)
-   {
-      scene.renderShadowMap(camera3D, x, y);
-   }
-
    private void renderScene(Set<RDXSceneLevel> sceneLevels)
    {
       preRender();
@@ -264,7 +253,7 @@ public class RDX3DPanel extends RDXPanel
          backgroundRenderer.run();
 
       scene.render(sceneLevels);
-      scene.postRender(camera3D, sceneLevels);
+      scene.postRender();
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
@@ -310,8 +299,6 @@ public class RDX3DPanel extends RDXPanel
       this.y = y;
       this.width = width;
       this.height = height;
-
-      scene.getShadowManager().setViewportBounds(x, y, width, height);
    }
 
    public int getCurrentWindowWidth()

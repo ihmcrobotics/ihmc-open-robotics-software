@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
@@ -22,7 +23,6 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
@@ -54,7 +54,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "blop", elevator, jointAxes));
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", elevator.getChildrenJoints().get(0));
@@ -89,7 +89,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       int numberOfJoints = 12; 
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       RandomFloatingRevoluteJointChain idRobot = new RandomFloatingRevoluteJointChain(random, jointAxes);
       RigidBodyBasics elevator = idRobot.getElevator();

@@ -8,6 +8,7 @@ import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class ROS2SceneGraphSubscriptionNode
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
    private DoorNodeMessage doorNodeMessage;
+   private TrashCanNodeMessage trashCanNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -42,6 +44,7 @@ public class ROS2SceneGraphSubscriptionNode
       yoloNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
       doorNodeMessage = null;
+      trashCanNodeMessage = null;
       children.clear();
    }
 
@@ -143,6 +146,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setDoorNodeMessage(DoorNodeMessage doorNodeMessage)
    {
       this.doorNodeMessage = doorNodeMessage;
+   }
+
+   public TrashCanNodeMessage getTrashCanNodeMessage()
+   {
+      return trashCanNodeMessage;
+   }
+
+   public void setTrashCanNodeMessage(TrashCanNodeMessage trashCanNodeMessage)
+   {
+      this.trashCanNodeMessage = trashCanNodeMessage;
    }
 
    public List<ROS2SceneGraphSubscriptionNode> getChildren()

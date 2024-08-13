@@ -10,9 +10,9 @@ public class CRDTUnidirectionalLong extends CRDTUnidirectionalField
 {
    private long value;
 
-   public CRDTUnidirectionalLong(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, long initialValue)
+   public CRDTUnidirectionalLong(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, long initialValue)
    {
-      super(sideThatCanModify, crdtInfo);
+      super(sideThatCanModify, requestConfirmFreezable);
 
       value = initialValue;
    }
@@ -24,9 +24,12 @@ public class CRDTUnidirectionalLong extends CRDTUnidirectionalField
 
    public void setValue(long value)
    {
-      checkActorCanModify();
+      if (this.value != value)
+      {
+         checkActorCanModifyAndFreeze();
 
-      this.value = value;
+         this.value = value;
+      }
    }
 
    public long toMessage()
@@ -36,7 +39,7 @@ public class CRDTUnidirectionalLong extends CRDTUnidirectionalField
 
    public void fromMessage(long value)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          this.value = value;
       }

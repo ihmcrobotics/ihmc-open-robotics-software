@@ -114,7 +114,7 @@ public class RDXModelInstanceScaler
    public void scale(double scaleFactor)
    {
       Model model = scaleForModel(scaleFactor);
-      modelInstance = new ModelInstance(model);
+      modelInstance = new RDXModelInstance(model);
    }
 
    public Model scaleForModel(double scaleFactor)

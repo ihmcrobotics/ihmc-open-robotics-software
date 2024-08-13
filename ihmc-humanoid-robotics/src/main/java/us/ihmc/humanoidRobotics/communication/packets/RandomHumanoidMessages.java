@@ -36,7 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -147,10 +147,10 @@ public final class RandomHumanoidMessages
    {
       SE3TrajectoryPointMessage next = new SE3TrajectoryPointMessage();
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
-      next.getPosition().set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
-      next.getOrientation().set(RandomGeometry.nextQuaternion(random));
-      next.getLinearVelocity().set(RandomGeometry.nextVector3D(random));
-      next.getAngularVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
+      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
+      next.getLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getAngularVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -241,8 +241,8 @@ public final class RandomHumanoidMessages
    {
       SO3TrajectoryPointMessage next = new SO3TrajectoryPointMessage();
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
-      next.getOrientation().set(RandomGeometry.nextQuaternion(random));
-      next.getAngularVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
+      next.getAngularVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -361,8 +361,8 @@ public final class RandomHumanoidMessages
       next.setSwingHeight(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
       if (next.getTrajectoryType() == TrajectoryType.CUSTOM.toByte())
       {
-         next.getCustomPositionWaypoints().add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         next.getCustomPositionWaypoints().add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         next.getCustomPositionWaypoints().add().set(EuclidCoreRandomTools.nextPoint3D(random, -10.0, 10.0));
+         next.getCustomPositionWaypoints().add().set(EuclidCoreRandomTools.nextPoint3D(random, -10.0, 10.0));
       }
       else if (next.getTrajectoryType() == TrajectoryType.WAYPOINTS.toByte())
       {
@@ -539,8 +539,8 @@ public final class RandomHumanoidMessages
    {
       EuclideanTrajectoryPointMessage next = new EuclideanTrajectoryPointMessage();
       next.setTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.01));
-      next.getPosition().set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
-      next.getLinearVelocity().set(RandomGeometry.nextVector3D(random));
+      next.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
+      next.getLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -663,9 +663,9 @@ public final class RandomHumanoidMessages
    {
       CapturabilityBasedStatus next = new CapturabilityBasedStatus();
       double max = Double.MAX_VALUE / 2;
-      next.getCapturePoint2d().set(RandomGeometry.nextPoint3D(random, max, max, 0.0));
-      next.getDesiredCapturePoint2d().set(RandomGeometry.nextPoint3D(random, max, max, 0.0));
-      next.getCenterOfMass3d().set(RandomGeometry.nextPoint3D(random, max, max, max));
+      next.getCapturePoint2d().set(EuclidCoreRandomTools.nextPoint3D(random, max, max, 0.0));
+      next.getDesiredCapturePoint2d().set(EuclidCoreRandomTools.nextPoint3D(random, max, max, 0.0));
+      next.getCenterOfMass3d().set(EuclidCoreRandomTools.nextPoint3D(random, max, max, max));
 
       IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getLeftFootSupportPolygon3d().add()::set);
       IntStream.range(0, HumanoidMessageTools.CAPTURABILITY_BASED_STATUS_MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getRightFootSupportPolygon3d().add()::set);
@@ -713,10 +713,10 @@ public final class RandomHumanoidMessages
          flag[footstepNumber] = (byte) random.nextInt(3);
          RobotSide robotSide = (footstepNumber % 2 == 0) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         Point3D position = RandomGeometry.nextPoint3D(random, xMax, yMax, zMax);
+         Point3D position = EuclidCoreRandomTools.nextPoint3D(random, xMax, yMax, zMax);
 
          Quaternion orientation = new Quaternion();
-         orientation.set(RandomGeometry.nextAxisAngle(random));
+         orientation.set(EuclidCoreRandomTools.nextAxisAngle(random));
 
          previousFootstep.transform(position);
 
@@ -911,10 +911,10 @@ public final class RandomHumanoidMessages
       next.setFootstepStatus(RandomNumbers.nextEnum(random, FootstepStatus.class).toByte());
       next.setFootstepIndex(RandomNumbers.nextIntWithEdgeCases(random, 0.1));
       next.setRobotSide(RobotSide.generateRandomRobotSide(random).toByte());
-      next.getDesiredFootPositionInWorld().set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
-      next.getDesiredFootOrientationInWorld().set(RandomGeometry.nextQuaternion(random));
-      next.getActualFootPositionInWorld().set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0));
-      next.getActualFootOrientationInWorld().set(RandomGeometry.nextQuaternion(random));
+      next.getDesiredFootPositionInWorld().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
+      next.getDesiredFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
+      next.getActualFootPositionInWorld().set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0));
+      next.getActualFootOrientationInWorld().set(EuclidCoreRandomTools.nextQuaternion(random));
       return next;
    }
 

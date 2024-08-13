@@ -24,15 +24,9 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
             */
    public int erosion_kernel_radius_;
    public float outlier_threshold_;
-   /**
-            * List of YOLOv8DetectionClass values that YOLO should detect
-            */
-   public us.ihmc.idl.IDLSequence.Byte  target_detection_classes_;
 
    public YOLOv8ParametersMessage()
    {
-      target_detection_classes_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");
-
    }
 
    public YOLOv8ParametersMessage(YOLOv8ParametersMessage other)
@@ -53,7 +47,6 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       outlier_threshold_ = other.outlier_threshold_;
 
-      target_detection_classes_.set(other.target_detection_classes_);
    }
 
    /**
@@ -114,15 +107,6 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    }
 
 
-   /**
-            * List of YOLOv8DetectionClass values that YOLO should detect
-            */
-   public us.ihmc.idl.IDLSequence.Byte  getTargetDetectionClasses()
-   {
-      return target_detection_classes_;
-   }
-
-
    public static Supplier<YOLOv8ParametersMessagePubSubType> getPubSubType()
    {
       return YOLOv8ParametersMessagePubSubType::new;
@@ -150,8 +134,6 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_threshold_, other.outlier_threshold_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.target_detection_classes_, other.target_detection_classes_, epsilon)) return false;
-
 
       return true;
    }
@@ -175,7 +157,6 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if(this.outlier_threshold_ != otherMyClass.outlier_threshold_) return false;
 
-      if (!this.target_detection_classes_.equals(otherMyClass.target_detection_classes_)) return false;
 
       return true;
    }
@@ -195,9 +176,7 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       builder.append("erosion_kernel_radius=");
       builder.append(this.erosion_kernel_radius_);      builder.append(", ");
       builder.append("outlier_threshold=");
-      builder.append(this.outlier_threshold_);      builder.append(", ");
-      builder.append("target_detection_classes=");
-      builder.append(this.target_detection_classes_);
+      builder.append(this.outlier_threshold_);
       builder.append("}");
       return builder.toString();
    }

@@ -48,7 +48,7 @@ public class RDXDepthSensorDemo
          @Override
          public void render()
          {
-            depthSensorSimulator.render(baseUI.getPrimaryScene(), false, Color.WHITE, 0.01f);
+            depthSensorSimulator.render(baseUI.getPrimaryScene(), false, Color.WHITE, 1.0f);
             pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
 
             baseUI.renderBeforeOnScreenUI();

@@ -53,7 +53,9 @@ public class DetachableReferenceFrame
             parentFrame = ReferenceFrameTools.constructARootFrame(parentFrameName);
          }
 
-         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
+         referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame,
+                                                                                                 transformToParent,
+                                                                                                 DetachableReferenceFrame.class.getSimpleName());
       }
       else
       {

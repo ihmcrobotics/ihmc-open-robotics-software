@@ -1,13 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ROS2BehaviorTreeSubscriptionNode
 {
-   private byte type;
+   private Class<?> nodeDefinitionClass;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
@@ -29,7 +30,7 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public void clear()
    {
-      type = -1;
+      nodeDefinitionClass = null;
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
       behaviorTreeRootNodeStateMessage = null;
@@ -50,14 +51,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       children.clear();
    }
 
-   public byte getType()
+   public Class<?> getType()
    {
-      return type;
+      return nodeDefinitionClass;
    }
 
    public void setType(byte type)
    {
-      this.type = type;
+      nodeDefinitionClass = BehaviorTreeDefinitionRegistry.getNodeDefinitionClass(type);
    }
 
    public BehaviorTreeNodeDefinitionMessage getBehaviorTreeNodeDefinitionMessage()

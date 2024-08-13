@@ -9,7 +9,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.HumanoidBehaviorDispatcherTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
@@ -30,7 +30,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Tag("humanoid-behaviors")

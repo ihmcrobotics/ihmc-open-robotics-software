@@ -5,6 +5,8 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.GL31;
+import com.badlogic.gdx.graphics.GL32;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
 
@@ -12,6 +14,18 @@ public class MinimalLibGDXGraphics implements Graphics
 {
    @Override
    public boolean isGL30Available()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean isGL31Available()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean isGL32Available()
    {
       return true;
    }
@@ -29,6 +43,18 @@ public class MinimalLibGDXGraphics implements Graphics
    }
 
    @Override
+   public GL31 getGL31()
+   {
+      return Gdx.gl31;
+   }
+
+   @Override
+   public GL32 getGL32()
+   {
+      return Gdx.gl32;
+   }
+
+   @Override
    public void setGL20(GL20 gl20)
    {
 
@@ -36,6 +62,18 @@ public class MinimalLibGDXGraphics implements Graphics
 
    @Override
    public void setGL30(GL30 gl30)
+   {
+
+   }
+
+   @Override
+   public void setGL31(GL31 gl31)
+   {
+
+   }
+
+   @Override
+   public void setGL32(GL32 gl32)
    {
 
    }

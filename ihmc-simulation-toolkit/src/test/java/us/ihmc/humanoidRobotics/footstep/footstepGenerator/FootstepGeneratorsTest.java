@@ -11,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -136,9 +134,9 @@ public class FootstepGeneratorsTest
    }
 
 	@Test
-   public void noVisualizationsForBambooTest()
+   public void noVisualizationsForCITest()
    {
-      assertTrue("Do not allow visualizations for committing to bamboo", allowVisualization == Visualization.NO_VISUALIZATION);
+      assertTrue("Do not allow visualizations for committing to CI", allowVisualization == Visualization.NO_VISUALIZATION);
    }
 
 	@Test

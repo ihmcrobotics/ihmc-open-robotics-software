@@ -11,7 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
 import us.ihmc.robotics.Assert;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
@@ -55,6 +55,6 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 }

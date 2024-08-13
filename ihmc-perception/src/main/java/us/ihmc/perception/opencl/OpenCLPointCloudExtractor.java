@@ -29,6 +29,8 @@ public class OpenCLPointCloudExtractor
    public List<Point3D32> extractPointCloud(RawImage depthImage16UC1)
    {
       RawImage depthImage = depthImage16UC1.get();
+      if (depthImage == null || depthImage.getCpuImageMat().isNull() || depthImage.getCpuImageMat().empty())
+         return new ArrayList<>();
 
       int numberOfPixels = depthImage.getImageWidth() * depthImage.getImageHeight();
       if (pointCloudVertexOutput == null)

@@ -21,6 +21,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMecha
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import java.util.Arrays;
@@ -134,6 +135,12 @@ public class ROS2SceneGraphTools
             doorNode.getOpeningMechanisms().put(doorOpeningMechanism.getDetectionID(), doorOpeningMechanism);
          }
          sceneNode = doorNode;
+      }
+      else if (nodeType == SceneGraphMessage.TRASH_CAN_NODE_TYPE)
+      {
+         TrashCanNode trashCanNode = new TrashCanNode(nodeID, nodeName, crdtInfo);
+         trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
+         sceneNode = trashCanNode;
       }
       else
       {

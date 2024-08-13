@@ -12,17 +12,19 @@ import us.ihmc.pubsub.TopicDataType;
        * in this message because ROS 2 messages cannot contain themselves.
        * Instead we use a depth first ordered list and number of children
        * to send trees over. This is contained in another higher level message.
+       * Long form notes about the node.
+       * string notes
        */
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
    /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
+   /**
             * The name of the node including .json if it's a JSON root node
             */
    public java.lang.StringBuilder name_;
-   /**
-            * Long form notes about the node.
-            */
-   public java.lang.StringBuilder notes_;
    /**
             * Number of children
             */
@@ -30,8 +32,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public BehaviorTreeNodeDefinitionMessage()
    {
+      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
       name_ = new java.lang.StringBuilder(255);
-      notes_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage other)
@@ -42,14 +44,21 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public void set(BehaviorTreeNodeDefinitionMessage other)
    {
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
       name_.setLength(0);
       name_.append(other.name_);
 
-      notes_.setLength(0);
-      notes_.append(other.notes_);
-
       number_of_children_ = other.number_of_children_;
 
+   }
+
+
+   /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
+   {
+      return confirmable_request_;
    }
 
    /**
@@ -74,30 +83,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    public java.lang.StringBuilder getName()
    {
       return name_;
-   }
-
-   /**
-            * Long form notes about the node.
-            */
-   public void setNotes(java.lang.String notes)
-   {
-      notes_.setLength(0);
-      notes_.append(notes);
-   }
-
-   /**
-            * Long form notes about the node.
-            */
-   public java.lang.String getNotesAsString()
-   {
-      return getNotes().toString();
-   }
-   /**
-            * Long form notes about the node.
-            */
-   public java.lang.StringBuilder getNotes()
-   {
-      return notes_;
    }
 
    /**
@@ -133,9 +118,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.notes_, other.notes_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
 
@@ -152,9 +136,8 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       BehaviorTreeNodeDefinitionMessage otherMyClass = (BehaviorTreeNodeDefinitionMessage) other;
 
+      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.notes_, otherMyClass.notes_)) return false;
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
 
@@ -168,10 +151,10 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeNodeDefinitionMessage {");
+      builder.append("confirmable_request=");
+      builder.append(this.confirmable_request_);      builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
-      builder.append("notes=");
-      builder.append(this.notes_);      builder.append(", ");
       builder.append("number_of_children=");
       builder.append(this.number_of_children_);
       builder.append("}");

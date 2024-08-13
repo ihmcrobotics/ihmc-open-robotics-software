@@ -1,17 +1,14 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class IntersectionPlaneBoxCalculatorTest
 {
@@ -30,7 +27,7 @@ public class IntersectionPlaneBoxCalculatorTest
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
          Point3D pointOnPlane = cubeCenter;
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          calculator.setCube(cubeSize, cubeCenter);
          calculator.setPlane(pointOnPlane, planeNormal);
          List<Point3D> intersections = calculator.computeIntersections();
@@ -40,7 +37,7 @@ public class IntersectionPlaneBoxCalculatorTest
             Point3D intersection = intersections.get(j);
             Vector3D sub = new Vector3D();
             sub.sub(intersection, pointOnPlane);
-            assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+            assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
             Vector3D v0 = new Vector3D();
             Vector3D v1 = new Vector3D();
@@ -50,7 +47,7 @@ public class IntersectionPlaneBoxCalculatorTest
             v0.sub(intersection, nextIntersection);
             v1.sub(intersection, previousIntersection);
             v3.cross(v0, v1);
-            assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+            assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
          }
       }
    }
@@ -66,8 +63,8 @@ public class IntersectionPlaneBoxCalculatorTest
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         Point3D pointOnPlane = RandomGeometry.nextPoint3D(random, 0.5, 0.5, 0.5);
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
+         Point3D pointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 0.5, 0.5, 0.5);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          calculator.setCube(cubeSize, cubeCenter);
          calculator.setPlane(pointOnPlane, planeNormal);
          List<Point3D> intersections = calculator.computeIntersections();
@@ -77,7 +74,7 @@ public class IntersectionPlaneBoxCalculatorTest
             Point3D intersection = intersections.get(j);
             Vector3D sub = new Vector3D();
             sub.sub(intersection, pointOnPlane);
-            assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+            assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
             Vector3D v0 = new Vector3D();
             Vector3D v1 = new Vector3D();
@@ -87,7 +84,7 @@ public class IntersectionPlaneBoxCalculatorTest
             v0.sub(intersection, nextIntersection);
             v1.sub(intersection, previousIntersection);
             v3.cross(v0, v1);
-            assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+            assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
          }
       }
    }
@@ -102,9 +99,9 @@ public class IntersectionPlaneBoxCalculatorTest
 
       for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
       {
-         Point3D cubeCenter = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
-         Point3D pointOnPlane = RandomGeometry.nextPoint3D(random, 0.5, 0.5, 0.5);
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
+         Point3D cubeCenter = EuclidCoreRandomTools.nextPoint3D(random, 10.0, 10.0, 10.0);
+         Point3D pointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 0.5, 0.5, 0.5);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          pointOnPlane.add(cubeCenter);
          calculator.setCube(cubeSize, cubeCenter);
          calculator.setPlane(pointOnPlane, planeNormal);
@@ -115,7 +112,7 @@ public class IntersectionPlaneBoxCalculatorTest
             Point3D intersection = intersections.get(j);
             Vector3D sub = new Vector3D();
             sub.sub(intersection, pointOnPlane);
-            assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+            assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
             Vector3D v0 = new Vector3D();
             Vector3D v1 = new Vector3D();
@@ -131,7 +128,7 @@ public class IntersectionPlaneBoxCalculatorTest
                System.err.println("      Point3D pointOnPlane = new Point3D" + pointOnPlane + ";");
                System.err.println("      Vector3d planeNormal = new Vector3d" + planeNormal + ";");
             }
-            assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+            assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
          }
       }
    }
@@ -154,7 +151,7 @@ public class IntersectionPlaneBoxCalculatorTest
          Point3D intersection = intersections.get(j);
          Vector3D sub = new Vector3D();
          sub.sub(intersection, pointOnPlane);
-         assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+         assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
          Vector3D v0 = new Vector3D();
          Vector3D v1 = new Vector3D();
@@ -165,7 +162,7 @@ public class IntersectionPlaneBoxCalculatorTest
          v1.sub(intersection, previousIntersection);
          v3.cross(v0, v1);
          System.out.println(v3.dot(planeNormal) > 0.0);
-         assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+         assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
       }
    }
 
@@ -187,7 +184,7 @@ public class IntersectionPlaneBoxCalculatorTest
          Point3D intersection = intersections.get(j);
          Vector3D sub = new Vector3D();
          sub.sub(intersection, pointOnPlane);
-         assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+         assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
          Vector3D v0 = new Vector3D();
          Vector3D v1 = new Vector3D();
@@ -198,7 +195,7 @@ public class IntersectionPlaneBoxCalculatorTest
          v1.sub(intersection, previousIntersection);
          v3.cross(v0, v1);
          System.out.println(v3.dot(planeNormal) > 0.0);
-         assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+         assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
       }
    }
 
@@ -220,7 +217,7 @@ public class IntersectionPlaneBoxCalculatorTest
          Point3D intersection = intersections.get(j);
          Vector3D sub = new Vector3D();
          sub.sub(intersection, pointOnPlane);
-         assertEquals("Intersection is not on plane", 0.0, sub.dot(planeNormal), EPS);
+         assertEquals(0.0, sub.dot(planeNormal), EPS, "Intersection is not on plane");
 
          Vector3D v0 = new Vector3D();
          Vector3D v1 = new Vector3D();
@@ -231,7 +228,7 @@ public class IntersectionPlaneBoxCalculatorTest
          v1.sub(intersection, previousIntersection);
          v3.cross(v0, v1);
          System.out.println(v3.dot(planeNormal) > 0.0);
-         assertTrue("Intersections are not properly ordered", v3.dot(planeNormal) > 0.0);
+         assertTrue(v3.dot(planeNormal) > 0.0, "Intersections are not properly ordered");
       }
    }
 }

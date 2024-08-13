@@ -1,11 +1,9 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.*;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -13,20 +11,18 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorTest;
-import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultipleWaypointsPositionTrajectoryGeneratorTest
 {
@@ -50,21 +46,19 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+      FramePoint3D initialPosition = new FramePoint3D(worldFrame, 1.0, 0.0, 1.0);
+      FramePoint3D finalPosition = new FramePoint3D(worldFrame, 0.2, 1.0, 0.4);
+
       MultipleWaypointsPositionTrajectoryGenerator multipleWaypointTrajectory;
-      StraightLinePositionTrajectoryGenerator simpleTrajectory;
-      
-      
-      DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
-      FramePositionProvider initialPositionProvider = () -> new FramePoint3D(worldFrame, 1.0, 0.0, 1.0);
-      FramePositionProvider finalPositionProvider = () -> new FramePoint3D(worldFrame, 0.2, 1.0, 0.4);
-      simpleTrajectory = new StraightLinePositionTrajectoryGenerator("simpleTraj", worldFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, registry);
+      StraightLinePoseTrajectoryGenerator simpleTrajectory = new StraightLinePoseTrajectoryGenerator("simpleTraj", worldFrame, registry);
+      simpleTrajectory.setInitialPose(initialPosition, new FrameQuaternion(worldFrame));
+      simpleTrajectory.setFinalPose(finalPosition, new FrameQuaternion(worldFrame));
+      simpleTrajectory.setTrajectoryTime(trajectoryTime);
       simpleTrajectory.initialize();
 
       int numberOfWaypoints = 11;
       multipleWaypointTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("testedTraj", 50, worldFrame, registry);
       multipleWaypointTrajectory.clear();
-      
-      
 
       FramePoint3D waypointPosition = new FramePoint3D();
       FrameVector3D waypointVelocity = new FrameVector3D();
@@ -95,12 +89,9 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
          
          simpleTrajectory.compute(t);
          simpleTrajectory.getLinearData(positionToPackSimple, velocityToPackSimple, accelerationToPackSimple);
-    
-         boolean positionEqual = positionToPackMultiple.epsilonEquals(positionToPackSimple, EPSILON);
-         assertTrue(positionEqual);
-         
-         boolean velocityEqual = velocityToPackMultiple.epsilonEquals(velocityToPackSimple, 5.0*EPSILON);
-         assertTrue(velocityEqual);
+
+         EuclidFrameTestTools.assertEquals(positionToPackSimple, positionToPackMultiple, EPSILON);
+         EuclidFrameTestTools.assertEquals(velocityToPackSimple, velocityToPackMultiple, 5.0 * EPSILON);
 
          // The straight line trajectory does minimum jerk whereas the multiple waypoint uses cubic splines
 //         boolean accelerationEqual = accelerationToPackMultiple.epsilonEquals(accelerationToPackSimple, 100.0*EPSILON);
@@ -245,7 +236,7 @@ public class MultipleWaypointsPositionTrajectoryGeneratorTest
       return referenceTrajectory;
    }
 
-   private class PositionTrajectoryState
+   private static class PositionTrajectoryState
    {
       public final double time;
       public final FramePoint3D position;

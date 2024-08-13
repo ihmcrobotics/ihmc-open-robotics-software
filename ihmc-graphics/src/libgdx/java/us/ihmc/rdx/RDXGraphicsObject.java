@@ -3,11 +3,12 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.SerializationException;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -118,7 +119,7 @@ public class RDXGraphicsObject extends Graphics3DInstructionExecutor implements 
 
             if (firstMaterial != null)
             {
-               firstMaterial.set(ColorAttribute.createDiffuse(color.r, color.g, color.b, color.a));
+               firstMaterial.set(PBRColorAttribute.createBaseColorFactor(color));
                if (color.a < 1.0f)
                {
                   firstMaterial.set(new BlendingAttribute(true, color.a));
@@ -126,7 +127,7 @@ public class RDXGraphicsObject extends Graphics3DInstructionExecutor implements 
             }
          }
 
-         ModelInstance modelInstance = new ModelInstance(model);
+         ModelInstance modelInstance = new RDXModelInstance(model);
          transforms.put(modelInstance, new AffineTransform(placementTransform));
          modelInstances.add(modelInstance);
       }

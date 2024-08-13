@@ -7,8 +7,8 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  */
 public class CRDTUnidirectionalString extends CRDTUnidirectionalImmutableField<String>
 {
-   public CRDTUnidirectionalString(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, String initialValue)
+   public CRDTUnidirectionalString(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, String initialValue)
    {
-      super(sideThatCanModify, crdtInfo, initialValue);
+      super(sideThatCanModify, requestConfirmFreezable, initialValue);
    }
 }

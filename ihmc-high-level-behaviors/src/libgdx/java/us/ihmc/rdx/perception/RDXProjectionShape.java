@@ -7,12 +7,12 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImBoolean;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -57,7 +57,7 @@ public abstract class RDXProjectionShape
       Material material = model.nodes.get(0).parts.get(0).material;
       material.set(new BlendingAttribute(opacity));
       if (texture != null)
-         material.set(TextureAttribute.createDiffuse(texture));
+         material.set(PBRTextureAttribute.createBaseColorTexture(texture));
       modelInstance = new ModelInstance(model);
    }
 
@@ -71,7 +71,7 @@ public abstract class RDXProjectionShape
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
       if (latestTexture != null)
-         material.set(TextureAttribute.createDiffuse(latestTexture));
+         material.set(PBRTextureAttribute.createBaseColorTexture(latestTexture));
       modelBuilder.part(meshPart, material);
 
       if (model != null)

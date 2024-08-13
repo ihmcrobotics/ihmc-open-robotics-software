@@ -4,8 +4,5 @@ uint32 id
 # A node is active if it lies on the path of the current tree tick.
 bool is_active
 
-# A mechanism for confirming and ending a freeze early
-ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
-
 # Recent log messages
 behavior_msgs/BehaviorTreeLogMessage[<=50] recent_log_messages

@@ -31,6 +31,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotics.EuclidGeometryMissingTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
@@ -382,7 +383,7 @@ public class PlanarRegionSLAMTools
                                                                          double maximumPointProjectionDistance,
                                                                          PairList<PlanarRegion, Point2D> shadowMatches)
    {
-      BoundingBox2D intersection = GeometryTools.getIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+      BoundingBox2D intersection = EuclidGeometryMissingTools.computeIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
       if (intersection == null)
       {

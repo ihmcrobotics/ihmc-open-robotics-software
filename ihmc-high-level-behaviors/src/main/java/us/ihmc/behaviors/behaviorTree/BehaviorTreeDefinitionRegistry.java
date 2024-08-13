@@ -42,7 +42,7 @@ public class BehaviorTreeDefinitionRegistry
       return null;
    }
 
-   public static Class<?> getNodeStateClass(byte nodeType)
+   public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
       for (RegistryRecord definitionEntry : DEFINITIONS)
       {

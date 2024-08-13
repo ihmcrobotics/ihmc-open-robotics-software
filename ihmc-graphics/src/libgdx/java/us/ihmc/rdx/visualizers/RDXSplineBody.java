@@ -5,14 +5,15 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import static com.badlogic.gdx.graphics.g3d.utils.MeshBuilder.MAX_INDEX;
+
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
@@ -37,16 +38,16 @@ public class RDXSplineBody implements RenderableProvider
    {
       this.lineWidth = lineWidth;
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
    }
 
    public RDXSplineBody(float lineWidth, float opacity)
    {
       this.lineWidth = lineWidth;
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
       material.set(new BlendingAttribute(true, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA, opacity));
    }
 

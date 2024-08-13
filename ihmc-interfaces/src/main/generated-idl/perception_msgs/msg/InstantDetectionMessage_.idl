@@ -6,6 +6,7 @@
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 #include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
+#include "perception_msgs/msg/./ImageMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -31,6 +32,9 @@ module perception_msgs
         /**
          * YOLOv8InstantDetection fields:
          */
+        perception_msgs::msg::dds::ImageMessage yolo_color_image;
+        perception_msgs::msg::dds::ImageMessage yolo_depth_image;
+        perception_msgs::msg::dds::ImageMessage yolo_object_mask;
         sequence<geometry_msgs::msg::dds::Point32, 511> yolo_object_point_cloud;
         /**
          * CenterPoseInstantDetection fields:

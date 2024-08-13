@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  */
 public class CRDTUnidirectionalVector3D extends CRDTUnidirectionalMutableField<Vector3D>
 {
-   public CRDTUnidirectionalVector3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalVector3D(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, Vector3D::new);
+      super(sideThatCanModify, requestConfirmFreezable, Vector3D::new);
    }
 
    public Vector3DReadOnly getValueReadOnly()
@@ -28,7 +28,7 @@ public class CRDTUnidirectionalVector3D extends CRDTUnidirectionalMutableField<V
 
    public void fromMessage(Vector3D message)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().set(message);
       }

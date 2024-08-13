@@ -9,7 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -157,8 +156,7 @@ public class IterativeClosestPointManager
             SceneNode node = sceneGraph.getIDToNodeMap().get(entry.getKey());
             if (node != null) // FIXME: race condition occurs when this is running & node is removed from scene graph through the scene graph UI
             {
-               node.getNodeToParentFrameTransform().set(centroidToWorldTransform);
-               node.getNodeFrame().update();
+               node.setNodeToParentFrameTransformAndUpdate(centroidToWorldTransform);
             }
          }
       }

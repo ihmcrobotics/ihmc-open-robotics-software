@@ -15,7 +15,6 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -60,8 +59,7 @@ public class RDXBehaviorTree
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
-                          ReferenceFrameLibrary referenceFrameLibrary,
-                          DefaultFootstepPlannerParametersBasics footstepPlannerParametersBasics)
+                          ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.treeFilesDirectory = treeFilesDirectory;
 
@@ -70,8 +68,7 @@ public class RDXBehaviorTree
                                                    selectionCollisionModel,
                                                    baseUI,
                                                    panel3D,
-                                                   referenceFrameLibrary,
-                                                   footstepPlannerParametersBasics);
+                                                   referenceFrameLibrary);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
 

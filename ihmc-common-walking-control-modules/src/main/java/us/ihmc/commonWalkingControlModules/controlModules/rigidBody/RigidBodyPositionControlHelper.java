@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.tools.QuaternionTools;
@@ -292,7 +293,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       trajectoryPoint.getPosition().set(desiredPosition);
    }
 
-   public void getDesiredPosition(FramePoint3D positionToPack)
+   public void getDesiredPosition(FramePoint3DBasics positionToPack)
    {
       if (trajectoryGenerator.isEmpty())
       {
@@ -584,13 +585,12 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       return trajectoryGenerator.getCurrentNumberOfWaypoints();
    }
 
-   private void queueInitialPoint(FramePoint3D initialPosition)
+   private void queueInitialPoint(FramePoint3DReadOnly initialPosition)
    {
-      initialPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
       FrameEuclideanTrajectoryPoint initialPoint = pointQueue.addLast();
       initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
-      initialPoint.getPosition().set(initialPosition);
+      initialPoint.getPosition().setMatchingFrame(initialPosition);
    }
 
    private FrameEuclideanTrajectoryPoint addPoint()

@@ -3,12 +3,12 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
@@ -31,7 +31,7 @@ public class HumanoidActivePerceptionModule
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
    public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
@@ -46,7 +46,8 @@ public class HumanoidActivePerceptionModule
    {
       LogTools.info("Initializing Active Mapping Process");
       activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName,
-                                                                         robotModel, continuousHikingParameters,
+                                                                         robotModel,
+                                                                         continuousHikingParameters,
                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                          PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
                                                                          ros2Node,
@@ -62,7 +63,13 @@ public class HumanoidActivePerceptionModule
                                                          HumanoidReferenceFrames referenceFrames,
                                                          ContinuousHikingParameters continuousHikingParameters)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousHikingParameters);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
+                                                                            ros2Node,
+                                                                            referenceFrames,
+                                                                            continuousHikingParameters,
+                                                                            new MonteCarloFootstepPlannerParameters(),
+                                                                            robotModel.getFootstepPlannerParameters("ForContinuousWalking"),
+                                                                            robotModel.getSwingPlannerParameters());
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -73,8 +80,8 @@ public class HumanoidActivePerceptionModule
                                                             perceptionConfigurationParameters.getOccupancyGridResolution(),
                                                             70);
          int gridY = HeightMapTools.getIndexFromCoordinates(sensorFrame.getTransformToWorldFrame().getTranslationY(),
-                                                                     perceptionConfigurationParameters.getOccupancyGridResolution(),
-                                                                     70);
+                                                            perceptionConfigurationParameters.getOccupancyGridResolution(),
+                                                            70);
 
          agent.changeStateTo(gridX, gridY);
          agent.measure(world);

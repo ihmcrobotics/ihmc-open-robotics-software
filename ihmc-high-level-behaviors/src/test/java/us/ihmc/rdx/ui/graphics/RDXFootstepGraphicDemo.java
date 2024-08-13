@@ -43,7 +43,6 @@ public class RDXFootstepGraphicDemo
             footsteps.add(new MinimalFootstep(RobotSide.RIGHT, rightPose, foothold, "Right"));
             footstepPlanGraphic.generateMeshes(footsteps);
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addRenderableProvider(footstepPlanGraphic);
          }
 

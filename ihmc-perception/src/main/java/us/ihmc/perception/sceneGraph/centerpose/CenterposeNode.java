@@ -5,6 +5,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.detections.PersistentDetection;
@@ -73,9 +74,10 @@ public class CenterposeNode extends DetectableSceneNode
       super.update(sceneGraph, modificationQueue);
 
       setCurrentlyDetected(objectDetection.isStable());
-      getNodeToParentFrameTransform().set(getMostRecentDetection().getPose());
-
       RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
+      detectionTransform.set(getMostRecentDetection().getPose());
+      getNodeFrame().update();
+
       FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
       FramePose3D interpolatedModelTransformPose = new FramePose3D(ReferenceFrame.getWorldFrame(), interpolatedModelTransform);
 
@@ -101,8 +103,7 @@ public class CenterposeNode extends DetectableSceneNode
          alpha = MathTools.clamp(alpha, 0.001, 1);
 
          interpolatedModelTransform.interpolate(detectionTransform, alpha);
-         getNodeToParentFrameTransform().set(interpolatedModelTransform);
-         getNodeFrame().update();
+         setNodeToParentFrameTransformAndUpdate(interpolatedModelTransform);
       }
 
       confidence = getMostRecentDetection().getConfidence();

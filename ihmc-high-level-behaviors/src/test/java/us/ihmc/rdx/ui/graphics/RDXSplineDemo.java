@@ -1,10 +1,8 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 
@@ -22,7 +20,6 @@ public class RDXSplineDemo
          public void create()
          {
             baseUI.create();
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             spline = new RDXSplineGraphic();
             spline.createStart(new Point3D(0.1, 0.1, 0.1), Color.BLUE);

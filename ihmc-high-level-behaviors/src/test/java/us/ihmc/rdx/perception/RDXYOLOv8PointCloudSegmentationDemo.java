@@ -10,9 +10,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionResults;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionResults;
+import us.ihmc.perception.detections.yolo.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.pubsub.DomainFactory;
@@ -31,12 +30,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+// This demo is broken
 public class RDXYOLOv8PointCloudSegmentationDemo
 {
    private static final float CONFIDENCE_THRESHOLD = 0.5f;
    private static final float NMS_THRESHOLD = 0.1f;
    private static final float MASK_THRESHOLD = 0.0f;
-   private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_PANEL;
    private static final Random random = new Random();
 
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
@@ -47,7 +46,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
 
-   private final YOLOv8ObjectDetector yoloObjectDetector = new YOLOv8ObjectDetector();
+   private final YOLOv8ObjectDetector yoloObjectDetector = null;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
@@ -72,8 +71,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
          RawImage zedDepthImage = zedImageRetriever.getLatestRawDepthImage();
          RawImage zedColorImage = zedImageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
-         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD);
-         RawImage objectMask = results.getSegmentationMatrixForObject(OBJECT_TYPE, MASK_THRESHOLD);
+         YOLOv8DetectionResults results = yoloObjectDetector.runOnImage(zedColorImage, CONFIDENCE_THRESHOLD, NMS_THRESHOLD, MASK_THRESHOLD);
+         RawImage objectMask = results.getSegmentationMatrixForObject("objectClassReplaceMe");
          if (objectMask != null)
          {
             RawImage segmentedDepth = segmenter.removeBackground(zedDepthImage, objectMask);

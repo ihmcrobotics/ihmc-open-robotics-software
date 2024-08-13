@@ -10,7 +10,6 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
@@ -21,11 +20,11 @@ import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -37,8 +36,6 @@ import us.ihmc.scs2.simulation.SimulationTerminalCondition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -795,59 +792,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public double getTimePerRecordTick()
    {
       return getSimulationConstructionSet().getBufferRecordTimePeriod();
-   }
-
-   public void createBambooVideo(String simplifiedRobotModelName, int callStackHeight)
-   {
-      if (createVideo)
-      {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName,
-                                                                                        createBambooToolsVideoAndDataExporter(),
-                                                                                        callStackHeight,
-                                                                                        avatarSimulation.getShowGUI());
-      }
-      else
-      {
-         LogTools.info("Skipping video generation.");
-      }
-   }
-
-   public void createBambooVideo(String videoName)
-   {
-      if (createVideo)
-      {
-         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(createBambooToolsVideoAndDataExporter(), videoName, avatarSimulation.getShowGUI());
-      }
-      else
-      {
-         LogTools.info("Skipping video generation.");
-      }
-   }
-
-   private VideoAndDataExporter createBambooToolsVideoAndDataExporter()
-   {
-      return new VideoAndDataExporter()
-      {
-         @Override
-         public void writeData(File dataFile)
-         {
-            // TODO Implement me
-         }
-
-         @Override
-         public void gotoOutPointNow()
-         {
-            getSimulationConstructionSet().gotoBufferOutPoint();
-         }
-
-         @Override
-         public File createVideo(String string)
-         {
-            File videoFile = new File(string);
-            exportVideo(videoFile);
-            return videoFile;
-         }
-      };
    }
 
    public void exportVideo(File videoFile)

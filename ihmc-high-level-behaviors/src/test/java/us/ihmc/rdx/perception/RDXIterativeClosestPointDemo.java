@@ -42,7 +42,6 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundPoint;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.nio.ByteBuffer;
@@ -113,7 +112,7 @@ public class RDXIterativeClosestPointDemo
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
+            environmentBuilder.loadEnvironment("HarderTerrain.json");
 
             // Place sensor in environment
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());

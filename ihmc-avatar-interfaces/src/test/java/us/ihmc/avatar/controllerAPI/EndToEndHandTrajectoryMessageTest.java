@@ -80,14 +80,14 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -120,7 +120,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -219,13 +219,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -328,13 +329,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                                              simulationTestingParameters);
@@ -408,7 +410,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          assertTrue(success);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
       // TODO: add assert to make sure the hand did not move significantly.
    }
@@ -416,7 +419,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
@@ -620,13 +623,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                            controllerDT);
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -697,7 +701,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testQueuedMessages() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
@@ -919,13 +923,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          startTime = endTime;
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -1055,7 +1060,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
@@ -1266,7 +1271,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -1296,7 +1301,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D desiredRandomHandPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
          desiredRandomHandPose.changeFrame(worldFrame);
-         desiredRandomHandPose.prependTranslation(RandomGeometry.nextVector3D(random, 0.2));
+         desiredRandomHandPose.prependTranslation(EuclidCoreRandomTools.nextVector3D(random, 0.2));
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
@@ -1342,7 +1347,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    public void testHoldHandWhileWalking() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
@@ -1395,7 +1400,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

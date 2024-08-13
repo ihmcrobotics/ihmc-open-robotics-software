@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarRangeOfMotionTests;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasRangeOfMotionTests extends AvatarRangeOfMotionTests
 {
@@ -35,7 +35,7 @@ public class AtlasRangeOfMotionTests extends AvatarRangeOfMotionTests
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Tag("controller-api-2")

@@ -1,8 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,7 +21,9 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RotationToolsTest
 {
@@ -39,25 +38,25 @@ public class RotationToolsTest
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxis = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          double randomAngleCompleteRotations = random.nextInt(2) * (2.0 * Math.PI);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, randomAngle);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, randomAngle + randomAngleCompleteRotations);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
 
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxis = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          double randomAngleNotCompleteRotations = random.nextInt(2) * (2.0 * Math.PI) + 0.25 * AngleTools.generateRandomAngle(random);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, randomAngle);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, randomAngle + randomAngleNotCompleteRotations);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(!RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -67,28 +66,28 @@ public class RotationToolsTest
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          Vector3D randomAxisA_flipped = new Vector3D(randomAxisA);
          randomAxisA_flipped.negate();
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngle);
          AxisAngle axisAngleB = new AxisAngle(randomAxisA_flipped, -randomAngle);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON));
+         assertTrue(RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
 
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
 
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          Vector3D randomAxisA_flipped = new Vector3D(randomAxisA);
          randomAxisA_flipped.negate();
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngle);
          AxisAngle axisAngleB = new AxisAngle(randomAxisA_flipped, randomAngle);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON));
+         assertTrue(!RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngleA, axisAngleB, EPSILON), axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -99,14 +98,14 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
-         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, 0.0);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, 0.0);
 
          AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -121,13 +120,13 @@ public class RotationToolsTest
          double randomAngleA_MultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
          double randomAngleB_MultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
 
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
-         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngleA_MultipleOfTwoPi);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, randomAngleB_MultipleOfTwoPi);
 
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
 
       for (int i = 0; i < numberOfTests; i++)
@@ -137,15 +136,15 @@ public class RotationToolsTest
          double randomAngleNotZeroOrMultipleOfTwoPi = randomAngleMultipleOfTwoPi + randomAngleEpsilonToHalfPiMinusEpsilon;
 
          double remainder = randomAngleNotZeroOrMultipleOfTwoPi % (2.0 * Math.PI);
-         assertTrue(randomAngleNotZeroOrMultipleOfTwoPi + " is divisible by 2*PI, but should not be!", Math.abs(remainder) != 0.0);
+         assertTrue(Math.abs(remainder) != 0.0, randomAngleNotZeroOrMultipleOfTwoPi + " is divisible by 2*PI, but should not be!");
 
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
-         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngleMultipleOfTwoPi);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, randomAngleNotZeroOrMultipleOfTwoPi);
 
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(!RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -156,25 +155,25 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxis = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, -Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, -Math.PI);
 
          AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
-         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, -Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, -Math.PI);
 
          AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(!RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -185,25 +184,25 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxis = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, Math.PI);
 
          AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should equal:\n" + axisAngleB + "!", RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should equal:\n" + axisAngleB + "!");
       }
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
-         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisA = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, Math.PI);
 
          AxisAngleComparisonMode mode = AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS;
-         assertTrue(axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!", !RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode));
+         assertTrue(!RotationTools.axisAngleEpsilonEquals(axisAngleA, axisAngleB, EPSILON, mode), axisAngleA + "\n should *NOT* equal:\n" + axisAngleB + "!");
       }
    }
 
@@ -250,7 +249,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numTests; i++)
       {
-         Quaternion quatToPack = RandomGeometry.nextQuaternion(random);
+         Quaternion quatToPack = EuclidCoreRandomTools.nextQuaternion(random);
          RotationMatrix rotationMatrixToPack = new RotationMatrix();
          double yaw = quatToPack.getYaw();
          rotationMatrixToPack.set(quatToPack);
@@ -351,7 +350,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Quaternion randomQuaternion = RandomGeometry.nextQuaternion(random);
+         Quaternion randomQuaternion = EuclidCoreRandomTools.nextQuaternion(random);
          RotationMatrix rotationMatrix = new RotationMatrix();
          rotationMatrix.set(randomQuaternion);
 
@@ -372,7 +371,7 @@ public class RotationToolsTest
    {
       for (int i = 0; i < 100; i++)
       {
-         Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random);
+         Vector3D expectedAngularVelocity = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D actualAngularVelocity = new Vector3D();
 
          Quaternion integrationResultPrevious = new Quaternion();
@@ -480,9 +479,9 @@ public class RotationToolsTest
          double[] actualYawPitchRollRates = new double[3];
          RotationTools.computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame(angularVelocityInBodyFrame, yaw, pitch, roll, actualYawPitchRollRates);
 
-         assertEquals("Iteration: " + i, yawRate, actualYawPitchRollRates[0], EPSILON);
-         assertEquals("Iteration: " + i, pitchRate, actualYawPitchRollRates[1], EPSILON);
-         assertEquals("Iteration: " + i, rollRate, actualYawPitchRollRates[2], EPSILON);
+         assertEquals(yawRate, actualYawPitchRollRates[0], EPSILON, "Iteration: " + i);
+         assertEquals(pitchRate, actualYawPitchRollRates[1], EPSILON, "Iteration: " + i);
+         assertEquals(rollRate, actualYawPitchRollRates[2], EPSILON, "Iteration: " + i);
       }
    }
 
@@ -580,11 +579,5 @@ public class RotationToolsTest
       m2.set(a);
 
       assertTrue(m2.epsilonEquals(m, 1e-5));
-   }
-
-   public static void assertAxisAngleEquivalent(String errorMsg, AxisAngle axisAngleExpected, AxisAngle axisAngleActual, AxisAngleComparisonMode mode, double epsilon)
-   {
-      boolean axisAnglesAreEqual = RotationTools.axisAngleEpsilonEquals(axisAngleExpected, axisAngleActual, epsilon, mode);
-      assertTrue(errorMsg + "\n AxisAngles are not Equal!\n expected:\n<" + axisAngleExpected + ">\n but was:\n<" + axisAngleActual + ">", axisAnglesAreEqual);
    }
 }

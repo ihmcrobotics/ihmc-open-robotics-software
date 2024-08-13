@@ -118,7 +118,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       {
          if (centerposeNode.getCurrentlyDetected() && centerposeNode.isEnableTracking())
          {
-            interactableObject.setPose(centerposeNode.getNodeToParentFrameTransform());
+            interactableObject.setPose(centerposeNode.getNodeToParentFrameTransformReadOnly());
             LibGDXTools.setOpacity(interactableObject.getModelInstance(), (float) centerposeNode.getConfidence());
             LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
          }

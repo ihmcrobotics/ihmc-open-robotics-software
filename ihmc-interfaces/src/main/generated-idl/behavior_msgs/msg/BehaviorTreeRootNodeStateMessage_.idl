@@ -30,10 +30,6 @@ module behavior_msgs
          */
         unsigned short execution_next_index;
         /**
-         * Next action rejection tooltip
-         */
-        string next_action_rejection_tooltip;
-        /**
          * Request manual execution of the next action
          */
         boolean manual_execution_requested;

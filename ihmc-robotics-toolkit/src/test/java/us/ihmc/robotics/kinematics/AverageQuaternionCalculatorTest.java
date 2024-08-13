@@ -1,7 +1,5 @@
 package us.ihmc.robotics.kinematics;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
@@ -13,7 +11,9 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AverageQuaternionCalculatorTest
 {
@@ -24,8 +24,8 @@ public class AverageQuaternionCalculatorTest
       {
          double epsilon = 1.0e-15;
          Random random = new Random(56416456L);
-         Quaternion quat1 = RandomGeometry.nextQuaternion(random);
-         Quaternion quat2 = RandomGeometry.nextQuaternion(random);
+         Quaternion quat1 = EuclidCoreRandomTools.nextQuaternion(random);
+         Quaternion quat2 = EuclidCoreRandomTools.nextQuaternion(random);
          Quaternion expectedAverageQuat = new Quaternion();
          expectedAverageQuat.interpolate(quat1, quat2, 0.5);
 
@@ -54,7 +54,7 @@ public class AverageQuaternionCalculatorTest
       {
          double epsilon = 1.0e-15;
          Random random = new Random(56416456L);
-         Vector3D randomRotationAxis = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomRotationAxis = EuclidCoreRandomTools.nextVector3D(random, 1.0);
          double[] randomAngles = RandomNumbers.nextDoubleArray(random, 100, Math.PI);
 
          AxisAngle expectedAverageAxisAngle = new AxisAngle(randomRotationAxis, AngleTools.computeAngleAverage(randomAngles));

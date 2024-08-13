@@ -8,7 +8,6 @@ import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -20,11 +19,11 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
+   private final BehaviorTreeRootNodeDefinition definition;
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTUnidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalBoolean concurrencyEnabled;
-   private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    private transient final MutableInt actionIndex = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
@@ -33,11 +32,12 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      automaticExecution = new CRDTBidirectionalBoolean(this, false);
-      executionNextIndex = new CRDTBidirectionalInteger(this, 0);
-      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, crdtInfo, this);
-      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
-      nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
+      definition = getDefinition();
+
+      automaticExecution = new CRDTBidirectionalBoolean(definition, false);
+      executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
+      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, definition);
+      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, definition, true);
    }
 
    @Override
@@ -76,7 +76,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
-      message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
    }
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
@@ -89,7 +88,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       concurrencyEnabled.fromMessage(message.getConcurrencyEnabled());
-      nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
    }
 
    @Nullable
@@ -133,16 +131,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public int getExecutionNextIndex()
    {
       return executionNextIndex.getValue();
-   }
-
-   public void setNextActionRejectionTooltip(String nextActionRejectionTooltip)
-   {
-      this.nextActionRejectionTooltip.setValue(nextActionRejectionTooltip);
-   }
-
-   public String getNextActionRejectionTooltip()
-   {
-      return nextActionRejectionTooltip.getValue();
    }
 
    public boolean getAutomaticExecution()

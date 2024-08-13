@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -19,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -30,6 +32,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import java.util.UUID;
@@ -67,6 +70,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
       sceneGraphMessage.getDoorSceneNodes().clear();
+      sceneGraphMessage.getTrashCanNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode());
 
@@ -141,15 +145,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
-            yoloNodeMessage.getObjectPointCloud().clear();
-            for (int i = 0; i < yoloNodeMessage.getObjectPointCloud().getCurrentCapacity() && i < yoloNode.getObjectPointCloud().size(); ++i)
-            {
-               Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
-               point.set(yoloNode.getObjectPointCloud().get(i));
-            }            yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
-            yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
-            yoloNodeMessage.getFilteredObjectPose().set(yoloNode.getObjectPose()); // FIXME Maybe set this to something else?
+            yoloNode.fromMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
@@ -157,7 +153,7 @@ public class ROS2SceneGraphPublisher
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
-            DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
+            DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().add();
             doorNodeMessage.getDoorCornerTransformToWorld().set(doorNode.getDoorCornerFrame().getTransformToWorldFrame());
             doorNodeMessage.setPoseLocked(doorNode.isDoorFramePoseLocked());
             doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
@@ -172,6 +168,15 @@ public class ROS2SceneGraphPublisher
                MessageTools.toMessage(id, doorOpeningMechanismMessage.getPersistentDetectionId());
             }
             detectableSceneNodeMessage = doorNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof TrashCanNode trashCanNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.TRASH_CAN_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getTrashCanNodes().size());
+            TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().add();
+            trashCanNodeMessage.getTrashCanToWorldTransform().set(trashCanNode.getTrashCanToWorldTransform());
+            trashCanNodeMessage.setTrashCanYaw(trashCanNode.getYaw());
+            detectableSceneNodeMessage = trashCanNodeMessage.getDetectableSceneNode();
          }
          else
          {
