@@ -17,6 +17,7 @@ public class RDXCapturyManager
    private final ImBoolean hideFingers = new ImBoolean(false);
    private final ImBoolean hideAll = new ImBoolean(false);
    private final ImBoolean snapActor = new ImBoolean(false);
+   private final ImBoolean capturyStarted = new ImBoolean(false);
    private final List<Integer> actorArray = new ArrayList<>();
    private int selectedIndex = 0;
    private int selectedActorID = 0;
@@ -56,7 +57,14 @@ public class RDXCapturyManager
             ImGui.endCombo();
          }
       }
-
+      if(ImGui.menuItem(labels.get("Remote Captury Start"), "", capturyStarted))
+      {
+         if(capturyStarted.get())
+         {
+            RDXBaseUI.pushNotification("Starting Remote Captury");
+            RDXBaseUI.pushNotification("Remote Captury Started");
+         }
+      }
       if (ImGui.menuItem(labels.get("Remote Captury Enabled"), "", capturyEnabled))
       {
          if (capturyEnabled.get())
@@ -106,6 +114,10 @@ public class RDXCapturyManager
       }
    }
 
+   public ImBoolean getCapturyStarted()
+   {
+      return capturyStarted;
+   }
    public ImBoolean getCapturyEnabled()
    {
       return capturyEnabled;
