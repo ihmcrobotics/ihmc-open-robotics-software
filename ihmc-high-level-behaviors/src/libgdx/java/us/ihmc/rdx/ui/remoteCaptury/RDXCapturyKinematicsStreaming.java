@@ -604,8 +604,8 @@ public class RDXCapturyKinematicsStreaming
                                                                                handDesiredControlFrames.get(side)
                                                                                                        .getReferenceFrame(),
                                                                                hand.getSegmentName(),
-                                                                               0.0,
-                                                                               1.0);
+                                                                               hand.getPositionWeight(),
+                                                                               hand.getOrientationWeight());
             MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
             MessageTools.packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
             message.getControlFramePositionInEndEffector().set(ikHandControlFramePoses.get(side).getPosition());
@@ -637,9 +637,8 @@ public class RDXCapturyKinematicsStreaming
             {
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                   trackerDesiredControlFrame.getReferenceFrame(),
-                                                                                  upperArm.getSegmentName(),
-                                                                                  0.0,
-                                                                                  0.5);
+                                                                                  upperArm.getSegmentName(), upperArm.getPositionWeight(),
+                                                                                  upperArm.getOrientationWeight());
 
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
                MessageTools.packSelectionMatrix3DMessage(true, false, true, null, message.getAngularSelectionMatrix());
@@ -670,8 +669,8 @@ public class RDXCapturyKinematicsStreaming
                                                                                   trackedSegmentDesiredFrame.get(forearm.getSegmentName())
                                                                                                             .getReferenceFrame(),
                                                                                   forearm.getSegmentName(),
-                                                                                  0.0,
-                                                                                  1.0);
+                                                                                  forearm.getPositionWeight(),
+                                                                                  forearm.getOrientationWeight());
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
                MessageTools.packSelectionMatrix3DMessage(true, false, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikForearmControlFramePoses.get(side).getPosition());
@@ -708,9 +707,8 @@ public class RDXCapturyKinematicsStreaming
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                   trackedSegmentDesiredFrame.get(chest.getSegmentName())
                                                                                                             .getReferenceFrame(),
-                                                                                  chest.getSegmentName(),
-                                                                                  0.0,
-                                                                                  10);
+                                                                                  chest.getSegmentName(), chest.getPositionWeight(),
+                                                                                  chest.getOrientationWeight());
                MessageTools.packSelectionMatrix3DMessage(false, message.getLinearSelectionMatrix());
                MessageTools.packSelectionMatrix3DMessage(true, true, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikChestControlFramePoses.getPosition());
