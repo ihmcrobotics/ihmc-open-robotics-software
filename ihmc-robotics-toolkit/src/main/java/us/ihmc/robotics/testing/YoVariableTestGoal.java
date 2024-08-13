@@ -325,7 +325,9 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    public static String getFormattedDoubleYoVariable(YoDouble yoDouble)
    {
-      return yoDouble.getName() + ": "
-            + FormattingTools.getFormattedToSignificantFigures(yoDouble.getDoubleValue(), SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+      if (Double.isFinite(yoDouble.getDoubleValue()))
+         return yoDouble.getName() + ": " + FormattingTools.getFormattedToSignificantFigures(yoDouble.getDoubleValue(), SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+      else
+         return yoDouble.getName() + ": " + yoDouble.getDoubleValue();
    }
 }
