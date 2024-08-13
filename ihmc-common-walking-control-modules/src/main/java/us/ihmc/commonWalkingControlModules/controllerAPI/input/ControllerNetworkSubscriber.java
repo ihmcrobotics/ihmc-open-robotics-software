@@ -96,7 +96,6 @@ public class ControllerNetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic<T> topic = inputTopic.withTypeName(multipleMessageType).withQoS(ControllerAPI.getQoS(multipleMessageType));
       try
       {
          T localInstance = multipleMessageType.newInstance();
@@ -106,7 +105,7 @@ public class ControllerNetworkSubscriber
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
          };
 
-         ros2Node.createSubscription(topic, messageListener);
+         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, multipleMessageType), messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {
@@ -159,8 +158,7 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic<MessageCollection> topicName = inputTopic.withTypeName(MessageCollection.class);
-      ros2Node.createSubscription(topicName.withTypeName(MessageCollection.class), s ->
+      ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, MessageCollection.class), s ->
       {
          s.takeNextData(messageCollection, null);
 
@@ -212,9 +210,8 @@ public class ControllerNetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         ros2Node.createSubscription(topicName.withTypeName(messageClass), s ->
+         ros2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
@@ -224,9 +221,7 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass)
    {
-      ROS2Topic<T> topicName = outputTopic.withTypeName(messageClass);
-      ROS2PublisherBasics<T> publisher = ros2Node.createPublisher(topicName.withTypeName(messageClass));
-      return publisher;
+      return ros2Node.createPublisher(ControllerAPI.getTopic(outputTopic, messageClass));
    }
 
    @SuppressWarnings("unchecked")
