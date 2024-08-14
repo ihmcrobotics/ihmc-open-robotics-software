@@ -175,6 +175,10 @@ public class RealsenseColorDepthImageRetriever
       {
          LogTools.error(interruptedException.getMessage());
       }
+      finally
+      {
+         newDepthImageLock.unlock();
+      }
 
       return depthImage.get();
    }
@@ -194,6 +198,10 @@ public class RealsenseColorDepthImageRetriever
       catch (InterruptedException interruptedException)
       {
          LogTools.error(interruptedException.getMessage());
+      }
+      finally
+      {
+         newColorImageLock.unlock();
       }
 
       return colorImage.get();
