@@ -230,7 +230,7 @@ public class PerceptionAndAutonomyProcess
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                                      realsenseFrameSupplier, realsenseDemandNode);
+                                                                      realsenseFrameSupplier, realsenseDemandNode::isDemanded);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
       realsenseProcessAndPublishThread = new RestartableThread("RealsenseProcessAndPublish", this::processAndPublishRealsense);
       realsenseProcessAndPublishThread.start();
