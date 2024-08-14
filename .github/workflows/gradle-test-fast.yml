@@ -102,11 +102,6 @@ jobs:
     with:
       subproject: 'ihmc-perception'
       test-category: 'fast'
-  ihmc-quadruped:
-    uses: ./.github/workflows/gradle-base.yml
-    with:
-      subproject: 'ihmc-quadruped'
-      test-category: 'fast'
   ihmc-robot-data-visualizer:
     uses: ./.github/workflows/gradle-base.yml
     with:
@@ -131,11 +126,6 @@ jobs:
     uses: ./.github/workflows/gradle-base.yml
     with:
       subproject: 'ihmc-sensor-processing'
-      test-category: 'fast'
-  ihmc-simple-whole-body-walking:
-    uses: ./.github/workflows/gradle-base.yml
-    with:
-      subproject: 'ihmc-simple-whole-body-walking'
       test-category: 'fast'
   ihmc-simulation-toolkit:
     uses: ./.github/workflows/gradle-base.yml

@@ -13,9 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:mecano:17-0.18.1")
-   api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
 }
 

@@ -1,12 +1,14 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
-public interface PositionTrajectoryGenerator extends TrajectoryGenerator, PositionProvider
+public interface PositionTrajectoryGenerator extends TrajectoryGenerator
 {
+   Point3DReadOnly getPosition();
+
    Vector3DReadOnly getVelocity();
 
    Vector3DReadOnly getAcceleration();

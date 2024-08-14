@@ -1,26 +1,26 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
@@ -113,7 +113,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
          translationOffsets[j] = new Vector3D();//RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
+         orientationOffsets[j] = EuclidCoreRandomTools.nextQuaternion(random, Math.PI / 2.0);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -133,8 +133,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          Quaternion calculatedRotationError = new Quaternion();
          calculatedRotationError.set(totalError.getRotation());
          Quaternion actualError = orientationOffsets[i];
-         
-         assertTrue(calculatedRotationError.epsilonEquals(actualError, 1e-4));
+
+         EuclidCoreTestTools.assertEquals(calculatedRotationError, actualError, 1e-4);
       }
    }
    
@@ -170,8 +170,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = EuclidCoreRandomTools.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = EuclidCoreRandomTools.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -196,9 +196,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          Quaternion calculatedRotationError = new Quaternion();
          calculatedRotationError.set(totalError.getRotation());
          Quaternion actualRotationError = orientationOffsets[i];
-         
-         assertTrue(calculatedTranslationError.epsilonEquals(actualTranslationError, 1e-4));
-         assertTrue(calculatedRotationError.epsilonEquals(actualRotationError, 1e-4));
+
+         EuclidCoreTestTools.assertEquals(calculatedTranslationError, actualTranslationError, 1e-4);
+         EuclidCoreTestTools.assertEquals(calculatedRotationError, actualRotationError, 1e-4);
       }
    }
    
@@ -234,8 +234,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = EuclidCoreRandomTools.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = EuclidCoreRandomTools.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -255,8 +255,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          Point3D calculatedTranslationError = new Point3D();
          calculatedTranslationError.set(totalError.getTranslation());
          Vector3D actualError = translationOffsets[i];
-         
-         assertTrue(calculatedTranslationError.epsilonEquals(actualError, 1e-4));
+
+         EuclidCoreTestTools.assertEquals(calculatedTranslationError, actualError, 1e-4);
       }
    }
    
@@ -283,8 +283,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       
       FramePose3D calculatedPose = new FramePose3D(localizationReferenceFrameToBeUpdated);
       calculatedPose.changeFrame(worldFrame);
-      
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
 
    }
    
@@ -318,8 +318,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       
       FramePose3D calculatedPose = new FramePose3D(localizationReferenceFrameToBeUpdated);
       calculatedPose.changeFrame(worldFrame);
-      
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
    }
    
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
@@ -363,7 +363,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + (3.0 * Math.PI) / 64.0 + " x: " + (Math.PI / 8.0));
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
    }
    
    @Test
@@ -405,7 +405,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + 0.0 + " x: " + 0.0);
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
    }
    
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
@@ -449,7 +449,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       System.out.println("z: " + -Math.PI / 64.0 + " y: " + Math.PI / 32.0 + " x: " + 0.0);
       System.out.println(calculatedPose);
       System.out.println(expectedPose);
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
    }
    
    @Test
@@ -477,8 +477,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       
       FramePose3D calculatedPose = new FramePose3D(localizationReferenceFrameToBeUpdated);
       calculatedPose.changeFrame(worldFrame);
-      
-      assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
+
+      EuclidFrameTestTools.assertEquals(calculatedPose, expectedPose, 1e-4);
 
    }
 
@@ -523,8 +523,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          long timeStamp = (long) (j * (lastTimeStamp * 0.8 - firstTimeStamp * 0.8) / numberOfOutdatedTransforms + firstTimeStamp * 1.2);
          outdatedTimeStamps[j] = timeStamp;
 
-         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
+         translationOffsets[j] = EuclidCoreRandomTools.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = EuclidCoreRandomTools.nextQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -571,13 +571,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 
          if (timeStamp < (int) (firstTimeStamp * 1.2 + numberOfTicksOfDelay))
          {
-            assertTrue(testedOrientation.epsilonEquals(new Quaternion(0.0, 0.0, 0.0, 1.0), 1e-4));
-            assertTrue(testedTranslation.epsilonEquals(new Vector3D(0.0, 0.0, 0.0), 1e-8));
+            EuclidCoreTestTools.assertEquals(new Quaternion(), testedOrientation, 1e-4);
+            EuclidCoreTestTools.assertEquals(new Vector3D(), testedTranslation, 1e-4);
          }
          else
          {
-            assertTrue(testedTranslation.epsilonEquals(translationOffsets[outdatedTimeStampsIndex - 1], 1e-8));
-            assertTrue(testedOrientation.epsilonEquals(orientationOffsets[outdatedTimeStampsIndex - 1], 1e-4));
+            EuclidCoreTestTools.assertEquals(orientationOffsets[outdatedTimeStampsIndex - 1], testedOrientation, 1e-4);
+            EuclidCoreTestTools.assertEquals(translationOffsets[outdatedTimeStampsIndex - 1], testedTranslation, 1e-4);
          }
       }
    }
@@ -608,8 +608,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private RigidBodyTransform generateRandomUpToDateTransforms(Random random)
    {
       RigidBodyTransform upToDateTransform = new RigidBodyTransform();
-      upToDateTransform.getTranslation().set(RandomGeometry.nextVector3D(random));
-      upToDateTransform.getRotation().set(RandomGeometry.nextQuaternion(random));
+      upToDateTransform.getTranslation().set(EuclidCoreRandomTools.nextVector3D(random));
+      upToDateTransform.getRotation().set(EuclidCoreRandomTools.nextQuaternion(random));
       return upToDateTransform;
    }
 

@@ -1,7 +1,5 @@
 package us.ihmc.robotics.quadTree;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
@@ -13,7 +11,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QuadTreeForGroundTest
 {
@@ -507,7 +507,7 @@ public class QuadTreeForGroundTest
    {
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = EuclidCoreRandomTools.nextPoint3D(random, bounds.minX, bounds.maxX, bounds.minY, bounds.maxY, minZ, maxZ);
          quadTree.put(point.getX(), point.getY(), point.getZ());
       }
    }
@@ -517,7 +517,7 @@ public class QuadTreeForGroundTest
       ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = EuclidCoreRandomTools.nextPoint3D(random, bounds.minX, bounds.maxX, bounds.minY, bounds.maxY, minZ, maxZ);
          pointsToReturn.add(point);
       }
 

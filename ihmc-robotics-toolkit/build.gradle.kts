@@ -21,17 +21,12 @@ mainDependencies {
    api("org.apache.commons:commons-math3:3.6.1")
    api("jgraph:jgraph:5.13.0.0")
    api("org.ejml:ejml-zdense:0.39")
-   api("org.ejml:ejml-core:0.39")
-   api("org.ejml:ejml-ddense:0.39")
    api("org.javassist:javassist:3.18.1-GA")
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
 
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:euclid:0.21.0")
-   api("us.ihmc:euclid-frame:0.21.0")
    api("us.ihmc:euclid-frame-shape:0.21.0")
-   api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:mecano:17-0.18.1")
    api("us.ihmc:mecano-yovariables:17-0.18.1")
    api("us.ihmc:ihmc-commons:0.32.0")

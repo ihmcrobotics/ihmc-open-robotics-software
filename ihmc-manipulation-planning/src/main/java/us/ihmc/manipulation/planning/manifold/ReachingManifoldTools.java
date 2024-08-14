@@ -13,16 +13,21 @@ import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.Torus3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -189,14 +194,7 @@ public class ReachingManifoldTools
       return message;
    }
 
-   public static double packClosestRigidBodyTransformOnManifold(List<ReachingManifoldCommand> manifolds, Pose3D pose,
-                                                                RigidBodyTransform rigidBodyTransformToPack, double positionWeight, double orientationWeight)
-   {
-      return packClosestRigidBodyTransformOnManifold(manifolds, new RigidBodyTransform(pose.getOrientation(), pose.getPosition()), rigidBodyTransformToPack,
-                                                     positionWeight, orientationWeight);
-   }
-
-   public static double packClosestRigidBodyTransformOnManifold(List<ReachingManifoldCommand> manifolds, RigidBodyTransform rigidBodyTransform,
+   public static double packClosestRigidBodyTransformOnManifold(List<ReachingManifoldCommand> manifolds, RigidBodyTransformReadOnly rigidBodyTransform,
                                                                 RigidBodyTransform rigidBodyTransformToPack, double positionWeight, double orientationWeight)
    {
       double distance = Double.MAX_VALUE;
@@ -363,7 +361,7 @@ public class ReachingManifoldTools
       return reachingManifoldMessage;
    }
 
-   public static void packExtrapolatedTransform(RigidBodyTransform from, RigidBodyTransform to, double ratio, RigidBodyTransform toPack)
+   public static void packExtrapolatedTransform(RigidBodyTransformReadOnly from, RigidBodyTransformReadOnly to, double ratio, RigidBodyTransform toPack)
    {
       Point3D pointToPack = new Point3D();
       RotationMatrix orientationToPack = new RotationMatrix();
@@ -376,7 +374,7 @@ public class ReachingManifoldTools
       toPack.getRotation().set(orientationToPack);
    }
 
-   public static double getDistance(RigidBodyTransform origin, RigidBodyTransform end, RigidBodyTransform to, double positionWeight, double orientationWeight)
+   public static double getDistance(RigidBodyTransformReadOnly origin, RigidBodyTransformReadOnly end, RigidBodyTransformReadOnly to, double positionWeight, double orientationWeight)
    {
       int wayPointSize = 100;
 
@@ -393,7 +391,7 @@ public class ReachingManifoldTools
       return minimumDistance;
    }
 
-   public static double getDistance(RigidBodyTransform from, RigidBodyTransform to, double positionWeight, double orientationWeight)
+   public static double getDistance(RigidBodyTransformReadOnly from, RigidBodyTransformReadOnly to, double positionWeight, double orientationWeight)
    {
       Point3D pointFrom = new Point3D(from.getTranslation());
       Quaternion orientationFrom = new Quaternion(from.getRotation());
@@ -409,14 +407,14 @@ public class ReachingManifoldTools
       return distance;
    }
 
-   private static void packExtrapolatedPoint(Vector3DReadOnly from, Vector3DReadOnly to, double ratio, Point3D toPack)
+   private static void packExtrapolatedPoint(Tuple3DReadOnly from, Tuple3DReadOnly to, double ratio, Point3DBasics toPack)
    {
       toPack.setX(ratio * (to.getX() - from.getX()) + from.getX());
       toPack.setY(ratio * (to.getY() - from.getY()) + from.getY());
       toPack.setZ(ratio * (to.getZ() - from.getZ()) + from.getZ());
    }
 
-   private static void packExtrapolatedOrienation(RotationMatrixReadOnly from, RotationMatrixReadOnly to, double ratio, RotationMatrix toPack)
+   private static void packExtrapolatedOrienation(Orientation3DReadOnly from, Orientation3DReadOnly to, double ratio, RotationMatrixBasics toPack)
    {
       Quaternion invFrom = new Quaternion(from);
       invFrom.inverse();
@@ -440,7 +438,7 @@ public class ReachingManifoldTools
       RotationMatrixConversion.convertAxisAngleToMatrix(toPackAxisAngle, toPack);
    }
 
-   private static double packClosestRigidBodyTransformOnManifold(ReachingManifoldCommand reachingManifoldCommand, RigidBodyTransform rigidBodyTransform,
+   private static double packClosestRigidBodyTransformOnManifold(ReachingManifoldCommand reachingManifoldCommand, RigidBodyTransformReadOnly rigidBodyTransform,
                                                                  RigidBodyTransform rigidBodyTransformToPack, double positionWeight, double orientationWeight)
    {
       double[] manifoldUpperLimits = reachingManifoldCommand.getManifoldUpperLimits().toArray();

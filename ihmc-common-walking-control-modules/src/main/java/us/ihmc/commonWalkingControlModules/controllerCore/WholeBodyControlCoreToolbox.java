@@ -19,11 +19,11 @@ import us.ihmc.mecano.algorithms.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.RigidBodyTwistCalculator;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -188,7 +188,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
       rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
 
-      totalMassProvider = () -> TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
+      totalMassProvider = () -> MultiBodySystemMissingTools.computeSubTreeMass(multiBodySystemInput.getRootBody());
 
       parentRegistry.addChild(registry);
    }
