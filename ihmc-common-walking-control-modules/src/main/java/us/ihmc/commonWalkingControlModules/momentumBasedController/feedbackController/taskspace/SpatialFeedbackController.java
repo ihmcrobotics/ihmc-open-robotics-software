@@ -801,6 +801,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          {
             yoErrorPositionIntegrated.setToZero(trajectoryFrame);
          }
+         if (yoErrorVector.getReferenceFrame() != trajectoryFrame)
+         {
+            yoErrorVector.setToZero(trajectoryFrame);
+         }
 
          linearFeedbackTermToPack.setIncludingFrame(yoErrorVector.getLinearPart());
          linearFeedbackTermToPack.scale(dt);
