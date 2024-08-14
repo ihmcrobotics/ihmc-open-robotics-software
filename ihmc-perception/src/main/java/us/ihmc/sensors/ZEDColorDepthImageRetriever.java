@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
@@ -328,6 +329,16 @@ public class ZEDColorDepthImageRetriever
       }
 
       return colorImages.get(side).get();
+   }
+
+   public CameraIntrinsics getCameraIntrinsics(RobotSide cameraSide)
+   {
+      return new CameraIntrinsics(imageHeight,
+                                  imageWidth,
+                                  cameraFocalLengthX.get(cameraSide),
+                                  cameraFocalLengthY.get(cameraSide),
+                                  cameraPrincipalPointX.get(cameraSide),
+                                  cameraPrincipalPointY.get(cameraSide));
    }
 
    public FramePose3D getLatestSensorPose()

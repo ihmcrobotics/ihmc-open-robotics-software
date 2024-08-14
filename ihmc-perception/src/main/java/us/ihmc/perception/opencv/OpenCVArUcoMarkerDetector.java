@@ -6,12 +6,14 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.ArucoDetector;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 
 /**
  * Thin wrapper over OpenCV's {@link ArucoDetector} to make it
@@ -67,6 +69,16 @@ public class OpenCVArUcoMarkerDetector
       cameraMatrix.ptr(1, 1).putDouble(depthCameraIntrinsics.getFy());
       cameraMatrix.ptr(0, 2).putDouble(depthCameraIntrinsics.getCx());
       cameraMatrix.ptr(1, 2).putDouble(depthCameraIntrinsics.getCy());
+   }
+
+   public void setCameraIntrinsics(CameraIntrinsics cameraIntrinsics)
+   {
+      opencv_core.setIdentity(cameraMatrix);
+      cameraMatrix.ptr(0, 0).putDouble(cameraIntrinsics.getFx());
+      cameraMatrix.ptr(1, 1).putDouble(cameraIntrinsics.getFy());
+      cameraMatrix.ptr(0, 2).putDouble(cameraIntrinsics.getCx());
+      cameraMatrix.ptr(1, 2).putDouble(cameraIntrinsics.getCy());
+
    }
 
    /**
