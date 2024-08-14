@@ -1,12 +1,5 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -19,8 +12,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -32,6 +25,13 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RobotConfigurationDataPublisherFactory
 {
@@ -48,7 +48,7 @@ public class RobotConfigurationDataPublisherFactory
 
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
-   private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
+   private final RequiredFactoryField<ROS2NodeInterface> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
    private final RequiredFactoryField<ROS2Topic<?>> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
    private final List<ReferenceFrame> frameDataToPublish = new ArrayList<>();
@@ -185,7 +185,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param ros2Node    the real-time node to create the publisher with.
     * @param outputTopic the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic<?> outputTopic)
+   public void setROS2Info(ROS2NodeInterface ros2Node, ROS2Topic<?> outputTopic)
    {
       realtimeROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);

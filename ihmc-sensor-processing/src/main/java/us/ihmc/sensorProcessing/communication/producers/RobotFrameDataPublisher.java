@@ -2,11 +2,11 @@ package us.ihmc.sensorProcessing.communication.producers;
 
 import ihmc_common_msgs.msg.dds.RobotFrameData;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 /**
  * ROS2 Publisher for {@link RobotFrameData}
@@ -24,7 +24,7 @@ public class RobotFrameDataPublisher
    private final ReferenceFrame myReferenceFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   public RobotFrameDataPublisher(ReferenceFrame referenceFrame, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic)
+   public RobotFrameDataPublisher(ReferenceFrame referenceFrame, ROS2NodeInterface realtimeROS2Node, ROS2Topic<?> outputTopic)
    {
       myReferenceFrame = referenceFrame;
       robotFrameData.getFrameName().append(referenceFrame.getName());
