@@ -631,6 +631,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
       }
 
+      if (yoErrorOrientation.getReferenceFrame() != trajectoryFrame)
+      {
+         yoErrorOrientation.setToZero(trajectoryFrame);
+         yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
+      }
+
       errorOrientationCumulated.setIncludingFrame(yoErrorOrientationCumulated);
       errorOrientationCumulated.multiply(yoErrorOrientation);
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
