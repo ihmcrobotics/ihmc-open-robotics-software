@@ -1,7 +1,5 @@
 package us.ihmc.robotics.math;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,13 +14,16 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QuaternionCalculusTest
 {
@@ -42,7 +43,7 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomGeometry.nextQuaternion(random);
+         Quaternion q = EuclidCoreRandomTools.nextQuaternion(random);
 
          Vector4D qLog = new Vector4D();
          Quaternion vExp = new Quaternion();
@@ -69,9 +70,9 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomGeometry.nextQuaternion(random);
+         Quaternion q = EuclidCoreRandomTools.nextQuaternion(random);
          double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random, length);
+         Vector3D expectedAngularVelocity = EuclidCoreRandomTools.nextVector3D(random, length);
          if (random.nextBoolean())
             expectedAngularVelocity.negate();
          Vector3D actualAngularVelocity = new Vector3D();
@@ -80,7 +81,7 @@ public class QuaternionCalculusTest
          quaternionCalculus.computeQDotInWorldFrame(q, expectedAngularVelocity, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
-         assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON);
       }
    }
 
@@ -92,12 +93,12 @@ public class QuaternionCalculusTest
       for (int i = 0; i < 10000; i++)
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
-         Quaternion q = RandomGeometry.nextQuaternion(random);
+         Quaternion q = EuclidCoreRandomTools.nextQuaternion(random);
          double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         Vector3D angularVelocity = RandomGeometry.nextVector3D(random, length);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, length);
          if (random.nextBoolean())
             angularVelocity.negate();
-         Vector3D expectedAngularAcceleration = RandomGeometry.nextVector3D(random, length);
+         Vector3D expectedAngularAcceleration = EuclidCoreRandomTools.nextVector3D(random, length);
          if (random.nextBoolean())
             expectedAngularAcceleration.negate();
          Vector3D actualAngularAcceleration = new Vector3D();
@@ -108,19 +109,19 @@ public class QuaternionCalculusTest
 
          quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
          quaternionCalculus.computeQDDotInWorldFrame(q, angularVelocity, actualAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
          quaternionCalculus.computeQDDotInWorldFrame(q, qDot, angularVelocity, actualAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
          quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
          quaternionCalculus.computeAngularAccelerationInWorldFrame(q, qDDot, angularVelocity, actualAngularAcceleration);
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
       }
    }
 
@@ -162,7 +163,7 @@ public class QuaternionCalculusTest
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
-         assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-8));
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, 1e-8);
       }
    }
 
@@ -210,7 +211,7 @@ public class QuaternionCalculusTest
             System.out.println("Actual   angular velocity: " + actualAngularVelocity);
          }
          assertTrue(sameVelocity);
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, 1.0e-7));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, 1e-7);
       }
    }
 
@@ -254,7 +255,7 @@ public class QuaternionCalculusTest
          quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, q, qNext, dtForFD, qDDot);
          quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
 
-         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, 1.0e-5));
+         EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, 1e-5);
       }
    }
 
@@ -263,8 +264,8 @@ public class QuaternionCalculusTest
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Random random = new Random(6546545L);
-      Quaternion q0 = RandomGeometry.nextQuaternion(random);
-      Quaternion q1 = RandomGeometry.nextQuaternion(random);
+      Quaternion q0 = EuclidCoreRandomTools.nextQuaternion(random);
+      Quaternion q1 = EuclidCoreRandomTools.nextQuaternion(random);
       Quaternion expectedQInterpolated = new Quaternion();
       Quaternion actualQInterpolated = new Quaternion();
 
@@ -273,7 +274,7 @@ public class QuaternionCalculusTest
          expectedQInterpolated.interpolate(q0, q1, alpha);
          quaternionCalculus.interpolate(alpha, q0, q1, actualQInterpolated);
 
-         assertTrue(expectedQInterpolated.epsilonEquals(actualQInterpolated, EPSILON));
+         EuclidCoreTestTools.assertEquals(expectedQInterpolated, actualQInterpolated, EPSILON);
       }
    }
 }

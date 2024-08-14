@@ -1,10 +1,10 @@
 package us.ihmc.manipulation.planning.manifold;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +71,7 @@ public class ReachingManifoldToolsTest
 
       System.out.println("distance " + distance);
 
-      assertTrue("expected transform is on the manifolds ", distance < errorThreshold);
+      assertTrue(distance < errorThreshold, "expected transform is on the manifolds ");
    }
 
    @Test
@@ -104,6 +104,6 @@ public class ReachingManifoldToolsTest
 
       System.out.println("distance " + distance);
 
-      assertTrue("expected transform is on the manifolds ", distance < errorThreshold);
+      assertTrue(distance < errorThreshold, "expected transform is on the manifolds ");
    }
 }

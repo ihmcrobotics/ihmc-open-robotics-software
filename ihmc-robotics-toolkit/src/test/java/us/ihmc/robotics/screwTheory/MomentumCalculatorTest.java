@@ -1,8 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -29,7 +26,9 @@ import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MomentumCalculatorTest
 {
@@ -41,10 +40,10 @@ public class MomentumCalculatorTest
       Random random = new Random(1766L);
 
       RigidBodyBasics elevator = new RigidBody("elevator", world);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random);
       jointAxis.normalize();
       PrismaticJoint joint = new PrismaticJoint("joint", elevator, new Vector3D(), jointAxis);
-      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RigidBodyBasics body = new RigidBody("body", joint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -62,7 +61,7 @@ public class MomentumCalculatorTest
       double epsilon = 1e-9;
       EuclidCoreTestTools.assertEquals(linearMomentumCheck, linearMomentum, epsilon);
       EuclidCoreTestTools.assertEquals(angularMomentumCheck, angularMomentum, epsilon);
-      assertTrue(linearMomentum.length() > epsilon);
+      assertTrue(linearMomentum.norm() > epsilon);
    }
 
 	@Test
@@ -71,12 +70,12 @@ public class MomentumCalculatorTest
       Random random = new Random(1766L);
 
       RigidBodyBasics elevator = new RigidBody("elevator", world);
-      Vector3D jointAxis = RandomGeometry.nextVector3D(random);
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random);
       jointAxis.normalize();
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setIdentity();
       RevoluteJoint joint = new RevoluteJoint("joint", elevator, transformToParent, jointAxis);
-      RigidBodyBasics body = new RigidBody("body", joint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
+      RigidBodyBasics body = new RigidBody("body", joint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(), new Vector3D());
 
       joint.setQ(random.nextDouble());
       joint.setQd(random.nextDouble());
@@ -98,7 +97,7 @@ public class MomentumCalculatorTest
       double epsilon = 1e-9;
       EuclidCoreTestTools.assertEquals(linearMomentumCheck, linearMomentum, epsilon);
       EuclidCoreTestTools.assertEquals(angularMomentumCheck, angularMomentum, epsilon);
-      assertTrue(angularMomentum.length() > epsilon);
+      assertTrue(angularMomentum.norm() > epsilon);
    }
 
 	@Test
@@ -112,7 +111,7 @@ public class MomentumCalculatorTest
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
       {
-         Vector3D jointAxis = RandomGeometry.nextVector3D(random);
+         Vector3D jointAxis = EuclidCoreRandomTools.nextVector3D(random);
          jointAxis.normalize();
          jointAxes[i] = jointAxis;
       }

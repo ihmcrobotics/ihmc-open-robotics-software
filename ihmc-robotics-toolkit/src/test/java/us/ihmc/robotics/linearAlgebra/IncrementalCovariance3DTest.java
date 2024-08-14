@@ -1,11 +1,10 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
@@ -15,7 +14,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class IncrementalCovariance3DTest
 {
@@ -57,7 +56,7 @@ public class IncrementalCovariance3DTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point3D average = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+         Point3D average = EuclidCoreRandomTools.nextPoint3D(random, 10.0, 10.0, 10.0);
          List<Point3D> dataset = createRandomDataset(random, average, length, maxAmplitude);
 
          incrementalCovariance3D.clear();
@@ -91,7 +90,7 @@ public class IncrementalCovariance3DTest
 
    private void assertEquals(DMatrixRMaj expectedCovariance, DMatrixRMaj actualCovariance, double epsilon)
    {
-      assertTrue(assertErrorMessage(expectedCovariance, actualCovariance), MatrixFeatures_DDRM.isEquals(expectedCovariance, actualCovariance, epsilon));
+      EjmlUnitTests.assertEquals(expectedCovariance, actualCovariance, epsilon);
    }
 
    private static String assertErrorMessage(DMatrixRMaj expectedCovariance, DMatrixRMaj actualCovariance)
@@ -109,7 +108,7 @@ public class IncrementalCovariance3DTest
       max.add(average, maxAmplitude);
 
       for (int i = 0; i < length; i++)
-         dataset.add(RandomGeometry.nextPoint3D(random, min, max));
+         dataset.add(EuclidCoreRandomTools.nextPoint3D(random, min.getX(), max.getX(), min.getY(), max.getY(), min.getZ(), max.getZ()));
 
       return dataset;
    }

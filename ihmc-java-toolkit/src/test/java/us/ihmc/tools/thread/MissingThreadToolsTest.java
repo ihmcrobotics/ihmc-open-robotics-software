@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -103,39 +104,48 @@ public class MissingThreadToolsTest
    public void testSingleScheduleThreadWithThrownException()
    {
       LogTools.info("Begin test");
-      int[] ints = new int[1];
+      TIntArrayList ints = new TIntArrayList();
       int queueSize = -1;
       boolean daemon= false;
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("Test", daemon, queueSize);
       AtomicInteger numberOfThingsThatHappened = new AtomicInteger();
       executor.execute(() ->
       {
-         LogTools.info("ints[0] = {}", ints[0]);
-         LogTools.info("ints[1] = {}", ints[1]);
+         MissingThreadTools.sleepAtLeast(0.01);
+
+         ints.add(0);
+         LogTools.info("ints = {}", ints);
+         numberOfThingsThatHappened.getAndIncrement();
       },
       exception ->
       {
          MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
          assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
-         numberOfThingsThatHappened.getAndIncrement();
       });
+      awaitExecution(executor);
 
       executor.submit(() ->
       {
-         LogTools.info("ints[0] = {}", ints[0]);
-         LogTools.info("ints[1] = {}", ints[1]);
+         MissingThreadTools.sleepAtLeast(0.01);
+
+         ints.add(1);
+         LogTools.info("ints = {}", ints);
+         numberOfThingsThatHappened.getAndIncrement();
       },
       exception ->
       {
          MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
          assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
-         numberOfThingsThatHappened.getAndIncrement();
       });
+      awaitExecution(executor);
 
       executor.submit(() ->
       {
-         LogTools.info("ints[0] = {}", ints[0]);
-         LogTools.info("ints[1] = {}", ints[1]);
+         MissingThreadTools.sleepAtLeast(0.01);
+
+         ints.add(2);
+         LogTools.info("ints = {}", ints);
+         numberOfThingsThatHappened.getAndIncrement();
 
          return 5;
       },
@@ -143,26 +153,40 @@ public class MissingThreadToolsTest
       {
          MESSAGE_AND_TRACE_WITH_THREAD_NAME.handleException(exception);
          assertTrue(exception instanceof ArrayIndexOutOfBoundsException);
-         numberOfThingsThatHappened.getAndIncrement();
       });
+      awaitExecution(executor);
 
       executor.submit(() ->
       {
-         LogTools.info("ints[0] = {}", ints[0]);
+         MissingThreadTools.sleepAtLeast(0.01);
+
+         ints.add(3);
+         LogTools.info("ints = {}", ints);
+         numberOfThingsThatHappened.getAndIncrement();
 
          return 5;
       },
       (result, exception) ->
       {
          assertEquals(5, result);
-         numberOfThingsThatHappened.getAndIncrement();
       });
-
-      ThreadTools.sleepSeconds(0.2);
+      awaitExecution(executor);
 
       assertEquals(4, numberOfThingsThatHappened.get());
 
       executor.destroy();
+   }
+
+   private static void awaitExecution(ResettableExceptionHandlingExecutorService executor)
+   {
+      double timeSlept = 0.0;
+      double timeout = 2.0;
+      while (executor.isExecuting() && timeSlept < timeout)
+      {
+         timeSlept += MissingThreadTools.sleepAtLeast(0.2);
+      }
+
+      assertTrue(timeSlept < timeout, "Timed out");
    }
 
    @Test

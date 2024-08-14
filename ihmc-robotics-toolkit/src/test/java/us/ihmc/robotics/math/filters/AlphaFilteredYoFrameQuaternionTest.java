@@ -1,7 +1,5 @@
 package us.ihmc.robotics.math.filters;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
@@ -13,10 +11,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AlphaFilteredYoFrameQuaternionTest
 {
@@ -35,7 +35,7 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       // set measurement randomly
       Random random = new Random(12351235L);
-      Quaternion qMeasured = RandomGeometry.nextQuaternion(random);
+      Quaternion qMeasured = EuclidCoreRandomTools.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qMeasured);
 
       // call update once
@@ -56,7 +56,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       Random random = new Random(73464L);
 
       // update once
-      Quaternion qInitial = RandomGeometry.nextQuaternion(random);
+      Quaternion qInitial = EuclidCoreRandomTools.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qInitial);
       q.update();
 
@@ -83,7 +83,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       doRandomUpdates(q, random, nUpdates);
 
       // update one more time
-      Quaternion qFinal = RandomGeometry.nextQuaternion(random);
+      Quaternion qFinal = EuclidCoreRandomTools.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qFinal);
       q.update();
 
@@ -102,12 +102,12 @@ public class AlphaFilteredYoFrameQuaternionTest
       Random random = new Random(12525123L);
 
       // update once
-      Quaternion qInitial = RandomGeometry.nextQuaternion(random);
+      Quaternion qInitial = EuclidCoreRandomTools.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qInitial);
       q.update();
 
       // update a whole bunch of times using the same quaternion
-      Quaternion qFinal = RandomGeometry.nextQuaternion(random);
+      Quaternion qFinal = EuclidCoreRandomTools.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qFinal);
 
       double angleDifference = getAngleDifference(qInitial, qFinal);
@@ -132,7 +132,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       for (int i = 0; i < nUpdates; i++)
       {
          // set measurement randomly and updated filtered version
-         Quaternion qMeasured = RandomGeometry.nextQuaternion(random);
+         Quaternion qMeasured = EuclidCoreRandomTools.nextQuaternion(random);
          q.getUnfilteredQuaternion().set(qMeasured);
          q.update();
       }

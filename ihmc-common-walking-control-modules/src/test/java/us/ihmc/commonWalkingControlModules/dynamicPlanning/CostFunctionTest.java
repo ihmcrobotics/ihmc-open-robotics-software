@@ -4,8 +4,8 @@ import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.trajectoryOptimization.LQCostFunction;
 
 public abstract class CostFunctionTest<E extends Enum<E>>
@@ -29,9 +29,9 @@ public abstract class CostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
+         DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
 
          DMatrixRMaj costGradient = new DMatrixRMaj(getStateVectorSize(), 1);
          DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getStateVectorSize(), 1);
@@ -62,9 +62,9 @@ public abstract class CostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
+         DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
 
          DMatrixRMaj costGradient = new DMatrixRMaj(getControlVectorSize(), 1);
          DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getControlVectorSize(), 1);
@@ -95,9 +95,9 @@ public abstract class CostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
+         DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
 
          DMatrixRMaj costHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
          DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
@@ -132,9 +132,9 @@ public abstract class CostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
+         DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
 
          DMatrixRMaj costHessian = new DMatrixRMaj(getControlVectorSize(), getControlVectorSize());
          DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getControlVectorSize(), getControlVectorSize());
@@ -169,9 +169,9 @@ public abstract class CostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomMatrices_DDRM.rectangle(getStateVectorSize(), 1, random);
+         DMatrixRMaj currentControl = RandomMatrices_DDRM.rectangle(getControlVectorSize(), 1, random);
+         DMatrixRMaj constants = RandomMatrices_DDRM.rectangle(getConstantVectorSize(), 1, random);
 
          DMatrixRMaj costHessian = new DMatrixRMaj(getStateVectorSize(), getControlVectorSize());
          DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getStateVectorSize(), getControlVectorSize());

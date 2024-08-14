@@ -1,12 +1,14 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
-public interface OrientationTrajectoryGenerator extends TrajectoryGenerator, OrientationProvider
+public interface OrientationTrajectoryGenerator extends TrajectoryGenerator
 {
+   Orientation3DReadOnly getOrientation();
+
    Vector3DReadOnly getAngularVelocity();
 
    Vector3DReadOnly getAngularAcceleration();
