@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 public class RealSensePublisher
 {
-   private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "215122253249");
+   private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "213522252883");
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
    private static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_TOPIC = PerceptionAPI.D455_DEPTH_IMAGE;
 
@@ -34,14 +34,10 @@ public class RealSensePublisher
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public RealSensePublisher()
+   public RealSensePublisher(Supplier<ReferenceFrame> realsenseFrameSupplier, ROS2Helper ros2Helper)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
 
-      Supplier<ReferenceFrame> realsenseFrameSupplier = ReferenceFrame::getWorldFrame;
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
@@ -73,6 +69,9 @@ public class RealSensePublisher
 
    public static void main(String[] args)
    {
-      new RealSensePublisher();
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+
+      new RealSensePublisher(ReferenceFrame::getWorldFrame, ros2Helper);
    }
 }
