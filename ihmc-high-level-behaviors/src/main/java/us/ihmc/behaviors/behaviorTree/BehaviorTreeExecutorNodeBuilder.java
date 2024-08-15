@@ -96,6 +96,19 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                referenceFrameLibrary,
                                                walkingControllerParameters);
       }
+      if (nodeType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new KickDoorApproachPlanActionExecutor(id,
+                                                       crdtInfo,
+                                                       saveFileDirectory,
+                                                       ros2ControllerHelper,
+                                                       syncedRobot,
+                                                       controllerStatusTracker,
+                                                       referenceFrameLibrary,
+                                                       walkingControllerParameters,
+                                                       footstepPlanner,
+                                                       footstepPlannerParameters);
+      }
       if (nodeType == HandPoseActionDefinition.class)
       {
          return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
@@ -124,7 +137,11 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
+      if (nodeType == KickDoorActionDefinition.class)
+      {
+         return new KickDoorActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+      }
 
-      return null;
+      throw new RuntimeException("Node defintion type not found: " + nodeType.getSimpleName());
    }
 }

@@ -41,6 +41,10 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, new DefaultFootstepPlannerParameters());
       }
+      if (definitionType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new KickDoorApproachPlanActionDefinition(crdtInfo, saveFileDirectory);
+      }
       if (definitionType == HandPoseActionDefinition.class)
       {
          return new HandPoseActionDefinition(crdtInfo, saveFileDirectory);

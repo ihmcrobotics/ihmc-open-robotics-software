@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -11,6 +12,8 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -150,6 +153,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       syncedRobot.getFullRobotModel(),
                                       selectionCollisionModel,
                                       referenceFrameLibrary);
+      }
+      if (nodeType == KickDoorActionDefinition.class)
+      {
+         return new RDXKickDoorAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary, footstepPlannerParametersBasics);
+      }
+      if (nodeType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new RDXKickDoorApproachPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, referenceFrameLibrary);
       }
       else
       {

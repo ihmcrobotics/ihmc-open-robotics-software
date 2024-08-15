@@ -12,6 +12,8 @@
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./KickDoorActionStateMessage_.idl"
+#include "behavior_msgs/msg/./KickDoorApproachPlanStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./TrashCanInteractionStateMessage_.idl"
@@ -68,6 +70,11 @@ module behavior_msgs
       const octet FOOT_POSE_ACTION =
       18;
 
+      const octet KICK_DOOR_ACTION =
+      19;
+
+      const octet KICK_DOOR_APPROACH_ACTION =
+      20;
 
       /**
        * Gives the current state of the complete collection of behavior tree nodes.
@@ -115,6 +122,8 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::PelvisHeightOrientationActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
         sequence<behavior_msgs::msg::dds::FootPoseActionStateMessage, 200> foot_pose_actions;
+        sequence<behavior_msgs::msg::dds::KickDoorActionStateMessage, 200> kick_door_actions;
+        sequence<behavior_msgs::msg::dds::KickDoorApproachPlanStateMessage, 200> kick_door_approach_actions;
       };
     };
   };

@@ -26,6 +26,8 @@ public class ROS2BehaviorTreeSubscriptionNode
    private PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
    private FootPoseActionStateMessage footPoseActionStateMessage;
+   private KickDoorActionStateMessage kickDoorActionStateMessage;
+   private KickDoorApproachPlanStateMessage kickDoorApproachPlanActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -48,6 +50,8 @@ public class ROS2BehaviorTreeSubscriptionNode
       pelvisHeightOrientationActionStateMessage = null;
       waitDurationActionStateMessage = null;
       footPoseActionStateMessage = null;
+      kickDoorActionStateMessage = null;
+      kickDoorApproachPlanActionStateMessage = null;
       children.clear();
    }
 
@@ -230,6 +234,27 @@ public class ROS2BehaviorTreeSubscriptionNode
    {
       this.footPoseActionStateMessage = footPoseActionStateMessage;
    }
+
+   public KickDoorActionStateMessage getKickDoorActionStateMessage()
+   {
+      return kickDoorActionStateMessage;
+   }
+
+   public void setKickDoorActionStateMessage(KickDoorActionStateMessage kickDoorActionStateMessage)
+   {
+      this.kickDoorActionStateMessage = kickDoorActionStateMessage;
+   }
+
+   public KickDoorApproachPlanStateMessage getKickDoorApproachPlanActionStateMessage()
+   {
+      return kickDoorApproachPlanActionStateMessage;
+   }
+
+   public void setKickDoorApproachPlanActionStateMessage(KickDoorApproachPlanStateMessage kickDoorApproachPlanActionStateMessage)
+   {
+      this.kickDoorApproachPlanActionStateMessage = kickDoorApproachPlanActionStateMessage;
+   }
+
 
    public List<ROS2BehaviorTreeSubscriptionNode> getChildren()
    {
