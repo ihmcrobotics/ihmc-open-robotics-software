@@ -296,6 +296,10 @@ public class ZEDColorDepthImageRetriever
       {
          LogTools.error(interruptedException.getMessage());
       }
+      finally
+      {
+         newDepthImageLock.unlock();
+      }
 
       return depthImage.get();
    }
@@ -317,6 +321,10 @@ public class ZEDColorDepthImageRetriever
       catch (InterruptedException interruptedException)
       {
          LogTools.error(interruptedException.getMessage());
+      }
+      finally
+      {
+         newColorImageLocks.get(side).unlock();
       }
 
       return colorImages.get(side).get();
