@@ -1,6 +1,7 @@
-package us.ihmc.sensors;
+package us.ihmc.perception;
 
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
@@ -8,11 +9,13 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.RawImage;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensors.RealsenseColorDepthImagePublisher;
+import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -29,13 +32,18 @@ public class RealSensePublisher
    private final RealsenseColorDepthImagePublisher realsenseImagePublisher;
 
    private final ROS2DemandGraphNode realsenseDemandNode;
+   private Supplier<ReferenceFrame> realsenseFrameSupplier = ReferenceFrame::getWorldFrame;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public RealSensePublisher(Supplier<ReferenceFrame> realsenseFrameSupplier, ROS2Helper ros2Helper)
+   public RealSensePublisher(ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
+      if (syncedRobot != null)
+      {
+         realsenseFrameSupplier = syncedRobot.getReferenceFrames()::getSteppingCameraFrame;
+      }
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
@@ -69,9 +77,8 @@ public class RealSensePublisher
 
    public static void main(String[] args)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_realsense_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-
-      new RealSensePublisher(ReferenceFrame::getWorldFrame, ros2Helper);
+      new RealSensePublisher(ros2Helper, null);
    }
 }
