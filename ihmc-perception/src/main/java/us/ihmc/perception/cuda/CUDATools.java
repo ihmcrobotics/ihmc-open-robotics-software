@@ -8,6 +8,18 @@ import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
 
 public class CUDATools
 {
+   public static int getCUDADeviceCount()
+   {
+      int[] devices = new int[1];
+      checkCUDAError(cudaGetDeviceCount(devices));
+      return devices[0];
+   }
+
+   public static boolean hasCUDADevice()
+   {
+      return getCUDADeviceCount() > 0;
+   }
+
    /**
     * Helper function for CUDA error checking.
     * @param errorCode The returned error code from a CUDA function.

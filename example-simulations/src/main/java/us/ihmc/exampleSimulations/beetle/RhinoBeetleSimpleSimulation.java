@@ -6,13 +6,11 @@ import javax.swing.JButton;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.exampleSimulations.beetle.controller.HexapodSimulationController;
-import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleGroundContactParameters;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleInverseDynamicsParameters;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleModelFactory;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleSimInitialSetup;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleVirtualModelControlParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -49,8 +47,7 @@ public class RhinoBeetleSimpleSimulation
       RhinoBeetleVirtualModelControlParameters vmcParameters = new RhinoBeetleVirtualModelControlParameters(registry);
       HexapodSimulationController controller = new HexapodSimulationController(fullRobotModel, sdfRobot, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, CONTROLLER_DT);
       sdfRobot.setController(controller, (int) (CONTROLLER_DT / SIMULATION_DT));
-      RhinoBeetleGroundContactParameters groundContactParameters = new RhinoBeetleGroundContactParameters();
-      GroundContactModel groundContactModel = createGroundContactModel(sdfRobot, groundContactParameters);
+      GroundContactModel groundContactModel = createGroundContactModel(sdfRobot);
       sdfRobot.setGroundContactModel(groundContactModel);
       
 
@@ -92,15 +89,15 @@ public class RhinoBeetleSimpleSimulation
       }
    }
 
-   private GroundContactModel createGroundContactModel(FloatingRootJointRobot sdfRobot, GroundContactParameters groundContactParameters)
+   private GroundContactModel createGroundContactModel(FloatingRootJointRobot sdfRobot)
    {
       FlatGroundProfile groundProfile3D = new FlatGroundProfile(0.0);
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(sdfRobot, sdfRobot.getRobotsYoRegistry());
-      groundContactModel.setZStiffness(groundContactParameters.getZStiffness());
-      groundContactModel.setZDamping(groundContactParameters.getZDamping());
-      groundContactModel.setXYStiffness(groundContactParameters.getXYStiffness());
-      groundContactModel.setXYDamping(groundContactParameters.getXYDamping());
+      groundContactModel.setZStiffness(200.0);
+      groundContactModel.setZDamping(250.0);
+      groundContactModel.setXYStiffness(5000.0);
+      groundContactModel.setXYDamping(100.0);
       groundContactModel.setGroundProfile3D(groundProfile3D);
       return groundContactModel;
    }

@@ -5,6 +5,8 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
@@ -14,6 +16,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
+   private CUDACompressionTools compressionTools;
    private SwapReference<BytedecoImage> depth16UC1ImageSwapReference;
 
    public RDXROS2ColoredPointCloudVisualizerDepthChannel(ROS2Topic<ImageMessage> topic)
@@ -31,6 +34,9 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
          getFrequencyText().ping();
          return depth16UC1Image;
       });
+
+      if (ImageMessageFormat.getFormat(imageMessage) == ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1)
+         compressionTools = new CUDACompressionTools();
    }
 
    @Override
@@ -38,9 +44,17 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    {
       synchronized (decompressionInputSwapReference)
       {
-         opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(),
-                                   opencv_imgcodecs.IMREAD_UNCHANGED,
-                                   depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
+         if (ImageMessageFormat.getFormat(imageMessage) == ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1)
+         {
+            compressionTools.decompressDepth(decompressionInputSwapReference.getForThreadTwo().getInputPointer(),
+                                             depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
+         }
+         else
+         {
+            opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(),
+                                      opencv_imgcodecs.IMREAD_UNCHANGED,
+                                      depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
+         }
       }
       depth16UC1ImageSwapReference.swap();
    }
@@ -49,6 +63,14 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    protected Object getDecompressionAccessSyncObject()
    {
       return depth16UC1ImageSwapReference;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      if (compressionTools != null)
+         compressionTools.destroy();
    }
 
    public BytedecoImage getDepth16UC1Image()

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
+import static us.ihmc.perception.cuda.CUDATools.hasCUDADevice;
 
 /**
  * Limits the number of CUDA streams created to (ideally) the number of device connections.
@@ -25,6 +26,9 @@ public class CUDAStreamManager
 
    public static synchronized CUstream_st getStream()
    {
+      if (!hasCUDADevice())
+         return null;
+
       if (streams.size() < MAX_CUDA_STREAMS)
       {
          ReferencedCUDAStream stream = new ReferencedCUDAStream();
