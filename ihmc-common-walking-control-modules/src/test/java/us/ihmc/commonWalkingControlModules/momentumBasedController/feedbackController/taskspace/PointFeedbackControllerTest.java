@@ -431,7 +431,7 @@ public final class PointFeedbackControllerTest
          pointControllerOutput.getDesiredSpatialAcceleration(pointDesiredAcceleration);
          spatialControllerOutput.getDesiredSpatialAcceleration(spatialDesiredAcceleration);
 
-         //         assertEquals(spatialDesiredAcceleration, pointDesiredAcceleration, 1.0e-12);
+         assertEquals(spatialDesiredAcceleration, pointDesiredAcceleration, 1.0e-12);
 
          assertEquals(spatialMotionQPInput.taskJacobian, pointMotionQPInput.taskJacobian, 1.0e-12);
          assertEquals(spatialMotionQPInput.taskObjective, pointMotionQPInput.taskObjective, 1.0e-12);
