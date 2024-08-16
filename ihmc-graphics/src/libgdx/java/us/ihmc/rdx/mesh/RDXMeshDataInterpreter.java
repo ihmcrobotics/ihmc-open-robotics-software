@@ -37,7 +37,25 @@ public class RDXMeshDataInterpreter
       return meshBuilder.end();
    }
 
-   // TODO: Support changing the number of vertices, too, which involves the indices buffer
+   public static void reorderMeshVertices(MeshDataHolder meshData, Mesh meshToPack)
+   {
+      meshToPack.getIndicesBuffer().clear();
+
+      for (int i = 0; i < meshData.getTriangleIndices().length; i += 3)
+      {
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 1]);
+         meshToPack.getIndicesBuffer().put((short) meshData.getTriangleIndices()[i + 2]);
+      }
+
+      meshToPack.getIndicesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
+      }
+   }
+
    public static void repositionMeshVertices(MeshDataHolder meshData, Mesh meshToPack, Color color)
    {
       meshToPack.getVerticesBuffer().clear();
@@ -64,6 +82,13 @@ public class RDXMeshDataInterpreter
          float[] textureLocation = RDXMultiColorMeshBuilder.getTextureLocation(color);
          meshToPack.getVerticesBuffer().put(textureLocation[0]);
          meshToPack.getVerticesBuffer().put(textureLocation[1]);
+      }
+
+      meshToPack.getVerticesBuffer().flip();
+
+      if (meshToPack.getVerticesBuffer().limit() == 0)
+      {
+         throw new RuntimeException("Mesh must have data. The application will SIGSEV on rendering if this continued.");
       }
    }
 }

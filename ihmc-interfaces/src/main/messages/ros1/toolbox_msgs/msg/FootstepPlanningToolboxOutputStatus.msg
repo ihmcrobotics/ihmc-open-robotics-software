@@ -52,8 +52,8 @@ int8 body_path_planning_result
 # Field default value 255
 int8 footstep_planning_result
 
-# (deprecated) Regions that correspond to the request message. Originally used for debugging networking
-perception_msgs/PlanarRegionsListMessage planar_regions_list
+# (deprecated) Height map that correspond to the request message. Originally used for debugging networking
+perception_msgs/HeightMapMessage height_map_message
 
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path

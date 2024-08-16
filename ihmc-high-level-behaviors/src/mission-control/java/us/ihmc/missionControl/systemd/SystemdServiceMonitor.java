@@ -2,8 +2,8 @@ package us.ihmc.missionControl.systemd;
 
 import com.google.common.collect.Lists;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.MissionControlAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
@@ -11,7 +11,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -22,7 +21,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    private final String serviceName;
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<SystemServiceStatusMessage> serviceStatusPublisher;
+   private final ROS2PublisherBasics<SystemServiceStatusMessage> serviceStatusPublisher;
    private final ExceptionHandlingThreadScheduler systemServiceStatusPublisherScheduler;
    private final JournalCtlReader reader;
 
@@ -30,9 +29,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       this.serviceName = serviceName;
       this.ros2Node = ros2Node;
-      serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                         ROS2Tools.getSystemServiceStatusTopic(instanceId),
-                                                         ROS2Tools.getSystemServiceStatusQosProfile());
+      serviceStatusPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemServiceStatusTopic(instanceId));
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 2.0);
 
@@ -100,7 +97,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       reader.stop();
       systemServiceStatusPublisherScheduler.shutdown();
-      serviceStatusPublisher.destroy();
+      serviceStatusPublisher.remove();
       ros2Node.destroy();
    }
 

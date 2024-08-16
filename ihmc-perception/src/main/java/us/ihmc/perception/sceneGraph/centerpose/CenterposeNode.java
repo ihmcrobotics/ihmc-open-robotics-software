@@ -14,26 +14,26 @@ public class CenterposeNode extends DetectableSceneNode
    private Point3D[] vertices2D;
    private String objectType;
    private double confidence;
-
-   private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
-   private final FramePose3D lastPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-
+   private final RigidBodyTransform interpolatedModelTransform = new RigidBodyTransform();
    private int glitchCount;
+   private boolean enableTracking;
 
-   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D)
+   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D, boolean enableTracking)
    {
       super(id, name);
       this.objectID = markerID;
       this.vertices3D = vertices3D;
       this.vertices2D = vertices2D;
+      this.enableTracking = enableTracking;
    }
 
    public void update()
    {
       RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
       FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
+      FramePose3D interpolatedModelTransformPose = new FramePose3D(ReferenceFrame.getWorldFrame(), interpolatedModelTransform);
 
-      double distance = lastPose.getPositionDistance(detectionPose);
+      double distance = detectionPose.getPositionDistance(interpolatedModelTransformPose);
 
       boolean skipUpdate = false;
       if (distance > 0.5)
@@ -49,18 +49,15 @@ public class CenterposeNode extends DetectableSceneNode
          }
       }
 
-      if (!skipUpdate)
+      if (!skipUpdate && enableTracking)
       {
          double alpha = normalize(distance, 0.001, 1.0);
-         alpha = MathTools.clamp(alpha, 0.001, 0.15);
+         alpha = MathTools.clamp(alpha, 0.001, 1);
 
-         interpolatedTransform.interpolate(detectionTransform, alpha);
-
-         getNodeToParentFrameTransform().set(interpolatedTransform);
+         interpolatedModelTransform.interpolate(detectionTransform, alpha);
+         getNodeToParentFrameTransform().set(interpolatedModelTransform);
          getNodeFrame().update();
       }
-
-      lastPose.set(detectionPose);
    }
 
    public static double normalize(double value, double min, double max) {
@@ -115,5 +112,15 @@ public class CenterposeNode extends DetectableSceneNode
    public void setConfidence(double confidence)
    {
       this.confidence = confidence;
+   }
+
+   public boolean isEnableTracking()
+   {
+      return enableTracking;
+   }
+
+   public void setEnableTracking(boolean enableTracking)
+   {
+      this.enableTracking = enableTracking;
    }
 }

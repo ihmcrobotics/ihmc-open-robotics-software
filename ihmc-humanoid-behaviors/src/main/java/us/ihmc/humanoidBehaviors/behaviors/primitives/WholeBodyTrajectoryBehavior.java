@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
@@ -21,7 +21,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
    private final YoDouble startTime;
    private final YoDouble trajectoryTime;
 
-   private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> publisher;
+   private final ROS2PublisherBasics<WholeBodyTrajectoryMessage> publisher;
 
    public WholeBodyTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

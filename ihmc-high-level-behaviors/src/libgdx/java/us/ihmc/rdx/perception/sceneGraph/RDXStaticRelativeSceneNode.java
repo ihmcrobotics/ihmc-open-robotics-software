@@ -34,7 +34,7 @@ public class RDXStaticRelativeSceneNode extends RDXPredefinedRigidBodySceneNode
 
       ImGui.text("Current distance: %.2f".formatted(staticRelativeSceneNode.getCurrentDistance()));
       ImGui.sameLine();
-      distanceToDisableTrackingInput.render();
+      distanceToDisableTrackingInput.renderImGuiWidget();
    }
 
    @Override

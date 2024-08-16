@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -17,7 +17,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    private final YoDouble yoTime;
    private final YoDouble startTime;
    private final YoDouble trajectoryTime;
-   private final IHMCROS2Publisher<HeadTrajectoryMessage> publisher;
+   private final ROS2PublisherBasics<HeadTrajectoryMessage> publisher;
 
    public HeadTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

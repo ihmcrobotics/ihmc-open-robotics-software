@@ -14,7 +14,7 @@ import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -89,17 +89,16 @@ public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+         new ROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
       }
       else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+         new ROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
       }
       else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node,
+         new ROS2Callback<>(ros2Node,
                                 topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                ROS2QosProfile.BEST_EFFORT(),
                                 this::queueRenderFusedSensorHeadPointCloud);
       }
    }

@@ -17,7 +17,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 {
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
-   private final CRDTBidirectionalNotification manualExecutionRequested;
+   private final CRDTUnidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    private transient final MutableInt actionIndex = new MutableInt();
@@ -29,7 +29,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
 
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
-      manualExecutionRequested = new CRDTBidirectionalNotification(this);
+      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, crdtInfo, this);
       nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
    }
 

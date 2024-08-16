@@ -2,16 +2,16 @@
 #define __behavior_msgs__msg__BehaviorTreeStateMessage__idl__
 
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
-#include "behavior_msgs/msg/./ArmJointAnglesActionStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
+#include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
+#include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
-#include "behavior_msgs/msg/./WalkActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
@@ -25,22 +25,25 @@ module behavior_msgs
       const octet ACTION_SEQUENCE =
       1;
 
-      const octet ARM_JOINT_ANGLES_ACTION =
-      10;
+      const octet DOOR_TRAVERSAL =
+      2;
 
       const octet CHEST_ORIENTATION_ACTION =
-      11;
+      10;
 
       const octet FOOTSTEP_PLAN_ACTION =
-      12;
+      11;
 
       const octet SAKE_HAND_COMMAND_ACTION =
-      13;
+      12;
 
       const octet HAND_POSE_ACTION =
-      14;
+      13;
 
       const octet HAND_WRENCH_ACTION =
+      14;
+
+      const octet SCREW_PRIMITIVE_ACTION =
       15;
 
       const octet PELVIS_HEIGHT_PITCH_ACTION =
@@ -48,9 +51,6 @@ module behavior_msgs
 
       const octet WAIT_DURATION_ACTION =
       17;
-
-      const octet WALK_ACTION =
-      18;
 
 
       /**
@@ -62,6 +62,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeStateMessage_")
       struct BehaviorTreeStateMessage
       {
+        /**
+         * Monotonically increasing message ID that matches the CRDTInfo update number
+         */
+        unsigned long sequence_id;
         /**
          * The ID to assign to the next instantiated node
          */
@@ -82,15 +86,15 @@ module behavior_msgs
         sequence<unsigned long, 1000> behavior_tree_indices;
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
-        sequence<behavior_msgs::msg::dds::ArmJointAnglesActionStateMessage, 200> arm_joint_angles_actions;
+        sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
         sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
+        sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 200> screw_primitive_actions;
         sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
-        sequence<behavior_msgs::msg::dds::WalkActionStateMessage, 200> walk_actions;
       };
     };
   };

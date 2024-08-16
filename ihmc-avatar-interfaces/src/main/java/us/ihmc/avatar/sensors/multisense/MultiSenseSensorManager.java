@@ -45,7 +45,7 @@ public class MultiSenseSensorManager
            robotConfigurationDataBuffer,
            rosMainNode,
            ros2Node,
-           ROS2QosProfile.DEFAULT(),
+           ROS2QosProfile.RELIABLE(),
            rosClockCalculator,
            cameraParameters,
            lidarParameters,

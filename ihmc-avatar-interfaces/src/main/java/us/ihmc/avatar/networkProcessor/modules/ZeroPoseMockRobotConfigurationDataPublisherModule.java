@@ -3,7 +3,8 @@ package us.ihmc.avatar.networkProcessor.modules;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -20,7 +21,7 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable, CloseableAndDisposable
 {
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<RobotConfigurationData> publisher;
+   private final ROS2PublisherBasics<RobotConfigurationData> publisher;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private long timeStamp = 0;
@@ -33,7 +34,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
-      publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName()));
+      publisher = ros2Node.createPublisher(HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName()).withTypeName(RobotConfigurationData.class));
 
       Thread t = new Thread(this);
       t.start();

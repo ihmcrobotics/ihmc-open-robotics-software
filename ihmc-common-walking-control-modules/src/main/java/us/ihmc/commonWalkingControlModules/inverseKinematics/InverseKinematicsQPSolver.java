@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
@@ -140,11 +139,11 @@ public class InverseKinematicsQPSolver
 
    private void addJointAccelerationRegularization()
    {
-      double factor = dt * dt / jointAccelerationRegularization.getDoubleValue();
+      double factor = jointAccelerationRegularization.getDoubleValue() / (dt * dt);
       for (int i = 0; i < numberOfDoFs; i++)
       {
-         solverInput_H.add(i, i, 1.0 / factor);
-         solverInput_f.add(i, 0, -desiredJointVelocities.get(i, 0) / factor);
+         solverInput_H.add(i, i, factor);
+         solverInput_f.add(i, 0, -desiredJointVelocities.get(i, 0) * factor);
       }
    }
 

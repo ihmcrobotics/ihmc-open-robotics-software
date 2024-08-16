@@ -1,37 +1,23 @@
 package us.ihmc.communication.controllerAPI;
 
-import java.util.List;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceStreamingMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.LegTrajectoryMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.QueueableMessage;
-import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.List;
 
 public final class MessageUnpackingTools
 {
@@ -102,7 +88,7 @@ public final class MessageUnpackingTools
             {
                messagesToPack.add(rightArmTrajectoryMessage);
             }
-            
+
             if (!rightLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
                messagesToPack.add(rightLegTrajectoryMessage);
             if (!leftLegTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
@@ -128,14 +114,15 @@ public final class MessageUnpackingTools
 
    public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker()
    {
-      return new MessageUnpacker<WholeBodyStreamingMessage>()
+      return new MessageUnpacker<>()
       {
          private final SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>(new HandTrajectoryMessage(),
                                                                                                                  new HandTrajectoryMessage());
          private final SideDependentList<ArmTrajectoryMessage> armTrajectoryMessages = new SideDependentList<>(new ArmTrajectoryMessage(),
                                                                                                                new ArmTrajectoryMessage());
-         private final SideDependentList<HandHybridJointspaceTaskspaceTrajectoryMessage> handHybridJointspaceTaskspaceTrajectoryMessages = new SideDependentList<>(new HandHybridJointspaceTaskspaceTrajectoryMessage(),
-                                                                                                                                                                   new HandHybridJointspaceTaskspaceTrajectoryMessage());
+         private final SideDependentList<HandHybridJointspaceTaskspaceTrajectoryMessage> handHybridJointspaceTaskspaceTrajectoryMessages = new SideDependentList<>(
+               new HandHybridJointspaceTaskspaceTrajectoryMessage(),
+               new HandHybridJointspaceTaskspaceTrajectoryMessage());
          private final ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
          private final PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
          private final NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage();
@@ -262,18 +249,34 @@ public final class MessageUnpackingTools
             return robotSide == RobotSide.LEFT ? left : right;
          }
 
-         private void toSO3TrajectoryMessage(SO3StreamingMessage source, SO3TrajectoryMessage destination, long sequenceId, long uniqueId,
-                                             double streamIntegrationDuration, long sourceTimestamp)
+         private void toSO3TrajectoryMessage(SO3StreamingMessage source,
+                                             SO3TrajectoryMessage destination,
+                                             long sequenceId,
+                                             long uniqueId,
+                                             double streamIntegrationDuration,
+                                             long sourceTimestamp)
          {
             destination.setSequenceId(sequenceId);
             destination.setUniqueId(uniqueId);
             destination.getTaskspaceTrajectoryPoints().clear();
-            SO3TrajectoryPointMessage trajectoryPoint = destination.getTaskspaceTrajectoryPoints().add();
-            trajectoryPoint.setSequenceId(sequenceId);
-            trajectoryPoint.setUniqueId(uniqueId);
-            trajectoryPoint.setTime(0.0);
-            trajectoryPoint.getOrientation().set(source.getOrientation());
-            trajectoryPoint.getAngularVelocity().set(source.getAngularVelocity());
+            SO3TrajectoryPointMessage firstPoint = destination.getTaskspaceTrajectoryPoints().add();
+            firstPoint.setSequenceId(sequenceId);
+            firstPoint.setUniqueId(uniqueId);
+            firstPoint.setTime(0.0);
+            firstPoint.getOrientation().set(source.getOrientation());
+            firstPoint.getAngularVelocity().set(source.getAngularVelocity());
+
+            SO3TrajectoryPointMessage secondPoint = destination.getTaskspaceTrajectoryPoints().add();
+            secondPoint.setSequenceId(sequenceId);
+            secondPoint.setUniqueId(uniqueId);
+            secondPoint.setTime(streamIntegrationDuration);
+            integrate(source.getOrientation(),
+                      source.getAngularVelocity(),
+                      source.getAngularAcceleration(),
+                      streamIntegrationDuration,
+                      secondPoint.getOrientation(),
+                      secondPoint.getAngularVelocity());
+
             MessageTools.packSelectionMatrix3DMessage(true, destination.getSelectionMatrix());
             destination.getFrameInformation().set(source.getFrameInformation());
             MessageTools.packWeightMatrix3DMessage(-1.0, destination.getWeightMatrix());
@@ -282,20 +285,64 @@ public final class MessageUnpackingTools
             configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
          }
 
-         private void toSE3TrajectoryMessage(SE3StreamingMessage source, SE3TrajectoryMessage destination, long sequenceId, long uniqueId,
-                                             double streamIntegrationDuration, long sourceTimestamp)
+         private final Vector3D tempVector = new Vector3D();
+         private final Vector3D angularVelocityLocalFrame = new Vector3D();
+         private final Vector3D angularAccelerationLocalFrame = new Vector3D();
+
+         private void integrate(QuaternionReadOnly initialOrientation,
+                                Vector3DReadOnly initialAngularVelocity,
+                                Vector3DReadOnly angularAcceleration,
+                                double integrationTime,
+                                QuaternionBasics finalOrientation,
+                                Vector3DBasics finalAngularVelocity)
+         {
+            initialOrientation.inverseTransform(initialAngularVelocity, angularVelocityLocalFrame);
+            initialOrientation.inverseTransform(angularAcceleration, angularAccelerationLocalFrame);
+
+            tempVector.setAndScale(integrationTime, angularVelocityLocalFrame);
+            tempVector.scaleAdd(0.5 * integrationTime * integrationTime, angularAccelerationLocalFrame, tempVector);
+            finalOrientation.setRotationVector(tempVector);
+            finalOrientation.prepend(initialOrientation);
+
+            finalAngularVelocity.scaleAdd(integrationTime, angularAccelerationLocalFrame, angularVelocityLocalFrame);
+            finalOrientation.transform(finalAngularVelocity);
+         }
+
+         private void toSE3TrajectoryMessage(SE3StreamingMessage source,
+                                             SE3TrajectoryMessage destination,
+                                             long sequenceId,
+                                             long uniqueId,
+                                             double streamIntegrationDuration,
+                                             long sourceTimestamp)
          {
             destination.setSequenceId(sequenceId);
             destination.setUniqueId(uniqueId);
             destination.getTaskspaceTrajectoryPoints().clear();
-            SE3TrajectoryPointMessage trajectoryPoint = destination.getTaskspaceTrajectoryPoints().add();
-            trajectoryPoint.setSequenceId(sequenceId);
-            trajectoryPoint.setUniqueId(uniqueId);
-            trajectoryPoint.setTime(0.0);
-            trajectoryPoint.getPosition().set(source.getPosition());
-            trajectoryPoint.getOrientation().set(source.getOrientation());
-            trajectoryPoint.getLinearVelocity().set(source.getLinearVelocity());
-            trajectoryPoint.getAngularVelocity().set(source.getAngularVelocity());
+            SE3TrajectoryPointMessage firstPoint = destination.getTaskspaceTrajectoryPoints().add();
+            firstPoint.setSequenceId(sequenceId);
+            firstPoint.setUniqueId(uniqueId);
+            firstPoint.setTime(0.0);
+            firstPoint.getPosition().set(source.getPosition());
+            firstPoint.getOrientation().set(source.getOrientation());
+            firstPoint.getLinearVelocity().set(source.getLinearVelocity());
+            firstPoint.getAngularVelocity().set(source.getAngularVelocity());
+
+            SE3TrajectoryPointMessage secondPoint = destination.getTaskspaceTrajectoryPoints().add();
+            secondPoint.setSequenceId(sequenceId);
+            secondPoint.setUniqueId(uniqueId);
+            secondPoint.setTime(streamIntegrationDuration);
+            integrate(source.getPosition(),
+                      source.getOrientation(),
+                      source.getLinearVelocity(),
+                      source.getAngularVelocity(),
+                      source.getLinearAcceleration(),
+                      source.getAngularAcceleration(),
+                      streamIntegrationDuration,
+                      secondPoint.getPosition(),
+                      secondPoint.getOrientation(),
+                      secondPoint.getLinearVelocity(),
+                      secondPoint.getAngularVelocity());
+
             MessageTools.packSelectionMatrix3DMessage(true, destination.getAngularSelectionMatrix());
             MessageTools.packSelectionMatrix3DMessage(true, destination.getLinearSelectionMatrix());
             destination.getFrameInformation().set(source.getFrameInformation());
@@ -306,35 +353,73 @@ public final class MessageUnpackingTools
             configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
          }
 
-         private void toJointspaceTrajectoryMessage(JointspaceStreamingMessage source, JointspaceTrajectoryMessage destination, long sequenceId, long uniqueId,
-                                                    double streamIntegrationDuration, long sourceTimestamp)
+         private void integrate(Point3DReadOnly initialPosition,
+                                QuaternionReadOnly initialOrientation,
+                                Vector3DReadOnly initialLinearVelocity,
+                                Vector3DReadOnly initialAngularVelocity,
+                                Vector3DReadOnly linearAcceleration,
+                                Vector3DReadOnly angularAcceleration,
+                                double integrationTime,
+                                Point3DBasics finalPosition,
+                                QuaternionBasics finalOrientation,
+                                Vector3DBasics finalLinearVelocity,
+                                Vector3DBasics finalAngularVelocity)
+         {
+            integrate(initialOrientation, initialAngularVelocity, angularAcceleration, integrationTime, finalOrientation, finalAngularVelocity);
+            finalPosition.scaleAdd(integrationTime, initialLinearVelocity, initialPosition);
+            finalPosition.scaleAdd(0.5 * integrationTime * integrationTime, linearAcceleration, finalPosition);
+            finalLinearVelocity.scaleAdd(integrationTime, linearAcceleration, initialLinearVelocity);
+         }
+
+         private void toJointspaceTrajectoryMessage(JointspaceStreamingMessage source,
+                                                    JointspaceTrajectoryMessage destination,
+                                                    long sequenceId,
+                                                    long uniqueId,
+                                                    double streamIntegrationDuration,
+                                                    long sourceTimestamp)
          {
             destination.setSequenceId(sequenceId);
             destination.setUniqueId(uniqueId);
             destination.getJointTrajectoryMessages().clear();
 
-            IDLSequence.Float positions = source.getPositions();
-            IDLSequence.Float velocities = source.getVelocities();
+            Float positions = source.getPositions();
+            Float velocities = source.getVelocities();
+            Float accelerations = source.getAccelerations();
 
             for (int i = 0; i < Math.min(positions.size(), velocities.size()); i++)
             {
+               double q = positions.get(i);
+               double qd = velocities.get(i);
+               double qdd = accelerations.get(i);
+
                OneDoFJointTrajectoryMessage jointTrajectoryMessage = destination.getJointTrajectoryMessages().add();
                jointTrajectoryMessage.setSequenceId(sequenceId);
                jointTrajectoryMessage.setUniqueId(uniqueId);
                jointTrajectoryMessage.getTrajectoryPoints().clear();
-               TrajectoryPoint1DMessage trajectoryPoint = jointTrajectoryMessage.getTrajectoryPoints().add();
-               trajectoryPoint.setSequenceId(sequenceId);
-               trajectoryPoint.setUniqueId(uniqueId);
-               trajectoryPoint.setTime(0.0);
-               trajectoryPoint.setPosition(positions.get(i));
-               trajectoryPoint.setVelocity(velocities.get(i));
+               TrajectoryPoint1DMessage firstPoint = jointTrajectoryMessage.getTrajectoryPoints().add();
+               firstPoint.setSequenceId(sequenceId);
+               firstPoint.setUniqueId(uniqueId);
+               firstPoint.setTime(0.0);
+               firstPoint.setPosition(q);
+               firstPoint.setVelocity(qd);
+
+               TrajectoryPoint1DMessage secondPoint = jointTrajectoryMessage.getTrajectoryPoints().add();
+               secondPoint.setSequenceId(sequenceId);
+               secondPoint.setUniqueId(uniqueId);
+               secondPoint.setTime(streamIntegrationDuration);
+               secondPoint.setPosition(q + qd * streamIntegrationDuration + 0.5 * qdd * streamIntegrationDuration * streamIntegrationDuration);
+               secondPoint.setVelocity(qd + qdd * streamIntegrationDuration);
+
                jointTrajectoryMessage.setWeight(-1.0);
             }
 
             configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
          }
 
-         private void configureQueueableMessage(QueueableMessage messageToModify, long sequenceId, long uniqueId, double streamIntegrationDuration,
+         private void configureQueueableMessage(QueueableMessage messageToModify,
+                                                long sequenceId,
+                                                long uniqueId,
+                                                double streamIntegrationDuration,
                                                 long sourceTimestamp)
          {
             messageToModify.setExecutionMode(ExecutionMode.STREAM.toByte());
@@ -343,7 +428,6 @@ public final class MessageUnpackingTools
             messageToModify.setStreamIntegrationDuration(streamIntegrationDuration);
             messageToModify.setTimestamp(sourceTimestamp);
          }
-
       };
    }
 
@@ -379,7 +463,7 @@ public final class MessageUnpackingTools
    {
       /**
        * Unpack the messages in the given list.
-       * 
+       *
        * @param messagesToPack the list the messages should be stored once unpacked.
        */
       public void unpackMessage(T multipleMessageHolder, List<Settable<?>> messagesToPack);

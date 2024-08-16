@@ -14,9 +14,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.behaviors.waypoints.Waypoint;
 import us.ihmc.behaviors.waypoints.WaypointManager;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -215,9 +215,9 @@ public class UpDownExplorer
       newWaypoint.getPose().appendYawRotation(randomTurn);
    }
 
-   public void onPlanFinished(RemoteFootstepPlannerResult result)
+   public void onPlanFinished(FootstepPlannerOutput result)
    {
-      if (!result.isValidForExecution())
+      if (!result.getFootstepPlanningResult().validForExecution())
       {
          plannerFailedOnLastRun.set();
       }

@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -39,6 +40,7 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -52,7 +54,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class SimpleOcclusionTests
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize =true; //  simulationTestingParameters.getKeepSCSUp();
+   private static final boolean visualize = true; //  simulationTestingParameters.getKeepSCSUp();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int maxSteps = 100;
@@ -84,11 +86,11 @@ public class SimpleOcclusionTests
 
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, double maxAllowedSolveTime)
    {
-      runTest(testInfo, startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, getParameters(), maxAllowedSolveTime);
    }
 
    private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
-                        VisibilityGraphsParametersReadOnly visibilityGraphsParameters, double maxAllowedSolveTime)
+                        double maxAllowedSolveTime)
    {
       YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -226,7 +228,7 @@ public class SimpleOcclusionTests
          }
 
          request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
-         request.setPlanarRegionsList(visiblePlanarRegions);
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(visiblePlanarRegions)));
          request.setRequestedInitialStanceSide(stanceSide);
          request.setStartFootPoses(parameters.getIdealFootstepWidth(), stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);
@@ -551,11 +553,6 @@ public class SimpleOcclusionTests
    private FootstepPlannerParametersReadOnly getParameters()
    {
       return new DefaultFootstepPlannerParameters();
-   }
-
-   private VisibilityGraphsParametersReadOnly getVisibilityGraphsParameters()
-   {
-      return new DefaultVisibilityGraphParameters();
    }
 
    private PlanarRegionsList createSimpleOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)

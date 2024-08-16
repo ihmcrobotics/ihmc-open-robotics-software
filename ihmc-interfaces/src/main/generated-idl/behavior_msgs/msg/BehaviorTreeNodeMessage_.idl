@@ -9,6 +9,11 @@ module behavior_msgs
     module dds
     {
 
+      /**
+       * DEPRECATED - See BehaviorTreeNodeDefinitionMessage for the new version
+       * We will remove this when the implementation has been migrated to the
+       * new structure.
+       */
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeMessage_")
       struct BehaviorTreeNodeMessage
       {

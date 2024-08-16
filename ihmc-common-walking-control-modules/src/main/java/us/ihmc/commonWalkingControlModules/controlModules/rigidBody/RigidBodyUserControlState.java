@@ -13,6 +13,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * A rigid body mode that takes a user's {@link DesiredAccelerationsCommand} and directly
+ * feeds that into the whole body controller core as a {@link JointspaceAccelerationCommand}.
+ */
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;

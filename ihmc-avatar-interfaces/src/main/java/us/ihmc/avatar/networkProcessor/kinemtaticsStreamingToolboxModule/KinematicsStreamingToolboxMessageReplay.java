@@ -9,7 +9,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -41,11 +42,11 @@ public class KinematicsStreamingToolboxMessageReplay
    private final JSONSerializer<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessageSerializer = new JSONSerializer<>(new KinematicsToolboxConfigurationMessagePubSubType());
    private final JSONSerializer<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessageSerializer = new JSONSerializer<>(new KinematicsStreamingToolboxInputMessagePubSubType());
 
-   private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final IHMCRealtimeROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
-   private final IHMCRealtimeROS2Publisher<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
-   private final IHMCRealtimeROS2Publisher<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
-   private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2PublisherBasics<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
+   private final ROS2PublisherBasics<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
+   private final ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
 
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;
@@ -59,14 +60,14 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
-      capturabilityBasedStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
+      capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class));
 
       ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxInputTopic);
-      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
+      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsToolboxConfigurationMessage.class));
+      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       ros2Node.spin();
    }

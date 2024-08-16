@@ -1,22 +1,18 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import net.java.games.input.Event;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class XBoxOneJavaFXController
 {
@@ -168,13 +164,13 @@ public class XBoxOneJavaFXController
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, true, 0.1, 3));
 
       joystick.addJoystickStatusListener(connected ->
-      {
-         if (!connected)
-         {
-            joystickConnected.set(false);
-            scheduleReconnectJoystick();
-         }
-      });
+                                         {
+                                            if (!connected)
+                                            {
+                                               joystickConnected.set(false);
+                                               scheduleReconnectJoystick();
+                                            }
+                                         });
       joystick.addJoystickEventListener(this::consumeEvent);
       joystickConnected.set(true);
       return true;
@@ -254,7 +250,10 @@ public class XBoxOneJavaFXController
                   stateTopic = DPadLeftState;
 
                if (stateTopic != null)
+               {
                   messager.submitMessage(stateTopic, ButtonState.PRESSED);
+                  lastDPadPressed = stateTopic;
+               }
             }
             break;
          case DPAD_UP:

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
@@ -58,5 +59,11 @@ public class PlanarRegionNormal implements UnitVector3DReadOnly
    public boolean isDirty()
    {
       return false;
+   }
+
+   @Override
+   public String toString(String format)
+   {
+      return EuclidCoreIOTools.getTuple3DString(format, this);
    }
 }

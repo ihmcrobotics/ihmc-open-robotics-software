@@ -1,9 +1,10 @@
 package us.ihmc.rdx.ui.affordances;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -24,8 +25,20 @@ public class RDXInteractableFoot extends RDXInteractableRobotLink
                               FullHumanoidRobotModel fullRobotModel)
    {
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
+
+      RigidBodyTransform graphicToControlFrameTransform = new RigidBodyTransform();
+      RigidBodyTransform linkToControlFrameTransform = new RigidBodyTransform();
+
+      FramePose3D graphicFrame = new FramePose3D();
+      graphicFrame.setToZero(fullRobotModel.getFoot(side).getParentJoint().getFrameAfterJoint());
+      graphicFrame.changeFrame(fullRobotModel.getSoleFrame(side));
+      graphicFrame.get(graphicToControlFrameTransform);
+      graphicFrame.get(linkToControlFrameTransform);
+
       create(robotCollidable,
-             fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+             fullRobotModel.getSoleFrame(side),
+             graphicToControlFrameTransform,
+             linkToControlFrameTransform,
              modelFileName,
              baseUI.getPrimary3DPanel());
    }

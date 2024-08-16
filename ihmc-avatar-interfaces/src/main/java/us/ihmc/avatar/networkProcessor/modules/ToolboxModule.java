@@ -16,6 +16,7 @@ import com.google.common.base.CaseFormat;
 
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -140,7 +141,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
-      timeWithoutInputsBeforeGoingToSleep.set(0.5);
+      timeWithoutInputsBeforeGoingToSleep.set(500.0);
       commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
       {
          private final Set<Class<? extends Command<?, ?>>> silentCommands = silentCommands();
@@ -155,7 +156,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(managedROS2Node, ToolboxStateMessage.class, getInputTopic(), new NewMessageListener<ToolboxStateMessage>()
+      managedROS2Node.createSubscription(getInputTopic().withTypeName(ToolboxStateMessage.class), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
 

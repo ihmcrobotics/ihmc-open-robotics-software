@@ -10,6 +10,8 @@ import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -17,12 +19,14 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.MocapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -44,7 +48,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230517_114430_PerceptionLog_900_ms.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);
@@ -62,6 +66,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Pose3D cameraPose = new Pose3D();
 
+   private Mat depthFloatImage;
+   private Mat depthFloatImageFiltered;
    private BytedecoImage bytedecoDepthImage;
    private RDXPanel navigationPanel;
    private String sensorTopicName;
@@ -99,25 +105,25 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createForPerspective(720, 1280, false); // Real D455
+//            createForPerspective(720, 1280, false); // Real D455
             //createForPerspective(768, 1024, false); // Real L515
             //createForPerspective(768, 1280, true); // Simulated L515
 
-            //createOuster(128, 1024);
+            createForSpherical(128, 2048);
 
             baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
 
-            if (!mocapPositionBuffer.isEmpty())
-            {
-               MocapTools.adjustMocapPositionsByOffset(mocapPositionBuffer, sensorPositionBuffer.get(0));
+//            if (!mocapPositionBuffer.isEmpty())
+//            {
+//               MocapTools.adjustMocapPositionsByOffset(mocapPositionBuffer, sensorPositionBuffer.get(0));
+//
+//               mocapGraphic.generateMeshes(mocapPositionBuffer, 10);
+//               mocapGraphic.update();
+//
+//               baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+//            }
 
-               mocapGraphic.generateMeshes(mocapPositionBuffer, 10);
-               mocapGraphic.update();
-
-               baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-            }
-
-            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+//            baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
 
             rootJointGraphic.generateMeshes(sensorPositionBuffer, 5);
             rootJointGraphic.update();
@@ -130,6 +136,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            depthFloatImage = new Mat(depthHeight, depthWidth, opencv_core.CV_32FC1);
+            depthFloatImageFiltered = new Mat(depthHeight, depthWidth, opencv_core.CV_32FC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME,
                                                      frameIndex.get(),
                                                      depthBytePointer,
@@ -265,6 +273,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             synchronized (bytedecoDepthImage.getBytedecoOpenCVMat())
             {
                frameRegions.getPlanarRegionsList().clear();
+
+               // applyBilateralFilter();
+
                rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, frameRegions);
                frameRegions.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
                planarRegionsListToRenderNotification.set(frameRegions.getPlanarRegionsList().copy());
@@ -277,6 +288,18 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          generateMesh(planarRegionsListToRenderNotification.read());
          updatePointCloudRenderer();
       }
+   }
+
+   public void applyBilateralFilter()
+   {
+      // perform bilateral filtering on the depth image using opencv_imgproc.bilateralFilter
+      bytedecoDepthImage.getBytedecoOpenCVMat().convertTo(depthFloatImage, opencv_core.CV_32FC1, 1000.0f, 0.0);
+      opencv_imgproc.bilateralFilter(depthFloatImage,
+                                     depthFloatImageFiltered,
+                                     5,
+                                     50,
+                                     50);
+      depthFloatImageFiltered.convertTo(bytedecoDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1/1000.0f, 0.0);
    }
 
    public synchronized void generateMesh(PlanarRegionsList regionsList)

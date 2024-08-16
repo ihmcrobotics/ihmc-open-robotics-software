@@ -31,13 +31,21 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-            * Define the desired 3D linear velocity to be reached.
+            * Define the desired 3D linear velocity, expressed in world frame,  to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_;
    /**
-            * Define the desired 3D angular velocity to be reached.
+            * Define the desired 3D angular velocity, expressed in world frame,  to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
+   /**
+            * Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
+   /**
+            * Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D angular_acceleration_;
 
    public SE3StreamingMessage()
    {
@@ -47,6 +55,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      angular_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public SE3StreamingMessage(SE3StreamingMessage other)
@@ -65,6 +75,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_velocity_, linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_acceleration_, linear_acceleration_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_acceleration_, angular_acceleration_);
    }
 
 
@@ -118,7 +130,7 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
 
 
    /**
-            * Define the desired 3D linear velocity to be reached.
+            * Define the desired 3D linear velocity, expressed in world frame,  to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getLinearVelocity()
    {
@@ -127,11 +139,29 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
 
 
    /**
-            * Define the desired 3D angular velocity to be reached.
+            * Define the desired 3D angular velocity, expressed in world frame,  to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocity()
    {
       return angular_velocity_;
+   }
+
+
+   /**
+            * Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getLinearAcceleration()
+   {
+      return linear_acceleration_;
+   }
+
+
+   /**
+            * Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getAngularAcceleration()
+   {
+      return angular_acceleration_;
    }
 
 
@@ -160,6 +190,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!this.linear_velocity_.epsilonEquals(other.linear_velocity_, epsilon)) return false;
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon)) return false;
+      if (!this.linear_acceleration_.epsilonEquals(other.linear_acceleration_, epsilon)) return false;
+      if (!this.angular_acceleration_.epsilonEquals(other.angular_acceleration_, epsilon)) return false;
 
       return true;
    }
@@ -181,6 +213,8 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if (!this.linear_velocity_.equals(otherMyClass.linear_velocity_)) return false;
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_)) return false;
+      if (!this.linear_acceleration_.equals(otherMyClass.linear_acceleration_)) return false;
+      if (!this.angular_acceleration_.equals(otherMyClass.angular_acceleration_)) return false;
 
       return true;
    }
@@ -204,7 +238,11 @@ public class SE3StreamingMessage extends Packet<SE3StreamingMessage> implements 
       builder.append("linear_velocity=");
       builder.append(this.linear_velocity_);      builder.append(", ");
       builder.append("angular_velocity=");
-      builder.append(this.angular_velocity_);
+      builder.append(this.angular_velocity_);      builder.append(", ");
+      builder.append("linear_acceleration=");
+      builder.append(this.linear_acceleration_);      builder.append(", ");
+      builder.append("angular_acceleration=");
+      builder.append(this.angular_acceleration_);
       builder.append("}");
       return builder.toString();
    }

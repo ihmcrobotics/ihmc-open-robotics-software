@@ -1,28 +1,35 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import java.util.Objects;
-
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
+import java.util.Objects;
+
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
 {
    private long sequenceId;
-   /** This is the unique hash code of the end-effector to be solved for. */
+   /**
+    * This is the unique hash code of the end-effector to be solved for.
+    */
    private int endEffectorHashCode;
-   /** This is the end-effector to be solved for. */
+   /**
+    * This is the end-effector to be solved for.
+    */
    private RigidBodyBasics endEffector;
 
    private final FramePose3D desiredPose = new FramePose3D();
+   private boolean hasDesiredVelocity;
+   private final SpatialVector desiredVelocity = new SpatialVector();
    private final FramePose3D controlFramePose = new FramePose3D();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
@@ -34,9 +41,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       endEffectorHashCode = 0;
       endEffector = null;
       desiredPose.setToNaN(ReferenceFrame.getWorldFrame());
+      desiredVelocity.setToNaN(ReferenceFrame.getWorldFrame());
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
       weightMatrix.clear();
+      hasDesiredVelocity = false;
    }
 
    @Override
@@ -46,9 +55,12 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
       desiredPose.setIncludingFrame(other.desiredPose);
+      desiredVelocity.setIncludingFrame(other.desiredVelocity);
       controlFramePose.setIncludingFrame(other.controlFramePose);
       selectionMatrix.set(other.selectionMatrix);
       weightMatrix.set(other.weightMatrix);
+
+      hasDesiredVelocity = other.hasDesiredVelocity;
    }
 
    @Override
@@ -57,7 +69,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       set(message, null, null);
    }
 
-   public void set(KinematicsToolboxRigidBodyMessage message, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
+   public void set(KinematicsToolboxRigidBodyMessage message,
+                   RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                    ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver)
    {
       Objects.requireNonNull(rigidBodyHashCodeResolver);
@@ -67,6 +80,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       endEffectorHashCode = message.getEndEffectorHashCode();
       endEffector = rigidBodyHashCodeResolver.castAndGetRigidBody(endEffectorHashCode);
       desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
+      desiredVelocity.setToZero(ReferenceFrame.getWorldFrame()); // TODO Consider adding desired velocity to the message
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
       controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
       weightMatrix.clear();
@@ -87,6 +101,19 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       ReferenceFrame angularWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(angularWeight.getWeightFrameId());
       ReferenceFrame linearWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(linearWeight.getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
+
+      hasDesiredVelocity = message.getHasAngularVelocity() && message.getHasLinearVelocity();
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getAngularVelocityInWorld(), message.getLinearVelocityInWorld());
+   }
+
+   public void setEndEffector(RigidBodyBasics endEffector)
+   {
+      this.endEffector = endEffector;
+   }
+
+   public void setHasDesiredVelocity(boolean hasDesiredVelocity)
+   {
+      this.hasDesiredVelocity = hasDesiredVelocity;
    }
 
    public RigidBodyBasics getEndEffector()
@@ -109,9 +136,19 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       return desiredPose;
    }
 
+   public SpatialVector getDesiredVelocity()
+   {
+      return desiredVelocity;
+   }
+
    public FramePose3D getControlFramePose()
    {
       return controlFramePose;
+   }
+
+   public boolean getHasDesiredVelocity()
+   {
+      return hasDesiredVelocity;
    }
 
    @Override

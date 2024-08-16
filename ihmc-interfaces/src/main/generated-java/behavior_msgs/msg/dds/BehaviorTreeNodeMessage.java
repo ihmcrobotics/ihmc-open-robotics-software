@@ -6,6 +6,11 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * DEPRECATED - See BehaviorTreeNodeDefinitionMessage for the new version
+       * We will remove this when the implementation has been migrated to the
+       * new structure.
+       */
 public class BehaviorTreeNodeMessage extends Packet<BehaviorTreeNodeMessage> implements Settable<BehaviorTreeNodeMessage>, EpsilonComparable<BehaviorTreeNodeMessage>
 {
    /**

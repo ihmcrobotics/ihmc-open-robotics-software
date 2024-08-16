@@ -15,7 +15,7 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54724d21104c5a61645ec007b37763386e7afcab35c59f7b72a1051f36ad5541";
+   		return "768798d33f087c83d9b53f0d040e8ca30fea9eb816379f14d856a864be1684ce";
    }
    
    @Override
@@ -66,6 +66,10 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -94,6 +98,10 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocity(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearAcceleration(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularAcceleration(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +116,8 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocity(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearAcceleration(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularAcceleration(), cdr);
    }
 
    public static void read(ihmc_common_msgs.msg.dds.SE3StreamingMessage data, us.ihmc.idl.CDR cdr)
@@ -120,6 +130,8 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularAcceleration(), cdr);	
 
    }
 
@@ -139,6 +151,10 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.write_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
 
+      ser.write_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
+      ser.write_type_a("angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularAcceleration());
+
    }
 
    @Override
@@ -156,6 +172,10 @@ public class SE3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.read_type_a("linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocity());
 
       ser.read_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
+
+      ser.read_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
+      ser.read_type_a("angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularAcceleration());
 
    }
 

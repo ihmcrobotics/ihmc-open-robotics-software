@@ -79,7 +79,7 @@ public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       {
          // Record the initial step frames. In case there is a step touching down this frame will be updated.
          PoseReferenceFrame stepFrame = stepFrames.get(robotSide);
-         tempPose.setIncludingFrame(state.getFootPose(robotSide));
+         tempPose.setIncludingFrame(state.getCurrentFootPose(robotSide));
          tempPose.changeFrame(stepFrame.getParent());
          stepFrame.setPoseAndUpdate(tempPose);
 

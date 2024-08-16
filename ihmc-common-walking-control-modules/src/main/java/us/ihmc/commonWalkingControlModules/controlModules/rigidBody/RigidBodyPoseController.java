@@ -29,6 +29,18 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A rigid body control mode for position and orientation. It combines the functionalities from
+ * the {@link RigidBodyPositionControlHelper position} and {@link RigidBodyOrientationControlHelper orientation}
+ * control helpers to provide combined spatial feedback control commands for submission to the whole body
+ * controller core.
+ * <p>
+ * This class also features a hybrid control mode, where the jointspace control commands from
+ * {@link RigidBodyJointControlHelper} are also included. This is useful for more control over, for example,
+ * the arms of the robot by specifying desireds in both taskspace and jointspace, which can help avoid
+ * singularities and instabilities.
+ * </p>
+ */
 public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 {
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -190,7 +202,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       // Copy from the position command since the orientation does not have a control frame.
       feedbackControlCommand.setControlFrameFixedInEndEffector(positionCommand.getBodyFixedPointToControl(),
-                                                               orientationCommand.getBodyFixedOrientationToControl());
+                                                               orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
    }
@@ -198,6 +210,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    @Override
    public void onEntry()
    {
+      positionHelper.resetFunctionGenerators();
+      orientationHelper.resetFunctionGenerator();
    }
 
    @Override
@@ -390,5 +404,11 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(positionHelper.getSCS2YoGraphics());
       return group;
+   }
+
+   @Override
+   public RigidBodyOrientationControlHelper getOrientationControlHelper()
+   {
+      return orientationHelper;
    }
 }

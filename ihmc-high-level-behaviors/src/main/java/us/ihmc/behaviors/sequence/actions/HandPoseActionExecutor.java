@@ -2,40 +2,41 @@ package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.Timer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.List;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
 {
-   public static final double POSITION_TOLERANCE = 0.15;
-   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
-
    private final HandPoseActionState state;
+   private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
-   private final Timer executionTimer = new Timer();
-   private double startPositionDistanceToGoal;
-   private double startOrientationDistanceToGoal;
-   private final BehaviorActionCompletionCalculator completionCalculator = new BehaviorActionCompletionCalculator();
+   private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
@@ -51,13 +52,14 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
+      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
+         armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
       }
 
       FramePose3D chestAfterJointToPelvis = new FramePose3D();
@@ -71,40 +73,40 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       super.update();
 
-      state.setCanExecute(state.getPalmFrame().isChildOfWorld());
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
+      if (state.getIsNextForExecution())
       {
-         ChestOrientationActionExecutor concurrentChestOrientationAction = null;
-         PelvisHeightPitchActionExecutor concurrentPelvisHeightPitchAction = null;
+         ChestOrientationActionState concurrentChestOrientationAction = null;
+         PelvisHeightPitchActionState concurrentPelvisHeightPitchAction = null;
 
-         if (getParent() instanceof ActionSequenceExecutor parentSequence)
+         ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
+         if (actionSequenceExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
             {
-               int concurrentSetIndex = parentSequence.getState().getExecutionNextIndex();
+               List<ActionNodeState<?>> actionChildren = actionSequenceExecutor.getState().getActionChildren();
 
-               while (concurrentSetIndex <= parentSequence.getLastIndexOfConcurrentSetToExecute())
+               for (int i = state.getActionIndex() - 1; i >= 0 && actionChildren.get(i + 1).getIsToBeExecutedConcurrently(); i--)
                {
-                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof ChestOrientationActionExecutor chestOrientationAction)
+                  if (actionChildren.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+                  if (actionChildren.get(i) instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
-                  ++concurrentSetIndex;
                }
             }
 
-            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : parentSequence.getCurrentlyExecutingActions())
+            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : actionSequenceExecutor.getCurrentlyExecutingActions())
             {
-               if (currentlyExecutingAction instanceof ChestOrientationActionExecutor chestOrientationAction)
+               if (currentlyExecutingAction.getState() instanceof ChestOrientationActionState chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+               if (currentlyExecutingAction.getState() instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
@@ -117,9 +119,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else if (concurrentPelvisHeightPitchAction == null)
          {
-            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
-            state.getGoalChestToWorldTransform().getValue()
-                 .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
+            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
+            state.getGoalChestToWorldTransform().getValue().set(concurrentChestOrientationAction.getChestFrame().getReferenceFrame().getTransformToRoot());
          }
          else if (concurrentChestOrientationAction == null)
          {
@@ -129,11 +130,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else // Combined case
          {
-            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
-            concurrentPelvisHeightPitchAction.getState().update(); // Ensure state's frames are initialized
+            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
+            concurrentPelvisHeightPitchAction.update(); // Ensure state's frames are initialized
 
-            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame();
-            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getState().getPelvisFrame().getReferenceFrame();
+            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getChestFrame().getReferenceFrame();
+            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getPelvisFrame().getReferenceFrame();
 
             chestInPelvis.setToZero(chestActionFrame);
             chestInPelvis.changeFrame(pelvisActionFrame);
@@ -145,17 +146,35 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             goalChestFrame.get(state.getGoalChestToWorldTransform().getValue());
          }
          state.getGoalChestFrame().update();
+      }
 
-         ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
-         armIKSolver.copySourceToWork();
-         armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
-         armIKSolver.solve();
+      if (definition.getUsePredefinedJointAngles())
+      {
+         state.setCanExecute(true);
 
-         // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-         state.setSolutionQuality(armIKSolver.getQuality());
-         for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+         state.setSolutionQuality(0.0);
+         for (int i = 0; i < definition.getJointAngles().getLength(); i++)
          {
-            state.getJointAngles().getValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+            state.getJointAngles().getValue()[i] = definition.getJointAngles().getValueReadOnly(i);
+         }
+      }
+      else
+      {
+         state.setCanExecute(state.getPalmFrame().isChildOfWorld());
+
+         if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
+         {
+            ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+            armIKSolver.copySourceToWork();
+            armIKSolver.update(state.getGoalChestFrame(), state.getPalmFrame().getReferenceFrame());
+            armIKSolver.solve();
+
+            // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+            state.setSolutionQuality(armIKSolver.getQuality());
+            for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
+            {
+               state.getJointAngles().getValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+            }
          }
       }
    }
@@ -163,114 +182,156 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    @Override
    public void triggerActionExecution()
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      super.triggerActionExecution();
+
+      state.setNominalExecutionDuration(definition.getTrajectoryDuration());
+      trackingCalculator.reset();
+
+      if (definition.getUsePredefinedJointAngles())
       {
-         ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
+         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
+         publishJointspaceCommand(jointspaceTrajectoryMessage);
+      }
+      else if (state.getPalmFrame().isChildOfWorld())
+      {
+         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
-         OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
-         double[] jointAngles = new double[solutionOneDoFJoints.length];
-         for (int i = 0; i < jointAngles.length; i++)
+         if (definition.getJointspaceOnly())
          {
-            jointAngles[i] = solutionOneDoFJoints[i].getQ();
+            publishJointspaceCommand(jointspaceTrajectoryMessage);
          }
-
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getDefinition().getSide(),
-                                                                                                     getDefinition().getTrajectoryDuration(),
-                                                                                                     jointAngles);
-         armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-         if (getDefinition().getJointSpaceControl())
+         else // Publishing taskspace only doesn't work well, so we use hybrid - @dcalvert
          {
-            LogTools.info("Publishing arm jointspace trajectory");
-            ros2ControllerHelper.publishToController(armTrajectoryMessage);
-         }
-         else
-         {
-            FramePose3D frameHand = new FramePose3D(state.getPalmFrame().getReferenceFrame());
-            frameHand.changeFrame(ReferenceFrame.getWorldFrame());
-            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(getDefinition().getSide(),
-                                                                                                           getDefinition().getTrajectoryDuration(),
-                                                                                                           frameHand.getPosition(),
-                                                                                                           frameHand.getOrientation(),
-                                                                                                           ReferenceFrame.getWorldFrame());
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setXWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setYWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getAngularWeightMatrix().setZWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setXWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setYWeight(50.0);
-            handTrajectoryMessage.getSe3Trajectory().getLinearWeightMatrix().setZWeight(50.0);
-            handTrajectoryMessage.setForceExecution(true);
+            ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
+            long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
+            FramePose3D desiredControlFramePose = new FramePose3D(state.getPalmFrame().getReferenceFrame());
+            desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
 
-            HandHybridJointspaceTaskspaceTrajectoryMessage hybridHandMessage = HumanoidMessageTools.createHandHybridJointspaceTaskspaceTrajectoryMessage(
-                  getDefinition().getSide(),
-                  handTrajectoryMessage.getSe3Trajectory(),
-                  armTrajectoryMessage.getJointspaceTrajectory());
-            LogTools.info("Publishing arm hybrid jointspace taskpace");
-            ros2ControllerHelper.publishToController(hybridHandMessage);
-         }
+            SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+            se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+            se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(definition.getLinearPositionWeight());
+            se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(definition.getLinearPositionWeight());
+            se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(definition.getLinearPositionWeight());
+            se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(definition.getAngularPositionWeight());
+            se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(definition.getAngularPositionWeight());
+            se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(definition.getAngularPositionWeight());
+            se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
+            SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+            se3TrajectoryPointMessage.setTime(definition.getTrajectoryDuration());
+            se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
+            se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
+            se3TrajectoryPointMessage.getLinearVelocity().setToZero();
+            se3TrajectoryPointMessage.getAngularVelocity().setToZero();
 
-         executionTimer.reset();
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
+                  = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+            handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(definition.getSide().toByte());
+            handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+            handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+            state.getLogger().info("Publishing arm hybrid jointspace taskpace");
+            ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
+         }
 
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
-         startPositionDistanceToGoal = syncedHandControlPose.getTranslation().differenceNorm(desiredHandControlPose.getTranslation());
-         startOrientationDistanceToGoal = syncedHandControlPose.getRotation().distance(desiredHandControlPose.getRotation(), true);
+         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedHandControlPose, desiredHandControlPose, definition.getTrajectoryDuration());
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
+   }
+
+   private void publishJointspaceCommand(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+      armTrajectoryMessage.setRobotSide(definition.getSide().toByte());
+      armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
+      state.getLogger().info("Publishing arm jointspace trajectory");
+      ros2ControllerHelper.publishToController(armTrajectoryMessage);
    }
 
    @Override
    public void updateCurrentlyExecuting()
    {
-      if (state.getPalmFrame().isChildOfWorld())
+      trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
+      state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
+      state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+      state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+
+      if (trackingCalculator.getHitTimeLimit())
+      {
+         state.setIsExecuting(false);
+         state.setFailed(true);
+         state.getLogger().error("Task execution timed out.");
+         return;
+      }
+
+      if (definition.getUsePredefinedJointAngles())
+      {
+         state.setIsExecuting(!trackingCalculator.getTimeIsUp());
+      }
+      else if (state.getPalmFrame().isChildOfWorld())
       {
          desiredHandControlPose.setFromReferenceFrame(state.getPalmFrame().getReferenceFrame());
-         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(getDefinition().getSide()));
+         syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
 
-         boolean wasExecuting = state.getIsExecuting();
-         // Left hand broke on Nadia and not in the robot model?
-         state.setIsExecuting(!completionCalculator.isComplete(desiredHandControlPose,
-                                                               syncedHandControlPose,
-                                                               POSITION_TOLERANCE,
-                                                               ORIENTATION_TOLERANCE,
-                                                               getDefinition().getTrajectoryDuration(),
-                                                               executionTimer,
-                                                               BehaviorActionCompletionComponent.TRANSLATION,
-                                                               BehaviorActionCompletionComponent.ORIENTATION));
+         trackingCalculator.computePoseTrackingData(desiredHandControlPose, syncedHandControlPose);
+         trackingCalculator.factorInR3Errors(definition.getPositionErrorTolerance());
+         trackingCalculator.factoryInSO3Errors(definition.getOrientationErrorTolerance());
 
-         state.setNominalExecutionDuration(getDefinition().getTrajectoryDuration());
-         state.setElapsedExecutionTime(executionTimer.getElapsedTime());
-         state.setStartOrientationDistanceToGoal(startOrientationDistanceToGoal);
-         state.setStartPositionDistanceToGoal(startPositionDistanceToGoal);
-         state.setCurrentOrientationDistanceToGoal(completionCalculator.getRotationError());
-         state.setCurrentPositionDistanceToGoal(completionCalculator.getTranslationError());
-         state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
-         state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
-         state.setHandWrenchMagnitudeLinear(syncedRobot.getHandWrenchCalculators().get(getDefinition().getSide()).getLinearWrenchMagnitude(true));
-         if (!state.getIsExecuting() && wasExecuting && !getDefinition().getJointSpaceControl() && !getDefinition().getHoldPoseInWorldLater())
+         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
+         state.getCurrentPose().getValue().set(syncedHandControlPose);
+         state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
+         state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
+
+         if (meetsDesiredCompletionCriteria)
          {
-            disengageHoldPoseInWorld();
+            state.setIsExecuting(false);
+
+            if (!definition.getJointspaceOnly() && !definition.getHoldPoseInWorldLater())
+            {
+               disengageHoldPoseInWorld();
+            }
          }
       }
    }
 
    private void disengageHoldPoseInWorld()
    {
-      ArmIKSolver armIKSolver = armIKSolvers.get(getDefinition().getSide());
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
-      OneDoFJointBasics[] solutionOneDoFJoints = armIKSolver.getSolutionOneDoFJoints();
-      double[] jointAngles = new double[solutionOneDoFJoints.length];
-      for (int i = 0; i < jointAngles.length; i++)
+      state.getLogger().info("Disengaging holding hand in taskspace");
+      publishJointspaceCommand(jointspaceTrajectoryMessage);
+   }
+
+   private JointspaceTrajectoryMessage buildJointspaceTrajectoryMessage()
+   {
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+
+      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length];
+
+      if (definition.getUsePredefinedJointAngles())
+         for (int i = 0; i < jointAngles.length; i++)
+            jointAngles[i] = definition.getJointAngles().getValueReadOnly(i);
+      else
+         for (int i = 0; i < jointAngles.length; i++)
+            jointAngles[i] = armIKSolvers.get(definition.getSide()).getSolutionOneDoFJoints()[i].getQ();
+
+      for (double q : jointAngles)
       {
-         jointAngles[i] = solutionOneDoFJoints[i].getQ();
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         oneDoFJointTrajectoryMessage.setWeight(definition.getJointspaceWeight());
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(definition.getTrajectoryDuration());
+         trajectoryPoint1DMessage.setPosition(q);
+         trajectoryPoint1DMessage.setVelocity(0.0);
       }
 
-      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(getDefinition().getSide(),
-                                                                                                  getDefinition().getTrajectoryDuration(),
-                                                                                                  jointAngles);
-      armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      ros2ControllerHelper.publishToController(armTrajectoryMessage);
+      return jointspaceTrajectoryMessage;
    }
 }

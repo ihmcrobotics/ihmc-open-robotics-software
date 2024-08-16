@@ -6,6 +6,7 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
@@ -119,12 +120,12 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
-                                              s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+         realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                             s -> robotDataReceiver.receivedPacket(s.takeNextData()));
       }
       else
       {
@@ -133,9 +134,7 @@ public abstract class QuadrupedToolboxModule
 
       networkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools
-            .createCallbackSubscriptionTypeNamed(realtimeROS2Node, ToolboxStateMessage.class, getInputTopic(), s -> receivedPacket(s.takeNextData()));
-
+      realtimeROS2Node.createSubscription(getInputTopic().withTypeName(ToolboxStateMessage.class), s -> receivedPacket(s.takeNextData()));
 
       registerExtraSubscribers(realtimeROS2Node);
       realtimeROS2Node.spin();
@@ -402,7 +401,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract ROS2Topic getOutputTopic();
+   public abstract ROS2Topic<?> getOutputTopic();
 
-   public abstract ROS2Topic getInputTopic();
+   public abstract ROS2Topic<?> getInputTopic();
 }

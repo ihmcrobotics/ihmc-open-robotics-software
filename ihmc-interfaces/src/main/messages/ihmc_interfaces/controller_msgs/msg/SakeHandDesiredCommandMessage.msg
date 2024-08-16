@@ -4,23 +4,24 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
-byte COMMAND_OPTION_OPEN = 0
-byte COMMAND_OPTION_CLOSE = 1
-byte COMMAND_OPTION_GRIP = 2
-byte COMMAND_OPTION_CUSTOM = 3
-byte COMMAND_OPTION_CALIBRATE = 4
-
-# Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
-
-# Specifies the side of the robot that will execute the trajectory
+# Specifies the side of the robot of the hand being referred to
 byte robot_side 255
-# Specifies the grasp to perform
-byte desired_command_option 255
-# Set to true when user confirms an error
-bool error_confirmation
 
-# 1.0 is closed, 0.0 is open
-float64 position_ratio
-# Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
-float64 torque_ratio
+# Request the gripper to perform a calibration sequence
+bool request_calibration
+
+# Request to reset the gripper error state after overheating
+bool request_reset_errors
+
+# The desired dynamixel position, normalized to the gripper range of motion
+# 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+# -1.0 means "unspecified". Gripper will keep current value
+float64 normalized_gripper_desired_position
+
+# The dynamixel torque limit setting in achieving the desired position,
+# normalized to the peak dynamixel torque.
+# 0.0: dynamixel will not apply any force and will not achieve desired position
+# 0.3: A reasonable normal value
+# 1.0: dynamixel max torque which will quickly overheat the motor
+# -1.0 means "unspecified". Gripper will keep current value
+float64 normalized_gripper_torque_limit

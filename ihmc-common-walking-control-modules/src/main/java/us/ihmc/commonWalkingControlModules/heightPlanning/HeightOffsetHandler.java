@@ -31,10 +31,8 @@ public class HeightOffsetHandler
 
    private final YoDouble offsetHeightAboveGroundPrevValue = new YoDouble("offsetHeightAboveGroundPrevValue", registry);
    private final YoDouble offsetHeightAboveGroundChangedTime = new YoDouble("offsetHeightAboveGroundChangedTime", registry);
-   private final YoDouble offsetHeightAboveGroundTrajectoryOutput = new YoDouble("offsetHeightAboveGroundTrajectoryOutput",
-                                                                                                                 registry);
-   private final YoDouble offsetHeightAboveGroundTrajectoryTimeProvider = new YoDouble("offsetHeightAboveGroundTrajectoryTimeProvider",
-                                                                                                                       registry);
+   private final YoDouble offsetHeightAboveGroundTrajectoryOutput = new YoDouble("offsetHeightAboveGroundTrajectoryOutput", registry);
+   private final YoDouble offsetHeightAboveGroundTrajectoryTimeProvider = new YoDouble("offsetHeightAboveGroundTrajectoryTimeProvider", registry);
    private final MultipleWaypointsTrajectoryGenerator offsetHeightTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("pelvisHeightOffset",
                                                                                                                                  registry);
 
@@ -50,7 +48,7 @@ public class HeightOffsetHandler
 
    private final DoubleProvider yoTime;
 
-   public HeightOffsetHandler(DoubleProvider yoTime,YoRegistry parentRegistry)
+   public HeightOffsetHandler(DoubleProvider yoTime, YoRegistry parentRegistry)
    {
       this.yoTime = yoTime;
 
@@ -196,30 +194,49 @@ public class HeightOffsetHandler
          clearCommandQueue(euclideanTrajectory.getCommandId());
          offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
 
-         if (euclideanTrajectory.getNumberOfTrajectoryPoints() != 1)
+         if (euclideanTrajectory.getNumberOfTrajectoryPoints() == 0 || euclideanTrajectory.getNumberOfTrajectoryPoints() > 1)
          {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + euclideanTrajectory.getNumberOfTrajectoryPoints());
+            LogTools.warn(
+                  "When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + euclideanTrajectory.getNumberOfTrajectoryPoints());
             return false;
          }
 
-         FrameEuclideanTrajectoryPoint trajectoryPoint = euclideanTrajectory.getTrajectoryPoint(0);
+         FrameEuclideanTrajectoryPoint firstPoint = euclideanTrajectory.getTrajectoryPoint(0);
 
-         if (trajectoryPoint.getTime() != 0.0)
+         if (firstPoint.getTime() != 0.0)
          {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
             return false;
          }
 
          offsetHeightTrajectoryGenerator.clear();
 
-         double time = trajectoryPoint.getTime();
-         double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ(), currentDesiredHeight);
-         double zDot = trajectoryPoint.getLinearVelocityZ();
+         double time = firstPoint.getTime();
+         double z = fromAbsoluteToOffset(firstPoint.getPositionZ(), currentDesiredHeight);
+         double zDot = firstPoint.getLinearVelocityZ();
          offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
 
-         time = euclideanTrajectory.getStreamIntegrationDuration();
-         z += time * zDot;
-         offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+         if (euclideanTrajectory.getNumberOfTrajectoryPoints() == 1)
+         {
+            time = euclideanTrajectory.getStreamIntegrationDuration();
+            z += time * zDot;
+            offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+         }
+         else
+         {
+            FrameEuclideanTrajectoryPoint secondPoint = euclideanTrajectory.getTrajectoryPoint(1);
+
+            if (secondPoint.getTime() != euclideanTrajectory.getStreamIntegrationDuration())
+            {
+               LogTools.warn("When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+               return false;
+            }
+
+            time = secondPoint.getTime();
+            z = fromAbsoluteToOffset(secondPoint.getPositionZ(), currentDesiredHeight);
+            zDot = secondPoint.getLinearVelocityZ();
+            offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
+         }
 
          offsetHeightTrajectoryGenerator.initialize();
          isTrajectoryOffsetStopped.set(false);
@@ -314,8 +331,8 @@ public class HeightOffsetHandler
    {
       int numberOfTrajectoryPoints = command.getEuclideanTrajectory().getNumberOfTrajectoryPoints();
 
-      int maximumNumberOfWaypoints = offsetHeightTrajectoryGenerator.getMaximumNumberOfWaypoints()
-                                     - offsetHeightTrajectoryGenerator.getCurrentNumberOfWaypoints();
+      int maximumNumberOfWaypoints =
+            offsetHeightTrajectoryGenerator.getMaximumNumberOfWaypoints() - offsetHeightTrajectoryGenerator.getCurrentNumberOfWaypoints();
 
       if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
          return numberOfTrajectoryPoints;

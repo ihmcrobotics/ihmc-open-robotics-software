@@ -7,7 +7,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
@@ -69,7 +69,7 @@ public class RDXSteppableRegionsPanel
 
    public void setUpForNetworking(ROS2Node ros2Node)
    {
-      new IHMCROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT, this::setLatestSteppableRegionDebugImagesToRender);
+      new ROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT, this::setLatestSteppableRegionDebugImagesToRender);
       steppableRegionsHeartbeat = new ROS2Heartbeat(ros2Node, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
    }
 

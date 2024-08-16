@@ -25,10 +25,12 @@ public class SteppableBorderRing implements Iterable<SteppableCell>
       if (this == other)
          return false;
 
-      for (SteppableCell otherCell : other.ringCells)
-      {
-         addCell(otherCell);
-      }
+      other.ringCells.forEach(cell ->
+                              {
+                                 cell.setBorderRing(this);
+                                 ringCells.add(cell);
+                              });
+
       other.clear();
 
       return true;

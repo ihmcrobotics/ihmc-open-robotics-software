@@ -38,11 +38,6 @@ public class FootstepPlannerOutput
    private FootstepPlanningResult footstepPlanningResult;
 
    /**
-    * @deprecated Regions that correspond to the request message. Originally used for debugging networking
-    */
-   private PlanarRegionsList planarRegionsList;
-
-   /**
     * Planned body path. Empty if planner failed
     */
    private final List<Pose3D> bodyPath = new ArrayList<>();
@@ -84,8 +79,6 @@ public class FootstepPlannerOutput
       footstepPlan.set(other.footstepPlan);
       bodyPathPlanningResult = other.bodyPathPlanningResult;
       footstepPlanningResult = other.footstepPlanningResult;
-      if (other.planarRegionsList != null)
-         planarRegionsList = new PlanarRegionsList(other.planarRegionsList);
       for (Pose3D pose3D : other.bodyPath)
       {
          bodyPath.add(new Pose3D(pose3D));
@@ -134,7 +127,6 @@ public class FootstepPlannerOutput
       footstepPlan.clear();
       bodyPathPlanningResult = null;
       footstepPlanningResult = null;
-      planarRegionsList = null;
       bodyPath.clear();
       bodyPathUnsmoothed.clear();
       goalPose.setToNaN();
@@ -166,15 +158,6 @@ public class FootstepPlannerOutput
    public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
    {
       return swingTrajectories;
-   }
-
-   /**
-    * @deprecated
-    * Use the regions from the request
-    */
-   public PlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
    }
 
    public List<Pose3D> getBodyPath()
@@ -215,11 +198,6 @@ public class FootstepPlannerOutput
    public void setFootstepPlanningResult(FootstepPlanningResult footstepPlanningResult)
    {
       this.footstepPlanningResult = footstepPlanningResult;
-   }
-
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
    }
 
    public void setGoalPose(Pose3DReadOnly goalPose)
@@ -268,11 +246,6 @@ public class FootstepPlannerOutput
                outputStatus.getStacktrace().add(exception.getStackTrace()[i].toString());
             }
          }
-      }
-
-      if(getPlanarRegionsList() != null)
-      {
-         outputStatus.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList()));
       }
 
       for (int i = 0; i < bodyPath.size(); i++)

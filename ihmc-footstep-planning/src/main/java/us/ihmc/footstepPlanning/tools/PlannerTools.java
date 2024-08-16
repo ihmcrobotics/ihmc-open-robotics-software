@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,6 +31,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlannerTools
@@ -41,14 +43,18 @@ public class PlannerTools
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, heelWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -heelWidth / 2.0);
-      footPolygon.update();
+      return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(createFootContactPoints(footLength, heelWidth, toeWidth)));
+   }
 
-      return footPolygon;
+   public static ArrayList<Point2D> createFootContactPoints(double footLength, double heelWidth, double toeWidth)
+   {
+      ArrayList<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(footLength / 2.0, toeWidth / 2.0));
+      contactPoints.add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, heelWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, -heelWidth / 2.0));
+
+      return contactPoints;
    }
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
@@ -263,15 +269,39 @@ public class PlannerTools
       bodyPathPlanHolder.getPointAlongPath(alphaToQuery, poseToPack);
    }
 
+   /**
+    * Calculates the total expected duration of a footstep plan, which depends
+    * on parameters outside of {@link FootstepPlannerParametersReadOnly}.
+    */
    public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
                                                                    double defaultSwingDuration,
                                                                    double defaultInitialTransferDuration,
                                                                    double defaultTransferDuration,
-                                                                   double defaultFinalTransferDuration)
+                                                                   double finalTransferDuration)
+   {
+      return calculateFootstepCompletionTime(footstepPlan,
+                                             defaultSwingDuration,
+                                             defaultInitialTransferDuration,
+                                             defaultTransferDuration,
+                                             finalTransferDuration,
+                                             footstepPlan.getNumberOfSteps());
+   }
+
+   /**
+    * Calculates as per {@link #calculateNominalTotalPlanExecutionDuration},
+    * however only adds up the durations of the first n footsteps as specified
+    * by the numberOfFootstepsToAddUp parameter.
+    */
+   public static double calculateFootstepCompletionTime(FootstepPlan footstepPlan,
+                                                        double defaultSwingDuration,
+                                                        double defaultInitialTransferDuration,
+                                                        double defaultTransferDuration,
+                                                        double finalTransferDuration,
+                                                        int numberOfFootstepsToAddUp)
    {
       int numberOfSteps = footstepPlan.getNumberOfSteps();
       double planExecutionTime = 0.0;
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < numberOfFootstepsToAddUp; i++)
       {
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          double transferDuration = footstep.getTransferDuration();
@@ -281,10 +311,6 @@ public class PlannerTools
             if (i == 0)
             {
                planExecutionTime += defaultInitialTransferDuration;
-            }
-            else if (i == numberOfSteps - 1)
-            {
-               planExecutionTime += defaultFinalTransferDuration;
             }
             else
             {
@@ -305,6 +331,7 @@ public class PlannerTools
             planExecutionTime += swingDuration;
          }
       }
+      planExecutionTime += finalTransferDuration;
       return planExecutionTime;
    }
 }

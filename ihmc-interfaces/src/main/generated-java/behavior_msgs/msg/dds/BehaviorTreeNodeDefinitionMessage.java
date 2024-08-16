@@ -16,22 +16,22 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
    /**
-            * A human readable description of what the node does
+            * The name of the node including .json if it's a JSON root node
             */
-   public java.lang.StringBuilder description_;
+   public java.lang.StringBuilder name_;
+   /**
+            * Long form notes about the node.
+            */
+   public java.lang.StringBuilder notes_;
    /**
             * Number of children
             */
    public int number_of_children_;
-   /**
-            * JSON file name if this node is the root of a JSON file
-            */
-   public java.lang.StringBuilder json_file_name_;
 
    public BehaviorTreeNodeDefinitionMessage()
    {
-      description_ = new java.lang.StringBuilder(255);
-      json_file_name_ = new java.lang.StringBuilder(255);
+      name_ = new java.lang.StringBuilder(255);
+      notes_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage other)
@@ -42,38 +42,62 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
    public void set(BehaviorTreeNodeDefinitionMessage other)
    {
-      description_.setLength(0);
-      description_.append(other.description_);
+      name_.setLength(0);
+      name_.append(other.name_);
+
+      notes_.setLength(0);
+      notes_.append(other.notes_);
 
       number_of_children_ = other.number_of_children_;
 
-      json_file_name_.setLength(0);
-      json_file_name_.append(other.json_file_name_);
-
    }
 
    /**
-            * A human readable description of what the node does
+            * The name of the node including .json if it's a JSON root node
             */
-   public void setDescription(java.lang.String description)
+   public void setName(java.lang.String name)
    {
-      description_.setLength(0);
-      description_.append(description);
+      name_.setLength(0);
+      name_.append(name);
    }
 
    /**
-            * A human readable description of what the node does
+            * The name of the node including .json if it's a JSON root node
             */
-   public java.lang.String getDescriptionAsString()
+   public java.lang.String getNameAsString()
    {
-      return getDescription().toString();
+      return getName().toString();
    }
    /**
-            * A human readable description of what the node does
+            * The name of the node including .json if it's a JSON root node
             */
-   public java.lang.StringBuilder getDescription()
+   public java.lang.StringBuilder getName()
    {
-      return description_;
+      return name_;
+   }
+
+   /**
+            * Long form notes about the node.
+            */
+   public void setNotes(java.lang.String notes)
+   {
+      notes_.setLength(0);
+      notes_.append(notes);
+   }
+
+   /**
+            * Long form notes about the node.
+            */
+   public java.lang.String getNotesAsString()
+   {
+      return getNotes().toString();
+   }
+   /**
+            * Long form notes about the node.
+            */
+   public java.lang.StringBuilder getNotes()
+   {
+      return notes_;
    }
 
    /**
@@ -89,30 +113,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    public int getNumberOfChildren()
    {
       return number_of_children_;
-   }
-
-   /**
-            * JSON file name if this node is the root of a JSON file
-            */
-   public void setJsonFileName(java.lang.String json_file_name)
-   {
-      json_file_name_.setLength(0);
-      json_file_name_.append(json_file_name);
-   }
-
-   /**
-            * JSON file name if this node is the root of a JSON file
-            */
-   public java.lang.String getJsonFileNameAsString()
-   {
-      return getJsonFileName().toString();
-   }
-   /**
-            * JSON file name if this node is the root of a JSON file
-            */
-   public java.lang.StringBuilder getJsonFileName()
-   {
-      return json_file_name_;
    }
 
 
@@ -133,11 +133,11 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.notes_, other.notes_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.json_file_name_, other.json_file_name_, epsilon)) return false;
 
 
       return true;
@@ -152,11 +152,11 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       BehaviorTreeNodeDefinitionMessage otherMyClass = (BehaviorTreeNodeDefinitionMessage) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.notes_, otherMyClass.notes_)) return false;
 
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.json_file_name_, otherMyClass.json_file_name_)) return false;
 
 
       return true;
@@ -168,12 +168,12 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorTreeNodeDefinitionMessage {");
-      builder.append("description=");
-      builder.append(this.description_);      builder.append(", ");
+      builder.append("name=");
+      builder.append(this.name_);      builder.append(", ");
+      builder.append("notes=");
+      builder.append(this.notes_);      builder.append(", ");
       builder.append("number_of_children=");
-      builder.append(this.number_of_children_);      builder.append(", ");
-      builder.append("json_file_name=");
-      builder.append(this.json_file_name_);
+      builder.append(this.number_of_children_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -26,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
@@ -43,6 +41,25 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The base functionality of the taskspace position control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of translation axes,
+ * and reference frames. It generates a cubic position trajectory for user provided
+ * waypoints and packs the desireds into an point feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 {
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
@@ -223,7 +240,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       }
       else if (desiredOrientationOfPreviousControlFrame == null)
       {
-         throw new RuntimeException("Changing the control frame requires a desired orientation. Bodies that are position controlled do not support control frame changes.");
+         throw new RuntimeException(
+               "Changing the control frame requires a desired orientation. Bodies that are position controlled do not support control frame changes.");
       }
 
       desiredOrientationOfPreviousControlFrame.changeFrame(desiredPositionToModify.getReferenceFrame());
@@ -453,13 +471,13 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       else if (command.getTrajectoryFrame() != trajectoryGenerator.getReferenceFrame())
       {
          LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getReferenceFrame() + " can not switch to " + command.getTrajectoryFrame()
-               + " without override.");
+                       + " without override.");
          return false;
       }
       else if (!selectionMatrix.equals(command.getSelectionMatrix()))
       {
          LogTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
-               + command.getSelectionMatrix());
+                       + command.getSelectionMatrix());
          return false;
       }
 
@@ -471,17 +489,18 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          this.streamTimestampOffset.set(streamTimestampOffset);
          this.streamTimestampSource.set(streamTimestampSource);
 
-         if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 0 || trajectoryPoints.getNumberOfTrajectoryPoints() > 2)
          {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
+            LogTools.warn(
+                  "When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
             return false;
          }
 
-         FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+         FrameEuclideanTrajectoryPoint firstPoint = trajectoryPoints.getTrajectoryPoint(0);
 
-         if (trajectoryPoint.getTime() != 0.0)
+         if (firstPoint.getTime() != 0.0)
          {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
             return false;
          }
 
@@ -490,7 +509,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          if (initialPoint == null)
             return false;
 
-         initialPoint.setIncludingFrame(trajectoryPoint);
+         initialPoint.setIncludingFrame(firstPoint);
          if (!Double.isNaN(streamTimestampOffset))
             initialPoint.setTime(streamTimestampOffset - streamTimeOffset);
 
@@ -499,9 +518,25 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          if (integratedPoint == null)
             return false;
 
-         integratedPoint.setIncludingFrame(trajectoryPoint);
-         integratedPosition.scaleAdd(command.getStreamIntegrationDuration(), integratedPoint.getLinearVelocity(), integratedPoint.getPosition());
-         integratedPoint.getPosition().set(integratedPosition);
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 1)
+         { // No extrapolation provided, so we do it here.
+            integratedPoint.setIncludingFrame(firstPoint);
+            integratedPosition.scaleAdd(command.getStreamIntegrationDuration(), integratedPoint.getLinearVelocity(), integratedPoint.getPosition());
+            integratedPoint.getPosition().set(integratedPosition);
+         }
+         else
+         {
+            FrameEuclideanTrajectoryPoint secondPoint = trajectoryPoints.getTrajectoryPoint(1);
+
+            if (secondPoint.getTime() != command.getStreamIntegrationDuration())
+            {
+               LogTools.warn("When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+               return false;
+            }
+
+            integratedPoint.setIncludingFrame(secondPoint);
+         }
+
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else
@@ -632,6 +667,15 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       pointQueue.clear();
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
+   }
+
+   public void resetFunctionGenerators()
+   {
+      for (int i = 0; i < functionGenerators.size(); i++)
+      {
+         functionGenerators.get(i).setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerators.get(i).reset();
+      }
    }
 
    public void disable()

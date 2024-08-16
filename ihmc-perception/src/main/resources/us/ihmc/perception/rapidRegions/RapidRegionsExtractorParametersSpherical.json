@@ -1,5 +1,5 @@
 {
-  "title" : "GPU planar region extraction parameters",
+  "title" : "Spherical rapid region parameters",
   "Normal pack range" : {
     "value" : 3,
     "lowerBound" : 1,

@@ -5,11 +5,10 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
@@ -20,6 +19,8 @@ public class RDXSceneNode
    private final SceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final String detailsText;
+   private boolean removed = false;
+   private final ImBoolean hideGraphics = new ImBoolean(false);
 
    public RDXSceneNode(SceneNode sceneNode)
    {
@@ -41,25 +42,47 @@ public class RDXSceneNode
       {
          if (ImGui.button("Remove##" + sceneNode.getID()))
          {
-            remove(modificationQueue, sceneGraph);
+            remove();
+         }
+         if (!(this instanceof RDXArUcoMarkerNode))
+         {
+            ImGui.sameLine();
+            ImGui.checkbox("Hide Graphics", hideGraphics);
          }
       }
-   }
 
-   public void remove(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
-   {
-      modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
-      modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL) && !hideGraphics.get())
+      {
          referenceFrameGraphic.getRenderables(renderables, pool);
+      }
+   }
+
+   public void destroy()
+   {
+
    }
 
    public SceneNode getSceneNode()
    {
       return sceneNode;
+   }
+
+   public void remove()
+   {
+      removed = true;
+   }
+
+   public boolean isRemoved()
+   {
+      return removed;
+   }
+
+   public boolean isGraphicsHidden()
+   {
+      return hideGraphics.get();
    }
 }

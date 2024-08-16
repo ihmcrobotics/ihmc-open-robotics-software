@@ -21,4 +21,9 @@ public class RDXIKSolverColors
    {
       return solutionQuality > ArmIKSolver.GOOD_QUALITY_MAX ? RDXIKSolverColors.BAD_QUALITY_COLOR : RDXIKSolverColors.GOOD_QUALITY_COLOR;
    }
+
+   public static Color getColor(boolean isSolutionGood)
+   {
+      return isSolutionGood ? RDXIKSolverColors.GOOD_QUALITY_COLOR : RDXIKSolverColors.BAD_QUALITY_COLOR;
+   }
 }

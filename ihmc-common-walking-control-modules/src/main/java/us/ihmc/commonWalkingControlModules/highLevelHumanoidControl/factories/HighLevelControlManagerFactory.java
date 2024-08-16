@@ -5,11 +5,14 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.BimanualManipulationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.LoadBearingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -17,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -67,6 +71,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
+   private InertialParameterManager inertialParameterManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -75,9 +80,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private CoPTrajectoryParameters copTrajectoryParameters;
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
+   private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
+   private InertialEstimationParameters inertialEstimationParameters;
+   private BimanualManipulationManager bimanualManipulationManager;
 
-   private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
-   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -116,8 +123,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -155,6 +161,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    public void setSplitFractionParameters(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
+   }
+
+   public void setInertialEstimationParameters(InertialEstimationParameters inertialEstimatorParameters)
+   {
+      this.inertialEstimationParameters = inertialEstimatorParameters;
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -237,6 +248,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
+      double controlDT = controllerToolbox.getControlDT();
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -255,12 +267,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
                                                                     contactableBody,
+                                                                    loadBearingParameters,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,
+                                                                    controlDT,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
+      manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
@@ -384,6 +398,21 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       return naturalPostureManager;
    }
 
+   public InertialParameterManager getOrCreateInertialParameterManager()
+   {
+      if (inertialParameterManager != null)
+         return inertialParameterManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(InertialParameterManager.class))
+         return null;
+      if (!hasInertialEstimatorParameters(InertialParameterManager.class))
+         return null;
+
+      inertialParameterManager = new InertialParameterManager(controllerToolbox, inertialEstimationParameters, registry);
+
+      return inertialParameterManager;
+   }
+
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
@@ -405,6 +434,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (copTrajectoryParameters != null)
          return true;
       missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
+      return false;
+   }
+
+   private boolean hasInertialEstimatorParameters(Class<?> managerClass)
+   {
+      if (inertialEstimationParameters != null)
+         return true;
+      missingObjectWarning(InertialEstimationParameters.class, managerClass);
       return false;
    }
 
@@ -483,6 +520,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
             group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
       }
+      if (bimanualManipulationManager != null)
+         group.addChild(bimanualManipulationManager.getSCS2YoGraphics());
       return group;
    }
 }

@@ -4,10 +4,9 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -26,7 +25,7 @@ public class OusterDepthImagePublisher
    private static final IntPointer COMPRESSION_PARAMETERS = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
 
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
 
    private long lastSequenceNumber = -1L;
    private RawImage nextCpuDepthImage;
@@ -41,7 +40,7 @@ public class OusterDepthImagePublisher
       this.ouster = ouster;
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
 
       publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);
       publishDepthThread.start();
@@ -76,7 +75,7 @@ public class OusterDepthImagePublisher
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
-         opencv_imgcodecs.imencode(".png", depthImageToPublish.getCpuImageMatrix(), depthPNGPointer, COMPRESSION_PARAMETERS);
+         opencv_imgcodecs.imencode(".png", depthImageToPublish.getCpuImageMat(), depthPNGPointer, COMPRESSION_PARAMETERS);
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -134,7 +133,7 @@ public class OusterDepthImagePublisher
       if (nextCpuDepthImage != null)
          nextCpuDepthImage.release();
 
-      ros2DepthImagePublisher.destroy();
+      ros2DepthImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

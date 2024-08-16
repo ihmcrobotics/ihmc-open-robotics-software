@@ -52,7 +52,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    @Override
    public void destroy()
    {
-      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getDescription(), getState().getID());
+      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getName(), getState().getID());
       getState().destroy();
    }
 

@@ -1,6 +1,7 @@
 #ifndef __perception_msgs__msg__DetectedObjectPacket__idl__
 #define __perception_msgs__msg__DetectedObjectPacket__idl__
 
+#include "geometry_msgs/msg/./Point32_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module perception_msgs
@@ -48,6 +49,11 @@ module perception_msgs
          * 3d Vertices of the 3d object Bounding box
          */
         geometry_msgs::msg::dds::Point bounding_box_vertices[8];
+        /**
+         * Optional point cloud for ICP tracked object
+         */
+        sequence<geometry_msgs::msg::dds::Point32, 32768> object_point_cloud;
+        sequence<geometry_msgs::msg::dds::Point32, 32768> segmented_point_cloud;
       };
     };
   };

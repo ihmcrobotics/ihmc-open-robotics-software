@@ -1,15 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
-import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
-
-import java.util.Map;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -24,11 +20,20 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.Map;
+
+import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
+import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
+
+/**
+ * The main class for setting up the IK streaming controller.
+ */
 public class KinematicsStreamingToolboxController extends ToolboxController
 {
    public enum KSTState
@@ -48,10 +53,12 @@ public class KinematicsStreamingToolboxController extends ToolboxController
             return null;
          return values[enumAsByte];
       }
-   };
+   }
 
    private final KSTTools tools;
 
+   private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
+   private KSTTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<KSTState, State> stateMachine;
 
@@ -62,45 +69,54 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager,
-                                               FullHumanoidRobotModel desiredFullRobotModel,
-                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoRegistry parentRegistry)
-   {
-      this(commandInputManager, statusOutputManager, KinematicsStreamingToolboxParameters.defaultParameters(), desiredFullRobotModel, fullRobotModelFactory,
-           walkingControllerPeriod, toolboxControllerPeriod, yoGraphicsListRegistry, parentRegistry);
-   }
-
-   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
-                                               StatusMessageOutputManager statusOutputManager,
                                                KinematicsStreamingToolboxParameters parameters,
                                                FullHumanoidRobotModel desiredFullRobotModel,
                                                FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      if (parameters.getClockType() == ClockType.CPU_CLOCK)
+         timeProvider = KSTTimeProvider.createCPUClockBased();
+      else if (parameters.getClockType() == ClockType.FIXED_DT)
+         timeProvider = KSTTimeProvider.createFixedDT(parameters.getToolboxUpdatePeriod());
+      else
+         throw new RuntimeException("Unknown clock type: " + parameters.getClockType());
 
       tools = new KSTTools(commandInputManager,
                            statusOutputManager,
                            parameters,
                            desiredFullRobotModel,
                            fullRobotModelFactory,
-                           walkingControllerPeriod,
-                           toolboxControllerPeriod,
                            time,
                            yoGraphicsListRegistry,
                            registry);
 
+      // Sleep state does pretty much nothing.
       sleepState = new KSTSleepState(tools);
+      // Streaming state is where the magic happens.
       streamingState = new KSTStreamingState(tools);
 
       stateMachine = createStateMachine(time);
       isDone.set(false);
+
+      if (parameters.getInitialConfigurationMap() != null)
+         setInitialRobotConfigurationNamedMap(parameters.getInitialConfigurationMap());
+   }
+
+   /**
+    * Set the time provider for the controller. The time provider is used to get the current time for the controller.
+    * <p>
+    * By default, the time provider is set to a CPU clock based time provider, which is useful for real-time applications. However, for testing purposes, a
+    * fixed time step time provider can be used.
+    * </p>
+    *
+    * @param timeProvider the time provider to use for the controller.
+    */
+   public void setTimeProvider(KSTTimeProvider timeProvider)
+   {
+      this.timeProvider = timeProvider;
    }
 
    public void setInitialRobotConfiguration(DRCRobotModel robotModel)
@@ -133,30 +149,31 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    public void setTrajectoryMessagePublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
    {
-      streamingState.setTrajectoryMessagerPublisher(outputPublisher);
+      tools.setTrajectoryMessagerPublisher(outputPublisher);
    }
 
    public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher outputPublisher)
    {
-      streamingState.setStreamingMessagePublisher(outputPublisher);
+      tools.setStreamingMessagePublisher(outputPublisher);
    }
 
    @Override
    public boolean initialize()
    {
       isDone.set(false);
-      initialTimestamp = System.nanoTime();
+      timeProvider.initialize();
+      time.set(timeProvider.getTime());
       return true;
    }
-
-   private long initialTimestamp = -1L;
 
    @Override
    public void updateInternal()
    {
       try
       {
-         time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
+         executionTimer.startMeasurement();
+         timeProvider.update();
+         time.set(timeProvider.getTime());
 
          if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
          { // Forwarding commands for the IK to the IK.
@@ -180,6 +197,10 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
          isDone.set(true);
       }
+      finally
+      {
+         executionTimer.stopMeasurement();
+      }
    }
 
    @Override
@@ -195,12 +216,12 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
-   public static interface WholeBodyTrajectoryMessagePublisher
+   public interface WholeBodyTrajectoryMessagePublisher
    {
       void publish(WholeBodyTrajectoryMessage messageToPublish);
    }
 
-   public static interface WholeBodyStreamingMessagePublisher
+   public interface WholeBodyStreamingMessagePublisher
    {
       void publish(WholeBodyStreamingMessage messageToPublish);
    }
@@ -210,9 +231,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return stateMachine.getCurrentStateKey();
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
-      tools.updateRobotConfigurationData(newConfigurationData);
+      tools.setRobotStateUpdater(robotStateUpdater);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
@@ -233,5 +254,68 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return tools.getDesiredFullRobotModel();
+   }
+
+   public interface KSTTimeProvider
+   {
+      void initialize();
+
+      void update();
+
+      double getTime();
+
+      static KSTTimeProvider createCPUClockBased()
+      {
+         return new KSTTimeProvider()
+         {
+            private long initialTimestamp = -1L;
+            private double time = 0.0;
+
+            @Override
+            public void initialize()
+            {
+               initialTimestamp = System.nanoTime();
+               time = 0.0;
+            }
+
+            @Override
+            public void update()
+            {
+               time = Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp);
+            }
+
+            @Override
+            public double getTime()
+            {
+               return time;
+            }
+         };
+      }
+
+      static KSTTimeProvider createFixedDT(double dt)
+      {
+         return new KSTTimeProvider()
+         {
+            private double time = 0.0;
+
+            @Override
+            public void initialize()
+            {
+               time = 0.0;
+            }
+
+            @Override
+            public void update()
+            {
+               time += dt;
+            }
+
+            @Override
+            public double getTime()
+            {
+               return time;
+            }
+         };
+      }
    }
 }

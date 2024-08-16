@@ -17,6 +17,7 @@ public class RDXGizmoTools
    public static final Color[] AXIS_COLORS = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
    public static final Color[] AXIS_SELECTED_COLORS = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
 
+   public static final Color DISABLED_AXIS_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.2f);
    /** When wanting to go faster or move more and the fine amount isn't enough, go this times as much. */
    public static final double FINE_TO_COARSE_MULTIPLIER = 10.0;
    /** Maybe you want to nudge things by this amount. */

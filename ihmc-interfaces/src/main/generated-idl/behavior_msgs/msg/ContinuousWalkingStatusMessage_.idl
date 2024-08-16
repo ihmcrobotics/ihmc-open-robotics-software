@@ -1,0 +1,39 @@
+#ifndef __behavior_msgs__msg__ContinuousWalkingStatusMessage__idl__
+#define __behavior_msgs__msg__ContinuousWalkingStatusMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ContinuousWalkingStatusMessage_")
+      struct ContinuousWalkingStatusMessage
+      {
+        /**
+         * flag to check if planning from left stance
+         */
+        boolean left_stance_to_plan_from;
+        /**
+         * monte-carlo footstep planning time
+         */
+        double monte_carlo_planning_time;
+        /**
+         * a-star footstep planning time
+         */
+        double a_star_planning_time;
+        /**
+         * a-star number of footsteps
+         */
+        unsigned short a_star_num_steps;
+        /**
+         * monte-carlo number of footsteps
+         */
+        unsigned short monte_carlo_num_steps;
+      };
+    };
+  };
+};
+
+#endif

@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -323,7 +324,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     *                                         {@code desiredLineaerVelocitys} is not expressed in
     *                                         control frame.
     */
-   public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearVelocity)
+   public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly desiredLinearVelocity)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularVelocity);
       controlFrame.checkReferenceFrameMatch(desiredLinearVelocity);

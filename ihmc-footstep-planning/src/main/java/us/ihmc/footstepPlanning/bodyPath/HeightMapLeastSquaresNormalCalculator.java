@@ -68,7 +68,7 @@ public class HeightMapLeastSquaresNormalCalculator
                double py = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
                translatedPatch.translate(px, py);
 
-               RigidBodyTransform transform = heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData, maxIncline);
+               RigidBodyTransform transform = heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData, snapHeightThreshold, maxIncline);
                if (transform != null)
                {
                   surfaceNormal.set(heightMapSnapper.getBestFitPlane().getNormal());

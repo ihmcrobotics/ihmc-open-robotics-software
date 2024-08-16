@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
-import java.util.List;
-
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -9,6 +7,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+
+import java.util.List;
 
 public class KinematicsStreamingToolboxInputCommand implements Command<KinematicsStreamingToolboxInputCommand, KinematicsStreamingToolboxInputMessage>
 {
@@ -52,7 +52,8 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       set(message, null, null);
    }
 
-   public void set(KinematicsStreamingToolboxInputMessage message, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
+   public void set(KinematicsStreamingToolboxInputMessage message,
+                   RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       sequenceId = message.getSequenceId();
@@ -82,6 +83,16 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
          this.inputs.add().set(inputs.get(i));
    }
 
+   public void removeInput(int index)
+   {
+      inputs.remove(index);
+   }
+
+   public void removeInput(KinematicsToolboxRigidBodyCommand input)
+   {
+      inputs.remove(input);
+   }
+
    public int getNumberOfInputs()
    {
       return inputs.size();
@@ -99,12 +110,17 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
 
    public boolean hasInputFor(RigidBodyBasics endEffector)
    {
+      return getInputFor(endEffector) != null;
+   }
+
+   public KinematicsToolboxRigidBodyCommand getInputFor(RigidBodyBasics endEffector)
+   {
       for (int i = 0; i < inputs.size(); i++)
       {
          if (inputs.get(i).getEndEffector() == endEffector)
-            return true;
+            return inputs.get(i);
       }
-      return false;
+      return null;
    }
 
    public boolean getStreamToController()

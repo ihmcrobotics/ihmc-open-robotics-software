@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -19,6 +20,11 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalRigidBodyTransform pelvisToParentTransform;
+
+   // On disk fields
+   private double onDiskTrajectoryDuration;
+   private String onDiskParentFrameName;
+   private final RigidBodyTransform onDiskPelvisToParentTransform = new RigidBodyTransform();
 
    public PelvisHeightPitchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -47,6 +53,38 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       JSONTools.toEuclid(jsonNode, pelvisToParentTransform.getValue());
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      onDiskParentFrameName = parentFrameName.getValue();
+      onDiskPelvisToParentTransform.set(pelvisToParentTransform.getValueReadOnly());
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      parentFrameName.setValue(onDiskParentFrameName);
+      pelvisToParentTransform.getValue().set(onDiskPelvisToParentTransform);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
+      unchanged &= pelvisToParentTransform.getValueReadOnly().equals(onDiskPelvisToParentTransform);
+
+      return !unchanged;
    }
 
    public void toMessage(PelvisHeightPitchActionDefinitionMessage message)

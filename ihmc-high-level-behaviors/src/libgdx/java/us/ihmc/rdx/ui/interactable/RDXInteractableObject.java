@@ -31,15 +31,15 @@ public class RDXInteractableObject implements RenderableProvider
    {
       this.objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), objectTransform);
 
-      selectablePose3DGizmo.getPoseGizmo().setParentFrame(ReferenceFrame.getWorldFrame());
+      selectablePose3DGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
       selectablePose3DGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(objectTransform.getTranslation());
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().getRotation().set(objectTransform.getRotation());
+      selectablePose3DGizmo.getTransformToParent().getTranslation().set(objectTransform.getTranslation());
+      selectablePose3DGizmo.getTransformToParent().getRotation().set(objectTransform.getRotation());
 
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(selectablePose3DGizmo::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(selectablePose3DGizmo::process3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::update);
-      baseUI.getImGuiPanelManager().addPanel(selectablePose3DGizmo.getPoseGizmo().createTunerPanel("object"));
+      baseUI.getImGuiPanelManager().addPanel(selectablePose3DGizmo.createTunerPanel("object"));
    }
 
    public void load(String modelFileName)
@@ -65,8 +65,8 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void update(ImGui3DViewInput input)
    {
-      selectablePose3DGizmo.getPoseGizmo().update();
-      objectTransform.set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+      selectablePose3DGizmo.update();
+      objectTransform.set(selectablePose3DGizmo.getTransformToParent());
       objectFrame.update();
       if (modelInstance != null)
          LibGDXTools.toLibGDX(modelInstanceFrame.getTransformToRoot(), modelInstance.transform);
@@ -106,23 +106,23 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void setInitialPose()
    {
-      initialObjectPose.set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+      initialObjectPose.set(selectablePose3DGizmo.getTransformToParent());
    }
 
    public void setPose(RigidBodyTransform transformToWorld)
    {
       initialObjectPose.set(transformToWorld);
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(initialObjectPose);
+      selectablePose3DGizmo.getTransformToParent().set(initialObjectPose);
    }
 
    public void resetToInitialPose()
    {
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(initialObjectPose);
+      selectablePose3DGizmo.getTransformToParent().set(initialObjectPose);
    }
 
    public void resetPose()
    {
-      selectablePose3DGizmo.getPoseGizmo().getTransformToParent().setToZero();
+      selectablePose3DGizmo.getTransformToParent().setToZero();
       initialObjectPose.setToZero();
    }
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,7 +15,7 @@ import us.ihmc.ros2.ROS2Node;
 
 public class PartialFootholdBehavior extends AbstractBehavior
 {
-   private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> publisher;
 
    public PartialFootholdBehavior(String robotName, ROS2Node ros2Node)
    {

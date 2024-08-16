@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.heightMap;
 
+import us.ihmc.log.LogTools;
+
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value

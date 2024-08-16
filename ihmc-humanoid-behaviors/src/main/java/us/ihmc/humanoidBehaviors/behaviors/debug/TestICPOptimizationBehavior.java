@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.debug;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,7 +29,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final YoBoolean abortBehavior = new YoBoolean("AbortBehavior", registry);
 
    private final YoStopwatch timer;
-   private final IHMCROS2Publisher<FootstepDataListMessage> publisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> publisher;
 
    public TestICPOptimizationBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoDouble yoTime)
    {

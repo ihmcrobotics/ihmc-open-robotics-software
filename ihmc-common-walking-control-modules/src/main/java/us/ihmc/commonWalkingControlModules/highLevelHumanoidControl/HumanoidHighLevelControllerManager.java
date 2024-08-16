@@ -13,16 +13,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -87,6 +84,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
 
+   private final InertialParameterManager inertialParameterManager;
+
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState,
@@ -140,6 +139,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
       pluginFactories.forEach(this::addControllerPluginFactory);
+
+      inertialParameterManager = managerFactory.getOrCreateInertialParameterManager();
    }
 
    /**
@@ -233,6 +234,9 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
+
+      if (inertialParameterManager != null)
+         inertialParameterManager.update();
    }
 
    @Override
@@ -393,6 +397,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       LinearMomentumRateControlModule linearMomentumRateControlModule = wholeBodyControllerCoreFactory.getLinearMomentumRateControlModule();
       if (linearMomentumRateControlModule != null)
          group.addChild(linearMomentumRateControlModule.getSCS2YoGraphics());
+      if (inertialParameterManager != null)
+         group.addChild(inertialParameterManager.getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
       for (HighLevelControllerState controllerState : highLevelControllerStates.values())

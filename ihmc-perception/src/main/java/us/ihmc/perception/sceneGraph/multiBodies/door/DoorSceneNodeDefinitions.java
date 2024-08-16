@@ -7,12 +7,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -154,14 +154,29 @@ public class DoorSceneNodeDefinitions
    static
    {
       LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
+      LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendTranslation(0.0, 0.25, 0.0);
    }
    public static final RigidBodyTransform RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-
+   public static final String DOOR_PULL_HANDLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPullHandle/pullhandle.g3dj";
+   public static final RigidBodyTransform DOOR_PULL_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      DOOR_PULL_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendRollRotation(Math.PI);
+      DOOR_PULL_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.appendYawRotation(Math.PI);
+   }
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
-      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PUSH_DOOR_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
-      ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PULL_DOOR_MARKER_ID, RigidBodySceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.RIGHT_PUSH_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(DoorModelParameters.LEFT_PULL_DOOR_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+   }
+
+   public static final double DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN = 1.5;
+   public static final RigidBodyTransform DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendRollRotation(Math.PI);
+      DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendYawRotation(Math.PI);
    }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)

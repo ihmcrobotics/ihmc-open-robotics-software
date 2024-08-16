@@ -2,10 +2,8 @@ package us.ihmc.rdx.ui.affordances;
 
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
@@ -16,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -29,8 +26,6 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private PlanarRegionsListMessage planarRegionsListMessage;
-   private PlanarRegionsList planarRegionsList;
    private HeightMapMessage heightMapMessage;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
@@ -48,11 +43,6 @@ public class RDXSwingPlanningModule
       this.syncedRobot = syncedRobot;
 
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
-   }
-
-   public void setPlanarRegionList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
    }
 
    public void setHeightMapData(HeightMapMessage heightMapData)
@@ -81,14 +71,9 @@ public class RDXSwingPlanningModule
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
-      if (planarRegionsList == null && planarRegionsListMessage != null)
-      {
-         planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-      }
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
-      swingPlanningModule.computeSwingWaypoints(planarRegionsList,
-                                                heightMapData,
+      swingPlanningModule.computeSwingWaypoints(heightMapData,
                                                 tempPlan,
                                                 startFootPoses,
                                                 swingPlannerType);

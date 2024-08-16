@@ -83,7 +83,7 @@ public class NavigationBehavior extends LocalOnlyBehaviorTreeNodeExecutor implem
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getROS2Node(), PlanarRegionsListMessage.class, PerceptionAPI.MAPPING_MODULE.withOutput());
+      mapRegionsInput = new ROS2Input<>(helper.getROS2Node(), PerceptionAPI.MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class));
 
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();

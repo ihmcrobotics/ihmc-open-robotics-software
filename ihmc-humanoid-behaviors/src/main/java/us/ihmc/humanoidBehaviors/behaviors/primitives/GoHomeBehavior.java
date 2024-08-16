@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.ros2.ROS2Node;
@@ -29,8 +29,8 @@ public class GoHomeBehavior extends AbstractBehavior
    protected final YoBoolean hasInputBeenSet;
    private final YoBoolean isDone;
 
-   private final IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
-   private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+   private final ROS2PublisherBasics<GoHomeMessage> goHomePublisher;
+   private final ROS2PublisherBasics<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
 
    public GoHomeBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

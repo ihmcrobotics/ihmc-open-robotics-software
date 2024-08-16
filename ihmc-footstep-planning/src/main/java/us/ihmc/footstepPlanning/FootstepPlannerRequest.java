@@ -96,11 +96,6 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
-    * Planar regions. May be null or empty to enable flat ground mode.
-    */
-   private PlanarRegionsList planarRegionsList;
-
-   /**
     * Height map. May be null to enable flat ground mode.
     */
    private HeightMapData heightMapData;
@@ -153,7 +148,6 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      planarRegionsList = null;
       heightMapData = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
@@ -277,11 +271,6 @@ public class FootstepPlannerRequest
       this.horizonLength = horizonLength;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
    public void setHeightMapData(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
@@ -385,11 +374,6 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public PlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
-   }
-
    public HeightMapData getHeightMapData()
    {
       return heightMapData;
@@ -464,8 +448,6 @@ public class FootstepPlannerRequest
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
       }
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
-      setPlanarRegionsList(planarRegionsList);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
       if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
@@ -501,12 +483,6 @@ public class FootstepPlannerRequest
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
       {
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
-      }
-
-      if (getPlanarRegionsList() != null)
-      {
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
-         requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       }
 
       if (getHeightMapData() != null)
@@ -548,11 +524,6 @@ public class FootstepPlannerRequest
       this.statusPublishPeriod = other.statusPublishPeriod;
       this.swingPlannerType = other.swingPlannerType;
 
-      if(other.planarRegionsList != null)
-      {
-         this.planarRegionsList = other.planarRegionsList.copy();
-      }
-
       for (int i = 0; i < other.bodyPathWaypoints.size(); i++)
       {
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
@@ -563,5 +534,24 @@ public class FootstepPlannerRequest
 
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);
+   }
+
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Footstep Planner Request: [")
+             .append("Stance Side: ").append(this.requestedInitialStanceSide).append(", ")
+             .append("Start Pose (Left): Position: ").append(startFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Start Pose (Right): Position: ").append(startFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Goal Pose (Left): Position: ").append(goalFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Goal Pose (Right): Position: ").append(goalFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Assume Flat Ground: ").append(this.assumeFlatGround).append(", ")
+             .append("Snap Goal Steps: ").append(this.snapGoalSteps).append(", ")
+             .append("Perform AStar Search: ").append(this.performAStarSearch).append(", ")
+             .append("Timeout: ").append(this.timeout);
+
+      builder.append("]\n");
+      return builder.toString();
    }
 }

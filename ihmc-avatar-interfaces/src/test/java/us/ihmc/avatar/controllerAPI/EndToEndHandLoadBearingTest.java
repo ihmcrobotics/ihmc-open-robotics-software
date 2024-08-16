@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,7 +28,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -50,6 +52,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    @Test
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       TestingEnvironment testingEnvironment = new TestingEnvironment();
@@ -98,21 +101,17 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       SE3TrajectoryMessage se3Trajectory2 = handTrajectoryMessage2.getSe3Trajectory();
       se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
+      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.5), handOrientation, new Vector3D(), new Vector3D()));
       simulationTestHelper.publishToController(handTrajectoryMessage2);
       success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
-      // Activate load bearing
-      Pose3D transformToContactFrame = new Pose3D();
-      transformToContactFrame.getPosition().set(0.0, 0.09, 0.0);
-      transformToContactFrame.appendRollRotation(Math.PI);
-
       HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
-      loadBearingMessage.getLoadBearingMessage().setLoad(true);
-      loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
-      loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
-      loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
+      loadBearingMessage.setLoad(true);
+      loadBearingMessage.setCoefficientOfFriction(0.8);
+      loadBearingMessage.getContactPointInBodyFrame().set(0.0, 0.09, 0.0);
+      loadBearingMessage.getContactNormalInWorld().set(0.0, 0.0, 1.0);
+
       simulationTestHelper.publishToController(loadBearingMessage);
       success = simulationTestHelper.simulateNow(1.0);
       assertTrue(success);
@@ -126,7 +125,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
-      
+
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 

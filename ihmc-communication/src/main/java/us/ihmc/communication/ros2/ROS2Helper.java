@@ -4,14 +4,16 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.ros2.*;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
 
@@ -39,25 +41,61 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, callback);
+      ros2NodeInterface.createSubscription2(topic, callback);
+   }
+
+   @Override
+   public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      ROS2Tools.createVolatileCallbackSubscription(ros2NodeInterface, topic, callback);
+   }
+
+   @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
+   {
+      return ROS2Tools.createSwapReferenceSubscription(ros2NodeInterface, topic, callback);
+   }
+
+   @Override
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
+   {
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
+      int queueSize = 16;
+      ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
+      ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+      {
+         T nextData = concurrentQueue.next();
+         if (nextData != null)
+         {
+            if (subscriber.takeNextData(nextData, null))
+            {
+               concurrentQueue.commit();
+            }
+         }
+         else
+         {
+            LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
+         }
+      }, topic.getName(), topic.getQoS());
+      return concurrentQueue;
    }
 
    @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> callback.run());
+      ros2NodeInterface.createSubscription2(topic, message -> callback.run());
    }
 
    @Override
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
-      return new IHMCROS2Input<>(ros2NodeInterface, topic.getType(), topic);
+      return new ROS2Input<>(ros2NodeInterface, topic.getType(), topic);
    }
 
    @Override
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter)
    {
-      return new IHMCROS2Input<>(ros2NodeInterface, topic.getType(), topic, messageFilter);
+      return new ROS2Input<>(ros2NodeInterface, topic.getType(), topic, messageFilter);
    }
 
    @Override
@@ -78,7 +116,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, typedNotification::set);
+      ros2NodeInterface.createSubscription2(topic, typedNotification::set);
       return typedNotification;
    }
 
@@ -86,7 +124,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> typedNotification.set(message.getData()));
+      ros2NodeInterface.createSubscription2(topic, message -> typedNotification.set(message.getData()));
       return typedNotification;
    }
 

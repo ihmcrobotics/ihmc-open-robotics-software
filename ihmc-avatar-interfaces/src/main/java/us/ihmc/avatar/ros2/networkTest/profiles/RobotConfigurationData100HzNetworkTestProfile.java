@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class RobotConfigurationData100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   public static final ROS2QosProfile QOS_PROFILE = ROS2QosProfile.DEFAULT();
+   public static final ROS2QosProfile QOS_PROFILE = ROS2QosProfile.RELIABLE();
 
    private static final ROS2Topic<RobotConfigurationData> TOPIC = ROS2Tools.IHMC_ROOT.withModule("rcd100Hz").withType(RobotConfigurationData.class);
 

@@ -8,16 +8,6 @@ import com.badlogic.gdx.physics.bullet.dynamics.*;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.yo.ImPlotYoPlot;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
@@ -35,35 +25,7 @@ public class RDXBulletPhysicsManager
    private final ArrayList<btRigidBody> rigidBodies = new ArrayList<>();
    private final ArrayList<btMultiBody> multiBodies = new ArrayList<>();
    private final ArrayList<btCollisionObject> collisionObjects = new ArrayList<>(); // static, massless
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean simulate = new ImBoolean(false);
-   private final ImFloat simulationRate = new ImFloat(1.0f);
-   private final int worldTicksPerSecond = 240;
-   /**
-    * The simulation dt of the bullet world in bullet world time. This is always constant and for us, in
-    * a robotics setting, rather than a gaming setting, want higher accuracy, so we set this to 250 Hz
-    * rather than maybe a typical setting of 60 Hz for simple games.
-    */
-   private final float fixedTimeStep = (float) UnitConversions.hertzToSeconds(worldTicksPerSecond);
-   /**
-    * Say we call bullet simulate and wait around for a while before calling it again.
-    * The next time we call Bullet, it is going to try to catch back up by performing
-    * several simulation ticks. If we wait like, 5 minutes, we surely don't want Bullet
-    * to try and to 5 minutes of simulation in one tick. We probably never want it to do
-    * more than like 1/4 of a second.
-    */
-   private final double longestTimeWedEverWantToLetBulletSimulate = 0.25;
-   private final int maxSubSteps = (int) Math.round(worldTicksPerSecond * longestTimeWedEverWantToLetBulletSimulate);
    private final ArrayList<Runnable> postTickRunnables = new ArrayList<>();
-   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
-   private final YoInteger ticksSimulated = new YoInteger("ticksSimulated", yoRegistry);
-   private final Stopwatch timeSpentInSteppingStopwatch = new Stopwatch();
-   private final YoDouble timeSpentInStepping = new YoDouble("timeSpentInStepping", yoRegistry);
-   private final YoDouble timeSpentPerTick = new YoDouble("timeSpentPerTick", yoRegistry);
-   private final YoDouble realtimePerformance = new YoDouble("realtimePerformance", yoRegistry);
-   private final ImPlotYoPlot ticksSimulatedPlot = new ImPlotYoPlot(ticksSimulated);
-   private final ImPlotYoPlot timeSpentInSteppingPlot = new ImPlotYoPlot(timeSpentInStepping, timeSpentPerTick);
-   private final ImPlotYoPlot realtimePerformancePlot = new ImPlotYoPlot(realtimePerformance);
 
    private RDXBulletPhysicsDebugger debugger;
 
@@ -147,48 +109,9 @@ public class RDXBulletPhysicsManager
       multiBodyDynamicsWorld.addCollisionObject(collisionShape, collisionGroup, collisionGroupMask);
    }
 
-   public void addMultiBodyConstraint(btMultiBodyConstraint constraint)
-   {
-      // TODO: Need to manage/remove this?
-      multiBodyDynamicsWorld.addMultiBodyConstraint(constraint);
-   }
-
-   public void removeMultiBodyConstraint(btMultiBodyConstraint constraint)
-   {
-      multiBodyDynamicsWorld.removeMultiBodyConstraint(constraint);
-   }
-
    public void addPostTickRunnable(Runnable postTickRunnable)
    {
       postTickRunnables.add(postTickRunnable);
-   }
-
-   /**
-    * See the Bullet wiki article on this:
-    * https://web.archive.org/web/20170708145909/http://bulletphysics.org/mediawiki-1.5.8/index.php/Stepping_the_World
-    */
-   public void simulate(float timePassedSinceThisWasCalledLast)
-   {
-      debugger.update();
-
-      ticksSimulated.set(0);
-      timeSpentInStepping.set(0.0);
-      if (simulate.get())
-      {
-         // We can simulate slower or faster in real world time by gaming the first parameter.
-         // Bullet will think it needs to catch up more, or it will not do as much.
-         timePassedSinceThisWasCalledLast *= simulationRate.get();
-         timeSpentInSteppingStopwatch.start();
-         // FIXME: May sometimes cause EXCEPTION_ACCESS_VIOLATION
-         ticksSimulated.set(multiBodyDynamicsWorld.stepSimulation(timePassedSinceThisWasCalledLast, maxSubSteps, fixedTimeStep));
-         timeSpentInStepping.set(timeSpentInSteppingStopwatch.totalElapsed());
-         if (ticksSimulated.getValue() > 0)
-            timeSpentPerTick.set(timeSpentInStepping.getValue() / ticksSimulated.getValue());
-         else
-            timeSpentPerTick.set(0);
-
-         realtimePerformance.set((ticksSimulated.getValue() * fixedTimeStep) / timeSpentInStepping.getValue());
-      }
    }
 
    public void setKinematicObject(btRigidBody btRigidBody, boolean isKinematicObject)
@@ -217,17 +140,6 @@ public class RDXBulletPhysicsManager
       multiBodies.remove(btMultiBody);
    }
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("Bullet simulation @ " + worldTicksPerSecond + " Hz dt");
-      ImGui.checkbox(labels.get("Simulate"), simulate);
-      ImGui.sliderFloat(labels.get("Simulation rate"), simulationRate.getData(), 0.001f, 1.0f);
-      ticksSimulatedPlot.render(simulate.get());
-      timeSpentInSteppingPlot.render(simulate.get());
-      realtimePerformancePlot.render(simulate.get());
-      debugger.renderImGuiWidgets();
-   }
-
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       debugger.getVirtualRenderables(renderables, pool);
@@ -250,18 +162,8 @@ public class RDXBulletPhysicsManager
       }
    }
 
-   public ImBoolean getSimulate()
-   {
-      return simulate;
-   }
-
    public btMultiBodyDynamicsWorld getMultiBodyDynamicsWorld()
    {
       return multiBodyDynamicsWorld;
-   }
-
-   public ImFloat getSimulationRate()
-   {
-      return simulationRate;
    }
 }

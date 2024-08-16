@@ -15,7 +15,7 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7f0daf2fddf890bd8de47267860eab4c1a2790f1b6d75debeb0adfeaeb972a2d";
+   		return "450ea5ef7da4346d0173d330206c10920b8d65ddfff5954a1965cb7950ca01c4";
    }
    
    @Override
@@ -60,6 +60,14 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -95,6 +103,16 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredOrientationInWorld(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearVelocityInWorld(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocityInWorld(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getControlFramePositionInEndEffector(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getControlFrameOrientationInEndEffector(), current_alignment);
@@ -119,6 +137,12 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredOrientationInWorld(), cdr);
+      cdr.write_type_7(data.getHasLinearVelocity());
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocityInWorld(), cdr);
+      cdr.write_type_7(data.getHasAngularVelocity());
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocityInWorld(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getControlFramePositionInEndEffector(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getControlFrameOrientationInEndEffector(), cdr);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getAngularSelectionMatrix(), cdr);
@@ -135,6 +159,12 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredOrientationInWorld(), cdr);	
+      data.setHasLinearVelocity(cdr.read_type_7());
+      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocityInWorld(), cdr);	
+      data.setHasAngularVelocity(cdr.read_type_7());
+      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocityInWorld(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getControlFramePositionInEndEffector(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getControlFrameOrientationInEndEffector(), cdr);	
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);	
@@ -152,6 +182,12 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       ser.write_type_a("desired_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientationInWorld());
+
+      ser.write_type_7("has_linear_velocity", data.getHasLinearVelocity());
+      ser.write_type_a("linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocityInWorld());
+
+      ser.write_type_7("has_angular_velocity", data.getHasAngularVelocity());
+      ser.write_type_a("angular_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocityInWorld());
 
       ser.write_type_a("control_frame_position_in_end_effector", new geometry_msgs.msg.dds.PointPubSubType(), data.getControlFramePositionInEndEffector());
 
@@ -175,6 +211,12 @@ public class KinematicsToolboxRigidBodyMessagePubSubType implements us.ihmc.pubs
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
       ser.read_type_a("desired_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredOrientationInWorld());
+
+      data.setHasLinearVelocity(ser.read_type_7("has_linear_velocity"));
+      ser.read_type_a("linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocityInWorld());
+
+      data.setHasAngularVelocity(ser.read_type_7("has_angular_velocity"));
+      ser.read_type_a("angular_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocityInWorld());
 
       ser.read_type_a("control_frame_position_in_end_effector", new geometry_msgs.msg.dds.PointPubSubType(), data.getControlFramePositionInEndEffector());
 

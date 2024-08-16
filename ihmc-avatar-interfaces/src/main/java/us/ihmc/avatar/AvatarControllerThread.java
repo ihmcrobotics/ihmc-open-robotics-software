@@ -19,14 +19,14 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -34,6 +34,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -82,7 +83,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final ModularRobotController robotController;
 
-   private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
+   private final ROS2PublisherBasics<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
@@ -121,9 +122,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       if (realtimeROS2Node != null)
       {
-         crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                         ControllerCrashNotificationPacket.class,
-                                                                         ROS2Tools.getControllerOutputTopic(robotName));
+         crashNotificationPublisher = realtimeROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
       }
       else
       {
@@ -171,7 +170,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
 
-   public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
+   public static JointBasics[] createListOfJointsToIgnore(FullRobotModel controllerFullRobotModel,
                                                           WholeBodyControllerParameters<RobotSide> robotModel,
                                                           HumanoidRobotSensorInformation sensorInformation)
    {

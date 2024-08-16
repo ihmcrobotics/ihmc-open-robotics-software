@@ -21,6 +21,15 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * A rigid body control mode for orientation only. See {@link RigidBodyOrientationControlHelper}.
+ * <p>
+ * This class also features a hybrid control mode, where the jointspace control commands from
+ * {@link RigidBodyJointControlHelper} are also included. This is useful for more control over, for example,
+ * the arms of the robot by specifying desireds in both taskspace and jointspace, which can help avoid
+ * singularities and instabilities.
+ * </p>
+ */
 public class RigidBodyOrientationController extends RigidBodyTaskspaceControlState
 {
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -133,6 +142,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    @Override
    public void onEntry()
    {
+      orientationHelper.resetFunctionGenerator();
    }
 
    @Override
@@ -191,12 +201,6 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      // TODO: this can be removed once the controller core can handle control frame orientations with orientation commands.
-      if (Math.abs(orientationHelper.getFeedbackControlCommand().getBodyFixedOrientationToControl().getS()) < 1.0 - 1.0e-5)
-      {
-         throw new RuntimeException("Control frame orientations for orientation control only are not supported!");
-      }
-
       if (hybridModeActive.getBooleanValue())
       {
          feedbackControlCommandList.clear();
@@ -271,5 +275,10 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;
+   }
+
+   public RigidBodyOrientationControlHelper getOrientationControlHelper()
+   {
+      return orientationHelper;
    }
 }

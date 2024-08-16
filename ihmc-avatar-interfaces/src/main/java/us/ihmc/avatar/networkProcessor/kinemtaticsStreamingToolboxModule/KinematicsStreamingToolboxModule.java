@@ -1,27 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
@@ -32,15 +21,30 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * This class is a toolbox module that provides the ability to stream kinematics commands to the robot.
+ * <p>
+ * It's useful to understand the API of the IK streaming.
+ * </p>
+ * <p>
+ * Typically extended for each robot, the final implementation contains a main to run as a standalone app.
+ * </p>
+ */
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
-   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
-
    protected final KinematicsStreamingToolboxController controller;
-   private IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
-   private IHMCROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
+   private ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private ROS2PublisherBasics<WholeBodyStreamingMessage> streamingMessagePublisher;
+
+   RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -52,19 +56,22 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer,
                                            PubSubImplementation pubSubImplementation)
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      super(robotModel.getSimpleRobotName(),
+            robotModel.createFullRobotModel(),
+            robotModel.getLogModelProvider(),
+            startYoVariableServer,
+            (int) (parameters.getToolboxUpdatePeriod() * 1000),
+            pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
                                                             statusOutputManager,
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            robotModel.getControllerDT(),
-                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                             yoGraphicsListRegistry,
                                                             registry);
+      controller.setRobotStateUpdater(robotStateUpdater);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
@@ -99,26 +106,20 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-
-      trajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
-      streamingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyStreamingMessage.class, controllerInputTopic);
+      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName));
+      streamingMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName));
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
-         if (controller != null)
-         {
-            s.takeNextData(robotConfigurationData, null);
-            controller.updateRobotConfigurationData(robotConfigurationData);
-         }
+         s.takeNextData(robotConfigurationData, null);
+         robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
       });
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (controller != null)
          {
@@ -171,7 +172,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -182,7 +183,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)
@@ -197,21 +198,21 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<KinematicsStreamingToolboxConfigurationMessage> getInputStreamingConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxConfigurationMessage.class);
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsStreamingToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class);
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
-      return getOutputTopic(robotName).withTypeName(KinematicsToolboxOutputStatus.class);
+      return ControllerAPI.getTopic(getOutputTopic(robotName), KinematicsToolboxOutputStatus.class);
    }
 
    public static ROS2Topic<ControllerCrashNotificationPacket> getOutputCrashNotificationTopic(String robotName)
    {
-      return getOutputTopic(robotName).withTypeName(ControllerCrashNotificationPacket.class);
+      return ControllerAPI.getTopic(getOutputTopic(robotName), ControllerCrashNotificationPacket.class);
    }
 }

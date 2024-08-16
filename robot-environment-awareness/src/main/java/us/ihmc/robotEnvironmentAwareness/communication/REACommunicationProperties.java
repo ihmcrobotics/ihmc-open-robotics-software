@@ -45,13 +45,13 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
  */
 public class REACommunicationProperties
 {
-   public static final ROS2Topic outputTopic = PerceptionAPI.REA.withRobot(null).withOutput();
-   public static final ROS2Topic lidarOutputTopic = PerceptionAPI.REA.withPrefix("lidar").withRobot(null).withOutput();
-   public static final ROS2Topic stereoOutputTopic = PerceptionAPI.REALSENSE_REA;
-   public static final ROS2Topic depthOutputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withOutput();
-   public static final ROS2Topic inputTopic = PerceptionAPI.REA.withRobot(null).withInput();
-   public static final ROS2Topic stereoInputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withInput();
-   public static final ROS2Topic subscriberCustomRegionsTopicName = PerceptionAPI.REA.withRobot(null)
+   public static final ROS2Topic<?> outputTopic = PerceptionAPI.REA.withRobot(null).withOutput();
+   public static final ROS2Topic<?> lidarOutputTopic = PerceptionAPI.REA.withPrefix("lidar").withRobot(null).withOutput();
+   public static final ROS2Topic<?> stereoOutputTopic = PerceptionAPI.REALSENSE_REA;
+   public static final ROS2Topic<?> depthOutputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withOutput();
+   public static final ROS2Topic<?> inputTopic = PerceptionAPI.REA.withRobot(null).withInput();
+   public static final ROS2Topic<?> stereoInputTopic = PerceptionAPI.REA.withPrefix("depth").withRobot(null).withInput();
+   public static final ROS2Topic<?> subscriberCustomRegionsTopicName = PerceptionAPI.REA.withRobot(null)
                                                                                  .withSuffix(PerceptionAPI.REA_CUSTOM_REGION_NAME)
                                                                                  .withInput();
 

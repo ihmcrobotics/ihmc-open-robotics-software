@@ -17,7 +17,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -53,16 +53,14 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       simulationTestHelper.start();
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(simulationTestHelper.getROS2Node(),
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                    (p) ->
-                                                    {
-                                                       if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
-                                                       {
-                                                          stepCounter.incrementAndGet();
-                                                       }
-                                                    });
+      simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+      {
+         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         {
+            stepCounter.incrementAndGet();
+         }
+      });
 
       DRCRobotModel robotModel = getRobotModel();
 
@@ -131,16 +129,14 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       simulationTestHelper.start();
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(simulationTestHelper.getROS2Node(),
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                    (p) ->
-                                                    {
-                                                       if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
-                                                       {
-                                                          stepCounter.incrementAndGet();
-                                                       }
-                                                    });
+      simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+      {
+         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         {
+            stepCounter.incrementAndGet();
+         }
+      });
 
       DRCRobotModel robotModel = getRobotModel();
 
@@ -214,16 +210,14 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       simulationTestHelper.start();
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(simulationTestHelper.getROS2Node(),
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                    (p) ->
-                                                    {
-                                                       if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
-                                                       {
-                                                          stepCounter.incrementAndGet();
-                                                       }
-                                                    });
+      simulationTestHelper.getROS2Node().createSubscription(HumanoidControllerAPI.getOutputTopic(getSimpleRobotName())
+                                                                                 .withTypeName(FootstepStatusMessage.class), (p) ->
+      {
+         if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
+         {
+            stepCounter.incrementAndGet();
+         }
+      });
 
       DRCRobotModel robotModel = getRobotModel();
 

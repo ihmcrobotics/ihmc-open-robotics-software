@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.perception.steppableRegions.SteppableRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -39,7 +38,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    private final List<Point3D> customWaypointPositions = new ArrayList<>();
    private final List<FrameSE3TrajectoryPoint> swingTrajectory = new ArrayList<>();
 
-   private PlanarRegion regonSnappedTo = null;
+   private PlanarRegion regionSnappedTo = null;
 
    private double swingDuration = -1.0;
    private double transferDuration = -1.0;
@@ -95,7 +94,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
       this.swingDuration = other.getSwingDuration();
       this.transferDuration = other.getTransferDuration();
-      this.regonSnappedTo = other.getRegionSnappedTo();
+      this.regionSnappedTo = other.getRegionSnappedTo();
    }
 
    public void reset()
@@ -106,7 +105,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       trajectoryType = null;
       customWaypointPositions.clear();
       customWaypointProportions.clear();
-      regonSnappedTo = null;
+      regionSnappedTo = null;
    }
 
    @Override
@@ -219,13 +218,13 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
    public void setRegionSnappedTo(PlanarRegion regionSnappedTo)
    {
-      this.regonSnappedTo = regionSnappedTo;
+      this.regionSnappedTo = regionSnappedTo;
    }
 
    @Override
    public PlanarRegion getRegionSnappedTo()
    {
-      return regonSnappedTo;
+      return regionSnappedTo;
    }
 
    @Override
@@ -259,11 +258,14 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          double proportion1 = footstepDataMessage.getCustomWaypointProportions().get(1);
          plannedFootstep.setCustomWaypointProportions(proportion0, proportion1);
       }
-      if (footstepDataMessage.getCustomPositionWaypoints().size() == 2)
+      if (footstepDataMessage.getCustomPositionWaypoints().size() >= 2)
       {
-         Point3D waypoint0 = footstepDataMessage.getCustomPositionWaypoints().get(0);
-         Point3D waypoint1 = footstepDataMessage.getCustomPositionWaypoints().get(1);
-         plannedFootstep.setCustomWaypointPositions(waypoint0, waypoint1);
+         plannedFootstep.getCustomWaypointPositions().clear();
+         for (int i = 0; i < footstepDataMessage.getCustomPositionWaypoints().size(); i++)
+         {
+            Point3D waypoint = footstepDataMessage.getCustomPositionWaypoints().get(i);
+            plannedFootstep.getCustomWaypointPositions().add(waypoint);
+         }
       }
       for (int i = 0; i < footstepDataMessage.getSwingTrajectory().size(); i++)
       {

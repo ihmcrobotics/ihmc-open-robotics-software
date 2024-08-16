@@ -24,6 +24,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+/**
+ * Holds the functionality common to all the rigid body control states.
+ */
 public abstract class RigidBodyControlState implements State, SCS2YoGraphicHolder
 {
    protected final YoRegistry registry;

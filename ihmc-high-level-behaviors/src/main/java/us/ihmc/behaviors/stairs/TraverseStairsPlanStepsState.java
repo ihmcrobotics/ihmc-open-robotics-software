@@ -6,10 +6,9 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -22,9 +21,11 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -41,7 +42,7 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
    private final AtomicBoolean operatorReviewEnabled;
    private final AtomicReference<Pose3D> goalInput = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepListPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> footstepListPublisher;
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule planningModule;
@@ -91,9 +92,9 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
 //         planningModule.getSwingPlannerParameters().setAllFromStrings(parametersAsStrings);
 //      });
 
-      footstepListPublisher = new IHMCROS2Publisher<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
-      new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
-      new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
+      footstepListPublisher = helper.getROS2Node().createPublisher(TraverseStairsBehaviorAPI.PLANNED_STEPS);
+      new ROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
+      new ROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
    }
 
    @Override
@@ -159,7 +160,7 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
       }
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()))));
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
       request.setPlanBodyPath(false);
 

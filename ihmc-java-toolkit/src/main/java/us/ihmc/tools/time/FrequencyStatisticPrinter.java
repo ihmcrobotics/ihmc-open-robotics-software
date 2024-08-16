@@ -4,7 +4,6 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayDeque;
@@ -26,17 +25,31 @@ public class FrequencyStatisticPrinter
 
    private final Stopwatch stopwatch = new Stopwatch();
 
-   private PausablePeriodicThread pausablePeriodicThread;
+   /** Used to identify printers. */
+   private final String prefix;
+   private final PausablePeriodicThread pausablePeriodicThread;
    private final double expiration = 1.0;
    private final Timer expirationTimer = new Timer();
 
    public FrequencyStatisticPrinter()
    {
-      this(null);
+      this("", null);
+   }
+
+   public FrequencyStatisticPrinter(String prefix)
+   {
+      this(prefix, null);
    }
 
    public FrequencyStatisticPrinter(Runnable onLogReport)
    {
+      this("", onLogReport);
+   }
+
+   public FrequencyStatisticPrinter(String prefix, Runnable onLogReport)
+   {
+      this.prefix = prefix.isEmpty() ? "" : prefix + ": ";
+
       reset();
 
       boolean runAsDaemon = true;
@@ -54,7 +67,7 @@ public class FrequencyStatisticPrinter
       if (!newEvents)
       {
          reset();
-         LogTools.info("no new events");
+         LogTools.info("%sno new events".formatted(prefix));
       }
       else if (!expirationTimer.isRunning(expiration))
       {
@@ -62,8 +75,8 @@ public class FrequencyStatisticPrinter
       }
       else
       {
-         LogTools.info(StringTools.format3D("averate rate: {}\n        min: {}s max: {}s std dev: {}s window: {}",
-                                            averageRate, minDelay, maxDelay, standardDeviation, window));
+         LogTools.info(2, "%saverate rate: %.3f (Hz)\n        min: %.3f (s) max: %.3f (s) std dev: %.3f (s) window: %d"
+                               .formatted(prefix, averageRate, minDelay, maxDelay, standardDeviation, window));
       }
    }
 

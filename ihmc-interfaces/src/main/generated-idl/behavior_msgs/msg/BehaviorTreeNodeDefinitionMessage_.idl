@@ -19,17 +19,17 @@ module behavior_msgs
       struct BehaviorTreeNodeDefinitionMessage
       {
         /**
-         * A human readable description of what the node does
+         * The name of the node including .json if it's a JSON root node
          */
-        string description;
+        string name;
+        /**
+         * Long form notes about the node.
+         */
+        string notes;
         /**
          * Number of children
          */
         unsigned short number_of_children;
-        /**
-         * JSON file name if this node is the root of a JSON file
-         */
-        string json_file_name;
       };
     };
   };

@@ -29,6 +29,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
+/**
+ * A tool to generate an orientation trajectory as a cubic Hermite curve through a series
+ * of provided waypoints. Given a query time, it provides the corresponding orientation
+ * as a quaternion and the angular velocity and angular acceleration vectors.
+ */
 public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOrientationTrajectoryGenerator, YoMutableFrameObject
 {
    private final String namePrefix;

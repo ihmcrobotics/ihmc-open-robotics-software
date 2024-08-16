@@ -68,7 +68,7 @@ public class RDXImNodesTreeNode
       String nodeName;
       String nodeType;
 
-      String name = behaviorNodeUI.getDefinition().getDescription();
+      String name = behaviorNodeUI.getDefinition().getName();
       // TODO: Fix or delete
 //      if (behaviorNodeUI instanceof SequenceNode)
 //      {

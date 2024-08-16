@@ -11,8 +11,10 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPoi
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.perception.ros1.camera.FisheyeCameraReceiver;
@@ -111,9 +113,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+         ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                     s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(),
                                                         modelFactory,
@@ -142,9 +143,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+         ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                     s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
          AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);

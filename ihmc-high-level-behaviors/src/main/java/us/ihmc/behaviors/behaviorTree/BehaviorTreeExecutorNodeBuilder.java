@@ -3,14 +3,19 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.door.DoorTraversalExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -19,29 +24,32 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
+   private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingFootstepTracker footstepTracker;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final SceneGraph sceneGraph;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
+                                          ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
-                                          WalkingFootstepTracker footstepTracker,
-                                          FootstepPlanningModule footstepPlanner,
-                                          FootstepPlannerParametersBasics footstepPlannerParameters,
-                                          WalkingControllerParameters walkingControllerParameters,
-                                          ROS2ControllerHelper ros2ControllerHelper)
+                                          SceneGraph sceneGraph)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
-      this.footstepTracker = footstepTracker;
-      this.footstepPlanner = footstepPlanner;
-      this.footstepPlannerParameters = footstepPlannerParameters;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
+
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      footstepTracker = controllerStatusTracker.getFootstepTracker();
+      footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      walkingControllerParameters = robotModel.getWalkingControllerParameters();
    }
 
    @Override
@@ -55,9 +63,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
       }
-      if (nodeType == ArmJointAnglesActionDefinition.class)
+      if (nodeType == DoorTraversalDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
@@ -70,9 +78,11 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                saveFileDirectory,
                                                ros2ControllerHelper,
                                                syncedRobot,
-                                               footstepTracker,
+                                               controllerStatusTracker,
                                                referenceFrameLibrary,
-                                               walkingControllerParameters);
+                                               walkingControllerParameters,
+                                               footstepPlanner,
+                                               footstepPlannerParameters);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -82,30 +92,21 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
       }
+      if (nodeType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new ScrewPrimitiveActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
+      }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
          return new PelvisHeightPitchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
-         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
+         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
       }
       if (nodeType == WaitDurationActionDefinition.class)
       {
-         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new WalkActionExecutor(id,
-                                       crdtInfo,
-                                       saveFileDirectory,
-                                       ros2ControllerHelper,
-                                       syncedRobot,
-                                       footstepTracker,
-                                       footstepPlanner,
-                                       footstepPlannerParameters,
-                                       walkingControllerParameters,
-                                       referenceFrameLibrary);
+         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
 
       return null;

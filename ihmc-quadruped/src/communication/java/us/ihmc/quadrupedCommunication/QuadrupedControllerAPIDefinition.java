@@ -27,7 +27,7 @@ import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
@@ -93,12 +93,12 @@ public class QuadrupedControllerAPIDefinition
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getQuadrupedControllerInputTopic(robotName);
+      return QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
    }
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      return QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
    }
 
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()

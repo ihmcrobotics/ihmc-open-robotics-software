@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.rdx.imgui.ImGuiInputText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -21,7 +22,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableAffordanceTemplateHand;
 import us.ihmc.rdx.ui.interactable.RDXInteractableNub;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSakeGripper;
-import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -79,7 +79,12 @@ public class RDXAffordanceTemplateEditorUI
                                RigidBodySceneObjectDefinitions.ensureCanOfSoupNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureDebrisNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureShoeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
-                               RigidBodySceneObjectDefinitions.ensureThinkPadNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureLaptopNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBookNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureCerealNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureMugNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureBikeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureDrillNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                             });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);
@@ -368,7 +373,7 @@ public class RDXAffordanceTemplateEditorUI
                }
                case GRASP ->
                {
-                  if (preGraspFrames.getNumberOfFrames() > 0)
+                  if (preGraspFrames.getNumberOfFrames(activeSide) > 0)
                   {
                      status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
                      preGraspFrames.setSelectedIndexToSize();
@@ -386,7 +391,7 @@ public class RDXAffordanceTemplateEditorUI
                         status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
                         graspFrame.selectFrame();
                      }
-                     else if (preGraspFrames.getNumberOfFrames() > 0)
+                     else if (preGraspFrames.getNumberOfFrames(activeSide) > 0)
                      {
                         status.setActiveMenu(RDXActiveAffordanceMenu.PRE_GRASP);
                         preGraspFrames.setSelectedIndexToSize();
@@ -416,7 +421,7 @@ public class RDXAffordanceTemplateEditorUI
                            status.setActiveMenu(RDXActiveAffordanceMenu.GRASP);
                            graspFrame.selectFrame();
                         }
-                        else if (postGraspFrames.getNumberOfFrames() > 0)
+                        else if (postGraspFrames.getNumberOfFrames(activeSide) > 0)
                         {
                            status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
                            postGraspFrames.resetSelectedIndex();
@@ -426,7 +431,7 @@ public class RDXAffordanceTemplateEditorUI
                   }
                   case GRASP ->
                   {
-                     if (postGraspFrames.getNumberOfFrames() > 0)
+                     if (postGraspFrames.getNumberOfFrames(activeSide) > 0)
                      {
                         status.setActiveMenu(RDXActiveAffordanceMenu.POST_GRASP);
                         postGraspFrames.resetSelectedIndex();
@@ -469,6 +474,15 @@ public class RDXAffordanceTemplateEditorUI
          {
             reset();
             fileManager.load();
+            for (RobotSide side : handPoses.keySet())
+            {
+               if (preGraspFrames.getNumberOfFrames(side) == 0 && !graspFrame.isSet(side))
+               {
+                  interactableHands.get(side).removeRenderables(panel3D);
+                  interactableHands.remove(side);
+                  handPoses.remove(side);
+               }
+            }
          }
       }
       else

@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c5a32d178bd5ca3076f7f5fffeceaa2339013016e0666003a84f9e7640754833";
+   		return "1a9f78e39e886450df19270e876d4d4d8b7bd3b23de81a762d9a9783e360586a";
    }
    
    @Override
@@ -59,9 +59,23 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -85,11 +99,30 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalTransformToParent(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getDesiredLeftFootsteps().size(); ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getDesiredLeftFootsteps().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getDesiredRightFootsteps().size(); ++i0)
+      {
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getDesiredRightFootsteps().get(i0), current_alignment);}
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentLeftFootPose(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentRightFootPose(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -103,10 +136,23 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length");
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalTransformToParent(), cdr);
+      cdr.write_type_9(data.getExecutionState());
+
       cdr.write_type_3(data.getTotalNumberOfFootsteps());
 
       cdr.write_type_3(data.getNumberOfIncompleteFootsteps());
 
+      if(data.getDesiredLeftFootsteps().size() <= 50)
+      cdr.write_type_e(data.getDesiredLeftFootsteps());else
+          throw new RuntimeException("desired_left_footsteps field exceeds the maximum length");
+
+      if(data.getDesiredRightFootsteps().size() <= 50)
+      cdr.write_type_e(data.getDesiredRightFootsteps());else
+          throw new RuntimeException("desired_right_footsteps field exceeds the maximum length");
+
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentLeftFootPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentRightFootPose(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -114,10 +160,17 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_e(data.getFootsteps());	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalTransformToParent(), cdr);	
+      data.setExecutionState(cdr.read_type_9());
+      	
       data.setTotalNumberOfFootsteps(cdr.read_type_3());
       	
       data.setNumberOfIncompleteFootsteps(cdr.read_type_3());
       	
+      cdr.read_type_e(data.getDesiredLeftFootsteps());	
+      cdr.read_type_e(data.getDesiredRightFootsteps());	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentLeftFootPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentRightFootPose(), cdr);	
 
    }
 
@@ -129,8 +182,17 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_e("footsteps", data.getFootsteps());
+      ser.write_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
+
+      ser.write_type_9("execution_state", data.getExecutionState());
       ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
       ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
+      ser.write_type_e("desired_left_footsteps", data.getDesiredLeftFootsteps());
+      ser.write_type_e("desired_right_footsteps", data.getDesiredRightFootsteps());
+      ser.write_type_a("current_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentLeftFootPose());
+
+      ser.write_type_a("current_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentRightFootPose());
+
    }
 
    @Override
@@ -141,8 +203,17 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_e("footsteps", data.getFootsteps());
+      ser.read_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
+
+      data.setExecutionState(ser.read_type_9("execution_state"));
       data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
       data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));
+      ser.read_type_e("desired_left_footsteps", data.getDesiredLeftFootsteps());
+      ser.read_type_e("desired_right_footsteps", data.getDesiredRightFootsteps());
+      ser.read_type_a("current_left_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentLeftFootPose());
+
+      ser.read_type_a("current_right_foot_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentRightFootPose());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionStateMessage src, behavior_msgs.msg.dds.FootstepPlanActionStateMessage dest)

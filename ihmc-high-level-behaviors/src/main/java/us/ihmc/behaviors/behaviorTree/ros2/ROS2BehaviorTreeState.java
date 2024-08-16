@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 
 import java.util.function.Consumer;
 
@@ -11,16 +11,17 @@ import java.util.function.Consumer;
  * This class is concerned with syncing behavior tree state only
  * over ROS 2 nodes as a CRDT.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ROS2BehaviorTreeState
 {
-   public static final double SYNC_FREQUENCY = 30.0;
+   /**
+    * The SYNC_FREQUENCY should be a multiple of the scene graph's update frequency.
+    */
+   public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
 
    private final BehaviorTreeState behaviorTreeState;
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final ROS2BehaviorTreePublisher behaviorTreePublisher;
    private final ROS2BehaviorTreeSubscription behaviorTreeSubscription;
-
-   private final Throttler publishThrottler = new Throttler().setFrequency(SYNC_FREQUENCY);
 
    /**
     * The complexity of this constructor is to support the UI having nodes that extend the base
@@ -31,7 +32,6 @@ public class ROS2BehaviorTreeState
                                 ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTreeState = behaviorTreeState;
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
 
       behaviorTreePublisher = new ROS2BehaviorTreePublisher(behaviorTreeState, ros2PublishSubscribeAPI);
       behaviorTreeSubscription = new ROS2BehaviorTreeSubscription(behaviorTreeState, rootNodeSetter, ros2PublishSubscribeAPI);
@@ -59,8 +59,7 @@ public class ROS2BehaviorTreeState
     */
    public void updatePublication()
    {
-      if (publishThrottler.run())
-         behaviorTreePublisher.publish();
+      behaviorTreePublisher.publish();
    }
 
    public void destroy()

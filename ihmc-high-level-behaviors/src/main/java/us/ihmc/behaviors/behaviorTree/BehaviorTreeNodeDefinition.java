@@ -17,26 +17,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The base definition of a behavior tree node is just a
- * human readable description and a list of children.
+ * The base definition of a behavior tree node.
  */
 public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
-   /** A human readable description of what the node does */
-   private final CRDTUnidirectionalString description;
+   /**
+    * The name of the node.
+    * It should be a set of words that summarize the node and that fits onto one line.
+    * Always ends with .json if it's a JSON root node.
+    * i.e. "PickUpObject.json"
+    * i.e. "Move left hand"
+    */
+   private final CRDTUnidirectionalString name;
+   /**
+    * Long form notes about the node.
+    * Can be in paragraph form and include notes about the current
+    * development state.
+    */
+   private final CRDTUnidirectionalString notes;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
    private final WorkspaceResourceDirectory saveFileDirectory;
-   /** Empty string if not the root of a JSON file */
-   private final CRDTUnidirectionalString jsonFileName;
+
+   // Used to compare with saved version and provide unsaved status (*) to the operator
+   private String onDiskName;
+   private String onDiskNotes;
+   private final List<String> onDiskChildrenNames = new ArrayList<>();
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       this.saveFileDirectory = saveFileDirectory;
 
-      description = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
-      jsonFileName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      name = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      notes = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
    }
 
    /** Save as JSON file root node. */
@@ -45,9 +59,12 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
       if (!isJSONRoot())
          LogTools.error("Cannot save. Can only be called for JSON roots.");
 
-      WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, jsonFileName.getValue());
+      WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, name.getValue());
       LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
-      JSONFileTools.save(saveFile, this::saveToFile);
+      if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
+      {
+         BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
+      }
    }
 
    /**
@@ -56,9 +73,8 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("type", getClass().getSimpleName());
-
-      if (!description.getValue().isEmpty()) // No reason to write default description
-         jsonNode.put("description", description.getValue());
+      jsonNode.put("name", name.getValue());
+      jsonNode.put("notes", notes.getValue());
 
       ArrayNode childrenArrayJsonNode = jsonNode.putArray("children");
       for (BehaviorTreeNodeDefinition child : children)
@@ -66,7 +82,7 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
          ObjectNode childJsonNode = childrenArrayJsonNode.addObject();
          if (child.isJSONRoot())
          {
-            childJsonNode.put("file", child.getJSONFilename());
+            childJsonNode.put("file", child.getName());
             child.saveToFile();
          }
          else
@@ -82,49 +98,85 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
     */
    public void loadFromFile(JsonNode jsonNode)
    {
-      description.setValue(jsonNode.get("description").textValue());
+      name.setValue(jsonNode.get("name").textValue());
+      notes.setValue(jsonNode.get("notes").textValue());
+   }
+
+   public void setOnDiskFields()
+   {
+      onDiskName = name.getValue();
+      onDiskNotes = notes.getValue();
+
+      onDiskChildrenNames.clear();
+      for (BehaviorTreeNodeDefinition child : children)
+         onDiskChildrenNames.add(child.getName());
+   }
+
+   public void undoAllNontopologicalChanges()
+   {
+      name.setValue(onDiskName);
+      notes.setValue(onDiskNotes);
+
+      // We are not able to undo changes to children topology.
+      // The user must delete and reload the entire tree.
+
+      for (BehaviorTreeNodeDefinition child : children)
+      {
+         child.undoAllNontopologicalChanges();
+      }
+   }
+
+   public boolean hasChanges()
+   {
+      boolean unchanged = true;
+      unchanged &= name.getValue().equals(onDiskName);
+      unchanged &= notes.getValue().equals(onDiskNotes);
+
+      boolean childrenSizeEquals = onDiskChildrenNames.size() == children.size();
+      unchanged &= childrenSizeEquals;
+      if (childrenSizeEquals)
+         for (int i = 0; i < children.size(); i++)
+            unchanged &= children.get(i).getName().equals(onDiskChildrenNames.get(i));
+
+      return !unchanged;
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      message.setDescription(description.toMessage());
+      message.setName(name.toMessage());
+      message.setNotes(notes.toMessage());
       message.setNumberOfChildren(children.size());
-      message.setJsonFileName(jsonFileName.toMessage());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      description.fromMessage(message.getDescriptionAsString());
-      jsonFileName.fromMessage(message.getJsonFileNameAsString());
+      name.fromMessage(message.getNameAsString());
+      notes.fromMessage(message.getNotesAsString());
    }
 
-   /**
-    * A description of the action to help the operator in understanding
-    * the purpose and context of the action.
-    */
-   public void setDescription(String description)
+   public void setName(String name)
    {
-      this.description.setValue(description);
+      this.name.setValue(name);
    }
 
-   public String getDescription()
+   public String getName()
    {
-      return description.getValue();
+      return name.getValue();
    }
 
-   public void setJSONFileName(String jsonFileName)
+   public void setNotes(String notes)
    {
-      this.jsonFileName.setValue(jsonFileName);
+      this.notes.setValue(notes);
    }
 
-   public String getJSONFilename()
+   public String getNotes()
    {
-      return jsonFileName.getValue();
+      return notes.getValue();
    }
 
    public boolean isJSONRoot()
    {
-      return !jsonFileName.getValue().isEmpty();
+      return name.getValue().endsWith(".json");
    }
 
    @Override

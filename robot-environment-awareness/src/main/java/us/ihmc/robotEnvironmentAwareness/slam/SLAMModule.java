@@ -15,7 +15,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -125,18 +125,11 @@ public class SLAMModule implements PerceptionModule
       slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION, transformFromLocalFrameToSensor);
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
-                                           this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PerceptionAPI.D435_POINT_CLOUD,
-                                           this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           REAStateRequestMessage.class,
-                                           REACommunicationProperties.stereoInputTopic,
-                                           this::handleREAStateRequestMessage);
-      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
-      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription(PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD, this::handlePointCloud);
+      ros2Node.createSubscription(PerceptionAPI.D435_POINT_CLOUD, this::handlePointCloud);
+      ros2Node.createSubscription(REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class), this::handleREAStateRequestMessage);
+      new ROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
+      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");
          stop();

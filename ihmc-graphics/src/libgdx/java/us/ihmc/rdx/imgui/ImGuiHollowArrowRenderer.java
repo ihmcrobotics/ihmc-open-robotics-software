@@ -22,7 +22,7 @@ public class ImGuiHollowArrowRenderer
 
    private boolean isHovered = false;
 
-   public boolean render(boolean active)
+   public boolean render(boolean useColor, int color, float lineHeight)
    {
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
@@ -33,6 +33,9 @@ public class ImGuiHollowArrowRenderer
 
       // Center is base of arrowhead
       center.set(0.7f * fontSize, 0.5f * fontSize);
+
+      if (lineHeight == ImGui.getFrameHeight())
+         center.addY(ImGui.getStyle().getFramePaddingY());
 
       float zero = 0.0f;
       float arrowheadHalfheight = 0.4f;
@@ -59,14 +62,14 @@ public class ImGuiHollowArrowRenderer
       baseBottomRight.scaleAdd(scale, center);
 
       float itemWidth = arrowheadTip.getX32() - baseTopLeft.getX32();
-      isHovered = ImGuiTools.isItemHovered(itemWidth);
+      isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       cursorXDesktopFrame = ImGui.getWindowPosX() + ImGui.getCursorPosX() - ImGui.getScrollX();
       cursorYDesktopFrame = ImGui.getWindowPosY() + ImGui.getCursorPosY() - ImGui.getScrollY();
 
-      if (active || isHovered)
+      if (useColor || isHovered)
       {
-         backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGuiTools.GREEN;
+         backgroundColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : color;
 
          ImGui.getWindowDrawList() .addTriangleFilled(cursorXDesktopFrame + arrowheadTop.getX32(), cursorYDesktopFrame + arrowheadTop.getY32(),
                                                       cursorXDesktopFrame + arrowheadTip.getX32(), cursorYDesktopFrame + arrowheadTip.getY32(),

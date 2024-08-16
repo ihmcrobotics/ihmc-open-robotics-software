@@ -17,21 +17,15 @@ module ihmc_common_msgs
       struct ConfirmableRequestMessage
       {
         /**
-         * If this message is a request to change something.
+         * Recent request numbers, monotonically increasing
+         * The size of this is roughly the max amount of expected dropped messages in 1 second
          */
-        boolean is_request;
+        sequence<unsigned long, 10> request_numbers;
         /**
-         * If this message is a confirmation that the request has been received by the other side.
+         * Recent confirmation numbers, the values of received request numbers
+         * The size of this is roughly the max amount of expected dropped messages in 1 second
          */
-        boolean is_confirmation;
-        /**
-         * Request number, monotonically increasing
-         */
-        unsigned long request_number;
-        /**
-         * Confirmation number, the value of the last received request number
-         */
-        unsigned long confirmation_number;
+        sequence<unsigned long, 10> confirmation_numbers;
       };
     };
   };

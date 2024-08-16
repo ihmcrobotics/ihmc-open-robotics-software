@@ -3,7 +3,10 @@ package us.ihmc.rdx.visualizers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
@@ -21,9 +24,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
@@ -44,6 +47,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
    // visualization options
    private Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
+   private float opacity = 1.0f;
    private boolean drawAreaText = false;
    private boolean drawBoundingBox = false;
    private boolean drawNormal;
@@ -120,6 +124,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
          lastModel = modelBuilder.end();
          modelInstance = new RDXModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         modelInstance.setOpacity(opacity);
       };
    }
 
@@ -253,5 +258,13 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
    public void setColorFunction(Function<Integer, Color> colorFunction)
    {
       this.colorFunction = colorFunction;
+   }
+
+   public void setBlendOpacity(float opacity)
+   {
+      this.opacity = opacity;
+
+      if (modelInstance != null)
+         modelInstance.setOpacity(opacity);
    }
 }

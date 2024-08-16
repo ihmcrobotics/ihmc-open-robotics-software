@@ -1,0 +1,32 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeLogMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeLogMessage__idl__
+
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeLogMessage_")
+      struct BehaviorTreeLogMessage
+      {
+        /**
+         * The instant the message was generated. Used also for equals comparison
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage instant;
+        /**
+         * Log level - Debug(500), Info(400), Warn(300), or Error(200)
+         */
+        unsigned short log_level;
+        /**
+         * The log message, as multiple ASCII bytes because of our 255 string length constraint
+         */
+        sequence<octet, 2048> log_message;
+      };
+    };
+  };
+};
+
+#endif

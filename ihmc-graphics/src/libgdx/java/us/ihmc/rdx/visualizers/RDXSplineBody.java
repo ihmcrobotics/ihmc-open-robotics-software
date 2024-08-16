@@ -106,4 +106,10 @@ public class RDXSplineBody implements RenderableProvider
          modelInstance.getRenderables(renderables, pool);
       }
    }
+
+   public void dispose()
+   {
+      if (lastModel != null)
+         lastModel.dispose();
+   }
 }

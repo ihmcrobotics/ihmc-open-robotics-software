@@ -46,10 +46,7 @@ module perception_msgs
          * 3d Vertices of the 3d object Bounding box
          */
         geometry_msgs::msg::dds::Point bounding_box_vertices[8];
-        /**
-         * Break frequency filter value for nodes that are alpha filtered
-         */
-        float break_frequency;
+        boolean enable_tracking;
       };
     };
   };

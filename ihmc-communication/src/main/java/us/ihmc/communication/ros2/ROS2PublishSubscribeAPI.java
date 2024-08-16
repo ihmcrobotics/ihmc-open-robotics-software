@@ -4,9 +4,11 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
 
@@ -17,11 +19,24 @@ public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
+   /**
+    * Allocation free callback where the user only has access to the message in the callback.
+    * The user should not take up any significat time in the callback to not slow down the ROS 2
+    * thread.
+    */
+   public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback);
+
+   /** Use when you only need the latest message and need allocation free. */
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback);
+
+   /** Allocation free version with size 16 ring buffer. */
+   public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic);
+
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
 
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic);
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic);
 
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter);
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter);
 
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic);
 

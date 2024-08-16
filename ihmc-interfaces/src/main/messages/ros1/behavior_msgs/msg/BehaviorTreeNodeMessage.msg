@@ -1,3 +1,6 @@
+# DEPRECATED - See BehaviorTreeNodeDefinitionMessage for the new version
+# We will remove this when the implementation has been migrated to the
+# new structure.
 
 # The number of children
 # This is used for a stack data structure to re-assemble the tree.

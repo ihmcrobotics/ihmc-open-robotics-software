@@ -8,8 +8,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -18,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -26,12 +23,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 {
+   private static final boolean enableCliffCost = false;
+   private static final double cliffCost = 0.3;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
@@ -48,20 +46,23 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
 
+   private final YoDouble xOffset = new YoDouble("xOffset", registry);
+   private final YoDouble yOffset = new YoDouble("yOffset", registry);
+   private final YoDouble zOffset = new YoDouble("zOffset", registry);
+   private final YoDouble yawOffset = new YoDouble("yawOffset", registry);
+   private final YoDouble pitchOffset = new YoDouble("pitchOffset", registry);
+   private final YoDouble rollOffset = new YoDouble("rollOffset", registry);
+
    private HeightMapData heightMapData;
    private final YoBoolean cliffDetected = new YoBoolean("cliffDetected", registry);
    private final ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D();
    private final Plane3D bestFitPlane = new Plane3D();
-   private static final double cliffCost = 0.0; // 0.3;
-
-   private final FootstepPlannerEnvironmentHandler environmentHandler;
 
    public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
-                                 FootstepPlannerEnvironmentHandler environmentHandler,
                                  YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -69,7 +70,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
       this.footPolygons = footPolygons;
-      this.environmentHandler = environmentHandler;
 
       /* Scale's by a factor of the foot length/width */
       double polygonScaleFactor = 0.65;
@@ -100,32 +100,30 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       idealStepTransform.preMultiplyInvertOther(stanceStepTransform);
       candidateStepTransform.preMultiplyInvertOther(stanceStepTransform);
 
-      double xOffset = candidateStepTransform.getTranslationX() - idealStepTransform.getTranslationX();
-      double yOffset = candidateStepTransform.getTranslationY() - idealStepTransform.getTranslationY();
-      double zOffset = candidateStepTransform.getTranslationZ() - idealStepTransform.getTranslationZ();
-      double yawOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw());
-      double pitchOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch());
-      double rollOffset = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll());
+      xOffset.set(candidateStepTransform.getTranslationX() - idealStepTransform.getTranslationX());
+      yOffset.set(candidateStepTransform.getTranslationY() - idealStepTransform.getTranslationY());
+      zOffset.set(candidateStepTransform.getTranslationZ() - idealStepTransform.getTranslationZ());
+      yawOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), idealStepTransform.getRotation().getYaw()));
+      pitchOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getPitch(), idealStepTransform.getRotation().getPitch()));
+      rollOffset.set(AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getRoll(), idealStepTransform.getRotation().getRoll()));
 
       edgeCost.set(0.0);
-      edgeCost.add(Math.abs(xOffset * parameters.getForwardWeight()));
-      edgeCost.add(Math.abs(yOffset * parameters.getLateralWeight()));
-      edgeCost.add(Math.abs(zOffset * (zOffset > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight())));
-      edgeCost.add(Math.abs(yawOffset * parameters.getYawWeight()));
-      edgeCost.add(Math.abs(pitchOffset * parameters.getPitchWeight()));
-      edgeCost.add(Math.abs(rollOffset * parameters.getRollWeight()));
+      edgeCost.add(Math.abs(xOffset.getValue() * parameters.getForwardWeight()));
+      edgeCost.add(Math.abs(yOffset.getValue() * parameters.getLateralWeight()));
+      edgeCost.add(Math.abs(zOffset.getValue() * (zOffset.getValue() > 0.0 ? parameters.getStepUpWeight() : parameters.getStepDownWeight())));
+      edgeCost.add(Math.abs(yawOffset.getValue() * parameters.getYawWeight()));
+      edgeCost.add(Math.abs(pitchOffset.getValue() * parameters.getPitchWeight()));
+      edgeCost.add(Math.abs(rollOffset.getValue() * parameters.getRollWeight()));
 
-      if (environmentHandler.hasFallbackHeightMap() && candidateSnapData.getSnappedToHeightMap())
+      double rmsError = candidateSnapData.getSnapRMSError();
+      if (!Double.isNaN(rmsError))
       {
-         double rmsError = candidateSnapData.getRMSErrorHeightMap();
          double rmsAlpha = EuclidCoreTools.clamp(
-               (rmsError - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()),
-               0.0,
-               1.0);
+               (rmsError - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()), 0.0, 1.0);
          edgeCost.add(rmsAlpha * parameters.getRMSErrorCost());
       }
 
-      if (heightMapData != null)
+      if (heightMapData != null && enableCliffCost)
       {
          edgeCost.add(computeHeightMapCliffCost(candidateStep));
       }
@@ -163,20 +161,12 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       if (snapData != null)
       {
          double area;
-         if (!environmentHandler.hasFallbackHeightMap() || !snapData.getSnappedToHeightMap())
+         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
+         if (footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
          {
-            ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
-            if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
-            {
-               return 0.0;
-            }
-
-            area = footholdAfterSnap.getArea();
+            return 0.0;
          }
-         else
-         {
-            area = snapData.getHeightMapArea();
-         }
+         area = footholdAfterSnap.getArea();
 
          double footArea = footPolygons.get(footstep.getRobotSide()).getArea();
          double percentAreaUnoccupied = Math.max(0.0, 1.0 - area / footArea);

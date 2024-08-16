@@ -7,6 +7,7 @@ import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXRobotLowLevelMessenger
 {
@@ -34,12 +35,14 @@ public class RDXRobotLowLevelMessenger
    {
       if (ImGui.button(labels.get("Freeze")))
       {
+         RDXBaseUI.pushNotification("Commanding freeze...");
          sendFreezeRequest();
       }
 
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stand prep")))
       {
+         RDXBaseUI.pushNotification("Commanding stand prep...");
          sendStandRequest();
       }
 
@@ -68,12 +71,15 @@ public class RDXRobotLowLevelMessenger
          GoHomeMessage homeChest = new GoHomeMessage();
          homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
          homeChest.setTrajectoryTime(trajectoryTime);
+
+         RDXBaseUI.pushNotification("Commanding home pose...");
          communicationHelper.publishToController(homeChest);
       }
 
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stop All Trajectories")))
       {
+         RDXBaseUI.pushNotification("Commanding stop all trajectories...");
          StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
          communicationHelper.publishToController(stopAllTrajectoryMessage);
       }

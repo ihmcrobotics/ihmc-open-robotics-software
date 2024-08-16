@@ -5,7 +5,8 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.MissionControlAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.resourceMonitor.FreeMemoryMonitor;
@@ -43,8 +44,8 @@ public class MissionControlDaemon
    private final Map<String, SystemdServiceMonitor> serviceMonitors = new HashMap<>();
 
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<SystemAvailableMessage> systemAvailablePublisher;
-   private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
+   private final ROS2PublisherBasics<SystemAvailableMessage> systemAvailablePublisher;
+   private final ROS2PublisherBasics<SystemResourceUsageMessage> systemResourceUsagePublisher;
    private final List<ExceptionHandlingThreadScheduler> schedulers = new ArrayList<>();
 
    public MissionControlDaemon()
@@ -93,8 +94,8 @@ public class MissionControlDaemon
 
       String ros2NodeName = "mission_control_daemon_" + instanceId.toString().replace("-", ""); // ROS2 node names cannot have dashes
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ros2NodeName);
-      systemAvailablePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_AVAILABLE);
-      systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId));
+      systemAvailablePublisher = ros2Node.createPublisher(MissionControlAPI.SYSTEM_AVAILABLE);
+      systemResourceUsagePublisher = ros2Node.createPublisher(MissionControlAPI.getSystemResourceUsageTopic(instanceId));
 
       ExceptionHandlingThreadScheduler systemAvailablePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemAvailablePublisherScheduler");
       ExceptionHandlingThreadScheduler systemResourceUsagePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemResourceUsagePublisherScheduler");
@@ -105,17 +106,17 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.1);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
       {
          handleServiceLogRefreshMessage(subscriber.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceActionTopic(instanceId), subscriber ->
       {
          SystemServiceActionMessage message = subscriber.takeNextData();
          LogTools.info("Received service action message " + message);
          handleServiceActionMessage(message);
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemRebootTopic(instanceId), subscriber ->
       {
          ProcessTools.execSimpleCommandSafe("sudo reboot");
       });
@@ -231,8 +232,8 @@ public class MissionControlDaemon
    {
       if (networkMonitor != null)
          networkMonitor.stop();
-      systemAvailablePublisher.destroy();
-      systemResourceUsagePublisher.destroy();
+      systemAvailablePublisher.remove();
+      systemResourceUsagePublisher.remove();
       schedulers.forEach(ExceptionHandlingThreadScheduler::shutdown);
       serviceMonitors.values().forEach(SystemdServiceMonitor::destroy);
       ros2Node.destroy();

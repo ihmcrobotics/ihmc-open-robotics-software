@@ -39,7 +39,6 @@ public class RDXVROnlyPointCloudDemo
             fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud",
                                                               ros2Node,
                                                               PerceptionAPI.MULTISENSE_LIDAR_SCAN);
-            fusedPointCloud.setSubscribed(true);
             fusedPointCloud.create();
             fusedPointCloud.setActive(true);
          }

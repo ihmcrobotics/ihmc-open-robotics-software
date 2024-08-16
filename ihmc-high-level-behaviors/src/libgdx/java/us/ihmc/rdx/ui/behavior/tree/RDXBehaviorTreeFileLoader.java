@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperation;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -11,8 +12,6 @@ import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
-
-import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeFileLoader
 {
@@ -30,10 +29,10 @@ public class RDXBehaviorTreeFileLoader
       MutableObject<RDXBehaviorTreeNode<?, ?>> loadedNode = new MutableObject<>();
 
       LogTools.info("Loading {}", fileToLoad.getTreeFile().getFilesystemFile());
-      RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(fileToLoad.getTreeFile().getFileName()));
+      RDXBaseUI.pushNotification("Loading %s".formatted(fileToLoad.getTreeFile().getFileName()));
       JSONFileTools.load(fileToLoad.getTreeFile(), jsonNode ->
       {
-         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue, fileToLoad.getTreeFile().getFileName()));
+         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue));
       });
 
       return loadedNode.getValue();
@@ -41,8 +40,7 @@ public class RDXBehaviorTreeFileLoader
 
    private RDXBehaviorTreeNode<?, ?> loadFromFile(JsonNode jsonNode,
                                                   RDXBehaviorTreeNode<?, ?> parentNode,
-                                                  BehaviorTreeTopologyOperationQueue topologyOperationQueue,
-                                                  @Nullable String jsonFileName)
+                                                  BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -50,10 +48,8 @@ public class RDXBehaviorTreeFileLoader
                                                               behaviorTreeState.getAndIncrementNextID(),
                                                               behaviorTreeState.getCRDTInfo(),
                                                               behaviorTreeState.getSaveFileDirectory());
-      if (jsonFileName != null)
-         node.getDefinition().setJSONFileName(jsonFileName);
       node.getDefinition().loadFromFile(jsonNode);
-      LogTools.info("Creating node: {}:{}", node.getDefinition().getDescription(), node.getState().getID());
+      LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
 
       if (parentNode != null)
       {
@@ -65,19 +61,23 @@ public class RDXBehaviorTreeFileLoader
          JsonNode fileNode = childJsonNode.get("file");
          if (fileNode == null)
          {
-            loadFromFile(childJsonNode, node, topologyOperationQueue, null);
+            loadFromFile(childJsonNode, node, topologyOperationQueue);
          }
          else
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
-            RDXBaseUI.getInstance().getPrimary3DPanel().getNotificationManager().pushNotification("Loading %s".formatted(childFile.getFileName()));
+            RDXBaseUI.pushNotification("Loading %s".formatted(childFile.getFileName()));
             JSONFileTools.load(childFile, childJSONNode ->
             {
-               loadFromFile(childJSONNode, node, topologyOperationQueue, childFile.getFileName());
+               loadFromFile(childJSONNode, node, topologyOperationQueue);
             });
          }
       });
+
+      // Set the on disk fields after the children are added so we
+      // can mark modified when children topology changes
+      topologyOperationQueue.queueOperation(() -> node.getDefinition().setOnDiskFields());
 
       return node;
    }

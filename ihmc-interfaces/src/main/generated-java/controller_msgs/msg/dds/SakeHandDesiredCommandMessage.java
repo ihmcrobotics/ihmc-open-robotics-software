@@ -14,35 +14,33 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public static final byte COMMAND_OPTION_OPEN = (byte) 0;
-   public static final byte COMMAND_OPTION_CLOSE = (byte) 1;
-   public static final byte COMMAND_OPTION_GRIP = (byte) 2;
-   public static final byte COMMAND_OPTION_CUSTOM = (byte) 3;
-   public static final byte COMMAND_OPTION_CALIBRATE = (byte) 4;
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
-   public long sequence_id_;
-   /**
-            * Specifies the side of the robot that will execute the trajectory
+            * Specifies the side of the robot of the hand being referred to
             */
    public byte robot_side_ = (byte) 255;
    /**
-            * Specifies the grasp to perform
+            * Request the gripper to perform a calibration sequence
             */
-   public byte desired_command_option_ = (byte) 255;
+   public boolean request_calibration_;
    /**
-            * Set to true when user confirms an error
+            * Request to reset the gripper error state after overheating
             */
-   public boolean error_confirmation_;
+   public boolean request_reset_errors_;
    /**
-            * 1.0 is closed, 0.0 is open
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * -1.0 means "unspecified". Gripper will keep current value
             */
-   public double position_ratio_;
+   public double normalized_gripper_desired_position_;
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
+            * The dynamixel torque limit setting in achieving the desired position,
+            * normalized to the peak dynamixel torque.
+            * 0.0: dynamixel will not apply any force and will not achieve desired position
+            * 0.3: A reasonable normal value
+            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * -1.0 means "unspecified". Gripper will keep current value
             */
-   public double torque_ratio_;
+   public double normalized_gripper_torque_limit_;
 
    public SakeHandDesiredCommandMessage()
    {
@@ -56,44 +54,27 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
    public void set(SakeHandDesiredCommandMessage other)
    {
-      sequence_id_ = other.sequence_id_;
-
       robot_side_ = other.robot_side_;
 
-      desired_command_option_ = other.desired_command_option_;
+      request_calibration_ = other.request_calibration_;
 
-      error_confirmation_ = other.error_confirmation_;
+      request_reset_errors_ = other.request_reset_errors_;
 
-      position_ratio_ = other.position_ratio_;
+      normalized_gripper_desired_position_ = other.normalized_gripper_desired_position_;
 
-      torque_ratio_ = other.torque_ratio_;
+      normalized_gripper_torque_limit_ = other.normalized_gripper_torque_limit_;
 
    }
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
-   public void setSequenceId(long sequence_id)
-   {
-      sequence_id_ = sequence_id;
-   }
-   /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
-   public long getSequenceId()
-   {
-      return sequence_id_;
-   }
-
-   /**
-            * Specifies the side of the robot that will execute the trajectory
+            * Specifies the side of the robot of the hand being referred to
             */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies the side of the robot that will execute the trajectory
+            * Specifies the side of the robot of the hand being referred to
             */
    public byte getRobotSide()
    {
@@ -101,63 +82,77 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
    }
 
    /**
-            * Specifies the grasp to perform
+            * Request the gripper to perform a calibration sequence
             */
-   public void setDesiredCommandOption(byte desired_command_option)
+   public void setRequestCalibration(boolean request_calibration)
    {
-      desired_command_option_ = desired_command_option;
+      request_calibration_ = request_calibration;
    }
    /**
-            * Specifies the grasp to perform
+            * Request the gripper to perform a calibration sequence
             */
-   public byte getDesiredCommandOption()
+   public boolean getRequestCalibration()
    {
-      return desired_command_option_;
-   }
-
-   /**
-            * Set to true when user confirms an error
-            */
-   public void setErrorConfirmation(boolean error_confirmation)
-   {
-      error_confirmation_ = error_confirmation;
-   }
-   /**
-            * Set to true when user confirms an error
-            */
-   public boolean getErrorConfirmation()
-   {
-      return error_confirmation_;
+      return request_calibration_;
    }
 
    /**
-            * 1.0 is closed, 0.0 is open
+            * Request to reset the gripper error state after overheating
             */
-   public void setPositionRatio(double position_ratio)
+   public void setRequestResetErrors(boolean request_reset_errors)
    {
-      position_ratio_ = position_ratio;
+      request_reset_errors_ = request_reset_errors;
    }
    /**
-            * 1.0 is closed, 0.0 is open
+            * Request to reset the gripper error state after overheating
             */
-   public double getPositionRatio()
+   public boolean getRequestResetErrors()
    {
-      return position_ratio_;
+      return request_reset_errors_;
    }
 
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * -1.0 means "unspecified". Gripper will keep current value
             */
-   public void setTorqueRatio(double torque_ratio)
+   public void setNormalizedGripperDesiredPosition(double normalized_gripper_desired_position)
    {
-      torque_ratio_ = torque_ratio;
+      normalized_gripper_desired_position_ = normalized_gripper_desired_position;
    }
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
+            * The desired dynamixel position, normalized to the gripper range of motion
+            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * -1.0 means "unspecified". Gripper will keep current value
             */
-   public double getTorqueRatio()
+   public double getNormalizedGripperDesiredPosition()
    {
-      return torque_ratio_;
+      return normalized_gripper_desired_position_;
+   }
+
+   /**
+            * The dynamixel torque limit setting in achieving the desired position,
+            * normalized to the peak dynamixel torque.
+            * 0.0: dynamixel will not apply any force and will not achieve desired position
+            * 0.3: A reasonable normal value
+            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * -1.0 means "unspecified". Gripper will keep current value
+            */
+   public void setNormalizedGripperTorqueLimit(double normalized_gripper_torque_limit)
+   {
+      normalized_gripper_torque_limit_ = normalized_gripper_torque_limit;
+   }
+   /**
+            * The dynamixel torque limit setting in achieving the desired position,
+            * normalized to the peak dynamixel torque.
+            * 0.0: dynamixel will not apply any force and will not achieve desired position
+            * 0.3: A reasonable normal value
+            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * -1.0 means "unspecified". Gripper will keep current value
+            */
+   public double getNormalizedGripperTorqueLimit()
+   {
+      return normalized_gripper_torque_limit_;
    }
 
 
@@ -178,17 +173,15 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_command_option_, other.desired_command_option_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_calibration_, other.request_calibration_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.error_confirmation_, other.error_confirmation_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_reset_errors_, other.request_reset_errors_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_ratio_, other.position_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_gripper_desired_position_, other.normalized_gripper_desired_position_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.torque_ratio_, other.torque_ratio_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_gripper_torque_limit_, other.normalized_gripper_torque_limit_, epsilon)) return false;
 
 
       return true;
@@ -203,17 +196,15 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       SakeHandDesiredCommandMessage otherMyClass = (SakeHandDesiredCommandMessage) other;
 
-      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      if(this.desired_command_option_ != otherMyClass.desired_command_option_) return false;
+      if(this.request_calibration_ != otherMyClass.request_calibration_) return false;
 
-      if(this.error_confirmation_ != otherMyClass.error_confirmation_) return false;
+      if(this.request_reset_errors_ != otherMyClass.request_reset_errors_) return false;
 
-      if(this.position_ratio_ != otherMyClass.position_ratio_) return false;
+      if(this.normalized_gripper_desired_position_ != otherMyClass.normalized_gripper_desired_position_) return false;
 
-      if(this.torque_ratio_ != otherMyClass.torque_ratio_) return false;
+      if(this.normalized_gripper_torque_limit_ != otherMyClass.normalized_gripper_torque_limit_) return false;
 
 
       return true;
@@ -225,18 +216,16 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       StringBuilder builder = new StringBuilder();
 
       builder.append("SakeHandDesiredCommandMessage {");
-      builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("desired_command_option=");
-      builder.append(this.desired_command_option_);      builder.append(", ");
-      builder.append("error_confirmation=");
-      builder.append(this.error_confirmation_);      builder.append(", ");
-      builder.append("position_ratio=");
-      builder.append(this.position_ratio_);      builder.append(", ");
-      builder.append("torque_ratio=");
-      builder.append(this.torque_ratio_);
+      builder.append("request_calibration=");
+      builder.append(this.request_calibration_);      builder.append(", ");
+      builder.append("request_reset_errors=");
+      builder.append(this.request_reset_errors_);      builder.append(", ");
+      builder.append("normalized_gripper_desired_position=");
+      builder.append(this.normalized_gripper_desired_position_);      builder.append(", ");
+      builder.append("normalized_gripper_torque_limit=");
+      builder.append(this.normalized_gripper_torque_limit_);
       builder.append("}");
       return builder.toString();
    }

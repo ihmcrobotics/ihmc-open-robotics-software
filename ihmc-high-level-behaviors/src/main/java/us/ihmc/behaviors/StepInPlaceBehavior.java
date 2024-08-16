@@ -10,7 +10,8 @@ import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.DeprecatedAPIs;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -35,7 +36,7 @@ public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor imple
 {
    private final BehaviorHelper helper;
 
-   private final IHMCROS2Input<Bool> stepping;
+   private final ROS2Input<Bool> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
    private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
    private final AtomicLong footstepID = new AtomicLong();
@@ -141,7 +142,7 @@ public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor imple
 
    public static class API
    {
-      private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/step_in_place";
+      private static final String MODULE_NAME = DeprecatedAPIs.BEHAVIOR_MODULE_NAME + "/step_in_place";
       private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
       public static final ROS2Topic<Bool> STEPPING = BASE_TOPIC.withType(Bool.class).withSuffix("stepping");

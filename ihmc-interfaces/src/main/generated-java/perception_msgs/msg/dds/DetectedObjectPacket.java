@@ -43,6 +43,11 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
             * 3d Vertices of the 3d object Bounding box
             */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_vertices_;
+   /**
+            * Optional point cloud for ICP tracked object
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  object_point_cloud_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  segmented_point_cloud_;
 
    public DetectedObjectPacket()
    {
@@ -61,6 +66,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       {
           bounding_box_vertices_[i3] = new us.ihmc.euclid.tuple3D.Point3D();
       }
+      object_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (32768, new geometry_msgs.msg.dds.Point32PubSubType());
+      segmented_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (32768, new geometry_msgs.msg.dds.Point32PubSubType());
+
    }
 
    public DetectedObjectPacket(DetectedObjectPacket other)
@@ -90,6 +98,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       {
             geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_vertices_[i7], bounding_box_vertices_[i7]);}
 
+      object_point_cloud_.set(other.object_point_cloud_);
+      segmented_point_cloud_.set(other.segmented_point_cloud_);
    }
 
    /**
@@ -198,6 +208,21 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
    }
 
 
+   /**
+            * Optional point cloud for ICP tracked object
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  getObjectPointCloud()
+   {
+      return object_point_cloud_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  getSegmentedPointCloud()
+   {
+      return segmented_point_cloud_;
+   }
+
+
    public static Supplier<DetectedObjectPacketPubSubType> getPubSubType()
    {
       return DetectedObjectPacketPubSubType::new;
@@ -235,6 +260,20 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
               if (!this.bounding_box_vertices_[i11].epsilonEquals(other.bounding_box_vertices_[i11], epsilon)) return false;
       }
 
+      if (this.object_point_cloud_.size() != other.object_point_cloud_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.object_point_cloud_.size(); i++)
+         {  if (!this.object_point_cloud_.get(i).epsilonEquals(other.object_point_cloud_.get(i), epsilon)) return false; }
+      }
+
+      if (this.segmented_point_cloud_.size() != other.segmented_point_cloud_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.segmented_point_cloud_.size(); i++)
+         {  if (!this.segmented_point_cloud_.get(i).epsilonEquals(other.segmented_point_cloud_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -266,6 +305,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       {
                 if (!this.bounding_box_vertices_[i15].equals(otherMyClass.bounding_box_vertices_[i15])) return false;
       }
+      if (!this.object_point_cloud_.equals(otherMyClass.object_point_cloud_)) return false;
+      if (!this.segmented_point_cloud_.equals(otherMyClass.segmented_point_cloud_)) return false;
 
       return true;
    }
@@ -291,7 +332,11 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       builder.append("bounding_box_2d_vertices=");
       builder.append(java.util.Arrays.toString(this.bounding_box_2d_vertices_));      builder.append(", ");
       builder.append("bounding_box_vertices=");
-      builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));
+      builder.append(java.util.Arrays.toString(this.bounding_box_vertices_));      builder.append(", ");
+      builder.append("object_point_cloud=");
+      builder.append(this.object_point_cloud_);      builder.append(", ");
+      builder.append("segmented_point_cloud=");
+      builder.append(this.segmented_point_cloud_);
       builder.append("}");
       return builder.toString();
    }

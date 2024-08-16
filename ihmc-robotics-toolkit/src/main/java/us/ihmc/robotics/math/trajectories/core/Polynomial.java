@@ -7,6 +7,9 @@ import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 
+/**
+ * Used to compute the value and 1st and 2nd order derivatives of a polynomial.
+ */
 public class Polynomial implements PolynomialBasics
 {
    private final int maximumNumberOfCoefficients;

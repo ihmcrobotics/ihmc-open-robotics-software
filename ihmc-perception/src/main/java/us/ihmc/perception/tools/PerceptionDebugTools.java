@@ -35,7 +35,7 @@ public class PerceptionDebugTools
    public static final Scalar COLOR_BLACK = new Scalar(0, 0, 0, 255);
    public static final Scalar COLOR_WHITE = new Scalar(255, 255, 255, 255);
    public static final Scalar COLOR_GRAY = new Scalar(128, 128, 128, 255);
-   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 255, 255);
+   public static final Scalar COLOR_PURPLE = new Scalar(255, 0, 160, 255);
 
    public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {
@@ -247,16 +247,16 @@ public class PerceptionDebugTools
    public static String heightMapToString(String name, HeightMapData heightMapData, int skip)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
-      LogTools.info("Height Map: [Center: {}]", heightMapData.getGridCenter());
+      LogTools.info("Height Map: [Center: {}, Size: {}]", heightMapData.getGridCenter(), heightMapData.getCellsPerAxis());
       for (int i = 0; i < heightMapData.getCellsPerAxis(); i += skip)
       {
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
             double height = heightMapData.getHeightAt(i, j);
-            if (height > 0.0001)
-               matString.append(String.format("%.2f", height)).append(" ");
-            else
-               matString.append("||||").append(" ");
+            //if (height > 0.0001)
+            matString.append(String.format("%.1f", height)).append(" ");
+            //else
+            //   matString.append("||||").append(" ");
          }
          matString.append("\n");
       }
@@ -302,11 +302,14 @@ public class PerceptionDebugTools
 
       if (screenSize != -1)
       {
-         opencv_highgui.resizeWindow(tag, screenSize / image.rows() * image.cols(), screenSize);
+         int finalRows = screenSize;
+         int finalCols = (int) ((float) screenSize / (float) image.rows() * (float) image.cols());
+         LogTools.debug(String.format("Image Size: %d x %d Display Size: %d x %d", finalRows, finalCols, image.rows(), image.cols()));
+         opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
 
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113 || code != -1) // Keycode for 'q'
+      if (code == 113) // Keycode for 'q'
       {
          System.exit(0);
       }
@@ -343,7 +346,7 @@ public class PerceptionDebugTools
       OpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
+      display(tag, finalDisplayDepth, delay, finalDisplayDepth.rows());
    }
 
    public void testProjection(Mat depth)
@@ -396,7 +399,7 @@ public class PerceptionDebugTools
       return proj;
    }
 
-   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size)
+   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size, int nodesPerMeter)
    {
       Scalar leftColor = new Scalar(0, 255, 255, 0);
       Scalar rightColor = new Scalar(0, 0, 255, 0);
@@ -404,7 +407,7 @@ public class PerceptionDebugTools
       for (int i = 0; i < linearOutput.getNumElements() / 2; i++)
       {
          Point2D point = new Point2D(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0));
-         Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+         Point2D positionOnMap = new Point2D(point.getY() * nodesPerMeter + displayImage.rows() / 2, point.getX() * nodesPerMeter + displayImage.cols() / 2);
          opencv_imgproc.rectangle(displayImage,
                                   new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                   new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
@@ -415,12 +418,12 @@ public class PerceptionDebugTools
       }
    }
 
-   public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
+   public static void plotRectangle(Mat displayImage, Point2D point, int nodesPerMeter, int size, Scalar color)
    {
-      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * nodesPerMeter + displayImage.rows() / 2), (int) (point.getX() * nodesPerMeter + displayImage.cols() / 2));
 
       // just like plotFootsteps
-      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      Point2D positionOnMap = new Point2D(point.getY() * nodesPerMeter + displayImage.rows() / 2, point.getX() * nodesPerMeter + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
                                new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
@@ -445,11 +448,11 @@ public class PerceptionDebugTools
                                0);
    }
 
-   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
+   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side, int nodesPerMeter)
    {
       LogTools.debug("Footstep Plotted: {} {} {}",
-                     (int) (origin.getY() * 50 + displayImage.rows() / 2),
-                     (int) (origin.getX() * 50 + displayImage.cols() / 2),
+                     (int) (origin.getY() * nodesPerMeter + displayImage.rows() / 2),
+                     (int) (origin.getX() * nodesPerMeter + displayImage.cols() / 2),
                      side);
 
       Scalar color;
@@ -463,7 +466,7 @@ public class PerceptionDebugTools
             color = new Scalar(255, 100, 0, 0);
             break;
          case 2: // start poses are black
-            color = new Scalar(0, 0, 0, 0);
+            color = new Scalar(0, 255, 255, 0);
             break;
          case 3: // goal poses are white
             color = new Scalar(255, 255, 255, 0);
@@ -474,7 +477,7 @@ public class PerceptionDebugTools
       }
 
       // just like plotFootsteps
-      //Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      //Point2D positionOnMap = new Point2D(origin.getY() * nodesPerMeter + displayImage.rows() / 2, origin.getX() * nodesPerMeter + displayImage.cols() / 2);
       //opencv_imgproc.rectangle(displayImage,
       //                         new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
       //                         new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
@@ -486,16 +489,13 @@ public class PerceptionDebugTools
       plotFootstepWithYaw(displayImage, new Point3D(origin.getX(), origin.getY(), yaw), color, -1, size, size * 2);
    }
 
-   public static void plotFootstepWithYaw(Mat display, Point3D pose, Scalar color, int index, double width, double length)
+   public static void plotFootstepWithYaw(Mat display, Point3D imageCoordinatesWithYaw, Scalar color, int index, double width, double length)
    {
-      double[] positionOnMap = {pose.getX() * 50 + display.rows() / 2, pose.getY() * 50 + display.cols() / 2};
-      double yaw = pose.getZ();
+      double[] positionOnMap = {imageCoordinatesWithYaw.getX() + display.rows() / 2, imageCoordinatesWithYaw.getY() + display.cols() / 2};
+      double yaw = imageCoordinatesWithYaw.getZ();
 
       // Create the footstep rectangle using the position and orientation
-      Point3D[] points = {new Point3D(-length, -width, 0),
-                          new Point3D(-length, width, 0),
-                          new Point3D(length, width, 0),
-                          new Point3D(length, -width, 0)};
+      Point3D[] points = {new Point3D(-length, -width, 0), new Point3D(-length, width, 0), new Point3D(length, width, 0), new Point3D(length, -width, 0)};
 
       Quaternion quat = new Quaternion();
       quat.setYawPitchRoll(yaw + Math.PI / 2, 0, 0);

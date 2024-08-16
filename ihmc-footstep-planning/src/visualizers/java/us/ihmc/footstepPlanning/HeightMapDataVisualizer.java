@@ -224,7 +224,10 @@ public class HeightMapDataVisualizer
          graphics3DObject.translate(0.0, 0.0, 0.1);
          graphics3DObject.addExtrudedPolygon(polygon, 0.02, YoAppearance.Glass());
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, parameters.getHeightMapSnapThreshold());
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap,
+                                                                           heightMapData,
+                                                                           parameters.getHeightMapSnapThreshold(),
+                                                                           parameters.getMinimumSurfaceInclineRadians());
          snapTransform.transform(stepTransform);
 
          graphics3DObject.identity();

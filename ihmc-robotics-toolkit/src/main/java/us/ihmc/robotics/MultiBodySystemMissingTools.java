@@ -24,10 +24,34 @@ public class MultiBodySystemMissingTools
       OneDoFJointBasics[] oneDofJoints1 = MultiBodySystemTools.filterJoints(source, OneDoFJointBasics.class);
       OneDoFJointBasics[] oneDofJoints2 = MultiBodySystemTools.filterJoints(destination, OneDoFJointBasics.class);
 
+      if (oneDofJoints1.length != oneDofJoints2.length)
+      {
+         throw new IllegalArgumentException("The lists of joints must be the same length. %d != %d".formatted(oneDofJoints1.length,
+                                                                                                              oneDofJoints2.length));
+      }
+
       for (int i = 0; i < oneDofJoints1.length; i++)
       {
          oneDofJoints2[i].setJointConfiguration(oneDofJoints1[i]);
       }
+   }
+
+   /**
+    * You want an elevator if you want to move the base around in world.
+    * Otherwise, it's stuck there.
+    *
+    * See {@link #getDetachedCopyOfSubtree}
+    */
+   public static RigidBodyBasics getDetachedCopyOfSubtreeWithElevator(RigidBodyBasics rootBodyToDetach)
+   {
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint floatingJoint = new SixDoFJoint(rootBodyToDetach.getName(), elevator);
+      RigidBodyBasics clonedRootBody = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER.cloneRigidBody(rootBodyToDetach,
+                                                                                                       null,
+                                                                                                       "",
+                                                                                                       floatingJoint);
+      cloneSubtree(rootBodyToDetach, clonedRootBody, "", null);
+      return elevator;
    }
 
    /**

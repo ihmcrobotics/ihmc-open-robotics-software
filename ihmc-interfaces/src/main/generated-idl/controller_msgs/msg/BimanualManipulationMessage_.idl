@@ -1,0 +1,47 @@
+#ifndef __controller_msgs__msg__BimanualManipulationMessage__idl__
+#define __controller_msgs__msg__BimanualManipulationMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message enables a box manipulation state.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BimanualManipulationMessage_")
+      struct BimanualManipulationMessage
+      {
+        /**
+         * If true, disables the bimanual manipulation manager and the fields below are ignored
+         */
+        boolean disable;
+        /**
+         * Mass of the object being manipulated
+         */
+        @defaultValue(value=-1.0)
+        double object_mass;
+        /**
+         * Lateral squeeze force while manipulating the object. Should approximately be squeeze_force = 0.5 * g * object_mass / friction_coefficient
+         */
+        @defaultValue(value=-1.0)
+        double squeeze_force;
+        /**
+         * The squeeze and mass compensation forces ramp up over this duration (if negative a default value is used)
+         */
+        @defaultValue(value=-1.0)
+        double initialize_duration;
+        /**
+         * Tracking error - if the distance between the hands varies from their initial distance by more than this value, the manipulation manager stops
+         */
+        @defaultValue(value=-1.0)
+        double acceptable_tracking_error;
+      };
+    };
+  };
+};
+
+#endif

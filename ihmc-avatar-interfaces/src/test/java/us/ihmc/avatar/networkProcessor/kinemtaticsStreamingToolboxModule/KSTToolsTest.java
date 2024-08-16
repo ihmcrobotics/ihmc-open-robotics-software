@@ -58,7 +58,7 @@ public class KSTToolsTest
          FrameVector3D angularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame);
 
          FrameQuaternion actual = new FrameQuaternion();
-         KSTTools.integrateAngularVelocity(dt, initialOrientation, angularVelocity, actual);
+         KSTTools.integrateAngularVelocity(dt, initialOrientation, angularVelocity, true, actual);
 
          Quaternion expected = new Quaternion();
          new MultiBodySystemStateIntegrator(dt).integrate(angularVelocity, initialOrientation, expected);

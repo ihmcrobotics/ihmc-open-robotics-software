@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -35,7 +35,7 @@ public class OusterHeightMapUpdater
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher;
+   private final ROS2PublisherBasics<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
    private final HeightMapUpdater heightMapUpdater;
@@ -47,7 +47,7 @@ public class OusterHeightMapUpdater
    public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_height_map_publisher");
-      heightMapPublisher = ROS2Tools.createPublisher(realtimeROS2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT);
+      heightMapPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
       ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);
       ros2.subscribeToControllerViaCallback(WalkingStatusMessage.class, this::consumeWalkingStatusMessage);

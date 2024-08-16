@@ -10,7 +10,7 @@ import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,8 +48,8 @@ public class FootstepListBehavior extends AbstractBehavior
    private double defaultSwingTime;
    private double defaultTranferTime;
 
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
-   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
 
    public FootstepListBehavior(String robotName, ROS2Node ros2Node, WalkingControllerParameters walkingControllerParameters)
    {

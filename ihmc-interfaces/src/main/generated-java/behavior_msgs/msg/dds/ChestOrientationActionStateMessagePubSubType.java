@@ -15,7 +15,7 @@ public class ChestOrientationActionStateMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d9693395887e01d241674c4adcf511f009c24f4fc9dddb30802b17513856df18";
+   		return "9b60397dcde9d3551593bf31efdd81462a3b3f5d7bbbf7570a6e5b8a6131886a";
    }
    
    @Override

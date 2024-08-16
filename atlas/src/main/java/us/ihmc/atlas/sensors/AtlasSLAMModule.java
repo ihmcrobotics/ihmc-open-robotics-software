@@ -11,8 +11,8 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -41,26 +41,20 @@ public class AtlasSLAMModule extends SLAMModule
     * to update corrected sensor frame for robot state estimation.
     */
    protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
-   protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
+   protected ROS2PublisherBasics<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
    public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
    {
       super(ros2Node, messager, AtlasSensorInformation.transformPelvisToD435DepthCamera, configurationFile);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleRobotConfigurationData);
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName())
+                                                       .withTypeName(RobotConfigurationData.class), this::handleRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleFootstepStatusMessage);
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName())
+                                                       .withTypeName(FootstepStatusMessage.class), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                    StampedPosePacket.class,
-                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      estimatedPelvisPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName()).withTypeName(StampedPosePacket.class));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
@@ -72,14 +66,13 @@ public class AtlasSLAMModule extends SLAMModule
    {
       super(messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleRobotConfigurationData);
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName())
+                                                       .withTypeName(RobotConfigurationData.class), this::handleRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleFootstepStatusMessage);
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName())
+                                                       .withTypeName(FootstepStatusMessage.class), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
-                                                                    ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()));
+      estimatedPelvisPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(drcRobotModel.getSimpleRobotName()).withTypeName(StampedPosePacket.class));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 

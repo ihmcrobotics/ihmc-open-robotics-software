@@ -574,6 +574,16 @@ module toolbox_msgs
          */
         @defaultValue(value=-11.1)
         double height_map_snap_threshold;
+        /**
+         * When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+         */
+        @defaultValue(value=-11.1)
+        double scaled_foot_polygon_percentage;
+        /**
+         * When using a height map, a distance is set that determines if a cliff is detected or not
+         */
+        @defaultValue(value=-11.1)
+        double cliff_height_threshold;
       };
     };
   };

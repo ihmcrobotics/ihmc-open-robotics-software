@@ -5,11 +5,9 @@ import sensor_msgs.msg.dds.CompressedImage;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -28,7 +26,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
    private static final boolean THROTTLE = true;
    private final double outputFrequenct;
 
-   private final IHMCROS2Publisher<VideoPacket> publisher;
+   private final ROS2PublisherBasics<VideoPacket> publisher;
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -50,7 +48,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
       ROS2Topic<VideoPacket> ros2Topic = ros2OutputTopic;
       LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+      publisher = ros2Node.createPublisher(ros2Topic);
    }
 
    @Override

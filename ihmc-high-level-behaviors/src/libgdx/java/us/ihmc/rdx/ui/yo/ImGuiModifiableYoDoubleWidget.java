@@ -11,9 +11,9 @@ public class ImGuiModifiableYoDoubleWidget
    private final ImGuiModifiableYoDouble modifiableYoDouble;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public ImGuiModifiableYoDoubleWidget(ImGuiYoVariableClientUI yoVariableClientUI, String yoVariableName)
+   public ImGuiModifiableYoDoubleWidget(RDXYoVariableClientPanel yoVariableClientPanel, String yoVariableName)
    {
-      yoDoubleClientHelper = yoVariableClientUI.getYoVariableClientHelper().subscribeToYoDouble(yoVariableName);
+      yoDoubleClientHelper = yoVariableClientPanel.getYoVariableClientHelper().subscribeToYoDouble(yoVariableName);
       modifiableYoDouble = new ImGuiModifiableYoDouble(yoDoubleClientHelper);
    }
 

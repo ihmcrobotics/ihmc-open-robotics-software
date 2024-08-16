@@ -17,9 +17,17 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
-         * Execute with next action
+         * If the node is set to execute after the previous node
          */
-        boolean execute_with_next_action;
+        boolean execute_after_previous;
+        /**
+         * If the node is set to execute after the beginning
+         */
+        boolean execute_after_beginning;
+        /**
+         * The ID of the node to execute after
+         */
+        unsigned long execute_after_node_id;
       };
     };
   };

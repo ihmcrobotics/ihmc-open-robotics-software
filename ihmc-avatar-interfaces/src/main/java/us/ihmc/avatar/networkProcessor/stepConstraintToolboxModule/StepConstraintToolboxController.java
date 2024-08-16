@@ -17,7 +17,7 @@ import us.ihmc.avatar.stepAdjustment.SimpleStep;
 import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -43,7 +43,7 @@ public class StepConstraintToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final IHMCROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
+   private final ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final HumanoidReferenceFrames referenceFrames;
@@ -54,7 +54,7 @@ public class StepConstraintToolboxController extends ToolboxController
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
-                                          IHMCROS2Publisher<StepConstraintMessage> constraintRegionPublisher,
+                                          ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher,
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,

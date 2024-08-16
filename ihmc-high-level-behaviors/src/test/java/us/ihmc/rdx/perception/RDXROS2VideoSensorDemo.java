@@ -49,7 +49,6 @@ public class RDXROS2VideoSensorDemo
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,
                                                                                       PerceptionAPI.BIG_VIDEO);
-            videoVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
 
             globalVisualizersPanel.create();

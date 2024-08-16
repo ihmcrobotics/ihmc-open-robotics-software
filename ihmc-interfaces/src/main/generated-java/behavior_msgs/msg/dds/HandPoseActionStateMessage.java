@@ -21,9 +21,13 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage goal_chest_transform_to_world_;
    /**
-            * Linear hand wrench magnitude
+            * Hand force
             */
-   public double hand_wrench_magnitude_linear_;
+   public us.ihmc.euclid.tuple3D.Vector3D force_;
+   /**
+            * Hand torque
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D torque_;
    /**
             * Joint angles
             */
@@ -38,6 +42,8 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.HandPoseActionDefinitionMessage();
       goal_chest_transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      force_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      torque_ = new us.ihmc.euclid.tuple3D.Vector3D();
       joint_angles_ = new double[7];
 
    }
@@ -53,8 +59,8 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.HandPoseActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_chest_transform_to_world_, goal_chest_transform_to_world_);
-      hand_wrench_magnitude_linear_ = other.hand_wrench_magnitude_linear_;
-
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.force_, force_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.torque_, torque_);
       for(int i1 = 0; i1 < joint_angles_.length; ++i1)
       {
             joint_angles_[i1] = other.joint_angles_[i1];
@@ -92,19 +98,22 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       return goal_chest_transform_to_world_;
    }
 
+
    /**
-            * Linear hand wrench magnitude
+            * Hand force
             */
-   public void setHandWrenchMagnitudeLinear(double hand_wrench_magnitude_linear)
+   public us.ihmc.euclid.tuple3D.Vector3D getForce()
    {
-      hand_wrench_magnitude_linear_ = hand_wrench_magnitude_linear;
+      return force_;
    }
+
+
    /**
-            * Linear hand wrench magnitude
+            * Hand torque
             */
-   public double getHandWrenchMagnitudeLinear()
+   public us.ihmc.euclid.tuple3D.Vector3D getTorque()
    {
-      return hand_wrench_magnitude_linear_;
+      return torque_;
    }
 
 
@@ -152,8 +161,8 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!this.goal_chest_transform_to_world_.epsilonEquals(other.goal_chest_transform_to_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_wrench_magnitude_linear_, other.hand_wrench_magnitude_linear_, epsilon)) return false;
-
+      if (!this.force_.epsilonEquals(other.force_, epsilon)) return false;
+      if (!this.torque_.epsilonEquals(other.torque_, epsilon)) return false;
       for(int i3 = 0; i3 < joint_angles_.length; ++i3)
       {
                 if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_angles_[i3], other.joint_angles_[i3], epsilon)) return false;
@@ -177,8 +186,8 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.goal_chest_transform_to_world_.equals(otherMyClass.goal_chest_transform_to_world_)) return false;
-      if(this.hand_wrench_magnitude_linear_ != otherMyClass.hand_wrench_magnitude_linear_) return false;
-
+      if (!this.force_.equals(otherMyClass.force_)) return false;
+      if (!this.torque_.equals(otherMyClass.torque_)) return false;
       for(int i5 = 0; i5 < joint_angles_.length; ++i5)
       {
                 if(this.joint_angles_[i5] != otherMyClass.joint_angles_[i5]) return false;
@@ -202,8 +211,10 @@ public class HandPoseActionStateMessage extends Packet<HandPoseActionStateMessag
       builder.append(this.definition_);      builder.append(", ");
       builder.append("goal_chest_transform_to_world=");
       builder.append(this.goal_chest_transform_to_world_);      builder.append(", ");
-      builder.append("hand_wrench_magnitude_linear=");
-      builder.append(this.hand_wrench_magnitude_linear_);      builder.append(", ");
+      builder.append("force=");
+      builder.append(this.force_);      builder.append(", ");
+      builder.append("torque=");
+      builder.append(this.torque_);      builder.append(", ");
       builder.append("joint_angles=");
       builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("solution_quality=");

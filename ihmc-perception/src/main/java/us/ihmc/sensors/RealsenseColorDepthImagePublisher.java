@@ -1,25 +1,17 @@
 package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDAImageEncoder;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
@@ -27,15 +19,14 @@ import us.ihmc.tools.thread.RestartableThread;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 public class RealsenseColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
-   private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2ColorImagePublisher;
 
-   private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
+   private CUDAImageEncoder imageEncoder;
 
    private long lastDepthSequenceNumber = -1L;
    private long lastColorSequenceNumber = -1L;
@@ -54,8 +45,8 @@ public class RealsenseColorDepthImagePublisher
                                             ROS2Topic<ImageMessage> colorTopic)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_publisher");
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
-      ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic);
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
+      ros2ColorImagePublisher = ros2Node.createPublisher(colorTopic);
 
       publishDepthThread = new RestartableThread("RealsenseDepthImagePublisher", this::publishDepthThreadFunction);
       publishColorThread = new RestartableThread("RealsenseColorImagePublisher", this::publishColorThreadFunction);
@@ -94,7 +85,7 @@ public class RealsenseColorDepthImagePublisher
       {
          // Encode depth image to png
          BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMatrix(), depthPNGPointer);
+         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -151,13 +142,16 @@ public class RealsenseColorDepthImagePublisher
       // Redundant safety checks
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumber)
       {
+         if (imageEncoder == null)
+            imageEncoder = new CUDAImageEncoder();
+
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMatrix().data(),
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
                                 colorJPEGPointer,
                                 colorImageToPublish.getImageWidth(),
                                 colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMatrix().step());
+                                colorImageToPublish.getGpuImageMat().step());
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
@@ -258,16 +252,18 @@ public class RealsenseColorDepthImagePublisher
       {
          colorPublishLock.unlock();
       }
+      publishColorThread.blockingStop();
 
       if (nextCpuDepthImage != null)
          nextCpuDepthImage.release();
       if (nextCpuColorImage != null)
          nextCpuColorImage.release();
 
-      imageEncoder.destroy();
+      if (imageEncoder != null)
+         imageEncoder.destroy();
 
-      ros2DepthImagePublisher.destroy();
-      ros2ColorImagePublisher.destroy();
+      ros2DepthImagePublisher.remove();
+      ros2ColorImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

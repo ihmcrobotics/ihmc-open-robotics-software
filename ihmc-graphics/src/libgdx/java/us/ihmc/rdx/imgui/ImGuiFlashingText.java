@@ -21,11 +21,7 @@ public class ImGuiFlashingText
 
    public void renderText(String text, boolean flashing)
    {
-      if (!timer.isRunning(PERIOD))
-      {
-         timer.reset();
-         flashState = !flashState;
-      }
+      update();
 
       if (flashing && flashState)
       {
@@ -35,6 +31,22 @@ public class ImGuiFlashingText
       if (flashing && flashState)
       {
          ImGui.popStyleColor();
+      }
+   }
+
+   public int getTextColor(boolean flashing)
+   {
+      update();
+
+      return flashing && flashState ? flashColor : ImGui.getColorU32(ImGuiCol.Text);
+   }
+
+   private void update()
+   {
+      if (!timer.isRunning(PERIOD))
+      {
+         timer.reset();
+         flashState = !flashState;
       }
    }
 }

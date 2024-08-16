@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.ObjectWeightPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
@@ -12,7 +12,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet" + behaviorName, registry);
    private final YoBoolean packetAvailable = new YoBoolean("packetAvailable" + behaviorName, registry);
    private ObjectWeightPacket objectWeightPacket;
-   private IHMCROS2Publisher<ObjectWeightPacket> publisher;
+   private ROS2PublisherBasics<ObjectWeightPacket> publisher;
 
    public ObjectWeightBehavior(String robotName, ROS2Node ros2Node)
    {

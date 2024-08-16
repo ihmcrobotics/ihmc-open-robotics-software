@@ -15,7 +15,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "edca1f926bc0d9534049018275a3d07026c76b066077034972ee413390547868";
+   		return "f59d8310b8c6a4da79d23234e59e7a0a6fb88daba0a0ec96d60ba50a8cfbbe52";
    }
    
    @Override
@@ -62,7 +62,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
@@ -106,7 +106,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
+      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getCdrSerializedSize(data.getHeightMapMessage(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBodyPath().size(); ++i0)
@@ -144,7 +144,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       cdr.write_type_9(data.getFootstepPlanningResult());
 
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
+      perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMapMessage(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
           throw new RuntimeException("body_path field exceeds the maximum length");
@@ -176,7 +176,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       	
       data.setFootstepPlanningResult(cdr.read_type_9());
       	
-      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
+      perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getHeightMapMessage(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
       cdr.read_type_e(data.getBodyPathUnsmoothed());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalPose(), cdr);	
@@ -195,7 +195,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       ser.write_type_9("body_path_planning_result", data.getBodyPathPlanningResult());
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
-      ser.write_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
+      ser.write_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
       ser.write_type_e("body_path", data.getBodyPath());
       ser.write_type_e("body_path_unsmoothed", data.getBodyPathUnsmoothed());
@@ -216,7 +216,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       data.setBodyPathPlanningResult(ser.read_type_9("body_path_planning_result"));
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
-      ser.read_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
+      ser.read_type_a("height_map_message", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMapMessage());
 
       ser.read_type_e("body_path", data.getBodyPath());
       ser.read_type_e("body_path_unsmoothed", data.getBodyPathUnsmoothed());

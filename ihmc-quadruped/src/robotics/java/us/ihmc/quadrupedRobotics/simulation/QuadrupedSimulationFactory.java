@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -338,7 +339,7 @@ public class QuadrupedSimulationFactory
       factory.setDefinitionsToPublish(fullRobotModel.get());
       factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
       factory.setRobotMotionStatusHolder(controllerManager.getMotionStatusHolder());
-      factory.setROS2Info(realtimeROS2Node, ROS2Tools.getQuadrupedControllerOutputTopic(sdfRobot.get().getName()));
+      factory.setROS2Info(realtimeROS2Node, QuadrupedAPI.getQuadrupedControllerOutputTopic(sdfRobot.get().getName()));
 
       robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
    }

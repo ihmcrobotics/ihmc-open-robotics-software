@@ -5,8 +5,6 @@ import os
 from h5py import Group, Dataset
 import matplotlib.pyplot as plt
 
-
-
 def get_data(data, namespace):
     ds = []
 
@@ -183,24 +181,36 @@ def get_data(data, namespace):
     data_block = np.vstack(ds)
     return data_block
 
-def display_image(data, index, namespace, delay):
+def load_depth(data, index, namespace):
     buffer = data[namespace + str(index)][:].byteswap().view('uint8')
     buffer_image = np.asarray(buffer, dtype=np.uint8)
+    buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_UNCHANGED)  # Use cv2.IMREAD_UNCHANGED
+    if buffer_image.dtype != np.uint16:  # Check if it's not already 16-bit
+        buffer_image = buffer_image.astype(np.uint16)
+    return buffer_image
+
+def load_image(data, index, namespace):
+    buffer = data[namespace + str(index)][:].byteswap().view('uint8')
+    buffer_image = np.asarray(buffer, dtype=np.uint8)
+    buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_ANYDEPTH)
+    return buffer_image
+
+def display_image(data, index, namespace, delay, name="Depth Image"):
+    buffer = data[namespace + '/' + str(index)][:].byteswap().view('uint8')
+    buffer_image = np.asarray(buffer, dtype=np.uint8)
     buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_GRAYSCALE)
+
+    show_depth(name, buffer_image, delay)
     
-    # print('Image: ', buffer_image.dtype, buffer_image.shape)
+def show_depth(name, image, delay):
+
+    # Convert 16-bit height map to 8-bit grayscale for display
+    image = cv2.convertScaleAbs(image, alpha=(255.0/65535.0))
 
     # Make the image brighter
-    buffer_image = np.minimum(buffer_image * 10, 255)
+    image = np.minimum(image * 10, 255)
 
-    # # Remove spikes from image by thresholding
-    # buffer_image[buffer_image > 80] = 0
-
-    # # Normalize image using OpenCV
-    # buffer_image = cv2.normalize(buffer_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
-
-
-    cv2.imshow("Depth Image", buffer_image)
+    cv2.imshow(name, image)
     code = cv2.waitKeyEx(delay)
 
     # print("Code: ", code)
@@ -219,24 +229,30 @@ def playback_images(data, channels):
         if code == 113 or code == 1048689:
             exit()
 
-def load_file(file_name):
-
-    path = '/home/quantum/.ihmc/logs/perception/'
-
-    files = ['20230216_140029_PerceptionLog.hdf5']
+def list_files():
+    home = os.path.expanduser('~')
+    path = home + '/.ihmc/logs/perception/'
+    files = sorted(os.listdir(path))
+    files = [file for file in files if file[-5:] == '.hdf5']
 
     for i, file in enumerate(files):
         print("File:", i, files[i])
 
-    data = h5py.File(path + files[0], 'r')
+def load_file(file_name):
+    home = os.path.expanduser('~')
+    path = home + '/.ihmc/logs/perception/'
+    data = h5py.File(path + file_name, 'r')
+    return data
 
 def plot_position(start_index, end_index, data_list, style_list, tag, type_string):
 
+    font = {'family' : 'normal',
+        'size'   : 20}
+
+    import matplotlib
+    matplotlib.rc('font', **font)
 
     # Compute RMSE between data_list[0] and data_list[1] with Eucledian distance between start index and end index
-    
-    
-
     fig3 = plt.figure(constrained_layout=True, figsize=(17,7))
     gs = fig3.add_gridspec(3, 7)
     xt_ax = fig3.add_subplot(gs[0, :4])
@@ -247,7 +263,6 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
     zt_ax.set_title('Position (Z) vs Keyframe Index')
     xy_ax = fig3.add_subplot(gs[:3, 4:7])
     xy_ax.set_title('Position (X) vs Position (Y)')
-
 
     # xt_ax.set_title(tag + ' ' + type_string + ' (X)')
     # yt_ax.set_title(tag + ' ' + type_string + ' (Y)')
@@ -278,10 +293,45 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
 
 
     # Add a legend on the top-left corner with blue being Ground Truth and Red being the estimated position
-    xt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    yt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    zt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
-    xy_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
+    # xt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    # yt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    # zt_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
+    xy_ax.legend(['Ground Truth', 'Sensor Position'], loc='upper left')
 
 
     plt.show()
+
+def load_raw_height_maps(data, dataset_name):
+    height_map = data[dataset_name][:]
+    return height_map
+
+def show_height_map(height_map, delay):
+    height_map_display = height_map.copy()
+
+    # convert grayscale to RGB
+    height_map_display = cv2.cvtColor(height_map_display, cv2.COLOR_GRAY2RGB)
+
+    # Resize the height map to 1000x1000
+    height_map_display = cv2.resize(height_map_display, (1000, 1000))
+
+    # compute scale factor
+    cv2.imshow("Height Map", height_map_display)
+    code = cv2.waitKeyEx(delay)
+
+    if code == 113 or code == 1048689:
+        exit()
+    
+def load_height_maps(data, count):
+    height_maps = []    
+    total_height_maps = len(data.keys()) if len(data.keys()) < count else count
+    # for i in range(total_height_maps):
+    height_map = load_raw_height_maps(data, "matrix")
+
+    # pad with 0s if less than 201 x 201
+    if height_map.shape[0] < 201:
+        height_map = np.pad(height_map, (0, 201 - height_map.shape[0]), 'constant')
+
+    print("Height Map Shape: ", height_map.shape)
+
+    height_maps.append(height_map)
+    return height_maps

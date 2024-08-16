@@ -152,10 +152,10 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    {
       setupTest(0.75);
 
-      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.simulateNow(0.25);
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
-      double delay = 0.5 * swingTime;
+      double delay = 0.2 * swingTime;
       Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
       double percentWeight = 0.5;
       double magnitude = percentWeight * totalMass * 9.81;
@@ -180,7 +180,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
-      double delay = 0.5 * swingTime;
+      double delay = 0.2 * swingTime;
       Vector3D firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
       double percentWeight = 0.3;
       double magnitude = percentWeight * totalMass * 9.81;

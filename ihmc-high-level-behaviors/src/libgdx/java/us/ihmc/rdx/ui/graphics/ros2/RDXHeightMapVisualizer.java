@@ -17,6 +17,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -44,10 +45,13 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
    private final ImBoolean enableHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
+   private final TerrainMapData terrainMapData = new TerrainMapData(RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                                                                    RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize());
+
    private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
    private HeightMapData latestHeightMapData;
    private Mat heightMapImage;
@@ -220,12 +224,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          if (heightMapImage.ptr(0) != null)
          {
             //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 10);
-            heightMapRenderer.update(zUpToWorldTransform,
-                                     heightMapImage.ptr(0),
-                                     zUpToWorldTransform.getTranslation().getX32(),
-                                     zUpToWorldTransform.getTranslation().getY32(),
-                                     heightMapImage.rows() / 2,
-                                     (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+            heightMapRenderer.update(zUpToWorldTransform, heightMapImage.ptr(0), (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset(),
+                                     zUpToWorldTransform.getTranslation().getX32(), zUpToWorldTransform.getTranslation().getY32(),
+                                     heightMapImage.rows() / 2, (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
                                      pixelScalingFactor);
          }
       }
@@ -261,6 +262,18 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public HeightMapMessage getLatestHeightMapMessage()
    {
       return latestHeightMapMessage;
+   }
+
+   public HeightMapData getLatestHeightMapData()
+   {
+      return latestHeightMapData;
+   }
+
+   public TerrainMapData getTerrainMapData()
+   {
+      terrainMapData.setHeightMap(heightMapImage);
+      terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation().getX(), zUpToWorldTransform.getTranslation().getY());
+      return terrainMapData;
    }
 
    public ImBoolean getDisplayGlobalHeightMapImage()

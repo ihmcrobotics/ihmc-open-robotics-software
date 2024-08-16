@@ -6,11 +6,9 @@ int8 ROBOT_SIDE_RIGHT=1
 
 int8 SWING_PLANNER_TYPE_NONE=0
 
-int8 SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION=1
+int8 SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION=1
 
-int8 SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION=2
-
-int8 SWING_PLANNER_TYPE_PROPORTION=3
+int8 SWING_PLANNER_TYPE_PROPORTION=2
 
 int32 NO_PLAN_ID=-1
 
@@ -77,10 +75,7 @@ int32 max_iterations
 # Max body path length if using body path
 float64 horizon_length
 
-# Planar regions to use, if you don't want to assume flat ground
-perception_msgs/PlanarRegionsListMessage planar_regions_list_message
-
-# Height map data, optional
+# Height map data, if you don'ot want to assume flat ground.
 perception_msgs/HeightMapMessage height_map_message
 
 # If true, steps are snapped assuming flat ground.

@@ -149,6 +149,11 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          variable.setValueFromDouble(value);
       }
    }
+   
+   public YoVariable getYoVariable(String variableName)
+   {
+      return yoRegistry.findVariable(variableName);
+   }
 
    @Override
    public YoBooleanClientHelper subscribeToYoBoolean(String variableName)

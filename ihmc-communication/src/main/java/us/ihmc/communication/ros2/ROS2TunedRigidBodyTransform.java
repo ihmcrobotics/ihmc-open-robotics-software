@@ -1,7 +1,7 @@
 package us.ihmc.communication.ros2;
 
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.thread.Throttler;
@@ -17,7 +17,7 @@ public class ROS2TunedRigidBodyTransform
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2IOTopicPair<RigidBodyTransformMessage> topicPair;
    private final RigidBodyTransform rigidBodyTransformToSync;
-   private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
+   private final ROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
    private final Throttler statusThrottler;
    private final RigidBodyTransformMessage statusMessage = new RigidBodyTransformMessage();
    private final boolean isRemoteTuner;

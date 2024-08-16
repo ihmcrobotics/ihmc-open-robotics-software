@@ -57,6 +57,7 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
       return new DefaultLogModelProvider<>(SDFModelLoader.class,
                                            sdfParameters.getSdfModelName(),
                                            sdfParameters.getSdfAsInputStream(),
+                                           null,
                                            sdfParameters.getResourceDirectories());
    }
 

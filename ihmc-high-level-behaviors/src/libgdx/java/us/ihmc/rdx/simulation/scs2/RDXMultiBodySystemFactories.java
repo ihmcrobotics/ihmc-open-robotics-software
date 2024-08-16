@@ -155,6 +155,7 @@ public class RDXMultiBodySystemFactories
                                              boolean createReferenceFrameGraphics)
    {
       RDXRigidBody RDXRigidBody = new RDXRigidBody(rigidBody);
+      // TODO (CD): Fix visual definition returned for the hand
       List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
       List<CollisionShapeDefinition> collisionShapeDefinitions = rigidBodyDefinition.getCollisionShapeDefinitions();
 

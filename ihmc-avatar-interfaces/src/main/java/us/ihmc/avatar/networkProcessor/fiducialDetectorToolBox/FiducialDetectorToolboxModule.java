@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -42,7 +41,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.VIDEO, videoPacket ->
+      ros2Node.createSubscription(PerceptionAPI.VIDEO, videoPacket ->
       {
          if (controller != null)
          {

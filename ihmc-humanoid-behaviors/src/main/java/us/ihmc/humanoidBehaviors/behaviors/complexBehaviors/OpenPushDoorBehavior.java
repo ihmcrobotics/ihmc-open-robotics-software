@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -54,13 +54,13 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SleepBehavior sleepBehavior;
-   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
   // private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    
    private long timeFirstDoorPushFinished = Long.MAX_VALUE;
 
-   private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
+   private final ROS2PublisherBasics<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
    public OpenPushDoorBehavior(String robotName, String behaviorPrefix, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,
                                DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService, YoGraphicsListRegistry yoGraphicsListRegistry)

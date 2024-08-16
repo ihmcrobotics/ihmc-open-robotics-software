@@ -82,6 +82,8 @@ public class RealsenseColorDepthImageRetriever
             realsense.updateDataBytePointers();
             Instant acquisitionTime = Instant.now();
 
+            numberOfFailedReads = 0;
+
             ReferenceFrame cameraFrame = sensorFrameSupplier.get();
             depthPose.setToZero(sensorFrameSupplier.get());
             depthPose.changeFrame(ReferenceFrame.getWorldFrame());

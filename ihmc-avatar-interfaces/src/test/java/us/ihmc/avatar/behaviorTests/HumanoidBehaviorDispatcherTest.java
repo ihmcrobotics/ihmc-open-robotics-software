@@ -20,7 +20,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -174,23 +175,19 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName), s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
       {
          if (robotDataReceiver != null && s != null)
             robotDataReceiver.receivedPacket(s.takeNextData());
       });
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    BehaviorControlModePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                                    s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(IHMCHumanoidBehaviorManager.getInputTopic(robotName).withTypeName(BehaviorControlModePacket.class),
+                                  s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    HumanoidBehaviorTypePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                                    s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(IHMCHumanoidBehaviorManager.getInputTopic(robotName).withTypeName(HumanoidBehaviorTypePacket.class),
+                                  s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
@@ -466,7 +463,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       targetMidFeetPose.changeFrame(worldFrame);
 
       BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
-      IHMCROS2Publisher<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
+      ROS2PublisherBasics<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
                                                                                                     IHMCHumanoidBehaviorManager.getInputTopic(getSimpleRobotName()));
       publisher.publish(pauseModePacket);
       LogTools.debug(this, "Sending Pause Request");

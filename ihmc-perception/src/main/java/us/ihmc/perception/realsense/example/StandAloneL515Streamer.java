@@ -88,7 +88,7 @@ public class StandAloneL515Streamer
       {
          ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "L515");
          ROS2Topic<StereoVisionPointCloudMessage> topic = ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
-         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+         pointcloudPublisher = ros2Node.createPublisher(topic)::publish;
 
          System.out.println("Created Publisher on: " + topic.getName());
       }

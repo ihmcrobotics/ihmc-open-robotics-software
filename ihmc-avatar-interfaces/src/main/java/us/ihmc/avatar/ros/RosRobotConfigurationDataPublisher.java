@@ -11,7 +11,6 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -162,7 +161,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
       }
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(robotConfigurationTopicName.withTypeName(RobotConfigurationData.class), s -> receivedPacket(s.takeNextData()));
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
       t.start();

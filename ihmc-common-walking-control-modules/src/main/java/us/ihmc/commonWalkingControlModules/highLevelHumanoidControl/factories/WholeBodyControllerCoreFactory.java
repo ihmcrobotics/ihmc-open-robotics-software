@@ -20,6 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WholeBodyControllerCoreFactory
@@ -122,6 +123,7 @@ public class WholeBodyControllerCoreFactory
       WholeBodyControlCoreToolbox toolbox = getOrCreateWholeBodyControllerCoreToolbox();
 
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      toolbox.setTotalMassProvider(controllerToolbox.getTotalMassProvider());
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
 
@@ -162,6 +164,7 @@ public class WholeBodyControllerCoreFactory
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
+      DoubleProvider totalMassProvider = controllerToolbox.getTotalMassProvider();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
@@ -172,6 +175,7 @@ public class WholeBodyControllerCoreFactory
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
+                                                                            totalMassProvider,
                                                                             gravityZ,
                                                                             controlDT,
                                                                             registry,
@@ -179,5 +183,4 @@ public class WholeBodyControllerCoreFactory
 
       return linearMomentumRateControlModule;
    }
-
 }

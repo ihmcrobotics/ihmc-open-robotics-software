@@ -21,7 +21,7 @@ public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState
 
       state = getState();
 
-      getDefinition().setDescription("Wait");
+      getDefinition().setName("Wait");
 
       waitDurationWidget = new ImDoubleWrapper(getDefinition()::getWaitDuration,
                                                getDefinition()::setWaitDuration,

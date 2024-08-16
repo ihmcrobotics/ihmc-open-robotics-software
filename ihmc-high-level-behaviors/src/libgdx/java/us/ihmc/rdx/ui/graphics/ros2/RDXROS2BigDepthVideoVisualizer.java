@@ -1,23 +1,19 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
-import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -28,8 +24,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<BigVideoPacket> topic;
    private RealtimeROS2Node realtimeROS2Node = null;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(false);
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
@@ -46,14 +40,25 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
+
+      setActivenessChangeCallback(isActive ->
+      {
+         if (isActive && realtimeROS2Node == null)
+         {
+            subscribe();
+         }
+         else if (!isActive && realtimeROS2Node != null)
+         {
+            unsubscribe();
+         }
+      });
    }
 
    private void subscribe()
    {
-      subscribed.set(true);
-
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+      // synchronize with the update method
+      realtimeROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (syncObject)
          {
@@ -109,12 +114,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
-      {
-         setSubscribed(subscribed.get());
-      }
-      ImGuiTools.previousWidgetTooltip("Subscribed");
-      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       messageSizeReadout.renderImGuiWidgets();
@@ -132,21 +131,8 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
       super.destroy();
    }
 
-   public void setSubscribed(boolean subscribed)
-   {
-      if (subscribed && realtimeROS2Node == null)
-      {
-         subscribe();
-      }
-      else if (!subscribed && realtimeROS2Node != null)
-      {
-         unsubscribe();
-      }
-   }
-
    private void unsubscribe()
    {
-      subscribed.set(false);
       if (realtimeROS2Node != null)
       {
          realtimeROS2Node.destroy();

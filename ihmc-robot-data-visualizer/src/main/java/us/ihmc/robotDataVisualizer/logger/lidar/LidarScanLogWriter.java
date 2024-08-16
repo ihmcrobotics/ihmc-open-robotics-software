@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
@@ -51,7 +50,7 @@ public class LidarScanLogWriter
       }
       else
       {
-         subscription = ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, topicName, subscriber -> receiveLidarScanMessage(subscriber.takeNextData()));
+         subscription = ros2Node.createSubscription(LidarScanMessage.class, subscriber -> receiveLidarScanMessage(subscriber.takeNextData()), topicName);
       }
 
       if (currentLoggingTask == null)

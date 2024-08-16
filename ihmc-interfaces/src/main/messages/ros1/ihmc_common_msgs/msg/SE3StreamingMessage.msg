@@ -16,10 +16,16 @@ geometry_msgs/Point position
 # Define the desired 3D orientation to be reached.
 geometry_msgs/Quaternion orientation
 
-# Define the desired 3D linear velocity to be reached.
+# Define the desired 3D linear velocity, expressed in world frame,  to be reached.
 geometry_msgs/Vector3 linear_velocity
 
-# Define the desired 3D angular velocity to be reached.
+# Define the desired 3D angular velocity, expressed in world frame,  to be reached.
 geometry_msgs/Vector3 angular_velocity
+
+# Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+geometry_msgs/Vector3 linear_acceleration
+
+# Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+geometry_msgs/Vector3 angular_acceleration
 
 

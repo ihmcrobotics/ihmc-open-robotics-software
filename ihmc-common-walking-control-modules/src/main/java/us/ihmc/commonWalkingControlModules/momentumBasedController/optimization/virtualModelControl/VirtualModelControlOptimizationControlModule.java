@@ -110,7 +110,7 @@ public class VirtualModelControlOptimizationControlModule implements SCS2YoGraph
 
       externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(),
                                                         centerOfMassFrame,
-                                                        toolbox.getTotalRobotMass(),
+                                                        toolbox.getTotalMassProvider(),
                                                         toolbox.getContactablePlaneBodies());
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());

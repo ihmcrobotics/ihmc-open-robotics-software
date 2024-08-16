@@ -7,23 +7,26 @@ int8 BASIC_NODE=0
 
 int8 ACTION_SEQUENCE=1
 
-int8 ARM_JOINT_ANGLES_ACTION=10
+int8 DOOR_TRAVERSAL=2
 
-int8 CHEST_ORIENTATION_ACTION=11
+int8 CHEST_ORIENTATION_ACTION=10
 
-int8 FOOTSTEP_PLAN_ACTION=12
+int8 FOOTSTEP_PLAN_ACTION=11
 
-int8 SAKE_HAND_COMMAND_ACTION=13
+int8 SAKE_HAND_COMMAND_ACTION=12
 
-int8 HAND_POSE_ACTION=14
+int8 HAND_POSE_ACTION=13
 
-int8 HAND_WRENCH_ACTION=15
+int8 HAND_WRENCH_ACTION=14
+
+int8 SCREW_PRIMITIVE_ACTION=15
 
 int8 PELVIS_HEIGHT_PITCH_ACTION=16
 
 int8 WAIT_DURATION_ACTION=17
 
-int8 WALK_ACTION=18
+# Monotonically increasing message ID that matches the CRDTInfo update number
+uint32 sequence_id
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -43,7 +46,7 @@ behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
-behavior_msgs/ArmJointAnglesActionStateMessage[] arm_joint_angles_actions
+behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 
@@ -55,10 +58,10 @@ behavior_msgs/HandPoseActionStateMessage[] hand_pose_actions
 
 behavior_msgs/HandWrenchActionStateMessage[] hand_wrench_actions
 
+behavior_msgs/ScrewPrimitiveActionStateMessage[] screw_primitive_actions
+
 behavior_msgs/PelvisHeightPitchActionStateMessage[] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
-
-behavior_msgs/WalkActionStateMessage[] walk_actions
 
 

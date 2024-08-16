@@ -4,9 +4,12 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -58,13 +61,32 @@ public class AlphaFilteredYoFramePose3D extends YoFramePose3D implements Process
       this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
    }
 
+   public AlphaFilteredYoFramePose3D(YoFramePoint3D position,
+                                     YoFrameQuaternion orientation,
+                                     FramePose3DReadOnly unfilteredPose,
+                                     DoubleProvider alpha,
+                                     YoRegistry registry)
+   {
+      super(position, orientation);
+      this.unfilteredPose = unfilteredPose;
+
+      String namePrefix = YoGeometryNameTools.getCommonPrefix(position.getNamePrefix(), orientation.getNamePrefix());
+      String nameSuffix = YoGeometryNameTools.getCommonSuffix(position.getNameSuffix(), orientation.getNameSuffix());
+
+      if (alpha == null)
+         alpha = createAlphaYoDouble(namePrefix, 0.0, registry);
+      this.alpha = alpha;
+
+      this.hasBeenCalled = new YoBoolean(namePrefix + nameSuffix + "HasBeenCalled", registry);
+   }
+
    @Override
    public void update()
    {
       if (unfilteredPose == null)
       {
-         throw new NullPointerException("AlphaFilteredYoFramePose3D must be constructed with a non null "
-                                        + "pose variable to call update(), otherwise use update(Pose3DReadOnly)");
+         throw new NullPointerException(
+               "AlphaFilteredYoFramePose3D must be constructed with a non null " + "pose variable to call update(), otherwise use update(Pose3DReadOnly)");
       }
 
       poseMeasured.set(unfilteredPose);

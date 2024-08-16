@@ -23,13 +23,27 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.SingleSupportToTransferToCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartFlamingoCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartWalkingCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopFlamingoCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromSingleSupportCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StopWalkingFromTransferCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.FlamingoStanceState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.StandingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToFlamingoStanceState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToStandingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferToWalkingSingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -65,7 +79,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -123,6 +144,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final YoBoolean limitCommandSent = new YoBoolean("limitCommandSent", registry);
 
    private final LegElasticityDebuggator legElasticityDebuggator;
+
+   private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -251,6 +274,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
+
+      isUpperBodyLoadBearing.addListener(v -> controllerToolbox.resetMultiContactCoMRegion());
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
       {
@@ -479,7 +504,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.controllerCoreOutput = controllerCoreOutput;
 
       for (int i = 0; i < bodyManagers.size(); i++)
-      { // Controller core output informs load-bearing state of load status
+      {
+         if (bodyManagers.get(i) == null)
+            continue;
+
+         // Controller core output informs load-bearing state of load status
          bodyManagers.get(i).setControllerCoreOutput(controllerCoreOutput);
       }
    }
@@ -744,7 +773,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       feetManager.compute();
 
-      boolean bodyManagerIsLoadBearing = false;
+      boolean isUpperBodyLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
@@ -753,8 +782,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             bodyManager.compute();
 
             if (bodyManager.isLoadBearing())
-               bodyManagerIsLoadBearing = true;
+               isUpperBodyLoadBearing = true;
          }
+      }
+
+      this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
+      if (isUpperBodyLoadBearing)
+      {
+         updateWholeBodyContactState();
+         controllerToolbox.updateMultiContactCoMRegion();
       }
 
       pelvisOrientationManager.compute();
@@ -772,11 +808,24 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
        * two modules.
        */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
-      boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
       else
-         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
+   }
+
+   private void updateWholeBodyContactState()
+   {
+      WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
+      wholeBodyContactState.clear();
+
+      // Set feet contact points
+      for (RobotSide robotSide : RobotSide.values)
+         wholeBodyContactState.addContactPoints(controllerToolbox.getFootContactState(robotSide));
+
+      // Set upper body contact points
+      for (int i = 0; i < bodyManagers.size(); i++)
+         bodyManagers.get(i).updateWholeBodyContactState(wholeBodyContactState);
    }
 
    private void reportStatusMessages()
@@ -796,6 +845,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          if (bodyManager != null)
          {
             statusMessage = bodyManager.pollStatusToReport();
+            if (statusMessage != null)
+               statusOutputManager.reportStatusMessage(statusMessage);
+            statusMessage = bodyManager.pollWrenchStatusToReport();
             if (statusMessage != null)
                statusOutputManager.reportStatusMessage(statusMessage);
          }

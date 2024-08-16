@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.perception;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -21,8 +21,8 @@ import java.util.function.Supplier;
 public class CompositePlanarRegionService
 {
    private Supplier<PlanarRegionsList>[] planarRegionSuppliers;
-   private final List<IHMCROS2Publisher<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
+   private final List<ROS2PublisherBasics<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
    private final PausablePeriodicThread thread;
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
@@ -34,10 +34,10 @@ public class CompositePlanarRegionService
 
       for (int i = 0; i < planarRegionSuppliers.length; i++)
       {
-         planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicNames.get(i)));
+         planarRegionPublishers.add(ros2Node.createPublisher(PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
-      combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.MAP_REGIONS);
+      combinedPlanarRegionPublisher = ros2Node.createPublisher(PerceptionAPI.MAP_REGIONS.withTypeName(PlanarRegionsListMessage.class));
       thread = new PausablePeriodicThread(getClass().getSimpleName(), period, this::process);
    }
 

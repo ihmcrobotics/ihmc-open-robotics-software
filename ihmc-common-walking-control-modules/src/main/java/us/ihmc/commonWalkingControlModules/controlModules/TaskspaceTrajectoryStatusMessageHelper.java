@@ -176,7 +176,7 @@ public class TaskspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMess
 
    private void updateStatusInfo(OrientationFeedbackControlCommand feedbackControlCommand)
    {
-      controlFramePose.getOrientation().setMatchingFrame(feedbackControlCommand.getBodyFixedOrientationToControl());
+      controlFramePose.getOrientation().setMatchingFrame(feedbackControlCommand.getControlFrameOrientation());
       controlFramePose.getPosition().setToNaN();
 
       desiredPose.getOrientation().setMatchingFrame(feedbackControlCommand.getReferenceOrientation());

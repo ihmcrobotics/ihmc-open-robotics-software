@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeNodeStateMessage__idl__
 
+#include "behavior_msgs/msg/./BehaviorTreeLogMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
@@ -24,6 +25,10 @@ module behavior_msgs
          * A mechanism for confirming and ending a freeze early
          */
         ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
+        /**
+         * Recent log messages
+         */
+        sequence<behavior_msgs::msg::dds::BehaviorTreeLogMessage, 50> recent_log_messages;
       };
     };
   };

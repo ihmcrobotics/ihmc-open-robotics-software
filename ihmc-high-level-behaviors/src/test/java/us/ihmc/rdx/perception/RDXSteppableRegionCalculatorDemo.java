@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -93,7 +93,7 @@ public class RDXSteppableRegionCalculatorDemo
 
             steppableRegionsUI.getEnabled().set(true);
 
-            new IHMCROS2Callback<>(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
+            new ROS2Callback<>(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
             {
                heightMapVisualizer.acceptHeightMapMessage(message);
                heightMapUI.acceptHeightMapMessage(message);
@@ -127,7 +127,6 @@ public class RDXSteppableRegionCalculatorDemo
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.OUSTER_LIDAR_SCAN);
-            ousterPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);

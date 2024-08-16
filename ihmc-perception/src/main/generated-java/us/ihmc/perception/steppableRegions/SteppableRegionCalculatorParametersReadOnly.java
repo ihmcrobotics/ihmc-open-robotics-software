@@ -45,6 +45,26 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
       return get(cliffEndHeightToAvoid);
    }
 
+   default double getMinSupportAreaFraction()
+   {
+      return get(minSupportAreaFraction);
+   }
+
+   default double getMinSnapHeightThreshold()
+   {
+      return get(minSnapHeightThreshold);
+   }
+
+   default double getSnapHeightThresholdAtSearchEdge()
+   {
+      return get(snapHeightThresholdAtSearchEdge);
+   }
+
+   default double getInequalityActivationSlope()
+   {
+      return get(inequalityActivationSlope);
+   }
+
    default int getMaxSearchDepthForRegions()
    {
       return get(maxSearchDepthForRegions);

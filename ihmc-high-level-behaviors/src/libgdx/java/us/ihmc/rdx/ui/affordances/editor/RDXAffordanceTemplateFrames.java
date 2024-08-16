@@ -351,9 +351,9 @@ public class RDXAffordanceTemplateFrames
          }
    }
 
-   public int getNumberOfFrames()
+   public int getNumberOfFrames(RobotSide side)
    {
-      return poseFrames.get(RobotSide.RIGHT).size();
+      return poseFrames.get(side).size();
    }
 
    public SideDependentList<List<FramePose3D>> getPoses()

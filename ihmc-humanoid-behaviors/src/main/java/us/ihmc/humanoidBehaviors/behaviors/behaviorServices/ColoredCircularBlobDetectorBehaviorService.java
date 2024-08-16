@@ -9,7 +9,7 @@ import org.opencv.core.Scalar;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -33,7 +33,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    private final Object ballListConch = new Object();
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
-   private final IHMCROS2Publisher<VideoPacket> videoPublisher;
+   private final ROS2PublisherBasics<VideoPacket> videoPublisher;
 
    public ColoredCircularBlobDetectorBehaviorService(String robotName, ROS2Node ros2Node)
    {

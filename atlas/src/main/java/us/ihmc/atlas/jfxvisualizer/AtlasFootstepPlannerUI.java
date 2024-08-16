@@ -13,7 +13,7 @@ import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerTerminationCondition;
@@ -55,8 +55,8 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
 
       RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
       AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
-      IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher
-            = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
+      ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher
+            = ros2Node.createPublisher(REACommunicationProperties.inputTopic.withTypeName(REAStateRequestMessage.class));
       messageConverter = new RemoteUIMessageConverter(ros2Node, messager, drcRobotModel.getSimpleRobotName());
 
       messager.startMessager();

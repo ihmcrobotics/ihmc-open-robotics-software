@@ -17,42 +17,53 @@ import us.ihmc.rdx.ui.RDX3DPanel;
  * Adds "selectedness" to a pose 3D gizmo. It's not included in the base class because
  * there's a few different ways to do it.
  */
-public class RDXSelectablePose3DGizmo
+public class RDXSelectablePose3DGizmo extends RDXPose3DGizmo
 {
-   private final RDXPose3DGizmo poseGizmo;
    private final ImBoolean selected;
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo()} */
    public RDXSelectablePose3DGizmo()
    {
+      super();
       this.selected = new ImBoolean(false);
-      poseGizmo = new RDXPose3DGizmo();
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
+      super(parentReferenceFrame);
       this.selected = new ImBoolean(false);
-      poseGizmo = new RDXPose3DGizmo(parentReferenceFrame);
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       this(gizmoFrame, gizmoTransformToParentFrameToModify, new ImBoolean(false));
    }
 
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(ReferenceFrame, RigidBodyTransform)} */
    public RDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify, ImBoolean selected)
    {
+      super(gizmoFrame, gizmoTransformToParentFrameToModify);
       this.selected = selected;
-      poseGizmo = new RDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
-   public void create(RDX3DPanel panel3D)
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
-      poseGizmo.create(panel3D);
+      this(gizmoTransformToParentFrameToModify, parentReferenceFrame, new ImBoolean(false));
+   }
+
+   /** See {@link RDXPose3DGizmo#RDXPose3DGizmo(RigidBodyTransform, ReferenceFrame)} */
+   public RDXSelectablePose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame, ImBoolean selected)
+   {
+      super(gizmoTransformToParentFrameToModify, parentReferenceFrame);
+      this.selected = selected;
    }
 
    public void createAndSetupDefault(RDX3DPanel panel3D)
    {
-      create(panel3D);
+      super.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this, this::process3DViewInput);
       panel3D.getScene().addRenderableProvider(this, this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
@@ -69,7 +80,7 @@ public class RDXSelectablePose3DGizmo
    {
       if (input.isWindowHovered() && selected.get())
       {
-         poseGizmo.calculate3DViewPick(input);
+         super.calculate3DViewPick(input);
       }
    }
 
@@ -86,6 +97,7 @@ public class RDXSelectablePose3DGizmo
          boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
          boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
          boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
+         boolean isCtrlPressed = ImGui.getIO().getKeyCtrl();
          boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
          // Determine selectedness
@@ -93,7 +105,8 @@ public class RDXSelectablePose3DGizmo
          {
             selected.set(true);
          }
-         if (somethingElseIsClickedOn || deselectionKeyPressed)
+         // Allow mutli-selection by holding Ctrl
+         if ((somethingElseIsClickedOn && !isCtrlPressed) || deselectionKeyPressed)
          {
             selected.set(false);
          }
@@ -102,11 +115,11 @@ public class RDXSelectablePose3DGizmo
       // Act
       if (selected.get())
       {
-         poseGizmo.process3DViewInput(input);
+         super.process3DViewInput(input);
       }
       else
       {
-         poseGizmo.update();
+         super.update();
       }
    }
 
@@ -114,13 +127,14 @@ public class RDXSelectablePose3DGizmo
    {
       if (selected.get())
       {
-         poseGizmo.getRenderables(renderables, pool);
+         super.getRenderables(renderables, pool);
       }
    }
 
+   // TODO: (AM) this does not need a getter, only here for backward compatibility reasons
    public RDXPose3DGizmo getPoseGizmo()
    {
-      return poseGizmo;
+      return this;
    }
 
    public boolean isSelected()

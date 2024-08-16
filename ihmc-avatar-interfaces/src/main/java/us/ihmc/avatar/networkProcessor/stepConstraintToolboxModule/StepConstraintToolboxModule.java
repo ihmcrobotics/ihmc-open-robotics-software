@@ -12,9 +12,9 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -28,7 +28,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 10;
 
    protected final StepConstraintToolboxController controller;
-   private IHMCROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
+   private ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher;
 
    public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
    {
@@ -59,9 +59,9 @@ public class StepConstraintToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+      ROS2Topic<?> controllerPubGenerator = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
          if (controller != null)
          {
@@ -71,7 +71,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
          if (controller != null)
          {
@@ -82,7 +82,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(CapturabilityBasedStatus.class), s ->
       {
          if (controller != null)
          {
@@ -93,7 +93,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       FootstepStatusMessage statusMessage = new FootstepStatusMessage();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(FootstepStatusMessage.class), s ->
       {
          if (controller != null)
          {
@@ -102,12 +102,10 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionsListMessage.class,
-                                                    REACommunicationProperties.outputTopic,
-                                                    s -> updatePlanarRegion(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
+      constraintRegionPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StepConstraintMessage.class));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
@@ -157,7 +155,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -168,6 +166,6 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withInput();
    }
 }

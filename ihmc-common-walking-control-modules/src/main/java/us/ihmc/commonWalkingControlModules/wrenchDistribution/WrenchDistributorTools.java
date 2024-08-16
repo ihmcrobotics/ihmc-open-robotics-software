@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Wrench;
 
@@ -69,7 +70,7 @@ public class WrenchDistributorTools
       return force;
    }
 
-   public static void computeForce(FrameVector3D forceToPack, FramePoint3DReadOnly centerOfMass, FramePoint3DBasics cmp, double fZ)
+   public static void computeForce(FrameVector3DBasics forceToPack, FramePoint3DReadOnly centerOfMass, FramePoint3DBasics cmp, double fZ)
    {
       cmp.changeFrame(centerOfMass.getReferenceFrame());
       forceToPack.setIncludingFrame(centerOfMass);

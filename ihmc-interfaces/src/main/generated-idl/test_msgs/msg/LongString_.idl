@@ -1,0 +1,23 @@
+#ifndef __test_msgs__msg__LongString__idl__
+#define __test_msgs__msg__LongString__idl__
+
+module test_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="test_msgs::msg::dds_::LongString_")
+      struct LongString
+      {
+        /**
+         * String as multiple ASCII bytes because of our 255 string length constraint
+         */
+        sequence<octet, 2048> long_string;
+      };
+    };
+  };
+};
+
+#endif

@@ -49,6 +49,8 @@ public class AvatarRandomTestMessages
       OneDoFJointBasics[] spineClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(pelvis, chest);
 
       MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, spineClone);
+      
+      spineClone[0].updateFramesRecursively();
       RigidBodyBasics chestClone = spineClone[spineClone.length - 1].getSuccessor();
       FrameQuaternion desiredOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredOrientation.changeFrame(trajectoryFrame);

@@ -4,7 +4,6 @@
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "perception_msgs/msg/./HeightMapMessage_.idl"
-#include "perception_msgs/msg/./PlanarRegionsListMessage_.idl"
 module toolbox_msgs
 {
   module msg
@@ -20,14 +19,11 @@ module toolbox_msgs
       const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      const octet SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION =
+      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
       1;
 
-      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
-      2;
-
       const octet SWING_PLANNER_TYPE_PROPORTION =
-      3;
+      2;
 
       const long NO_PLAN_ID =
       -1;
@@ -121,11 +117,7 @@ module toolbox_msgs
          */
         double horizon_length;
         /**
-         * Planar regions to use, if you don't want to assume flat ground
-         */
-        perception_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
-        /**
-         * Height map data, optional
+         * Height map data, if you don'ot want to assume flat ground.
          */
         perception_msgs::msg::dds::HeightMapMessage height_map_message;
         /**

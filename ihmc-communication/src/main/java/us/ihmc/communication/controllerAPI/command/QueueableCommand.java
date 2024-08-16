@@ -214,6 +214,18 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    }
 
    /**
+    * When receiving a trajectory message that is part of a stream, the controller will extrapolate the
+    * trajectory point in the future using a simple first order integration over the given duration.
+    * This integration allows to improve continuity of execution for streams. If no new message is
+    * received once the integration duration has elapsed, the controller will hold the desired position
+    * and reset the desired velocity to 0.
+    */
+   public void setStreamIntegrationDuration(double streamIntegrationDuration)
+   {
+      this.streamIntegrationDuration = streamIntegrationDuration;
+   }
+
+   /**
     * Timestamp (in nanoseconds) when this message was created. The timestamp can be generated from the
     * computer where this message originates.
     */

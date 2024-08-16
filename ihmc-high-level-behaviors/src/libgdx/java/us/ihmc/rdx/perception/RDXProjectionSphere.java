@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -42,8 +43,8 @@ public class RDXProjectionSphere
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
-   private Mesh mesh;
    private Texture latestTexture;
+   private final Matrix4 previousTransform = new Matrix4();
 
    public void create()
    {
@@ -79,6 +80,9 @@ public class RDXProjectionSphere
    /** Only needs to be done when parameters change, not the texture.*/
    public void rebuildUVSphereMesh()
    {
+      if (modelInstance != null)
+         previousTransform.set(modelInstance.transform);
+
       MeshDataHolder sphereMeshDataHolder = MeshDataGeneratorMissing.InvertedSphere(sphereRadius.get(),
                                                                                     sphereLatitudeVertices.get(),
                                                                                     sphereLongitudeVertices.get());
@@ -101,7 +105,7 @@ public class RDXProjectionSphere
          texturePoint.setY(imageY + 0.0);
       }
 
-      mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
+      Mesh mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
@@ -118,6 +122,8 @@ public class RDXProjectionSphere
       model = modelBuilder.end();
 
       modelInstance = new ModelInstance(model);
+
+      modelInstance.transform.set(previousTransform); // Prevent glitching
    }
 
    public void updateTexture(Texture texture)
@@ -143,5 +149,30 @@ public class RDXProjectionSphere
    public ModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   public ImDouble getSphereRadius()
+   {
+      return sphereRadius;
+   }
+
+   public ImDouble getFocalLengthX()
+   {
+      return focalLengthX;
+   }
+
+   public ImDouble getFocalLengthY()
+   {
+      return focalLengthY;
+   }
+
+   public ImDouble getPrinciplePointX()
+   {
+      return principlePointX;
+   }
+
+   public ImDouble getPrinciplePointY()
+   {
+      return principlePointY;
    }
 }

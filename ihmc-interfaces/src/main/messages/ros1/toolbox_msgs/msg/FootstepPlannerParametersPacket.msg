@@ -480,4 +480,12 @@ float64 rms_min_error_to_penalize
 # Field default value -11.1
 float64 height_map_snap_threshold
 
+# When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+# Field default value -11.1
+float64 scaled_foot_polygon_percentage
+
+# When using a height map, a distance is set that determines if a cliff is detected or not
+# Field default value -11.1
+float64 cliff_height_threshold
+
 

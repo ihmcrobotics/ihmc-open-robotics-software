@@ -90,7 +90,7 @@ public class MultisenseSLWithMicroStrainHeadPoseEstimator extends EKFHeadPoseEst
       {
          RealtimeROS2Node realtimeROS2Node = ROS2Tools
                .createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "multisense_microstrain_head_pose_estimator");
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, ROS2Tools.IHMC_ROOT, this::onNewDataMessage);
+         realtimeROS2Node.createSubscription(ROS2Tools.IHMC_ROOT.withTypeName(RobotConfigurationData.class), this::onNewDataMessage);
       }
 
       headPositionEstimateFromRobotModel = new FramePoint3D(ReferenceFrame.getWorldFrame());

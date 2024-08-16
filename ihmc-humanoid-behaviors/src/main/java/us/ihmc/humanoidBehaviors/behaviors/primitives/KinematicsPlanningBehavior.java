@@ -9,7 +9,7 @@ import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -44,10 +44,10 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<KinematicsPlanningToolboxOutputStatus> toolboxOutputQueue = new ConcurrentListeningQueue<>(40);
 
-   private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCROS2Publisher<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
-   private final IHMCROS2Publisher<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
-   private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessagePublisher;
+   private final ROS2PublisherBasics<KinematicsPlanningToolboxCenterOfMassMessage> comMessagePublisher;
+   private final ROS2PublisherBasics<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
    private double trajectoryTime = 0.0;
    private int planningResult = -1;

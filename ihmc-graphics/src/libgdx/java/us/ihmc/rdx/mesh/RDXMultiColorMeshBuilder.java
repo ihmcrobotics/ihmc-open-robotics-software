@@ -1003,6 +1003,11 @@ public class RDXMultiColorMeshBuilder
       addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, resolution), color);
    }
 
+   public void addArrow(double arrowBodyLength, Color color)
+   {
+      addMesh(MeshDataGeneratorMissing.Arrow(arrowBodyLength), color);
+   }
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3DReadOnly offset, AxisAngle orientation, Color color)
    {
       meshBuilder.addMesh(createMeshDataWithColor(meshDataHolder, color), offset, orientation);
@@ -1072,6 +1077,11 @@ public class RDXMultiColorMeshBuilder
    public Mesh generateMesh()
    {
       return meshBuilder.generateMesh();
+   }
+
+   public MeshDataHolder generateMeshDataHolder()
+   {
+      return meshBuilder.generateMeshDataHolder();
    }
 
    public void clear()

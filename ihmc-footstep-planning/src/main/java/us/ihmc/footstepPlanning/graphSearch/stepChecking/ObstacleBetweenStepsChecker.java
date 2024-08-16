@@ -1,18 +1,23 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -22,19 +27,19 @@ public class ObstacleBetweenStepsChecker
 {
    private static final boolean DEBUG = false;
 
-   private PlanarRegionsList planarRegionsList;
-   private final FootstepSnapAndWiggler snapper;
+   private HeightMapData heightMapData;
+   private final FootstepSnapperReadOnly snapper;
    private final BooleanSupplier checkForPathCollisions;
    private final DoubleSupplier idealFootstepWidth;
    private final DoubleSupplier heightOffset;
    private final DoubleSupplier heightExtrusion;
 
-   public ObstacleBetweenStepsChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper)
+   public ObstacleBetweenStepsChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper)
    {
       this(snapper, parameters::checkForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
    }
 
-   public ObstacleBetweenStepsChecker(FootstepSnapAndWiggler snapper,
+   public ObstacleBetweenStepsChecker(FootstepSnapperReadOnly snapper,
                                       BooleanSupplier checkForPathCollisions,
                                       DoubleSupplier idealFootstepWidth,
                                       DoubleSupplier heightOffset,
@@ -47,31 +52,31 @@ public class ObstacleBetweenStepsChecker
       this.heightExtrusion = heightExtrusion;
    }
 
-   public void setPlanarRegions(PlanarRegionsList planarRegions)
+   public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.planarRegionsList = planarRegions;
+      this.heightMapData = heightMapData;
    }
 
-   boolean hasPlanarRegions()
+   boolean hasHeightMapData()
    {
-      return planarRegionsList != null && !planarRegionsList.isEmpty();
+      return heightMapData != null && !heightMapData.isEmpty();
    }
 
    public boolean isFootstepValid(DiscreteFootstep footstep, DiscreteFootstep previousStep)
    {
-      if (previousStep == null || !checkForPathCollisions.getAsBoolean() || !hasPlanarRegions())
+      if (previousStep == null || !checkForPathCollisions.getAsBoolean() || !hasHeightMapData())
          return true;
 
-      FootstepSnapData snapData = snapper.snapFootstep(footstep);
+      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData == null)
       {
          return true;
       }
 
-      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      RigidBodyTransformReadOnly snapTransform = snapData.getSnapTransform();
 
-      FootstepSnapData previousStepSnapData = snapper.snapFootstep(previousStep);
-      RigidBodyTransform previousSnapTransform = previousStepSnapData.getSnapTransform();
+      FootstepSnapDataReadOnly previousStepSnapData = snapper.snapFootstep(previousStep);
+      RigidBodyTransformReadOnly previousSnapTransform = previousStepSnapData.getSnapTransform();
 
       Point3D stepPosition = new Point3D(footstep.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
       Point3D previousStepPosition = new Point3D(previousStep.getOrComputeMidFootPoint(idealFootstepWidth.getAsDouble()));
@@ -79,7 +84,7 @@ public class ObstacleBetweenStepsChecker
       snapTransform.transform(stepPosition);
       previousSnapTransform.transform(previousStepPosition);
 
-      if (isObstacleBetweenSteps(stepPosition, previousStepPosition, planarRegionsList.getPlanarRegionsAsList()))
+      if (isObstacleBetweenSteps(stepPosition, previousStepPosition, heightMapData))
       {
          if (DEBUG)
          {
@@ -95,74 +100,31 @@ public class ObstacleBetweenStepsChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private boolean isObstacleBetweenSteps(Point3D stepPosition, Point3D previousStepPosition, List<PlanarRegion> planarRegions)
+   private boolean isObstacleBetweenSteps(Point3DReadOnly stepPosition, Point3DReadOnly previousStepPosition, HeightMapData heightMapData)
    {
       double groundClearance = heightOffset.getAsDouble();
       double regionHeight = heightExtrusion.getAsDouble();
 
-      try
-      {
-         PlanarRegion bodyPath = createBodyRegionFromSteps(stepPosition, previousStepPosition, groundClearance, regionHeight);
+      double maxZofGroundForCollision = Math.max(stepPosition.getZ(), previousStepPosition.getZ()) + groundClearance;
 
-         for (PlanarRegion region : planarRegions)
-         {
-            List<LineSegment3D> intersections = region.intersect(bodyPath);
-            if (!intersections.isEmpty())
-            {
-               return true;
-            }
-         }
-      }
-      catch(Exception e)
+      int pointsToCheck = computePointsToCheck(stepPosition, previousStepPosition, heightMapData.getGridResolutionXY());
+
+      for (int i = 0; i <= pointsToCheck; i++)
       {
-         if (DEBUG)
-         {
-            e.printStackTrace();
-         }
+         double alpha = ((double) i) / pointsToCheck;
+         double x = InterpolationTools.linearInterpolate(stepPosition.getX(), previousStepPosition.getX(), alpha);
+         double y = InterpolationTools.linearInterpolate(stepPosition.getY(), previousStepPosition.getY(), alpha);
+
+         if (heightMapData.getHeightAt(x, y) > maxZofGroundForCollision)
+            return true;
       }
 
       return false;
    }
 
-   /**
-    * Given two footstep position this will create a vertical planar region above the steps. The region
-    * will be aligned with the vector connecting the steps. It's lower edge will be the specified
-    * distance above the higher of the two steps and the plane will have the specified hight.
-    */
-   public static PlanarRegion createBodyRegionFromSteps(Point3DReadOnly stepPositionA, Point3DReadOnly stepPositionB, double clearance, double height)
+   private static int computePointsToCheck(Point3DReadOnly pointA, Point3DReadOnly pointB, double resolutionXY)
    {
-      double lowerZ = Math.max(stepPositionA.getZ(), stepPositionB.getZ()) + clearance;
-      double higherZ = lowerZ + height;
-
-      Point3D point0 = new Point3D(stepPositionA.getX(), stepPositionA.getY(), lowerZ);
-      Point3D point1 = new Point3D(stepPositionA.getX(), stepPositionA.getY(), higherZ);
-      Point3D point2 = new Point3D(stepPositionB.getX(), stepPositionB.getY(), lowerZ);
-      Point3D point3 = new Point3D(stepPositionB.getX(), stepPositionB.getY(), higherZ);
-
-      Vector3D xAxisInPlane = new Vector3D();
-      xAxisInPlane.sub(point2, point0);
-      xAxisInPlane.normalize();
-      Vector3D yAxisInPlane = new Vector3D(0.0, 0.0, 1.0);
-      Vector3D zAxis = new Vector3D();
-      zAxis.cross(xAxisInPlane, yAxisInPlane);
-
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getRotation().set(xAxisInPlane.getX(), xAxisInPlane.getY(), xAxisInPlane.getZ(), yAxisInPlane.getX(), yAxisInPlane.getY(), yAxisInPlane.getZ(), zAxis.getX(), zAxis.getY(), zAxis.getZ());
-      transform.getTranslation().set(point0);
-      transform.getRotation().invert();
-
-      point0.applyInverseTransform(transform);
-      point1.applyInverseTransform(transform);
-      point2.applyInverseTransform(transform);
-      point3.applyInverseTransform(transform);
-
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(point0.getX(), point0.getY());
-      polygon.addVertex(point1.getX(), point1.getY());
-      polygon.addVertex(point2.getX(), point2.getY());
-      polygon.addVertex(point3.getX(), point3.getY());
-      polygon.update();
-
-      return new PlanarRegion(transform, polygon);
+      double distanceXY = pointA.distanceXY(pointB);
+      return ((int) Math.ceil(distanceXY / resolutionXY)) + 1;
    }
 }

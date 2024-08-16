@@ -4,9 +4,8 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedBufferedRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -22,7 +21,7 @@ public class MapSensePlanarRegionROS1Bridge
 {
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> publisher;
    private final ROS2SyncedBufferedRobotModel syncedRobot;
    private final Timer throttleTimer = new Timer();
 
@@ -32,7 +31,7 @@ public class MapSensePlanarRegionROS1Bridge
 
       MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
 
-      publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MAPSENSE_REGIONS);
+      publisher = ros2Node.createPublisher(PerceptionAPI.MAPSENSE_REGIONS);
 
       boolean daemon = true;
       int queueSize = 1;

@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -482,8 +482,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Topic inputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
-      ROS2Topic outputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic inputTopic = QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
+      ROS2Topic outputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 commandInputManager,
                                                                                                 outputTopic,

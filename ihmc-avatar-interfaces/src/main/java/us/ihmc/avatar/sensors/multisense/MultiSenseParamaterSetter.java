@@ -19,7 +19,7 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
@@ -43,18 +43,17 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
    private ParameterTree params;
-   private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
+   private ROS2PublisherBasics<MultisenseParameterPacket> publisher;
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2NodeInterface ros2Node)
    {
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           MultisenseParameterPacket.class,
-                                           ROS2Tools.IHMC_TOPIC_PREFIX + "/multisense_parameter",
-                                           s -> receivedPacket(s.takeNextData()));
-      publisher = ROS2Tools.createPublisher(ros2Node, MultisenseParameterPacket.class, ROS2Tools.IHMC_TOPIC_PREFIX + "/initial_multisense_parameter");
+      ros2Node.createSubscription(MultisenseParameterPacket.class,
+                                  s -> receivedPacket(s.takeNextData()),
+                                  ROS2Tools.IHMC_TOPIC_PREFIX + "/multisense_parameter");
+      publisher = ros2Node.createPublisher(MultisenseParameterPacket.class, ROS2Tools.IHMC_TOPIC_PREFIX + "/initial_multisense_parameter");
    }
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode2)

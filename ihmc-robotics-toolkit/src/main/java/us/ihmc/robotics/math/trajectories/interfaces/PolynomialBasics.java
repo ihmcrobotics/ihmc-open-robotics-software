@@ -721,6 +721,19 @@ public interface PolynomialBasics extends PolynomialReadOnly
       initialize();
    }
 
+   default void setCubicUsingFinalAccelerationButNotFinalVelocity(double t0, double tFinal, double z0, double zd0, double zFinal, double zddFinal)
+   {
+      setTime(t0, tFinal);
+      reshape(4);
+      setPositionRow(0, t0, z0);
+      setVelocityRow(1, t0, zd0);
+      setPositionRow(2, tFinal, zFinal);
+      setAccelerationRow(3, tFinal, zddFinal);
+      setIsConstraintMatrixUpToDate(true);
+
+      initialize();
+   }
+
    default void setQuadratic(double t0, double tFinal, double z0, double zd0, double zFinal)
    {
       setTime(t0, tFinal);

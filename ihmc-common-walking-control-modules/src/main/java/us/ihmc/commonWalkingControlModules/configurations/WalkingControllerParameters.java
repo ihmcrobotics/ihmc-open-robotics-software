@@ -193,24 +193,7 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
-   {
-      return new ArrayList<>();
-   }
-
-   /**
-    * Gains used for low-level joint position control intended to be sent directly to the motor, torque
-    * = kp * (q_des - q) + kd * (v_des - v)
-    * <p>
-    * Each {@link GroupParameter} contains gains for one joint group:</br>
-    * - The name of the joint group that the gain is used for (e.g. Arms).</br>
-    * - The gains for the joint group.</br>
-    * - The names of all rigid bodies in the joint group.
-    * </p>
-    * If a joint is not contained in the list, low-level jointspace control is not supported for that
-    * joint.
-    */
-   public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
    {
       return new ArrayList<>();
    }

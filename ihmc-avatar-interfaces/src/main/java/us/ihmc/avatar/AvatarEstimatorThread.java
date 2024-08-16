@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -48,7 +48,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    private final List<Runnable> runnables = new ArrayList<>();
-   private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
+   private final ROS2PublisherBasics<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final ExecutionTimer estimatorThreadTimer;
@@ -58,7 +58,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
                                 HumanoidRobotContextData humanoidRobotContextData,
                                 StateEstimatorController mainStateEstimator,
                                 PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
+                                ROS2PublisherBasics<ControllerCrashNotificationPacket> controllerCrashPublisher,
                                 YoRegistry estimatorRegistry,
                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {

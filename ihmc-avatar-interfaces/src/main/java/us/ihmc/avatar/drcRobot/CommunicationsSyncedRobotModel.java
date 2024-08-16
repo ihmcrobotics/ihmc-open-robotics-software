@@ -53,7 +53,7 @@ public abstract class CommunicationsSyncedRobotModel
       this.handModels = handModels;
       robotConfigurationData = new RobotConfigurationData();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, sensorInformation);
-      allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      allJoints = fullRobotModel.getOneDoFJoints();
 
       if (handModels != null)
          HandModelUtils.getHandJoints(handModels, fullRobotModel, handJoints);

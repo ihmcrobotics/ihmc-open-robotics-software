@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.*;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.pathPlanning.DataSet;
@@ -125,10 +124,10 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
 
       stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.FAST);
 
-      ROS2Topic footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(quadrupedTestFactory.getRobotName());
+      ROS2Topic<?> footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(quadrupedTestFactory.getRobotName());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic,
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));
+      stepTeleopManager.getROS2Node().createSubscription(footstepPlannerOutputTopic.withTypeName(PawStepPlanningToolboxOutputStatus.class),
+                                  s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 

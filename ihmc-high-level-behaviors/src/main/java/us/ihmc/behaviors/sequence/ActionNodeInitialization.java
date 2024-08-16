@@ -3,9 +3,7 @@ package us.ihmc.behaviors.sequence;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SidedObject;
 
 import javax.annotation.Nullable;
 
@@ -17,18 +15,12 @@ public class ActionNodeInitialization
                                        @Nullable RobotSide sideOfNewAction,
                                        ROS2SyncedRobotModel syncedRobot)
    {
-      if (newAction instanceof WalkActionState walkAction)
-      {
-         MovingReferenceFrame parentFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
-         walkAction.getDefinition().setParentFrameName(parentFrame.getName());
-         walkAction.getState().update();
-      }
-      else if (newAction instanceof HandPoseActionState handPoseAction)
+      if (newAction instanceof HandPoseActionState handPoseAction)
       {
          // Set the new action to where the last one was for faster authoring
          handPoseAction.getDefinition().setSide(sideOfNewAction);
          handPoseAction.getDefinition().setPalmParentFrameName(findConvenientParentFrameName(actionSequence,
-                                                                                             handPoseAction,
+                                                                                             HandPoseActionState.class,
                                                                                              indexOfInsertion,
                                                                                              sideOfNewAction));
          handPoseAction.getState().update();
@@ -52,6 +44,13 @@ public class ActionNodeInitialization
                                                    ReferenceFrame.getWorldFrame());
          }
          handPoseAction.update();
+      }
+      else if (newAction instanceof ScrewPrimitiveActionState screwPrimitiveAction)
+      {
+         screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);
+         screwPrimitiveAction.getDefinition()
+                             .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandPoseActionState.class, indexOfInsertion, sideOfNewAction));
+         screwPrimitiveAction.getState().update();
       }
       else if (newAction instanceof ChestOrientationActionState chestOrientationAction)
       {
@@ -79,7 +78,7 @@ public class ActionNodeInitialization
          {
             pelvisHeightPitchAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
             pelvisHeightPitchAction.getDefinition().getPelvisToParentTransform().getValue()
-                                  .set(nextPreviousAction.getDefinition().getPelvisToParentTransform().getValueReadOnly());
+                                   .set(nextPreviousAction.getDefinition().getPelvisToParentTransform().getValueReadOnly());
          }
          else
          {
@@ -100,9 +99,13 @@ public class ActionNodeInitialization
          }
          else // set to current robot's pelvis pose
          {
-            footstepPlanAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            footstepPlanAction.getDefinition().setParentFrameName(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getName());
          }
          footstepPlanAction.update();
+      }
+      else if (newAction instanceof SakeHandCommandActionState sakeHandCommandActionState)
+      {
+         sakeHandCommandActionState.getDefinition().setSide(sideOfNewAction);
       }
    }
 
@@ -114,11 +117,11 @@ public class ActionNodeInitialization
     *         spatially consistent values.
     */
    private static String findConvenientParentFrameName(@Nullable ActionSequenceState actionSequence,
-                                                       ActionNodeState<?> action,
+                                                       Class<? extends ActionNodeState<?>> actionClass,
                                                        int indexOfInsertion,
                                                        @Nullable RobotSide side)
    {
-      ActionNodeState<?> nextPreviousAction = findNextPreviousAction(actionSequence, action.getClass(), indexOfInsertion, side);
+      ActionNodeState<?> nextPreviousAction = findNextPreviousAction(actionSequence, actionClass, indexOfInsertion, side);
 
       if (nextPreviousAction instanceof FootstepPlanActionState footstepPlanAction)
       {
@@ -127,10 +130,6 @@ public class ActionNodeInitialization
       else if (nextPreviousAction instanceof HandPoseActionState handPoseAction)
       {
          return handPoseAction.getDefinition().getPalmParentFrameName();
-      }
-      else if (nextPreviousAction instanceof WalkActionState walkAction)
-      {
-         return walkAction.getDefinition().getParentFrameName();
       }
 
       return ReferenceFrame.getWorldFrame().getName();

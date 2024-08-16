@@ -27,9 +27,13 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-            * Define the desired 3D angular velocity to be reached.
+            * Define the desired 3D angular velocity, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
+   /**
+            * Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D angular_acceleration_;
 
    public SO3StreamingMessage()
    {
@@ -37,6 +41,7 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
       control_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      angular_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public SO3StreamingMessage(SO3StreamingMessage other)
@@ -53,6 +58,7 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.control_frame_pose_, control_frame_pose_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_acceleration_, angular_acceleration_);
    }
 
 
@@ -97,11 +103,20 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
 
 
    /**
-            * Define the desired 3D angular velocity to be reached.
+            * Define the desired 3D angular velocity, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocity()
    {
       return angular_velocity_;
+   }
+
+
+   /**
+            * Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getAngularAcceleration()
+   {
+      return angular_acceleration_;
    }
 
 
@@ -128,6 +143,7 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
       if (!this.control_frame_pose_.epsilonEquals(other.control_frame_pose_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon)) return false;
+      if (!this.angular_acceleration_.epsilonEquals(other.angular_acceleration_, epsilon)) return false;
 
       return true;
    }
@@ -147,6 +163,7 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
       if (!this.control_frame_pose_.equals(otherMyClass.control_frame_pose_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_)) return false;
+      if (!this.angular_acceleration_.equals(otherMyClass.angular_acceleration_)) return false;
 
       return true;
    }
@@ -166,7 +183,9 @@ public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements 
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
       builder.append("angular_velocity=");
-      builder.append(this.angular_velocity_);
+      builder.append(this.angular_velocity_);      builder.append(", ");
+      builder.append("angular_acceleration=");
+      builder.append(this.angular_acceleration_);
       builder.append("}");
       return builder.toString();
    }

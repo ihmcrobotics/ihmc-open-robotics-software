@@ -1233,7 +1233,7 @@ public class CrossRobotCommandRandomTools
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
       next.setCommandId(random.nextInt());
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
-      next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getControlFrameOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));

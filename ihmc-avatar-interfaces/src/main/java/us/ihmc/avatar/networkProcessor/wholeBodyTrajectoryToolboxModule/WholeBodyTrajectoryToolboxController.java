@@ -818,6 +818,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          humanoidKinematicsSolver.setInitialConfiguration(initialConfiguration);
       }
 
+      humanoidKinematicsSolver.setAsDoubleSupport();
       humanoidKinematicsSolver.initialize();
       humanoidKinematicsSolver.submit(toolboxData.createMessages(node));
       /*

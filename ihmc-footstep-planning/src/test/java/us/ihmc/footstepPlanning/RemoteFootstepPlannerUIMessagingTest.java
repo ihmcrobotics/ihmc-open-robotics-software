@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -23,11 +24,11 @@ import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.FootstepPlannerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -37,11 +38,11 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
@@ -55,7 +56,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class RemoteFootstepPlannerUIMessagingTest
 {
@@ -200,10 +204,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlanningRequestPacket.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                              .withInput(),
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      localNode.createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                      .withInput().withTypeName(FootstepPlanningRequestPacket.class), s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
       double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
@@ -220,6 +222,8 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
@@ -230,7 +234,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+      messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, heightMapMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
       messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
@@ -263,15 +267,13 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(plannerRequestId, packet.getPlannerRequestId(), epsilon, "Planner Request Ids aren't equal.");
       assertEquals(horizonLength, packet.getHorizonLength(), epsilon, "Planner horizon lengths aren't equal.");
 
-      checkPlanarRegionListsAreEqual(planarRegionsList, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsListMessage()));
+      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessage(packet.getHeightMapMessage()));
    }
 
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
-      IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisherTypeNamed(localNode, FootstepPlanningRequestPacket.class,
-                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
+      ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -295,6 +297,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -312,7 +315,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       packet.setPlannerRequestId(plannerRequestId);
       packet.setSequenceId(sequenceId);
       packet.setHorizonLength(horizonLength);
-      packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      packet.getHeightMapMessage().set(heightMapMessage);
 
       footstepPlanningRequestPublisher.publish(packet);
 
@@ -344,14 +347,14 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlannerParametersPacket.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                              .withInput(),
-                                           s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, VisibilityGraphsParametersPacket.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                              .withInput(),
-                                           s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
+      ROS2Topic<?> topicName1 = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                         .withInput();
+      localNode.createSubscription(topicName1.withTypeName(FootstepPlannerParametersPacket.class),
+                                   s1 -> processFootstepPlannerParametersPacket(s1.takeNextData()));
+      ROS2Topic<?> topicName = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                  .withInput();
+      localNode.createSubscription(topicName.withTypeName(VisibilityGraphsParametersPacket.class),
+                                   s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
       FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
@@ -410,9 +413,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
-      IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
-            .createPublisherTypeNamed(localNode, FootstepPlanningToolboxOutputStatus.class,
-                                      ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput());
+      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
@@ -426,6 +427,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
       goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
       int sequenceId = RandomNumbers.nextInt(random, 0, 100);
       int planId = RandomNumbers.nextInt(random, 0, 100);
@@ -443,7 +445,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
       outputPacket.getGoalPose().set(goalPose);
-      outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      outputPacket.getHeightMapMessage().set(heightMapMessage);
       outputPacket.getFootstepDataList().set(footstepDataListMessage);
       outputPacket.setPlanId(planId);
       outputPacket.setSequenceId(sequenceId);
@@ -586,50 +588,20 @@ public class RemoteFootstepPlannerUIMessagingTest
       return parameters;
    }
 
-   private static void checkPlanarRegionListsAreEqual(PlanarRegionsList listA, PlanarRegionsList listB)
+   private static void checkHeightMapDataAreEqual(HeightMapData dataA, HeightMapData dataB)
    {
-      assertEquals(listA.getNumberOfPlanarRegions(), listB.getNumberOfPlanarRegions(), "Planar region lists are different sizes.");
+      assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
+      assertEquals(dataA.getGridResolutionXY(), dataB.getGridResolutionXY(), epsilon);
+      assertEquals(dataA.getGridSizeXY(), dataB.getGridSizeXY(), epsilon);
+      EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
 
-      for (int i = 0; i < listA.getNumberOfPlanarRegions(); i++)
+      int cellsPerSide = 2 * dataA.getCenterIndex() + 1;
+      for (int x = 0; x < cellsPerSide; x++)
       {
-         PlanarRegion planarRegionA = listA.getPlanarRegion(i);
-         PlanarRegion planarRegionB = null;
-         for (int j = 0; j < listB.getNumberOfPlanarRegions(); j++)
+         for (int y = 0; y < cellsPerSide; y++)
          {
-            if (planarRegionA.getRegionId() == listB.getPlanarRegion(j).getRegionId())
-            {
-               planarRegionB = listB.getPlanarRegion(j);
-               break;
-            }
+            assertEquals(dataA.getHeightAt(x, y), dataB.getHeightAt(x, y), epsilon);
          }
-         assertNotNull(planarRegionB, "Unable to find equivalent planar region");
-         checkPlanarRegionsEqual(i, planarRegionA, planarRegionB);
-      }
-   }
-
-   private static void checkPlanarRegionsEqual(int regionId, PlanarRegion planarRegionA, PlanarRegion planarRegionB)
-   {
-      Point3D centerA = new Point3D();
-      Point3D centerB = new Point3D();
-
-      planarRegionA.getPointInRegion(centerA);
-      planarRegionB.getPointInRegion(centerB);
-
-      Vector3D normalA = new Vector3D();
-      Vector3D normalB = new Vector3D();
-
-      planarRegionA.getNormal(normalA);
-      planarRegionB.getNormal(normalB);
-
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Center of regions " + regionId + " are not equal.", centerA, centerB, epsilon);
-      EuclidCoreTestTools.assertVector3DGeometricallyEquals("Normal of regions " + regionId + " are not equal.", normalA, normalB, epsilon);
-
-      assertEquals(planarRegionA.getNumberOfConvexPolygons(), planarRegionB.getNumberOfConvexPolygons(),
-                   "Number of convex polygons of " + regionId + " not equal. ");
-      for (int i = 0; i < planarRegionA.getNumberOfConvexPolygons(); i++)
-      {
-         assertTrue(planarRegionA.getConvexPolygon(i).epsilonEquals(planarRegionB.getConvexPolygon(i), epsilon),
-                    "Convex polygon " + i + " of planar region " + regionId + " is not equal");
       }
    }
 

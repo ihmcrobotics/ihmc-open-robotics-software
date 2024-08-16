@@ -2,7 +2,7 @@ package us.ihmc.communication;
 
 import us.ihmc.ros2.ROS2Topic;
 
-public class ActiveMappingAPI
+public final class ActiveMappingAPI
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);

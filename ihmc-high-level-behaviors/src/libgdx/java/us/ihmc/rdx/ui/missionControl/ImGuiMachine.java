@@ -10,8 +10,8 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.MissionControlAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -41,7 +41,7 @@ public class ImGuiMachine
    private final String hostname;
 
    private final ROS2Node ros2Node;
-   private IHMCROS2Publisher<Empty> rebootPublisher;
+   private ROS2PublisherBasics<Empty> rebootPublisher;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
    private final RDXPanel panel;
@@ -96,17 +96,13 @@ public class ImGuiMachine
 
       ThreadTools.startAsDaemon(() ->
       {
-         rebootPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId));
+         rebootPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemRebootTopic(instanceId));
       }, "Reboot-Publisher-Thread");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId), subscriber ->
-      {
-         acceptSystemResourceUsageMessage(subscriber.takeNextData());
-      });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceStatusTopic(instanceId), subscriber ->
-      {
-         acceptSystemServiceStatusMessage(subscriber.takeNextData());
-      }, ROS2Tools.getSystemServiceStatusQosProfile());
+      ros2Node.createSubscription(MissionControlAPI.getSystemResourceUsageTopic(instanceId),
+                                  subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceStatusTopic(instanceId),
+                                  subscriber -> acceptSystemServiceStatusMessage(subscriber.takeNextData()));
    }
 
    public String getHostname()

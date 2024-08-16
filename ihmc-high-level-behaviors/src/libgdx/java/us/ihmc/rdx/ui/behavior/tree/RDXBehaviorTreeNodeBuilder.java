@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -12,6 +13,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -60,12 +62,12 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXActionSequence(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == DoorTraversalDefinition.class)
+      {
+         return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
 
       // Actions:
-      if (nodeType == ArmJointAnglesActionDefinition.class)
-      {
-         return new RDXArmJointAnglesAction(id, crdtInfo, saveFileDirectory, robotModel);
-      }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
          return new RDXChestOrientationAction(id,
@@ -79,7 +81,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == FootstepPlanActionDefinition.class)
       {
-         return new RDXFootstepPlanAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary);
+         return new RDXFootstepPlanAction(id,
+                                          crdtInfo,
+                                          saveFileDirectory,
+                                          baseUI,
+                                          robotModel,
+                                          syncedRobot,
+                                          referenceFrameLibrary,
+                                          footstepPlannerParametersBasics);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -88,13 +97,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       saveFileDirectory,
                                       panel3D,
                                       robotModel,
-                                      syncedRobot.getFullRobotModel(),
+                                      syncedRobot,
                                       selectionCollisionModel,
                                       referenceFrameLibrary);
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
          return new RDXHandWrenchAction(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new RDXScrewPrimitiveAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == PelvisHeightPitchActionDefinition.class)
       {
@@ -114,10 +127,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == WalkActionDefinition.class)
-      {
-         return new RDXWalkAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, referenceFrameLibrary, footstepPlannerParametersBasics);
       }
       else
       {

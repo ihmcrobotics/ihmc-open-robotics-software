@@ -5,8 +5,8 @@ import std_msgs.msg.dds.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -29,10 +29,7 @@ import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
  */
 public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   public static final ROS2QosProfile PUBLISHER_QOS_PROFILE = ROS2QosProfile.BEST_EFFORT();
-   public static final ROS2QosProfile SUBSCRIBER_QOS_PROFILE = ROS2QosProfile.BEST_EFFORT();
-
-   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class);
+   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class).withQoS(ROS2QosProfile.BEST_EFFORT());
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
    public static final double PUBLISH_FREQUENCY = 100.0;
    public static final double EXPERIMENT_DURATION = 100.0;
@@ -91,7 +88,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         new IHMCROS2Callback<>(ros2Node, TO_OCU, SUBSCRIBER_QOS_PROFILE, message ->
+         new ROS2Callback<>(ros2Node, TO_OCU, message ->
          {
             long messageNumber = message.getData();
             if (messageNumber - 1 != lastReceived)
@@ -115,7 +112,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
             ThreadTools.sleepSeconds(2.0 * publishPeriod / numberOfRemoteMachines);
          }
 
-         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU, PUBLISHER_QOS_PROFILE);
+         ROS2PublisherBasics<Int64> publisher = ros2Node.createPublisher(TO_OCU);
          publishThread = new PausablePeriodicThread(getClass().getSimpleName(), publishPeriod, () ->
          {
             if (messagesSent.getValue() < PUBLISH_FREQUENCY * EXPERIMENT_DURATION)

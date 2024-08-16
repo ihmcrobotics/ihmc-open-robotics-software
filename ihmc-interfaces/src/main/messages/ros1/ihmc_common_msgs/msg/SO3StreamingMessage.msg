@@ -13,7 +13,10 @@ geometry_msgs/Pose control_frame_pose
 # Define the desired 3D orientation to be reached.
 geometry_msgs/Quaternion orientation
 
-# Define the desired 3D angular velocity to be reached.
+# Define the desired 3D angular velocity, expressed in world frame, to be reached.
 geometry_msgs/Vector3 angular_velocity
+
+# Define the desired 3D angular acceleration, expressed in world frame,  to be reached.
+geometry_msgs/Vector3 angular_acceleration
 
 

@@ -6,13 +6,16 @@ behavior_msgs/ActionNodeDefinitionMessage definition
 # Field default value 255
 int8 robot_side
 
-# Hand configuration type
-uint32 configuration
+# Desired angle between the fingers from 0 to 210 degrees (specified in radians)
+float64 hand_open_angle
 
-# Goal position as ratio from 0.0 (closed) to 1.0 (open)
-float64 position_ratio
+# If hand angles are less than this amount off, skip the action
+float64 initial_satisfaction_hand_angle_tolerance
 
-# Goal torque as ratio from 0.0 (closed) to 1.0 (open)
-float64 torque_ratio
+# Hand angles goal error tolerance
+float64 completion_hand_angle_tolerance
+
+# Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
+float64 fingertip_grip_force_limit
 
 

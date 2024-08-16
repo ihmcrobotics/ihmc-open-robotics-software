@@ -30,9 +30,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
@@ -42,17 +46,16 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
+import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.*;
 
 /**
  * A gizmo for manipulating a Pose3D in 3D space using
@@ -67,6 +70,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final ImFloat torusRadius = new ImFloat(0.5f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
+   private final ImFloat centerSphereRadius = new ImFloat();
+   private final ImFloat centerSphereToTorusRatio = new ImFloat(1.0f / 8.0f);
    private final ImFloat arrowLengthRatio = new ImFloat(0.431f);
    private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.480f);
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
@@ -80,7 +85,9 @@ public class RDXPose3DGizmo implements RenderableProvider
    private double arrowSpacing;
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
+   private final Material disabledMaterial = new Material();
    private final Axis3DRotations axisRotations = new Axis3DRotations();
+   private final DynamicLibGDXModel centerSphereModel = new DynamicLibGDXModel();
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
    private final DynamicLibGDXModel[] torusModels = new DynamicLibGDXModel[3];
    private final Point3D closestCollision = new Point3D();
@@ -90,6 +97,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean isGizmoHovered = false;
    private boolean isBeingManipulated = false;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
+   private final SphereRayIntersection centerSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    /** The main, source, true, base transform that this thing represents. */
@@ -104,6 +112,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    /** For being able to tell if the user moved the gizmo. */
    private final Notification gizmoModifiedByUser = new Notification();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
+   private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private RDXFocusBasedCamera camera3D;
@@ -112,25 +121,29 @@ public class RDXPose3DGizmo implements RenderableProvider
    private double lastDistanceToCamera = -1.0;
    private final double translateSpeedFactor = 0.5;
    private boolean queuePopupToOpen = false;
-   private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private List<SixDoFSelection> disabledDoFs = new ArrayList<>();
 
+   /** Maintains it's own frame in World. */
    public RDXPose3DGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
    }
 
+   /** Maintains it's own frame in World with the given name. */
    public RDXPose3DGizmo(String gizmoFrameName)
    {
       this(gizmoFrameName, ReferenceFrame.getWorldFrame());
    }
 
+   /** Maintains it's own frame in the given parent frame. */
    public RDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), parentReferenceFrame);
    }
 
+   /** Maintains it's own frame with the given name in the given parent frame. */
    public RDXPose3DGizmo(String gizmoFrameName, ReferenceFrame parentReferenceFrame)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
@@ -140,16 +153,19 @@ public class RDXPose3DGizmo implements RenderableProvider
       initialize(gizmoFrame, transformToParent);
    }
 
+   /** Wraps the given frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   /** Maintains it's own frame in the given parent frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
       this(ReferenceFrameMissingTools.computeFrameName(), gizmoTransformToParentFrameToModify, parentReferenceFrame);
    }
 
+   /** Maintains it's own frame with the given name in the given parent frame and updates it by modifying the given transform. */
    public RDXPose3DGizmo(String gizmoFrameName, RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
    {
       ReferenceFrame gizmoFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(gizmoFrameName,
@@ -194,8 +210,11 @@ public class RDXPose3DGizmo implements RenderableProvider
     */
    public void setParentFrame(ReferenceFrame newParentFrame)
    {
-      gizmoFrame.remove();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+      if (newParentFrame != gizmoFrame.getParent())
+      {
+         gizmoFrame.remove();
+         gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+      }
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)
@@ -220,6 +239,8 @@ public class RDXPose3DGizmo implements RenderableProvider
       frameBasedGizmoModification = new FrameBasedGizmoModification(this::getGizmoFrame, () -> gizmoFrame.getParent(), camera3D);
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
+      centerSphereModel.setMesh(meshBuilder -> meshBuilder.addSphere(centerSphereRadius.get(), RDXGizmoTools.CENTER_DEFAULT_COLOR));
+
       for (Axis3D axis : Axis3D.values)
       {
          Color color = AXIS_COLORS[axis.ordinal()];
@@ -229,6 +250,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          highlightedMaterials[axis.ordinal()] = new Material();
          highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
+         disabledMaterial.set(new BlendingAttribute(true, DISABLED_AXIS_COLOR.a));
          arrowModels[axis.ordinal()] = new DynamicLibGDXModel();
          arrowModels[axis.ordinal()].setMesh(meshBuilder ->
          {
@@ -291,11 +313,17 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       updateMaterialHighlighting();
 
-      if (isBeingManipulated)
+      if (isBeingManipulated && closestCollisionSelection != null)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
-         if (closestCollisionSelection.isLinear())
+         if (closestCollisionSelection.isCenter())
+         {
+            Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+            frameBasedGizmoModification.translateInWorld(planarMotion);
+            closestCollision.add(planarMotion);
+         }
+         else if (closestCollisionSelection.isLinear())
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
                                                                         closestCollision,
@@ -306,10 +334,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          }
          else if (closestCollisionSelection.isAngular())
          {
-            if (clockFaceDragAlgorithm.calculate(pickRay,
-                                                 closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
-                                                 transformToWorld))
+            if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
             {
                frameBasedGizmoModification.rotateInWorld(clockFaceDragAlgorithm.getMotion());
             }
@@ -347,59 +372,77 @@ public class RDXPose3DGizmo implements RenderableProvider
 
             if (altHeld && !ctrlHeld) // orientation
             {
-               if (upArrowHeld) // pitch +
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Y))
                {
-                  orientationToAdjust.appendPitchRotation(amountRotation);
+                  if (upArrowHeld) // pitch +
+                  {
+                     orientationToAdjust.appendPitchRotation(amountRotation);
+                  }
+                  if (downArrowHeld) // pitch -
+                  {
+                     orientationToAdjust.appendPitchRotation(-amountRotation);
+                  }
                }
-               if (downArrowHeld) // pitch -
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_X))
                {
-                  orientationToAdjust.appendPitchRotation(-amountRotation);
-               }
-               if (rightArrowHeld) // roll +
-               {
-                  orientationToAdjust.appendRollRotation(amountRotation);
-               }
-               if (leftArrowHeld) // roll -
-               {
-                  orientationToAdjust.appendRollRotation(-amountRotation);
+                  if (rightArrowHeld) // roll +
+                  {
+                     orientationToAdjust.appendRollRotation(amountRotation);
+                  }
+                  if (leftArrowHeld) // roll -
+                  {
+                     orientationToAdjust.appendRollRotation(-amountRotation);
+                  }
                }
             }
             else if (!altHeld && ctrlHeld) // yaw the orientation, or z the translation
             {
-               if (leftArrowHeld) // yaw +
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(amountRotation);
+                  if (leftArrowHeld) // yaw +
+                  {
+                     orientationToAdjust.appendYawRotation(amountRotation);
+                  }
+                  if (rightArrowHeld) // yaw -
+                  {
+                     orientationToAdjust.appendYawRotation(-amountRotation);
+                  }
                }
-               if (rightArrowHeld) // yaw -
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(-amountRotation);
-               }
-               if (upArrowHeld) // z +
-               {
-                  positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (downArrowHeld) // z -
-               {
-                  positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld) // z +
+                  {
+                     positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld) // z -
+                  {
+                     positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
             else // translation
             {
-               if (upArrowHeld && !ctrlHeld) // x +
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_X))
                {
-                  positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld && !ctrlHeld) // x +
+                  {
+                     positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld && !ctrlHeld) // x -
+                  {
+                     positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
-               if (downArrowHeld && !ctrlHeld) // x -
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Y))
                {
-                  positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (leftArrowHeld && !ctrlHeld) // y +
-               {
-                  positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (rightArrowHeld && !ctrlHeld) // y -
-               {
-                  positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  if (leftArrowHeld && !ctrlHeld) // y +
+                  {
+                     positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (rightArrowHeld && !ctrlHeld) // y -
+                  {
+                     positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
 
@@ -479,6 +522,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    private void updateGraphicTransforms()
    {
+      LibGDXTools.toLibGDX(transformToWorld, centerSphereModel.getOrCreateModelInstance().transform);
       for (Axis3D axis : Axis3D.values)
       {
          LibGDXTools.toLibGDX(axisTransformToWorlds[axis.ordinal()], arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
@@ -495,12 +539,26 @@ public class RDXPose3DGizmo implements RenderableProvider
       boundingSphereIntersection.update(1.5 * torusRadius.get(), transformToWorld);
       if (boundingSphereIntersection.intersect(pickRay))
       {
+         centerSphereIntersection.update(centerSphereRadius.get(), transformToWorld);
+         boolean hoveringCenterSphere = centerSphereIntersection.intersect(pickRay);
+         double distance = centerSphereIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+         if (hoveringCenterSphere && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = SixDoFSelection.CENTER;
+            closestCollision.set(centerSphereIntersection.getFirstIntersectionToPack());
+         }
+
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+               continue;
+
             // TODO: Only update when shape changes?
             torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), axisTransformToWorlds[axis.ordinal()]);
-            double distance = torusIntersection.intersect(pickRay, 100);
+            distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
             {
                closestCollisionDistance = distance;
@@ -512,12 +570,16 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide arrows
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+               continue;
+
             for (RobotSide side : RobotSide.values)
             {
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
                // TODO: Only update when shape changes?
                arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, axisTransformToWorlds[axis.ordinal()]);
-               double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
+               distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
 
                if (!Double.isNaN(distance) && distance < closestCollisionDistance)
                {
@@ -535,9 +597,23 @@ public class RDXPose3DGizmo implements RenderableProvider
       // closestCollisionSelection can be null if the the 3D panel is zoomed in or out without the mouse hovering
       boolean highlightingPrior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
       // could only do this when selection changed
+
+      if (highlightingPrior && closestCollisionSelection.isCenter())
+      {
+         centerSphereModel.setMaterial(highlightedMaterials[0]);
+      }
+      else
+      {
+         centerSphereModel.setMaterial(normalMaterials[0]);
+      }
+
       for (Axis3D axis : Axis3D.values)
       {
-         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+         {
+            torusModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -546,7 +622,11 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+         {
+            arrowModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -584,6 +664,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          ImGui.popItemWidth();
          ImGui.separator();
          ImGui.pushItemWidth(100.00f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Center sphere to torus ratio"), centerSphereToTorusRatio.getData(), 0.05f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.05f);
@@ -602,7 +683,8 @@ public class RDXPose3DGizmo implements RenderableProvider
          else
             torusRadius.set(torusCameraSize.get());
       }
-      arrowBodyRadius = (float) torusTubeRadiusRatio.get() * torusRadius.get();
+      centerSphereRadius.set(torusRadius.get() * centerSphereToTorusRatio.get());
+      arrowBodyRadius = torusTubeRadiusRatio.get() * torusRadius.get();
       arrowLength = arrowLengthRatio.get() * torusRadius.get();
       arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio.get()) * arrowLength;
       arrowHeadRadius = arrowHeadBodyRadiusRatio.get() * arrowBodyRadius;
@@ -611,6 +693,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       updateMaterialHighlighting();
 
+      centerSphereModel.invalidateMesh();
       for (Axis3D axis : Axis3D.values)
       {
          arrowModels[axis.ordinal()].invalidateMesh();
@@ -622,6 +705,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      centerSphereModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       for (Axis3D axis : Axis3D.values)
       {
          arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
@@ -711,5 +795,21 @@ public class RDXPose3DGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public void disableDoF(SixDoFSelection dof)
+   {
+      if (!disabledDoFs.contains(dof))
+      {
+         disabledDoFs.add(dof);
+      }
+   }
+
+   public void enableDoF(SixDoFSelection dof)
+   {
+      if (disabledDoFs.contains(dof))
+      {
+         disabledDoFs.remove(dof);
+      }
    }
 }

@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -68,8 +68,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       locationEnabled.set(false);
 
-      IHMCROS2Publisher<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
-      IHMCROS2Publisher<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
+      ROS2PublisherBasics<BoundingBoxesPacket> boundingBoxesPublisher = createBehaviorOutputPublisher(BoundingBoxesPacket.class, "/bounding_boxes");
+      ROS2PublisherBasics<HeatMapPacket> heatMapPublisher = createBehaviorOutputPublisher(HeatMapPacket.class, "/heat_map");
 
 //      objectDetectorFromCameraImages.addDetectionResultListener(detectionVisualizationPackets -> {
 //         boundingBoxesPublisher.publish(detectionVisualizationPackets.getBoundingBoxesPacket());

@@ -211,8 +211,8 @@ public class RDX3DSituatedImGuiPanel
       if (ImGui.begin(name, windowFlags))
       {
          renderImGuiWidgets.run();
-         ImGui.end();
       }
+      ImGui.end();
       if (useTransparentBackground)
          ImGui.popStyleColor();
 

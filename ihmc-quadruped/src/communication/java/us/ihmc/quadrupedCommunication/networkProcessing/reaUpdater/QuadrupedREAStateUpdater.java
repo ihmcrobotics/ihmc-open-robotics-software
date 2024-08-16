@@ -7,7 +7,8 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.QuadrupedAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -19,7 +20,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 public class QuadrupedREAStateUpdater
 {
    private final RealtimeROS2Node ros2Node;
-   private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -38,11 +39,11 @@ public class QuadrupedREAStateUpdater
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
 
-      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
-                                                    this::handleHighLevelStateChangeMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedSteppingStateChangeMessage.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
-                                                    this::handleSteppingStateMessage);
+      reaStateRequestPublisher = ros2Node.createPublisher(REACommunicationProperties.inputTopic.withTypeName(REAStateRequestMessage.class));
+      ros2Node.createSubscription(QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName)
+                                              .withTypeName(HighLevelStateChangeStatusMessage.class), this::handleHighLevelStateChangeMessage);
+      ros2Node.createSubscription(QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName)
+                                              .withTypeName(QuadrupedSteppingStateChangeMessage.class), this::handleSteppingStateMessage);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
          shutdown();

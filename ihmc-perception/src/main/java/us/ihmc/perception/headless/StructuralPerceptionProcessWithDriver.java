@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -29,7 +29,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -54,7 +53,7 @@ import java.util.function.Supplier;
 public class StructuralPerceptionProcessWithDriver
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
@@ -93,7 +92,7 @@ public class StructuralPerceptionProcessWithDriver
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
       LogTools.info("Publishing ROS 2 depth images: {}", depthTopic);
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2DepthImagePublisher = realtimeROS2Node.createPublisher(depthTopic);
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
 

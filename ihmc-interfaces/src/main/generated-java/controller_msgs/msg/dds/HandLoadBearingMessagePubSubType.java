@@ -15,7 +15,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "01a6479612d8f89a0a0e56035c3795a1f17f9b38bc2d9644aee7c18009935433";
+   		return "9fc5fdaff0b5bc6cf704491ee99037e8c88c67ed0964fe9bb64a1a78b41be258";
    }
    
    @Override
@@ -58,11 +58,13 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.LoadBearingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -86,12 +88,15 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectory(), current_alignment);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += controller_msgs.msg.dds.LoadBearingMessagePubSubType.getCdrSerializedSize(data.getLoadBearingMessage(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getContactPointInBodyFrame(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getContactNormalInWorld(), current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       return current_alignment - initial_alignment;
@@ -103,12 +108,14 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_7(data.getUseJointspaceCommand());
+      cdr.write_type_7(data.getLoad());
 
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectory(), cdr);
+      cdr.write_type_6(data.getCoefficientOfFriction());
+
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getContactPointInBodyFrame(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getContactNormalInWorld(), cdr);
       cdr.write_type_6(data.getExecutionDelayTime());
 
-      controller_msgs.msg.dds.LoadBearingMessagePubSubType.write(data.getLoadBearingMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.HandLoadBearingMessage data, us.ihmc.idl.CDR cdr)
@@ -117,12 +124,14 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setUseJointspaceCommand(cdr.read_type_7());
+      data.setLoad(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectory(), cdr);	
+      data.setCoefficientOfFriction(cdr.read_type_6());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getContactPointInBodyFrame(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getContactNormalInWorld(), cdr);	
       data.setExecutionDelayTime(cdr.read_type_6());
       	
-      controller_msgs.msg.dds.LoadBearingMessagePubSubType.read(data.getLoadBearingMessage(), cdr);	
 
    }
 
@@ -131,12 +140,13 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_7("use_jointspace_command", data.getUseJointspaceCommand());
-      ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
+      ser.write_type_7("load", data.getLoad());
+      ser.write_type_6("coefficient_of_friction", data.getCoefficientOfFriction());
+      ser.write_type_a("contact_point_in_body_frame", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPointInBodyFrame());
+
+      ser.write_type_a("contact_normal_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorld());
 
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
-      ser.write_type_a("load_bearing_message", new controller_msgs.msg.dds.LoadBearingMessagePubSubType(), data.getLoadBearingMessage());
-
    }
 
    @Override
@@ -144,12 +154,13 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setUseJointspaceCommand(ser.read_type_7("use_jointspace_command"));
-      ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
+      data.setLoad(ser.read_type_7("load"));
+      data.setCoefficientOfFriction(ser.read_type_6("coefficient_of_friction"));
+      ser.read_type_a("contact_point_in_body_frame", new geometry_msgs.msg.dds.PointPubSubType(), data.getContactPointInBodyFrame());
+
+      ser.read_type_a("contact_normal_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getContactNormalInWorld());
 
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
-      ser.read_type_a("load_bearing_message", new controller_msgs.msg.dds.LoadBearingMessagePubSubType(), data.getLoadBearingMessage());
-
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandLoadBearingMessage src, controller_msgs.msg.dds.HandLoadBearingMessage dest)

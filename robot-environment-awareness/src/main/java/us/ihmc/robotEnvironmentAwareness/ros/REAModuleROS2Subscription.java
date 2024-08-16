@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.ros;
 
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.NewMessageListener;
@@ -54,7 +53,7 @@ public class REAModuleROS2Subscription<T>
    public void create(ROS2NodeInterface ros2Node)
    {
       if (subscription == null)
-         subscription = ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, listener, qosProfile);
+         subscription = ros2Node.createSubscription(messageType, listener, topicName, qosProfile);
    }
 
    public void remove()

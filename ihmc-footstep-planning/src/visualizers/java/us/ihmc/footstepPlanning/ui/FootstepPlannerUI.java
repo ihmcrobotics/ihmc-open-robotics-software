@@ -38,7 +38,7 @@ import javafx.stage.Stage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;

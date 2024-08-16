@@ -15,7 +15,7 @@ import perception_msgs.msg.dds.PointCloudWorldPacket;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -60,7 +60,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    // temp vars
    private final Point3D chestPosition = new Point3D();
 
-   private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
+   private ROS2PublisherBasics<DetectedObjectPacket> detectedObjectPublisher;
 
    public SphereDetectionBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {

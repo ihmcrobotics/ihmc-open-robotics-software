@@ -8,9 +8,10 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 public enum SwingPlannerType
 {
    NONE,
-   TWO_WAYPOINT_POSITION,
    MULTI_WAYPOINT_POSITION,
    PROPORTION;
+
+   public static final SwingPlannerType[] values = values();
 
    public static SwingPlannerType fromByte(byte index)
    {
@@ -20,7 +21,7 @@ public enum SwingPlannerType
       }
       else
       {
-         return values()[index];
+         return values[index];
       }
    }
 
@@ -32,7 +33,7 @@ public enum SwingPlannerType
       }
       else
       {
-         return values()[index];
+         return values[index];
       }
    }
 

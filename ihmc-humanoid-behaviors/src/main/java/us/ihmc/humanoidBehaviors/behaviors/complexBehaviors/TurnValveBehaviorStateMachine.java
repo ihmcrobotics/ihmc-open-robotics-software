@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -60,7 +60,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final GetUserValidationBehavior userValidationExampleBehavior;
 
    RobotSide side = RobotSide.RIGHT;
-   private final IHMCROS2Publisher<ValveLocationPacket> publisher;
+   private final ROS2PublisherBasics<ValveLocationPacket> publisher;
 
    public TurnValveBehaviorStateMachine(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,

@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3Trajector
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
@@ -33,9 +34,22 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * The base functionality of the taskspace orientation control state for a rigid body.
+ * <p>
+ * This class triages QP weights and PD control gains, user selection of rotation axes,
+ * and reference frames. It generates a cubic orientation trajectory for user provided
+ * waypoints and packs the desireds into an orientation feedback control command for
+ * submission to the whole body controller core.
+ * </p>
+ * <p>
+ * This class also supports kinematics streaming by accommodating for network
+ * delay when using {@link ExecutionMode#STREAM}.
+ * </p>
+ * <p>
+ * Additionally, it supports the use of function generators to perform diagnostic trajectories.
+ * </p>
+ */
 public class RigidBodyOrientationControlHelper
 {
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
@@ -132,7 +146,7 @@ public class RigidBodyOrientationControlHelper
       if (enableFunctionGenerators)
       {
          functionGenerator = new YoFunctionGeneratorNew(prefix + "_FG", time, registry);
-         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class);
+         functionGeneratorAxis = new YoEnum<>(prefix + "_FGAxis", registry, Axis3D.class, true);
       }
       else
       {
@@ -164,16 +178,17 @@ public class RigidBodyOrientationControlHelper
    private void setDefaultControlFrame()
    {
       controlFrameOrientation.setFromReferenceFrame(defaultControlFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
    private void setControlFrameOrientation(Orientation3DReadOnly controlFrameOrientationInBodyFrame)
    {
       controlFrameOrientation.set(controlFrameOrientationInBodyFrame);
-      feedbackControlCommand.setBodyFixedOrientationToControl(controlFrameOrientation);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
-   public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify, QuaternionReadOnly previousControlFrameOrientation,
+   public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify,
+                                         QuaternionReadOnly previousControlFrameOrientation,
                                          QuaternionReadOnly newControlFrameOrientation)
    {
       desiredOrientationToModify.multiplyConjugateOther(previousControlFrameOrientation);
@@ -183,7 +198,7 @@ public class RigidBodyOrientationControlHelper
    public void holdCurrent()
    {
       clear();
-      desiredOrientation.setIncludingFrame(controlFrameOrientation);
+      desiredOrientation.setIncludingFrame(bodyFrame, controlFrameOrientation);
       queueInitialPoint(desiredOrientation);
    }
 
@@ -394,13 +409,13 @@ public class RigidBodyOrientationControlHelper
       else if (command.getTrajectoryFrame() != trajectoryGenerator.getReferenceFrame())
       {
          LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getReferenceFrame() + " can not switch to " + command.getTrajectoryFrame()
-               + " without override.");
+                       + " without override.");
          return false;
       }
       else if (!selectionMatrix.equals(command.getSelectionMatrix()))
       {
          LogTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
-               + command.getSelectionMatrix());
+                       + command.getSelectionMatrix());
          return false;
       }
 
@@ -411,18 +426,19 @@ public class RigidBodyOrientationControlHelper
       {
          this.streamTimestampOffset.set(streamTimestampOffset);
          this.streamTimestampSource.set(streamTimestampSource);
-      
-         if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
+
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 0 || trajectoryPoints.getNumberOfTrajectoryPoints() > 2)
          {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
+            LogTools.warn(
+                  "When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
             return false;
          }
 
-         FrameSO3TrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+         FrameSO3TrajectoryPoint firstPoint = trajectoryPoints.getTrajectoryPoint(0);
 
-         if (trajectoryPoint.getTime() != 0.0)
+         if (firstPoint.getTime() != 0.0)
          {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
             return false;
          }
 
@@ -431,7 +447,7 @@ public class RigidBodyOrientationControlHelper
          if (initialPoint == null)
             return false;
 
-         initialPoint.setIncludingFrame(trajectoryPoint);
+         initialPoint.setIncludingFrame(firstPoint);
          if (!Double.isNaN(streamTimestampOffset))
             initialPoint.setTime(streamTimestampOffset - streamTimeOffset);
 
@@ -440,11 +456,27 @@ public class RigidBodyOrientationControlHelper
          if (integratedPoint == null)
             return false;
 
-         integratedPoint.setIncludingFrame(initialPoint);
-         integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
-         integratedOrientation.setRotationVector(integratedRotationVector);
-         integratedOrientation.append(integratedPoint.getOrientation());
-         integratedPoint.getOrientation().set(integratedOrientation);
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 1)
+         { // No extrapolation provided, so we do it here.
+            integratedPoint.setIncludingFrame(initialPoint);
+            integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
+            integratedOrientation.setRotationVector(integratedRotationVector);
+            integratedOrientation.append(integratedPoint.getOrientation());
+            integratedPoint.getOrientation().set(integratedOrientation);
+         }
+         else
+         { // Extrapolation provided, so we use it.
+            FrameSO3TrajectoryPoint secondPoint = trajectoryPoints.getTrajectoryPoint(1);
+
+            if (secondPoint.getTime() != command.getStreamIntegrationDuration())
+            {
+               LogTools.warn("When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+               return false;
+            }
+
+            integratedPoint.setIncludingFrame(secondPoint);
+         }
+
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else
@@ -480,7 +512,7 @@ public class RigidBodyOrientationControlHelper
          desiredVelocity.addY(functionGenerator.getValueDot());
          feedForwardAcceleration.addY(functionGenerator.getValueDDot());
       }
-      else
+      else if (functionGeneratorAxis.getValue() == Axis3D.Z)
       {
          desiredOrientation.appendYawRotation(functionGenerator.getValue());
          desiredVelocity.addZ(functionGenerator.getValueDot());
@@ -560,6 +592,16 @@ public class RigidBodyOrientationControlHelper
          return false;
       }
       return trajectoryGenerator.isDone();
+   }
+
+   public void resetFunctionGenerator()
+   {
+      if (functionGenerator != null)
+      {
+         functionGenerator.setMode(YoFunctionGeneratorMode.OFF);
+         functionGenerator.reset();
+         functionGeneratorAxis.set(null);
+      }
    }
 
    public double getLastTrajectoryPointTime()

@@ -35,6 +35,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+/**
+ * This class doesn't really work anymore. The swing over planar regions planner has been removed from the FootstepPlanningModule. A local instance of
+ * planning for the footstep plan should be implemented for this viewer to work sufficiently well.
+ */
 public class SwingOverPlanarRegionsLogViewer
 {
    public SwingOverPlanarRegionsLogViewer(String fileName)
@@ -63,14 +67,14 @@ public class SwingOverPlanarRegionsLogViewer
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
       parameters.set(log.getSwingPlannerParametersPacket());
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getStatusPacket().getPlanarRegionsList());
+      // FIXME need to load this some other way.
+      PlanarRegionsList planarRegionsList = null;//PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getStatusPacket().getPlanarRegionsList());
 
       WalkingControllerParameters walkingControllerParameters = new ProxyAtlasWalkingControllerParameters();
       ConvexPolygon2D foot = ProxyAtlasWalkingControllerParameters.getProxyAtlasFootPolygon();
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                         new DefaultVisibilityGraphParameters(),
                                                                          new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          parameters,
@@ -84,7 +88,7 @@ public class SwingOverPlanarRegionsLogViewer
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       YoFramePoint3D firstWaypoint = new YoFramePoint3D("firstWaypoint", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint3D secondWaypoint = new YoFramePoint3D("secondWaypoint", ReferenceFrame.getWorldFrame(), registry);
@@ -94,12 +98,11 @@ public class SwingOverPlanarRegionsLogViewer
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
-      SwingOverPlanarRegionsTrajectoryExpander expander = planningModule.getSwingOverPlanarRegionsTrajectoryExpander();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
 
-      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
-      expander.attachVisualizer(visualizer::update);
+//      SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
+//      expander.attachVisualizer(visualizer::update);
 
       scs.setDT(1.0, 1);
       scs.addYoRegistry(registry);
@@ -107,11 +110,10 @@ public class SwingOverPlanarRegionsLogViewer
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                                    request.getHeightMapData(),
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getHeightMapData(),
                                                                     footstepPlan,
                                                                     request.getStartFootPoses(),
-                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
+                                                                    SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
       scs.startOnAThread();
       scs.cropBuffer();

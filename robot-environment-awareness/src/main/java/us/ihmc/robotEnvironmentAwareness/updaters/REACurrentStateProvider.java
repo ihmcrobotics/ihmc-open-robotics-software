@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import perception_msgs.msg.dds.REAStatusMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class REACurrentStateProvider
 {
-   private final IHMCROS2Publisher<REAStatusMessage> currentStatePublisher;
+   private final ROS2PublisherBasics<REAStatusMessage> currentStatePublisher;
    private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
    private final AtomicReference<Double> minRange, maxRange;
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
@@ -24,7 +24,7 @@ public class REACurrentStateProvider
                                   ROS2Topic outputTopic,
                                   Messager messager)
    {
-      currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopic);
+      currentStatePublisher = ros2Node.createPublisher(outputTopic.withTypeName(REAStatusMessage.class));
       isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
       // This should be the only input with a default value, the rest gets populated at the very start.
       hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);

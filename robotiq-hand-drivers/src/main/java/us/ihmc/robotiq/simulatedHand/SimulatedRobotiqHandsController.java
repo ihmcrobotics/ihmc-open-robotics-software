@@ -7,8 +7,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -95,9 +94,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                                                                  HandJointAnglePacket.class,
-                                                                                                                  outputTopic);
+         ROS2PublisherBasics<HandJointAnglePacket> jointAnglePublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(HandJointAnglePacket.class));
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, fullRobotModel);
       }
       else
@@ -132,10 +129,7 @@ public class SimulatedRobotiqHandsController implements RobotController
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (realtimeROS2Node != null)
             {
-               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                             HandDesiredConfigurationMessage.class,
-                                                             inputTopic,
-                                                             handDesiredConfigurationSubscriber);
+               realtimeROS2Node.createSubscription(inputTopic.withTypeName(HandDesiredConfigurationMessage.class), handDesiredConfigurationSubscriber);
             }
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide,

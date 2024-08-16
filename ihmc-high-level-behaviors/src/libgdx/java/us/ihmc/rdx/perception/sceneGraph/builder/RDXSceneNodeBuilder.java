@@ -38,11 +38,6 @@ public abstract class RDXSceneNodeBuilder<T extends RDXSceneNode>
 
    public String getRejectionTooltip()
    {
-      if (name.isEmpty())
-      {
-         return "Name field empty";
-      }
-
       if (sceneGraph.getNodeNameList().contains(name.get()))
       {
          return "Name already taken";

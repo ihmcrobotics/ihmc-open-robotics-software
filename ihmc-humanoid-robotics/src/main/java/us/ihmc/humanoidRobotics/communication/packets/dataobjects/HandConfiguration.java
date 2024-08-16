@@ -3,7 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.dataobjects;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
 /**
-* @author twan
+* @deprecated Not supported anymore. For the Sake gripper, use SakeHandCommandOption.
+ *
+ * @author twan
 *         Date: 6/8/13
 */
 public enum HandConfiguration

@@ -51,7 +51,8 @@ public class GradientDescentStepConstraintSolverVisualizer
       List<FootstepGraphNode> footstepPlan = log.getFootstepPlan();
       LogTools.info("Loaded plan with " + footstepPlan.size() + " steps");
 
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
+      // FIXME this doesn't work without the logged planar region messages
+      PlanarRegionsList planarRegionsList = null;// PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
       scs.setGroundVisible(false);

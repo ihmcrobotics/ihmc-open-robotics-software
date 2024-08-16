@@ -24,16 +24,15 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -220,7 +219,9 @@ public abstract class EndToEndFrameDataPublisherTest implements MultiRobotTestIn
       simulationTestHelper.publishToController(steps);
       
       //      fullRobotModel.updateFrames();
-      ROS2Topic<RobotFrameData> ros2Topic = ControllerAPIDefinition.getOutputTopic(robotModel.getSimpleRobotName()).withSuffix("afterL_arm_ely").withType(RobotFrameData.class);
+      ROS2Topic<RobotFrameData> ros2Topic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())
+                                                                 .withSuffix("afterL_arm_ely")
+                                                                 .withType(RobotFrameData.class);
       List<RobotFrameData> frameMessages = new ArrayList<>();
       
       

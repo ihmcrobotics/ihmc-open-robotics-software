@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -25,7 +25,7 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
 
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot numberOfMarkersPlot = new ImGuiPlot("# Markers", 1000, 230, 20);
-   private final IHMCROS2Input<ArUcoMarkerPoses> subscription;
+   private final ROS2Input<ArUcoMarkerPoses> subscription;
    private int numberOfArUcoMarkers = 0;
    private final ArrayList<RDXModelInstance> markerCoordinateFrames = new ArrayList<>();
    private final Pose3D markerPose = new Pose3D();

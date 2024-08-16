@@ -14,24 +14,22 @@ import us.ihmc.pubsub.TopicDataType;
 public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage> implements Settable<ConfirmableRequestMessage>, EpsilonComparable<ConfirmableRequestMessage>
 {
    /**
-            * If this message is a request to change something.
+            * Recent request numbers, monotonically increasing
+            * The size of this is roughly the max amount of expected dropped messages in 1 second
             */
-   public boolean is_request_;
+   public us.ihmc.idl.IDLSequence.Long  request_numbers_;
    /**
-            * If this message is a confirmation that the request has been received by the other side.
+            * Recent confirmation numbers, the values of received request numbers
+            * The size of this is roughly the max amount of expected dropped messages in 1 second
             */
-   public boolean is_confirmation_;
-   /**
-            * Request number, monotonically increasing
-            */
-   public long request_number_;
-   /**
-            * Confirmation number, the value of the last received request number
-            */
-   public long confirmation_number_;
+   public us.ihmc.idl.IDLSequence.Long  confirmation_numbers_;
 
    public ConfirmableRequestMessage()
    {
+      request_numbers_ = new us.ihmc.idl.IDLSequence.Long (10, "type_4");
+
+      confirmation_numbers_ = new us.ihmc.idl.IDLSequence.Long (10, "type_4");
+
    }
 
    public ConfirmableRequestMessage(ConfirmableRequestMessage other)
@@ -42,74 +40,28 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
    public void set(ConfirmableRequestMessage other)
    {
-      is_request_ = other.is_request_;
-
-      is_confirmation_ = other.is_confirmation_;
-
-      request_number_ = other.request_number_;
-
-      confirmation_number_ = other.confirmation_number_;
-
+      request_numbers_.set(other.request_numbers_);
+      confirmation_numbers_.set(other.confirmation_numbers_);
    }
 
-   /**
-            * If this message is a request to change something.
-            */
-   public void setIsRequest(boolean is_request)
-   {
-      is_request_ = is_request;
-   }
-   /**
-            * If this message is a request to change something.
-            */
-   public boolean getIsRequest()
-   {
-      return is_request_;
-   }
 
    /**
-            * If this message is a confirmation that the request has been received by the other side.
+            * Recent request numbers, monotonically increasing
+            * The size of this is roughly the max amount of expected dropped messages in 1 second
             */
-   public void setIsConfirmation(boolean is_confirmation)
+   public us.ihmc.idl.IDLSequence.Long  getRequestNumbers()
    {
-      is_confirmation_ = is_confirmation;
-   }
-   /**
-            * If this message is a confirmation that the request has been received by the other side.
-            */
-   public boolean getIsConfirmation()
-   {
-      return is_confirmation_;
+      return request_numbers_;
    }
 
-   /**
-            * Request number, monotonically increasing
-            */
-   public void setRequestNumber(long request_number)
-   {
-      request_number_ = request_number;
-   }
-   /**
-            * Request number, monotonically increasing
-            */
-   public long getRequestNumber()
-   {
-      return request_number_;
-   }
 
    /**
-            * Confirmation number, the value of the last received request number
+            * Recent confirmation numbers, the values of received request numbers
+            * The size of this is roughly the max amount of expected dropped messages in 1 second
             */
-   public void setConfirmationNumber(long confirmation_number)
+   public us.ihmc.idl.IDLSequence.Long  getConfirmationNumbers()
    {
-      confirmation_number_ = confirmation_number;
-   }
-   /**
-            * Confirmation number, the value of the last received request number
-            */
-   public long getConfirmationNumber()
-   {
-      return confirmation_number_;
+      return confirmation_numbers_;
    }
 
 
@@ -130,13 +82,9 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_request_, other.is_request_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.request_numbers_, other.request_numbers_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_confirmation_, other.is_confirmation_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.request_number_, other.request_number_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confirmation_number_, other.confirmation_number_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.confirmation_numbers_, other.confirmation_numbers_, epsilon)) return false;
 
 
       return true;
@@ -151,14 +99,8 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
       ConfirmableRequestMessage otherMyClass = (ConfirmableRequestMessage) other;
 
-      if(this.is_request_ != otherMyClass.is_request_) return false;
-
-      if(this.is_confirmation_ != otherMyClass.is_confirmation_) return false;
-
-      if(this.request_number_ != otherMyClass.request_number_) return false;
-
-      if(this.confirmation_number_ != otherMyClass.confirmation_number_) return false;
-
+      if (!this.request_numbers_.equals(otherMyClass.request_numbers_)) return false;
+      if (!this.confirmation_numbers_.equals(otherMyClass.confirmation_numbers_)) return false;
 
       return true;
    }
@@ -169,14 +111,10 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ConfirmableRequestMessage {");
-      builder.append("is_request=");
-      builder.append(this.is_request_);      builder.append(", ");
-      builder.append("is_confirmation=");
-      builder.append(this.is_confirmation_);      builder.append(", ");
-      builder.append("request_number=");
-      builder.append(this.request_number_);      builder.append(", ");
-      builder.append("confirmation_number=");
-      builder.append(this.confirmation_number_);
+      builder.append("request_numbers=");
+      builder.append(this.request_numbers_);      builder.append(", ");
+      builder.append("confirmation_numbers=");
+      builder.append(this.confirmation_numbers_);
       builder.append("}");
       return builder.toString();
    }

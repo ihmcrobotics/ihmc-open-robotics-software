@@ -3,3 +3,4 @@
 
 float32[<=12] positions
 float32[<=12] velocities
+float32[<=12] accelerations

@@ -17,6 +17,7 @@ module controller_msgs
       {
         sequence<float, 12> positions;
         sequence<float, 12> velocities;
+        sequence<float, 12> accelerations;
       };
     };
   };
