@@ -66,5 +66,32 @@ rm -f zed-c-api.tar.gz
 rm -rf zed-c-api-4.1.0/
 ```
 
-## Windows
+## Windows (x86_64)
+
+### CUDA Toolkit
+
+```shell
+curl -OL https://developer.download.nvidia.com/compute/cuda/12.6.0/network_installers/cuda_12.6.0_windows_network.exe
+cuda_12.6.0_windows_network.exe -s
+
+:: Follow the NVIDIA Installer prompts. 
+:: When asked whether to run express or custom installation, you may select express. 
+
+del cuda_12.6.0_windows_network.exe
+```
+
+### nvCOMP
+
+```shell
+curl -o nvcomp.zip https://developer.download.nvidia.com/compute/nvcomp/4.0.0/local_installers/nvcomp-windows-x86_64-4.0.0-cuda12.5.zip
+tar -xvf nvcomp.zip
+
+:: The following move commands must be ran as administrator
+move nvcomp\include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move nvcomp\lib\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
+move nvcomp\lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
+
+del nvcomp.zip
+rmdir /s /q nvcomp
+```
 
