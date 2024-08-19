@@ -1,5 +1,6 @@
 package us.ihmc.sensors;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
@@ -8,6 +9,8 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,9 +24,12 @@ import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RecordingStatus;
 import us.ihmc.zed.SL_RuntimeParameters;
 import us.ihmc.zed.SL_Vector3;
+import us.ihmc.zed.SL_Vector4;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -61,6 +67,7 @@ public class ZEDColorDepthImageRetriever
 
    private Pointer colorImagePointer;
    private Pointer depthImagePointer;
+   private BytePointer pointCloudPointer;
    private long grabSequenceNumber = 0L;
 
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
@@ -72,6 +79,7 @@ public class ZEDColorDepthImageRetriever
    private RawImage depthImage = null;
 
    private final FramePose3D retrievedSensorPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private List<Point3D32> retrievedPointCloud = new ArrayList<>();
 
    private final boolean useSensorPositionalTracking;
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
@@ -160,6 +168,7 @@ public class ZEDColorDepthImageRetriever
             retrieveAndSaveDepthImage();
             retrieveAndSaveColorImage(RobotSide.LEFT);
             retrieveAndSaveColorImage(RobotSide.RIGHT);
+            retrieveAndSavePointCloud();
             grabSequenceNumber++;
 
             // Occasionally print something if recording
@@ -280,6 +289,26 @@ public class ZEDColorDepthImageRetriever
       translation.close();
    }
 
+   private void retrieveAndSavePointCloud()
+   {
+      sl_retrieve_measure(0, pointCloudPointer, SL_MEASURE_XYZ, SL_MEM_CPU, imageWidth, imageHeight);
+
+      List<Point3D32> pointCloud = new ArrayList<>(imageWidth * imageHeight);
+      SL_Vector4 point = new SL_Vector4();
+      for (int row = 0; row < imageHeight; ++row)
+      {
+         for (int col = 0; col < imageWidth; ++col)
+         {
+            sl_mat_get_value_float4(pointCloudPointer, col, row, point, SL_MEM_CPU);
+            pointCloud.add(new Point3D32(point.x(), point.y() + (float) zedModelData.getCenterToCameraDistance(), point.z()));
+         }
+      }
+      retrievedPointCloud = pointCloud;
+
+      pointCloudPointer.close();
+      point.close();
+   }
+
    public RawImage getLatestRawDepthImage()
    {
       newDepthImageLock.lock();
@@ -328,6 +357,11 @@ public class ZEDColorDepthImageRetriever
       }
 
       return colorImages.get(side).get();
+   }
+
+   public List<Point3D32> getLatestPointCloud()
+   {
+      return retrievedPointCloud;
    }
 
    public FramePose3D getLatestSensorPose()
@@ -470,6 +504,7 @@ public class ZEDColorDepthImageRetriever
 
       colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
+      pointCloudPointer = new BytePointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_F32_C4, SL_MEM_CPU));
 
       LogTools.info("Started {} camera", getCameraModel(cameraID));
       LogTools.info("Firmware version: {}", sl_get_camera_firmware(cameraID));
