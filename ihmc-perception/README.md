@@ -88,10 +88,42 @@ tar -xvf nvcomp.zip
 
 :: The following move commands must be ran as administrator
 move nvcomp\include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move nvcomp\include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
 move nvcomp\lib\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
 move nvcomp\lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
 
 del nvcomp.zip
 rmdir /s /q nvcomp
+```
+
+### ZED SDK & API
+
+Install the SDK:
+
+```shell
+curl -o ZED_SDK_Installer.exe -L https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.1/ZED_SDK_Windows_cuda12.1_v4.1.3.exe
+ZED_SDK_Installer .exe -s
+
+:: Follow the ZED SDK installer prompts
+
+del ZED_SDK_Installer.exe
+```
+
+Install the API:
+
+```shell
+winget install LLVM
+:: You should add C:\Program Files\LLVM\bin to the system path. 
+winget install kitware.cmake
+
+curl -o zed-c-api.tar.gz -L https://codeload.github.com/stereolabs/zed-c-api/tar.gz/refs/tags/v4.1.0
+tar -xvf zed-c-api.tar.gz
+
+cd zed-c-api-4.1.0/
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+cmake --install .
 ```
 
