@@ -19,7 +19,7 @@ mainDependencies {
    api("com.hierynomus:sshj:0.32.0")
 
    api("us.ihmc:mecano-graphviz:17-0.18.1")
-   api("us.ihmc:scs2-bullet-simulation:17-0.26.0")
+   api("us.ihmc:scs2-bullet-simulation:17-0.27.0")
 
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
