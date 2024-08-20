@@ -15,7 +15,7 @@ public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "09642cb7ad6c5f27a8b441af43d779a48af661d1096d33a0520f5a32c8d9a52d";
+   		return "7ebc33ac5626cf1901bdf3af415c6c94a434f97bfca7429d82aa06a25c79379d";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2600 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -72,7 +72,7 @@ public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.Topi
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getDoubleValues().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getDoubleValues().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -89,7 +89,7 @@ public class PrimitiveDataVectorMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getDoubleValues().size() <= 200)
+      if(data.getDoubleValues().size() <= 2600)
       cdr.write_type_e(data.getDoubleValues());else
           throw new RuntimeException("double_values field exceeds the maximum length");
 

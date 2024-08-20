@@ -2,8 +2,8 @@
 # The number and ordering of values is assumed to be defined ahead of time
 # so it is not necessary to send indicies.
 
-# double values
-float64[] double_values
+# data
+int8[] double_values
 
 # integer values
 int32[] integer_values
