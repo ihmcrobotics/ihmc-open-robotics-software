@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -192,6 +193,16 @@ public class RawImage
          return cpuImageMat.rows();
       else if (gpuImageMat != null && !gpuImageMat.isNull())
          return gpuImageMat.rows();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
+   }
+
+   public Size getImageSize()
+   {
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.size();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.size();
 
       throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }

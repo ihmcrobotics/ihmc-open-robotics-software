@@ -27,8 +27,8 @@ import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -248,7 +248,7 @@ public class PerceptionAndAutonomyProcess
       blackflyProcessAndPublishThread = new RestartableThread("BlackflyProcessAndPublish", this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
 
-      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, BLACKFLY_LENS, blackflyFrameSuppliers.get(RobotSide.RIGHT));
+      arUcoUpdater = new ArUcoDetectionUpdater(ros2Helper, zedFrameSupplier.get());
       arUcoMarkerDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::detectAndPublishArUcoMarkers);
       arUcoMarkerDetectionThread.start();
 
@@ -405,6 +405,9 @@ public class PerceptionAndAutonomyProcess
          if (yoloZEDDemandNode.isDemanded())
             yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
+         if (arUcoDetectionDemandNode.isDemanded())
+            arUcoUpdater.setNextImage(zedColorImages.get(RobotSide.LEFT));
+
          if (ballDetectionDemandNode.isDemanded())
             ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
 
@@ -481,10 +484,7 @@ public class PerceptionAndAutonomyProcess
             if (blackflyImageRetrievers.get(side) != null && blackflyImagePublishers.get(side) != null)
             {
                blackflyImages.put(side, blackflyImageRetrievers.get(side).getLatestRawImage());
-
                blackflyImagePublishers.get(side).setNextDistortedImage(blackflyImages.get(side).get());
-               arUcoUpdater.setNextDistortedImage(blackflyImages.get(side).get());
-
                blackflyImages.get(side).release();
             }
             else
@@ -502,7 +502,7 @@ public class PerceptionAndAutonomyProcess
    {
       if (arUcoDetectionDemandNode.isDemanded())
       {
-         boolean performedDetection = arUcoUpdater.undistortAndUpdateArUco();
+         boolean performedDetection = arUcoUpdater.updateArUco();
          if (performedDetection)
          {
             sharedArUcoDetectionResults.getForThreadOne().copyOutputData(arUcoUpdater.getArUcoMarkerDetector());
@@ -670,11 +670,10 @@ public class PerceptionAndAutonomyProcess
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
       zedDepthDemandNode.addDependents(planarRegionsDemandNode); // Using ZED for planar regions
       zedDepthDemandNode.addDependents(zedPointCloudDemandNode); // Used by global visualizer to demand color & depth
-      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerPoseDemandNode, ballDetectionDemandNode);
+      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerPoseDemandNode, ballDetectionDemandNode, arUcoDetectionDemandNode);
       planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
       realsenseDemandNode.addDependents(heightMapDemandNode);
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images
    }
 
    /*
