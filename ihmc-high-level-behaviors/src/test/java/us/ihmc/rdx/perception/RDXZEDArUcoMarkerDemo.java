@@ -12,7 +12,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
@@ -47,7 +46,7 @@ public class RDXZEDArUcoMarkerDemo
    private final RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer;
    private final RDXPerceptionVisualizersPanel perceptionVisualizersPanel;
    private final RDXReferenceFrameGraphicsList markerPoseGraphics = new RDXReferenceFrameGraphicsList();
-   private final ImFloat markerSize = new ImFloat(0.0215f);
+   private final ImFloat markerSize = new ImFloat(0.02975f);
 
    private final OpenCVArUcoMarkerDetector arUcoDetector;
    private BytedecoImage detectionImage;
