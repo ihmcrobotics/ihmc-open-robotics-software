@@ -14,9 +14,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class PrimitiveDataVectorMessage extends Packet<PrimitiveDataVectorMessage> implements Settable<PrimitiveDataVectorMessage>, EpsilonComparable<PrimitiveDataVectorMessage>
 {
    /**
-            * data
+            * double values
             */
-   public us.ihmc.idl.IDLSequence.Byte  double_values_;
+   public us.ihmc.idl.IDLSequence.Double  double_values_;
    /**
             * integer values
             */
@@ -28,7 +28,7 @@ public class PrimitiveDataVectorMessage extends Packet<PrimitiveDataVectorMessag
 
    public PrimitiveDataVectorMessage()
    {
-      double_values_ = new us.ihmc.idl.IDLSequence.Byte (2600, "type_9");
+      double_values_ = new us.ihmc.idl.IDLSequence.Double (200, "type_6");
 
       integer_values_ = new us.ihmc.idl.IDLSequence.Integer (200, "type_2");
 
@@ -51,9 +51,9 @@ public class PrimitiveDataVectorMessage extends Packet<PrimitiveDataVectorMessag
 
 
    /**
-            * data
+            * double values
             */
-   public us.ihmc.idl.IDLSequence.Byte  getDoubleValues()
+   public us.ihmc.idl.IDLSequence.Double  getDoubleValues()
    {
       return double_values_;
    }
@@ -94,7 +94,7 @@ public class PrimitiveDataVectorMessage extends Packet<PrimitiveDataVectorMessag
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.double_values_, other.double_values_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.double_values_, other.double_values_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.integer_values_, other.integer_values_, epsilon)) return false;
 

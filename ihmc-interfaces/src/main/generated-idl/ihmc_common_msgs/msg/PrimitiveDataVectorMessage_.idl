@@ -17,9 +17,9 @@ module ihmc_common_msgs
       struct PrimitiveDataVectorMessage
       {
         /**
-         * data
+         * double values
          */
-        sequence<octet, 2600> double_values;
+        sequence<double, 200> double_values;
         /**
          * integer values
          */
