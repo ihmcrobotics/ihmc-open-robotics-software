@@ -24,7 +24,6 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private final byte[] messageDataHeapArray = new byte[25000000];
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
@@ -69,10 +68,8 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
          {
             synchronized (syncObject)
             {
-               IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
-               int numberOfBytes = imageEncodedTByteArrayList.size();
-               imageEncodedTByteArrayList.copyArray();
-               messageEncodedBytePointer.put(messageDataHeapArray, 0, numberOfBytes);
+               int numberOfBytes = videoPacket.getData().size();
+               messageEncodedBytePointer.put(videoPacket.getData().getBuffer().array(), 0, numberOfBytes);
                messageEncodedBytePointer.limit(numberOfBytes);
 
                inputJPEGMat.cols(numberOfBytes);

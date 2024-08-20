@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Subscription;
@@ -178,10 +177,9 @@ public class LidarScanLogWriter
 
          logDataOutputStream.writeInt(lidarScanMessage.getScan().size());
 
-         Byte aByte = lidarScanMessage.getScan();
-         for (byte scanData : aByte.copyArray())
+         for (int i = 0; i < lidarScanMessage.getScan().size(); i++)
          {
-            logDataOutputStream.writeByte(scanData);
+            logDataOutputStream.writeByte(lidarScanMessage.getScan().get(i));
          }
       }
       catch (IOException e)

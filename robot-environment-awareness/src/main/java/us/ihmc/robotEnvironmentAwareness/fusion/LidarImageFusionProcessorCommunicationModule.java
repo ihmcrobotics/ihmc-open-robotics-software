@@ -22,7 +22,6 @@ import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
@@ -132,8 +131,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private void dispatchVideoPacket(VideoPacket message)
    {
-      Byte aByte = message.getData();
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(aByte.copyArray());
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().copyArray());
       stereoREAModule.updateLatestBufferedImage(bufferedImage);
       latestBufferedImage.set(bufferedImage);
       messager.submitMessage(LidarImageFusionAPI.CameraPositionState, message.getPosition());

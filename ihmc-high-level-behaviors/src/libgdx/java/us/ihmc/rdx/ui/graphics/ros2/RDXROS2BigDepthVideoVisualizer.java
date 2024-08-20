@@ -23,7 +23,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private byte[] messageDataHeapArray;
    private BytePointer messageBytePointer;
    private Mat inputDepthMat;
    private Mat normalizedScaledImage;
@@ -69,15 +68,13 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer
                IDLSequence.Byte imageTByteArrayList = videoPacket.getData();
                int numberOfBytes = imageTByteArrayList.size();
 
-               if (messageDataHeapArray == null || messageDataHeapArray.length != imageTByteArrayList.size())
+               if (messageBytePointer == null || messageBytePointer.capacity() < imageTByteArrayList.capacity())
                {
-                  messageDataHeapArray = new byte[imageTByteArrayList.size()];
                   messageBytePointer = new BytePointer(imageTByteArrayList.size());
                }
 
-               imageTByteArrayList.copyArray();
                messageBytePointer.position(0);
-               messageBytePointer.put(messageDataHeapArray, 0, imageTByteArrayList.size());
+               messageBytePointer.put(imageTByteArrayList.getBuffer().array(), 0, imageTByteArrayList.size());
                messageBytePointer.limit(imageTByteArrayList.size());
 
                if (inputDepthMat == null)

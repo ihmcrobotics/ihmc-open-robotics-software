@@ -9,7 +9,6 @@ import us.ihmc.communication.video.VideoCallback;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.ros2.ROS2Node;
 
 public abstract class VideoPacketListenerBehavior extends AbstractBehavior implements VideoCallback
@@ -33,8 +32,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
       if (cameraData.isNewPacketAvailable())
       {
          VideoPacket packet = cameraData.poll();
-         Byte aByte = packet.getData();
-         videoDataClient.onFrame(VideoSource.fromByte(packet.getVideoSource()), aByte.copyArray(), packet.getTimestamp(), packet.getPosition(),
+         videoDataClient.onFrame(VideoSource.fromByte(packet.getVideoSource()), packet.getData().copyArray(), packet.getTimestamp(), packet.getPosition(),
                                  packet.getOrientation(), HumanoidMessageTools.toIntrinsicParameters(packet.getIntrinsicParameters()));
       }
    }

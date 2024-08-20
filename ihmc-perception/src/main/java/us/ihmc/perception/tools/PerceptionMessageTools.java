@@ -17,7 +17,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -186,8 +185,7 @@ public class PerceptionMessageTools
    public static void displayVideoPacketColor(VideoPacket videoPacket)
    {
       Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
-      Byte aByte = videoPacket.getData();
-      byte[] compressedByteArray = aByte.copyArray();
+      byte[] compressedByteArray = videoPacket.getData().copyArray();
       OpenCVTools.decompressJPG(compressedByteArray, colorImage);
       PerceptionDebugTools.display("Color Image", colorImage, 1);
    }
