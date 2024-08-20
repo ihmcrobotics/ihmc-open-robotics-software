@@ -90,7 +90,7 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<Lock> newColorImageLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
    private final SideDependentList<Condition> newColorImagesAvailable = new SideDependentList<>(newColorImageLocks.get(RobotSide.LEFT).newCondition(),
                                                                                                 newColorImageLocks.get(RobotSide.RIGHT).newCondition());
-   private SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
+   private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
    private boolean initialized = false;
 

@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.ArucoDetector;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import org.bytedeco.opencv.opencv_objdetect.Dictionary;
@@ -78,7 +77,6 @@ public class OpenCVArUcoMarkerDetector
       cameraMatrix.ptr(1, 1).putDouble(cameraIntrinsics.getFy());
       cameraMatrix.ptr(0, 2).putDouble(cameraIntrinsics.getCx());
       cameraMatrix.ptr(1, 2).putDouble(cameraIntrinsics.getCy());
-
    }
 
    /**
