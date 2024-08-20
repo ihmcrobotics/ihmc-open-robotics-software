@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -44,8 +43,7 @@ public class CollaborativeBehavior extends AbstractBehavior
          {
             try
             {
-               Byte aByte = vidPack.getData();
-               InputStream in = new ByteArrayInputStream(aByte.copyArray());
+               InputStream in = new ByteArrayInputStream(vidPack.getData().copyArray());
                ImageIO.write(ImageIO.read(in), "png", new java.io.File("testImage"));
             }
             catch (IOException e)

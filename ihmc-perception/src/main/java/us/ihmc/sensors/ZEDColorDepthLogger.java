@@ -4,7 +4,6 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.pubsub.DomainFactory;
@@ -79,14 +78,10 @@ public class ZEDColorDepthLogger
    {
       subscriber.takeNextData(imageMessage, sampleInfo);
 
-      byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      Byte aByte = imageMessage.getData();
-      System.arraycopy(aByte.copyArray(), 0, heapArray, 0, imageMessage.getData().size());
-
       synchronized (colorBytePointerSyncObject)
       {
          colorBytePointer = new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
-         colorBytePointer.put(heapArray, 0, imageMessage.getData().size());
+         colorBytePointer.put(imageMessage.getData().getBuffer().array(), 0, imageMessage.getData().size());
          colorBytePointer.limit(imageMessage.getData().size());
       }
    }
