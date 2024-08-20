@@ -73,11 +73,15 @@ public class RigidBodySceneObjectDefinitions
    public static final String PLATFORM_VISUAL_MODEL_FILE_PATH = "environmentObjects/workPlatform/workPlatform.g3dj";
    public static final RigidBodyTransform PLATFORM_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
+   public static final int ROBOT_HAND_MARKER_ID = 7;
+   public static final double ROBOT_HAND_MARKER_SIZE = 0.02975;
+
    public static final TIntDoubleMap ARUCO_MARKER_SIZES = new TIntDoubleHashMap();
    static
    {
       ARUCO_MARKER_SIZES.put(BOX_MARKER_ID, BOX_MARKER_SIZE);
       ARUCO_MARKER_SIZES.put(CAN_OF_SOUP_MARKER_ID, SceneObjectDefinitions.LARGE_MARKER_WIDTH);
+      ARUCO_MARKER_SIZES.put(ROBOT_HAND_MARKER_ID, ROBOT_HAND_MARKER_SIZE);
    }
 
    public static final String SHOE_NAME = "Shoe";
