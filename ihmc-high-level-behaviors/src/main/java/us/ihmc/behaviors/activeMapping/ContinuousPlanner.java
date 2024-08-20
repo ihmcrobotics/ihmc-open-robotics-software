@@ -402,7 +402,11 @@ public class ContinuousPlanner
          imminentFootSide = sideFromMessage;
       }
 
-      int index = getNextIndexOnOppositeSide(RobotSide.fromByte(footstepStatusMessage.get().getRobotSide()), controllerQueue);
+      int index = 0;
+      while (index < controllerQueue.size() && controllerQueue.get(index).getRobotSide() == footstepStatusMessage.get().getRobotSide())
+      {
+         index++;
+      }
 
       FramePose3D imminentFootstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                          footstepStatusMessage.get().getDesiredFootPositionInWorld(),
@@ -443,15 +447,6 @@ public class ContinuousPlanner
 
       startStancePose.get(imminentFootstepSide).set(imminentFootstepPose);
       startStancePose.get(imminentFootstepSide.getOppositeSide()).set(nextRobotStepAfterCurrent);
-   }
-
-   private int getNextIndexOnOppositeSide(RobotSide side, List<QueuedFootstepStatusMessage> controllerQueue)
-   {
-      int i = 0;
-      while (i < controllerQueue.size() && RobotSide.fromByte(controllerQueue.get(i).getRobotSide()) == side)
-         i++;
-
-      return i;
    }
 
    public void transitionCallback()
