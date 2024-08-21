@@ -3,7 +3,7 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
