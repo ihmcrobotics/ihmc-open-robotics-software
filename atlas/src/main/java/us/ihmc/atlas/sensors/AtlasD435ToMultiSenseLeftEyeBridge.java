@@ -70,36 +70,36 @@ public class AtlasD435ToMultiSenseLeftEyeBridge
                   syncedRobot.update();
 //                  if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
                   {
-                     try
-                     {
-                        byte[] payload = ros1Image.getData().array();
-                        int offset = ros1Image.getData().arrayOffset();
-                        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
-
-                        YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);
-                        ByteBuffer buffer = encoder.encode(picture, 75);
-
-                        byte[] data = new byte[buffer.remaining()];
-                        buffer.get(data);
-
-                        FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
-                        ousterPose.get(transformToWorld);
-
-                        VideoPacket message = new VideoPacket();
-                        message.setTimestamp(System.nanoTime());
-                        message.getData().add(data);
-                        message.getPosition().set(ousterPose.getPosition());
-                        message.getOrientation().set(ousterPose.getOrientation());
-                        message.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
-                        message.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
-
-                        ros2Helper.publish(PerceptionAPI.VIDEO, message);
-                     }
-                     catch (Exception e)
-                     {
-                        LogTools.error(e.getMessage());
-                        e.printStackTrace();
-                     }
+//                     try
+//                     {
+//                        byte[] payload = ros1Image.getData().array();
+//                        int offset = ros1Image.getData().arrayOffset();
+//                        BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
+//
+//                        YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);
+//                        ByteBuffer buffer = encoder.encode(picture, 75);
+//
+//                        byte[] data = new byte[buffer.remaining()];
+//                        buffer.get(data);
+//
+//                        FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
+//                        ousterPose.get(transformToWorld);
+//
+//                        VideoPacket message = new VideoPacket();
+//                        message.setTimestamp(System.nanoTime());
+//                        message.getData().add(data);
+//                        message.getPosition().set(ousterPose.getPosition());
+//                        message.getOrientation().set(ousterPose.getOrientation());
+//                        message.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
+//                        message.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
+//
+//                        ros2Helper.publish(PerceptionAPI.VIDEO, message);
+//                     }
+//                     catch (Exception e)
+//                     {
+//                        LogTools.error(e.getMessage());
+//                        e.printStackTrace();
+//                     }
                   }
                });
             }

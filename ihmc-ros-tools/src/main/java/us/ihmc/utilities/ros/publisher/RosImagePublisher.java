@@ -4,8 +4,7 @@ import java.awt.image.BufferedImage;
 //import java.awt.image.DataBufferByte;
 //import java.nio.ByteOrder;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferFactory;
+//import org.jboss.netty.buffer.ChannelBuffer;
 //import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.ros.message.Time;
 
@@ -60,22 +59,22 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
 //        publish(message);
    }
 
-   public Image createMessage(int width, int height, int bytesPerValue, String encoding, ChannelBuffer channelBuffer)
-   {
-      Image message = getMessage();
-      Header header = message.getHeader();
-
-      header.setSeq(seq++);
-
-      message.setIsBigendian((byte) 0);
-      message.setStep(width * bytesPerValue);
-      message.setHeight(height);
-      message.setWidth(width);
-      message.setEncoding(encoding);
-
-      message.setData(channelBuffer);
-      return message;
-   }
+//   public Image createMessage(int width, int height, int bytesPerValue, String encoding, ChannelBuffer channelBuffer)
+//   {
+//      Image message = getMessage();
+//      Header header = message.getHeader();
+//
+//      header.setSeq(seq++);
+//
+//      message.setIsBigendian((byte) 0);
+//      message.setStep(width * bytesPerValue);
+//      message.setHeight(height);
+//      message.setWidth(width);
+//      message.setEncoding(encoding);
+//
+//      message.setData(channelBuffer);
+//      return message;
+//   }
 
    public void publish(Image message)
    {
@@ -107,10 +106,5 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
       return sign | ((fbits & 0x7fffff | 0x800000) // add subnormal bit
                      + (0x800000 >>> val - 102)     // round depending on cut off
                      >>> 126 - val);   // div by 2^(1-(exp-127+15)) and >> 13 | exp=0
-   }
-
-   public ChannelBufferFactory getChannelBufferFactory()
-   {
-      return null;
    }
 }

@@ -74,38 +74,38 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
    private void compute(sensor_msgs.CompressedImage ros1Image)
    {
-      try
-      {
-         byte[] payload = ros1Image.getData().array();
-         int offset = ros1Image.getData().arrayOffset();
-         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
-
-         YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);
-         ByteBuffer buffer = encoder.encode(picture, 75);
-
-         byte[] data = new byte[buffer.remaining()];
-         buffer.get(data);
-
-         VideoPacket message = new VideoPacket();
-         message.setTimestamp(System.nanoTime());
-         message.getData().add(data);
-
-         publisher.publish(message);
-      }
-      catch (Exception e)
-      {
-         LogTools.error(e.getMessage());
-         e.printStackTrace();
-      }
+//      try
+//      {
+//         byte[] payload = ros1Image.getData().array();
+//         int offset = ros1Image.getData().arrayOffset();
+//         BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
+//
+//         YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);
+//         ByteBuffer buffer = encoder.encode(picture, 75);
+//
+//         byte[] data = new byte[buffer.remaining()];
+//         buffer.get(data);
+//
+//         VideoPacket message = new VideoPacket();
+//         message.setTimestamp(System.nanoTime());
+//         message.getData().add(data);
+//
+//         publisher.publish(message);
+//      }
+//      catch (Exception e)
+//      {
+//         LogTools.error(e.getMessage());
+//         e.printStackTrace();
+//      }
    }
 
    // Eventually it would be nice to use Compressed Image
-   private void createROS2CompressedImage(sensor_msgs.CompressedImage ros1Image)
-   {
-      CompressedImage ros2Image = new CompressedImage();
-      byte[] data = ros1Image.getData().array();
-      int dataOffset = ros1Image.getData().arrayOffset();
-      int length = data.length;
-      ros2Image.getData().add(data, dataOffset, length - dataOffset);
-   }
+//   private void createROS2CompressedImage(sensor_msgs.CompressedImage ros1Image)
+//   {
+//      CompressedImage ros2Image = new CompressedImage();
+//      byte[] data = ros1Image.getData().array();
+//      int dataOffset = ros1Image.getData().arrayOffset();
+//      int length = data.length;
+//      ros2Image.getData().add(data, dataOffset, length - dataOffset);
+//   }
 }

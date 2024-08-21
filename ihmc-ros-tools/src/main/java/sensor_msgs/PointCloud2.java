@@ -6,7 +6,7 @@
 package sensor_msgs;
 
 import java.util.List;
-import org.jboss.netty.buffer.ChannelBuffer;
+//import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.Message;
 import std_msgs.Header;
 
@@ -42,9 +42,9 @@ public interface PointCloud2 extends Message {
 
    void setRowStep(int var1);
 
-   ChannelBuffer getData();
-
-   void setData(ChannelBuffer var1);
+//   ChannelBuffer getData();
+//
+//   void setData(ChannelBuffer var1);
 
    boolean getIsDense();
 

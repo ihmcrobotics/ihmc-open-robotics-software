@@ -1,6 +1,5 @@
 package sensor_msgs;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.Message;
 import std_msgs.Header;
 
@@ -16,7 +15,7 @@ public interface CompressedImage extends Message {
 
    void setFormat(String var1);
 
-   ChannelBuffer getData();
-
-   void setData(ChannelBuffer var1);
+//   ChannelBuffer getData();
+//
+//   void setData(ChannelBuffer var1);
 }

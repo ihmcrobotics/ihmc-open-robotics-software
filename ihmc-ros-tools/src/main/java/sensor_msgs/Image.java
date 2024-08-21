@@ -1,6 +1,6 @@
 package sensor_msgs;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+//import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.Message;
 import std_msgs.Header;
 
@@ -32,7 +32,7 @@ public interface Image extends Message {
 
    void setStep(int var1);
 
-   ChannelBuffer getData();
-
-   void setData(ChannelBuffer var1);
+//   ChannelBuffer getData();
+//
+//   void setData(ChannelBuffer var1);
 }

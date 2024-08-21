@@ -2,8 +2,6 @@ package us.ihmc.atlas.sensors;
 
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import org.bytedeco.javacpp.BytePointer;
-import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -94,12 +92,12 @@ public class AtlasOusterL515ZED2FusedColoredROS1ToREABridge
                      Point3D[] l515Points = null;
                      if (latestL515PointCloud2 != null && zed2Image != null)
                      {
-                        ChannelBuffer l515NettyImageData = latestL515PointCloud2.getData();
-                        ByteBuffer l515DataByteBuffer = l515NettyImageData.toByteBuffer();
-                        int arrayOffset = l515NettyImageData.arrayOffset();
-                        l515DataByteBuffer.position(arrayOffset);
-                        ByteBuffer offsetByteBuffer = l515DataByteBuffer.slice();
-                        BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
+//                        ChannelBuffer l515NettyImageData = latestL515PointCloud2.getData();
+//                        ByteBuffer l515DataByteBuffer = l515NettyImageData.toByteBuffer();
+//                        int arrayOffset = l515NettyImageData.arrayOffset();
+//                        l515DataByteBuffer.position(arrayOffset);
+//                        ByteBuffer offsetByteBuffer = l515DataByteBuffer.slice();
+//                        BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
 
                         // l515 is 4 float 32s, X,Y,Z,RGB
 //                        Point4fVector l515Point3fVector = new Point4fVector(imageDataPointer);

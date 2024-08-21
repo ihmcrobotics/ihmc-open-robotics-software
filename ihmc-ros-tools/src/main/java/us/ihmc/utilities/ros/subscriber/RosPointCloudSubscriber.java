@@ -142,43 +142,43 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
             break;
       }
 
-      int offset = pointCloud.getData().arrayOffset();
-      int pointStep = pointCloud.getPointStep();
+//      int offset = pointCloud.getData().arrayOffset();
+//      int pointStep = pointCloud.getPointStep();
+//
+//      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud.getData().array(), offset, numberOfPoints * pointStep);
+//
+//      if (pointCloud.getIsBigendian())
+//         byteBuffer.order(ByteOrder.BIG_ENDIAN);
+//      else
+//         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud.getData().array(), offset, numberOfPoints * pointStep);
-
-      if (pointCloud.getIsBigendian())
-         byteBuffer.order(ByteOrder.BIG_ENDIAN);
-      else
-         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         byteBuffer.position(i * pointStep + offset);
-         float x = byteBuffer.getFloat();
-         float y = byteBuffer.getFloat();
-         float z = byteBuffer.getFloat();
-
-         packet.points[i] = new Point3D(x, y, z);
-
-         switch (packet.pointType)
-         {
-            case XYZI:
-               packet.intensities[i] = byteBuffer.getFloat();
-               break;
-
-            case XYZRGB:
-               int b = byteToUnsignedInt(byteBuffer.get());
-               int g = byteToUnsignedInt(byteBuffer.get());
-               int r = byteToUnsignedInt(byteBuffer.get());
-               int a = byteToUnsignedInt(byteBuffer.get());
-               packet.pointColors[i] = toRGB(r, g, b);
-               break;
-
-            case XYZ:
-               break;
-         }
-      }
+//      for (int i = 0; i < numberOfPoints; i++)
+//      {
+//         byteBuffer.position(i * pointStep + offset);
+//         float x = byteBuffer.getFloat();
+//         float y = byteBuffer.getFloat();
+//         float z = byteBuffer.getFloat();
+//
+//         packet.points[i] = new Point3D(x, y, z);
+//
+//         switch (packet.pointType)
+//         {
+//            case XYZI:
+//               packet.intensities[i] = byteBuffer.getFloat();
+//               break;
+//
+//            case XYZRGB:
+//               int b = byteToUnsignedInt(byteBuffer.get());
+//               int g = byteToUnsignedInt(byteBuffer.get());
+//               int r = byteToUnsignedInt(byteBuffer.get());
+//               int a = byteToUnsignedInt(byteBuffer.get());
+//               packet.pointColors[i] = toRGB(r, g, b);
+//               break;
+//
+//            case XYZ:
+//               break;
+//         }
+//      }
 
       return packet;
    }
