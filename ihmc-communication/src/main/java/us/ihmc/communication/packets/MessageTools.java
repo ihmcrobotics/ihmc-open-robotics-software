@@ -1080,7 +1080,7 @@ public class MessageTools
 
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
-      lidarScanMessage.getScan().reset();
+      lidarScanMessage.getScan().resetQuick();
       LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> scan[i].getElement(j));
    }
 
@@ -1491,9 +1491,9 @@ public class MessageTools
     */
    public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
    {
-      byteSequence.clear();
+      byteSequence.resetQuick();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
-      byteSequence.addAll(longStringBytes);
+      byteSequence.add(longStringBytes);
    }
 
    /**
@@ -1501,7 +1501,7 @@ public class MessageTools
     */
    public static String unpackLongStringFromByteSequence(IDLSequence.Byte byteSequence)
    {
-      byte[] longStringData = byteSequence.toArray();
+      byte[] longStringData = byteSequence.copyArray();
       return new String(longStringData, StandardCharsets.US_ASCII);
    }
 

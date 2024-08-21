@@ -15,10 +15,8 @@ ihmc {
 mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.apache.commons:commons-math3:3.6.1")
-   api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
-   api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:ihmc-robot-data-logger:0.29.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.3")
    api("us.ihmc:ihmc-graphics-javafx:source")
 
    var javaFXVersion = "17.0.9"

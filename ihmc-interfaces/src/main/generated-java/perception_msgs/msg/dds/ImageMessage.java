@@ -41,7 +41,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public us.ihmc.idl.IDLSequence.Byte  data_;
    /**
-            * The image format. Ordinal of OpenCVImageFormat
+            * The image format. Ordinal of ImageMessageFormat
             */
    public byte format_;
    /**
@@ -217,14 +217,14 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
    /**
-            * The image format. Ordinal of OpenCVImageFormat
+            * The image format. Ordinal of ImageMessageFormat
             */
    public void setFormat(byte format)
    {
       format_ = format;
    }
    /**
-            * The image format. Ordinal of OpenCVImageFormat
+            * The image format. Ordinal of ImageMessageFormat
             */
    public byte getFormat()
    {

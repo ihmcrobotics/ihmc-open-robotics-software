@@ -62,11 +62,8 @@ public class ZEDColorDepthLogger
       Instant current_time = Instant.now();
       subscriber.takeNextData(imageMessage, sampleInfo);
 
-      byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
-
       BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
-      bytePointer.put(heapArray, 0, imageMessage.getData().size());
+      bytePointer.put(imageMessage.getData().getBuffer().array(), 0, imageMessage.getData().size());
       bytePointer.limit(imageMessage.getData().size());
 
       zedDepthDataLogger.storeBytesFromPointer(depthChannelName, bytePointer);
@@ -81,13 +78,10 @@ public class ZEDColorDepthLogger
    {
       subscriber.takeNextData(imageMessage, sampleInfo);
 
-      byte[] heapArray = new byte[PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE];
-      System.arraycopy(imageMessage.getData().toArray(), 0, heapArray, 0, imageMessage.getData().size());
-
       synchronized (colorBytePointerSyncObject)
       {
          colorBytePointer = new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
-         colorBytePointer.put(heapArray, 0, imageMessage.getData().size());
+         colorBytePointer.put(imageMessage.getData().getBuffer().array(), 0, imageMessage.getData().size());
          colorBytePointer.limit(imageMessage.getData().size());
       }
    }

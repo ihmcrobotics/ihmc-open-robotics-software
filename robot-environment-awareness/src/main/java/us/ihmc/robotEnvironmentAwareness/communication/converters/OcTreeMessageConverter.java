@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import perception_msgs.msg.dds.OcTreeKeyListMessage;
-import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
@@ -144,11 +144,11 @@ public class OcTreeMessageConverter
       return ocTreeDataMessage;
    }
 
-   public static List<OcTreeKey> decompressMessage(TByteArrayList compressedOcTreeKeyData, int numberOfKeys)
+   public static List<OcTreeKey> decompressMessage(IDLSequence.Byte compressedOcTreeKeyData, int numberOfKeys)
    {
       int decompressedCapacity = numberOfKeys * 3 * 4;
 
-      ByteBuffer compressedOcTreeByteBuffer = ByteBuffer.wrap(compressedOcTreeKeyData.toArray());
+      ByteBuffer compressedOcTreeByteBuffer = compressedOcTreeKeyData.copyByteBuffer();
       ByteBuffer decompressedOcTreeByteBuffer = ByteBuffer.allocate(decompressedCapacity);
       compressorThreadLocal.get().decompress(compressedOcTreeByteBuffer, decompressedOcTreeByteBuffer, decompressedCapacity);
 

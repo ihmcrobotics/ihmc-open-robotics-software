@@ -41,8 +41,8 @@ testDependencies {
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
-   api("us.ihmc:scs2-examples:17-0.26.0")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.26.0")
+   api("us.ihmc:scs2-examples:17-0.27.0")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.27.0")
    api("us.ihmc:example-simulations:source")
 }
 

@@ -114,7 +114,7 @@ public class PointCloud2ToLidarScanMessageConverter
                           }
 
                           lidarScanMessage.setSequenceId(counter.getAndIncrement());
-                          lidarScanMessage.getScan().clear();
+                          lidarScanMessage.getScan().resetQuick();
                           LidarPointCloudCompression.compressPointCloud(numberOfPoints, lidarScanMessage, (index, element) -> points[3 * index + element]);
                           lidarScanMessagePublisher.publish(lidarScanMessage);
                        }

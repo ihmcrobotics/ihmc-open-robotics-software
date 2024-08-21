@@ -124,7 +124,7 @@ public class OusterDepthPublisher
          lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
          lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
          lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
-         lidarScanMessage.getScan().reset();
+         lidarScanMessage.getScan().resetQuick();
          LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
                                                        lidarScanMessage,
                                                        (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));

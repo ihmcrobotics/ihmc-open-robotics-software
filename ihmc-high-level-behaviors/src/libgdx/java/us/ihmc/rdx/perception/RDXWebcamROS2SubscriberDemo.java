@@ -48,7 +48,6 @@ public class RDXWebcamROS2SubscriberDemo
    private final Object syncObject = new Object();
    private int imageWidth = -1;
    private int imageHeight = -1;
-   private final byte[] messageDataHeapArray = new byte[25000000];
    private BytePointer messageEncodedBytePointer;
    private Mat inputJPEGMat;
    private Mat inputYUVI420Mat;
@@ -124,8 +123,7 @@ public class RDXWebcamROS2SubscriberDemo
                   }
 
                   IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
-                  imageEncodedTByteArrayList.toArray(messageDataHeapArray);
-                  messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+                  messageEncodedBytePointer.put(videoPacket.getData().getBuffer().array(), 0, imageEncodedTByteArrayList.size());
                   messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
 
                   inputJPEGMat.cols(imageEncodedTByteArrayList.size());
