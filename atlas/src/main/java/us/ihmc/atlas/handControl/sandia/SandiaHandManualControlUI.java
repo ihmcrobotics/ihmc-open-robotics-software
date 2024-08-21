@@ -25,7 +25,7 @@ import javax.swing.JSlider;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
-import org.ros.node.DefaultNodeMainExecutor;
+//import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
@@ -393,8 +393,8 @@ public class SandiaHandManualControlUI extends AbstractNodeMain
          master = new URI(MASTER_URI);
 
       NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
-      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-      nodeMainExecutor.execute(new SandiaHandManualControlUI(), nodeConfiguration);
+//      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+//      nodeMainExecutor.execute(new SandiaHandManualControlUI(), nodeConfiguration);
    }
 
    class FingerJointSliderMouseListener implements MouseListener

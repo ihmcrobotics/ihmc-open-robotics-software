@@ -47,7 +47,7 @@ public class RosJointStatePublisher extends RosTopicPublisher<JointState>
 
       Header header = message.getHeader();
       header.setStamp(t);
-      header.setFrameId("/world");
+//      header.setFrameId("/world");
       header.setSeq(seq++);
       message.setHeader(header);
 

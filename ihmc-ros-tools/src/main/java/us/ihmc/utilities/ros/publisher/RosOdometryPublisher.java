@@ -29,7 +29,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       Odometry message = getMessage();
 
       Header header = createHeaderMsg(timestamp);
-      header.setFrameId(frameId);
+//      header.setFrameId(frameId);
       message.setHeader(header);
       
       PoseWithCovariance poseWithCovariance = createPoseWithCovarianceMsg(transform);
