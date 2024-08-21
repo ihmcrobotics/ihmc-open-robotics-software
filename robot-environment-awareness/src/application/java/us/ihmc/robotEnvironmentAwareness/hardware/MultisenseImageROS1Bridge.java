@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.imageio.ImageIO;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+//import org.jboss.netty.buffer.ChannelBuffer;
 
 import perception_msgs.msg.dds.Image32;
 import sensor_msgs.CameraInfo;
@@ -94,25 +94,25 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
       message.setHeight(height);
       message.setWidth(width);
 
-      ChannelBuffer data = image.getData();
-      byte[] array = data.array();
-      int dataIndex = data.arrayOffset();
-      for (int i = 0; i < height; i++)
-      {
-         for (int j = 0; j < width; j++)
-         {
-            int b = array[dataIndex];
-            dataIndex++;
-            int g = array[dataIndex];
-            dataIndex++;
-            int r = array[dataIndex];
-            dataIndex++;
-
-            int rgbColor = convertBGR2RGB(b, g, r);
-            message.getRgbdata().add(rgbColor);
-            bufferedImage.setRGB(j, i, rgbColor);
-         }
-      }
+//      ChannelBuffer data = image.getData();
+//      byte[] array = data.array();
+//      int dataIndex = data.arrayOffset();
+//      for (int i = 0; i < height; i++)
+//      {
+//         for (int j = 0; j < width; j++)
+//         {
+//            int b = array[dataIndex];
+//            dataIndex++;
+//            int g = array[dataIndex];
+//            dataIndex++;
+//            int r = array[dataIndex];
+//            dataIndex++;
+//
+//            int rgbColor = convertBGR2RGB(b, g, r);
+//            message.getRgbdata().add(rgbColor);
+//            bufferedImage.setRGB(j, i, rgbColor);
+//         }
+//      }
 
       imagePublisher.publish(message);
 
