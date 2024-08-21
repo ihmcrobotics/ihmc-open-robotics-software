@@ -7,13 +7,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
+import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
+public class SimpleOrientationTrajectoryGenerator extends TrajectoryGeneratorInMultipleFrames implements FrameOrientationTrajectoryGenerator
 {
    private final YoRegistry registry;
 

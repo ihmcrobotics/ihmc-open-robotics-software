@@ -43,7 +43,7 @@ public class HeightMapMessageTools
       messageToPack.setGridCenterY(heightMapData.getGridCenter().getY());
       messageToPack.setEstimatedGroundHeight(heightMapData.getEstimatedGroundHeight());
 
-      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
+      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells() && i < messageToPack.getKeys().capacity(); i++)
       {
          int key = heightMapData.getKey(i);
          messageToPack.getKeys().add(key);

@@ -57,7 +57,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -104,7 +104,7 @@ public class AtlasAllocationTest
       allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
       allocationProfiler.excludeAllocationsInsideMethod(LogTools.class.getName() + ".warn");
 
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setup();
    }
@@ -359,7 +359,7 @@ public class AtlasAllocationTest
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
       if (testHelper != null)
       {

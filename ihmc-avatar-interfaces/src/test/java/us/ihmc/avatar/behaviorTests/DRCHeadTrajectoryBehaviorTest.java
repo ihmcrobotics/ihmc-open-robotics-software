@@ -1,8 +1,5 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +17,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
@@ -27,11 +25,12 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
@@ -87,7 +86,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    @Test
    public void testHeadPitch()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 1, 0);
@@ -95,13 +94,13 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testHeadRoll()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(1, 0, 0);
@@ -109,13 +108,13 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testHeadYaw()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double trajectoryTime = 4.0;
       Vector3D axis = new Vector3D(0, 0, 1);
@@ -123,22 +122,22 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       HeadTrajectoryMessage message = createHeadOrientationPacket(axis, rotationAngle, trajectoryTime);
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testRandomOrientation()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FullHumanoidRobotModel controllerFullRobotModel = behaviorTestHelper.getControllerFullRobotModel();
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
       double trajectoryTime = 4.0;
-      Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
+      Quaternion desiredHeadQuat = new Quaternion(EuclidCoreRandomTools.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
       HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private HeadTrajectoryMessage createHeadOrientationPacket(Vector3D axis, double rotationAngle, double trajectoryTime)
@@ -213,11 +212,10 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       if (!Double.isNaN(POSITION_THRESHOLD))
       {
-         assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
+         assertEquals(0.0, positionDistance, POSITION_THRESHOLD, "Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD);
 
          assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
       }
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,
-                   ORIENTATION_THRESHOLD);
+      assertEquals( 0.0, orientationDistance, ORIENTATION_THRESHOLD, "Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD);
    }
 }

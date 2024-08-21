@@ -18,7 +18,7 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final BooleanStoredPropertyKey enableContinuousWalking = keys.addBooleanKey("Enable continuous walking");
+   public static final BooleanStoredPropertyKey enableContinuousHiking = keys.addBooleanKey("Enable continuous hiking");
    public static final BooleanStoredPropertyKey stepPublisherEnabled = keys.addBooleanKey("Step publisher enabled");
    public static final BooleanStoredPropertyKey overrideEntireQueueEachStep = keys.addBooleanKey("Override entire queue each step");
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");

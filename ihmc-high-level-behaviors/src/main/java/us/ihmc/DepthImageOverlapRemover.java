@@ -118,12 +118,9 @@ public class DepthImageOverlapRemover
 
       return new RawImage(lowQualityImage.getSequenceNumber(),
                           lowQualityImage.getAcquisitionTime(),
-                          lowQualityImage.getImageWidth(),
-                          lowQualityImage.getImageHeight(),
                           lowQualityImage.getDepthDiscretization(),
                           bytedecoZEDOutput.getBytedecoOpenCVMat(),
                           null,
-                          lowQualityImage.getOpenCVType(),
                           lowQualityImage.getFocalLengthX(),
                           lowQualityImage.getFocalLengthY(),
                           lowQualityImage.getPrincipalPointX(),

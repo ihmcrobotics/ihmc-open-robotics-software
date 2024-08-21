@@ -138,7 +138,7 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
-         if (showWrench)
+         if (showWrench && syncedRobot.getHandWrenchCalculators().get(side) != null)
          {
             panelHandWrenchIndicator.update(side,
                                             syncedRobot.getHandWrenchCalculators().get(side).getLinearWrenchMagnitude(true),

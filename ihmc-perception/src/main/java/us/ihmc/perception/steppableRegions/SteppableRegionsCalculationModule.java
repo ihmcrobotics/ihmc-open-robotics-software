@@ -343,7 +343,7 @@ public class SteppableRegionsCalculationModule
          }
       }
 
-      messageToPack.getData().reset();
+      messageToPack.getData().resetQuick();
       uncompressedByteBuffer.rewind();
       for (int i = 0; i < totalSize; i++)
          messageToPack.getData().add(uncompressedByteBuffer.get());
@@ -391,7 +391,7 @@ public class SteppableRegionsCalculationModule
          }
       }
 
-      messageToPack.getData().reset();
+      messageToPack.getData().resetQuick();
       uncompressedByteBuffer.rewind();
       for (int i = 0; i < totalSize; i++)
          messageToPack.getData().add(uncompressedByteBuffer.get());

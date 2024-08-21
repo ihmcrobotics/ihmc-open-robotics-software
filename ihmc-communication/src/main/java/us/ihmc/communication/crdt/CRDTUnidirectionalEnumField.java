@@ -8,9 +8,9 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  */
 public class CRDTUnidirectionalEnumField<T extends Enum<T>> extends CRDTUnidirectionalImmutableField<T>
 {
-   public CRDTUnidirectionalEnumField(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, T initialValue)
+   public CRDTUnidirectionalEnumField(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, T initialValue)
    {
-      super(sideThatCanModify, crdtInfo, initialValue);
+      super(sideThatCanModify, requestConfirmFreezable, initialValue);
    }
 
    public int toMessageOrdinal()

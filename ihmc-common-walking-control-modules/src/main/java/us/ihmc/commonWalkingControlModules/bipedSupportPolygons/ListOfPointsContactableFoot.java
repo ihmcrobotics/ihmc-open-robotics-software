@@ -3,10 +3,12 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
@@ -15,8 +17,11 @@ public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBod
    private final FramePoint2D toeOffContactPoint;
    private final FrameLineSegment2D toeOffContactLine;
 
-   public ListOfPointsContactableFoot(RigidBodyBasics rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
-         LineSegment2D toeOffContactLineInSoleFrame)
+   public ListOfPointsContactableFoot(RigidBodyBasics rigidBody,
+                                      ReferenceFrame soleFrame,
+                                      List<? extends Point2DReadOnly> contactPointsInSoleFrame,
+                                      Point2DReadOnly toeOffContactPointInSoleFrame,
+                                      LineSegment2DReadOnly toeOffContactLineInSoleFrame)
    {
       super(rigidBody, soleFrame, contactPointsInSoleFrame);
 

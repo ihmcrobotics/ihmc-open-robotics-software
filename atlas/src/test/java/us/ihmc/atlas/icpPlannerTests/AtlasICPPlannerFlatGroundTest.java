@@ -13,7 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.icpPlannerTests.AvatarICPPlannerFlatGroundTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-flat-ground")
 public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
@@ -62,7 +62,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    private class TestModel extends AtlasRobotModel

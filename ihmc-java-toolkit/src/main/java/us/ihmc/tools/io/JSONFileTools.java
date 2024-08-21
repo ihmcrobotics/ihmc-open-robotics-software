@@ -11,6 +11,7 @@ import us.ihmc.log.LogTools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -149,6 +150,27 @@ public class JSONFileTools
       try
       {
          JSONFileTools.loadInternal(fileStream, jsonNodeConsumer);
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Could not load JSON.");
+         e.printStackTrace();
+      }
+   }
+
+   private static void loadInternal(URL fileURL, Consumer<JsonNode> jsonNodeConsumer) throws IOException
+   {
+      JsonFactory jsonFactory = new JsonFactory();
+      ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+      JsonNode jsonNode = objectMapper.readTree(fileURL);
+      jsonNodeConsumer.accept(jsonNode);
+   }
+
+   public static void load(URL fileURL, Consumer<JsonNode> jsonNodeConsumer)
+   {
+      try
+      {
+         JSONFileTools.loadInternal(fileURL, jsonNodeConsumer);
       }
       catch (IOException e)
       {

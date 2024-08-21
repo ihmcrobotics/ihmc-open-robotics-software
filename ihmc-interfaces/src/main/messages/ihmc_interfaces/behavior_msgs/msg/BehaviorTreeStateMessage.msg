@@ -3,11 +3,12 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-byte BASIC_NODE = 0
-byte ACTION_SEQUENCE = 1
-byte DOOR_TRAVERSAL = 2
-byte TRASH_CAN_INTERACTION = 3
-byte BUILDING_EXPLORATION = 4
+byte ROOT_NODE = 0
+byte BASIC_NODE = 1
+byte ACTION_SEQUENCE = 2
+byte DOOR_TRAVERSAL = 3
+byte TRASH_CAN_INTERACTION = 4
+byte BUILDING_EXPLORATION = 5
 
 byte CHEST_ORIENTATION_ACTION = 10
 byte FOOTSTEP_PLAN_ACTION = 11
@@ -35,6 +36,8 @@ byte[<=1000] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[<=1000] behavior_tree_indices
+
+behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
 
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 

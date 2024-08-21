@@ -67,15 +67,15 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
       state = getState();
       definition = getDefinition();
 
-      getDefinition().setName("Foot pose");
+      definition.setName("Foot pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getFootToParentTransform().getValue(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getFootToParentTransform().accessValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
-                                                                getState().getFootFrame()::changeFrame);
+                                                                definition::getParentFrameName,
+                                                                state.getFootFrame()::changeFrame);
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
@@ -115,6 +115,11 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
 
          poseGizmo.getPoseGizmo().update();
          highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
+
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         {
+            definition.getFootToParentTransform().accessValue();
+         }
 
          if (poseGizmo.isSelected() || isMouseHovering)
          {

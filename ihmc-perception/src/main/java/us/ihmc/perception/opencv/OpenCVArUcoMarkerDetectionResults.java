@@ -168,7 +168,7 @@ public class OpenCVArUcoMarkerDetectionResults
    {
       if (!isDetected(markerID))
       {
-         LogTools.error("Marker ID is invalid.");
+         LogTools.debug("Marker ID is invalid.");
          poseToPack.setToNaN();
          return false;
       }

@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1446,8 +1446,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
-      Vector3D randomTranslation = RandomGeometry.nextVector3D(random, 10.0);
-      Quaternion randomOrientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
+      Vector3D randomTranslation = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 10.0);
+      Quaternion randomOrientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(45.0));
       RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
 
       return new PlanarRegion(regionTransform, regionConvexPolygons);

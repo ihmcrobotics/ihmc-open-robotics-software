@@ -1,0 +1,67 @@
+name: _gradle_base
+
+on:
+  workflow_call:
+    inputs:
+      subproject:
+        description: 'Subproject'
+        required: true
+        type: string
+        default: 'atlas'
+      test-category:
+        description: 'Test category'
+        required: false
+        type: string
+        default: 'fast'
+      setup-javafx-headless:
+        description: 'Setup JavaFX headless'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-package: 'jdk'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        id: setup-gradle
+        with:
+          gradle-version: 8.5
+
+      - name: Set up JavaFX deps
+        if: ${{ inputs.setup-javafx-headless }}
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y libxxf86vm1 libgl1-mesa-glx
+
+      - name: Set up Virtual Display (for Linux)
+        if: ${{ inputs.setup-javafx-headless }} && ( runner.os == 'Linux' )
+        run: |
+          Xvfb ${{env.DISPLAY}} ${{env.XVFB_PARMS}} &
+
+      - name: Gradle test - ${{ inputs.test-category }}
+        run: |
+          cd ${{ inputs.subproject }}
+          gradle test -Pcategory=${{ inputs.test-category }} --info --no-daemon -PrunningOnCIServer=true
+      - name: Publish Test Report - ${{ inputs.test-category }}
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+          detailed_summary: true

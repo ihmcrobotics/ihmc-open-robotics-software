@@ -12,6 +12,8 @@ import java.util.HashMap;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 
@@ -131,8 +133,8 @@ public class RDX3DSituatedText implements RenderableProvider
       }
 
       Texture libGDXTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      Material material = new Material(TextureAttribute.createDiffuse(libGDXTexture),
-                                       ColorAttribute.createSpecular(1, 1, 1, 1),
+      Material material = new Material(PBRTextureAttribute.createBaseColorTexture(libGDXTexture),
+                                       PBRColorAttribute.createSpecular(1, 1, 1, 1),
                                        new BlendingAttribute(GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 

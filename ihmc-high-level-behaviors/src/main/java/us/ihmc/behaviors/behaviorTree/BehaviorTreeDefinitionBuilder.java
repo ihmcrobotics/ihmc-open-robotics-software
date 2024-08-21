@@ -6,6 +6,7 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeDefinitionBuilder
@@ -38,7 +39,7 @@ public class BehaviorTreeDefinitionBuilder
       }
       if (definitionType == FootstepPlanActionDefinition.class)
       {
-         return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory);
+         return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, new DefaultFootstepPlannerParameters());
       }
       if (definitionType == HandPoseActionDefinition.class)
       {

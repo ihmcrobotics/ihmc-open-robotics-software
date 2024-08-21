@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -114,7 +115,7 @@ public class DynamicLibGDXModel
    public ModelInstance newModelInstance()
    {
       buildIfNeeded();
-      return new ModelInstance(model);
+      return new RDXModelInstance(model);
    }
 
    public Model getModel()

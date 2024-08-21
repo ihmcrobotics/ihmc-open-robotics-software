@@ -7,8 +7,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
-import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.cuda.CUDACompressionTools;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -26,7 +26,8 @@ public class RealsenseColorDepthImagePublisher
    private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final ROS2PublisherBasics<ImageMessage> ros2ColorImagePublisher;
 
-   private CUDAImageEncoder imageEncoder;
+   private CUDAJPEGProcessor imageEncoder;
+   private CUDACompressionTools compressionTools;
 
    private long lastDepthSequenceNumber = -1L;
    private long lastColorSequenceNumber = -1L;
@@ -83,9 +84,11 @@ public class RealsenseColorDepthImagePublisher
       // Redundant safety checks
       if (depthImageToPublish != null && !depthImageToPublish.isEmpty() && depthImageToPublish.getSequenceNumber() != lastDepthSequenceNumber)
       {
+         if (compressionTools == null)
+            compressionTools = new CUDACompressionTools();
+
          // Encode depth image to png
-         BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
+         BytePointer depthPNGPointer = compressionTools.compressDepth(depthImageToPublish.getGpuImageMat());
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
@@ -103,7 +106,7 @@ public class RealsenseColorDepthImagePublisher
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+         ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1.packMessageFormat(depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
          lastDepthSequenceNumber = depthImageToPublish.getSequenceNumber();
@@ -143,15 +146,11 @@ public class RealsenseColorDepthImagePublisher
       if (colorImageToPublish != null && !colorImageToPublish.isEmpty() && colorImageToPublish.getSequenceNumber() != lastColorSequenceNumber)
       {
          if (imageEncoder == null)
-            imageEncoder = new CUDAImageEncoder();
+            imageEncoder = new CUDAJPEGProcessor();
 
          // Compress image
          BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat().data(),
-                                colorJPEGPointer,
-                                colorImageToPublish.getImageWidth(),
-                                colorImageToPublish.getImageHeight(),
-                                colorImageToPublish.getGpuImageMat().step());
+         imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
@@ -261,6 +260,8 @@ public class RealsenseColorDepthImagePublisher
 
       if (imageEncoder != null)
          imageEncoder.destroy();
+      if (compressionTools != null)
+         compressionTools.destroy();
 
       ros2DepthImagePublisher.remove();
       ros2ColorImagePublisher.remove();

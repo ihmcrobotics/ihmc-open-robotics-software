@@ -27,9 +27,9 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1000.0);
-      force = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 20.0);
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 1000.0);
+      force = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 20.0);
    }
 
    @Override

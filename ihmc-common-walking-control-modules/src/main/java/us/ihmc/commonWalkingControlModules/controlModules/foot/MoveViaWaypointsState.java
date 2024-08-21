@@ -214,6 +214,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    @Override
    public void onExit(double timeInState)
    {
+      controlManager.getTaskspaceControlState().onExit(timeInState);
+      controlManager.getJointspaceControlState().onExit(timeInState);
    }
 
    @Override

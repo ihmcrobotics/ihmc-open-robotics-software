@@ -3,6 +3,7 @@ package us.ihmc.robotics.referenceFrames;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
@@ -21,7 +22,7 @@ public class MutableReferenceFrame
     * This reference is final, meaning even when this class's ReferenceFrame
     * is recreated, this is still the instance that represents the transformToParent.
     */
-   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final RigidBodyTransform transformToParent;
    private final String frameName;
    private ReferenceFrame referenceFrame;
 
@@ -37,7 +38,13 @@ public class MutableReferenceFrame
 
    public MutableReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
+      this (frameName, parentFrame, new RigidBodyTransform());
+   }
+
+   public MutableReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly initialTransformToParent)
+   {
       this.frameName = frameName;
+      this.transformToParent = new RigidBodyTransform(initialTransformToParent);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, parentFrame, transformToParent);
    }
 

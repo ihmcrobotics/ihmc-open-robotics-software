@@ -16,7 +16,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,7 +39,7 @@ public class RDXVRHandPlacedFootstepMode
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private int footstepIndex = 0;
-   private RDXLocomotionParameters locomotionParameters;
+   private LocomotionParameters locomotionParameters;
 
 
    public RDXVRHandPlacedFootstepMode(RDXVRContext vrContext)
@@ -71,7 +71,7 @@ public class RDXVRHandPlacedFootstepMode
       }
    }
 
-   public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
+   public void setLocomotionParameters(LocomotionParameters locomotionParameters)
    {
       this.locomotionParameters = locomotionParameters;
    }
@@ -126,7 +126,7 @@ public class RDXVRHandPlacedFootstepMode
       }
    }
 
-   private void sendPlacedFootsteps(RDXLocomotionParameters locomotionParameters)
+   private void sendPlacedFootsteps(LocomotionParameters locomotionParameters)
    {
       // send the placed footsteps
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();

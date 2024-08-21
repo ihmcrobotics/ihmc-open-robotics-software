@@ -109,7 +109,7 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
 
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
-         state.getCurrentPose().getValue().set(syncedFootPose);
+         state.getCurrentPose().accessValue().set(syncedFootPose);
 
          if (meetsDesiredCompletionCriteria)
          {

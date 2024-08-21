@@ -13,6 +13,7 @@ public class BehaviorTreeDefinitionRegistry
 
    private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
    {
+      new RegistryRecord(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
       new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
       new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
       new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
@@ -41,7 +42,7 @@ public class BehaviorTreeDefinitionRegistry
       return null;
    }
 
-   public static Class<?> getNodeStateClass(byte nodeType)
+   public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
       for (RegistryRecord definitionEntry : DEFINITIONS)
       {

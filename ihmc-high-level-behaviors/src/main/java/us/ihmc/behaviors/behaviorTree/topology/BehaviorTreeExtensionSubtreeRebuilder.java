@@ -50,7 +50,7 @@ public class BehaviorTreeExtensionSubtreeRebuilder
 //                                                                             crdtInfo.getActorDesignation()));
          idToNodesMap.put(localNode.getState().getID(), localNode);
 
-         if (!localNode.getState().isFrozen()) // Disassemble non-frozen parts
+         if (!localNode.getDefinition().isFrozen()) // Disassemble non-frozen parts
          {
             for (BehaviorTreeNode<?> child : localNode.getChildren())
             {

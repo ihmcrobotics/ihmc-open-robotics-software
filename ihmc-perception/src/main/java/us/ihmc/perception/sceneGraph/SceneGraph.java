@@ -7,27 +7,39 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -60,7 +72,6 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
-   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private int numberOfFrozenNodes = 0;
 
@@ -93,13 +104,13 @@ public class SceneGraph
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      DoorNodeTools.addDoorNodes(this);
-
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
+      sceneNode.update(this, modificationQueue);
+
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
          staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
@@ -129,6 +140,7 @@ public class SceneGraph
 
    private void update()
    {
+      destroyRemovedSceneNodes();
       idToNodeMap.clear();
       synchronized (nodeNameList)
       {
@@ -136,10 +148,32 @@ public class SceneGraph
       }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
-      centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       numberOfFrozenNodes = 0;
       updateCaches(rootNode);
+   }
+
+   private void destroyRemovedSceneNodes()
+   {
+      Set<Long> existingSceneNodeIDs = new HashSet<>();
+
+      getExistingSceneNodeIDs(rootNode, existingSceneNodeIDs);
+
+      for (long id : idToNodeMap.keys())
+      {
+         if (!existingSceneNodeIDs.contains(id))
+            idToNodeMap.get(id).destroy(this);
+      }
+   }
+
+   private void getExistingSceneNodeIDs(SceneNode node, Collection<Long> ids)
+   {
+      ids.add(node.getID());
+
+      for (SceneNode childNode : node.getChildren())
+      {
+         getExistingSceneNodeIDs(childNode, ids);
+      }
    }
 
    private void updateCaches(SceneNode node)
@@ -156,10 +190,6 @@ public class SceneGraph
       {
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
       }
-      else if (node instanceof CenterposeNode centerposeNode)
-      {
-         centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
-      }
 
       if (node.isFrozen())
          ++numberOfFrozenNodes;
@@ -168,6 +198,39 @@ public class SceneGraph
       {
          updateCaches(child);
       }
+   }
+
+   public void updateDetections(DetectionManager detectionManager)
+   {
+      detectionManager.updateDetections();
+
+      Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
+
+      // Update or add door nodes
+      Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
+                                                                              .filter(DoorNodeTools::detectionIsDoorComponent)
+                                                                              .collect(Collectors.toSet());
+      for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
+      {
+         // Does this new detection correspond with an existing door node?
+         modifyTree(modificationQueue ->
+         {
+            boolean matched = sceneNodesByID.stream()
+                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
+                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
+            if (!matched)
+            {
+               // Create new door node
+               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode));
+            }
+         });
+      }
+
+//      for (PersistentDetection newDetection : newlyValidDetections)
+//         addNodeFromDetection(newDetection);
+
+      detectionManager.clearNewlyValidDetections();
    }
 
    public SceneNode getRootNode()
@@ -210,11 +273,6 @@ public class SceneGraph
       return arUcoMarkerIDToNodeMap;
    }
 
-   public TIntObjectMap<CenterposeNode> getCenterposeDetectedMarkerIDToNodeMap()
-   {
-      return centerposeDetectedMarkerIDToNodeMap;
-   }
-
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
@@ -233,5 +291,28 @@ public class SceneGraph
          return sceneNode == null ? null : sceneNode.getNodeFrame();
       };
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
+   }
+
+   private void addNodeFromDetection(PersistentDetection detection)
+   {
+      DetectableSceneNode detectableNode;
+      long newNodeID = getNextID().getAndIncrement();
+      String newNodeName = detection.getDetectedObjectName() + newNodeID;
+
+      Class<?> detectionClass = detection.getInstantDetectionClass();
+      if (detectionClass.equals(YOLOv8InstantDetection.class))
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
+      else if (detectionClass.equals(CenterPoseInstantDetection.class))
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
+      else
+      {
+         LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
+         detectableNode = null;
+      }
+
+      if (detectableNode != null)
+      {
+         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode)));
+      }
    }
 }

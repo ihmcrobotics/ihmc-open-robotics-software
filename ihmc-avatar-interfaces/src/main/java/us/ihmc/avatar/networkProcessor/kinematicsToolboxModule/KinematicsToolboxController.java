@@ -86,7 +86,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -95,7 +95,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -461,7 +460,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      totalRobotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
@@ -472,7 +471,7 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      robotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.
 
       spatialGains.setPositionProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.

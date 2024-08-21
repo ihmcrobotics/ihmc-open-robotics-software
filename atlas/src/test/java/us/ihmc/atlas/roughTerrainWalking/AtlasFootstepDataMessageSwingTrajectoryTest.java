@@ -13,7 +13,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarAbsoluteStepTimingsTest;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;
 import us.ihmc.robotics.Assert;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-rough-terrain")
 public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDataMessageSwingTrajectoryTest
@@ -60,7 +60,7 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Override

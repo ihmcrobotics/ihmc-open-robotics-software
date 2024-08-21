@@ -5,19 +5,21 @@ import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
+import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -28,11 +30,16 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
+import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
 import java.util.function.BiFunction;
 
 /**
@@ -126,8 +133,6 @@ public class ROS2SceneGraphSubscription
                   modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
                updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
-
-               // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
             });
          }
       }
@@ -159,26 +164,20 @@ public class ROS2SceneGraphSubscription
             arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
             arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
             arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
+            // TODO: FIXME TOMASZ PLEASE ADD INSTANT DETECTION UPDATE
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.setObjectID(subscriptionNode.getCenterposeNodeMessage().getObjectId());
             centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
-            centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
-            centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
-            centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+            centerposeNode.setBoundingBoxVertices(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
+            centerposeNode.setBoundingBoxVertices2D(Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
+                                                          .map(Point2D::new)
+                                                          .toArray(Point2D[]::new));
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.setMaskErosionKernelRadius(subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius());
-            yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
-            yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
-            yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
-            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
-            yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
-            yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
-            yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
+            yoloNode.fromMessage(subscriptionNode.getYOLONodeMessage());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
@@ -186,11 +185,32 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof DoorNode doorNode)
          {
-            doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
-            doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
-            doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
-            doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
-            doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
+            doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
+            doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
+            doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
+            for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
+            {
+               UUID messageDetectionID = MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId());
+               if (!messageDetectionID.equals(PersistentDetection.NULL_DETECTION_ID))
+               {
+                  if (!doorNode.getOpeningMechanisms().containsKey(messageDetectionID))
+                  {
+                     DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
+                     DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
+                     DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType, messageDetectionID);
+                     doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
+                     doorNode.getOpeningMechanisms().put(messageDetectionID, doorOpeningMechanism);
+                  }
+                  else
+                  {
+                     doorNode.getOpeningMechanisms().get(messageDetectionID).updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
+                  }
+               }
+            }
+         }
+         if (localNode instanceof TrashCanNode trashCanNode)
+         {
+            trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
          }
 
          if (localParentNode != null) // Parent of root node is null
@@ -292,7 +312,15 @@ public class ROS2SceneGraphSubscription
          {
             DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().get(indexInTypesList);
             subscriptionNode.setDoorNodeMessage(doorNodeMessage);
-            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getSceneNode());
+            subscriptionNode.setDetectableSceneNodeMessage(doorNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.TRASH_CAN_NODE_TYPE ->
+         {
+            TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().get(indexInTypesList);
+            subscriptionNode.setTrashCanNodeMessage(trashCanNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode().getSceneNode());
          }
       }
 

@@ -2,6 +2,7 @@ package us.ihmc.robotics.time;
 
 import us.ihmc.commons.Conversions;
 
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -39,5 +40,28 @@ public class TimeTools
       long seconds = now.getEpochSecond() - eventSecondsSinceEpoch;
       long nano = now.getNano() - eventAdditionalNanos;
       return seconds + Conversions.nanosecondsToSeconds(nano);
+   }
+
+   public static double toDoubleSeconds(Duration duration)
+   {
+      return secondsNanosToDoubleSeconds(duration.getSeconds(), duration.getNano());
+   }
+
+   public static double secondsMillisToDoubleSeconds(long seconds, long millis)
+   {
+
+      return seconds + Conversions.millisecondsToSeconds(millis);
+   }
+
+   public static double secondsNanosToDoubleSeconds(long seconds, int nanos)
+   {
+      return seconds + Conversions.nanosecondsToSeconds(nanos);
+   }
+
+   public static Duration durationOfSeconds(double seconds)
+   {
+      long longSeconds = (long) seconds;
+      long nanos = (long) ((seconds - longSeconds) * 1E9);
+      return Duration.ofSeconds(longSeconds, nanos);
    }
 }

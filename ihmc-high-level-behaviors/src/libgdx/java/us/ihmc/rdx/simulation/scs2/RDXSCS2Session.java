@@ -86,6 +86,12 @@ public class RDXSCS2Session
     */
    public void startSession(Session session)
    {
+      if (session != null)
+      {
+         stopSession();
+         waitForSessionToBeStopped();
+      }
+      
       sessionStartedHandled = false;
 
       this.session = session;
@@ -392,15 +398,19 @@ public class RDXSCS2Session
       changeDT();
    }
 
-   public void endSession()
+   public void stopSession()
    {
-      stoppingSession = true;
-      ThreadTools.startAsDaemon(() ->
+      if (session != null)
       {
-         session.stopSessionThread();
-         stoppingSession = false;
-         sessionStoppedNotification.notifyOtherThread();
-      }, getClass().getSimpleName() + "Destroy");
+         stoppingSession = true;
+         ThreadTools.startAsDaemon(() ->
+         {
+            session.stopSessionThread();
+            session = null;
+            stoppingSession = false;
+            sessionStoppedNotification.notifyOtherThread();
+         }, getClass().getSimpleName() + "Destroy");
+      }
       robots.clear();
       terrainObjects.clear();
       showRobotPairs.clear();
@@ -481,6 +491,6 @@ public class RDXSCS2Session
 
    public boolean isSessionThreadRunning()
    {
-      return session.hasSessionStarted() && !session.isSessionShutdown();
+      return session != null && session.hasSessionStarted() && !session.isSessionShutdown();
    }
 }

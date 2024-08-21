@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjus
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-obstacle-slow-3")
 public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryOverSteppingStonesTest
@@ -101,7 +101,7 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Override

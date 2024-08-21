@@ -4,16 +4,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.PropertyException;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
@@ -335,7 +336,7 @@ public abstract class SDFRobotWriter
       Vector3D com = new Vector3D();
       scsLink.getComOffset(com);
 
-      RigidBodyTransform comOffset = TransformTools.createTranslationTransform(com);
+      RigidBodyTransform comOffset = new RigidBodyTransform(new Quaternion(), com);
       comOffsetInWorld.multiply(comOffset);
 
       sdfInertial.setPose(getPoseFromTransform3D(comOffsetInWorld));

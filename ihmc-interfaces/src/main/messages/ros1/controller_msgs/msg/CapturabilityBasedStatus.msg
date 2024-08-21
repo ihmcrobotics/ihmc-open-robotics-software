@@ -24,4 +24,16 @@ geometry_msgs/Point[] left_foot_support_polygon_3d
 # List of the active contact points used for the right foot. The coordinates are in world frame.
 geometry_msgs/Point[] right_foot_support_polygon_3d
 
+# List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
+geometry_msgs/Point[] left_hand_contact_point
+
+# List of the active contact points for the right hand, empty is there is no hand contact point. The coordinates are in the hand body-fixed frame.
+geometry_msgs/Point[] right_hand_contact_point
+
+# Surface normal of the left hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+geometry_msgs/Vector3 left_hand_contact_normal
+
+# Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+geometry_msgs/Vector3 right_hand_contact_normal
+
 

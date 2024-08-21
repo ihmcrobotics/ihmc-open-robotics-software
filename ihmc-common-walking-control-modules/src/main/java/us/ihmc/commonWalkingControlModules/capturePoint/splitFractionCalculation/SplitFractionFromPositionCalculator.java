@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -126,7 +127,7 @@ public class SplitFractionFromPositionCalculator
             double largestStepHeight = isABigStepDown ? splitFractionParameters.getLargestStepDownHeight() : splitFractionParameters.getLargestStepUpHeight();
 
             // This is like an alpha value for how "down" or "up" the step is, and must be between 0 and 1.
-            double alpha = Math.min(1.0, (Math.abs(stepHeight) - largeStepHeight) / (largestStepHeight - largeStepHeight));
+            double alpha = MathTools.clamp((Math.abs(stepHeight) - largeStepHeight) / (largestStepHeight - largeStepHeight), 0.0, 1.0);
 
             // This says what the extreme value of the split fraction should be if stepping or down. If down, we likely want to initially move the CoP very
             // quickly, and then move it slowly (like loading the foot quickly). If up, we want the opposite.

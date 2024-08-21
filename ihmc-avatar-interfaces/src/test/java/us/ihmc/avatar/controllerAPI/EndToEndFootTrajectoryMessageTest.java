@@ -2,6 +2,8 @@ package us.ihmc.avatar.controllerAPI;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import org.junit.jupiter.api.AfterEach;
@@ -53,12 +55,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -76,8 +77,6 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -191,7 +190,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String bodyName = foot.getName();
 
       FramePose3D desiredRandomFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredRandomFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.3));
+      desiredRandomFootPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.3));
       desiredRandomFootPose.getPosition().set(getRandomPositionInSphere(random, robotSide));
       desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -226,7 +225,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -258,14 +257,15 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    //Picks up a foot and puts it down. Done using both sides
    @Test
    public void testPickUpAndPutDown() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -292,14 +292,46 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
       }
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      FootstepDataMessage leftStep = footstepDataListMessage.getFootstepDataList().add();
+      FootstepDataMessage rightStep = footstepDataListMessage.getFootstepDataList().add();
+      leftStep.getLocation().set(0.3, 0.12, 0.0);
+      leftStep.setRobotSide(RobotSide.LEFT.toByte());
+      rightStep.getLocation().set(0.3, -0.12, 0.0);
+      rightStep.setRobotSide(RobotSide.RIGHT.toByte());
+      leftStep = footstepDataListMessage.getFootstepDataList().add();
+      rightStep = footstepDataListMessage.getFootstepDataList().add();
+      leftStep.getLocation().set(0.6, 0.12, 0.0);
+      leftStep.setRobotSide(RobotSide.LEFT.toByte());
+      rightStep.getLocation().set(0.6, -0.12, 0.0);
+      rightStep.setRobotSide(RobotSide.RIGHT.toByte());
+
+      simulationTestHelper.publishToController(footstepDataListMessage);
+      simulationTestHelper.simulateNow(5.0);
+
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         FramePose3D initialFootPosition = new FramePose3D(foot.getBodyFixedFrame());
+         initialFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
+
+         // First need to pick up the foot:
+         assertTrue(pickupFoot(robotSide, foot));
+
+         // Without forgetting to put the foot back on the ground
+         assertTrue(putFootOnGround(robotSide, foot, initialFootPosition));
+      }
+
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    //picks up a foot, moves it around in a ribbon shape, then puts the foot down, Done using both sides
    @Test
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
@@ -411,7 +443,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          putFootOnGround(robotSide, foot, initialFootPosition);
       }
 
-      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //moves each foot to a single position using a custom control point
@@ -419,7 +452,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
       SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
                                                                                                                          new FlatGroundEnvironment(),
@@ -468,16 +501,17 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String namePrefix = fullRobotModel.getFoot(robotSide).getName();
       String className = WorkspaceLimiterControlModule.class.getSimpleName();
       YoBoolean singularityEscape = (YoBoolean) simulationTestHelper.findVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
-      assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
+      assertFalse(singularityEscape.getBooleanValue(), "Singularity escape should not be active.");
 
-      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //picks up the left foot, moves the foot around a sphere (ribbons yawed around the circle center)
    @Test
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel robotModel = getRobotModel();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
@@ -573,7 +607,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
@@ -617,7 +652,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          startTime = endTime;
       }
 
-      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(robotModel.getSimpleRobotName(), 2);
    }
 
    //takes the trajectory points created from the eucledian traj generator and divides them up by the number of messages desired and sends them to the controller
@@ -707,7 +743,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),
@@ -773,7 +809,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(595161);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -980,7 +1016,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(564574L);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
                                                                                             new FlatGroundEnvironment(),

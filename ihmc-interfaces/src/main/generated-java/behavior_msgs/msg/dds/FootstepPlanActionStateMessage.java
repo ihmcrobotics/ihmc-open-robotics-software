@@ -56,6 +56,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             * Current right pose
             */
    public us.ihmc.euclid.geometry.Pose3D current_right_foot_pose_;
+   /**
+            * Preview footstep plan, with a maximum of 50
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  preview_footsteps_;
 
    public FootstepPlanActionStateMessage()
    {
@@ -67,6 +71,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       desired_right_footsteps_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       current_right_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      preview_footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
 
    }
 
@@ -92,6 +97,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       desired_right_footsteps_.set(other.desired_right_footsteps_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.current_left_foot_pose_, current_left_foot_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.current_right_foot_pose_, current_right_foot_pose_);
+      preview_footsteps_.set(other.preview_footsteps_);
    }
 
 
@@ -212,6 +218,15 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    }
 
 
+   /**
+            * Preview footstep plan, with a maximum of 50
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  getPreviewFootsteps()
+   {
+      return preview_footsteps_;
+   }
+
+
    public static Supplier<FootstepPlanActionStateMessagePubSubType> getPubSubType()
    {
       return FootstepPlanActionStateMessagePubSubType::new;
@@ -261,6 +276,13 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
       if (!this.current_left_foot_pose_.epsilonEquals(other.current_left_foot_pose_, epsilon)) return false;
       if (!this.current_right_foot_pose_.epsilonEquals(other.current_right_foot_pose_, epsilon)) return false;
+      if (this.preview_footsteps_.size() != other.preview_footsteps_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.preview_footsteps_.size(); i++)
+         {  if (!this.preview_footsteps_.get(i).epsilonEquals(other.preview_footsteps_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -288,6 +310,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if (!this.desired_right_footsteps_.equals(otherMyClass.desired_right_footsteps_)) return false;
       if (!this.current_left_foot_pose_.equals(otherMyClass.current_left_foot_pose_)) return false;
       if (!this.current_right_foot_pose_.equals(otherMyClass.current_right_foot_pose_)) return false;
+      if (!this.preview_footsteps_.equals(otherMyClass.preview_footsteps_)) return false;
 
       return true;
    }
@@ -319,7 +342,9 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append("current_left_foot_pose=");
       builder.append(this.current_left_foot_pose_);      builder.append(", ");
       builder.append("current_right_foot_pose=");
-      builder.append(this.current_right_foot_pose_);
+      builder.append(this.current_right_foot_pose_);      builder.append(", ");
+      builder.append("preview_footsteps=");
+      builder.append(this.preview_footsteps_);
       builder.append("}");
       return builder.toString();
    }

@@ -13,11 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("gov.nist.math:jama:1.0.3")
-   api("org.ejml:ejml-ddense:0.39")
-   api("org.ejml:ejml-core:0.39")
-
-   api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

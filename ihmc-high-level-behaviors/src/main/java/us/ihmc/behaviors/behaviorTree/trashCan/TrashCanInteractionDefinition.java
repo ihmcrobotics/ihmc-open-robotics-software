@@ -15,7 +15,7 @@ public class TrashCanInteractionDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      obstructedNode = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      obstructedNode = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
    }
 
    public void toMessage(TrashCanInteractionDefinitionMessage message)

@@ -11,9 +11,9 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
  */
 public class CRDTUnidirectionalPose3D extends CRDTUnidirectionalMutableField<Pose3D>
 {
-   public CRDTUnidirectionalPose3D(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo)
+   public CRDTUnidirectionalPose3D(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable)
    {
-      super(sideThatCanModify, crdtInfo, Pose3D::new);
+      super(sideThatCanModify, requestConfirmFreezable, Pose3D::new);
    }
 
    public Pose3DReadOnly getValueReadOnly()
@@ -28,7 +28,7 @@ public class CRDTUnidirectionalPose3D extends CRDTUnidirectionalMutableField<Pos
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          getValueInternal().set(poseMessage);
       }

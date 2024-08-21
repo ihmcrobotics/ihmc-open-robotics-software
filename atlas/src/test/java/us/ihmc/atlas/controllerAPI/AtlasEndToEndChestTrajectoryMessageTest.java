@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajectoryMessageTest
 {
@@ -24,7 +24,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Tag("controller-api-slow")

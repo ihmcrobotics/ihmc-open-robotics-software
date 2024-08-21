@@ -190,6 +190,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
       desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);
+      linearMomentum.setIncludingFrame(other.linearMomentum);
+      angularMomentum.setIncludingFrame(other.angularMomentum);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
       angularMomentumRate.setIncludingFrame(other.angularMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
@@ -212,6 +214,10 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
          if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
             return false;
          if (!desiredExternalWrenchHolder.equals(other.desiredExternalWrenchHolder))
+            return false;
+         if (!linearMomentum.equals(other.linearMomentum))
+            return false;
+         if (!angularMomentum.equals(other.angularMomentum))
             return false;
          if (!linearMomentumRate.equals(other.linearMomentumRate))
             return false;

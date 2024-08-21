@@ -3,6 +3,7 @@ package us.ihmc.atlas.physics;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -52,7 +53,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       CollisionShapeDescription collisionFoot = factoryShape.createBox(jointMap.getPhysicalProperties().getActualFootLength() / 2, jointMap.getPhysicalProperties().getActualFootWidth() / 2, 0.05);
 
       //      public static final double ankleHeight = 0.084;
-      RigidBodyTransform ankleToSole = TransformTools.createTranslationTransform(new Vector3D(0.0, 0.0, 0.084));//jointMap.getPhysicalProperties().getAnkle_to_sole_frame_tranform();
+      RigidBodyTransform ankleToSole = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, 0.0, 0.084)); //jointMap.getPhysicalProperties().getAnkle_to_sole_frame_tranform();
       RigidBodyTransform soleToAnkle = new RigidBodyTransform();
       ankleToSole.setAndInvert(soleToAnkle);
 

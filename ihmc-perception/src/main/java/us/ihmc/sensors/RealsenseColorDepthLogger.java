@@ -22,7 +22,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
@@ -77,7 +76,7 @@ public class RealsenseColorDepthLogger
 
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
       perceptionDataLogger.addImageChannel(depthChannelName);

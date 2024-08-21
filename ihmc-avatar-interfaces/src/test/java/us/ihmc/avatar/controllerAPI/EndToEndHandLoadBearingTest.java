@@ -4,7 +4,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +17,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -31,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -53,7 +49,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters.setKeepSCSUp(true);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
@@ -126,7 +122,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
@@ -172,7 +169,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -185,7 +182,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 }

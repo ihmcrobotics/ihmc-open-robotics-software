@@ -2,12 +2,11 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "ArUco Marker Detection" : false,
-    "ArUco Marker Detection Image" : false,
-    "Environment" : false,
-    "Global Visualizers" : true,
-    "Scene Graph" : true,
-    "VR Settings" : false,
-    "VR Thread Debugger" : false
+    "Perception Visualizers" : true,
+    "/ihmc/yolo/annotated_image###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/yolo/annotated_image" : true,
+    "/ihmc/zed2/depth###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/depth" : false,
+    "/ihmc/zed2/left_color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/left_color" : false,
+    "/ihmc/zed2/right_color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/right_color" : false,
+    "Scene Graph" : true
   }
 }

@@ -32,7 +32,7 @@ public class RDXSceneNode
       detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSimpleName());
    }
 
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void update(SceneGraph sceneGraph)
    {
       referenceFrameGraphic.setToReferenceFrame(sceneNode.getNodeFrame());
    }

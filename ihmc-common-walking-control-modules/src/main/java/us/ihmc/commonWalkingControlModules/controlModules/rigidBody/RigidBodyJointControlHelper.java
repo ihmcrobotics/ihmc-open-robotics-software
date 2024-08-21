@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -17,6 +18,10 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -77,9 +82,12 @@ public class RigidBodyJointControlHelper
 
    private final OneDoFTrajectoryPoint lastPointAdded = new OneDoFTrajectoryPoint();
    private final JointspaceFeedbackControlCommand feedbackControlCommand = new JointspaceFeedbackControlCommand();
+   private final JointDesiredOutputList jointDesiredOutputList;
+   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
 
    private final OneDoFJointBasics[] joints;
    private final int numberOfJoints;
+   private final BooleanParameter[] bypassAccelerationIntegration;
 
    private final DoubleProvider time;
 
@@ -88,6 +96,7 @@ public class RigidBodyJointControlHelper
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoRegistry(bodyName + shortName);
       trajectoryDone = new YoBoolean(shortName + "Done", registry);
+      this.bypassAccelerationIntegration = new BooleanParameter[jointsToControl.length];
 
       this.time = time;
       this.joints = jointsToControl;
@@ -98,6 +107,7 @@ public class RigidBodyJointControlHelper
       hasGains = new YoBoolean(prefix + "HasGains", registry);
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       functionGeneratorErrorCalculator = enableFunctionGenerators ? new FunctionGeneratorErrorCalculator(bodyName, controlDT, registry) : null;
+      jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
@@ -126,6 +136,8 @@ public class RigidBodyJointControlHelper
             int jointIdxFinal = jointIdx;
             functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), () -> getJointDesiredPosition(jointIdxFinal), jointsToControl[jointIdx]);
          }
+
+         bypassAccelerationIntegration[jointIdx] = new BooleanParameter(jointsToControl[jointIdx].getName() + "BypassAccelerationIntegration", registry);
       }
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
@@ -482,6 +494,38 @@ public class RigidBodyJointControlHelper
 
       trajectoryDone.set(false);
       return true;
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredData()
+   {
+      boolean bypassAccelerationIntegration = false;
+      jointDesiredOutputList.clear();
+
+      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
+      {
+         if (this.bypassAccelerationIntegration[jointIdx].getValue())
+         {
+            bypassAccelerationIntegration = true;
+            JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(jointIdx);
+            lowLevelJointData.setDesiredPosition(getJointDesiredPosition(jointIdx));
+            lowLevelJointData.setDesiredVelocity(getJointDesiredVelocity(jointIdx));
+         }
+      }
+
+      return bypassAccelerationIntegration ? jointDesiredOutputList : null;
+   }
+
+   public JointAccelerationIntegrationCommand getAccelerationIntegrationCommand()
+   {
+      accelerationIntegrationCommand.clear();
+
+      for (int jointIdx = 0; jointIdx < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); jointIdx++)
+      {
+         accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joints[jointIdx])
+                                       .setDisableAccelerationIntegration(bypassAccelerationIntegration[jointIdx].getValue());
+      }
+
+      return accelerationIntegrationCommand;
    }
 
    public void queuePointsAtTimeWithZeroVelocity(double time, double[] jointPositions)

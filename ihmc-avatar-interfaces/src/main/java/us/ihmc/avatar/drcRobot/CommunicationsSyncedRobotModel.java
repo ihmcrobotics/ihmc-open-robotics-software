@@ -68,7 +68,8 @@ public abstract class CommunicationsSyncedRobotModel
       {
          for (RobotSide side : handModels.sides())
          {
-            handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
+            if (robotModel.getRobotVersion().hasSakeGripperJoints(side))
+               handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          }
       }
    }

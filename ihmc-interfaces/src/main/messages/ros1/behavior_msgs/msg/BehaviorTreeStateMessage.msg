@@ -3,15 +3,17 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-int8 BASIC_NODE=0
+int8 ROOT_NODE=0
 
-int8 ACTION_SEQUENCE=1
+int8 BASIC_NODE=1
 
-int8 DOOR_TRAVERSAL=2
+int8 ACTION_SEQUENCE=2
 
-int8 TRASH_CAN_INTERACTION=3
+int8 DOOR_TRAVERSAL=3
 
-int8 BUILDING_EXPLORATION=4
+int8 TRASH_CAN_INTERACTION=4
+
+int8 BUILDING_EXPLORATION=5
 
 int8 CHEST_ORIENTATION_ACTION=10
 
@@ -47,6 +49,8 @@ int8[] behavior_tree_types
 # The index is of that node in it's respective list for
 # it's type.
 uint32[] behavior_tree_indices
+
+behavior_msgs/BehaviorTreeRootNodeStateMessage[] root_nodes
 
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
 

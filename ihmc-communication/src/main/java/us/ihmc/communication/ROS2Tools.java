@@ -96,18 +96,25 @@ public final class ROS2Tools
    }
 
    /** Use when you only need the latest message and need allocation free. */
-   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Notification callback)
+   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
       TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
       SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
       ros2Node.createSubscription(topicDataType, subscriber ->
       {
-         if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
+         T messageToPack = swapReference.getForThreadOne();
+         if (subscriber.takeNextData(messageToPack, null))
          {
             swapReference.swap();
-            callback.set();
+            callback.accept(messageToPack);
          }
       }, topic.getName(), topic.getQoS());
       return swapReference;
+   }
+
+   /** Use when you only need the latest message and need allocation free. */
+   public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Notification callback)
+   {
+      return createSwapReferenceSubscription(ros2Node, topic, message -> callback.set());
    }
 }

@@ -38,7 +38,6 @@ public class DurationFreezable implements Freezable
       return now - freezeTime < FREEZE_DURATION_ON_MODIFICATION;
    }
 
-   @Override
    public void unfreeze()
    {
       freezeTime = Double.MIN_VALUE;

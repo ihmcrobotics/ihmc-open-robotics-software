@@ -32,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -243,7 +244,7 @@ public class PushRecoveryBalanceManager
       footstepTimings.clear();
    }
 
-   public void compute(FeedbackControlCommand<?> heightControlCommand, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
+   public void compute(FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
       yoDesiredCapturePoint.set(comTrajectoryPlanner.getDesiredDCMPosition());
       yoDesiredICPVelocity.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -287,7 +288,7 @@ public class PushRecoveryBalanceManager
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
-      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      linearMomentumRateControlModuleInput.setMultiContactStabilityRegion(multiContactStabilityRegion);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(true); // TODO

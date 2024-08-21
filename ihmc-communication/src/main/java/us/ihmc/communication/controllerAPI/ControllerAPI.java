@@ -143,15 +143,11 @@ public final class ControllerAPI
    public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-      {
          return baseTopic.withInput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
+      else if (outputMessageClasses.contains(messageClass))
          return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-
-      throw new RuntimeException("Topic does not exist: " + messageClass);
+      else
+         return baseTopic.withTypeName(messageClass).withQoS(getQoS(messageClass));
    }
 
    public static ROS2QosProfile getQoS(Class<?> messageClass)

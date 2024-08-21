@@ -14,12 +14,11 @@ public class RDXPointLightObject extends RDXEnvironmentObject
 {
    public static final String NAME = "Point Light";
    public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXPointLightObject.class);
-   private final RDXPointLight light;
+   private final RDXPointLight light = new RDXPointLight();
 
    public RDXPointLightObject()
    {
       super(NAME, FACTORY);
-      light = new RDXPointLight();
 
       Model model = RDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");
       setRealisticModel(model);
@@ -41,8 +40,7 @@ public class RDXPointLightObject extends RDXEnvironmentObject
    {
       super.updateRenderablesPoses();
 
-      light.getPosition().set(getObjectTransform().getTranslation());
-      light.update();
+      light.setPosition(getObjectTransform().getTranslation());
    }
 
    public RDXPointLight getLight()

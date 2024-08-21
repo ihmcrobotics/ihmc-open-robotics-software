@@ -1,22 +1,21 @@
 package us.ihmc.exampleSimulations.groundTruthinator;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GroundTruthinatorTest
 {
@@ -60,7 +59,7 @@ public class GroundTruthinatorTest
 
       FramePose3D estimatedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
-      assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
+      EuclidFrameTestTools.assertEquals(objectPose, estimatedPose, epsilon);
 
       position = new FramePoint3D(worldFrame, 0.1, 0.0, 0.0);
       orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
@@ -72,14 +71,14 @@ public class GroundTruthinatorTest
       groundTruthinator.setSensedCableLengths(sensedCableLengths);
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
 
-      assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
+      EuclidFrameTestTools.assertEquals(objectPose, estimatedPose, epsilon);
 
       int numberOfTests = 100;
 
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
+         position = new FramePoint3D(worldFrame, EuclidCoreRandomTools.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.set(position, orientation);
 
@@ -129,7 +128,7 @@ public class GroundTruthinatorTest
 
       FramePose3D estimatedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
-      assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
+      EuclidFrameTestTools.assertEquals(objectPose, estimatedPose, epsilon);
 
       position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
@@ -142,14 +141,14 @@ public class GroundTruthinatorTest
       groundTruthinator.setSensedCableLengths(sensedCableLengths);
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
 
-      assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
+      EuclidFrameTestTools.assertEquals(objectPose, estimatedPose, epsilon);
 
       int numberOfTests = 100;
 
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
+         position = new FramePoint3D(worldFrame, EuclidCoreRandomTools.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameQuaternion(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.set(position, orientation);
 
@@ -159,7 +158,7 @@ public class GroundTruthinatorTest
          groundTruthinator.setSensedCableLengths(sensedCableLengths);
          groundTruthinator.estimateObjectPose(estimatedPose, precision);
 
-         assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
+         EuclidFrameTestTools.assertEquals(objectPose, estimatedPose, epsilon);
       }
    }
 

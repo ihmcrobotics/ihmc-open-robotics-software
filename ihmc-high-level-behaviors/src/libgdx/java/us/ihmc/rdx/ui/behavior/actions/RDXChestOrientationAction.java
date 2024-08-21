@@ -69,7 +69,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
       getDefinition().setName("Chest orientation");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValue(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().accessValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
@@ -121,15 +121,26 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
          }
 
          poseGizmo.getPoseGizmo().update();
-         highlightModel.setPose(graphicFrame.getReferenceFrame());
 
-         if (poseGizmo.isSelected() || isMouseHovering)
+         if (!getSelected())
+            poseGizmo.setSelected(false);
+
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            highlightModel.setTransparency(0.7);
+            getDefinition().getChestToParentTransform().accessValue();
          }
-         else
+
+         if (state.getIsNextForExecution() || getSelected())
          {
-            highlightModel.setTransparency(0.5);
+            highlightModel.setPose(graphicFrame.getReferenceFrame());
+            if (poseGizmo.isSelected() || isMouseHovering)
+            {
+               highlightModel.setTransparency(0.7);
+            }
+            else
+            {
+               highlightModel.setTransparency(0.5);
+            }
          }
       }
    }
@@ -193,7 +204,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getChestFrame().isChildOfWorld())
+      if (state.getChestFrame().isChildOfWorld() && (state.getIsNextForExecution() || getSelected()))
       {
          highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);

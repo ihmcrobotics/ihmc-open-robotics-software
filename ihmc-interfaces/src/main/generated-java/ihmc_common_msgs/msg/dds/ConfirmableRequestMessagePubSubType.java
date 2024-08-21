@@ -15,7 +15,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "77162364776eb836993a2507571a7532a546c7b1759c3d38a3b71e6e668cf3c1";
+   		return "6aebd34f262d3363c24fd293f972281327744ab6da4aa9fcb8c7149c751c088e";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -87,7 +87,7 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_e(data.getRequestNumbers());else
           throw new RuntimeException("request_numbers field exceeds the maximum length");
 
-      if(data.getConfirmationNumbers().size() <= 10)
+      if(data.getConfirmationNumbers().size() <= 250)
       cdr.write_type_e(data.getConfirmationNumbers());else
           throw new RuntimeException("confirmation_numbers field exceeds the maximum length");
 

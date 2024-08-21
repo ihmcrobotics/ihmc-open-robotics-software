@@ -1,7 +1,15 @@
 package us.ihmc.perception;
 
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -20,28 +28,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  * the missing Mat or GpuMat objects by copying the existing image matrix to the CPU or GPU.
  * </p>
  * <p>
- *  To ensure all Mat and GpuMat objects get deallocated properly, this class uses
- *  a reference count. Whenever passing the image to another class, the
- *  {@code RawImage::get()} method should be used instead of passing it directly.
- *  Each class is responsible for releasing the image once it is done using the image.
+ * To ensure all Mat and GpuMat objects get deallocated properly, this class uses
+ * a reference count. The counter is incremented upon construction and each call to
+ * {@link RawImage#get()}, and decremented for each call to {@link RawImage#release()}.
+ * Once the reference count hits zero, the image data is deallocated.
+ * </p>
+ * <p>
+ * Each method should call {@link RawImage#get()} before accessing the image data
+ * to ensure it is not deallocated during access. After the data has been accessed,
+ * {@link RawImage#release()} should be called.
  * </p>
  */
 public class RawImage
 {
    private final long sequenceNumber;
    private final Instant acquisitionTime;
-   private final int imageWidth;
-   private final int imageHeight;
    private final float depthDiscretization;
    /*
     * Although both cpu & gpu image matrices are nullable,
     * at least one should be not null.
     */
    @Nullable
-   private Mat cpuImageMat;
+   private Mat cpuImageMat = null;
    @Nullable
-   private GpuMat gpuImageMat;
-   private final int openCVType;
+   private GpuMat gpuImageMat = null;
    private final float focalLengthX;
    private final float focalLengthY;
    private final float principalPointX;
@@ -53,12 +63,9 @@ public class RawImage
 
    public RawImage(long sequenceNumber,
                    Instant acquisitionTime,
-                   int imageWidth,
-                   int imageHeight,
                    float depthDiscretization,
                    @Nullable Mat cpuImageMat,
                    @Nullable GpuMat gpuImageMat,
-                   int openCVType,
                    float focalLengthX,
                    float focalLengthY,
                    float principalPointX,
@@ -68,12 +75,9 @@ public class RawImage
    {
       this.sequenceNumber = sequenceNumber;
       this.acquisitionTime = acquisitionTime;
-      this.imageWidth = imageWidth;
-      this.imageHeight = imageHeight;
       this.depthDiscretization = depthDiscretization;
       this.cpuImageMat = cpuImageMat;
       this.gpuImageMat = gpuImageMat;
-      this.openCVType = openCVType;
       this.focalLengthX = focalLengthX;
       this.focalLengthY = focalLengthY;
       this.principalPointX = principalPointX;
@@ -86,8 +90,6 @@ public class RawImage
    {
       this.sequenceNumber = other.sequenceNumber;
       this.acquisitionTime = other.acquisitionTime;
-      this.imageWidth = other.imageWidth;
-      this.imageHeight = other.imageHeight;
       this.depthDiscretization = other.depthDiscretization;
       if (!other.isEmpty())
       {
@@ -96,13 +98,72 @@ public class RawImage
          if (other.gpuImageMat != null && !other.gpuImageMat.isNull())
             this.gpuImageMat = other.gpuImageMat.clone();
       }
-      this.openCVType = other.openCVType;
       this.focalLengthX = other.focalLengthX;
       this.focalLengthY = other.focalLengthY;
       this.principalPointX = other.principalPointX;
       this.principalPointY = other.principalPointY;
       this.position = other.position;
       this.orientation = other.orientation;
+   }
+
+   public static RawImage fromMessage(ImageMessage imageMessage)
+   {
+      try (BytePointer compressedImageData = new BytePointer(imageMessage.getData().size());
+           Mat compressedImageMat = new Mat(1, imageMessage.getData().size(), opencv_core.CV_8UC1))
+      {
+         compressedImageData.put(imageMessage.getData().getBuffer().array(), 0, imageMessage.getData().size());
+         compressedImageMat.data(compressedImageData);
+         Mat imageMat = new Mat();
+         opencv_imgcodecs.imdecode(compressedImageMat, opencv_imgcodecs.IMREAD_UNCHANGED, imageMat);
+
+         return new RawImage(imageMessage.getSequenceNumber(),
+                             MessageTools.toInstant(imageMessage.getAcquisitionTime()),
+                             imageMessage.getDepthDiscretization(),
+                             imageMat,
+                             null,
+                             imageMessage.getFocalLengthXPixels(),
+                             imageMessage.getFocalLengthYPixels(),
+                             imageMessage.getPrincipalPointXPixels(),
+                             imageMessage.getPrincipalPointYPixels(),
+                             new FramePoint3D(ReferenceFrame.getWorldFrame(), imageMessage.getPosition()),
+                             new FrameQuaternion(ReferenceFrame.getWorldFrame(), imageMessage.getOrientation()));
+      }
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions & type.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(Mat newCpuImageMat)
+   {
+      if (getImageWidth() != newCpuImageMat.cols() || getImageHeight() != newCpuImageMat.rows())
+         throw new IllegalArgumentException("New image must have the same dimensions as the current image");
+
+      RawImage newRawImage = new RawImage(this);
+      newCpuImageMat.copyTo(newRawImage.getCpuImageMat());
+      newRawImage.getGpuImageMat().upload(newCpuImageMat);
+      return newRawImage;
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions & type.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(GpuMat newGpuImageMat)
+   {
+      if (getImageWidth() != newGpuImageMat.cols() || getImageHeight() != newGpuImageMat.rows())
+         throw new IllegalArgumentException("New image must have the same dimensions as the current image");
+      if (getOpenCVType() != newGpuImageMat.type())
+         throw new IllegalArgumentException("New image must be the same OpenCV type as the current image");
+
+      RawImage newRawImage = new RawImage(this);
+      newGpuImageMat.copyTo(newRawImage.getGpuImageMat());
+      newGpuImageMat.download(newRawImage.getCpuImageMat());
+      return newRawImage;
    }
 
    public long getSequenceNumber()
@@ -117,12 +178,22 @@ public class RawImage
 
    public int getImageWidth()
    {
-      return imageWidth;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.cols();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.cols();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public int getImageHeight()
    {
-      return imageHeight;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.rows();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.rows();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public float getDepthDiscretization()
@@ -138,7 +209,7 @@ public class RawImage
       }
       else if (cpuImageMat == null && !gpuImageMat.isNull())
       {
-         cpuImageMat = new Mat(imageHeight, imageWidth, openCVType);
+         cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
          gpuImageMat.download(cpuImageMat);
       }
 
@@ -162,7 +233,7 @@ public class RawImage
       }
       else if (gpuImageMat == null && !cpuImageMat.isNull())
       {
-         gpuImageMat = new GpuMat(imageHeight, imageWidth, openCVType);
+         gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
          gpuImageMat.upload(cpuImageMat);
       }
 
@@ -180,12 +251,17 @@ public class RawImage
 
    public CameraIntrinsics getIntrinsicsCopy()
    {
-      return new CameraIntrinsics(imageHeight, imageWidth, focalLengthX, focalLengthY, principalPointX, principalPointY);
+      return new CameraIntrinsics(getImageHeight(), getImageWidth(), focalLengthX, focalLengthY, principalPointX, principalPointY);
    }
 
    public int getOpenCVType()
    {
-      return openCVType;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.type();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.type();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public float getFocalLengthX()
@@ -233,7 +309,7 @@ public class RawImage
       if (numberOfReferences.incrementAndGet() > 1)
          return this;
       else
-         throw new NullPointerException("This image has been deallocated");
+         return null;
    }
 
    public void release()

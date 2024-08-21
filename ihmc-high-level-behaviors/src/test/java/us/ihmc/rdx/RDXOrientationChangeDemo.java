@@ -49,7 +49,6 @@ public class RDXOrientationChangeDemo
             baseUI.getPrimary3DPanel().getCamera3D().setCameraFocusPoint(new Point3D(0.7, 0.0, 0.4));
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-3.0, -4.0, 4.0);
 
-            worldFrameGraphic = new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3));
             LibGDXTools.setOpacity(worldFrameGraphic, 0.6f);
 
             interactableStartPose = new RDXInteractableReferenceFrame();

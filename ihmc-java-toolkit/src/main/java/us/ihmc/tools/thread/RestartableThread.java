@@ -67,6 +67,11 @@ public class RestartableThread
       }
    }
 
+   public void runOnce()
+   {
+      ExceptionTools.handle(runnable, exceptionHandler);
+   }
+
    /**
     * Stops the running thread once it completes the current execution of the runnable
     */

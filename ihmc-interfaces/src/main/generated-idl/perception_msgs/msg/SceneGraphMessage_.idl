@@ -9,6 +9,7 @@
 #include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 #include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./TrashCanNodeMessage_.idl"
 #include "perception_msgs/msg/./YOLOv8NodeMessage_.idl"
 module perception_msgs
 {
@@ -42,6 +43,9 @@ module perception_msgs
 
       const octet DOOR_NODE_TYPE =
       8;
+
+      const octet TRASH_CAN_NODE_TYPE =
+      9;
 
 
       /**
@@ -107,6 +111,10 @@ module perception_msgs
          * Door scene nodes
          */
         sequence<perception_msgs::msg::dds::DoorNodeMessage, 200> door_scene_nodes;
+        /**
+         * Trash can scene nodes
+         */
+        sequence<perception_msgs::msg::dds::TrashCanNodeMessage, 200> trash_can_nodes;
       };
     };
   };

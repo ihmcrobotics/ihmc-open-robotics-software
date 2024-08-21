@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -59,7 +60,7 @@ public class RDXBuildingConstructor extends RDXPanel
 
    private Point3D cornerPoint;
 
-   private final ColorAttribute highlightColor = ColorAttribute.createDiffuse(0.8f, 0.6f, 0.2f, 1.0f);
+   private final ColorAttribute highlightColor = PBRColorAttribute.createBaseColorFactor(new Color(0.8f, 0.6f, 0.2f, 1.0f));
    List<WorkspaceResourceFile> buildingFilesInDirectory = new ArrayList<WorkspaceResourceFile>();
 
    private RDXBuildingObject building;
@@ -246,7 +247,7 @@ public class RDXBuildingConstructor extends RDXPanel
       ImGui.separator();
       if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
       {
-         panel3D.getScene().setAmbientLight(ambientLightAmount.get());
+         panel3D.getScene().setAmbientLightIntensity(ambientLightAmount.get());
       }
       ImGui.separator();
       if (mode == Mode.NONE)

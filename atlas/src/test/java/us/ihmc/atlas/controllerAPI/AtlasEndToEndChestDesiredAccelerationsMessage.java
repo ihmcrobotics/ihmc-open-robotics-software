@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndChestDesiredAccelerationsMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasEndToEndChestDesiredAccelerationsMessage extends EndToEndChestDesiredAccelerationsMessageTest
 {
@@ -31,6 +31,6 @@ public class AtlasEndToEndChestDesiredAccelerationsMessage extends EndToEndChest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 }

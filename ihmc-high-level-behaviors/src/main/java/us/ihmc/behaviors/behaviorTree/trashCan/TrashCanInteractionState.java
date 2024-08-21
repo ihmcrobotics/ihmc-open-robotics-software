@@ -2,13 +2,13 @@ package us.ihmc.behaviors.behaviorTree.trashCan;
 
 import behavior_msgs.msg.dds.TrashCanInteractionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
+import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -22,7 +22,8 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    public static final String APPROACH_FRONT = "Approach Front";
    public static final String APPROACH_RIGHT = "Approach Right";
 
-   private ActionSequenceState actionSequence;
+   private final TrashCanInteractionDefinition definition;
+   private BehaviorTreeRootNodeState actionSequence;
    private WaitDurationActionState computeStanceAction;
    private WaitDurationActionState approachingLeftAction;
    private WaitDurationActionState approachingRightAction;
@@ -30,13 +31,15 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    private FootstepPlanActionState approachLeftAction;
    private FootstepPlanActionState approachRightAction;
    private FootstepPlanActionState approachFrontAction;
-   private final CRDTUnidirectionalEnumField<InteractionStance> stance;
+   private final CRDTStatusEnumField<InteractionStance> stance;
 
    public TrashCanInteractionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      stance = new CRDTUnidirectionalEnumField(ROS2ActorDesignation.ROBOT, crdtInfo, InteractionStance.FRONT);
+      definition = getDefinition();
+
+      stance = new CRDTStatusEnumField<>(ROS2ActorDesignation.ROBOT, crdtInfo, InteractionStance.FRONT);
    }
 
    @Override
@@ -44,7 +47,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    {
       super.update();
 
-      actionSequence = BehaviorTreeTools.findActionSequenceAncestor(this);
+      actionSequence = BehaviorTreeTools.findRootNode(this);
 
       updateActionSubtree(this);
    }
@@ -106,6 +109,12 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       }
    }
 
+   @Override
+   public boolean hasStatus()
+   {
+      return stance.pollHasStatus();
+   }
+
    public void toMessage(TrashCanInteractionStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());
@@ -137,7 +146,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       return isValid;
    }
 
-   public ActionSequenceState getActionSequence()
+   public BehaviorTreeRootNodeState getActionSequence()
    {
       return actionSequence;
    }
@@ -177,7 +186,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       return approachRightAction;
    }
 
-   public CRDTUnidirectionalEnumField getStance()
+   public CRDTStatusEnumField<InteractionStance> getStance()
    {
       return stance;
    }

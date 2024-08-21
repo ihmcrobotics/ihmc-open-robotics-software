@@ -29,10 +29,10 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
-      chestToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
+      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
+      chestToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
    }
 
    @Override
@@ -54,7 +54,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, chestToParentTransform.getValue());
+      JSONTools.toEuclid(jsonNode, chestToParentTransform.accessValue());
    }
 
    @Override
@@ -76,7 +76,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
       parentFrameName.setValue(onDiskParentFrameName);
-      chestToParentTransform.getValue().set(onDiskChestToParentTransform);
+      chestToParentTransform.accessValue().set(onDiskChestToParentTransform);
    }
 
    @Override
@@ -114,25 +114,25 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValue().getRotation();
-      chestToParentTransform.getValue().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
+      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValue().getRotation();
-      chestToParentTransform.getValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
+      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.getValue().getRotation();
-      chestToParentTransform.getValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
+      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public RotationMatrixBasics getRotation()
    {
-      return chestToParentTransform.getValue().getRotation();
+      return chestToParentTransform.accessValue().getRotation();
    }
 
    public double getTrajectoryDuration()

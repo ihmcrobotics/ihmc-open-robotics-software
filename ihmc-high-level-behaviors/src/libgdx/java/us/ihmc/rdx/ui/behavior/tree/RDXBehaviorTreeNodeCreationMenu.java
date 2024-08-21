@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
@@ -17,7 +18,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,114 +54,30 @@ public class RDXBehaviorTreeNodeCreationMenu
     */
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
-      boolean actionSequenceIsPresent = RDXBehaviorTreeTools.findActionSequenceAncestor(relativeNode) != null;
-
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("From file:");
-      ImGui.popFont();
-
-      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
+      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         indexedTreeFile.update();
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Start from scratch:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Root Node", BehaviorTreeRootNodeDefinition.class, null);
       }
-
-      indexedTreeFiles.sort(Comparator.comparing((RDXAvailableBehaviorTreeFile file) -> file.getNumberOfFramesInWorld() > 0).reversed()
-                                      .thenComparing(RDXAvailableBehaviorTreeFile::getName));
-
-      ImGui.indent();
-      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
+      else
       {
-         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
-            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Control nodes:");
+         ImGui.popFont();
+         ImGui.indent();
 
-         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
-                                                                       indexedTreeFile.getNumberOfFramesInWorld(),
-                                                                       indexedTreeFile.getReferenceFrameNames().size());
-         if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
-         {
-            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
-            {
-               try
-               {
-                  RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
-                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                        = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-                  complete(insertionDefinition);
-               }
-               catch (Exception e)
-               {
-                  LogTools.error("""
-                                 Error loading {}.
-                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
-                                 Error: {}
-                                 """, textToDisplay, e.getMessage());
-               }
-            }
-         }
-
-         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
-            ImGui.popStyleColor();
-
-         if (ImGui.isItemHovered())
-         {
-            ImGui.beginTooltip();
-
-            if (!indexedTreeFile.getNotes().isEmpty())
-            {
-               ImGui.text(indexedTreeFile.getNotes());
-               ImGui.spacing();
-            }
-
-            ImGui.text("Reference frames:");
-
-            if (indexedTreeFile.getReferenceFrameNames().isEmpty())
-            {
-               ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-               ImGui.text("\t(Contains no reference frames.)");
-               ImGui.popStyleColor();
-            }
-
-            for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
-            {
-               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-
-               ImGui.text("\t" + referenceFrameName);
-
-               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                  ImGui.popStyleColor();
-            }
-
-            ImGui.endTooltip();
-         }
-      }
-      ImGui.unindent();
-      ImGui.spacing();
-
-      ImGui.separator();
-
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("Control nodes:");
-      ImGui.popFont();
-      ImGui.indent();
-
-      if (relativeNode != null)
-      {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
-      }
-      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
-      {
-         renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
-      }
 
-      ImGui.unindent();
+         ImGui.unindent();
 
-      if (actionSequenceIsPresent)
-      {
          ImGui.separator();
 
          ImGui.pushFont(ImGuiTools.getSmallBoldFont());
@@ -206,6 +122,98 @@ public class RDXBehaviorTreeNodeCreationMenu
 
          ImGui.unindent();
       }
+      ImGui.unindent();
+      ImGui.spacing();
+      ImGui.separator();
+
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.text("Load existing tree from file:");
+      ImGui.popFont();
+
+      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
+      {
+         indexedTreeFile.update();
+      }
+
+      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
+
+      ImGui.indent();
+      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
+      {
+         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
+                                                                       indexedTreeFile.getNumberOfFramesInWorld(),
+                                                                       indexedTreeFile.getReferenceFrameNames().size());
+         if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
+         {
+            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            {
+               RDXBehaviorTreeNode<?, ?> loadedNode = null;
+               try
+               {
+                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+               }
+               catch (Exception e)
+               {
+                  LogTools.error("""
+                                 Error loading {}.
+                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
+                                 Error: {}
+                                 """, textToDisplay, e.getMessage());
+               }
+
+               if (loadedNode != null)
+               {
+                  RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
+
+                  if (tree.getRootNode() == null) // Automatically add a root node if there isn't one
+                  {
+                     nodeToInsert = new RDXBehaviorTreeRootNode(tree.getBehaviorTreeState().getAndIncrementNextID(),
+                                                                tree.getBehaviorTreeState().getCRDTInfo(),
+                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
+                     topologyOperationQueue.queueAddAndFreezeNode(loadedNode, nodeToInsert);
+                  }
+
+                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                        = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+
+                  complete(insertionDefinition);
+               }
+            }
+         }
+
+         if (ImGui.isItemHovered())
+         {
+            ImGui.beginTooltip();
+
+            if (!indexedTreeFile.getNotes().isEmpty())
+            {
+               ImGui.text(indexedTreeFile.getNotes());
+               ImGui.spacing();
+            }
+
+            ImGui.text("Reference frames:");
+
+            if (indexedTreeFile.getReferenceFrameNames().isEmpty())
+            {
+               ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+               ImGui.text("\t(Contains no reference frames.)");
+               ImGui.popStyleColor();
+            }
+
+            for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
+            {
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+
+               ImGui.text("\t" + referenceFrameName);
+
+               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
+                  ImGui.popStyleColor();
+            }
+
+            ImGui.endTooltip();
+         }
+      }
    }
 
    private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
@@ -224,16 +232,13 @@ public class RDXBehaviorTreeNodeCreationMenu
                                                                 tree.getBehaviorTreeState().getCRDTInfo(),
                                                                 tree.getBehaviorTreeState().getSaveFileDirectory());
 
-
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
-               // We want to to best effort initialization
-               RDXActionSequence actionSequenceOrNull = null;
-               if (insertionDefinition.getParent() instanceof RDXActionSequence actionSequence)
-                  actionSequenceOrNull = actionSequence;
+               // We want to do best effort initialization
+               RDXBehaviorTreeRootNode actionSequenceOrNull = tree.getRootNode();
                tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 

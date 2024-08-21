@@ -42,6 +42,22 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
             * List of the active contact points used for the right foot. The coordinates are in world frame.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  right_foot_support_polygon_3d_;
+   /**
+            * List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  left_hand_contact_point_;
+   /**
+            * List of the active contact points for the right hand, empty is there is no hand contact point. The coordinates are in the hand body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  right_hand_contact_point_;
+   /**
+            * Surface normal of the left hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D left_hand_contact_normal_;
+   /**
+            * Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D right_hand_contact_normal_;
 
    public CapturabilityBasedStatus()
    {
@@ -50,6 +66,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
       left_foot_support_polygon_3d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
       right_foot_support_polygon_3d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (8, new geometry_msgs.msg.dds.PointPubSubType());
+      left_hand_contact_point_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
+      right_hand_contact_point_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
+      left_hand_contact_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      right_hand_contact_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
 
    }
 
@@ -70,6 +90,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.center_of_mass_3d_, center_of_mass_3d_);
       left_foot_support_polygon_3d_.set(other.left_foot_support_polygon_3d_);
       right_foot_support_polygon_3d_.set(other.right_foot_support_polygon_3d_);
+      left_hand_contact_point_.set(other.left_hand_contact_point_);
+      right_hand_contact_point_.set(other.right_hand_contact_point_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.left_hand_contact_normal_, left_hand_contact_normal_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.right_hand_contact_normal_, right_hand_contact_normal_);
    }
 
    /**
@@ -148,6 +172,42 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    }
 
 
+   /**
+            * List of the active contact points for the left hand, empty if there is no hand contact point. The coordinates are in the hand body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getLeftHandContactPoints()
+   {
+      return left_hand_contact_point_;
+   }
+
+
+   /**
+            * List of the active contact points for the right hand, empty is there is no hand contact point. The coordinates are in the hand body-fixed frame.
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getRightHandContactPoints()
+   {
+      return right_hand_contact_point_;
+   }
+
+
+   /**
+            * Surface normal of the left hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getLeftHandContactNormal()
+   {
+      return left_hand_contact_normal_;
+   }
+
+
+   /**
+            * Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getRightHandContactNormal()
+   {
+      return right_hand_contact_normal_;
+   }
+
+
    public static Supplier<CapturabilityBasedStatusPubSubType> getPubSubType()
    {
       return CapturabilityBasedStatusPubSubType::new;
@@ -186,6 +246,22 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
          {  if (!this.right_foot_support_polygon_3d_.get(i).epsilonEquals(other.right_foot_support_polygon_3d_.get(i), epsilon)) return false; }
       }
 
+      if (this.left_hand_contact_point_.size() != other.left_hand_contact_point_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.left_hand_contact_point_.size(); i++)
+         {  if (!this.left_hand_contact_point_.get(i).epsilonEquals(other.left_hand_contact_point_.get(i), epsilon)) return false; }
+      }
+
+      if (this.right_hand_contact_point_.size() != other.right_hand_contact_point_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.right_hand_contact_point_.size(); i++)
+         {  if (!this.right_hand_contact_point_.get(i).epsilonEquals(other.right_hand_contact_point_.get(i), epsilon)) return false; }
+      }
+
+      if (!this.left_hand_contact_normal_.epsilonEquals(other.left_hand_contact_normal_, epsilon)) return false;
+      if (!this.right_hand_contact_normal_.epsilonEquals(other.right_hand_contact_normal_, epsilon)) return false;
 
       return true;
    }
@@ -208,6 +284,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       if (!this.center_of_mass_3d_.equals(otherMyClass.center_of_mass_3d_)) return false;
       if (!this.left_foot_support_polygon_3d_.equals(otherMyClass.left_foot_support_polygon_3d_)) return false;
       if (!this.right_foot_support_polygon_3d_.equals(otherMyClass.right_foot_support_polygon_3d_)) return false;
+      if (!this.left_hand_contact_point_.equals(otherMyClass.left_hand_contact_point_)) return false;
+      if (!this.right_hand_contact_point_.equals(otherMyClass.right_hand_contact_point_)) return false;
+      if (!this.left_hand_contact_normal_.equals(otherMyClass.left_hand_contact_normal_)) return false;
+      if (!this.right_hand_contact_normal_.equals(otherMyClass.right_hand_contact_normal_)) return false;
 
       return true;
    }
@@ -231,7 +311,15 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       builder.append("left_foot_support_polygon_3d=");
       builder.append(this.left_foot_support_polygon_3d_);      builder.append(", ");
       builder.append("right_foot_support_polygon_3d=");
-      builder.append(this.right_foot_support_polygon_3d_);
+      builder.append(this.right_foot_support_polygon_3d_);      builder.append(", ");
+      builder.append("left_hand_contact_point=");
+      builder.append(this.left_hand_contact_point_);      builder.append(", ");
+      builder.append("right_hand_contact_point=");
+      builder.append(this.right_hand_contact_point_);      builder.append(", ");
+      builder.append("left_hand_contact_normal=");
+      builder.append(this.left_hand_contact_normal_);      builder.append(", ");
+      builder.append("right_hand_contact_normal=");
+      builder.append(this.right_hand_contact_normal_);
       builder.append("}");
       return builder.toString();
    }

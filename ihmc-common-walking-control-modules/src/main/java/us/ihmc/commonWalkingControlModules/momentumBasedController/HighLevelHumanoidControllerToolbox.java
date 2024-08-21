@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -40,6 +40,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -50,7 +51,6 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -168,8 +168,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingMessageHandler walkingMessageHandler;
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
-   private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
-   private final YoBoolean updateWholeBodyContactState = new YoBoolean("updateWholeBodyContactState", registry);
+   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
+   private final YoBoolean wholeBodyContactsChanged = new YoBoolean("wholeBodyContactsChanged", registry);
    private final WholeBodyContactState wholeBodyContactState;
 
    private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTotalTimer", registry);
@@ -235,7 +235,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.contactableBodies = contactableBodies;
 
       RigidBodyBasics elevator = fullRobotModel.getElevator();
-      this.totalMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
+      this.totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(elevator));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -344,11 +344,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
             handCenterOfMassFrames.put(robotSide, handCoMFrame);
             YoDouble handMass = new YoDouble(sidePrefix + "HandTotalMass", registry);
             handsMass.put(robotSide, handMass);
-            handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
+            handMass.set(MultiBodySystemMissingTools.computeSubTreeMass(measurementLink));
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator("", totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
 
       String graphicListName = getClass().getSimpleName();
@@ -420,7 +421,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void update()
    {
-      totalMass.set(TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()));
+      totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()));
 
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
@@ -1058,12 +1059,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return walkingMessageHandler;
    }
 
-   public void resetMultiContactCoMRegion()
+   public void onWholeBodyContactsChanged()
    {
+      wholeBodyContactsChanged.set(true);
       multiContactRegionCalculator.clear();
-
-      // Update whole body contact state on next solve tick
-      updateWholeBodyContactState.set(true);
    }
 
    public WholeBodyContactState getWholeBodyContactState()
@@ -1071,7 +1070,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return wholeBodyContactState;
    }
 
-   public CenterOfMassStaticStabilityRegionCalculator getMultiContactRegionCalculator()
+   public CenterOfMassStabilityMarginRegionCalculator getMultiContactRegionCalculator()
    {
       return multiContactRegionCalculator;
    }
@@ -1080,29 +1079,34 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    {
       multiContactCoMTimer.startMeasurement();
 
-      if (updateWholeBodyContactState.getValue())
+      // Update basis vector transforms and actuation constraints
+      contactStateUpdateTimer.startMeasurement();
+      wholeBodyContactState.updateActuationConstraintVector();
+      wholeBodyContactState.updateActuationConstraintMatrix(true);
+      contactStateUpdateTimer.stopMeasurement();
+
+      // Update LP solver constraints based on contact state
+      multiContactRegionLPUpdateTimer.startMeasurement();
+      multiContactRegionCalculator.updateContactState(wholeBodyContactState, wholeBodyContactsChanged.getValue());
+      wholeBodyContactsChanged.set(false);
+      multiContactRegionLPUpdateTimer.stopMeasurement();
+
+      multiContactRegionLPSolveTimer.startMeasurement();
+      if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
-         // Update basis vector transforms and actuation constraints
-         contactStateUpdateTimer.startMeasurement();
-         wholeBodyContactState.update();
-         contactStateUpdateTimer.stopMeasurement();
+         // Update one edge of the region
+         int edgeToUpdateIndex = multiContactRegionCalculator.getQueryCounter();
+         multiContactRegionCalculator.performUpdateForNextEdge();
 
-         // Update LP solver constraints based on contact state
-         multiContactRegionLPUpdateTimer.startMeasurement();
-         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
-         multiContactRegionLPUpdateTimer.stopMeasurement();
-
-         updateWholeBodyContactState.set(false);
+         // Perform fixed-basis update for lowest margin edge
+         multiContactRegionCalculator.performFastUpdateForLowestMarginEdge(edgeToUpdateIndex);
       }
       else
       {
-         // Queries new direction and updates support region
-         multiContactRegionLPSolveTimer.startMeasurement();
-         multiContactRegionCalculator.performCoMRegionQuery();
-         multiContactRegionLPSolveTimer.stopMeasurement();
-
-         updateWholeBodyContactState.set(multiContactRegionCalculator.getQueryCounter() == 0);
+         // Query new direction until initial region has been constructed
+         multiContactRegionCalculator.performUpdateForNextEdge();
       }
+      multiContactRegionLPSolveTimer.stopMeasurement();
 
       multiContactCoMTimer.stopMeasurement();
    }

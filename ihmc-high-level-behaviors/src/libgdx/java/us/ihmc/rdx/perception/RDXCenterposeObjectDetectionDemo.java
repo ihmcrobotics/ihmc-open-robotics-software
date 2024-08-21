@@ -5,7 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -45,7 +45,7 @@ public class RDXCenterposeObjectDetectionDemo
             ReferenceFrame centerposeOutputFrame
                   = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CenterposeOutputFrame",
                                                                                       zedLeftCameraFrame,
-                                                                                      CenterposeDetectionManager.CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
+                                                                                      CenterPoseDetectionSubscriber.CENTERPOSE_DETECTION_TO_IHMC_ZUP_TRANSFORM);
 
 
             RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer

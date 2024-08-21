@@ -51,12 +51,12 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -507,7 +507,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       contactablePlaneBodies.addAll(additionalContacts);
 
       double gravityZ = Math.abs(gravity);
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
@@ -544,6 +544,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
+      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
+      if (jointsToCheckTorqueFeasibilityInMultiContact != null)
+         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
+      
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();

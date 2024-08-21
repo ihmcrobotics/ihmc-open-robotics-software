@@ -21,7 +21,7 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
       getState().setFailed(false);
       getState().setNominalExecutionDuration(0.0);
       getState().setElapsedExecutionTime(0.0);
-      getState().getCommandedTrajectory().getValue().clear();
+      getState().getCommandedTrajectory().accessValue().clear();
       getState().getCommandedJointTrajectories().clear(0);
    }
 

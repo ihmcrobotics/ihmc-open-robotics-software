@@ -58,8 +58,8 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    private final ArrayList<ModelInstance> normalArrows = new ArrayList<>();
 
    private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
-   private SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
-   private SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
+   private final SideDependentList<RDXFootstepGraphic> goalFootstepGraphics;
+   private final SideDependentList<RDXFootstepGraphic> startFootstepGraphics;
    private List<Pose3D> monteCarloTreeNodeStates;
    private TerrainMapData terrainMapData;
 
@@ -124,10 +124,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
 
    public void generateSwingGraphics(FootstepPlan plan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
-      if (plan != null)
-      {
-         footstepPlanGraphic.updateTrajectoriesFromPlan(plan, swingTrajectories);
-      }
+      footstepPlanGraphic.updateTrajectoriesFromPlan(plan, swingTrajectories);
    }
 
    public void generateFootstepPlanGraphic(FootstepDataListMessage message)

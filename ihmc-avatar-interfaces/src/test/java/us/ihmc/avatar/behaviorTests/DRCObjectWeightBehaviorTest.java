@@ -15,7 +15,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -31,7 +31,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
       SCS2AvatarTestingSimulation simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),

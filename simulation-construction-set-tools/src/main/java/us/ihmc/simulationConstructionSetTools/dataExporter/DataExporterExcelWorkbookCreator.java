@@ -28,7 +28,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
 import us.ihmc.scs2.sharedMemory.YoVariableBuffer;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
@@ -211,7 +211,7 @@ public class DataExporterExcelWorkbookCreator
    {
       robotName = robot.getName();
       robotType = robot.getClass();
-      robotMass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
+      robotMass = MultiBodySystemMissingTools.computeSubTreeMass(robot.getRootBody());
       gravity.set(0.0, 0.0, -9.81); // FIXME
       timeVariable = time;
 

@@ -4,12 +4,12 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -83,8 +83,8 @@ public class RDXModelBuilder
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
       modelBuilder.part(meshPart, material);
 
       return modelBuilder.end();
@@ -102,8 +102,8 @@ public class RDXModelBuilder
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
       Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
+      material.set(PBRTextureAttribute.createBaseColorTexture(paletteTexture));
+      material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
 
       node.parts.add(new NodePart(meshPart, material));
    }

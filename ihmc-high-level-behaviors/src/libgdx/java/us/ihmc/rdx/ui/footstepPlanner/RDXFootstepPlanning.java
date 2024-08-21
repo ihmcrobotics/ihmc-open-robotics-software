@@ -27,7 +27,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -44,7 +44,7 @@ public class RDXFootstepPlanning
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
-   private final RDXLocomotionParameters locomotionParameters;
+   private final LocomotionParameters locomotionParameters;
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
@@ -65,7 +65,7 @@ public class RDXFootstepPlanning
    public RDXFootstepPlanning(DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               ControllerStatusTracker controllerStatusTracker,
-                              RDXLocomotionParameters locomotionParameters,
+                              LocomotionParameters locomotionParameters,
                               DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                               AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters,
                               SwingPlannerParametersBasics swingFootPlannerParameters)

@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class TransformTools
 {
@@ -31,17 +32,6 @@ public class TransformTools
       return location;
    }
 
-   public static RigidBodyTransform createTranslationTransform(double x, double y, double z)
-   {
-      return createTranslationTransform(new Vector3D(x, y, z));
-   }
-
-   public static RigidBodyTransform createTranslationTransform(Vector3D translation)
-   {
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(translation);
-      return transform;
-   }
 
    public static RigidBodyTransform createTransformFromTranslationAndEulerAngles(double x, double y, double z, double roll, double pitch, double yaw)
    {

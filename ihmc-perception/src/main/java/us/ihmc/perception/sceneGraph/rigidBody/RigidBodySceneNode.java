@@ -29,8 +29,7 @@ public class RigidBodySceneNode extends SceneNode
       this.initialParentNodeID = initialParentNodeID;
       this.initialTransformToParent.set(initialTransformToParent);
 
-      getNodeToParentFrameTransform().set(initialTransformToParent);
-      getNodeFrame().update();
+      setNodeToParentFrameTransformAndUpdate(initialTransformToParent);
    }
 
    public void setTrackInitialParent(boolean trackInitialParent, SceneGraphModificationQueue modificationQueue)
@@ -67,13 +66,12 @@ public class RigidBodySceneNode extends SceneNode
       {
          initialPose.setIncludingFrame(initialParentNode.getNodeFrame(), initialTransformToParent);
          initialPose.changeFrame(getNodeFrame().getParent());
-         initialPose.get(getNodeToParentFrameTransform());
+         setNodeToParentFrameTransformAndUpdate(initialPose);
       }
       else
       {
-         getNodeToParentFrameTransform().set(initialTransformToParent);
+         setNodeToParentFrameTransformAndUpdate(initialTransformToParent);
       }
-      getNodeFrame().update();
    }
 
    public TLongObjectMap<SceneNode> getSceneGraphIDToNodeMap()

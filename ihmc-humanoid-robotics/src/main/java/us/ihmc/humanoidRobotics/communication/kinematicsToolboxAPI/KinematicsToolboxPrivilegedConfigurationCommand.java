@@ -184,6 +184,11 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
       this.privilegedGain = privilegedGain;
    }
 
+   public void setHasPrivilegedJointAngles(boolean hasPrivilegedJointAngles)
+   {
+      this.hasPrivilegedJointAngles = hasPrivilegedJointAngles;
+   }
+
    @Override
    public Class<KinematicsToolboxPrivilegedConfigurationMessage> getMessageClass()
    {

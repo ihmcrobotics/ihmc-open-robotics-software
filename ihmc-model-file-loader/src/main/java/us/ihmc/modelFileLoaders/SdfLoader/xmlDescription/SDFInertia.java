@@ -1,6 +1,6 @@
 package us.ihmc.modelFileLoaders.SdfLoader.xmlDescription;
 
-import javax.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElement;
 
 public class SDFInertia
 {

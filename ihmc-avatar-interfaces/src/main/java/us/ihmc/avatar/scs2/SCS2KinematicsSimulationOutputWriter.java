@@ -1,5 +1,6 @@
 package us.ihmc.avatar.scs2;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
@@ -107,7 +108,10 @@ public class SCS2KinematicsSimulationOutputWriter implements JointDesiredOutputW
 
    protected void write()
    {
-      simFloatingRootJoint.setJointAcceleration(0, outputForRootJoint.getDesiredAcceleration());
+      DMatrixRMaj desiredAcceleration = outputForRootJoint.getDesiredAcceleration();
+      desiredAcceleration.reshape(6, 1, true);
+
+      simFloatingRootJoint.setJointAcceleration(0, desiredAcceleration);
 
       for (int i = 0; i < jointControllers.size(); i++)
       {

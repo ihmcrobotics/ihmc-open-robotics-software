@@ -20,7 +20,7 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
    public us.ihmc.idl.IDLSequence.Long  request_numbers_;
    /**
             * Recent confirmation numbers, the values of received request numbers
-            * The size of this is roughly the max amount of expected dropped messages in 1 second
+            * The size of this must be greater than or equal to the max timeout
             */
    public us.ihmc.idl.IDLSequence.Long  confirmation_numbers_;
 
@@ -28,7 +28,7 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
    {
       request_numbers_ = new us.ihmc.idl.IDLSequence.Long (10, "type_4");
 
-      confirmation_numbers_ = new us.ihmc.idl.IDLSequence.Long (10, "type_4");
+      confirmation_numbers_ = new us.ihmc.idl.IDLSequence.Long (250, "type_4");
 
    }
 
@@ -57,7 +57,7 @@ public class ConfirmableRequestMessage extends Packet<ConfirmableRequestMessage>
 
    /**
             * Recent confirmation numbers, the values of received request numbers
-            * The size of this is roughly the max amount of expected dropped messages in 1 second
+            * The size of this must be greater than or equal to the max timeout
             */
    public us.ihmc.idl.IDLSequence.Long  getConfirmationNumbers()
    {

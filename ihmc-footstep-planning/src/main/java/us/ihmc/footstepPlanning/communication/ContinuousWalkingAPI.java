@@ -34,7 +34,7 @@ public class ContinuousWalkingAPI
    public static final ROS2Topic<PoseListMessage> MONTE_CARLO_TREE_NODES = IHMC_ROOT.withModule("continuous_walking").withType(PoseListMessage.class).withSuffix("monte_carlo_tree_nodes");
    public static final ROS2Topic<FootstepDataListMessage> MONTE_CARLO_FOOTSTEP_PLAN = IHMC_ROOT.withModule("continuous_walking").withType(FootstepDataListMessage.class).withSuffix("monte_carlo_footstep_plan");
 
-   public static final StoredPropertySetROS2TopicPair CONTINUOUS_WALKING_PARAMETERS
+   public static final StoredPropertySetROS2TopicPair CONTINUOUS_HIKING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"continuous_walking_parameters");
 
    public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS

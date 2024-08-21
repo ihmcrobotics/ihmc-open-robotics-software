@@ -3,7 +3,6 @@ package us.ihmc.sensors;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -17,6 +16,7 @@ import java.time.Instant;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public class RealsenseColorDepthImageRetriever
@@ -39,7 +39,7 @@ public class RealsenseColorDepthImageRetriever
    private final FramePose3D depthPose = new FramePose3D();
    private final FramePose3D colorPose = new FramePose3D();
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
-   private final ROS2DemandGraphNode demandGraphNode;
+   private final BooleanSupplier demandSupplier;
    private final RestartableThrottledThread realsenseGrabThread;
 
    private final Lock newDepthImageLock = new ReentrantLock();
@@ -56,13 +56,13 @@ public class RealsenseColorDepthImageRetriever
                                             String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
-                                            ROS2DemandGraphNode realsenseDemandNode)
+                                            BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
       this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
-      this.demandGraphNode = realsenseDemandNode;
+      this.demandSupplier = realsenseDemandSupplier;
 
       realsenseGrabThread = new RestartableThrottledThread("RealsenseImageGrabber", OUTPUT_FREQUENCY, this::updateImages);
       realsenseGrabThread.start();
@@ -70,7 +70,7 @@ public class RealsenseColorDepthImageRetriever
 
    private void updateImages()
    {
-      if (demandGraphNode.isDemanded())
+      if (demandSupplier.getAsBoolean())
       {
          if (realsense == null || realsense.getDevice() == null || numberOfFailedReads > 30)
          {
@@ -103,12 +103,9 @@ public class RealsenseColorDepthImageRetriever
                   depthImage.release();
                depthImage = new RawImage(grabSequenceNumber,
                                          acquisitionTime,
-                                         realsense.getDepthWidth(),
-                                         realsense.getDepthHeight(),
                                          (float) realsense.getDepthDiscretization(),
                                          depthMat16UC1.clone(),
                                          null,
-                                         opencv_core.CV_16UC1,
                                          (float) realsense.getDepthFocalLengthPixelsX(),
                                          (float) realsense.getDepthFocalLengthPixelsY(),
                                          (float) realsense.getDepthPrincipalOffsetXPixels(),
@@ -134,12 +131,9 @@ public class RealsenseColorDepthImageRetriever
                   colorImage.release();
                colorImage = new RawImage(grabSequenceNumber,
                                          acquisitionTime,
-                                         realsense.getColorWidth(),
-                                         realsense.getColorHeight(),
                                          (float) realsense.getDepthDiscretization(),
                                          colorMatRGB.clone(),
                                          null,
-                                         opencv_core.CV_8UC3,
                                          (float) realsense.getColorFocalLengthPixelsX(),
                                          (float) realsense.getColorFocalLengthPixelsY(),
                                          (float) realsense.getColorPrincipalOffsetXPixels(),
@@ -181,6 +175,10 @@ public class RealsenseColorDepthImageRetriever
       {
          LogTools.error(interruptedException.getMessage());
       }
+      finally
+      {
+         newDepthImageLock.unlock();
+      }
 
       return depthImage.get();
    }
@@ -200,6 +198,10 @@ public class RealsenseColorDepthImageRetriever
       catch (InterruptedException interruptedException)
       {
          LogTools.error(interruptedException.getMessage());
+      }
+      finally
+      {
+         newColorImageLock.unlock();
       }
 
       return colorImage.get();

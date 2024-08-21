@@ -227,9 +227,9 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    }
 
    @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void update(SceneGraph sceneGraph)
    {
-      super.update(modificationQueue);
+      super.update(sceneGraph);
 
       if (!wasPlacing && getPosePlacement().isPlaced())
       {

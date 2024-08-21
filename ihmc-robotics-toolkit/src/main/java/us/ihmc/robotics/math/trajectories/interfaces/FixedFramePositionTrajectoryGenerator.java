@@ -1,14 +1,19 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 
-public interface FixedFramePositionTrajectoryGenerator extends FramePositionProvider, PositionTrajectoryGenerator
+public interface FixedFramePositionTrajectoryGenerator extends PositionTrajectoryGenerator, ReferenceFrameHolder
 {
+   @Override
+   default ReferenceFrame getReferenceFrame()
+   {
+      return getPosition().getReferenceFrame();
+   }
+
+   @Override
+   FramePoint3DReadOnly getPosition();
+
    @Override
    FrameVector3DReadOnly getVelocity();
 

@@ -1,15 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ROS2BehaviorTreeSubscriptionNode
 {
-   private byte type;
+   private Class<?> nodeDefinitionClass;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
+   private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
@@ -28,9 +30,10 @@ public class ROS2BehaviorTreeSubscriptionNode
 
    public void clear()
    {
-      type = -1;
+      nodeDefinitionClass = null;
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
+      behaviorTreeRootNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
       trashCanInteractionStateMessage = null;
@@ -48,14 +51,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       children.clear();
    }
 
-   public byte getType()
+   public Class<?> getType()
    {
-      return type;
+      return nodeDefinitionClass;
    }
 
    public void setType(byte type)
    {
-      this.type = type;
+      nodeDefinitionClass = BehaviorTreeDefinitionRegistry.getNodeDefinitionClass(type);
    }
 
    public BehaviorTreeNodeDefinitionMessage getBehaviorTreeNodeDefinitionMessage()
@@ -76,6 +79,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage)
    {
       this.behaviorTreeNodeStateMessage = behaviorTreeNodeStateMessage;
+   }
+
+   public BehaviorTreeRootNodeStateMessage getBehaviorTreeRootNodeStateMessage()
+   {
+      return behaviorTreeRootNodeStateMessage;
+   }
+
+   public void setBehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage)
+   {
+      this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
    }
 
    public ActionNodeStateMessage getActionNodeStateMessage()

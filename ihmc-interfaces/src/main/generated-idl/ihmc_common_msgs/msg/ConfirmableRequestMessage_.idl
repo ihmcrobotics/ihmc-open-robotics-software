@@ -23,9 +23,9 @@ module ihmc_common_msgs
         sequence<unsigned long, 10> request_numbers;
         /**
          * Recent confirmation numbers, the values of received request numbers
-         * The size of this is roughly the max amount of expected dropped messages in 1 second
+         * The size of this must be greater than or equal to the max timeout
          */
-        sequence<unsigned long, 10> confirmation_numbers;
+        sequence<unsigned long, 250> confirmation_numbers;
       };
     };
   };

@@ -2,15 +2,18 @@ package us.ihmc.behaviors.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.Stack;
 
 public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
 {
+   @Nullable
+   private DoorTraversalState doorTraversalState;
    private final Stack<DoorNode> traversedDoorNodes = new Stack<>();
    private DoorNode nextDoorNode;
 
@@ -20,9 +23,18 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
    }
 
    @Override
-   public List<BehaviorTreeNodeState<?>> getChildren()
+   public void update()
    {
-      return super.getChildren();
+      super.update();
+
+      // We assume that there is a possible DoorTraversal as a child of BuildingExploration
+      for (BehaviorTreeNodeState<?> child : getChildren())
+      {
+         if (child instanceof DoorTraversalState doorTraversalState)
+         {
+            this.doorTraversalState = doorTraversalState;
+         }
+      }
    }
 
    public void toMessage(BuildingExplorationStateMessage message)
@@ -37,6 +49,12 @@ public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExpl
       super.fromMessage(message.getState());
 
       getDefinition().fromMessage(message.getDefinition());
+   }
+
+   @Nullable
+   public DoorTraversalState getDoorTraversalState()
+   {
+      return doorTraversalState;
    }
 
    public Stack<DoorNode> getTraversedDoorNodes()

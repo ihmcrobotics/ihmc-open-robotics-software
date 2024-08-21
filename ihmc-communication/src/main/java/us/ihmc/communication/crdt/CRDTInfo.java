@@ -6,7 +6,7 @@ public class CRDTInfo
 {
    private final ROS2ActorDesignation actorDesignation;
    private final int maxFreezeDuration;
-   private long updateNumber = -1; // Increment before first update
+   private long updateNumber = 0;
 
    public CRDTInfo(ROS2ActorDesignation actorDesignation, int maxFreezeDuration)
    {

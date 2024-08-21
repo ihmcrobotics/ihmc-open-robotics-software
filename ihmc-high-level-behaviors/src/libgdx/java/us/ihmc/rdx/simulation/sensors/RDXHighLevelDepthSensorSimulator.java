@@ -44,6 +44,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -107,6 +108,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final int imageHeight;
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final Mat rgba8Mat;
+   private final Mat bgr8Mat;
+   private final Mat depthDiscretizedMat;
 
    int depthSequenceNumber = 0;
    int colorSequenceNumber = 0;
@@ -170,7 +173,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final Color pointColorFromPicker = new Color();
-   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final ImFloat pointSizeScale = new ImFloat(1.0f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
    private final ImInt segmentationDivisor = new ImInt(8);
    private final List<Point3D> pointCloud = new ArrayList<>();
@@ -237,6 +240,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
       rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+      bgr8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      depthDiscretizedMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
 
       publishImagesThread = new Thread(() ->
       {
@@ -368,7 +373,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             {
                LibGDXTools.toLibGDX(color, pointColorFromPicker);
                Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-               depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
+               depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSizeScale.get());
                pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
             }
             else
@@ -582,7 +587,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       ImGui.checkbox("Use Sensor Color", useSensorColor);
       ImGui.sameLine();
       ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
-      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
+      ImGui.sliderFloat("Point scale", pointSizeScale.getData(), 0.0f, 2.0f);
       if (ImGui.collapsingHeader(labels.get("Color tuner")))
       {
          ImGui.colorPicker4("Color", color);
@@ -685,7 +690,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
             lz4Compressor.compress(discretizedIntBuffer.getBackingDirectByteBuffer(), compressedPointCloudBuffer);
             compressedPointCloudBuffer.flip();
-            outputFusedROS2Message.getScan().clear();
+            outputFusedROS2Message.getScan().resetQuick();
             for (int j = 0; j < compressedPointCloudBuffer.limit(); j++)
             {
                outputFusedROS2Message.getScan().add(compressedPointCloudBuffer.get());
@@ -801,6 +806,45 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       return pointCloud;
    }
 
+   public RawImage createRawColorImageBGR()
+   {
+      CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+
+      opencv_imgproc.cvtColor(rgba8Mat, bgr8Mat, opencv_imgproc.COLOR_RGBA2BGR);
+
+      return new RawImage(depthSensorSimulator.getSequenceNumber(),
+                          Instant.now(),
+                          0.0f,
+                          bgr8Mat,
+                          null,
+                          (float) intrinsics.getFx(),
+                          (float) intrinsics.getFy(),
+                          (float) intrinsics.getCx(),
+                          (float) intrinsics.getCy(),
+                          sensorPose.getPosition(),
+                          sensorPose.getOrientation());
+   }
+
+   public RawImage createRawDepthImageDiscretized()
+   {
+      CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+
+      float discretization = 0.001f;
+      OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(), depthDiscretizedMat, 1.0f / discretization, 0.0);
+
+      return new RawImage(depthSensorSimulator.getSequenceNumber(),
+                          Instant.now(),
+                          discretization,
+                          depthDiscretizedMat,
+                          null,
+                          (float) intrinsics.getFx(),
+                          (float) intrinsics.getFy(),
+                          (float) intrinsics.getCx(),
+                          (float) intrinsics.getCy(),
+                          sensorPose.getPosition(),
+                          sensorPose.getOrientation());
+   }
+
    public void dispose()
    {
       publishImagesRunning = false;
@@ -853,9 +897,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
-   public void setPointSize(double size)
+   public void setPointSizeScale(double size)
    {
-      pointSize.set((float) size);
+      pointSizeScale.set((float) size);
    }
 
    public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)

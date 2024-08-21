@@ -128,6 +128,8 @@ public class CrossRobotCommandResolver
 
    public void resolveControllerCoreOutput(ControllerCoreOutput in, ControllerCoreOutput out)
    {
+      resolveFrameTuple3D(in.getLinearMomentum(), out.getLinearMomentum());
+      resolveFrameTuple3D(in.getAngularMomentum(), out.getAngularMomentum());
       resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
       resolveFrameTuple3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
@@ -917,7 +919,7 @@ public class CrossRobotCommandResolver
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
-      out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
+      out.setMultiContactStabilityRegion(in.getMultiContactStabilityRegion());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));

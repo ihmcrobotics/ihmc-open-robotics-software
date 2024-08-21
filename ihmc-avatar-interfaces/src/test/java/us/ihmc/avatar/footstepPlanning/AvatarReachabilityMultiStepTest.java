@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -69,7 +69,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    public void setup()
    {
       simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       robotModel = getRobotModel();
       StepReachabilityIOHelper stepReachabilityIOHelper = new StepReachabilityIOHelper();
       stepReachabilityIOHelper.loadStepReachability(robotModel);
@@ -96,7 +96,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    protected abstract HumanoidRobotInitialSetup createInitialSetup(HumanoidJointNameMap jointNameMap);

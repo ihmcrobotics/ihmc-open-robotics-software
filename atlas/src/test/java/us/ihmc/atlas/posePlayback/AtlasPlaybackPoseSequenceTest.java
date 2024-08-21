@@ -7,7 +7,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceDRCTest;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
 {
@@ -21,7 +21,7 @@ public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Override

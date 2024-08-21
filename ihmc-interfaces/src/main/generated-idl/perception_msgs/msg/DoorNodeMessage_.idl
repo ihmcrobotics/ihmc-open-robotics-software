@@ -1,10 +1,10 @@
 #ifndef __perception_msgs__msg__DoorNodeMessage__idl__
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Pose_.idl"
-#include "perception_msgs/msg/./PlanarRegionMessage_.idl"
-#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+#include "geometry_msgs/msg/./Transform_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./DoorOpeningMechanismMessage_.idl"
+#include "perception_msgs/msg/./DoorPanelMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -18,27 +18,23 @@ module perception_msgs
         /**
          * The base scene node information
          */
-        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         /**
-         * The type of door opening mechanism detected
+         * The transform of the frame of the door corner (X points in the direction the door opens)
          */
-        octet opening_mechanism_type;
+        geometry_msgs::msg::dds::Transform door_corner_transform_to_world;
         /**
-         * The 3D point of the detected door hardware
+         * Whether the pose of the door frame is locked
          */
-        geometry_msgs::msg::dds::Point opening_mechanism_point;
+        boolean pose_locked;
         /**
-         * The pose of the detected door hardware wrt the door planar region
+         * The door panel
          */
-        geometry_msgs::msg::dds::Pose opening_mechanism_pose;
+        perception_msgs::msg::dds::DoorPanelMessage door_panel;
         /**
-         * The planar region we assume is the door panel
+         * The door opening mechanisms
          */
-        perception_msgs::msg::dds::PlanarRegionMessage door_planar_region;
-        /**
-         * The last time the door planar region was updated
-         */
-        unsigned long long door_planar_region_update_time_millis;
+        sequence<perception_msgs::msg::dds::DoorOpeningMechanismMessage> opening_mechanisms;
       };
     };
   };

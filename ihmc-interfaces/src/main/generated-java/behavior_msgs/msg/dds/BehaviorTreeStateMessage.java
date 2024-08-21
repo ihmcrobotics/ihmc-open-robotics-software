@@ -14,11 +14,12 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> implements Settable<BehaviorTreeStateMessage>, EpsilonComparable<BehaviorTreeStateMessage>
 {
-   public static final byte BASIC_NODE = (byte) 0;
-   public static final byte ACTION_SEQUENCE = (byte) 1;
-   public static final byte DOOR_TRAVERSAL = (byte) 2;
-   public static final byte TRASH_CAN_INTERACTION = (byte) 3;
-   public static final byte BUILDING_EXPLORATION = (byte) 4;
+   public static final byte ROOT_NODE = (byte) 0;
+   public static final byte BASIC_NODE = (byte) 1;
+   public static final byte ACTION_SEQUENCE = (byte) 2;
+   public static final byte DOOR_TRAVERSAL = (byte) 3;
+   public static final byte TRASH_CAN_INTERACTION = (byte) 4;
+   public static final byte BUILDING_EXPLORATION = (byte) 5;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
@@ -50,6 +51,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             * it's type.
             */
    public us.ihmc.idl.IDLSequence.Long  behavior_tree_indices_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage>  root_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  basic_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  action_sequences_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
@@ -72,6 +74,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       behavior_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
 
+      root_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage> (1, new behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType());
       basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (200, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
       door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (200, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
@@ -104,6 +107,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
+      root_nodes_.set(other.root_nodes_);
       basic_nodes_.set(other.basic_nodes_);
       action_sequences_.set(other.action_sequences_);
       door_traversals_.set(other.door_traversals_);
@@ -177,6 +181,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Long  getBehaviorTreeIndices()
    {
       return behavior_tree_indices_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage>  getRootNodes()
+   {
+      return root_nodes_;
    }
 
 
@@ -289,6 +299,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.behavior_tree_indices_, other.behavior_tree_indices_, epsilon)) return false;
+
+      if (this.root_nodes_.size() != other.root_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.root_nodes_.size(); i++)
+         {  if (!this.root_nodes_.get(i).epsilonEquals(other.root_nodes_.get(i), epsilon)) return false; }
+      }
 
       if (this.basic_nodes_.size() != other.basic_nodes_.size()) { return false; }
       else
@@ -408,6 +425,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
+      if (!this.root_nodes_.equals(otherMyClass.root_nodes_)) return false;
       if (!this.basic_nodes_.equals(otherMyClass.basic_nodes_)) return false;
       if (!this.action_sequences_.equals(otherMyClass.action_sequences_)) return false;
       if (!this.door_traversals_.equals(otherMyClass.door_traversals_)) return false;
@@ -442,6 +460,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.behavior_tree_types_);      builder.append(", ");
       builder.append("behavior_tree_indices=");
       builder.append(this.behavior_tree_indices_);      builder.append(", ");
+      builder.append("root_nodes=");
+      builder.append(this.root_nodes_);      builder.append(", ");
       builder.append("basic_nodes=");
       builder.append(this.basic_nodes_);      builder.append(", ");
       builder.append("action_sequences=");

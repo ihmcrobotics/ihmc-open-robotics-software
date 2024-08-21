@@ -16,7 +16,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RewindabilityVerifier;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -45,7 +45,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    @Test
    public void testCanRewindAndGoForward()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       int numberOfSteps = 100;
       SCS2AvatarTestingSimulation simulationTestHelper = setupSimulation();
       simulationTestHelper.start();
@@ -60,13 +60,13 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       }
 
       simulationTestHelper.finishTest();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
    public void testRunsTheSameWayTwice()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
       SCS2AvatarTestingSimulation simulationTestHelper2 = setupSimulation();
       simulationTestHelper1.start();
@@ -88,14 +88,14 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       simulationTestHelper1.finishTest();
       simulationTestHelper2.finishTest();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Disabled
    @Test
    public void testRewindabilityWithSimpleFastMethod()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       double totalTimeBeforeWalking = 2.0;
       double totalTimeAfterWalking = 4.0;
       SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
@@ -140,14 +140,14 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       simulationTestHelper1.finishTest();
       simulationTestHelper2.finishTest();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Disabled
    @Test
    public void testRewindabilityWithSlowerMoreExtensiveMethod()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       double totalTimeBeforeWalking = 2.0;
       double totalTimeAfterWalking = 4.0;
       SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
@@ -188,7 +188,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       simulationTestHelper1.finishTest();
       simulationTestHelper2.finishTest();
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void checkForVariableDifferences(ArrayList<VariableDifference> variableDifferences)

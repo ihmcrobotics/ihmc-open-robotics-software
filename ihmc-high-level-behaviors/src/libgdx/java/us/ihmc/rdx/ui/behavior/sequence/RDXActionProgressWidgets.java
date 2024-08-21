@@ -7,7 +7,7 @@ import imgui.internal.ImGui;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
+import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -328,7 +328,7 @@ public class RDXActionProgressWidgets
 
    public void renderHandForce(float dividedBarWidth, boolean renderAsPlots)
    {
-      CRDTUnidirectionalVector3D forceCRDT = null;
+      CRDTStatusVector3D forceCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
          forceCRDT = handPoseAction.getState().getForce();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)
@@ -362,7 +362,7 @@ public class RDXActionProgressWidgets
 
    public void renderHandTorque(float dividedBarWidth, boolean renderAsPlots)
    {
-      CRDTUnidirectionalVector3D torqueCRDT = null;
+      CRDTStatusVector3D torqueCRDT = null;
       if (action instanceof RDXHandPoseAction handPoseAction)
          torqueCRDT = handPoseAction.getState().getTorque();
       else if (action instanceof RDXScrewPrimitiveAction screwPrimitiveAction)

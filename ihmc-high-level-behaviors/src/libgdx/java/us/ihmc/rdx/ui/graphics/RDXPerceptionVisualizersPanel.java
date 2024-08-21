@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImString;
+import rosgraph_msgs.Log;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
@@ -38,6 +40,12 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
          addChild(panel);
       if (created)
          visualizer.create();
+   }
+
+   public void removeVisualizer(RDXVisualizer visualizer)
+   {
+      visualizers.remove(visualizer);
+      queueRemoveChild(visualizer.getPanel());
    }
 
    public void create()

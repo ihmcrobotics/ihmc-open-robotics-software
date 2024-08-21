@@ -27,6 +27,8 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.gl3.ImGuiImplGl3;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
@@ -161,9 +163,9 @@ public class RDX3DSituatedImGuiPanel
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
       frameBuffer = frameBufferBuilder.build();
       Texture colorBufferTexture = frameBuffer.getColorBufferTexture();
-      material.set(TextureAttribute.createDiffuse(colorBufferTexture));
+      material.set(PBRTextureAttribute.createBaseColorTexture(colorBufferTexture));
 
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
+      material.set(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
       modelBuilder.part(meshPart, material);
 
       Model model = modelBuilder.end();

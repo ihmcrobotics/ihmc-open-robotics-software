@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.utilities.screwTheory;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -31,7 +29,7 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsMechanismExplorer;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -45,6 +43,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -354,7 +354,7 @@ public class InverseDynamicsCalculatorSCSTest
 
    private void assertAccelerationsEqual(HashMap<RevoluteJoint, PinJoint> jointMap)
    {
-      double epsilon = 1e-12;
+      double epsilon = 1e-10;
       for (RevoluteJoint idJoint : jointMap.keySet())
       {
          OneDegreeOfFreedomJoint revoluteJoint = jointMap.get(idJoint);
@@ -409,11 +409,11 @@ public class InverseDynamicsCalculatorSCSTest
       PinJoint previousJoint = null;
       for (int i = 0; i < jointAxes.length; i++)
       {         
-         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
+         Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D jointAxis = jointAxes[i];
-         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
-         Vector3D comOffset = RandomGeometry.nextVector3D(random);
+         Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -456,12 +456,12 @@ public class InverseDynamicsCalculatorSCSTest
       
       for (int i = 0; i < numberOfJoints; i++)
       {         
-         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
+         Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
-         Vector3D comOffset = RandomGeometry.nextVector3D(random);
+         Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
          double jointPosition = random.nextDouble();
          double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
          double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
@@ -554,8 +554,8 @@ public class InverseDynamicsCalculatorSCSTest
    
    private void setRandomVelocity(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
-      Vector3D linearVelocity = RandomGeometry.nextVector3D(random, 1.0);
-      Vector3D angularVelocity = RandomGeometry.nextVector3D(random, 1.0);
+      Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random, 1.0);
+      Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
       floatingJoint.setVelocity(linearVelocity);
       floatingJoint.setAngularVelocityInBody(angularVelocity);

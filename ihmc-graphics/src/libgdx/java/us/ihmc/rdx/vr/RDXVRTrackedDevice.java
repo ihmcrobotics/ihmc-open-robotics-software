@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 
 import java.nio.IntBuffer;
@@ -98,7 +99,7 @@ public abstract class RDXVRTrackedDevice
                }
                else
                   model = RDXVRModelLoader.loadRenderModel(renderModelName);
-               modelInstance = model != null ? new ModelInstance(model) : null;
+               modelInstance = model != null ? new RDXModelInstance(model) : null;
             }
 
             deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());

@@ -165,6 +165,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      return ros2Helper.subscribeViaSwapReference(topic, callback);
+   }
+
+   @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
       return ros2Helper.subscribeViaSwapReference(topic, callback);

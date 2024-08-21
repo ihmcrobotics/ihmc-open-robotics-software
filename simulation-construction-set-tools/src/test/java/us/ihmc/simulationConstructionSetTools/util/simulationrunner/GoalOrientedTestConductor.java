@@ -13,7 +13,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.testing.GoalOrientedTestGoal;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.scs2.SimulationConstructionSet2;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -239,9 +238,7 @@ public class GoalOrientedTestConductor
 
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots().get(0).getName(),
-                                                                                        scs,
-                                                                                        additionalStackDepthForRelevantCallingMethod + 1);
+         // TODO GITHUB WORKFLOWS
       }
 
       ThreadTools.sleep(200);
@@ -257,7 +254,7 @@ public class GoalOrientedTestConductor
 
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
+         // TODO GITHUB WORKFLOWS
       }
 
       ThreadTools.sleep(200);

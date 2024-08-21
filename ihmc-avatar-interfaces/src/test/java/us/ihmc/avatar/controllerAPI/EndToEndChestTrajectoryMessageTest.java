@@ -42,7 +42,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -57,7 +56,7 @@ import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
@@ -116,7 +115,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    @Test
    public void testLookingLeftAndRight() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       simulationTestHelper = createSimulationTestHelper(selectedLocation);
@@ -178,7 +177,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -256,7 +255,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
@@ -334,7 +333,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -443,7 +442,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(56457L);
 
@@ -523,7 +522,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testMultipleTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(3456357);
 
@@ -641,7 +640,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
@@ -750,7 +749,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
@@ -860,7 +859,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testQueuedMessages() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(532);
 
@@ -1026,7 +1025,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testQueueWithWrongPreviousId() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
@@ -1225,7 +1224,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       simulationTestHelper = createSimulationTestHelper(selectedLocation);
@@ -1288,7 +1287,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = createSimulationTestHelper();
       simulationTestHelper.start();
@@ -1409,7 +1408,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    public void testStopAllTrajectory() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -1480,7 +1479,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
     */
    public void testStopAllTrajectoryRepeatedly() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = createSimulationTestHelper(new FlatGroundEnvironment());
       simulationTestHelper.start();
@@ -1534,7 +1533,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -1697,7 +1696,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)

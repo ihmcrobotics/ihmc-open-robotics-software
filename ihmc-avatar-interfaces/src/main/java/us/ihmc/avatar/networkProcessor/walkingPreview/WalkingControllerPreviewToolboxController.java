@@ -53,10 +53,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -213,7 +213,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(additionalContacts);
       allContactableBodies.addAll(feet.values());
 
-      double robotMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double robotMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
 
       for (RobotSide robotSide : RobotSide.values)
       {

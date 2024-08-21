@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -24,6 +23,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
+   private final ImGuiAveragedFrequencyText publishFrequencyText = new ImGuiAveragedFrequencyText();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -32,7 +32,6 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
                               ReferenceFrameLibrary referenceFrameLibrary,
-                              DefaultFootstepPlannerParametersBasics footstepPlannerParametersBasics,
                               ROS2ControllerPublishSubscribeAPI ros2)
    {
       super(treeFilesDirectory,
@@ -41,8 +40,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
             selectionCollisionModel,
             baseUI,
             panel3D,
-            referenceFrameLibrary,
-            footstepPlannerParametersBasics);
+            referenceFrameLibrary);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getBehaviorTreeState(), this::setRootNode, ros2);
 
@@ -53,12 +51,17 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       boolean updateComms = communicationThrottler.run();
       if (updateComms)
+      {
          ros2BehaviorTreeState.updateSubscription();
+      }
 
       super.update();
 
       if (updateComms)
+      {
          ros2BehaviorTreeState.updatePublication();
+         publishFrequencyText.ping();
+      }
    }
 
    @Override
@@ -91,6 +94,14 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
       ImGui.text("Dropped: %4d".formatted(ros2BehaviorTreeState.getBehaviorTreeSubscription().getMessageDropCount()));
+
+      ImGui.endMenuBar();
+
+      ImGui.text("CRDT#: Local: %d (%s)  Robot: %d  Out of order: %d"
+                       .formatted(getBehaviorTreeState().getCRDTInfo().getUpdateNumber(),
+                                  publishFrequencyText.getText(),
+                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getPreviousSequenceID(),
+                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getOutOfOrderCount()));
 
       super.renderImGuiWidgetsPost();
    }

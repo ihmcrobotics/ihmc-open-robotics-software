@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Level;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -45,6 +46,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -1089,7 +1091,7 @@ public class MessageTools
 
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
-      lidarScanMessage.getScan().reset();
+      lidarScanMessage.getScan().resetQuick();
       LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> scan[i].getElement(j));
    }
 
@@ -1353,6 +1355,18 @@ public class MessageTools
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
    }
 
+   public static void toMessage(Duration duration, DurationMessage durationMessage)
+   {
+      durationMessage.setSeconds(duration.getSeconds());
+      durationMessage.setNanos(duration.getNano());
+   }
+
+   public static Duration toDuration(DurationMessage durationMessage)
+   {
+      long totalNanos = Conversions.secondsToNanoseconds(durationMessage.getSeconds()) + durationMessage.getNanos();
+      return Duration.ofNanos(totalNanos);
+   }
+
    public static void toMessage(UUID uuid, UUIDMessage uuidMessage)
    {
       uuidMessage.setLeastSignificantBits(uuid.getLeastSignificantBits());
@@ -1488,9 +1502,9 @@ public class MessageTools
     */
    public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
    {
-      byteSequence.clear();
+      byteSequence.resetQuick();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
-      byteSequence.addAll(longStringBytes);
+      byteSequence.add(longStringBytes);
    }
 
    /**
@@ -1498,7 +1512,7 @@ public class MessageTools
     */
    public static String unpackLongStringFromByteSequence(IDLSequence.Byte byteSequence)
    {
-      byte[] longStringData = byteSequence.toArray();
+      byte[] longStringData = byteSequence.copyArray();
       return new String(longStringData, StandardCharsets.US_ASCII);
    }
 

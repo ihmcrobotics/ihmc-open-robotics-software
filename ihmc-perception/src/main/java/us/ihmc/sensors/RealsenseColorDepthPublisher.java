@@ -36,7 +36,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -262,7 +261,7 @@ public class RealsenseColorDepthPublisher
    private void initializeLogger()
    {
       String logFileName = HDF5Tools.generateFileName();
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      FileTools.ensureDirectoryExists(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
       perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);

@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXZEDSVORecorderPanel
@@ -50,32 +51,37 @@ public class RDXZEDSVORecorderPanel
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());
 
-      if (!holdingOnToTheSlider)
-         requestedPosition.set((int) latestMessage.getCurrentPosition());
+      RecordMode recordMode = RecordMode.fromByte(latestMessage.getRecordMode());
 
-      if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
+      if (recordMode == RecordMode.PLAYBACK)
       {
-         holdingOnToTheSlider = true;
+         if (!holdingOnToTheSlider)
+            requestedPosition.set((int) latestMessage.getCurrentPosition());
 
-         if (requestThrottler.run())
+         if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
          {
+            holdingOnToTheSlider = true;
+
+            if (requestThrottler.run())
+            {
+               publishPositionRequest();
+            }
+         }
+         // Called once you let go of the slider
+         if (ImGui.isItemDeactivatedAfterEdit())
+         {
+            holdingOnToTheSlider = false;
+
             publishPositionRequest();
          }
-      }
-      // Called once you let go of the slider
-      if (ImGui.isItemDeactivatedAfterEdit())
-      {
-         holdingOnToTheSlider = false;
 
-         publishPositionRequest();
-      }
+         ImGui.sameLine();
 
-      ImGui.sameLine();
-
-      if (ImGui.button(labels.get(paused ? "Play" : "Pause")))
-      {
-         ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
-         paused = !paused;
+         if (ImGui.button(labels.get(paused ? "Play" : "Pause")))
+         {
+            ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
+            paused = !paused;
+         }
       }
    }
 

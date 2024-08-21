@@ -27,6 +27,9 @@ public interface ROS2PublishSubscribeAPI
    public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback);
 
    /** Use when you only need the latest message and need allocation free. */
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback);
+
+   /** Use when you only need the latest message and need allocation free. */
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback);
 
    /** Allocation free version with size 16 ring buffer. */

@@ -37,13 +37,13 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandPreset.OPEN.getHandOpenAngle());
+      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
+      handOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, SakeHandPreset.OPEN.getHandOpenAngle());
       initialSatisfactionHandAngleTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR,
-                                                                           crdtInfo,
+                                                                           this,
                                                                            DEFAULT_HAND_ANGLE_INITIAL_SATISFACTION_TOLERANCE);
-      completionHandAngleTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_HAND_ANGLE_COMPLETION_TOLERANCE);
-      fingertipGripForceLimit = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
+      completionHandAngleTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_HAND_ANGLE_COMPLETION_TOLERANCE);
+      fingertipGripForceLimit = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE);
    }
 
    @Override

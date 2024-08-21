@@ -2,21 +2,21 @@ package us.ihmc.tools;
 
 public class TimerSnapshotWithExpiration extends TimerSnapshot
 {
-   private final double expirationTime;
+   private final double expirationDuration;
 
-   public TimerSnapshotWithExpiration(double timePassedSinceReset, double expirationTime)
+   public TimerSnapshotWithExpiration(double timePassedSinceReset, double expirationDuration)
    {
       super(timePassedSinceReset);
-      this.expirationTime = expirationTime;
+      this.expirationDuration = expirationDuration;
    }
 
    public boolean isExpired()
    {
-      return isExpired(expirationTime);
+      return isExpired(expirationDuration);
    }
 
    public boolean isRunning()
    {
-      return isRunning(expirationTime);
+      return isRunning(expirationDuration);
    }
 }

@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.EuclidModelInstance;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 
@@ -38,7 +39,7 @@ public class RDXIHMCLabEnvironment implements RenderableProvider
       Pose3D pose = new Pose3D();
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      ModelInstance floorInstance = new ModelInstance(labFloorModel);
+      ModelInstance floorInstance = new RDXModelInstance(labFloorModel);
       modelInstances.add(floorInstance);
       pose.set(new Point3D(0.0f, 0.0f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
       pose.get(transform);

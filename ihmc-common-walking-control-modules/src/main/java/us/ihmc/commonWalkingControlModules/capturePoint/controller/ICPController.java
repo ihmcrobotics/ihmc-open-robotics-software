@@ -503,9 +503,9 @@ public class ICPController implements ICPControllerInterface
     * {@inheritDoc}
     */
    @Override
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      this.copConstraintHandler.setMultiContactStabilityRegion(multiContactStabilityRegion);
    }
 
    @Override

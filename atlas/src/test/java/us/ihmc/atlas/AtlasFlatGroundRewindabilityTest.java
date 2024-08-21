@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-flat-ground")
 @Disabled
@@ -23,7 +23,7 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
    @Override
    public String getSimpleRobotName()
    {
-      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+      return CITools.getSimpleRobotNameFor(CITools.SimpleRobotNameKeys.ATLAS);
    }
 
    @Override

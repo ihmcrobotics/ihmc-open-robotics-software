@@ -46,7 +46,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          node.renderContextMenuItems();
 
          ImGui.separator();
-         if (!node.isRootNode() && !(node instanceof RDXActionSequence))
+         if (!node.isRootNode())
          {
             if (ImGui.menuItem(labels.get("Insert Node Before...")))
             {
@@ -57,7 +57,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
             }
          }
-         if (node.getChildren().isEmpty() && !(node instanceof RDXActionNode<?, ?>))
+         if (!(node instanceof RDXActionNode<?, ?>))
          {
             if (ImGui.menuItem(labels.get("Add Child Node...")))
             {
@@ -141,6 +141,9 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          case INSERT_AFTER -> node.setModalPopupTitle("Insert after \"%s\"".formatted(node.getDefinition().getName()));
          case INSERT_AS_CHILD -> node.setModalPopupTitle("Insert as child of \"%s\"".formatted(node.getDefinition().getName()));
       }
+
+      // Update listings every time we pop the node creation dialog
+      tree.getNodeCreationMenu().reindexDirectory();
 
       ImGui.openPopup(node.getModalPopupID());
       LogTools.info("Opening popup {}", node.getModalPopupID());

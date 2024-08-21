@@ -52,8 +52,24 @@ public class ImGuiReferenceFrameLibraryCombo
       // Make sure current frame is selected
       selectedFrameIndex = ArrayUtils.indexOf(selectableReferenceFrameNameArray, currentFrameNameGetter.get());
 
-      if (ImGui.beginCombo(labels.get(comboName), selectableReferenceFrameNameArray[selectedFrameIndex]))
+      String selectedFrameName = selectableReferenceFrameNameArray[selectedFrameIndex];
+      boolean libraryContainsSelectedFrame = referenceFrameLibraryNames.contains(selectedFrameName);
+
+      boolean needToPopStyle = false;
+      if (!libraryContainsSelectedFrame)
       {
+         needToPopStyle = true;
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.RED);
+      }
+
+      if (ImGui.beginCombo(labels.get(comboName), selectedFrameName))
+      {
+         if (needToPopStyle)
+         {
+            needToPopStyle = false;
+            ImGui.popStyleColor();
+         }
+
          for (int i = 0; i < selectableReferenceFrameNameArray.length; i++)
          {
             String referenceFrameName = selectableReferenceFrameNameArray[i];
@@ -73,6 +89,11 @@ public class ImGuiReferenceFrameLibraryCombo
          }
 
          ImGui.endCombo();
+      }
+
+      if (needToPopStyle)
+      {
+         ImGui.popStyleColor();
       }
    }
 }

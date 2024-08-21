@@ -3,8 +3,9 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -47,7 +48,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp()
             && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -112,7 +113,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      assertEquals(2, leftFootStateChanges.getValue());
+      Assertions.assertEquals(2, leftFootStateChanges.getValue());
 
       assertTrue(success);
 
@@ -121,7 +122,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -196,7 +197,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void checkSplitFractionParameters(YoEnum<WalkingStateEnum> currentWalkingState,

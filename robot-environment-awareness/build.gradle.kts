@@ -27,17 +27,12 @@ ihmc {
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:joctomap:1.12.5")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
-   api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.7")
    api("us.ihmc:ihmc-ros-tools:source")
 
-   api("org.bytedeco:javacpp:1.5.9")
    val openblasVersion = "0.3.23-1.5.9"
    api("org.bytedeco:openblas:$openblasVersion")
    api("org.bytedeco:openblas:$openblasVersion:linux-x86_64")
@@ -50,9 +45,6 @@ mainDependencies {
 
 applicationDependencies {
    api(ihmc.sourceSetProject("main"))
-
-   api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:simulation-construction-set-tools:source")
 }
 
 testDependencies {

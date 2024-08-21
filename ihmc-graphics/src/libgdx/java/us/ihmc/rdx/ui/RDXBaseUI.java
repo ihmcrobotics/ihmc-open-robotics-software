@@ -16,12 +16,15 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
+import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
@@ -112,11 +115,15 @@ public class RDXBaseUI
    private final ImInt foregroundFPSLimit = new ImInt(240);
    private final ImBoolean plotFrameRate = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
+   private final ImBoolean lockPanelsWithinWindows = new ImBoolean(true);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
+   private ImGuiSliderDoubleWrapper ambientLightIntensitySlider;
+   private ImGuiSliderDoubleWrapper pointLightIntensitySlider;
+   private ImGuiSliderDoubleWrapper directionalLightIntensitySlider;
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -173,12 +180,22 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
-         int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
-         Gdx.graphics.setWindowedMode(width, height);
-         int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
-         int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
-         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
+         // Work around for native crash on Windows
+         new Thread(new Runnable()
+         {
+            @Override
+            public void run()
+            {
+               ThreadTools.sleep(1);
+               int width = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth();
+               int height = imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight();
+               Gdx.graphics.setWindowedMode(width, height);
+               int x = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getX();
+               int y = imGuiWindowAndDockSystem.getPrimaryWindowContentAreaPosition().getY();
+               ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(x, y);
+            }
+         }, getClass().getSimpleName() + "SetWindowSize").start();
+
          return true;
       });
       layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
@@ -216,6 +233,7 @@ public class RDXBaseUI
       }
       plotFrameRate.set(settings.plotFrameRateEnabled());
       setVsync(settings.vsyncEnabled());
+      lockPanelsWithinWindows.set(settings.getlockPanelsWithinWindows());
       setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
       imguiFontSize.set(settings.getFontSize());
@@ -245,8 +263,7 @@ public class RDXBaseUI
       // with the contents behind the window displayed for a few seconds, which is really
       // confusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
-      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
-                                                    applicationAdapter);
+      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration, applicationAdapter);
    }
 
    public void create()
@@ -276,6 +293,20 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
+      ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+      ambientLightIntensitySlider = new ImGuiSliderDoubleWrapper("Ambient light intensity", "%.2f", 0.0, 0.05,
+                                                                 () -> primaryScene.getAmbientLightIntensity(),
+                                                                 value -> primaryScene.setAmbientLightIntensity((float) value));
+      ambientLightIntensitySlider.addWidgetAligner(widgetAligner);
+      pointLightIntensitySlider = new ImGuiSliderDoubleWrapper("Point light intensity", "%.1f", 0.0, 1000.0,
+                                                               () -> primaryScene.getPointLightIntensity(),
+                                                               value -> primaryScene.setPointLightIntensity((float) value));
+      pointLightIntensitySlider.addWidgetAligner(widgetAligner);
+      directionalLightIntensitySlider = new ImGuiSliderDoubleWrapper("Directional light intensity", "%.1f", 0.0, 10.0,
+                                                                     () -> primaryScene.getDirectionalLightIntensity(),
+                                                                     value -> primaryScene.setDirectionalLightIntensity((float) value));
+      directionalLightIntensitySlider.addWidgetAligner(widgetAligner);
+
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
       vrManager.create();
@@ -292,7 +323,7 @@ public class RDXBaseUI
    {
       vrManager.pollEventsAndRender(this, primaryScene);
       Gdx.graphics.setTitle(windowTitle);
-      imGuiWindowAndDockSystem.beforeWindowManagement();
+      imGuiWindowAndDockSystem.beforeWindowManagement(settings.getlockPanelsWithinWindows());
       primary3DPanel.render();
       for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
@@ -464,6 +495,10 @@ public class RDXBaseUI
             Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
             Gdx.graphics.setVSync(vsync.get());
          }
+         if (ImGui.menuItem(labels.get("Lock panels within windows"), null, lockPanelsWithinWindows))
+         {
+            settings.setlockPanelsWithinWindows(lockPanelsWithinWindows.get());
+         }
 
          ImGui.separator(); // Environment section
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
@@ -490,6 +525,10 @@ public class RDXBaseUI
             else
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
+         ImGui.separator();
+         ambientLightIntensitySlider.renderImGuiWidget();
+         pointLightIntensitySlider.renderImGuiWidget();
+         directionalLightIntensitySlider.renderImGuiWidget();
          ImGui.separator(); // Mouse behavior section
          if (ImGui.menuItem(labels.get("Model scene mouse collision enabled"), null, modelSceneMouseCollisionEnabled))
          {

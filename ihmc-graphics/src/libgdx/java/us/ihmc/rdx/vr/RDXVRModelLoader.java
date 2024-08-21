@@ -6,12 +6,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.ObjectMap;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
@@ -90,7 +90,7 @@ public class RDXVRModelLoader
       pixmap.getPixels().put(pixels);
       pixmap.getPixels().position(0);
       com.badlogic.gdx.graphics.Texture texture = new Texture(new PixmapTextureData(pixmap, pixmap.getFormat(), true, true));
-      Material material = new Material(new TextureAttribute(TextureAttribute.Diffuse, texture));
+      Material material = new Material(PBRTextureAttribute.createBaseColorTexture(texture));
 
       Model model = new Model();
       model.meshes.add(mesh);

@@ -1,20 +1,18 @@
 package us.ihmc.tools;
 
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.commons.Conversions;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 public class Timer
 {
-   private final Stopwatch stopwatch = new Stopwatch();
+   private double resetTime = Double.NaN;
 
    /**
     * Reset or "crank" the timer back to zero time elapsed.
-    *
-    * TODO: Rename to "set" as in "set a timer"?
     */
    public void reset()
    {
-      stopwatch.start();
+      resetTime = Conversions.nanosecondsToSeconds(System.nanoTime());
    }
 
    /**
@@ -22,20 +20,22 @@ public class Timer
     */
    public double getElapsedTime()
    {
-      return stopwatch.totalElapsed();
+      return Conversions.nanosecondsToSeconds(System.nanoTime()) - resetTime;
    }
 
    /**
     * If the timer is running, sleep until it expires.
     *
-    * @param expirationTime
+    * @param expirationDuration
     */
-   public void sleepUntilExpiration(double expirationTime)
+   public void sleepUntilExpiration(double expirationDuration)
    {
-      TimerSnapshotWithExpiration snapshot = createSnapshot(expirationTime);
-      if (snapshot.isRunning())
+      if (!Double.isNaN(resetTime))
       {
-         ThreadTools.sleepSeconds(expirationTime - snapshot.getTimePassedSinceReset());
+         double expirationTime = resetTime + expirationDuration;
+         double remainingDuration = expirationTime - Conversions.nanosecondsToSeconds(System.nanoTime());
+
+         MissingThreadTools.sleepAtLeast(remainingDuration);
       }
    }
 
@@ -48,26 +48,26 @@ public class Timer
    }
 
    /**
-    * @param expirationTime
+    * @param expirationDuration
     * @return If the timer has been set and it has expired.
     */
-   public boolean isExpired(double expirationTime)
+   public boolean isExpired(double expirationDuration)
    {
-      return isExpired(getElapsedTime(), expirationTime);
+      return isExpired(getElapsedTime(), expirationDuration);
    }
 
    /**
-    * @param expirationTime
+    * @param expirationDuration
     * @return If the timer has been set and it's still running.
     */
-   public boolean isRunning(double expirationTime)
+   public boolean isRunning(double expirationDuration)
    {
-      return isRunning(getElapsedTime(), expirationTime);
+      return isRunning(getElapsedTime(), expirationDuration);
    }
 
-   static boolean isRunning(double timePassedSinceReset, double expirationTime)
+   static boolean isRunning(double timePassedSinceReset, double expirationDuration)
    {
-      return hasBeenSet(timePassedSinceReset) && !isExpired(timePassedSinceReset, expirationTime);
+      return hasBeenSet(timePassedSinceReset) && !isExpired(timePassedSinceReset, expirationDuration);
    }
 
    static boolean hasBeenSet(double timePassedSinceReset)
@@ -77,17 +77,17 @@ public class Timer
 
    /**
     * @param timePassedSinceReset
-    * @param expirationTime
+    * @param expirationDuration
     * @return false if the timer has never been set. else returns if it's expired.
     */
-   static boolean isExpired(double timePassedSinceReset, double expirationTime)
+   static boolean isExpired(double timePassedSinceReset, double expirationDuration)
    {
-      return hasBeenSet(timePassedSinceReset) && timePassedSinceReset > expirationTime;
+      return hasBeenSet(timePassedSinceReset) && timePassedSinceReset > expirationDuration;
    }
 
-   public TimerSnapshotWithExpiration createSnapshot(double expirationTime)
+   public TimerSnapshotWithExpiration createSnapshot(double expirationDuration)
    {
-      return new TimerSnapshotWithExpiration(getElapsedTime(), expirationTime);
+      return new TimerSnapshotWithExpiration(getElapsedTime(), expirationDuration);
    }
 
    public TimerSnapshot createSnapshot()

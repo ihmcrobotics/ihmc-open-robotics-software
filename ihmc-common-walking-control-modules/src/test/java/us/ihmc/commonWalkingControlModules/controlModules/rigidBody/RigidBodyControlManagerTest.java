@@ -1,19 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertNull;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.junit.jupiter.api.Test;
-
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -55,6 +44,14 @@ import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class RigidBodyControlManagerTest
 {
@@ -520,6 +517,7 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     null,
                                                                     false,
+                                                                    null,
                                                                     yoTime,
                                                                     0.0,
                                                                     null,

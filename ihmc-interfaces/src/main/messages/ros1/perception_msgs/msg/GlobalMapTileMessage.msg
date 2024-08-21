@@ -1,0 +1,10 @@
+
+int32 center_x
+
+int32 center_y
+
+int32 hash_code_of_tile
+
+perception_msgs/HeightMapMessage height_map
+
+

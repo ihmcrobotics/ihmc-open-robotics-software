@@ -141,6 +141,23 @@ public class OpenCVTools
    }
 
    /**
+    * OpenCV's {@code inRange()} function bur with {@code Scalar}s to specify lower and upper bounds
+    * @param sourceMat Source Mat to calculate the mask on
+    * @param lowerBound Lower bound pixel values
+    * @param upperBound Upper bound of pixel values
+    * @param destinationMat Output: A CV_8U Mat of same size as {@code sourceMat}, where each pixel is set to 255
+    *                       if the corresponding pixel in {@code sourceMat} is within the bounds, and otherwise set to 0.
+    */
+   public static void inRange(Mat sourceMat, Scalar lowerBound, Scalar upperBound, Mat destinationMat)
+   {
+      try (Mat lowerBoundMat = new Mat(lowerBound);
+           Mat upperBoundMat = new Mat(upperBound))
+      {
+         opencv_core.inRange(sourceMat, lowerBoundMat, upperBoundMat, destinationMat);
+      }
+   }
+
+   /**
     * Like OpenCV's inRange() function, but for GPU mats
     * @param sourceMat Source mat
     * @param lowerBound lower boundary
@@ -264,6 +281,21 @@ public class OpenCVTools
       return a.cols() == imageWidth && a.rows() == imageHeight;
    }
 
+   public static boolean dimensionsMatch(Mat a, Mat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(GpuMat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(Mat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
    /**
     * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
     * Assumes Mat is continuous. i.e. Mat::isContinuous == true
@@ -284,5 +316,42 @@ public class OpenCVTools
    public static long getFloat3ByteIndexContinuous(int float3Index, int floatIndex)
    {
       return (long) float3Index * 3 * Float.BYTES + floatIndex * Float.BYTES;
+   }
+
+   public static Mat segmentByColor(Mat colorImage, Scalar colorLowerBounds, Scalar colorUpperBounds)
+   {
+      Mat resultMat = new Mat();
+      try (Mat imageMask = new Mat())
+      {
+         inRange(colorImage, colorLowerBounds, colorUpperBounds, imageMask);
+         opencv_core.bitwise_and(colorImage, colorImage, resultMat, imageMask);
+      }
+      return resultMat;
+   }
+
+   public static GpuMat segmentByColor(GpuMat colorImage, Scalar colorLowerBounds, Scalar colorUpperBounds)
+   {
+      GpuMat resultGpuMat = new GpuMat();
+      try (GpuMat imageMask = cudaInRange(colorImage, colorLowerBounds, colorUpperBounds))
+      {
+         opencv_cudaarithm.bitwise_and(colorImage, colorImage, resultGpuMat, imageMask, Stream.Null());
+      }
+      return resultGpuMat;
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(Mat mat)
+   {
+      return mat.elemSize() * mat.total();
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(GpuMat mat)
+   {
+      return mat.elemSize() * mat.rows() * mat.cols();
    }
 }

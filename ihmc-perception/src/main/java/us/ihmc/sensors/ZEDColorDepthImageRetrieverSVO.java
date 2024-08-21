@@ -2,7 +2,6 @@ package us.ihmc.sensors;
 
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -14,6 +13,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
@@ -26,31 +26,48 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    private final RestartableThrottledThread publishInfoThread;
 
    public ZEDColorDepthImageRetrieverSVO(int cameraID,
-                                         Supplier<ReferenceFrame> sensorFrameSupplier,
-                                         ROS2DemandGraphNode depthDemandNode,
-                                         ROS2DemandGraphNode colorDemandNode,
+                                         BooleanSupplier depthDemandSupplier,
+                                         BooleanSupplier colorDemandSupplier,
                                          ROS2Helper ros2Helper,
                                          RecordMode recordMode,
                                          String svoFileName)
    {
-      super(cameraID, sensorFrameSupplier, depthDemandNode, colorDemandNode);
+      this(cameraID, ReferenceFrame::getWorldFrame, true, depthDemandSupplier, colorDemandSupplier, ros2Helper, recordMode, svoFileName);
+
+   }
+
+   public ZEDColorDepthImageRetrieverSVO(int cameraID,
+                                         Supplier<ReferenceFrame> sensorFrameSupplier,
+                                         boolean useSensorPoseTracking,
+                                         BooleanSupplier depthDemandSupplier,
+                                         BooleanSupplier colorDemandSupplier,
+                                         ROS2Helper ros2Helper,
+                                         RecordMode recordMode,
+                                         String svoFileName)
+   {
+      super(cameraID, sensorFrameSupplier, depthDemandSupplier, colorDemandSupplier, useSensorPoseTracking);
 
       if (recordMode == RecordMode.PLAYBACK && svoFileName == null)
       {
          throw new RuntimeException("Must specify an SVO file name for playback");
       }
 
-      File svoFile = new File(svoFileName);
+      this.recordMode = recordMode;
+      this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
+
+      File svoFile = new File(this.svoFileName);
 
       if (recordMode == RecordMode.PLAYBACK && !svoFile.exists())
       {
          throw new RuntimeException("SVO file does not exist");
       }
 
-      this.recordMode = recordMode;
-      this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
-
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 ->
+      {
+         setCurrentPosition((int) int64.getData());
+         if (!isRunning())
+            grabOneFrame();
+      });
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () ->
       {
          if (recordMode == RecordMode.RECORD)
@@ -90,15 +107,14 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 
       if (recordMode == RecordMode.RECORD)
       {
-         svoFileName = generateSVOFileName();
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting recording: " + svoFileName);
+         LogTools.info("Starting recording: " + this.svoFileName);
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
       else
       {
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting playback: " + svoFileName);
+         LogTools.info("Starting playback: " + this.svoFileName);
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
    }
