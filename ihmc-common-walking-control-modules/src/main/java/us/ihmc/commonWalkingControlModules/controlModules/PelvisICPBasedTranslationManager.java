@@ -84,7 +84,6 @@ public class PelvisICPBasedTranslationManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2DReadOnly supportPolygon;
-   private final CenterOfMassStabilityMarginRegionCalculator multiContactCoMRegionCalculator;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
@@ -121,7 +120,6 @@ public class PelvisICPBasedTranslationManager
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       soleZUpFrames = controllerToolbox.getReferenceFrames().getSoleZUpFrames();
-      multiContactCoMRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 
@@ -149,7 +147,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, boolean isUpperBodyLoadBearing)
+   public void compute(RobotSide supportLeg, FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
@@ -166,18 +164,18 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (isUpperBodyLoadBearing && multiContactCoMRegionCalculator.hasSolvedWholeRegion())
-      {
-         supportFrame = multiContactCoMRegionCalculator.getFeasibleCoMRegion().getReferenceFrame();
-         supportPolygon = multiContactCoMRegionCalculator.getFeasibleCoMRegion();
+      if (multiContactStabilityRegion != null)
+      { // Upper body is load-bearing
+         supportFrame = multiContactStabilityRegion.getReferenceFrame();
+         supportPolygon = multiContactStabilityRegion;
       }
       else if (supportLeg == null)
-      {
+      { // Double support
          supportFrame = midFeetZUpFrame;
          supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       }
       else
-      {
+      { // Single support
          supportFrame = soleZUpFrames.get(supportLeg);
          supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportLeg);
       }

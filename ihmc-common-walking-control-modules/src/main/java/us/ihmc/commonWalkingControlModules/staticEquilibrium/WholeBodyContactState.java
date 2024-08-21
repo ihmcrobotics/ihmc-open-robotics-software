@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -27,19 +28,25 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.GRAVITY;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
 
 public class WholeBodyContactState implements WholeBodyContactStateInterface
 {
+   private static final boolean INCLUDE_GRAVITY_CORIOLIS_TORQUES = true;
+
    private final RecyclingArrayList<ContactPoint> contactPoints = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(ContactPoint::new));
    private final Map<RigidBodyBasics, GeometricJacobian> contactJacobians = new HashMap<>();
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final GravityCoriolisExternalWrenchMatrixCalculator gravityCoriolisExternalWrenchMatrixCalculator;
+   private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
 
    /* Jacobian-transpose actuation constraint corresponding to joint torque lower effort limits: - J^T f >= tau_lower - g */
    private final DMatrixRMaj constraintLowerBound;
@@ -47,9 +54,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    private final DMatrixRMaj constraintUpperBound;
 
    /* Stacked Jacobian-transpose actuation constraints matrices: J_stacked = (J^T, -J^T), so that J_stacked f <= b_stacked */
-   private final DMatrixRMaj stackedConstraintMatrix;
+   private final DMatrixRMaj stackedConstraintMatrix = new DMatrixRMaj(0);
    /* Stacked Jacobian-transpose actuation constraints vectors: b_stacked = (-tau_lower + g, tau_upper - g), so that J_stacked f <= b_stacked */
-   private final DMatrixRMaj stackedConstraintVector;
+   private final DMatrixRMaj stackedConstraintVector = new DMatrixRMaj(0);
+   /* Gradient of stacked Jacobian-transpose actuation constraints matrices: J_stacked = (J^T, -J^T), so that J_stacked f <= b_stacked */
+   private final DMatrixRMaj stackedConstraintMatrixGradient = new DMatrixRMaj(0);
 
    /* 3 x n_j point-jacobian */
    private final DMatrixRMaj contactJacobian;
@@ -57,8 +66,6 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    private final DMatrixRMaj contactJacobianTranspose;
    /* n_j x 3n_c stacked point-jacobian transpose */
    private final DMatrixRMaj graspMatrixJacobianTranspose;
-   /* 2n_j, the number of actuation constraints for lower and upper joint torque bounds */
-   private final int numberOfActuationConstraints;
 
    /* Pose at which the Geometric Jacobian is evaluated */
    private final FramePose3D worldAlignedContactPose = new FramePose3D();
@@ -68,6 +75,16 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    private final TObjectIntMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
    /* Placeholder to efficiently set contact points from a PlaneContactState object */
    private final PlaneContactStateCommand tempPlaneContactStateCommand = new PlaneContactStateCommand();
+   /* Map from joint to index in the reduced set of joints that are being validated for torque feasibility */
+   private final TObjectIntMap<OneDoFJointBasics> jointTorqueIndexMap = new TObjectIntHashMap<>();
+   /* Mask for which joints to check torque feasibility, which is static and defined in WalkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact */
+   private final boolean[] jointTorqueStaticMask;
+   /* Mask for which joints are loaded at a given tick */
+   private final boolean[] jointLoadStatusMask;
+   /* Number of joints being validated for torque feasibility */
+   private int numberOfTorqueValidatedJoints;
+   /* Array of joints being validated for torque feasibility */
+   private final List<OneDoFJointBasics> torqueValidatedJoints = new ArrayList<>();
 
    public WholeBodyContactState(OneDoFJointBasics[] oneDoFJoints, JointBasics rootJoint)
    {
@@ -90,18 +107,24 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       constraintLowerBound = new DMatrixRMaj(oneDoFJoints.length, 1);
       constraintUpperBound = new DMatrixRMaj(oneDoFJoints.length, 1);
 
-      numberOfActuationConstraints = 2 * oneDoFJoints.length;
-      stackedConstraintMatrix = new DMatrixRMaj(0);
-      stackedConstraintVector = new DMatrixRMaj(numberOfActuationConstraints, 1);
-
-      contactJacobian = new DMatrixRMaj(LINEAR_DIMENSIONS, oneDoFJoints.length);
-      contactJacobianTranspose = new DMatrixRMaj(oneDoFJoints.length, LINEAR_DIMENSIONS);
+      contactJacobian = new DMatrixRMaj(0);
+      contactJacobianTranspose = new DMatrixRMaj(0);
       graspMatrixJacobianTranspose = new DMatrixRMaj(0);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          jointIndexMap.put(oneDoFJoints[i], i);
       }
+
+      jointTorqueStaticMask = new boolean[oneDoFJoints.length];
+      jointLoadStatusMask = new boolean[oneDoFJoints.length];
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointIndexMap.put(oneDoFJoints[i], i);
+      }
+
+      setupForSelectedJoints(name -> true);
    }
 
    public void clear()
@@ -156,13 +179,64 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
    public void update()
    {
-      gravityCoriolisExternalWrenchMatrixCalculator.compute();
+      updateContactPoints();
+      updateJointIndices();
+      updateActuationConstraintVector();
+      updateActuationConstraintMatrix(true);
+   }
+
+   public void updateContactPoints()
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).update();
+      }
+   }
+
+   public void updateJointIndices()
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         ContactPoint contactPoint = contactPoints.get(i);
+         JointBasics[] contactJacobianJoints = contactJacobians.get(contactPoint.contactingBody).getJointsInOrder();
+         for (int j = 1; j < contactJacobianJoints.length; j++)
+         {
+            jointLoadStatusMask[jointIndexMap.get(contactJacobianJoints[j])] = true;
+         }
+      }
+
+      numberOfTorqueValidatedJoints = 0;
+      torqueValidatedJoints.clear();
+      jointTorqueIndexMap.clear();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         double gravityTorque = gravityCoriolisExternalWrenchMatrixCalculator.getComputedJointTau(oneDoFJoints[i]).get(0, 0);
-         double torqueConstraintLowerBound = oneDoFJoints[i].getEffortLimitLower() - gravityTorque;
-         double torqueConstraintUpperBound = oneDoFJoints[i].getEffortLimitUpper() - gravityTorque;
+         if (considerJointTorque(i))
+         {
+            torqueValidatedJoints.add(oneDoFJoints[i]);
+            jointTorqueIndexMap.put(oneDoFJoints[i], numberOfTorqueValidatedJoints++);
+         }
+      }
+   }
+
+   public void updateActuationConstraintVector()
+   {
+      if (INCLUDE_GRAVITY_CORIOLIS_TORQUES)
+      {
+         gravityCoriolisExternalWrenchMatrixCalculator.compute();
+      }
+
+      constraintLowerBound.reshape(numberOfTorqueValidatedJoints, 1);
+      constraintUpperBound.reshape(numberOfTorqueValidatedJoints, 1);
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         if (!considerJointTorque(i))
+            continue;
+
+         double gravityTorque = INCLUDE_GRAVITY_CORIOLIS_TORQUES ? gravityCoriolisExternalWrenchMatrixCalculator.getComputedJointTau(oneDoFJoints[i]).get(0, 0) : 0.0;
+         double torqueConstraintLowerBound = getEffortLimitLower(oneDoFJoints[i]) - gravityTorque;
+         double torqueConstraintUpperBound = getEffortLimitUpper(oneDoFJoints[i]) - gravityTorque;
 
          if (torqueConstraintLowerBound > torqueConstraintUpperBound)
          {
@@ -171,34 +245,53 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
             return;
          }
 
-         constraintLowerBound.set(i, torqueConstraintLowerBound);
-         constraintUpperBound.set(i, torqueConstraintUpperBound);
+         constraintLowerBound.set(jointTorqueIndexMap.get(oneDoFJoints[i]), torqueConstraintLowerBound);
+         constraintUpperBound.set(jointTorqueIndexMap.get(oneDoFJoints[i]), torqueConstraintUpperBound);
       }
+   }
 
+   public void updateActuationConstraintMatrix(boolean updateContactPointFrame)
+   {
       int nContactForceVariables = LINEAR_DIMENSIONS * contactPoints.size();
-      graspMatrixJacobianTranspose.reshape(oneDoFJoints.length, nContactForceVariables);
+      graspMatrixJacobianTranspose.reshape(numberOfTorqueValidatedJoints, nContactForceVariables);
+      graspMatrixJacobianTranspose.zero();
+
+      contactJacobian.reshape(LINEAR_DIMENSIONS, numberOfTorqueValidatedJoints);
+      contactJacobianTranspose.reshape(numberOfTorqueValidatedJoints, LINEAR_DIMENSIONS);
 
       for (int contactPointIndex = 0; contactPointIndex < contactPoints.size(); contactPointIndex++)
       {
          ContactPoint contactPoint = contactPoints.get(contactPointIndex);
-         contactPoint.update();
+         JointBasics[] contactJacobianJoints = contactJacobians.get(contactPoint.contactingBody).getJointsInOrder();
 
-         worldAlignedContactPose.setToZero(contactPoint.contactFrame);
-         worldAlignedContactPose.changeFrame(ReferenceFrame.getWorldFrame());
-         worldAlignedContactPose.getOrientation().setToZero();
-         worldAlignedContactFrame.setPoseAndUpdate(worldAlignedContactPose);
+         if (!containsTorqueValidatedJoint(contactJacobianJoints))
+         {
+            continue;
+         }
+
+         if (updateContactPointFrame)
+         {
+            worldAlignedContactPose.setToZero(contactPoint.contactFrame);
+            worldAlignedContactPose.changeFrame(ReferenceFrame.getWorldFrame());
+            worldAlignedContactPose.getOrientation().setToZero();
+            worldAlignedContactFrame.setPoseAndUpdate(worldAlignedContactPose);
+         }
 
          contactJacobians.get(contactPoint.contactingBody).changeFrame(worldAlignedContactFrame);
          contactJacobians.get(contactPoint.contactingBody).compute();
 
          DMatrixRMaj jacobianMatrix = contactJacobians.get(contactPoint.contactingBody).getJacobianMatrix();
-         JointBasics[] contactJacobianJoints = contactJacobians.get(contactPoint.contactingBody).getJointsInOrder();
          contactJacobian.zero();
 
          for (int jacobianJointIndex = 1; jacobianJointIndex < contactJacobianJoints.length; jacobianJointIndex++)
          {
             OneDoFJointBasics joint = (OneDoFJointBasics) contactJacobianJoints[jacobianJointIndex];
-            int jointIndex = jointIndexMap.get(joint);
+            if (!considerJointTorque(jointIndexMap.get(joint)))
+            {
+               continue;
+            }
+
+            int jointIndex = jointTorqueIndexMap.get(joint);
 
             for (int linearCoordIndex = 0; linearCoordIndex < LINEAR_DIMENSIONS; linearCoordIndex++)
             {
@@ -218,10 +311,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
       }
 
-      stackedConstraintMatrix.reshape(numberOfActuationConstraints, nContactForceVariables);
+      stackedConstraintMatrix.reshape(getNumberOfActuationConstraints(), nContactForceVariables);
+      stackedConstraintVector.reshape(getNumberOfActuationConstraints(), 1);
 
       int rowOffsetLowerBound = 0;
-      int rowOffsetUpperBound = oneDoFJoints.length;
+      int rowOffsetUpperBound = numberOfTorqueValidatedJoints;
 
       /* Lower torque bound constraint: J^T f <= - tau_lower + g */
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, rowOffsetLowerBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
@@ -230,6 +324,117 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       /* Upper torque bound constraint: -J^T f <= tau_upper - g */
       MatrixTools.setMatrixBlock(stackedConstraintMatrix, rowOffsetUpperBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
       MatrixTools.setMatrixBlock(stackedConstraintVector, rowOffsetUpperBound, 0, constraintUpperBound, 0, 0, constraintUpperBound.getNumRows(), constraintUpperBound.getNumCols(), 1.0);
+   }
+
+   public void updateActuationMatrixGradient()
+   {
+      int nContactForceVariables = LINEAR_DIMENSIONS * contactPoints.size();
+      graspMatrixJacobianTranspose.reshape(numberOfTorqueValidatedJoints, nContactForceVariables);
+      graspMatrixJacobianTranspose.zero();
+
+      contactJacobian.reshape(LINEAR_DIMENSIONS, numberOfTorqueValidatedJoints);
+      contactJacobianTranspose.reshape(numberOfTorqueValidatedJoints, LINEAR_DIMENSIONS);
+
+      for (int contactPointIndex = 0; contactPointIndex < contactPoints.size(); contactPointIndex++)
+      {
+         ContactPoint contactPoint = contactPoints.get(contactPointIndex);
+         JointBasics[] contactJacobianJoints = contactJacobians.get(contactPoint.contactingBody).getJointsInOrder();
+
+         if (!containsTorqueValidatedJoint(contactJacobianJoints))
+         {
+            continue;
+         }
+
+         worldAlignedContactPose.setToZero(contactPoint.contactFrame);
+         worldAlignedContactPose.changeFrame(ReferenceFrame.getWorldFrame());
+         worldAlignedContactPose.getOrientation().setToZero();
+         worldAlignedContactFrame.setPoseAndUpdate(worldAlignedContactPose);
+
+         /* Compute 6 x n geometric jacobian rate */
+         geometricJacobianCalculator.setKinematicChain(contactJacobianJoints);
+         geometricJacobianCalculator.setJacobianFrame(worldAlignedContactFrame);
+
+         /* compute 3 x n point jacobian rate */
+//         pointJacobianRate.set(geometricJacobianCalculator, contactPoint.contactPose.getPosition());
+//         pointJacobianRate.compute();
+//         DMatrixRMaj pointJacobianRateMatrix = pointJacobianRate.getJacobianRateMatrix();
+
+         System.out.println("Jacobian rate matrix at control frame");
+         System.out.println(geometricJacobianCalculator.getJacobianRateMatrix());
+         System.out.println();
+         System.out.println();
+
+         geometricJacobianCalculator.setKinematicChain(contactJacobianJoints);
+
+         System.out.println("Jacobian rate matrix at body fixed frame");
+         System.out.println(geometricJacobianCalculator.getJacobianRateMatrix());
+         System.out.println();
+         System.out.println();
+
+         DMatrixRMaj jacobianRateMatrix = geometricJacobianCalculator.getJacobianRateMatrix();
+         contactJacobian.zero();
+
+         for (int jacobianJointIndex = 1; jacobianJointIndex < contactJacobianJoints.length; jacobianJointIndex++)
+         {
+            OneDoFJointBasics joint = (OneDoFJointBasics) contactJacobianJoints[jacobianJointIndex];
+            if (!considerJointTorque(jointIndexMap.get(joint)))
+            {
+               continue;
+            }
+
+            int jointIndex = jointTorqueIndexMap.get(joint);
+
+            for (int linearCoordIndex = 0; linearCoordIndex < LINEAR_DIMENSIONS; linearCoordIndex++)
+            {
+               // We're computing just the linear component, ignore angular block
+               int rowOffset = LINEAR_DIMENSIONS;
+
+               // Offset to ignore root joint indices
+               int colOffset = 5;
+
+               double jacobianEntry = jacobianRateMatrix.get(rowOffset + linearCoordIndex, colOffset + jacobianJointIndex);
+
+               contactJacobian.set(linearCoordIndex, jointIndex, jacobianEntry);
+            }
+         }
+
+         CommonOps_DDRM.transpose(contactJacobian, contactJacobianTranspose);
+         MatrixTools.setMatrixBlock(graspMatrixJacobianTranspose, 0, LINEAR_DIMENSIONS * contactPointIndex, contactJacobianTranspose, 0, 0, contactJacobianTranspose.getNumRows(), contactJacobianTranspose.getNumCols(), 1.0);
+      }
+
+      stackedConstraintMatrixGradient.reshape(getNumberOfActuationConstraints(), nContactForceVariables);
+
+      int rowOffsetLowerBound = 0;
+      int rowOffsetUpperBound = numberOfTorqueValidatedJoints;
+
+      /* Lower torque bound constraint: J^T f <= - tau_lower + g */
+      MatrixTools.setMatrixBlock(stackedConstraintMatrixGradient, rowOffsetLowerBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), 1.0);
+
+      /* Upper torque bound constraint: -J^T f <= tau_upper - g */
+      MatrixTools.setMatrixBlock(stackedConstraintMatrixGradient, rowOffsetUpperBound, 0, graspMatrixJacobianTranspose, 0, 0, graspMatrixJacobianTranspose.getNumRows(), graspMatrixJacobianTranspose.getNumCols(), -1.0);
+   }
+
+   private boolean containsTorqueValidatedJoint(JointBasics[] jacobianJoints)
+   {
+      for (int i = 1; i < jacobianJoints.length; i++)
+      {
+         if (considerJointTorque(jointIndexMap.get(jacobianJoints[i])))
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private boolean considerJointTorque(int jointIndex)
+   {
+      return jointTorqueStaticMask[jointIndex] && jointLoadStatusMask[jointIndex];
+   }
+
+   private int getNumberOfActuationConstraints()
+   {
+      return 2 * numberOfTorqueValidatedJoints;
    }
 
    private static class ContactPoint
@@ -327,6 +532,11 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       return stackedConstraintVector;
    }
 
+   public DMatrixRMaj getActuationConstraintMatrixGradient()
+   {
+      return stackedConstraintMatrixGradient;
+   }
+
    public GravityCoriolisExternalWrenchMatrixCalculator getGravityCalculator()
    {
       return gravityCoriolisExternalWrenchMatrixCalculator;
@@ -364,6 +574,19 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       return jacobian;
    }
 
+   public void setupForSelectedJoints(Predicate<String> jointsToCheckTorqueFeasibilityFilter)
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointTorqueStaticMask[i] = jointsToCheckTorqueFeasibilityFilter.test(oneDoFJoints[i].getName());
+      }
+   }
+
+   public GeometricJacobian getJacobian(RigidBodyBasics rigidBody)
+   {
+      return contactJacobians.get(rigidBody);
+   }
+
    /**
     * Given constraintActiveSetIndex, which represents the constraint row of A in the problem constraint Ax <= b,
     * this returns true if that row corresponds to a joint actuation constraint or false otherwise when the row corresponds to a
@@ -387,7 +610,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          throw new RuntimeException("Invalid constraint index");
       }
 
-      return oneDoFJoints[(constraintActiveSetIndex - staticEquilibriumInequalityConstraints) % oneDoFJoints.length];
+      return torqueValidatedJoints.get((constraintActiveSetIndex - staticEquilibriumInequalityConstraints) % numberOfTorqueValidatedJoints);
    }
 
    /**
@@ -402,7 +625,48 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
          throw new RuntimeException("Invalid constraint index");
       }
 
-      return constraintActiveSetIndex - staticEquilibriumInequalityConstraints >= oneDoFJoints.length;
+      return constraintActiveSetIndex - staticEquilibriumInequalityConstraints >= numberOfTorqueValidatedJoints;
+   }
+
+   /**
+    * Returns the joint corresponding to the constraint row actuationConstraintIndex of A_c in the actuation constraint A_c x <= b_c.
+    */
+   public OneDoFJointBasics getJointFromActuationConstraintIndexZeroIndexed(int constraintActiveSetIndex)
+   {
+      return torqueValidatedJoints.get(constraintActiveSetIndex % numberOfTorqueValidatedJoints);
+   }
+
+   /**
+    * Assuming the given index actuationConstraintIndex corresponds to a joint torque bound, returns true
+    * if the constraint corresponds to the joint's upper torque bound and false otherwise
+    */
+   public boolean isActuationConstraintUpperBoundZeroIndexed(int constraintActiveSetIndex)
+   {
+      return constraintActiveSetIndex >= numberOfTorqueValidatedJoints;
+   }
+
+   private static double getEffortLimitLower(OneDoFJointBasics joint)
+   {
+      if (Double.isFinite(joint.getEffortLimitLower()))
+      {
+         return joint.getEffortLimitLower();
+      }
+      else
+      {
+         return -1000.0;
+      }
+   }
+
+   private static double getEffortLimitUpper(OneDoFJointBasics joint)
+   {
+      if (Double.isFinite(joint.getEffortLimitUpper()))
+      {
+         return joint.getEffortLimitUpper();
+      }
+      else
+      {
+         return 1000.0;
+      }
    }
 }
 

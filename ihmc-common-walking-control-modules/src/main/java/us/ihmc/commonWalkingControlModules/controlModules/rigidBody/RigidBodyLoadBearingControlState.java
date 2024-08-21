@@ -9,8 +9,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -38,9 +41,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -69,6 +70,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private static final boolean ENABLE_POINT_FEEDBACK = true;
    private static final boolean ENABLE_JOINTSPACE_FEEDBACK = true;
    private static final boolean ENABLE_ORIENTATION_FEEDBACK = true;
+   private static final double RHO_WEIGHT_INITIAL = 1.5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroWorld = new FrameVector3D();
@@ -88,6 +90,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final DefaultYoPIDSE3Gains feedbackGains;
    private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
    private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
+   private final double nominalRhoWeight;
 
    /* Hand load status */
    private final GlitchFilteredYoBoolean bodyBarelyLoaded;
@@ -132,6 +135,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                            RigidBodyJointControlHelper jointControlHelper,
                                            RigidBodyOrientationControlHelper orientationControlHelper,
                                            LoadBearingParameters loadBearingParameters,
+                                           MomentumOptimizationSettings momentumOptimizationSettings,
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
@@ -141,8 +145,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
+      this.nominalRhoWeight = momentumOptimizationSettings.getRhoWeight();
 
-      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
+//      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
 
       String bodyName = bodyToControl.getName();
 
@@ -264,6 +269,14 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.setContactNormal(contactNormal);
       planeContactStateCommand.addPointInContact(getYoContactPointInBodyFrame());
       planeContactStateCommand.setHasContactStateChanged(false);
+
+      double alphaLoaded = EuclidCoreTools.clamp(timeInState / loadBearingParameters.getHandLoadDuration(), 0.0, 1.0);
+      double rhoWeightInterpolated = EuclidCoreTools.interpolate(RHO_WEIGHT_INITIAL, nominalRhoWeight, alphaLoaded);
+
+      for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
+      {
+         planeContactStateCommand.setRhoWeight(i, rhoWeightInterpolated);
+      }
 
       // assemble zero acceleration command
       bodyAcceleration.setToZero(desiredContactFrameFixedInWorld, elevatorFrame, desiredContactFrameFixedInWorld);
@@ -587,6 +600,12 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       {
          wholeBodyContactStateToUpdate.addContactPoints(planeContactStateCommand);
       }
+   }
+
+   public void packContactData(RecyclingArrayList<Point3D> contactPointList, Vector3DBasics contactNormalToPack)
+   {
+      contactPointList.add().set(contactPointInBody);
+      contactNormalToPack.set(contactNormal);
    }
 
    public double getJointDesiredPosition(int jointIdx)

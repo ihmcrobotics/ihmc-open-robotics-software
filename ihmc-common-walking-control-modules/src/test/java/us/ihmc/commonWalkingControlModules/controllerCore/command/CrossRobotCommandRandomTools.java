@@ -28,7 +28,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -440,7 +447,7 @@ public class CrossRobotCommandRandomTools
       next.setPositionLimitDamping(random.nextDouble());
       return next;
    }
-
+   
    public static PDGains nextPDGains(Random random)
    {
       PDGains next = new PDGains();
@@ -1860,7 +1867,7 @@ public class CrossRobotCommandRandomTools
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
       next.setDesiredCapturePointAtEndOfState(nextFramePoint2D(random, possibleFrames));
       next.setInitializeOnStateChange(random.nextBoolean());
-      next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
+      next.setMultiContactStabilityRegion(random.nextBoolean() ? null : new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), nextConvexPolygon2D(random)));
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
       next.setOmega0(random.nextDouble());
       next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));

@@ -919,7 +919,7 @@ public class CrossRobotCommandResolver
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
-      out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
+      out.setMultiContactStabilityRegion(in.getMultiContactStabilityRegion());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
