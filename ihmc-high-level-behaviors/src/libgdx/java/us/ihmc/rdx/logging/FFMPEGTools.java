@@ -33,7 +33,7 @@ public class FFMPEGTools
 
    public static void checkNegativeError(int returnCode, String message)
    {
-      checkNonZeroError(returnCode, message, true);
+      checkNegativeError(returnCode, message, true);
    }
 
    public static void checkNegativeError(int returnCode, String message, boolean throwException)

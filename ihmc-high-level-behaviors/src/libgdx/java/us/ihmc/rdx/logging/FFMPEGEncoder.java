@@ -1,38 +1,92 @@
 package us.ihmc.rdx.logging;
 
+import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
+import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVStream;
+import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVRational;
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avformat;
 
 import java.util.function.Consumer;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
+import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 
-public class FFMPEGEncoder
+public abstract class FFMPEGEncoder
 {
-   public static boolean encodeVideoFrame(FFMPEGVideoOutputStream outputStream, Consumer<AVPacket> packetConsumer)
+   protected final AVFormatContext formatContext;
+
+   protected final AVStream stream;
+   protected final AVCodec encoder;
+   protected final AVCodecContext encoderContext;
+
+   protected long nextPresentationTimestamp = 0L;
+   protected final AVFrame nextFrame;
+   protected final AVPacket packet;
+
+   protected AVRational timeBase;
+   protected final int bitRate;
+
+   protected int error;
+
+   public FFMPEGEncoder(AVFormatContext formatContext, String preferredEncoderName, int bitRate)
    {
-      return encodeFrame(outputStream.getCodecContext(), outputStream.getStream(), outputStream.getNextFrame(), outputStream.getNextPacket(), packetConsumer);
+      this.formatContext = formatContext;
+      this.bitRate = bitRate;
+
+      encoder = findEncoder(preferredEncoderName, formatContext);
+      FFMPEGTools.checkPointer(encoder, "Finding encoder");
+
+      packet = av_packet_alloc();
+      FFMPEGTools.checkPointer(packet, "Allocating next packet");
+
+      stream = avformat_new_stream(formatContext, null);
+      FFMPEGTools.checkPointer(stream, "Creating new stream");
+
+      encoderContext = avcodec_alloc_context3(encoder);
+      FFMPEGTools.checkPointer(encoderContext, "Allocating codec context");
+
+      nextFrame = av_frame_alloc();
+      FFMPEGTools.checkPointer(nextFrame, "Allocating input frame");
+
+      if ((formatContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
+         encoderContext.flags(encoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
    }
 
-   public static boolean encodeFrame(AVCodecContext codecContext, AVStream stream, AVFrame frame, AVPacket packet, Consumer<AVPacket> packetConsumer)
+   public void initialize()
+   {
+      initialize(null);
+   }
+
+   public abstract void initialize(AVDictionary codecOptions);
+
+   protected void assignNextFrame(Consumer<AVFrame> nextFrameAssignment)
+   {
+      nextFrameAssignment.accept(nextFrame);
+      nextFrame.pts(nextPresentationTimestamp++);
+   }
+
+   public boolean encodeNextFrame(Consumer<AVPacket> packetConsumer)
    {
       int error;
-      error = avcodec_send_frame(codecContext, frame);
+      error = avcodec_send_frame(encoderContext, nextFrame);
       FFMPEGTools.checkNegativeError(error, "Sending frame");
 
       while (error >= 0)
       {
-         error = avcodec_receive_packet(codecContext, packet);
+         error = avcodec_receive_packet(encoderContext, packet);
          if (error == AVERROR_EAGAIN() || error == AVERROR_EOF())
             break;
          else
             FFMPEGTools.checkNegativeError(error, "Receiving packet");
 
-         av_packet_rescale_ts(packet, codecContext.time_base(), stream.time_base());
+         av_packet_rescale_ts(packet, encoderContext.time_base(), stream.time_base());
          packet.stream_index(stream.index());
 
          packetConsumer.accept(packet);
@@ -43,4 +97,18 @@ public class FFMPEGEncoder
       return error == AVERROR_EAGAIN();
    }
 
+   public void destroy()
+   {
+      avcodec_free_context(encoderContext);
+      av_frame_free(nextFrame);
+      av_packet_free(packet);
+
+      encoder.close();
+      encoderContext.close();
+      nextFrame.close();
+      stream.close();
+      timeBase.close();
+   }
+
+   protected abstract AVCodec findEncoder(String preferredEncoderName, AVFormatContext outputContext);
 }
