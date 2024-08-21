@@ -2,7 +2,7 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
-import org.ros.node.ConnectedNode;
+//import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 
 public abstract class RosTopicPublisher<T extends Message>
@@ -28,8 +28,8 @@ public abstract class RosTopicPublisher<T extends Message>
 
    public void registered(Publisher<T> publisher)
    {
-      this.publisher = publisher;
-      this.publisher.setLatchMode(latched);
+//      this.publisher = publisher;
+//      this.publisher.setLatchMode(latched);
 
       synchronized (syncObject)
       {
@@ -60,14 +60,14 @@ public abstract class RosTopicPublisher<T extends Message>
    public void publish(T message)
    {
       checkInitialized();
-      publisher.publish(message);
+//      publisher.publish(message);
    }
 
    public T getMessage()
    {
       checkInitialized();
 
-      return publisher.newMessage();
+      return null;
    }
 
    private void checkInitialized()
@@ -87,10 +87,10 @@ public abstract class RosTopicPublisher<T extends Message>
    {
    }
 
-   public void setConnectedNode(ConnectedNode connectedNode)
-   {
-      this.messageFactory = connectedNode.getTopicMessageFactory();
-   }
+//   public void setConnectedNode(ConnectedNode connectedNode)
+//   {
+//      this.messageFactory = connectedNode.getTopicMessageFactory();
+//   }
    
    protected <T> T newMessageFromType(String messageType)
    {

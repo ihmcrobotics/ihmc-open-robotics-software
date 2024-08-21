@@ -3,9 +3,9 @@ package us.ihmc.utilities.ros.types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-import org.ros.internal.message.topic.TopicMessageFactory;
-import org.ros.message.MessageDefinitionProvider;
+//import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
+//import org.ros.internal.message.topic.TopicMessageFactory;
+//import org.ros.message.MessageDefinitionProvider;
 
 import sensor_msgs.PointField;
 
@@ -52,8 +52,8 @@ public enum PointType
 
    public List<PointField> getPointField()
    {
-      MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
-      TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
+//      MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+//      TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
 
       ArrayList<PointField> pointFields = new ArrayList<>();
       String[] fieldNames = null;
@@ -75,13 +75,13 @@ public enum PointType
       int offset = 0;
       for (int i = 0; i < fieldNames.length; i++)
       {
-         PointField pointField = topicMessageFactory.newFromType(PointField._TYPE);
-         pointField.setName(fieldNames[i]);
-         pointField.setDatatype(PointField.FLOAT32);
-         pointField.setCount(1);
-         pointField.setOffset(offset);
-         pointFields.add(pointField);
-         offset += 4;
+//         PointField pointField = topicMessageFactory.newFromType(PointField._TYPE);
+//         pointField.setName(fieldNames[i]);
+//         pointField.setDatatype(PointField.FLOAT32);
+//         pointField.setCount(1);
+//         pointField.setOffset(offset);
+//         pointFields.add(pointField);
+//         offset += 4;
       }
 
       return pointFields;

@@ -26,7 +26,7 @@ public abstract class AbstractRosTopicSubscriber<T> implements RosTopicSubscribe
 
    public void registered(Subscriber<T> subscriber)
    {
-      LogTools.info("Registered: {} ({})", subscriber.getTopicName().toString(), messageType);
+//      LogTools.info("Registered: {} ({})", subscriber.getTopicName().toString(), messageType);
       synchronized (lock)
       {
          isRegistered = true;

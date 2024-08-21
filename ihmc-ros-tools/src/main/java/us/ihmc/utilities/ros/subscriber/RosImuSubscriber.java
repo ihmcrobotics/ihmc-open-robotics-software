@@ -69,17 +69,17 @@ public abstract class  RosImuSubscriber extends AbstractRosTopicSubscriber<senso
    
    public static void main(String[] arg) throws URISyntaxException
    {
-      RosMainNode mainNode = new RosMainNode(new URI("http://localhost:11311"), "testImu");
-      mainNode.attachSubscriber("/multisense/imu/imu_data", new RosImuSubscriber()
-      {
-         
-         @Override
-         protected void onNewMessage(long timeStamp, int seqId, Quaternion orientation, Vector3D angularVelocity, Vector3D linearAcceleration)
-         {
-            System.out.println("Gravity:"+ linearAcceleration);
-         }
-      });
-      mainNode.execute();
+//      RosMainNode mainNode = new RosMainNode(new URI("http://localhost:11311"), "testImu");
+//      mainNode.attachSubscriber("/multisense/imu/imu_data", new RosImuSubscriber()
+//      {
+//
+//         @Override
+//         protected void onNewMessage(long timeStamp, int seqId, Quaternion orientation, Vector3D angularVelocity, Vector3D linearAcceleration)
+//         {
+//            System.out.println("Gravity:"+ linearAcceleration);
+//         }
+//      });
+//      mainNode.execute();
    }
 
 }

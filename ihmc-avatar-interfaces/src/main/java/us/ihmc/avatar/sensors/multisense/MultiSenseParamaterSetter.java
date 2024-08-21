@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-import org.ros.exception.RemoteException;
+//import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
-import org.ros.node.service.ServiceResponseListener;
+//import org.ros.node.service.ServiceResponseListener;
 
 import perception_msgs.msg.dds.MultisenseParameterPacket;
 import dynamic_reconfigure.BoolParameter;
@@ -321,19 +321,19 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
                gainParam.setValue(3.2);
                request.getConfig().getDoubles().add(gainParam);
 
-               multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-               {
-
-                  public void onSuccess(ReconfigureResponse response)
-                  {
-                     System.out.println("Set resolution to " + response.getConfig().getStrs().get(0).getValue());
-                  }
-
-                  public void onFailure(RemoteException e)
-                  {
-                     e.printStackTrace();
-                  }
-               });
+//               multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+//               {
+//
+//                  public void onSuccess(ReconfigureResponse response)
+//                  {
+//                     System.out.println("Set resolution to " + response.getConfig().getStrs().get(0).getValue());
+//                  }
+//
+//                  public void onFailure(RemoteException e)
+//                  {
+//                     e.printStackTrace();
+//                  }
+//               });
             }
          };
 
@@ -421,19 +421,19 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          @Override
          public void run()
          {
-            multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-            {
-
-               public void onSuccess(ReconfigureResponse response)
-               {
-                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-               }
-
-               public void onFailure(RemoteException e)
-               {
-                  e.printStackTrace();
-               }
-            });
+//            multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+//            {
+//
+//               public void onSuccess(ReconfigureResponse response)
+//               {
+//                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+//               }
+//
+//               public void onFailure(RemoteException e)
+//               {
+//                  e.printStackTrace();
+//               }
+//            });
          }
 
       }.start();
