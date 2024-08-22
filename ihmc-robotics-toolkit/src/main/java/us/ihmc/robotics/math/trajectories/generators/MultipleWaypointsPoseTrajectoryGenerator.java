@@ -4,12 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -73,11 +68,20 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements FixedFramePoseT
       orientationTrajectory.appendWaypoint(waypoint);
    }
 
-   public void appendPoseWaypoint(double timeAtWaypoint, FramePose3D pose, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
+   public void appendPoseWaypoint(double timeAtWaypoint, FramePose3DBasics pose, FrameVector3DBasics linearVelocity, FrameVector3DBasics angularVelocity)
    {
       pose.changeFrame(activeFrame);
       linearVelocity.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
+
+      appendPoseWaypoint(timeAtWaypoint, (FramePose3DReadOnly) pose, (FrameVector3DReadOnly) linearVelocity, (FrameVector3DReadOnly) angularVelocity);
+   }
+
+   public void appendPoseWaypoint(double timeAtWaypoint, FramePose3DReadOnly pose, FrameVector3DReadOnly linearVelocity, FrameVector3DReadOnly angularVelocity)
+   {
+      pose.checkReferenceFrameMatch(activeFrame);
+      linearVelocity.checkReferenceFrameMatch(activeFrame);
+      angularVelocity.checkReferenceFrameMatch(activeFrame);
 
       positionTrajectory.appendWaypoint(timeAtWaypoint, pose.getPosition(), linearVelocity);
       orientationTrajectory.appendWaypoint(timeAtWaypoint, pose.getOrientation(), angularVelocity);
@@ -87,6 +91,13 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements FixedFramePoseT
    {
       position.changeFrame(activeFrame);
       linearVelocity.changeFrame(activeFrame);
+      appendPositionWaypoint(timeAtWaypoint, (FramePoint3DReadOnly) position, (FrameVector3DReadOnly) linearVelocity);
+   }
+
+   public void appendPositionWaypoint(double timeAtWaypoint, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   {
+      position.checkReferenceFrameMatch(activeFrame);
+      linearVelocity.checkReferenceFrameMatch(activeFrame);
       positionTrajectory.appendWaypoint(timeAtWaypoint, position, linearVelocity);
    }
 
@@ -96,10 +107,17 @@ public class MultipleWaypointsPoseTrajectoryGenerator implements FixedFramePoseT
       positionTrajectory.appendWaypoint(positionWaypoint);
    }
 
-   public void appendOrientationWaypoint(double timeAtWaypoint, FrameQuaternion orientation, FrameVector3D angularVelocity)
+   public void appendOrientationWaypoint(double timeAtWaypoint, FrameQuaternion orientation, FrameVector3DBasics angularVelocity)
    {
       orientation.changeFrame(activeFrame);
       angularVelocity.changeFrame(activeFrame);
+      appendOrientationWaypoint(timeAtWaypoint, (FrameQuaternionReadOnly) orientation, (FrameVector3DReadOnly) angularVelocity);
+   }
+
+   public void appendOrientationWaypoint(double timeAtWaypoint, FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
+   {
+      orientation.checkReferenceFrameMatch(activeFrame);
+      angularVelocity.checkReferenceFrameMatch(activeFrame);
       orientationTrajectory.appendWaypoint(timeAtWaypoint, orientation, angularVelocity);
    }
 
