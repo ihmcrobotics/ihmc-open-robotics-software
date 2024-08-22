@@ -157,6 +157,7 @@ public class DiagnosticsWhenHangingHelper
 
    private final FrameVector3D jointAxisInWorld = new FrameVector3D();
    private final FrameVector3D jointToCenterOfMassInWorld = new FrameVector3D(jointToCenterOfMass);
+   private final FrameVector3D forceVectorInWorld = new FrameVector3D();
 
    public void update()
    {
@@ -185,7 +186,8 @@ public class DiagnosticsWhenHangingHelper
       forceVector.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -9.81 * totalMass.getDoubleValue());
       forceVector.changeFrame(jointAxis.getReferenceFrame());
 
-      FrameVector3D forceVectorInWorld = new FrameVector3D(forceVector);
+      forceVectorInWorld.setReferenceFrame(forceVector.getReferenceFrame());
+      forceVectorInWorld.set(forceVector);
       forceVectorInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       yoForceVector.set(forceVectorInWorld);
 
