@@ -135,7 +135,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                            RigidBodyJointControlHelper jointControlHelper,
                                            RigidBodyOrientationControlHelper orientationControlHelper,
                                            LoadBearingParameters loadBearingParameters,
-                                           MomentumOptimizationSettings momentumOptimizationSettings,
+                                           double nominalRhoWeight,
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
@@ -145,7 +145,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
       this.loadBearingParameters = loadBearingParameters;
-      this.nominalRhoWeight = momentumOptimizationSettings.getRhoWeight();
+      this.nominalRhoWeight = nominalRhoWeight;
 
 //      LogTools.info("Setting up load bearing state " + bodyToControl.getName());
 

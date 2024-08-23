@@ -99,7 +99,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
-                                  MomentumOptimizationSettings momentumOptimizationSettings,
+                                  double nominalRhoWeight,
                                   YoDouble yoTime,
                                   double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
@@ -201,7 +201,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         jointControlHelper,
                                                                         taskspaceControlState.getOrientationControlHelper(),
                                                                         loadBearingParameters,
-                                                                        momentumOptimizationSettings,
+                                                                        nominalRhoWeight,
                                                                         graphicsListRegistry,
                                                                         registry);
       }

@@ -259,7 +259,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     null,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
-                                                                    momentumOptimizationSettings,
+                                                                    momentumOptimizationSettings.getRhoWeight(),
                                                                     yoTime,
                                                                     gravityZ,
                                                                     graphicsListRegistry,
