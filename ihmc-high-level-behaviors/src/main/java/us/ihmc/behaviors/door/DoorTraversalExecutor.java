@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
@@ -63,10 +64,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
 
       boolean shouldClearStaticHandles = false;
-      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
-      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForApproachPushBarAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForGraspPushBarAction().getIsExecuting();
 
       if (shouldClearStaticHandles)
       {

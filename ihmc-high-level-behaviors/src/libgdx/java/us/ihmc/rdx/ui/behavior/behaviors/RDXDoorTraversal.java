@@ -81,6 +81,8 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
 
       renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH, state.getSetStaticForApproachActions());
       renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP, state.getSetStaticForGraspActions());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH_PUSH_BAR, state.getSetStaticForApproachPushBarAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP_PUSH_BAR, state.getSetStaticForGraspPushBarAction());
       renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
       renderNodePresenceStatus(DoorTraversalState.POST_GRASP_HANDLE, state.getPostGraspEvaluationAction());
       renderNodePresenceStatus(DoorTraversalState.POST_PULL_DOOR, state.getPostPullDoorEvaluationAction());
