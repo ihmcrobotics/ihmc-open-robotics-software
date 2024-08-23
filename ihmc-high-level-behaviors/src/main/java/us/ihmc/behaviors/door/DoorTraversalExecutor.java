@@ -64,8 +64,14 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
 
       boolean shouldClearStaticHandles = false;
+      shouldClearStaticHandles |= state.getSetStaticForApproachAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForGraspAction().getIsExecuting();
       shouldClearStaticHandles |= state.getSetStaticForApproachPushBarAction().getIsExecuting();
       shouldClearStaticHandles |= state.getSetStaticForGraspPushBarAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForApproachKnobAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForGraspKnobAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForApproachHandleAction().getIsExecuting();
+      shouldClearStaticHandles |= state.getSetStaticForGraspHandleAction().getIsExecuting();
 
       if (shouldClearStaticHandles)
       {

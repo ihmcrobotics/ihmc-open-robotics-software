@@ -23,6 +23,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";
    public static final String SET_STATIC_FOR_APPROACH_PUSH_BAR = "Set static for approach Push Bar";
    public static final String SET_STATIC_FOR_GRASP_PUSH_BAR = "Set static for grasp Push Bar";
+   public static final String SET_STATIC_FOR_APPROACH_KNOB = "Set static for approach Knob";
+   public static final String SET_STATIC_FOR_GRASP_KNOB = "Set static for grasp Knob";
+   public static final String SET_STATIC_FOR_APPROACH_HANDLE = "Set static for approach Handle";
+   public static final String SET_STATIC_FOR_GRASP_HANDLE = "Set static for grasp Handle";
    public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
    public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
@@ -34,10 +38,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private DoorNode doorNode;
 
    private BehaviorTreeRootNodeState actionSequence;
-   private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
-   private final List<WaitDurationActionState> setStaticForGraspActions = new ArrayList<>();
+   private WaitDurationActionState setStaticForApproachLeverAction;
+   private WaitDurationActionState setStaticForGraspLeverAction;
    private WaitDurationActionState setStaticForApproachPushBarAction;
    private WaitDurationActionState setStaticForGraspPushBarAction;
+   private WaitDurationActionState setStaticForApproachKnobAction;
+   private WaitDurationActionState setStaticForGraspKnobAction;
+   private WaitDurationActionState setStaticForApproachHandleAction;
+   private WaitDurationActionState setStaticForGraspHandleAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
    private WaitDurationActionState postGraspEvaluationAction;
@@ -68,14 +76,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
-      setStaticForApproachActions.clear();
-      setStaticForGraspActions.clear();
       waitToOpenRightHandAction = null;
       pullScrewPrimitiveAction = null;
       postGraspEvaluationAction = null;
       postPullDoorEvaluationAction = null;
-      setStaticForApproachPushBarAction = null;
-      setStaticForGraspPushBarAction = null;
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
@@ -84,12 +88,12 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH))
             {
-               setStaticForApproachActions.add(waitDurationAction);
+               setStaticForApproachLeverAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP))
             {
-               setStaticForGraspActions.add(waitDurationAction);
+               setStaticForGraspLeverAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_PUSH_BAR))
@@ -100,6 +104,26 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_PUSH_BAR))
             {
                setStaticForGraspPushBarAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_KNOB))
+            {
+               setStaticForApproachKnobAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_KNOB))
+            {
+               setStaticForGraspKnobAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH_HANDLE))
+            {
+               setStaticForApproachHandleAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP_HANDLE))
+            {
+               setStaticForGraspHandleAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
@@ -184,14 +208,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       return actionSequence;
    }
 
-   public List<WaitDurationActionState> getSetStaticForApproachActions()
+   public WaitDurationActionState getSetStaticForApproachAction()
    {
-      return setStaticForApproachActions;
+      return setStaticForApproachLeverAction;
    }
 
-   public List<WaitDurationActionState> getSetStaticForGraspActions()
+   public WaitDurationActionState getSetStaticForGraspAction()
    {
-      return setStaticForGraspActions;
+      return setStaticForGraspLeverAction;
    }
 
    public WaitDurationActionState getSetStaticForApproachPushBarAction()
@@ -202,6 +226,26 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public WaitDurationActionState getSetStaticForGraspPushBarAction()
    {
       return setStaticForGraspPushBarAction;
+   }
+
+   public WaitDurationActionState getSetStaticForApproachKnobAction()
+   {
+      return setStaticForApproachKnobAction;
+   }
+
+   public WaitDurationActionState getSetStaticForGraspKnobAction()
+   {
+      return setStaticForGraspKnobAction;
+   }
+
+   public WaitDurationActionState getSetStaticForApproachHandleAction()
+   {
+      return setStaticForApproachHandleAction;
+   }
+
+   public WaitDurationActionState getSetStaticForGraspHandleAction()
+   {
+      return setStaticForGraspHandleAction;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()

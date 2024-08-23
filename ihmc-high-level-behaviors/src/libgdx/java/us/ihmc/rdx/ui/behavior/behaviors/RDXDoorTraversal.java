@@ -79,10 +79,14 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
-      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH, state.getSetStaticForApproachActions());
-      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP, state.getSetStaticForGraspActions());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH, state.getSetStaticForApproachAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP, state.getSetStaticForGraspAction());
       renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH_PUSH_BAR, state.getSetStaticForApproachPushBarAction());
       renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP_PUSH_BAR, state.getSetStaticForGraspPushBarAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH_KNOB, state.getSetStaticForApproachKnobAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP_KNOB, state.getSetStaticForGraspKnobAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH_HANDLE, state.getSetStaticForApproachHandleAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP_HANDLE, state.getSetStaticForGraspHandleAction());
       renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
       renderNodePresenceStatus(DoorTraversalState.POST_GRASP_HANDLE, state.getPostGraspEvaluationAction());
       renderNodePresenceStatus(DoorTraversalState.POST_PULL_DOOR, state.getPostPullDoorEvaluationAction());
