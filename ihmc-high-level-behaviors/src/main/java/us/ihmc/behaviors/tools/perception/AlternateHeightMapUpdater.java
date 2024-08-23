@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @deprecated Needs work
  */
+@Deprecated
 public class AlternateHeightMapUpdater
 {
    private final HeightMapParameters parameters;

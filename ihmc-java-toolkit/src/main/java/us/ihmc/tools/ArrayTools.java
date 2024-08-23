@@ -32,7 +32,7 @@ public class ArrayTools
       StringTokenizer tokenizer = new StringTokenizer(line.replace("{", "").replace("}", "").replace(" ", "").replace(";", ""), ",");
       while (tokenizer.hasMoreElements())
       {
-         retArray.add(new Double(Double.parseDouble((String) tokenizer.nextElement())));
+         retArray.add(Double.valueOf(Double.parseDouble((String) tokenizer.nextElement())));
 
          // retArray.add(new
          // Double(Double.parseDouble(tokenizer.nextToken())));
@@ -79,7 +79,7 @@ public class ArrayTools
       StringTokenizer tokenizer = new StringTokenizer(line.replace("[", "").replace("]", "").replace(" ", ""), ",");
       while (tokenizer.hasMoreElements())
       {
-         retArray.add(new Double(Double.parseDouble((String) tokenizer.nextElement())));
+         retArray.add(Double.valueOf(Double.parseDouble((String) tokenizer.nextElement())));
 
          // retArray.add(new
          // Double(Double.parseDouble(tokenizer.nextToken())));
@@ -135,7 +135,7 @@ public class ArrayTools
                                                       ",");
       while (tokenizer.hasMoreElements())
       {
-         retArray.add(new Integer(Integer.parseInt((String) tokenizer.nextElement())));
+         retArray.add(Integer.valueOf(Integer.parseInt((String) tokenizer.nextElement())));
       }
 
       int[] ret = new int[retArray.size()];

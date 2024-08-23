@@ -46,6 +46,7 @@ public class ScriptFileSaver
     * @deprecated This method is highly inefficient. The whole scripting needs to be redone to better
     *             implement the transform.
     */
+   @Deprecated
    public void recordObject(long timestamp, Object object, RigidBodyTransform objectTransform) throws IOException
    {
 

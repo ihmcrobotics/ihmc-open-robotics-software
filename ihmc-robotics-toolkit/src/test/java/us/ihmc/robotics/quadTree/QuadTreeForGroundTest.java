@@ -192,7 +192,7 @@ public class QuadTreeForGroundTest
 
       // Put a single point at zero
 
-      Double valueAtZero = new Double(1.5);
+      Double valueAtZero = Double.valueOf(1.5);
       quadTree.put(0.0, 0.0f, valueAtZero);
       assertEquals(1, quadTree.getNumberOfQuads());
       quadTree.checkRepInvarients();
@@ -209,7 +209,7 @@ public class QuadTreeForGroundTest
       assertEquals(valueAtZero, returnValueAwayFromZero, 1e-7);
 
       // Put a point away from zero
-      Double valueAtNegativeOneOne = new Double(2.7);
+      Double valueAtNegativeOneOne = Double.valueOf(2.7);
       quadTree.put(-1.0f, 1.0f, valueAtNegativeOneOne);
       assertEquals(4, quadTree.getNumberOfQuads());
       quadTree.checkRepInvarients();

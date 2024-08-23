@@ -7,6 +7,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 /**
  * @deprecated Broken. See {@link ClearLidarBehavior}.
  */
+@Deprecated
 public class EnableLidarBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);

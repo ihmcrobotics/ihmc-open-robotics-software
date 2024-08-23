@@ -37,14 +37,19 @@ public enum XBoxOneMapping implements JoystickMapping
    LEFT_STICK_BUTTON,
    RIGHT_STICK_BUTTON,
    /** @deprecated Only works on Windows and Linux */
+   @Deprecated
    DPAD,
    /** @deprecated Only works on Mac */
+   @Deprecated
    DPAD_UP,
    /** @deprecated Only works on Mac */
+   @Deprecated
    DPAD_DOWN,
    /** @deprecated Only works on Mac */
+   @Deprecated
    DPAD_LEFT,
    /** @deprecated Only works on Mac */
+   @Deprecated
    DPAD_RIGHT,
    SLIDER;
 

@@ -18,6 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
  *
  * @deprecated Replaced by ROS2BehaviorTreeExecutor
  */
+@Deprecated
 public class BehaviorModule
 {
    private final BehaviorTreeMessage behaviorTreeMessage = new BehaviorTreeMessage();

@@ -19,10 +19,12 @@ public enum MadCatzFLY5StickMapping implements JoystickMapping
    THROTTLE_LEFT,
    THROTTLE_RIGHT,
    /** @deprecated Not supported on Windows */
+   @Deprecated
    THROTTLE_LOCK,
    HAT,
    THUMB_SCOLL_UP,
    /** @deprecated Not identified on Linux */
+   @Deprecated
    THUMB_SCOLL_DOWN,
    STICK_ROLL,
    STICK_PITCH,
@@ -38,6 +40,7 @@ public enum MadCatzFLY5StickMapping implements JoystickMapping
    BUTTON_10,
    BUTTON_11,
    /** @deprecated Not identified on Linux */
+   @Deprecated
    BASE_MODE_BUTTON;
 
    public static final MadCatzFLY5StickMapping[] values = values();

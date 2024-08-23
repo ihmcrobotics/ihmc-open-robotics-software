@@ -32,6 +32,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 /**
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class FancyPosesBehavior extends LocalOnlyBehaviorTreeNodeExecutor implements Destroyable
 {
    private final BehaviorHelper helper;

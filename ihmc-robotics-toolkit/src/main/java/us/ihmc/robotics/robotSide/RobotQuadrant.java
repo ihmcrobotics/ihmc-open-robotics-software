@@ -684,6 +684,7 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
    /**
     * @deprecated Use getPascalCaseName() instead.
     */
+   @Deprecated
    public String getCamelCaseNameForMiddleOfExpression()
    {
       return getPascalCaseName();

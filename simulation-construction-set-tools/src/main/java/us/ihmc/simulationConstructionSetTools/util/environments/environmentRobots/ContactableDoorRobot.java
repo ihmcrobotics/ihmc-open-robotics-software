@@ -487,8 +487,8 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    public void createAvailableContactPoints(int groupId, int numDoorContactPoints, int numHandleContactPoints, double forceVectorScale, boolean visualizeContacts)
    {
       ArrayList<Integer> numContactPoints = new ArrayList<Integer>();
-      numContactPoints.add(new Integer(numDoorContactPoints));
-      numContactPoints.add(new Integer(numHandleContactPoints));
+      numContactPoints.add(Integer.valueOf(numDoorContactPoints));
+      numContactPoints.add(Integer.valueOf(numHandleContactPoints));
       internalMultiJointArticulatedContactable.createAvailableContactPoints(groupId, numContactPoints, forceVectorScale, visualizeContacts);
       
       internalMultiJointArticulatedContactable.setNumDoorContactPoints(numDoorContactPoints);

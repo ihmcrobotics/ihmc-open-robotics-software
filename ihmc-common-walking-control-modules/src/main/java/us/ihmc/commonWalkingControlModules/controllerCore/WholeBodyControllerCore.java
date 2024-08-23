@@ -176,6 +176,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
     * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
     *       {@link #compute()} obsolete.
     */
+   @Deprecated
    public void submitControllerCoreCommand(ControllerCoreCommandInterface controllerCoreCommand)
    {
       reset();
@@ -213,6 +214,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
     * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
     *       {@link #submitControllerCoreCommand(ControllerCoreCommandInterface)} obsolete.
     */
+   @Deprecated
    public void compute()
    {
       controllerCoreComputeTimer.startMeasurement();

@@ -1,8 +1,5 @@
 package us.ihmc.robotics.robotSide;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -14,6 +11,9 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class SideDependentListTest
 {
 
@@ -49,10 +49,10 @@ public class SideDependentListTest
       LinkedList<Boolean> rightObject = new  LinkedList<Boolean>();
       
       @SuppressWarnings({ "rawtypes", "unchecked" })
-      SideDependentList sideDependentList = new SideDependentList(leftObject, rightObject);
+      SideDependentList<?> sideDependentList = new SideDependentList(leftObject, rightObject);
 
-      assertTrue(leftObject == sideDependentList.get(RobotSide.LEFT));
-      assertTrue(rightObject == sideDependentList.get(RobotSide.RIGHT));
+      assertSame(leftObject, sideDependentList.get(RobotSide.LEFT));
+      assertSame(rightObject, sideDependentList.get(RobotSide.RIGHT));
    }
 
 	@Test 
@@ -64,13 +64,13 @@ public class SideDependentListTest
       SideDependentList<Object> sideDependentList = new SideDependentList<Object>(leftObject, rightObject);
       SideDependentList<Object> sideDependentListCopy = new SideDependentList<Object>(sideDependentList);
       
-      assertTrue(sideDependentList.get(RobotSide.LEFT) == leftObject);
-      assertTrue(sideDependentList.get(RobotSide.RIGHT) == rightObject);
+      assertSame(sideDependentList.get(RobotSide.LEFT), leftObject);
+      assertSame(sideDependentList.get(RobotSide.RIGHT), rightObject);
 
-      assertTrue(sideDependentList.get(RobotSide.LEFT) == sideDependentListCopy.get(RobotSide.LEFT));
-      assertTrue(sideDependentList.get(RobotSide.RIGHT) == sideDependentListCopy.get(RobotSide.RIGHT));
-      assertTrue(sideDependentList.get(RobotSide.LEFT) != sideDependentListCopy.get(RobotSide.RIGHT));
-      assertTrue(sideDependentList.get(RobotSide.RIGHT) != sideDependentListCopy.get(RobotSide.LEFT));
+      assertSame(sideDependentList.get(RobotSide.LEFT), sideDependentListCopy.get(RobotSide.LEFT));
+      assertSame(sideDependentList.get(RobotSide.RIGHT), sideDependentListCopy.get(RobotSide.RIGHT));
+      assertNotSame(sideDependentList.get(RobotSide.LEFT), sideDependentListCopy.get(RobotSide.RIGHT));
+      assertNotSame(sideDependentList.get(RobotSide.RIGHT), sideDependentListCopy.get(RobotSide.LEFT));
       
    }
 
@@ -117,11 +117,11 @@ public class SideDependentListTest
      
       sideDependentListCopy.set(sideDependentList);
       
-      assertTrue(sideDependentList.get(RobotSide.LEFT) == sideDependentListCopy.get(RobotSide.LEFT));
-      assertTrue(sideDependentList.get(RobotSide.RIGHT) == sideDependentListCopy.get(RobotSide.RIGHT));
-      
-      assertTrue(leftObject == sideDependentListCopy.get(RobotSide.LEFT));
-      assertTrue(rightObject == sideDependentListCopy.get(RobotSide.RIGHT));
+      assertSame(sideDependentList.get(RobotSide.LEFT), sideDependentListCopy.get(RobotSide.LEFT));
+      assertSame(sideDependentList.get(RobotSide.RIGHT), sideDependentListCopy.get(RobotSide.RIGHT));
+
+      assertSame(leftObject, sideDependentListCopy.get(RobotSide.LEFT));
+      assertSame(rightObject, sideDependentListCopy.get(RobotSide.RIGHT));
 
    }
 
@@ -169,8 +169,8 @@ public class SideDependentListTest
       assertEquals("YummyTootyFruity", sideDependentList.get(RobotSide.LEFT).get(IceCreamFlavor.TOOTYFRUITY));
       
       assertEquals("ChocolateWow", sideDependentList.get(RobotSide.RIGHT).get(IceCreamFlavor.CHOCOLATE));
-      assertEquals(null, sideDependentList.get(RobotSide.RIGHT).get(IceCreamFlavor.VANILLA));
-      assertEquals(null, sideDependentList.get(RobotSide.RIGHT).get(IceCreamFlavor.TOOTYFRUITY));
+      assertNull(sideDependentList.get(RobotSide.RIGHT).get(IceCreamFlavor.VANILLA));
+      assertNull(sideDependentList.get(RobotSide.RIGHT).get(IceCreamFlavor.TOOTYFRUITY));
    }
    
    private enum IceCreamFlavor

@@ -107,7 +107,7 @@ public class StereoREAAnchorPaneController
       @Override
       public Number interpret(Integer newValue)
       {
-         return new Double(newValue.intValue());
+         return Double.valueOf(newValue.intValue());
       }
    };
 

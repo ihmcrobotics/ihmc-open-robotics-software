@@ -46,6 +46,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
  * an upgrade was planned but never finished.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class BuildingExplorationBehaviorOld extends ResettingNode implements Destroyable
 {
    private static final int UPDATE_RATE_MILLIS = 50;

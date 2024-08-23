@@ -40,6 +40,7 @@ import us.ihmc.commons.thread.TypedNotification;
  * This also was used to walk to high and low big planar regions autonomously.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class PatrolBehavior extends LocalOnlyBehaviorTreeNodeExecutor
 {
    public enum PatrolBehaviorState

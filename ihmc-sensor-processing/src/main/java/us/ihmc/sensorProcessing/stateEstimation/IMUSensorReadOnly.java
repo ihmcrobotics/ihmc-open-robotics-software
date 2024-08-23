@@ -22,6 +22,7 @@ public interface IMUSensorReadOnly
    /**
     * @deprecated use {@link #getOrientationMeasurement()} instead.
     */
+   @Deprecated
    public default void getOrientationMeasurement(RotationMatrix orientationToPack)
    {
       orientationToPack.set(getOrientationMeasurement());
@@ -32,6 +33,7 @@ public interface IMUSensorReadOnly
    /**
     * @deprecated use {@link #getAngularVelocityMeasurement()} instead.
     */
+   @Deprecated
    public default void getAngularVelocityMeasurement(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(getAngularVelocityMeasurement());
@@ -42,6 +44,7 @@ public interface IMUSensorReadOnly
    /**
     * @deprecated use {@link #getLinearAccelerationMeasurement()} instead.
     */
+   @Deprecated
    public default void getLinearAccelerationMeasurement(Vector3DBasics linearAccelerationToPack)
    {
       linearAccelerationToPack.set(getLinearAccelerationMeasurement());

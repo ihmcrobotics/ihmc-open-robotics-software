@@ -98,6 +98,7 @@ public class InverseKinematicsCommandList implements InverseKinematicsCommand<In
     * @return the last command.
     * @deprecated this method should be removed and it is not really useful anyway.
     */
+   @Deprecated
    public InverseKinematicsCommand<?> pollCommand()
    {
       if (commandList.isEmpty())

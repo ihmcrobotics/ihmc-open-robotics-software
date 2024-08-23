@@ -24,6 +24,7 @@ import static us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus.*;
  * An attempt mostly in simulation to explore a building.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class ExploreAreaBehavior extends FallbackNode implements Destroyable
 {
    public static final double TICK_PERIOD = UnitConversions.hertzToSeconds(2);

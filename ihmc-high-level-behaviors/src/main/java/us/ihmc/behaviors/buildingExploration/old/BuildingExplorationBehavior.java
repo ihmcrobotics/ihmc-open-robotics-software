@@ -25,6 +25,7 @@ import static us.ihmc.behaviors.buildingExploration.old.BuildingExplorationBehav
  * This was intended to be an upgrade for the 2019 Atlas building exploration demo but never got used.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class BuildingExplorationBehavior extends ResettingNode implements Destroyable
 {
    private final BehaviorHelper helper;

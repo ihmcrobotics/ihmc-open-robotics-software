@@ -26,6 +26,7 @@ import us.ihmc.messager.TopicListenerBase;
  * @deprecated This is an old implementation that imposes restrictions like having a NetClassList.
  * Use {@link us.ihmc.messager.kryo.KryoMessager} instead.
  */
+@Deprecated
 public class KryoMessager implements Messager
 {
    public static final int BUFFER_SIZE = 2097152 * 20;

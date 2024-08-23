@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * A behavior tree layer on top of the door behavior that John wrote for Atlas.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class DoorBehavior extends ResettingNode implements Destroyable
 {
    private BehaviorHelper helper;
