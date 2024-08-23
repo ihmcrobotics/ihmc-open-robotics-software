@@ -41,6 +41,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -108,6 +109,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
    private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
    private final YoInteger numberOfRecoveryStepsTaken = new YoInteger("numberOfRecoveryStepsTaken", registry);
@@ -451,7 +453,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
-      balanceManager.compute(heightControlCommand, null, controlHeightWithMomentum);
+      balanceManager.compute(heightControlCommand, zeroRegion, controlHeightWithMomentum);
    }
 
    private void reportStatusMessages()

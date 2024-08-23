@@ -132,7 +132,7 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       }
 
       feasibleCoMRegion = new YoFrameConvexPolygon2D("comStabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE, registry);
-      feasibleCoMRegion.setToNaN();
+      feasibleCoMRegion.clear();
 
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       centerOfMassStabilityMargin = new YoDouble("centerOfMassStabilityMargin", registry);

@@ -9,6 +9,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPCoPConstraintHandler
 {
+   private static final boolean CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION = true;
    private final ICPControlPolygons icpControlPolygons;
 
    private final boolean hasICPControlPolygons;
@@ -46,7 +47,7 @@ public class ICPCoPConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly updateCoPConstraint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
-      copIsConstrainedByMultiContactRegion.set(multiContactStabilityRegion != null);
+      copIsConstrainedByMultiContactRegion.set(CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION && multiContactStabilityRegion != null && !multiContactStabilityRegion.isEmpty());
 
       if (copIsConstrainedByMultiContactRegion.getValue())
       {

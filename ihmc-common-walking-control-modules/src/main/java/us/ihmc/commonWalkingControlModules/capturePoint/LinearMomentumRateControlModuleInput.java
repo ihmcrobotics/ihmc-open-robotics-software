@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabili
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -90,10 +91,10 @@ public class LinearMomentumRateControlModuleInput
 
    /**
     * CoM stability region computed by {@link CenterOfMassStabilityMarginRegionCalculator}. This region is enabled when the robot's
-    * upper body is load-bearing, resulting in a modified support region. When this field is not null, the ICP controller can place
+    * upper body is load-bearing, resulting in a modified support region. When this polygon is not empty, the ICP controller can place
     * the feedback CoP in this modified support region.
     */
-   private FrameConvexPolygon2DReadOnly multiContactStabilityRegion;
+   private final FrameConvexPolygon2D multiContactStabilityRegion = new FrameConvexPolygon2D();
 
    /**
     * Is a flag that enables the z-selection in the angular momentum rate command if {@code true}. The desired angular
@@ -249,7 +250,7 @@ public class LinearMomentumRateControlModuleInput
 
    public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.multiContactStabilityRegion = multiContactStabilityRegion;
+      this.multiContactStabilityRegion.setIncludingFrame(multiContactStabilityRegion);
    }
 
    public FrameConvexPolygon2DReadOnly getMultiContactStabilityRegion()
@@ -281,7 +282,7 @@ public class LinearMomentumRateControlModuleInput
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
       initializeOnStateChange = other.initializeOnStateChange;
-      multiContactStabilityRegion = other.multiContactStabilityRegion;
+      multiContactStabilityRegion.setIncludingFrame(other.multiContactStabilityRegion);
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
       setHasHeightCommand(other.getHasHeightCommand());
