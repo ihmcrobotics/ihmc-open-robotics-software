@@ -4,6 +4,7 @@ import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
+import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
@@ -14,10 +15,12 @@ import org.bytedeco.ffmpeg.global.avformat;
 import java.util.function.Consumer;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
+import static org.bytedeco.ffmpeg.global.avformat.av_interleaved_write_frame;
 import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 
+// TODO: Add a FFMPEGAudioEncoder
 public abstract class FFMPEGEncoder
 {
    protected final AVFormatContext formatContext;
@@ -40,7 +43,7 @@ public abstract class FFMPEGEncoder
       this.formatContext = formatContext;
       this.bitRate = bitRate;
 
-      encoder = findEncoder(preferredEncoderName, formatContext);
+      encoder = findEncoder(preferredEncoderName, formatContext.oformat());
       FFMPEGTools.checkPointer(encoder, "Finding encoder");
 
       packet = av_packet_alloc();
@@ -72,7 +75,16 @@ public abstract class FFMPEGEncoder
       nextFrame.pts(nextPresentationTimestamp++);
    }
 
-   public boolean encodeNextFrame(Consumer<AVPacket> packetConsumer)
+   public boolean encodeAndWriteNextFrame()
+   {
+      return encodeAndWriteNextFrame(packet ->
+      {
+         error = av_interleaved_write_frame(formatContext, packet);
+         FFMPEGTools.checkNegativeError(error, "Writing packet");
+      });
+   }
+
+   public boolean encodeAndWriteNextFrame(Consumer<AVPacket> packetConsumer)
    {
       int error;
       error = avcodec_send_frame(encoderContext, nextFrame);
@@ -110,5 +122,5 @@ public abstract class FFMPEGEncoder
       timeBase.close();
    }
 
-   protected abstract AVCodec findEncoder(String preferredEncoderName, AVFormatContext outputContext);
+   protected abstract AVCodec findEncoder(String preferredEncoderName, AVOutputFormat outputFormat);
 }

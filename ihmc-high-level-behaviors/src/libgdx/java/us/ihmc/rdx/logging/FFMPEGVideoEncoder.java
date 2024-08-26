@@ -164,10 +164,9 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
    }
 
    @Override
-   protected AVCodec findEncoder(String preferredEncoderName, AVFormatContext outputContext)
+   protected AVCodec findEncoder(String preferredEncoderName, AVOutputFormat outputFormat)
    {
       AVCodec encoder = null;
-      AVOutputFormat outputFormat = outputContext.oformat();
 
       if (preferredEncoderName != null)
       {

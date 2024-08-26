@@ -3,7 +3,6 @@ package us.ihmc.rdx.logging;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
-import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -25,10 +24,10 @@ public class FFMPEGWebcamEncodingDemo
    private static final String RESULT_FILE_NAME = "FFMPEGWebcamEncodingDemo_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".h264";
    private static final String RESULT_FILE_PATH = RESULT_FILE_DIRECTORY + RESULT_FILE_NAME;
 
-   private int error;
-
    public FFMPEGWebcamEncodingDemo()
    {
+      int error;
+
       VideoCapture videoCapture = new VideoCapture(-1);
 
       int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
@@ -36,7 +35,7 @@ public class FFMPEGWebcamEncodingDemo
       double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       AVFormatContext outputContext = new AVFormatContext();
-      error = avformat.avformat_alloc_output_context2(outputContext, null, null, RESULT_FILE_NAME);
+      error = avformat_alloc_output_context2(outputContext, null, null, RESULT_FILE_NAME);
       FFMPEGTools.checkPointer(outputContext, "Allocating output context");
       FFMPEGTools.checkNegativeError(error, "Allocating output context");
 
@@ -76,11 +75,7 @@ public class FFMPEGWebcamEncodingDemo
 
          System.out.println("Encoding frame " + i);
          videoEncoder.setNextFrame(frame);
-         notDone = videoEncoder.encodeNextFrame(packet ->
-         {
-            error = av_interleaved_write_frame(outputContext, packet);
-            FFMPEGTools.checkNegativeError(error, "Writing packet");
-         });
+         notDone = videoEncoder.encodeAndWriteNextFrame();
 
          frame.close();
       }
