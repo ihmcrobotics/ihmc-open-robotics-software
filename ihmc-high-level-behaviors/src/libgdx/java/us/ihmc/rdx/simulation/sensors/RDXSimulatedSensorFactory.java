@@ -7,8 +7,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 
 import java.util.function.LongSupplier;
 
@@ -66,7 +64,7 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXHighLevelDepthSensorSimulator createChestD435ForObjectDetection(ROS2SyncedRobotModel syncedRobot, RosNodeInterface ros1Node)
+   public static RDXHighLevelDepthSensorSimulator createChestD435ForObjectDetection(ROS2SyncedRobotModel syncedRobot)
    {
       double publishRateHz = 5.0;
       double verticalFOV = 57.0;
@@ -92,8 +90,6 @@ public class RDXSimulatedSensorFactory
                                                                                                             0.001,
                                                                                                             false,
                                                                                                             publishRateHz);
-      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.D435_DEPTH, RosTools.D435_DEPTH_CAMERA_INFO);
-      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.D435_VIDEO, RosTools.D435_CAMERA_INFO);
       return highLevelDepthSensorSimulator;
    }
 
