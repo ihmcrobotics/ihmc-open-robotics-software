@@ -69,7 +69,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == AI2RNodeDefinition.class)
       {
-         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, syncedRobot, sceneGraph);
+         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == ActionSequenceDefinition.class)
       {
