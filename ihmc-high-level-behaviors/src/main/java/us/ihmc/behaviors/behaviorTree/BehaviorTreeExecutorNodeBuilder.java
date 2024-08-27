@@ -3,6 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.ai2r.AI2RNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionExecutor;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
@@ -64,6 +66,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == BehaviorTreeNodeDefinition.class)
       {
          return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == AI2RNodeDefinition.class)
+      {
+         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, syncedRobot, sceneGraph);
       }
       if (nodeType == ActionSequenceDefinition.class)
       {
