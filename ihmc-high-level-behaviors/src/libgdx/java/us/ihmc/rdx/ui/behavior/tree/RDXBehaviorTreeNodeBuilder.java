@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -15,6 +16,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXAI2RNode;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXTrashCanInteraction;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXBuildingExploration;
@@ -62,6 +64,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == BehaviorTreeNodeDefinition.class)
       {
          return new RDXBehaviorTreeNode<>(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == AI2RNodeDefinition.class)
+      {
+         return new RDXAI2RNode(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
       if (nodeType == ActionSequenceDefinition.class)
       {

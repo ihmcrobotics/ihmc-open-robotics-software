@@ -1,0 +1,31 @@
+#ifndef __behavior_msgs__msg__AI2RObjectMessage__idl__
+#define __behavior_msgs__msg__AI2RObjectMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * For use by external AI to modify the behavior tree and operate behaviors
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::AI2RObjectMessage_")
+      struct AI2RObjectMessage
+      {
+        /**
+         * Name of the object
+         */
+        string object_name;
+        /**
+         * Pose of the object in world frame
+         */
+        geometry_msgs::msg::dds::Pose object_pose_in_world;
+      };
+    };
+  };
+};
+
+#endif
