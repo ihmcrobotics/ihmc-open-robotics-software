@@ -24,6 +24,7 @@ public class FFMPEGWebcamUDPStreamingDemo
    private final AVIOContext ioContext = new AVIOContext();
    private final FFMPEGVideoEncoder videoEncoder;
 
+   private int error;
    private boolean done = false;
    private boolean shutdown = false;
    private final Notification readyForShutdown = new Notification();
@@ -36,7 +37,7 @@ public class FFMPEGWebcamUDPStreamingDemo
       double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       // Open UDP IO
-      int error = avio_open(ioContext, "udp://127.0.0.1:60001", AVIO_FLAG_WRITE);
+      error = avio_open(ioContext, "udp://127.0.0.1:60001", AVIO_FLAG_WRITE);
       FFMPEGTools.checkError(error, ioContext, "Openning UDP port");
 
       // Create an output context
@@ -80,6 +81,9 @@ public class FFMPEGWebcamUDPStreamingDemo
 
    private void run()
    {
+      error = avformat_init_output(outputContext, (AVDictionary) null);
+      FFMPEGTools.checkNegativeError(error, "Initializing UDP Output");
+
       Mat frame = new Mat();
       while (!done && !shutdown)
       {

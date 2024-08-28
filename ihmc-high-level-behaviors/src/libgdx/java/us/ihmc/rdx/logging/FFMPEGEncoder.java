@@ -11,6 +11,7 @@ import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
+import us.ihmc.log.LogTools;
 
 import java.util.function.Consumer;
 
@@ -49,7 +50,7 @@ public abstract class FFMPEGEncoder
       packet = av_packet_alloc();
       FFMPEGTools.checkPointer(packet, "Allocating next packet");
 
-      stream = avformat_new_stream(formatContext, null);
+      stream = avformat_new_stream(formatContext, encoder);
       FFMPEGTools.checkPointer(stream, "Creating new stream");
 
       encoderContext = avcodec_alloc_context3(encoder);
@@ -111,6 +112,7 @@ public abstract class FFMPEGEncoder
 
    public void destroy()
    {
+      avcodec_close(encoderContext);
       avcodec_free_context(encoderContext);
       av_frame_free(nextFrame);
       av_packet_free(packet);
@@ -122,5 +124,20 @@ public abstract class FFMPEGEncoder
       timeBase.close();
    }
 
-   protected abstract AVCodec findEncoder(String preferredEncoderName, AVOutputFormat outputFormat);
+   private AVCodec findEncoder(String preferredEncoderName, AVOutputFormat outputFormat)
+   {
+      AVCodec encoder;
+
+      if (preferredEncoderName != null)
+      {
+         encoder = avcodec_find_encoder_by_name(preferredEncoderName);
+         if (encoder != null && !encoder.isNull())
+            return encoder;
+
+         LogTools.error("Failed to find valid encoder " + preferredEncoderName + " - attempting to default to another");
+      }
+
+      encoder = avcodec_find_encoder(outputFormat.video_codec());
+      return encoder;
+   }
 }

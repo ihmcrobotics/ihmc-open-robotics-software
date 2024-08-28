@@ -162,31 +162,4 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
          swsContext.close();
       }
    }
-
-   @Override
-   protected AVCodec findEncoder(String preferredEncoderName, AVOutputFormat outputFormat)
-   {
-      AVCodec encoder = null;
-
-      if (preferredEncoderName != null)
-      {
-         encoder = avcodec_find_encoder_by_name(preferredEncoderName);
-
-         if (encoder != null && !encoder.isNull())
-         {
-            if (outputFormat.video_codec() != encoder.id())
-               outputFormat.video_codec(encoder.id()); // FIXME: This doesn't work
-            LogTools.info("Found encoder " + preferredEncoderName + " - id:" + encoder.id());
-         }
-         else
-            LogTools.error("Failed to find valid encoder " + preferredEncoderName + " - attempting to default to another");
-      }
-
-      if (preferredEncoderName == null || encoder == null || encoder.isNull())
-      {
-         encoder = avcodec_find_encoder(outputFormat.video_codec());
-      }
-
-      return encoder;
-   }
 }
