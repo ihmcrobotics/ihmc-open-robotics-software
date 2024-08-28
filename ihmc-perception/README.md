@@ -33,7 +33,7 @@ sudo tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/include/ --strip-c
 rm -f nvcomp_3.0.5_x86_64_12.x.tgz
 ```
 
-### ZED SDK & API
+### ZED SDK
 
 ```shell
 cd ~/Downloads
