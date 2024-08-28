@@ -49,8 +49,6 @@ public class FFMPEGWebcamEncodingDemo
                                                                10,
                                                                2,
                                                                AV_PIX_FMT_BGR24);
-      // TODO: Mess around with encoder options
-//      AVDictionary videoCodecOptions = new AVDictionary();
 
       videoEncoder.initialize();
 
