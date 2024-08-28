@@ -83,16 +83,18 @@ del cuda_12.6.0_windows_network.exe
 ### nvCOMP
 
 ```shell
-curl -o nvcomp.zip https://developer.download.nvidia.com/compute/nvcomp/4.0.0/local_installers/nvcomp-windows-x86_64-4.0.0-cuda12.5.zip
+mkdir nvcomp
+cd nvcomp
+curl -o nvcomp.zip -L https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_windows_12.x.zip
 tar -xvf nvcomp.zip
 
 :: The following move commands must be ran as administrator
-move nvcomp\include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move nvcomp\include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move nvcomp\lib\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
-move nvcomp\lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
+move include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
+move lib\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
+move lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
 
-del nvcomp.zip
+cd ..
 rmdir /s /q nvcomp
 ```
 
@@ -109,21 +111,32 @@ ZED_SDK_Installer .exe -s
 del ZED_SDK_Installer.exe
 ```
 
+We will require [cmake](https://cmake.org/) to build the API. 
+If you do not have cmake, use the below command to install it. 
+You will need to restart your computer after installation. 
+
+```shell
+winget install kitware.cmake
+```
+
 Install the API:
 
 ```shell
-winget install LLVM
-:: You should add C:\Program Files\LLVM\bin to the system path. 
-winget install kitware.cmake
-
+:: Download and unzip API
 curl -o zed-c-api.tar.gz -L https://codeload.github.com/stereolabs/zed-c-api/tar.gz/refs/tags/v4.1.0
 tar -xvf zed-c-api.tar.gz
 
-cd zed-c-api-4.1.0/
+:: Build and install the API
+cd zed-c-api-4.1.0
 mkdir build
 cd build
 cmake ..
 cmake --build . --config Release
 cmake --install .
+
+:: Clean up
+cd ../..
+del zed-c-api.tar.gz
+rmdir /s /q zed-c-api-4.1.0
 ```
 
