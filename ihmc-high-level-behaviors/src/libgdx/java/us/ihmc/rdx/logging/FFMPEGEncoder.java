@@ -77,14 +77,14 @@ public abstract class FFMPEGEncoder
 
    public boolean encodeAndWriteNextFrame()
    {
-      return encodeAndWriteNextFrame(packet ->
+      return encodeNextFrame(packet ->
       {
          error = av_interleaved_write_frame(formatContext, packet);
          FFMPEGTools.checkNegativeError(error, "Writing packet");
       });
    }
 
-   public boolean encodeAndWriteNextFrame(Consumer<AVPacket> packetConsumer)
+   public boolean encodeNextFrame(Consumer<AVPacket> packetConsumer)
    {
       int error;
       error = avcodec_send_frame(encoderContext, nextFrame);

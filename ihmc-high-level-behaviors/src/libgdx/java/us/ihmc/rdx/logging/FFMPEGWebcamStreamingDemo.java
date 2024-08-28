@@ -8,10 +8,8 @@ import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import us.ihmc.commons.thread.ThreadTools;
-
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.log.LogTools;
 
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
@@ -20,9 +18,8 @@ public class FFMPEGWebcamStreamingDemo
 {
    private final VideoCapture videoCapture;
    private final Mat image = new Mat();
+   private final TypedNotification<Mat> imageNotification = new TypedNotification<>();
    private long sequenceNumber = 0L;
-   private final Lock newImageLock = new ReentrantLock();
-   private final Condition newImageAvailable = newImageLock.newCondition();
 
    public FFMPEGWebcamStreamingDemo()
    {
@@ -47,29 +44,24 @@ public class FFMPEGWebcamStreamingDemo
 
       for (int i = 0; true; i++)
       {
-         System.out.println("Waiting for client...");
+         LogTools.info("Waiting for client...");
          AVIOContext clientContext = new AVIOContext();
          error = avio_accept(serverContext, clientContext);
          FFMPEGTools.checkNegativeError(error, "Accepting client");
          FFMPEGTools.checkPointer(clientContext, "Accepting client");
-         System.out.println("Got a client!");
 
+         LogTools.info("Got a client!");
          ThreadTools.startAThread(new ClientHandler(clientContext, imageWidth, imageHeight, reportedFPS), "ClientThread" + i);
       }
    }
 
    public void captureImage()
    {
-      newImageLock.lock();
-      try
+      while (true)
       {
          videoCapture.read(image);
          sequenceNumber++;
-         newImageAvailable.signalAll();
-      }
-      finally
-      {
-         newImageLock.unlock();
+         imageNotification.set(image.clone());
       }
    }
 
@@ -77,8 +69,9 @@ public class FFMPEGWebcamStreamingDemo
    {
       private final AVFormatContext outputContext;
       private final FFMPEGVideoEncoder videoEncoder;
-      private long lastSequenceNumber = 0L;
       private int error;
+      private boolean keepGoing = true;
+      private boolean disconnected = false;
 
       private ClientHandler(AVIOContext clientContext, int imageWidth, int imageHeight, double outputFrameRate)
       {
@@ -97,40 +90,33 @@ public class FFMPEGWebcamStreamingDemo
                                                10,
                                                2,
                                                AV_PIX_FMT_BGR24);
+         videoEncoder.initialize();
       }
 
       @Override
       public void run()
       {
+         LogTools.info("Sending header...");
          AVDictionary streamFlags = new AVDictionary();
          avutil.av_dict_set(streamFlags, "lossless", "0", 0);
          error = avformat_write_header(outputContext, streamFlags);
+         LogTools.info("Sent header");
 
-         boolean notDone = true;
-         while (notDone)
+         while (keepGoing && !disconnected)
          {
-            newImageLock.lock();
-            try
-            {
-               while (lastSequenceNumber >= sequenceNumber)
-                  newImageAvailable.await();
+            Mat image = imageNotification.blockingPoll();
+            LogTools.info("Sending frame {}", sequenceNumber);
 
-               lastSequenceNumber = sequenceNumber;
-               videoEncoder.setNextFrame(image);
-               notDone = videoEncoder.encodeAndWriteNextFrame();
-            }
-            catch (InterruptedException e)
+            videoEncoder.setNextFrame(image);
+            keepGoing = videoEncoder.encodeNextFrame(packet ->
             {
-               throw new RuntimeException(e);
-            }
-            finally
-            {
-               newImageLock.unlock();
-            }
+               error = av_interleaved_write_frame(outputContext, packet);
+               if (error < 0)
+                  disconnected = true;
+            });
          }
 
-         av_write_trailer(outputContext);
-
+         LogTools.info("Closing connection with client");
          av_write_trailer(outputContext);
 
          videoEncoder.destroy();
