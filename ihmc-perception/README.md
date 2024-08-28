@@ -82,6 +82,8 @@ del cuda_12.6.0_windows_network.exe
 
 ### nvCOMP
 
+Some of the following commands must be ran as an administrator. To open a Command Prompt as administrator, search CMD in the windows search menu, right click on Command Prompt, and select "Run as administrator."
+
 ```shell
 mkdir nvcomp
 cd nvcomp
