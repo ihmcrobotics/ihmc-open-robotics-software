@@ -10,13 +10,14 @@ Follow the below instructions to install the dependencies.
 For other linux distros or architectures, find installation instructions on the [CUDA Toolkit Download](https://developer.nvidia.com/cuda-downloads) site.
 
 ```shell
+cd ~/Downloads
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
 sudo apt-get -y install cuda-toolkit-12-6
 ```
 
-To install the appropriate Nvidia driver:
+To install the appropriate NVIDIA driver:
 
 ```shell
 sudo apt-get install -y nvidia-open
@@ -25,6 +26,7 @@ sudo apt-get install -y nvidia-open
 ### nvCOMP
 
 ```shell
+cd ~/Downloads
 wget https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_x86_64_12.x.tgz
 sudo tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/lib64/ --strip-components=1 lib/
 sudo tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/include/ --strip-components=1 include/
@@ -33,9 +35,8 @@ rm -f nvcomp_3.0.5_x86_64_12.x.tgz
 
 ### ZED SDK & API
 
-Install the SDK:
-
 ```shell
+cd ~/Downloads
 wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.1/ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
 chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
 ./ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
@@ -45,32 +46,12 @@ chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
 rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
 ```
 
-Install the API:
-
-```shell
-# Download and unzip API
-wget -O zed-c-api.tar.gz https://codeload.github.com/stereolabs/zed-c-api/tar.gz/refs/tags/v4.1.0
-tar -xvf zed-c-api.tar.gz
-
-# Build and install the API
-cd zed-c-api-4.1.0/
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-
-# Clean up
-cd ../..
-rm -f zed-c-api.tar.gz
-rm -rf zed-c-api-4.1.0/
-```
-
 ## Windows (x86_64)
 
 ### CUDA Toolkit
 
 ```shell
+cd %USERPROFILE%\Downloads
 curl -OL https://developer.download.nvidia.com/compute/cuda/12.6.0/network_installers/cuda_12.6.0_windows_network.exe
 cuda_12.6.0_windows_network.exe -s
 
@@ -100,11 +81,10 @@ cd ..
 rmdir /s /q nvcomp
 ```
 
-### ZED SDK & API
-
-Install the SDK:
+### ZED SDK
 
 ```shell
+cd %USERPROFILE%\Downloads
 curl -o ZED_SDK_Installer.exe -L https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.1/ZED_SDK_Windows_cuda12.1_v4.1.3.exe
 ZED_SDK_Installer .exe -s
 
@@ -112,33 +92,3 @@ ZED_SDK_Installer .exe -s
 
 del ZED_SDK_Installer.exe
 ```
-
-We will require [cmake](https://cmake.org/) to build the API. 
-If you do not have cmake, use the below command to install it. 
-You will need to restart your computer after installation. 
-
-```shell
-winget install kitware.cmake
-```
-
-Install the API:
-
-```shell
-:: Download and unzip API
-curl -o zed-c-api.tar.gz -L https://codeload.github.com/stereolabs/zed-c-api/tar.gz/refs/tags/v4.1.0
-tar -xvf zed-c-api.tar.gz
-
-:: Build and install the API
-cd zed-c-api-4.1.0
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-cmake --install .
-
-:: Clean up
-cd ../..
-del zed-c-api.tar.gz
-rmdir /s /q zed-c-api-4.1.0
-```
-
