@@ -106,6 +106,12 @@ public class WrenchVisualizer
       }
    }
 
+   public void registerContactablePlaneBody(String planeBodyName, ReferenceFrame soleFrame, RigidBodyBasics rigidBody)
+   {
+      rigidBodies.add(rigidBody);
+      visualizerMap.put(rigidBody, new ContactablePlaneBodyWrenchVisualizer(planeBodyName, soleFrame));
+   }
+
    public void registerContactablePlaneBody(ContactablePlaneBody contactablePlaneBody)
    {
       RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
@@ -139,8 +145,13 @@ public class WrenchVisualizer
 
       public ContactablePlaneBodyWrenchVisualizer(ContactablePlaneBody contactablePlaneBody)
       {
-         String prefix = contactablePlaneBody.getName() + name;
-         soleFrame = contactablePlaneBody.getSoleFrame();
+         this(contactablePlaneBody.getName(), contactablePlaneBody.getSoleFrame());
+      }
+
+      public ContactablePlaneBodyWrenchVisualizer(String planeBodyName, ReferenceFrame soleFrame)
+      {
+         String prefix = planeBodyName + name;
+         this.soleFrame = soleFrame;
          forceWorld = new YoFrameVector3D(prefix + "ForceWorldFrame", worldFrame, registry);
          torqueWorld = new YoFrameVector3D(prefix + "TorqueWorldFrame", worldFrame, registry);
          forceSole = new YoFrameVector3D(prefix + "ForceSoleFrame", soleFrame, registry);
