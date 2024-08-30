@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -48,7 +49,18 @@ public class FootstepPlanActionPlanningThread
          goalFootPoses.get(side).set(liveGoalFeetPoses.get(side));
       }
 
-      Thread thread = new Thread(() -> plan(started), getClass().getSimpleName() + started);
+      Thread thread = new Thread(() ->
+      {
+         try
+         {
+            plan(started);
+         }
+         catch (Throwable throwable)
+         {
+            LogTools.error(throwable.getMessage());
+            throwable.printStackTrace();
+         }
+      }, getClass().getSimpleName() + started);
       thread.start();
    }
 
