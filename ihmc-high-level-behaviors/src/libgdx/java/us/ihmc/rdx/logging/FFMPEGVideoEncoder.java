@@ -1,8 +1,6 @@
 package us.ihmc.rdx.logging;
 
-import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
-import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.global.avcodec;
@@ -11,9 +9,9 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.log.LogTools;
 
-import static org.bytedeco.ffmpeg.global.avcodec.*;
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_open2;
+import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
 
@@ -66,7 +64,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       timeBase = avutil.av_inv_q(avutil.av_d2q(outputFrameRate, 4096));
       stream.time_base(timeBase);
 
-      if ((formatContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
+      if ((outputContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
          encoderContext.flags(encoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
 
       inputFrame.format(inputPixelFormat);
@@ -92,10 +90,10 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       error = avcodec_parameters_from_context(stream.codecpar(), encoderContext);
       FFMPEGTools.checkNegativeError(error, "Copying parameters from codec to stream");
 
-      AVDictionary options = new AVDictionary();
-      av_dict_copy(options, codecOptions, 0);
-      error = avcodec_open2(encoderContext, encoder, options);
-      av_dict_free(options);
+      AVDictionary optionsCopy = new AVDictionary();
+      av_dict_copy(optionsCopy, codecOptions, 0);
+      error = avcodec_open2(encoderContext, encoder, optionsCopy);
+      av_dict_free(optionsCopy);
       FFMPEGTools.checkNegativeError(error, "Opening codec");
    }
 
@@ -121,15 +119,15 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
 
    private void initializeInputFrame(Mat firstFrame)
    {
-      int width = firstFrame.cols();
-      int height = firstFrame.rows();
+      int inputWidth = firstFrame.cols();
+      int inputHeight = firstFrame.rows();
 
-      inputFrame.width(width);
-      inputFrame.height(height);
+      inputFrame.width(inputWidth);
+      inputFrame.height(inputHeight);
       error = av_frame_get_buffer(inputFrame, 0);
       FFMPEGTools.checkNegativeError(error, "Getting input frame buffer");
 
-      if (inputPixelFormat != outputPixelFormat)
+      if (inputWidth != outputWidth || inputHeight != outputHeight || inputPixelFormat != outputPixelFormat)
          initializeSwsContext();
    }
 
