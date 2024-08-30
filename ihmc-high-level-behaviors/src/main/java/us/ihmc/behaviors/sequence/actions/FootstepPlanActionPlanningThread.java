@@ -23,8 +23,11 @@ public class FootstepPlanActionPlanningThread
    private long started = 0;
    private long completed = 0;
    private final FootstepPlanningModule footstepPlanner = new FootstepPlanningModule();
-   private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<FramePose3D> goalFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final FramePose3D startMidFeetPose = new FramePose3D();
+   private final FramePose3D startTurnedToMatchGoalFacing = new FramePose3D();
+   private final FramePose3D goalMidFeetPose = new FramePose3D();
    private FootstepPlan result;
    private final TypedNotification<FootstepPlan> resultNotification = new TypedNotification<>();
 
@@ -41,8 +44,8 @@ public class FootstepPlanActionPlanningThread
 
       for (RobotSide side : RobotSide.values)
       {
-         startFootPosesForThread.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-         goalFootPosesForThread.get(side).set(liveGoalFeetPoses.get(side));
+         startFootPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+         goalFootPoses.get(side).set(liveGoalFeetPoses.get(side));
       }
 
       Thread thread = new Thread(() -> plan(started), getClass().getSimpleName() + started);
@@ -67,12 +70,11 @@ public class FootstepPlanActionPlanningThread
    private void plan(long sequenceID)
    {
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-      footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setStartFootPoses(startFootPosesForThread.get(RobotSide.LEFT), startFootPosesForThread.get(RobotSide.RIGHT));
-      // TODO: Set start footholds!!
+      // TODO: Set start footholds
       for (RobotSide side : RobotSide.values)
       {
-         footstepPlannerRequest.setGoalFootPose(side, goalFootPosesForThread.get(side));
+         footstepPlannerRequest.setStartFootPose(side, startFootPoses.get(side));
+         footstepPlannerRequest.setGoalFootPose(side, goalFootPoses.get(side));
       }
 
       if (definition.getPlannerInitialStanceSide().getValue() == InitialStanceSide.LEFT)
@@ -81,8 +83,8 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
       else // AUTO, swing the foot furthest from the goal first
       {
-         double leftStartToGoal = goalFootPosesForThread.get(RobotSide.LEFT).getPositionDistance(startFootPosesForThread.get(RobotSide.LEFT));
-         double rightStartToGoal = goalFootPosesForThread.get(RobotSide.RIGHT).getPositionDistance(startFootPosesForThread.get(RobotSide.RIGHT));
+         double leftStartToGoal = goalFootPoses.get(RobotSide.LEFT).getPositionDistance(startFootPoses.get(RobotSide.LEFT));
+         double rightStartToGoal = goalFootPoses.get(RobotSide.RIGHT).getPositionDistance(startFootPoses.get(RobotSide.RIGHT));
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
@@ -90,6 +92,20 @@ public class FootstepPlanActionPlanningThread
       footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
+
+      // TODO: Add body path planning options to user
+      footstepPlannerRequest.setPlanBodyPath(false);
+      if (!footstepPlannerRequest.getPlanBodyPath())
+      {
+         // At beginning, first turn in place to face the direction that the goal stance faces
+         startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
+         goalMidFeetPose.interpolate(goalFootPoses.get(RobotSide.LEFT), goalFootPoses.get(RobotSide.RIGHT), 0.5);
+         startTurnedToMatchGoalFacing.set(startMidFeetPose);
+         startTurnedToMatchGoalFacing.getOrientation().set(goalMidFeetPose.getOrientation());
+         footstepPlannerRequest.getBodyPathWaypoints().add(startMidFeetPose);
+         footstepPlannerRequest.getBodyPathWaypoints().add(startTurnedToMatchGoalFacing);
+         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
+      }
 
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
