@@ -1,4 +1,4 @@
-package us.ihmc.parameterEstimation;
+package us.ihmc.parameterEstimation.examples;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -7,6 +7,7 @@ import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilterTestTools.NonlinearSystem;
+import us.ihmc.parameterEstimation.ExtendedNativeKalmanFilter;
 
 import javax.swing.*;
 import java.util.ArrayList;
