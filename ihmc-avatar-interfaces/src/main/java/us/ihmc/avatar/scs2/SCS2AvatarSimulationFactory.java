@@ -113,7 +113,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
-   protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
+   protected final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               getDefaultOutputWriterFactory());
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
@@ -154,6 +154,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
+   protected AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -307,13 +308,10 @@ public class SCS2AvatarSimulationFactory
       robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                         gravity.get(),
                                                                         robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager().getControllerInput()),
-                                   robotModel.getEstimatorDT());
+                                                                        robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
-         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
-                                                                    simulationConstructionSet.getTime(),
-                                                                    robotModel.getEstimatorDT()),
+         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT()),
                                       robotModel.getEstimatorDT());
       }
 
@@ -349,8 +347,7 @@ public class SCS2AvatarSimulationFactory
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(),
-                                                         robot.getControllerManager().getControllerOutput());
+                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
    }
 
    private void setupKinematicsSimulationOutputWriter()
@@ -386,8 +383,9 @@ public class SCS2AvatarSimulationFactory
          if (realtimeROS2Node.hasBeenSet())
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
-            realtimeROS2Node.get().createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                        s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            realtimeROS2Node.get()
+                            .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
          }
       }
 
@@ -526,6 +524,7 @@ public class SCS2AvatarSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
+      int wholeBodyControllerCoreDivisor = (int) Math.round(robotModel.getWholeBodyControllerCoreDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
@@ -533,6 +532,11 @@ public class SCS2AvatarSimulationFactory
                                                                          stepGeneratorDivisor,
                                                                          simulationDT.get(),
                                                                          masterFullRobotModel);
+      HumanoidRobotControlTask wholeBodyControllerCoreTask = new WholeBodyControllerCoreTask("WholeBodyController",
+                                                                                             wholeBodyControllerCoreThread,
+                                                                                             wholeBodyControllerCoreDivisor,
+                                                                                             simulationDT.get(),
+                                                                                             masterFullRobotModel);
       HumanoidRobotControlTask ikStreamingRTTask;
       if (createIKStreamingRealTimeController.get())
          ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask(simulationDT.get());
@@ -940,7 +944,9 @@ public class SCS2AvatarSimulationFactory
       this.usePerfectSensors.set(usePerfectSensors);
    }
 
-   /** Must be used with perfect sensors. */
+   /**
+    * Must be used with perfect sensors.
+    */
    public void setKinematicsSimulation(boolean kinematicsSimulation)
    {
       this.kinematicsSimulation.set(kinematicsSimulation);

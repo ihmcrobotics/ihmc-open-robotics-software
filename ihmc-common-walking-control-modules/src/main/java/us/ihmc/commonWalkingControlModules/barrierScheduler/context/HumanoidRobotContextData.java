@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import java.util.Arrays;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -13,6 +10,9 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -60,7 +60,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * context. Set by the controller.
     */
    private boolean controllerRan = false;
-
+   /**
+    * Serves to inform the controller and estimator that the wholeBodyControllerCore ran and populated the desired values in
+    * this context. Set by the wholeBodyControllerCore
+    */
+   private boolean wholeBodyControllerCoreRan = false;
    /**
     * Serves to inform the estimator and controller that the perception ran. Set by the perception.
     */
@@ -218,7 +222,14 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       return controllerRan;
    }
-   
+   public boolean getWholeBodyControllerCoreRan()
+   {
+      return wholeBodyControllerCoreRan;
+   }
+   public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
+   {
+      this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
+   }
    public void setPerceptionRan(boolean perceptionRan)
    {
       this.perceptionRan = perceptionRan;
