@@ -1,11 +1,11 @@
 package us.ihmc.avatar;
 
-import boofcv.visualize.SingleAxisRgb;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -19,6 +19,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
 
@@ -28,10 +29,13 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    private final YoDouble wholeBodyControllerCoreTime = new YoDouble("WholeBodyControllerCoreTime", wbccRegistry);
    private final FullHumanoidRobotModel wholeBodyControllerCoreFullRobotModel;
    private final YoBoolean firstTick = new YoBoolean("FirstTick", wbccRegistry);
+   private final YoLong timeStamp = new YoLong("TimeStampWholeBodyControllerCore", wbccRegistry);
+   private final YoLong timeStampOffset = new YoLong("TimestampOffsetWholeBodyControllerCore", wbccRegistry);
    private final HumanoidRobotContextData humanoidRobotContextData;
-   private final YoBoolean runWholeBodyControllerCore = new YoBoolean("RunWholeBodyControllerCore",wbccRegistry);
+   private final YoBoolean runWholeBodyControllerCore = new YoBoolean("RunWholeBodyControllerCore", wbccRegistry);
    private final ModularRobotController robotController;
    private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
+
    public AvatarWholeBodyControllerCoreThread(HumanoidRobotContextDataFactory contextDataFactory,
                                               StatusMessageOutputManager walkingOutputManager,
                                               DRCRobotModel drcRobotModel,
@@ -41,7 +45,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(wholeBodyControllerCoreFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForWholeBodyControllerCore = new ForceSensorDataHolder(Arrays.asList(wholeBodyControllerCoreFullRobotModel.getForceSensorDefinitions()));
       CenterOfMassDataHolder centerOfMassDataHolderForWholeBodyControllerCore = new CenterOfMassDataHolder();
-      CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore =  new CenterOfPressureDataHolder(wholeBodyControllerCoreFullRobotModel);
+      CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore = new CenterOfPressureDataHolder(wholeBodyControllerCoreFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(wholeBodyControllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
@@ -52,7 +56,6 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(wholeBodyControllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-
    }
 
    public void initialize()
@@ -69,31 +72,43 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          jointDesiredOutputList.getJointDesiredOutput(i).clear();
       }
    }
+
    private void runOnFirstTick()
    {
 
    }
+
    @Override
    public void run()
    {
+      wholeBodyControllerCoreThreadTimer.startMeasurement();
       // TODO getWholeBodyControllerCoreRan() should be called in the controllerThread.
       // This tells the controlThread that the wholeBodyControllerCore runs
       //runWholeBodyControllerCore.set(humanoidRobotContextData.getWholeBodyControllerCoreRan());
-      if(!runWholeBodyControllerCore.getValue())
+      if (!runWholeBodyControllerCore.getValue())
       {
          return;
       }
 
       try
       {
-         if(firstTick.getValue())
+         timeStamp.set(humanoidRobotContextData.getTimestamp());
+         if (firstTick.getValue())
          {
             initialize();
+            timeStampOffset.set(timeStamp.getValue());
          }
+         wholeBodyControllerCoreTime.set(Conversions.nanosecondsToSeconds(timeStamp.getValue() - timeStampOffset.getValue()));
+         if(firstTick.getValue())
+         {
+            firstTick.set(false);
+         }
+         humanoidRobotContextData.setWholeBodyControllerCoreRan(true);
       }
       catch (Exception e)
       {
          throw new RuntimeException(e);
       }
+      wholeBodyControllerCoreThreadTimer.stopMeasurement();
    }
 }
