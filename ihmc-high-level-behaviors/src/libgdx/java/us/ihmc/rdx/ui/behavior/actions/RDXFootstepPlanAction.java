@@ -60,7 +60,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
-   private final ImBooleanWrapper useTurnWalkTurnPlannerWidget;
+   private final ImBooleanWrapper performAStarSearchWidget;
+   private final ImBooleanWrapper walkWithGoalOrientationWidget;
    private final RDXStoredPropertySetTuner plannerParametersWidgets;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
@@ -142,9 +143,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
                                                    definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
-      useTurnWalkTurnPlannerWidget = new ImBooleanWrapper(definition.getPlannerUseTurnWalkTurn()::getValue,
-                                                          definition.getPlannerUseTurnWalkTurn()::setValue,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Use Turn Walk Turn Planner"), imBoolean));
+      performAStarSearchWidget = new ImBooleanWrapper(definition.getPlannerPerformAStarSearch()::getValue,
+                                                      definition.getPlannerPerformAStarSearch()::setValue,
+                                                      imBoolean -> ImGui.checkbox(labels.get("Perform A* search"), imBoolean));
+      walkWithGoalOrientationWidget = new ImBooleanWrapper(definition.getPlannerWalkWithGoalOrientation()::getValue,
+                                                           definition.getPlannerWalkWithGoalOrientation()::setValue,
+                                                           imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
       plannerParametersWidgets.create(definition.accessPlannerParameters(), false);
 
@@ -454,7 +458,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
                   definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
             }
-            useTurnWalkTurnPlannerWidget.renderImGuiWidget();
+            performAStarSearchWidget.renderImGuiWidget();
+            walkWithGoalOrientationWidget.renderImGuiWidget();
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 

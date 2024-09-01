@@ -100,14 +100,14 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      footstepPlannerRequest.setPerformAStarSearch(!definition.getPlannerUseTurnWalkTurn().getValue());
+      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
       footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
 
       // TODO: Add body path planning options to user
       footstepPlannerRequest.setPlanBodyPath(false);
-      if (!footstepPlannerRequest.getPlanBodyPath())
+      if (definition.getPlannerWalkWithGoalOrientation().getValue())
       {
          // At beginning, first turn in place to face the direction that the goal stance faces
          startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
