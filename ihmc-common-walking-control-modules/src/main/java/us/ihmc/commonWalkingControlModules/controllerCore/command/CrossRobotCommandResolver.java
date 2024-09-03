@@ -39,14 +39,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -919,7 +912,7 @@ public class CrossRobotCommandResolver
       resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
       resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
       out.setInitializeOnStateChange(in.getInitializeOnStateChange());
-      out.setMultiContactStabilityRegion(in.getMultiContactStabilityRegion());
+      resolveFrameConvexPolygon2D(in.getMultiContactStabilityRegion(), out.getMultiContactStabilityRegion());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
@@ -980,6 +973,11 @@ public class CrossRobotCommandResolver
    }
 
    public void resolveFrameTuple2D(FrameTuple2DReadOnly in, FrameTuple2DBasics out)
+   {
+      out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
+   }
+
+   public void resolveFrameConvexPolygon2D(FrameConvexPolygon2DReadOnly in, FrameConvexPolygon2DBasics out)
    {
       out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
    }

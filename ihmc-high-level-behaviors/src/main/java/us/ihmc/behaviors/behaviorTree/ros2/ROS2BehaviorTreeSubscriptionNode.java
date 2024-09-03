@@ -12,6 +12,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
+   private AI2RNodeStateMessage ai2rNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
@@ -34,6 +35,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
       behaviorTreeRootNodeStateMessage = null;
+      ai2rNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
       trashCanInteractionStateMessage = null;
@@ -89,6 +91,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage)
    {
       this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
+   }
+
+   public AI2RNodeStateMessage getAI2RNodeStateMessage()
+   {
+      return ai2rNodeStateMessage;
+   }
+
+   public void setAI2RNodeStateMessage(AI2RNodeStateMessage ai2rNodeStateMessage)
+   {
+      this.ai2rNodeStateMessage = ai2rNodeStateMessage;
    }
 
    public ActionNodeStateMessage getActionNodeStateMessage()

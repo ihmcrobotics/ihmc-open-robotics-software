@@ -7,13 +7,15 @@ int8 ROOT_NODE=0
 
 int8 BASIC_NODE=1
 
-int8 ACTION_SEQUENCE=2
+int8 AI2R_NODE=2
 
-int8 DOOR_TRAVERSAL=3
+int8 ACTION_SEQUENCE=3
 
-int8 TRASH_CAN_INTERACTION=4
+int8 DOOR_TRAVERSAL=4
 
-int8 BUILDING_EXPLORATION=5
+int8 TRASH_CAN_INTERACTION=5
+
+int8 BUILDING_EXPLORATION=6
 
 int8 CHEST_ORIENTATION_ACTION=10
 
@@ -53,6 +55,8 @@ uint32[] behavior_tree_indices
 behavior_msgs/BehaviorTreeRootNodeStateMessage[] root_nodes
 
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
+
+behavior_msgs/AI2RNodeStateMessage[] ai2r_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
