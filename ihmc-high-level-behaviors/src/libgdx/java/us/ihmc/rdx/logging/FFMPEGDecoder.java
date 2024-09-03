@@ -9,6 +9,7 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.av_find_best_stream;
@@ -24,20 +25,21 @@ public class FFMPEGDecoder
    protected final AVPacket nextPacket;
    protected final AVFrame decodedFrame;
 
+   private Function<AVPacket, Integer> packetProvider;
+   private boolean sendAPacket = true;
+
    protected int error;
 
-   private Consumer<AVPacket> packetProvider;
-
-   public FFMPEGDecoder(AVFormatContext intputContext, int wantedStreamIndex, int relatedStreamIndex, int avMediaType)
+   public FFMPEGDecoder(AVFormatContext inputContext, int wantedStreamIndex, int relatedStreamIndex, int avMediaType)
    {
-      this.inputContext = intputContext;
+      this.inputContext = inputContext;
 
       // Find the stream to decode, and decoder to use
       decoder = new AVCodec();
       int streamIndex = av_find_best_stream(inputContext, avMediaType, wantedStreamIndex, relatedStreamIndex, decoder, 0);
       FFMPEGTools.checkNegativeError(streamIndex, "Finding best stream index");
       FFMPEGTools.checkPointer(decoder, "Finding stream decoder");
-      streamToDecode = intputContext.streams(streamIndex);
+      streamToDecode = inputContext.streams(streamIndex);
 
       // Create decoder context
       decoderContext = avcodec_alloc_context3(decoder);
@@ -54,7 +56,7 @@ public class FFMPEGDecoder
       FFMPEGTools.checkPointer(decodedFrame, "Allocating decoded frame");
    }
 
-   public void initialize(AVDictionary codecOptions, Consumer<AVPacket> packetProvider)
+   public void initialize(AVDictionary codecOptions, Function<AVPacket, Integer> packetProvider)
    {
       this.packetProvider = packetProvider;
 
@@ -65,42 +67,70 @@ public class FFMPEGDecoder
       FFMPEGTools.checkNegativeError(error, "Opening codec");
    }
 
-   protected boolean decodePacket(Consumer<AVFrame> frameConsumer)
+   protected boolean decodeNextFrame(Consumer<AVFrame> frameConsumer)
    {
-      // Get the next packet
-      packetProvider.accept(nextPacket);
-
-      // Don't decode packets from another stream
-      if (nextPacket.stream_index() != streamToDecode.index())
-         return false;
-
-      // Send the packet to be decoded
-      error = avcodec_send_packet(decoderContext, nextPacket);
-      FFMPEGTools.checkNegativeError(error, "Sending packet for decoding");
-
-      while (error >= 0)
+      do
       {
+         if (sendAPacket)
+         {
+            // Send a packet
+            error = sendNextPacket();
+
+            // Handle the errors
+            if (error == AVERROR_EOF())
+               return false;
+            FFMPEGTools.checkNegativeError(error, "Sending packet");
+         }
+
          // Try to receive decoded frame
          error = avcodec_receive_frame(decoderContext, decodedFrame);
 
-         // Handle any errors
-         if (error == AVERROR_EAGAIN() || error == AVERROR_EOF()) // No errors, but no frame received
-            break;
-         else // bad errors
+         // Handle errors
+         if (error == AVERROR_EOF()) // No more frames to receive, don't throw exceptions
+            return false;
+         else if (error != AVERROR_EAGAIN())// Bad error. Throw exceptions
             FFMPEGTools.checkNegativeError(error, "Receiving decoded frame");
 
-         // Do whatever with the frame
-         frameConsumer.accept(decodedFrame);
+         // Go again if libav tells us to
+         sendAPacket = error == AVERROR_EAGAIN();
+      } while (sendAPacket);
 
-         // Unreference the frame
-         av_frame_unref(decodedFrame);
+      // Do whatever with the frame
+      frameConsumer.accept(decodedFrame);
+      return true;
+   }
+
+   private int sendNextPacket()
+   {
+      // Get a packet from the stream we're decoding
+      do
+      {
+         error = packetProvider.apply(nextPacket);
+         if (error < 0)
+            return error;
       }
+      while (nextPacket.stream_index() != streamToDecode.index());
 
-      return error == AVERROR_EAGAIN();
+      // Send the packet to the decoder
+      error = avcodec_send_packet(decoderContext, nextPacket);
+      return error;
    }
 
    public void destroy()
    {
-      // TODO:
+      // Flush the decoder
+      avcodec_flush_buffers(decoderContext);
+
+      // Free everything
+      avcodec_close(decoderContext);
+      avcodec_free_context(decoderContext);
+      av_frame_free(decodedFrame);
+      av_packet_free(nextPacket);
+
+      // Close everything
+      decoder.close();
+      decoderContext.close();
+      decodedFrame.close();
+      nextPacket.close();
    }
 }

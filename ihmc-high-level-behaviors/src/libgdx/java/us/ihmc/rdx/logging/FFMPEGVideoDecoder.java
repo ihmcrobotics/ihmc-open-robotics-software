@@ -8,7 +8,7 @@ import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
@@ -23,21 +23,25 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
 
    private SwsContext swsContext;
 
-   private final int outputWidth;
-   private final int outputHeight;
-   private final int outputPixelFormat;
+   private int outputWidth;
+   private int outputHeight;
+   private int outputPixelFormat;
    private final AVFrame outputFrame;
    private Mat outputImage;
 
-   public FFMPEGVideoDecoder(AVFormatContext intputContext,
+   public FFMPEGVideoDecoder(AVFormatContext inputContext, int outputPixelFormat)
+   {
+      this(inputContext, -1, -1, -1, -1, outputPixelFormat);
+   }
+
+   public FFMPEGVideoDecoder(AVFormatContext inputContext,
                              int wantedStreamIndex,
                              int relatedStreamIndex,
-                             int avMediaType,
                              int outputWidth,
                              int outputHeight,
                              int outputPixelFormat)
    {
-      super(intputContext, wantedStreamIndex, relatedStreamIndex, avMediaType);
+      super(inputContext, wantedStreamIndex, relatedStreamIndex, AVMEDIA_TYPE_VIDEO);
 
       this.outputWidth = outputWidth;
       this.outputHeight = outputHeight;
@@ -48,7 +52,7 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
    }
 
    @Override
-   public void initialize(AVDictionary codecOptions, Consumer<AVPacket> packetProvider)
+   public void initialize(AVDictionary codecOptions, Function<AVPacket, Integer> packetProvider)
    {
       super.initialize(codecOptions, packetProvider);
 
@@ -56,8 +60,12 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
       inputHeight = decoderContext.height();
       inputPixelFormat = decoderContext.pix_fmt();
 
-      int openCVType = FFMPEGTools.avPixelFormatToOpenCVType(outputPixelFormat);
-      outputImage = new Mat(inputHeight, inputWidth, openCVType);
+      if (outputWidth <= 0)
+         outputWidth = inputWidth;
+      if (outputHeight <= 0)
+         outputHeight = inputHeight;
+      if (outputPixelFormat < 0)
+         outputPixelFormat = inputPixelFormat;
 
       if (inputWidth != outputWidth || inputHeight != outputHeight || inputPixelFormat != outputPixelFormat)
          initializeSwsContext();
@@ -80,31 +88,30 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
 
    public Mat getNextFrame()
    {
-      boolean keepGoing;
-      do
+      if (outputImage != null)
+         outputImage.close();
+
+      boolean gotAFrame = decodeNextFrame(decodedFrame ->
       {
-         if (outputImage != null)
-            outputImage.close();
-
-         keepGoing = decodePacket(decodedFrame ->
+         if (swsContext != null)
          {
-            if (swsContext != null)
-            {
-               error = sws_scale_frame(swsContext, outputFrame, decodedFrame);
-               FFMPEGTools.checkNegativeError(error, "Scaling decoded frame to output frame");
-               outputImage = FFMPEGTools.avFrameToMat(outputFrame);
-            }
-            else
-            {
-               error = av_frame_ref(outputFrame, decodedFrame);
-               FFMPEGTools.checkNegativeError(error, "Copying decoded frame to output frame");
-               outputImage = FFMPEGTools.avFrameToMat(outputFrame);
-               av_frame_unref(outputFrame);
-            }
-         });
-      } while (keepGoing);
+            error = sws_scale_frame(swsContext, outputFrame, decodedFrame);
+            FFMPEGTools.checkNegativeError(error, "Scaling decoded frame to output frame");
+            outputImage = FFMPEGTools.avFrameToMat(outputFrame);
+         }
+         else
+         {
+            error = av_frame_ref(outputFrame, decodedFrame);
+            FFMPEGTools.checkNegativeError(error, "Copying decoded frame to output frame");
+            outputImage = FFMPEGTools.avFrameToMat(outputFrame);
+            av_frame_unref(outputFrame);
+         }
+      });
 
-      return outputImage.clone();
+      if (!gotAFrame)
+         return null;
+
+      return outputImage;
    }
 
    @Override
@@ -112,6 +119,16 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
    {
       super.destroy();
 
-      // TODO:
+      av_frame_free(outputFrame);
+      outputFrame.close();
+
+      if (outputImage != null)
+         outputImage.close();
+
+      if (swsContext != null)
+      {
+         sws_freeContext(swsContext);
+         swsContext.close();
+      }
    }
 }

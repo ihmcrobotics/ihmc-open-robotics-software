@@ -104,7 +104,7 @@ public class FFMPEGTools
    public static Mat avFrameToMat(AVFrame frame)
    {
       int openCVType = avPixelFormatToOpenCVType(frame.format());
-      return new Mat(frame.height(), frame.width(), openCVType, frame.data());
+      return new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
    }
 
    public static void listLicenses()
