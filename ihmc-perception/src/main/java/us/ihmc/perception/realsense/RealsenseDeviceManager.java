@@ -1,12 +1,11 @@
 package us.ihmc.perception.realsense;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.librealsense2.global.realsense2;
 import org.bytedeco.librealsense2.rs2_context;
 import org.bytedeco.librealsense2.rs2_device;
 import org.bytedeco.librealsense2.rs2_device_list;
 import org.bytedeco.librealsense2.rs2_error;
-import org.bytedeco.librealsense2.global.realsense2;
-
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
@@ -22,6 +21,8 @@ import java.util.function.Supplier;
  */
 public class RealsenseDeviceManager
 {
+   public static final String[] REALSENSE_SERIAL_NUMBERS = {"213522252883", "215122253249"};
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry graphicsListRegistry;

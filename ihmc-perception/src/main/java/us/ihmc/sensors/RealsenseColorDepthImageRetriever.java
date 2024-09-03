@@ -23,7 +23,6 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final String realsenseSerialNumber;
    private final RealsenseConfiguration realsenseConfiguration;
    private RealsenseDeviceManager realsenseManager;
    private RealsenseDevice realsense = null;
@@ -53,14 +52,12 @@ public class RealsenseColorDepthImageRetriever
    private int numberOfFailedReads = 0;
 
    public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
-                                            String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
                                             BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
-      this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.demandSupplier = realsenseDemandSupplier;
 
@@ -243,19 +240,26 @@ public class RealsenseColorDepthImageRetriever
       }
 
       realsenseManager = new RealsenseDeviceManager();
-      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
 
-      if (realsense != null && realsense.getDevice() != null)
+      for (String serialNumber : RealsenseDeviceManager.REALSENSE_SERIAL_NUMBERS)
       {
-         LogTools.info("Initializing Realsense...");
-         realsense.enableColor(realsenseConfiguration);
-         realsense.initialize();
+         LogTools.info("Attempting to initialize Realsense #{}", serialNumber);
+         realsense = realsenseManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
 
-         numberOfFailedReads = 0;
-      }
-      else
-      {
-         LogTools.error("Failed to initialize Realsense");
+         if (realsense != null && realsense.getDevice() != null)
+         {
+            LogTools.info("Initializing Realsense...");
+            realsense.enableColor(realsenseConfiguration);
+            realsense.initialize();
+
+            numberOfFailedReads = 0;
+
+            break;
+         }
+         else
+         {
+            LogTools.error("Failed to initialize Realsense #{}", serialNumber);
+         }
       }
 
       return realsense != null;

@@ -20,15 +20,11 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BallDetectionManager;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.IterativeClosestPointManager;
-import us.ihmc.perception.RapidHeightMapManager;
-import us.ihmc.perception.RawImage;
+import us.ihmc.perception.*;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -94,7 +90,6 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> ZED_DEPTH_TOPIC = PerceptionAPI.ZED2_DEPTH;
    private static final ROS2Topic<ImageMessage> ZED_CUT_OUT_DEPTH = PerceptionAPI.ZED2_CUT_OUT_DEPTH;
 
-   private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "215122253249");
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
    private static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_TOPIC = PerceptionAPI.D455_DEPTH_IMAGE;
 
@@ -228,7 +223,6 @@ public class PerceptionAndAutonomyProcess
       zedProcessAndPublishThread.start();
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
-                                                                      REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier, realsenseDemandNode::isDemanded);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
