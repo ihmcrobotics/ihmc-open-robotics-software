@@ -1,25 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertNull;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.junit.jupiter.api.Test;
-
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -31,8 +22,10 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -55,6 +48,14 @@ import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class RigidBodyControlManagerTest
 {
@@ -504,6 +505,7 @@ public class RigidBodyControlManagerTest
       userModeWeights.put(joint2.getName(), weight);
       Vector3D taskspaceAngularWeight = new Vector3D(1.0, 1.0, 1.0);
       Vector3D taskspaceLinearWeight = new Vector3D(1.0, 1.0, 1.0);
+      double nominalRhoWeight = 1.0;
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -520,6 +522,7 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     null,
                                                                     false,
+                                                                    nominalRhoWeight,
                                                                     yoTime,
                                                                     0.0,
                                                                     null,

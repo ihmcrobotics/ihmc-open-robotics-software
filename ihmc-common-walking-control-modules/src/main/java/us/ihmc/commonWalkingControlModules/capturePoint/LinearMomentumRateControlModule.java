@@ -146,7 +146,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private boolean initializeOnStateChange;
-   private boolean keepCoPInsideSupportPolygon;
+   private FrameConvexPolygon2DReadOnly multiContactStabilityRegion;
 
    private final CenterOfPressureCommandCalculator centerOfPressureCommandCalculator;
 
@@ -300,7 +300,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
       this.controlHeightWithMomentum.set(input.getControlHeightWithMomentum());
       this.initializeOnStateChange = input.getInitializeOnStateChange();
-      this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
+      this.multiContactStabilityRegion = input.getMultiContactStabilityRegion();
       for (RobotSide robotSide : RobotSide.values)
       {
          this.contactStateCommands.get(robotSide).set(input.getContactStateCommands().get(robotSide));
@@ -471,7 +471,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          icpController.initialize();
       }
 
-      icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      icpController.setMultiContactStabilityRegion(multiContactStabilityRegion);
    }
 
    private void computeICPController()

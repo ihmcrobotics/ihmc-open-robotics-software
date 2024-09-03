@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
@@ -89,7 +90,7 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<Lock> newColorImageLocks = new SideDependentList<>(new ReentrantLock(), new ReentrantLock());
    private final SideDependentList<Condition> newColorImagesAvailable = new SideDependentList<>(newColorImageLocks.get(RobotSide.LEFT).newCondition(),
                                                                                                 newColorImageLocks.get(RobotSide.RIGHT).newCondition());
-   private SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
+   private final SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
    private boolean initialized = false;
 
@@ -296,6 +297,10 @@ public class ZEDColorDepthImageRetriever
       {
          LogTools.error(interruptedException.getMessage());
       }
+      finally
+      {
+         newDepthImageLock.unlock();
+      }
 
       return depthImage.get();
    }
@@ -318,8 +323,22 @@ public class ZEDColorDepthImageRetriever
       {
          LogTools.error(interruptedException.getMessage());
       }
+      finally
+      {
+         newColorImageLocks.get(side).unlock();
+      }
 
       return colorImages.get(side).get();
+   }
+
+   public CameraIntrinsics getCameraIntrinsics(RobotSide cameraSide)
+   {
+      return new CameraIntrinsics(imageHeight,
+                                  imageWidth,
+                                  cameraFocalLengthX.get(cameraSide),
+                                  cameraFocalLengthY.get(cameraSide),
+                                  cameraPrincipalPointX.get(cameraSide),
+                                  cameraPrincipalPointY.get(cameraSide));
    }
 
    public FramePose3D getLatestSensorPose()

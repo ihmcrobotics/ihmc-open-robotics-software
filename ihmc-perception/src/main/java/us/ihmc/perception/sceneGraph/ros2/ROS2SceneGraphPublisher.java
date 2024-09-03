@@ -19,8 +19,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -59,7 +57,7 @@ public class ROS2SceneGraphPublisher
    {
       sceneGraphMessage.setSequenceId(sceneGraph.getCRDTInfo().getUpdateNumber());
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
-      sceneGraphMessage.getSceneTreeTypes().clear();
+      sceneGraphMessage.getSceneTreeTypes().resetQuick();
       sceneGraphMessage.getSceneTreeIndices().clear();
       sceneGraphMessage.getSceneNodes().clear();
       sceneGraphMessage.getDetectableSceneNodes().clear();

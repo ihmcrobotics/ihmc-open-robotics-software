@@ -23,7 +23,7 @@ float32 depth_discretization
 # The raw data for the image
 byte[<=25000000] data
 
-# The image format. Ordinal of OpenCVImageFormat
+# The image format. Ordinal of ImageMessageFormat
 uint8 format
 
 # Position of the focal point at sensor data acquisition

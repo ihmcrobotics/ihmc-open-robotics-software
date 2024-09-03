@@ -1,0 +1,38 @@
+#ifndef __behavior_msgs__msg__AI2RStatusMessage__idl__
+#define __behavior_msgs__msg__AI2RStatusMessage__idl__
+
+#include "behavior_msgs/msg/./AI2RObjectMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Status of robot, environment, and behaviors for use by external AI
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::AI2RStatusMessage_")
+      struct AI2RStatusMessage
+      {
+        /**
+         * Pose of the robot.
+         * Mid point between footsoles and facing the direction of the pelvis in world frame.
+         * Z always points straight up.
+         */
+        geometry_msgs::msg::dds::Pose robot_mid_feet_under_pelvis_pose_in_world;
+        /**
+         * List of objects in the scene
+         */
+        sequence<behavior_msgs::msg::dds::AI2RObjectMessage, 200> objects;
+        /**
+         * List of available behaviors (JSON file names)
+         */
+        sequence<string, 200> available_behaviors;
+      };
+    };
+  };
+};
+
+#endif

@@ -3,8 +3,9 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -112,7 +113,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       success = success && simulationTestHelper.simulateNow(4.0);
 
-      assertEquals(2, leftFootStateChanges.getValue());
+      Assertions.assertEquals(2, leftFootStateChanges.getValue());
 
       assertTrue(success);
 

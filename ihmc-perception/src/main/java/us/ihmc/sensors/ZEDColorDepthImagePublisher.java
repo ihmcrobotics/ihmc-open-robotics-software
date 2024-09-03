@@ -7,8 +7,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,6 +30,7 @@ public class ZEDColorDepthImagePublisher
    private final ROS2PublisherBasics<ImageMessage> ros2CutOutDepthImagePublisher;
 
    private final SideDependentList<CUDAJPEGProcessor> imageEncoders = new SideDependentList<>();
+   private final CUDACompressionTools dataCompressor = new CUDACompressionTools();
 
    private long lastDepthSequenceNumber = -1L;
    private long lastCutOutDepthSequenceNumber = -1L;
@@ -136,8 +137,7 @@ public class ZEDColorDepthImagePublisher
          depthImageToPublish.get();
 
          // Encode depth image to png
-         BytePointer depthPNGPointer = new BytePointer();
-         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
+         BytePointer depthPNGPointer = dataCompressor.compressDepth(depthImageToPublish.getGpuImageMat());
 
          // Publish image
          ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
@@ -154,7 +154,7 @@ public class ZEDColorDepthImagePublisher
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+         ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1.packMessageFormat(depthImageMessage);
 
          // Close GpuMat
          depthPNGPointer.close();

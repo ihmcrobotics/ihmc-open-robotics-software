@@ -281,6 +281,21 @@ public class OpenCVTools
       return a.cols() == imageWidth && a.rows() == imageHeight;
    }
 
+   public static boolean dimensionsMatch(Mat a, Mat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(GpuMat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(Mat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
    /**
     * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
     * Assumes Mat is continuous. i.e. Mat::isContinuous == true
@@ -322,5 +337,21 @@ public class OpenCVTools
          opencv_cudaarithm.bitwise_and(colorImage, colorImage, resultGpuMat, imageMask, Stream.Null());
       }
       return resultGpuMat;
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(Mat mat)
+   {
+      return mat.elemSize() * mat.total();
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(GpuMat mat)
+   {
+      return mat.elemSize() * mat.rows() * mat.cols();
    }
 }

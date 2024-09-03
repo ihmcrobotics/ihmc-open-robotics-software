@@ -137,7 +137,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private void detectFromVideoPacket(VideoPacket videoPacket)
    {
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().copyArray());
       detect(bufferedImage,
              videoPacket.getPosition(),
              videoPacket.getOrientation(),

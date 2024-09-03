@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;

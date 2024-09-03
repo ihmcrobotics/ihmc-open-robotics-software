@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "ArUco Detections" : true,
+    "Perception Visualizers" : true,
+    "Settings" : true
+  }
+}

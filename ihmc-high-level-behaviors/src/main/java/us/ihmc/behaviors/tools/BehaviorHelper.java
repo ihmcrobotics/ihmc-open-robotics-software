@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.tools;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorStatusPacket;
@@ -74,7 +74,7 @@ public class BehaviorHelper extends CommunicationHelper implements YoVariableCli
    public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       super(robotModel, ros2Node);
-      String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
+      String yoVariableRegistryName = StringUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
       yoVariableClientHelper = new YoVariableClientHelper(yoVariableRegistryName);
    }
 

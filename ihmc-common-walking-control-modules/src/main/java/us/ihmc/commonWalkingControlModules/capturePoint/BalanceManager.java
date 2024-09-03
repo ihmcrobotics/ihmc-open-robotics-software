@@ -538,7 +538,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
    }
 
-   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean isUpperBodyLoadBearing, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -548,7 +548,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
       capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
-      pelvisICPBasedTranslationManager.compute(supportLeg, isUpperBodyLoadBearing);
+      pelvisICPBasedTranslationManager.compute(supportLeg, multiContactStabilityRegion);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCMP2d);
 
       double omega0 = controllerToolbox.getOmega0();
@@ -623,7 +623,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
-      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(!isUpperBodyLoadBearing);
+      linearMomentumRateControlModuleInput.setMultiContactStabilityRegion(multiContactStabilityRegion);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());

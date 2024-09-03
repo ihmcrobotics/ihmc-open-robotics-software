@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -33,6 +34,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
+   private CUDACompressionTools compressionTools;
    private int imageWidth;
    private int imageHeight;
    private int numberOfPixels;
@@ -105,46 +107,40 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
 
             if (incomingCompressedImageBuffer == null)
             {
-               switch (ImageMessageFormat.getFormat(imageMessage))
+               ImageMessageFormat imageMessageFormat = ImageMessageFormat.getFormat(imageMessage);
+               LogTools.info("Creating Image Message Visualizer for {} with type {}", topic.getName(), imageMessageFormat.name());
+
+               bytesIfUncompressed = imageMessageFormat.getBytesPerPixel() * numberOfPixels;
+               incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+               incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+               switch (imageMessageFormat)
                {
                   case GRAY_PNG_8UC1 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type PNG_8UC1", topic.getName());
-                     bytesIfUncompressed = numberOfPixels;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
                   }
                   case DEPTH_PNG_16UC1 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_16UC1", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 2;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                   }
+                  case DEPTH_HYBRID_ZSTD_JPEG_16UC1 ->
+                  {
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+                     normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
+
+                     compressionTools = new CUDACompressionTools();
+                  }
                   case COLOR_JPEG_YUVI420 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_YUVI420", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 3;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
                   case COLOR_JPEG_BGR8 ->
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with the type COLOR_JPEG_BGR8", topic.getName());
-                     bytesIfUncompressed = numberOfPixels * 3;
-                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-
                      compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                   }
@@ -164,9 +160,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
             sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
          }
 
-         compressedBytesMat.cols(numberOfBytes);
-         compressedBytesMat.data(incomingCompressedImageBytePointer);
-         opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
+         if (ImageMessageFormat.getFormat(imageMessage) == ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1)
+         {
+            compressionTools.decompressDepth(incomingCompressedImageBytePointer, decompressedImage);
+         }
+         else
+         {
+            compressedBytesMat.cols(numberOfBytes);
+            compressedBytesMat.data(incomingCompressedImageBytePointer);
+            opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
+         }
 
          synchronized (this) // synchronize with the update method
          {
@@ -178,7 +181,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
                {
                   OpenCVTools.convertGrayToRGBA(decompressedImage, getOpenCVVideoVisualizer().getRGBA8Mat());
                }
-               case DEPTH_PNG_16UC1 ->
+               case DEPTH_PNG_16UC1, DEPTH_HYBRID_ZSTD_JPEG_16UC1 ->
                {
                   OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
                   OpenCVTools.convertGrayToRGBA(normalizedScaledImage, getOpenCVVideoVisualizer().getRGBA8Mat());
@@ -222,6 +225,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       unsubscribe();
       super.destroy();
       getOpenCVVideoVisualizer().destroy();
+      if (compressionTools != null)
+         compressionTools.destroy();
    }
 
    public void renderStatistics()

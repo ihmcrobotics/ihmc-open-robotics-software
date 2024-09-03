@@ -81,11 +81,9 @@ public class RDXROS2VideoSensorDemo
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(false);
-            highLevelDepthSensorSimulator.setPublishDepthImageROS1(false);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
-            highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);
          }

@@ -18,12 +18,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.1") {
-      exclude group: "org.junit.jupiter", module: "junit-jupiter-api"
-      exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
-      exclude group: "org.junit.platform", module: "junit-platform-commons"
-      exclude group: "org.junit.platform", module: "junit-platform-launcher"
-   }
+   api("us.ihmc:ihmc-robot-data-logger:0.29.7")
 }
 
 benchmarksDependencies {
@@ -31,7 +26,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-convex-optimization:0.17.19")
+   api("us.ihmc:ihmc-convex-optimization:0.17.21")
 }
 
 remotes {
