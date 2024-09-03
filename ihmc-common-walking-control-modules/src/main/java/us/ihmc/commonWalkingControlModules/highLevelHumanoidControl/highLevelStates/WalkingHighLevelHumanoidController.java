@@ -818,9 +818,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          naturalPostureManager.compute();
       }
 
-      comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
-      FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
-
       /*
        * The comHeightManager can control the pelvis with a feedback controller and doesn't always need
        * the z component of the momentum command. It would be better to remove the coupling between these
@@ -828,7 +825,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
        */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       RobotSide supportLeg = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
-      balanceManager.compute(supportLeg, heightControlCommand, multiContactStabilityRegion, controlHeightWithMomentum);
+      balanceManager.compute(supportLeg, multiContactStabilityRegion, controlHeightWithMomentum);
+
+      // TODO: double check: The desired ICP velocity is probably 1 tick old, which could be troublesome at state change
+      comHeightManager.compute(balanceManager.getDesiredICPVelocity(), desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0, feetManager);
+      FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
+      balanceManager.submitHeightControlCommand(heightControlCommand);
+
    }
 
    private void updateWholeBodyContactState()

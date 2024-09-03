@@ -538,7 +538,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
    }
 
-   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -593,26 +593,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-      if (heightControlCommand == null)
-      {
-         linearMomentumRateControlModuleInput.setHasHeightCommand(false);
-      }
-      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
-      {
-         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
-         linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);
-         linearMomentumRateControlModuleInput.setPelvisHeightControlCommand((PointFeedbackControlCommand) heightControlCommand);
-      }
-      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.MOMENTUM)
-      {
-         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
-         linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(false);
-         linearMomentumRateControlModuleInput.setCenterOfMassHeightControlCommand((CenterOfMassFeedbackControlCommand) heightControlCommand);
-      }
-      else
-      {
-         throw new IllegalArgumentException("Invalid height control type.");
-      }
+//      submitHeightControlCommand(heightControlCommand);
 
       if (perfectCMPTrajectory != null)
       {
@@ -643,6 +624,30 @@ public class BalanceManager implements SCS2YoGraphicHolder
       if (momentumTrajectoryHandler != null)
       {
          momentumTrajectoryHandler.packDesiredAngularMomentumAtTime(yoTime.getValue(), null, null);
+      }
+   }
+
+   public void submitHeightControlCommand(FeedbackControlCommand<?> heightControlCommand)
+   {
+      if (heightControlCommand == null)
+      {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(false);
+      }
+      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.POINT)
+      {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
+         linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(true);
+         linearMomentumRateControlModuleInput.setPelvisHeightControlCommand((PointFeedbackControlCommand) heightControlCommand);
+      }
+      else if (heightControlCommand.getCommandType() == ControllerCoreCommandType.MOMENTUM)
+      {
+         linearMomentumRateControlModuleInput.setHasHeightCommand(true);
+         linearMomentumRateControlModuleInput.setUsePelvisHeightCommand(false);
+         linearMomentumRateControlModuleInput.setCenterOfMassHeightControlCommand((CenterOfMassFeedbackControlCommand) heightControlCommand);
+      }
+      else
+      {
+         throw new IllegalArgumentException("Invalid height control type.");
       }
    }
 
