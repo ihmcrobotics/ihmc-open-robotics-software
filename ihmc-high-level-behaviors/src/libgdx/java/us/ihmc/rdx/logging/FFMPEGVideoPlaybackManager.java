@@ -6,7 +6,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.tools.thread.Throttler;
 

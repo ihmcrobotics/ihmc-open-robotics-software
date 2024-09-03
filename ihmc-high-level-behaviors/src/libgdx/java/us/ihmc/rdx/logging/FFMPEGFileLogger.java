@@ -12,6 +12,7 @@ import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.ffmpeg.FFMPEGTools;
 
 import java.nio.file.Paths;
 

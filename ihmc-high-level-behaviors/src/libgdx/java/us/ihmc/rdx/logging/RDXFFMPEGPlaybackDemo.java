@@ -5,6 +5,7 @@ import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImLong;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
