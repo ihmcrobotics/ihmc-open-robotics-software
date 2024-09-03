@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
@@ -26,6 +28,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getBehaviorTreeTypes().resetQuick();
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getRootNodes().clear();
+      treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getDoorTraversals().clear();
@@ -54,6 +57,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getRootNodes().size());
             rootNodeState.toMessage(treeStateMessage.getRootNodes().add());
+         }
+         else if (nodeState instanceof AI2RNodeState ai2rNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.AI2R_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getAi2rNodes().size());
+            ai2rNodeState.toMessage(treeStateMessage.getAi2rNodes().add());
          }
          else if (nodeState instanceof ActionSequenceState actionSequenceState)
          {
@@ -161,6 +170,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          rootNodeState.fromMessage(subscriptionNode.getBehaviorTreeRootNodeStateMessage());
       }
+      else if (subscriptionNode.getType() == AI2RNodeDefinition.class && nodeState instanceof AI2RNodeState ai2rNodeState)
+      {
+         ai2rNodeState.fromMessage(subscriptionNode.getAI2RNodeStateMessage());
+      }
       else if (subscriptionNode.getType() == ActionSequenceDefinition.class && nodeState instanceof ActionSequenceState actionSequenceState)
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
@@ -239,6 +252,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeRootNodeStateMessage(rootNodeStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(rootNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(rootNodeStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.AI2R_NODE ->
+         {
+            AI2RNodeStateMessage ai2rNodeStateMessage = treeStateMessage.getAi2rNodes().get(indexInTypesList);
+            subscriptionNode.setAI2RNodeStateMessage(ai2rNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(ai2rNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(ai2rNodeStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.ACTION_SEQUENCE ->
          {

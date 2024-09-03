@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b13e2f588d7da88d5206cd65dd4eb428ecad6f183e6f021de8aeeacbbb9368c5";
+   		return "50561c21b0473ba92ebfb6d282b4c635cb3ddf27dd88fa52d8ec9b9b44ca63b7";
    }
    
    @Override
@@ -68,6 +68,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -145,6 +148,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getBasicNodes().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getCdrSerializedSize(data.getBasicNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getAi2rNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType.getCdrSerializedSize(data.getAi2rNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getActionSequences().size(); ++i0)
@@ -238,6 +246,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getBasicNodes());else
           throw new RuntimeException("basic_nodes field exceeds the maximum length");
 
+      if(data.getAi2rNodes().size() <= 1)
+      cdr.write_type_e(data.getAi2rNodes());else
+          throw new RuntimeException("ai2r_nodes field exceeds the maximum length");
+
       if(data.getActionSequences().size() <= 200)
       cdr.write_type_e(data.getActionSequences());else
           throw new RuntimeException("action_sequences field exceeds the maximum length");
@@ -303,6 +315,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getBehaviorTreeIndices());	
       cdr.read_type_e(data.getRootNodes());	
       cdr.read_type_e(data.getBasicNodes());	
+      cdr.read_type_e(data.getAi2rNodes());	
       cdr.read_type_e(data.getActionSequences());	
       cdr.read_type_e(data.getDoorTraversals());	
       cdr.read_type_e(data.getTrashCanInteractions());	
@@ -330,6 +343,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
       ser.write_type_e("root_nodes", data.getRootNodes());
       ser.write_type_e("basic_nodes", data.getBasicNodes());
+      ser.write_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
       ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
@@ -356,6 +370,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
       ser.read_type_e("root_nodes", data.getRootNodes());
       ser.read_type_e("basic_nodes", data.getBasicNodes());
+      ser.read_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
       ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());

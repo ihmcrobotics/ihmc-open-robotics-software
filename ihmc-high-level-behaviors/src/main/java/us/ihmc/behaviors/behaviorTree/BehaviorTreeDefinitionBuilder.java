@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
@@ -16,6 +17,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == BehaviorTreeNodeDefinition.class)
       {
          return new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == AI2RNodeDefinition.class)
+      {
+         return new AI2RNodeDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == ActionSequenceDefinition.class)
       {

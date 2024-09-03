@@ -4,9 +4,11 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabili
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -253,7 +255,7 @@ public class LinearMomentumRateControlModuleInput
       this.multiContactStabilityRegion.setIncludingFrame(multiContactStabilityRegion);
    }
 
-   public FrameConvexPolygon2DReadOnly getMultiContactStabilityRegion()
+   public FrameConvexPolygon2DBasics getMultiContactStabilityRegion()
    {
       return multiContactStabilityRegion;
    }
@@ -320,7 +322,7 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (initializeOnStateChange ^ other.initializeOnStateChange)
             return false;
-         if (!Objects.equals(multiContactStabilityRegion, other.multiContactStabilityRegion))
+         if (!multiContactStabilityRegion.equals(other.multiContactStabilityRegion))
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
             return false;
