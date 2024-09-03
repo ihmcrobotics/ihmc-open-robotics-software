@@ -116,7 +116,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
          }
          jsonNode.put("plannerInitialStanceSide", plannerInitialStanceSide.getValue().name());
          jsonNode.put("plannerPerformAStarSearch", plannerPerformAStarSearch.getValue());
-         jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
+         if (plannerPerformAStarSearch.getValue())
+            jsonNode.put("plannerWalkWithGoalOrientation", plannerWalkWithGoalOrientation.getValue());
          plannerParameters.toJSON(jsonNode);
       }
    }

@@ -458,8 +458,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                if (ImGui.radioButton(labels.get(initialStanceSide.name()), definition.getPlannerInitialStanceSide().getValue() == initialStanceSide))
                   definition.getPlannerInitialStanceSide().setValue(initialStanceSide);
             }
+
             performAStarSearchWidget.renderImGuiWidget();
+
+            ImGui.beginDisabled(!definition.getPlannerPerformAStarSearch().getValue());
             walkWithGoalOrientationWidget.renderImGuiWidget();
+            ImGui.endDisabled();
 
             ImGui.text("Preview steps: %d".formatted(state.getPreviewFootsteps().getSize()));
 
