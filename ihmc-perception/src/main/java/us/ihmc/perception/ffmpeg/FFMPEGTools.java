@@ -1,6 +1,7 @@
 package us.ihmc.perception.ffmpeg;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.*;
@@ -12,6 +13,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
@@ -126,5 +128,11 @@ public class FFMPEGTools
                        });
 
       LogTools.debug(licensesStringBuilder.toString());
+   }
+
+   public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)
+   {
+      for (Map.Entry<String, String> option : options.entrySet())
+         av_dict_set(dictionaryToSet, option.getKey(), option.getValue(), 0);
    }
 }

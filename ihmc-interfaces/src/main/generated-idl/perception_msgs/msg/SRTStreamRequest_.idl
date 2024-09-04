@@ -1,0 +1,31 @@
+#ifndef __perception_msgs__msg__SRTStreamRequest__idl__
+#define __perception_msgs__msg__SRTStreamRequest__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SRTStreamRequest_")
+      struct SRTStreamRequest
+      {
+        /**
+         * Name of the topic being requested
+         */
+        string topic_name;
+        /**
+         * Address to send the stream to
+         */
+        string receiver_address;
+        /**
+         * Port to send the stream to
+         */
+        unsigned short receiver_port;
+      };
+    };
+  };
+};
+
+#endif
