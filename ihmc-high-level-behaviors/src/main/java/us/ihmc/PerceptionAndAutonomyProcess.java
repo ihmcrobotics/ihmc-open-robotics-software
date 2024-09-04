@@ -227,7 +227,6 @@ public class PerceptionAndAutonomyProcess
       zedProcessAndPublishThread.start();
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
-                                                                      null, // Not specifying the serial number; accept any realsense device
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier, realsenseDemandNode::isDemanded);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);

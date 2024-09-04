@@ -24,8 +24,6 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   @Nullable
-   private final String realsenseSerialNumber;
    private final RealsenseConfiguration realsenseConfiguration;
    private RealsenseDeviceManager realsenseManager;
    private RealsenseDevice realsense = null;
@@ -55,14 +53,12 @@ public class RealsenseColorDepthImageRetriever
    private int numberOfFailedReads = 0;
 
    public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
-                                            @Nullable String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
                                             BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
-      this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.demandSupplier = realsenseDemandSupplier;
 
@@ -245,7 +241,7 @@ public class RealsenseColorDepthImageRetriever
       }
 
       realsenseManager = new RealsenseDeviceManager();
-      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
+      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseConfiguration);
 
       if (realsense != null && realsense.getDevice() != null)
       {
