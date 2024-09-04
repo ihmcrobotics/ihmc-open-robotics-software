@@ -21,8 +21,6 @@ import java.util.function.Supplier;
  */
 public class RealsenseDeviceManager
 {
-   public static final String[] REALSENSE_SERIAL_NUMBERS = {"213522252883", "215122253249"};
-
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry graphicsListRegistry;
@@ -64,7 +62,8 @@ public class RealsenseDeviceManager
    /**
     *  Creates Realsense Device handler.
     *
-    *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+    *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor.
+    *                              Passing in {@code null} will choose the first device found.
     *  @param configuration The requested device settings
     *  @return BytedecoRealsense device object for accessing sensor data and config information
     */
@@ -79,7 +78,8 @@ public class RealsenseDeviceManager
    /**
    *  Creates Realsense Device handler.
    *
-   *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+   *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor.
+    *                              Passing in {@code null} will choose the first device found.
    *  @param depthWidth The width of the depth maps to be requested from the sensor firmware
    *  @param depthHeight  The height of depth maps to be requested from the sensor firmware
    *  @param fps Frames Per Second which is the frequency of update to be requested from the sensor firmware
@@ -87,8 +87,8 @@ public class RealsenseDeviceManager
    */
    public RealsenseDevice createBytedecoRealsenseDevice(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
    {
-      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new RealsenseDevice(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
+      String sanitizedSerialNumberToFind = serialNumberToFind != null ? serialNumberToFind.toLowerCase() : null;
+      return new RealsenseDevice(context, createDevice(sanitizedSerialNumberToFind), depthWidth, depthHeight, fps);
    }
 
    public rs2_device createDevice(String serialNumberToFind)
@@ -117,7 +117,7 @@ public class RealsenseDeviceManager
             if (deviceRecommendedFirmwareVersion != null)
                LogTools.info("Realsense device recommended firmware version: {}", deviceRecommendedFirmwareVersion);
 
-            if (deviceSerialNumber.contains(serialNumberToFind.toLowerCase()))
+            if (serialNumberToFind == null || deviceSerialNumber.contains(serialNumberToFind.toLowerCase()))
             {
                return rs2Device;
             }

@@ -12,6 +12,7 @@ import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -23,6 +24,8 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
+   @Nullable
+   private final String realsenseSerialNumber;
    private final RealsenseConfiguration realsenseConfiguration;
    private RealsenseDeviceManager realsenseManager;
    private RealsenseDevice realsense = null;
@@ -52,12 +55,14 @@ public class RealsenseColorDepthImageRetriever
    private int numberOfFailedReads = 0;
 
    public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
+                                            @Nullable String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
                                             BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
+      this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.demandSupplier = realsenseDemandSupplier;
 
@@ -240,26 +245,19 @@ public class RealsenseColorDepthImageRetriever
       }
 
       realsenseManager = new RealsenseDeviceManager();
+      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
 
-      for (String serialNumber : RealsenseDeviceManager.REALSENSE_SERIAL_NUMBERS)
+      if (realsense != null && realsense.getDevice() != null)
       {
-         LogTools.info("Attempting to initialize Realsense #{}", serialNumber);
-         realsense = realsenseManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+         LogTools.info("Initializing Realsense...");
+         realsense.enableColor(realsenseConfiguration);
+         realsense.initialize();
 
-         if (realsense != null && realsense.getDevice() != null)
-         {
-            LogTools.info("Initializing Realsense...");
-            realsense.enableColor(realsenseConfiguration);
-            realsense.initialize();
-
-            numberOfFailedReads = 0;
-
-            break;
-         }
-         else
-         {
-            LogTools.error("Failed to initialize Realsense #{}", serialNumber);
-         }
+         numberOfFailedReads = 0;
+      }
+      else
+      {
+         LogTools.error("Failed to initialize Realsense");
       }
 
       return realsense != null;

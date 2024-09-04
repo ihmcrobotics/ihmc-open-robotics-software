@@ -21,6 +21,7 @@ import us.ihmc.tools.string.StringTools;
 
 import java.util.function.Supplier;
 
+import static org.bytedeco.librealsense2.global.realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class RealsenseDevice
@@ -69,7 +70,7 @@ public class RealsenseDevice
    private CameraIntrinsics depthCameraIntrinsics;
    private CameraIntrinsics colorCameraIntrinsics;
 
-   public RealsenseDevice(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
+   public RealsenseDevice(rs2_context context, rs2_device device, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
       this.depthWidth = depthWidth;
@@ -82,6 +83,9 @@ public class RealsenseDevice
 
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError("Failed to enable stream.");
+
+      BytePointer serialNumber = realsense2.rs2_get_device_info(device, RS2_CAMERA_INFO_SERIAL_NUMBER, error);
+      checkError("Failed to get device serial number.");
 
       realsense2.rs2_config_enable_device(config, serialNumber, error);
       checkError("Failed to enable device.");
@@ -154,7 +158,11 @@ public class RealsenseDevice
 
       realsense2.rs2_delete_sensor_list(sensorList);
 
-      LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
+      if (serialNumber != null && !serialNumber.isNull())
+      {
+         LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber.getString());
+         serialNumber.close();
+      }
    }
 
    private boolean checkSensorType(rs2_sensor sensor, int sensorType)
