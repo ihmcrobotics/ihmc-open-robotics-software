@@ -48,10 +48,10 @@ public class RDXROS2StatsPanel extends RDXPanel
                                    .reversed()
                                    .thenComparingInt(Object::hashCode));
    private final TreeSet<PubSubPublisherStats> publishersSortedByName
-         = new TreeSet<>(Comparator.<PubSubPublisherStats, String>comparing(o -> o.getPublisher().getAttributes().getHumanReadableTopicName())
+         = new TreeSet<>(Comparator.<PubSubPublisherStats, String>comparing(o -> o.getPublisher().getAttributes().getTopicName())
                                    .thenComparingInt(Object::hashCode));
    private final TreeSet<PubSubSubscriberStats> subscribersSortedByName
-         = new TreeSet<>(Comparator.<PubSubSubscriberStats, String>comparing(o -> o.getSubscriber().getAttributes().getHumanReadableTopicName())
+         = new TreeSet<>(Comparator.<PubSubSubscriberStats, String>comparing(o -> o.getSubscriber().getAttributes().getTopicName())
                                    .thenComparingInt(Object::hashCode));
 
    public RDXROS2StatsPanel()
@@ -316,8 +316,8 @@ public class RDXROS2StatsPanel extends RDXPanel
    private void renderPublisherRow(PubSubPublisherStats publisherStats)
    {
       String nodeName = publisherStats.getParticipant().getAttributes().getName();
-      String topicName = publisherStats.getPublisher().getAttributes().getHumanReadableTopicName();
-      String typeName = publisherStats.getPublisher().getAttributes().getHumanReadableTopicDataTypeName();
+      String topicName = publisherStats.getPublisher().getAttributes().getTopicName();
+      String typeName = publisherStats.getPublisher().getAttributes().getTopicDataType().getName();
       String reliabilityKindName = publisherStats.getPublisher().getAttributes().getReliabilityKind().name();
 
       boolean show;
@@ -364,8 +364,8 @@ public class RDXROS2StatsPanel extends RDXPanel
    private void renderSubscriberRow(PubSubSubscriberStats subscriberStats)
    {
       String nodeName = subscriberStats.getParticipant().getAttributes().getName();
-      String topicName = subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName();
-      String typeName = subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName();
+      String topicName = subscriberStats.getSubscriber().getAttributes().getTopicName();
+      String typeName = subscriberStats.getSubscriber().getAttributes().getTopicDataType().getName();
       String reliabilityKindName = subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name();
 
       boolean show;
