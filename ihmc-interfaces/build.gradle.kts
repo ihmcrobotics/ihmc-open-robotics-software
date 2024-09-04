@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.24.3")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.24.4")
       classpath("us.ihmc:log-tools:0.6.3") // removes vulnerable log4j versions from plugin classpath; can be removed later
    }
 }
@@ -31,7 +31,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:euclid-geometry:0.21.0")
    api("us.ihmc:ihmc-pub-sub:0.19.2")
-   api("us.ihmc:ros2-common-interfaces:0.24.3") {
+   api("us.ihmc:ros2-common-interfaces:0.24.4") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
@@ -41,13 +41,13 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.24.3")
+   api("us.ihmc:ihmc-ros2-library:0.24.4")
 }
 
 generatorDependencies {
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:ihmc-commons:0.32.0")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.24.3")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.24.4")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()

@@ -20,7 +20,7 @@ mainDependencies {
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.7")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.8")
 }
 
 testDependencies {
