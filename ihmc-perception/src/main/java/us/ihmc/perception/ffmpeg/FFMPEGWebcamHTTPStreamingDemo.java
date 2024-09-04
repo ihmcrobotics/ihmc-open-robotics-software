@@ -2,6 +2,7 @@ package us.ihmc.perception.ffmpeg;
 
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
+import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -11,6 +12,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 
+import static org.bytedeco.ffmpeg.global.avcodec.av_packet_rescale_ts;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
@@ -76,6 +78,7 @@ public class FFMPEGWebcamHTTPStreamingDemo
    private class ClientHandler implements Runnable
    {
       private final AVFormatContext outputContext;
+      private final AVStream outputStream;
       private final FFMPEGVideoEncoder videoEncoder;
       private int error;
       private boolean keepGoing = true;
@@ -90,7 +93,7 @@ public class FFMPEGWebcamHTTPStreamingDemo
          outputContext.pb(clientContext);
 
          // Initialize the video encoder
-         videoEncoder = new FFMPEGVideoEncoder(outputContext,
+         videoEncoder = new FFMPEGVideoEncoder(outputContext.oformat(),
                                                "h264_nvenc",
                                                400000,
                                                imageWidth,
@@ -116,6 +119,8 @@ public class FFMPEGWebcamHTTPStreamingDemo
          videoEncoder.initialize(encoderFlags);
          av_dict_free(encoderFlags);
          encoderFlags.close();
+
+         outputStream = videoEncoder.newStream(outputContext);
       }
 
       @Override
@@ -139,6 +144,9 @@ public class FFMPEGWebcamHTTPStreamingDemo
             videoEncoder.setNextFrame(image);
             keepGoing = videoEncoder.encodeNextFrame(packet ->
             {
+               av_packet_rescale_ts(packet, packet.time_base(), outputStream.time_base());
+               packet.stream_index(outputStream.index());
+
                error = av_interleaved_write_frame(outputContext, packet);
                if (error < 0)
                   disconnected = true;

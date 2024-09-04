@@ -2,6 +2,7 @@ package us.ihmc.perception.ffmpeg;
 
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
+import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -21,6 +22,7 @@ public class FFMPEGWebcamUDPStreamingDemo
    private final VideoCapture videoCapture = new VideoCapture(-1);
 
    private final AVFormatContext outputContext = new AVFormatContext();
+   private final AVStream outputStream;
    private final AVIOContext ioContext = new AVIOContext();
    private final FFMPEGVideoEncoder videoEncoder;
 
@@ -47,7 +49,7 @@ public class FFMPEGWebcamUDPStreamingDemo
       outputContext.flush_packets(1);
 
       // Initialize video encoder
-      videoEncoder = new FFMPEGVideoEncoder(outputContext,
+      videoEncoder = new FFMPEGVideoEncoder(outputContext.oformat(),
                                             "h264_nvenc",
                                             400000,
                                             imageWidth,
@@ -74,6 +76,8 @@ public class FFMPEGWebcamUDPStreamingDemo
       av_dict_free(encoderFlags);
       encoderFlags.close();
 
+      outputStream = videoEncoder.newStream(outputContext);
+
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "WebcamUDPStreamingShutdown"));
 
       run();
@@ -92,7 +96,7 @@ public class FFMPEGWebcamUDPStreamingDemo
 
          // Encode it and send it off
          videoEncoder.setNextFrame(frame);
-         done = !videoEncoder.encodeAndWriteNextFrame();
+         done = !videoEncoder.encodeAndWriteNextFrame(outputContext, outputStream);
       }
 
       readyForShutdown.set();
@@ -109,6 +113,7 @@ public class FFMPEGWebcamUDPStreamingDemo
       ioContext.close();
       avformat_free_context(outputContext);
       outputContext.close();
+      outputStream.close();
       videoCapture.close();
    }
 

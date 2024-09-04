@@ -1,10 +1,10 @@
 package us.ihmc.perception.ffmpeg;
 
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
+import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
+import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
@@ -33,7 +33,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
 
    private SwsContext swsContext;
 
-   public FFMPEGVideoEncoder(AVFormatContext formatContext,
+   public FFMPEGVideoEncoder(AVOutputFormat outputFormat,
                              String preferredCodecName,
                              int bitRate,
                              int outputWidth,
@@ -44,7 +44,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
                              int maxBFrames,
                              int inputPixelFormat)
    {
-      super(formatContext, preferredCodecName, bitRate);
+      super(outputFormat, preferredCodecName, bitRate);
 
       this.outputWidth = outputWidth;
       this.outputHeight = outputHeight;
@@ -62,10 +62,6 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
    public void initialize(AVDictionary codecOptions)
    {
       timeBase = avutil.av_inv_q(avutil.av_d2q(outputFrameRate, 4096));
-      stream.time_base(timeBase);
-
-      if ((outputContext.oformat().flags() & avformat.AVFMT_GLOBALHEADER) != 0)
-         encoderContext.flags(encoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
 
       inputFrame.format(inputPixelFormat);
       // input frame width & height initialized upon reception of first image
@@ -87,14 +83,22 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       encoderContext.gop_size(groupOfPicturesSize);
       encoderContext.max_b_frames(maxBFrames);
 
-      error = avcodec_parameters_from_context(stream.codecpar(), encoderContext);
-      FFMPEGTools.checkNegativeError(error, "Copying parameters from codec to stream");
-
       AVDictionary optionsCopy = new AVDictionary();
       av_dict_copy(optionsCopy, codecOptions, 0);
       error = avcodec_open2(encoderContext, encoder, optionsCopy);
       av_dict_free(optionsCopy);
       FFMPEGTools.checkNegativeError(error, "Opening codec");
+   }
+
+   @Override
+   public AVStream newStream(AVFormatContext outputContext)
+   {
+      AVStream stream = super.newStream(outputContext);
+
+      error = avcodec_parameters_from_context(stream.codecpar(), encoderContext);
+      FFMPEGTools.checkNegativeError(error, "Copying parameters from codec to stream");
+
+      return stream;
    }
 
    public void setNextFrame(Mat frame)

@@ -2,6 +2,7 @@ package us.ihmc.perception.ffmpeg;
 
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
+import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_videoio;
@@ -39,7 +40,7 @@ public class FFMPEGWebcamEncodingDemo
       FFMPEGTools.checkPointer(outputContext, "Allocating output context");
       FFMPEGTools.checkNegativeError(error, "Allocating output context");
 
-      FFMPEGVideoEncoder videoEncoder = new FFMPEGVideoEncoder(outputContext,
+      FFMPEGVideoEncoder videoEncoder = new FFMPEGVideoEncoder(outputContext.oformat(),
                                                                "h264_nvenc",
                                                                400000,
                                                                imageWidth,
@@ -51,6 +52,7 @@ public class FFMPEGWebcamEncodingDemo
                                                                AV_PIX_FMT_BGR24);
 
       videoEncoder.initialize();
+      AVStream outputStream = videoEncoder.newStream(outputContext);
 
       FileTools.ensureDirectoryExists(Paths.get(RESULT_FILE_PATH).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
@@ -73,21 +75,18 @@ public class FFMPEGWebcamEncodingDemo
 
          System.out.println("Encoding frame " + i);
          videoEncoder.setNextFrame(frame);
-         notDone = videoEncoder.encodeAndWriteNextFrame();
+         notDone = videoEncoder.encodeAndWriteNextFrame(outputContext, outputStream);
 
          frame.close();
       }
 
       av_write_trailer(outputContext);
-
       videoEncoder.destroy();
       avio_closep(outputContext.pb());
-
       avformat_free_context(outputContext);
-
       av_dict_free(streamFlags);
       streamFlags.close();
-
+      outputStream.close();
       videoCapture.close();
    }
 
