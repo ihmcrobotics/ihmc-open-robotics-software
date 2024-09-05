@@ -15,7 +15,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6c372e16c39ac26f646ed283adcdd54d5e01eb2546014e395bdb0d65f80dd999";
+   		return "a44158c7e1f9f01839db7c39eaa61ba8e6bc0cc4401c1239381adbf5d25b9cad";
    }
    
    @Override
@@ -56,9 +56,15 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -78,9 +84,17 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPositionInWorld(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredLinearVelocityInWorld(), current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getWeights(), current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       return current_alignment - initial_alignment;
@@ -91,8 +105,13 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       cdr.write_type_4(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
+      cdr.write_type_7(data.getHasDesiredLinearVelocity());
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredLinearVelocityInWorld(), cdr);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
+      cdr.write_type_6(data.getLinearRateLimitation());
+
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
@@ -100,8 +119,13 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       data.setSequenceId(cdr.read_type_4());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
+      data.setHasDesiredLinearVelocity(cdr.read_type_7());
+      	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredLinearVelocityInWorld(), cdr);	
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeights(), cdr);	
+      data.setLinearRateLimitation(cdr.read_type_6());
+      	
 
    }
 
@@ -111,10 +135,14 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
+      ser.write_type_7("has_desired_linear_velocity", data.getHasDesiredLinearVelocity());
+      ser.write_type_a("desired_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredLinearVelocityInWorld());
+
       ser.write_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
       ser.write_type_a("weights", new ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 
+      ser.write_type_6("linear_rate_limitation", data.getLinearRateLimitation());
    }
 
    @Override
@@ -123,10 +151,14 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
+      data.setHasDesiredLinearVelocity(ser.read_type_7("has_desired_linear_velocity"));
+      ser.read_type_a("desired_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredLinearVelocityInWorld());
+
       ser.read_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
       ser.read_type_a("weights", new ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 
+      data.setLinearRateLimitation(ser.read_type_6("linear_rate_limitation"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage src, toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage dest)

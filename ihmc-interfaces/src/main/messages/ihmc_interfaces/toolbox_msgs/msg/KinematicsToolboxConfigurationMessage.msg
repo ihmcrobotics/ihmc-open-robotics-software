@@ -27,7 +27,7 @@ bool enable_collision_avoidance false
 # By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
 # For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
 # A command that persists is overridden if another is received for the same body.
-# Priviliged configuration inputs are not affected by this flag.
+# Privileged configuration inputs are not affected by this flag.
 # In case persistence of inputs is not desired, use this flag to disable it.
 # When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
 bool disable_input_persistence false
@@ -40,3 +40,9 @@ bool enable_input_persistence false
 bool enable_support_polygon_constraint
 # When true, this disables the support polygon constraint on the center of mass.
 bool disable_support_polygon_constraint
+
+# Hash codes of the joints to be deactivated in the solver
+int32[<=10] joints_to_deactivate
+# Hash codes of the joints to be re-activated in the solver
+int32[<=10] joints_to_activate
+

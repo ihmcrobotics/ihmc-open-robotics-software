@@ -19,8 +19,8 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
    {
       gains = new YoPDGains("Output", registry);
       gains.createDerivativeGainUpdater(false);
-      gains.setKp(500.0);
-      gains.setZeta(1.0);
+      gains.setKp(tools.getParameters().getOutputFeedbackGain());
+      gains.setZeta(tools.getParameters().getOutputFeedbackDampingRatio());
 
       updateDT = tools.getToolboxControllerPeriod();
 
@@ -75,18 +75,24 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
 
          double qMin = outputRobotState.getOneDoFJoints()[i].getJointLimitLower();
          double qMax = outputRobotState.getOneDoFJoints()[i].getJointLimitUpper();
+         double qdMin = outputRobotState.getOneDoFJoints()[i].getVelocityLimitLower();
+         double qdMax = outputRobotState.getOneDoFJoints()[i].getVelocityLimitUpper();
 
-         if (!Double.isInfinite(qMin))
-         {
-            double qDDotMin = KSTTools.computeJointMinAcceleration(qMin, outputRobotState.getJointPosition(i), outputRobotState.getJointVelocity(i), updateDT);
+         double qDDotMin = KSTTools.computeJointMinAcceleration(qMin,
+                                                                qdMin,
+                                                                outputRobotState.getJointPosition(i),
+                                                                outputRobotState.getJointVelocity(i),
+                                                                updateDT);
+         if (Double.isFinite(qDDotMin))
             qdd = Math.max(qdd, qDDotMin);
-         }
 
-         if (!Double.isInfinite(qMax))
-         {
-            double qDDotMax = KSTTools.computeJointMaxAcceleration(qMax, outputRobotState.getJointPosition(i), outputRobotState.getJointVelocity(i), updateDT);
+         double qDDotMax = KSTTools.computeJointMaxAcceleration(qMax,
+                                                                qdMax,
+                                                                outputRobotState.getJointPosition(i),
+                                                                outputRobotState.getJointVelocity(i),
+                                                                updateDT);
+         if (Double.isFinite(qDDotMax))
             qdd = Math.min(qdd, qDDotMax);
-         }
 
          outputRobotState.setJointAcceleration(i, qdd);
       }

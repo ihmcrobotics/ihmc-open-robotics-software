@@ -29,3 +29,8 @@ float64 linear_rate_limitation -1.0
 # control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
 # to the robot's end-effectors.
 KinematicsToolboxRigidBodyMessage[<=10] inputs
+# When true, the solver will use the center of mass input to control the robot's center of mass.
+bool use_center_of_mass_input false
+# The (optional) input for controlling the center of mass of the robot.
+# If use_center_of_mass_input is false, this message is ignored.
+KinematicsToolboxCenterOfMassMessage center_of_mass_input
