@@ -40,7 +40,6 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -80,7 +79,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
-   private final Map<RigidBodyBasics, GeometricJacobian> rootJacobians = new HashMap<>();
 
    private final YoBoolean enableAutoSupportPolygon = new YoBoolean("enableAutoSupportPolygon", registry);
    /**
@@ -217,12 +215,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
 
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
-      desiredFullRobotModel.getRootBody()
-                           .subtreeStream()
-                           .forEach(rigidBody -> rootJacobians.put(rigidBody,
-                                                                   new GeometricJacobian(desiredFullRobotModel.getElevator(),
-                                                                                         rigidBody,
-                                                                                         ReferenceFrame.getWorldFrame())));
       Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       supportRigidBodyWeight.set(200.0);
