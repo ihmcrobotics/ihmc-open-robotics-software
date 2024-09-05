@@ -9,12 +9,14 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
+import java.net.InetSocketAddress;
+
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.av_dict_copy;
 import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
-public class SRTStreamOutput
+public class SRTStreamWriter
 {
    private final FFMPEGVideoEncoder encoder;
 
@@ -34,16 +36,15 @@ public class SRTStreamOutput
 
    private int error;
 
-   public SRTStreamOutput(FFMPEGVideoEncoder encoder,
-                          String outputAddress,
-                          int outputPort,
+   public SRTStreamWriter(FFMPEGVideoEncoder encoder,
+                          InetSocketAddress outputAddress,
                           AVOutputFormat outputFormat,
                           AVDictionary ioOptions,
                           AVDictionary formatOptions)
    {
       this.encoder = encoder;
       this.outputFormat = outputFormat;
-      srtAddress = "srt://" + outputAddress + ":" + outputPort;
+      srtAddress = StreamingTools.toSRTAddress(outputAddress);
 
       // Copy the IO options
       this.ioOptions = new AVDictionary();
@@ -113,7 +114,7 @@ public class SRTStreamOutput
       return connected;
    }
 
-   public void close()
+   public void destroy()
    {
       connected = false;
 

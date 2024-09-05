@@ -56,7 +56,7 @@ public class SRTVideoStreamer
    private final AVOutputFormat outputFormat;
 
    private final Queue<InetSocketAddress> connectionQueue = new LinkedBlockingQueue<>();
-   private final Map<InetSocketAddress, SRTStreamOutput> callers;
+   private final Map<InetSocketAddress, SRTStreamWriter> callers;
 
    private final AVDictionary encoderOptions;
    private FFMPEGVideoEncoder encoder;
@@ -121,18 +121,18 @@ public class SRTVideoStreamer
    {
       boolean writeSucceeded;
 
-      Iterator<SRTStreamOutput> streamOutputIterator = callers.values().iterator();
-      while (streamOutputIterator.hasNext())
+      Iterator<SRTStreamWriter> callerIterator = callers.values().iterator();
+      while (callerIterator.hasNext())
       {
-         SRTStreamOutput streamOutput = streamOutputIterator.next();
-         if (!streamOutput.isConnected())
+         SRTStreamWriter callerWriter = callerIterator.next();
+         if (!callerWriter.isConnected())
             continue;
 
-         writeSucceeded = streamOutput.write(packetToWrite);
+         writeSucceeded = callerWriter.write(packetToWrite);
          if (!writeSucceeded)
          {
-            streamOutput.close();
-            streamOutputIterator.remove();
+            callerWriter.destroy();
+            callerIterator.remove();
          }
       }
    }
@@ -142,7 +142,7 @@ public class SRTVideoStreamer
     * This can happen any time.
     * @param callerAddress Address of caller to add
     */
-   public void queueCaller(InetSocketAddress callerAddress)
+   public void queueCallerToConnect(InetSocketAddress callerAddress)
    {
       connectionQueue.add(callerAddress);
    }
@@ -158,7 +158,7 @@ public class SRTVideoStreamer
       while (!connectionQueue.isEmpty())
       {
          InetSocketAddress callerAddress = connectionQueue.poll();
-         SRTStreamOutput callerOutput = new SRTStreamOutput(encoder, callerAddress.getHostString(), callerAddress.getPort(), outputFormat, ioOptions, null);
+         SRTStreamWriter callerOutput = new SRTStreamWriter(encoder, callerAddress, outputFormat, ioOptions, null);
          if (callerOutput.connect()) // This call can block for a while
             callers.putIfAbsent(callerAddress, callerOutput);
       }
@@ -167,7 +167,7 @@ public class SRTVideoStreamer
    public void removeCaller(InetSocketAddress callerAddress)
    {
       if (callers.containsKey(callerAddress))
-         callers.remove(callerAddress).close();
+         callers.remove(callerAddress).destroy();
 
       connectionQueue.remove(callerAddress);
    }
@@ -187,7 +187,7 @@ public class SRTVideoStreamer
       return connectedCallerCount() + queuedCallerCount();
    }
 
-   public void close()
+   public void destroy()
    {
       av_dict_free(ioOptions);
       ioOptions.close();
@@ -198,7 +198,7 @@ public class SRTVideoStreamer
       if (encoder != null)
          encoder.destroy();
 
-      for (SRTStreamOutput callerOutput : callers.values())
-         callerOutput.close();
+      for (SRTStreamWriter callerOutput : callers.values())
+         callerOutput.destroy();
    }
 }

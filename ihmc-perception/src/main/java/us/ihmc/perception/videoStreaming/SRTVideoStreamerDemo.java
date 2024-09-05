@@ -18,6 +18,8 @@ import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
  */
 public class SRTVideoStreamerDemo
 {
+   private static final InetSocketAddress CALLER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+
    private final VideoCapture videoCapture;
    private final Mat frame;
    private final SRTVideoStreamer videoStreamer;
@@ -40,7 +42,7 @@ public class SRTVideoStreamerDemo
       // Create and initialize the video streamer
       videoStreamer = new SRTVideoStreamer();
       videoStreamer.initialize(imageWidth, imageHeight, reportedFPS, AV_PIX_FMT_BGR24);
-      videoStreamer.queueCaller(InetSocketAddress.createUnresolved("127.0.0.1", 60001));
+      videoStreamer.queueCallerToConnect(CALLER_ADDRESS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTStreamerDemoDestruction"));
 
@@ -69,7 +71,7 @@ public class SRTVideoStreamerDemo
       shutdownReady.blockingPoll();
 
       videoCapture.close();
-      videoStreamer.close();
+      videoStreamer.destroy();
       frame.close();
    }
 
