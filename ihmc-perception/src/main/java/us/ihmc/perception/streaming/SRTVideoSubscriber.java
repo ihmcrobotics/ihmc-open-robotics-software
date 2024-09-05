@@ -1,4 +1,4 @@
-package us.ihmc.perception.videoStreaming;
+package us.ihmc.perception.streaming;
 
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
@@ -17,7 +17,6 @@ import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
 // TODO: Make abstract SRTSubscriber class and extend to video and audio
 public class SRTVideoSubscriber
 {
-   private static final int MAX_FAILED_READS = 64;
    private static final int RETRY_SLEEP_DURATION_MS = 8;
 
    private final String srtInputAddress;
@@ -28,6 +27,7 @@ public class SRTVideoSubscriber
    private final AVFormatContext inputFormatContext;
 
    private boolean connected = false;
+   private double readFrameTimeout = 1.0;
 
    int error;
 
@@ -42,6 +42,7 @@ public class SRTVideoSubscriber
 
    public boolean connect()
    {
+      // TODO: add timeout
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, null);
       if (error < 0)
          return false;
@@ -99,19 +100,26 @@ public class SRTVideoSubscriber
 
    private int getNextPacket(AVPacket packetToPack)
    {
-      int failedReads = 0;
+      long startTime = System.nanoTime();
       do
       {
          // Try reading a packet from the stream
          error = av_read_frame(inputFormatContext, packetToPack);
 
-         if (error < 0)
+         if (error < 0) // Failed to read packet
          {
-            // Failed to read packet; wait a bit and retry
-            ++failedReads;
+            // Calculate time spent
+            long currentTime = System.nanoTime();
+            double timeTaken = Conversions.nanosecondsToSeconds(currentTime - startTime);
+
+            // Waited too long. Stop trying
+            if (timeTaken > readFrameTimeout && readFrameTimeout >= 0)
+               break;
+
+            // Wait a bit and retry
             ThreadTools.sleep(RETRY_SLEEP_DURATION_MS);
          }
-      } while (error < 0 && failedReads < MAX_FAILED_READS);
+      } while (error < 0);
 
       // Couldn't receive any packets. Disconnect.
       if (error < 0)
@@ -124,8 +132,12 @@ public class SRTVideoSubscriber
       return 0;
    }
 
-   public Mat getNextImage()
+   public Mat getNextImage(double timeout)
    {
+      if (!connected)
+         return null;
+
+      readFrameTimeout = timeout;
       return decoder.getNextFrame();
    }
 
@@ -138,6 +150,8 @@ public class SRTVideoSubscriber
    {
       if (isConnected())
          disconnect();
+
+      avformat_free_context(inputFormatContext);
 
       inputFormatContext.close();
    }

@@ -9,10 +9,6 @@ import us.ihmc.pubsub.TopicDataType;
 public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settable<SRTStreamRequest>, EpsilonComparable<SRTStreamRequest>
 {
    /**
-            * Name of the topic being requested
-            */
-   public java.lang.StringBuilder topic_name_;
-   /**
             * Address to send the stream to
             */
    public java.lang.StringBuilder receiver_address_;
@@ -27,7 +23,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
    public SRTStreamRequest()
    {
-      topic_name_ = new java.lang.StringBuilder(255);
       receiver_address_ = new java.lang.StringBuilder(255);
    }
 
@@ -39,9 +34,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
    public void set(SRTStreamRequest other)
    {
-      topic_name_.setLength(0);
-      topic_name_.append(other.topic_name_);
-
       receiver_address_.setLength(0);
       receiver_address_.append(other.receiver_address_);
 
@@ -49,30 +41,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
       connection_wanted_ = other.connection_wanted_;
 
-   }
-
-   /**
-            * Name of the topic being requested
-            */
-   public void setTopicName(java.lang.String topic_name)
-   {
-      topic_name_.setLength(0);
-      topic_name_.append(topic_name);
-   }
-
-   /**
-            * Name of the topic being requested
-            */
-   public java.lang.String getTopicNameAsString()
-   {
-      return getTopicName().toString();
-   }
-   /**
-            * Name of the topic being requested
-            */
-   public java.lang.StringBuilder getTopicName()
-   {
-      return topic_name_;
    }
 
    /**
@@ -147,8 +115,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.topic_name_, other.topic_name_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.receiver_address_, other.receiver_address_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.receiver_port_, other.receiver_port_, epsilon)) return false;
@@ -168,8 +134,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
       SRTStreamRequest otherMyClass = (SRTStreamRequest) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.topic_name_, otherMyClass.topic_name_)) return false;
-
       if (!us.ihmc.idl.IDLTools.equals(this.receiver_address_, otherMyClass.receiver_address_)) return false;
 
       if(this.receiver_port_ != otherMyClass.receiver_port_) return false;
@@ -186,8 +150,6 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("SRTStreamRequest {");
-      builder.append("topic_name=");
-      builder.append(this.topic_name_);      builder.append(", ");
       builder.append("receiver_address=");
       builder.append(this.receiver_address_);      builder.append(", ");
       builder.append("receiver_port=");

@@ -1,6 +1,3 @@
-# Name of the topic being requested
-string topic_name
-
 # Address to send the stream to
 string receiver_address
 

@@ -1,4 +1,4 @@
-package us.ihmc.perception.videoStreaming;
+package us.ihmc.perception.streaming;
 
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -37,7 +37,7 @@ public class SRTVideoSubscriberDemo
 
       while (!shutdown && videoSubscriber.isConnected())
       {
-         Mat frame = videoSubscriber.getNextImage();
+         Mat frame = videoSubscriber.getNextImage(0.5);
          if (frame == null)
             break;
 

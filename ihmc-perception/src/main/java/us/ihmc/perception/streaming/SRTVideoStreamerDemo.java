@@ -1,4 +1,4 @@
-package us.ihmc.perception.videoStreaming;
+package us.ihmc.perception.streaming;
 
 import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -42,7 +42,6 @@ public class SRTVideoStreamerDemo
       // Create and initialize the video streamer
       videoStreamer = new SRTVideoStreamer();
       videoStreamer.initialize(imageWidth, imageHeight, reportedFPS, AV_PIX_FMT_BGR24);
-      videoStreamer.queueCallerToConnect(CALLER_ADDRESS);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTStreamerDemoDestruction"));
 
@@ -52,10 +51,10 @@ public class SRTVideoStreamerDemo
    private void run()
    {
       LogTools.info("Connecting to caller...");
-      videoStreamer.connectToNewCallers();
+      videoStreamer.connectToCaller(CALLER_ADDRESS);
 
       LogTools.info("Got a connection! Streaming!");
-      while (!shutdown && videoStreamer.totalCallerCount() > 0)
+      while (!shutdown && videoStreamer.connectedCallerCount() > 0)
       {
          videoCapture.read(frame);
          videoStreamer.sendFrame(frame);

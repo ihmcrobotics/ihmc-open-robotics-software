@@ -46,6 +46,8 @@ public final class PerceptionAPI
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
 
+   public static final String STREAMING_NAME = "streaming";
+
    public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
    public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX = IHMC_ROOT.withModule(FIDUCIAL_MODULE_NAME);
@@ -285,4 +287,11 @@ public final class PerceptionAPI
    {
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
    }
+
+   public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
+   public static final ROS2Topic<?> STREAMING_MODULE = RELIABLE.withModule(STREAMING_NAME);
+   public static final ROS2Topic<SRTStreamRequest> REALSENSE_COLOR_STREAM_REQUEST = STREAMING_MODULE.withPrefix(D455_NAME)
+                                                                                                    .withSuffix("color_request")
+                                                                                                    .withType(SRTStreamRequest.class);
+
 }

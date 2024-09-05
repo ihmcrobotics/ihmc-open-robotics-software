@@ -1,4 +1,4 @@
-package us.ihmc.perception.videoStreaming;
+package us.ihmc.perception.streaming;
 
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
@@ -31,7 +32,6 @@ public class SRTStreamWriter
    private final AVPacket packetCopy;
    private AVStream outputStream;
 
-   private boolean initialized = false;
    private boolean connected = false;
 
    private int error;
@@ -79,21 +79,19 @@ public class SRTStreamWriter
 
       // Get an output stream
       outputStream = encoder.newStream(formatContext);
+
+      error = avformat_write_header(formatContext, formatOptions);
+      if (!FFMPEGTools.checkNegativeError(error, "Sending header to caller", false))
+         return false;
+
+      LogTools.info("Connected to {}", srtAddress);
+
       connected = true;
       return true;
    }
 
    public boolean write(AVPacket packetToWrite)
    {
-      if (!initialized)
-      {
-         error = avformat_write_header(formatContext, formatOptions);
-         if (!FFMPEGTools.checkNegativeError(error, "Sending header to caller", false))
-            connected = false;
-
-         initialized = true;
-      }
-
       if (connected)
       {
          av_packet_ref(packetCopy, packetToWrite);
@@ -117,7 +115,8 @@ public class SRTStreamWriter
 
    public void destroy()
    {
-      connected = false;
+      if (connected)
+         disconnect();
 
       avio_closep(ioContext);
       ioContext.close();
@@ -136,5 +135,18 @@ public class SRTStreamWriter
 
       if (outputStream != null)
          outputStream.close();
+   }
+
+   private void disconnect()
+   {
+      if (!connected)
+         return;
+
+      error = av_write_trailer(formatContext);
+      FFMPEGTools.checkNegativeError(error, "Writing trailer");
+
+      connected = false;
+
+      LogTools.info("Disconnected from {}", srtAddress);
    }
 }

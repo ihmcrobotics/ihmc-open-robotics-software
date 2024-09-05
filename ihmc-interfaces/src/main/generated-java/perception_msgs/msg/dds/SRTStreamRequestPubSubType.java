@@ -15,7 +15,7 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "80a44158d0f237614b762209e265c14b1936ab7fdb1f4d9790c02e9cb39161e7";
+   		return "f6b11bf088d60fb68bd49c2d7097ff18c0f7863c14451d792e5489274241134e";
    }
    
    @Override
@@ -53,7 +53,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -71,8 +70,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getTopicName().length() + 1;
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReceiverAddress().length() + 1;
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -87,10 +84,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(perception_msgs.msg.dds.SRTStreamRequest data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getTopicName().length() <= 255)
-      cdr.write_type_d(data.getTopicName());else
-          throw new RuntimeException("topic_name field exceeds the maximum length");
-
       if(data.getReceiverAddress().length() <= 255)
       cdr.write_type_d(data.getReceiverAddress());else
           throw new RuntimeException("receiver_address field exceeds the maximum length");
@@ -103,7 +96,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(perception_msgs.msg.dds.SRTStreamRequest data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_d(data.getTopicName());	
       cdr.read_type_d(data.getReceiverAddress());	
       data.setReceiverPort(cdr.read_type_3());
       	
@@ -115,7 +107,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(perception_msgs.msg.dds.SRTStreamRequest data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("topic_name", data.getTopicName());
       ser.write_type_d("receiver_address", data.getReceiverAddress());
       ser.write_type_3("receiver_port", data.getReceiverPort());
       ser.write_type_7("connection_wanted", data.getConnectionWanted());
@@ -124,7 +115,6 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SRTStreamRequest data)
    {
-      ser.read_type_d("topic_name", data.getTopicName());
       ser.read_type_d("receiver_address", data.getReceiverAddress());
       data.setReceiverPort(ser.read_type_3("receiver_port"));
       data.setConnectionWanted(ser.read_type_7("connection_wanted"));

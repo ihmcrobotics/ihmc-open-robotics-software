@@ -1,19 +1,16 @@
-package us.ihmc.perception.videoStreaming;
+package us.ihmc.perception.streaming;
 
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Map.entry;
 import static org.bytedeco.ffmpeg.global.avformat.av_guess_format;
@@ -56,8 +53,7 @@ public class SRTVideoStreamer
    private final AVDictionary ioOptions;
    private final AVOutputFormat outputFormat;
 
-   private final Queue<InetSocketAddress> connectionQueue = new LinkedBlockingQueue<>();
-   private final Map<InetSocketAddress, SRTStreamWriter> callers;
+   private final Map<InetSocketAddress, SRTStreamWriter> callers = new ConcurrentHashMap<>();
 
    private final AVDictionary encoderOptions;
    private FFMPEGVideoEncoder encoder;
@@ -74,7 +70,6 @@ public class SRTVideoStreamer
       FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
 
       outputFormat = av_guess_format(OUTPUT_FORMAT_NAME, null, null);
-      callers = new HashMap<>();
    }
 
    /**
@@ -100,16 +95,6 @@ public class SRTVideoStreamer
                                        0,
                                        inputAVPixelFormat);
       encoder.initialize(encoderOptions);
-   }
-
-   public void sendFrame(RawImage image)
-   {
-      if (image.get() == null)
-         return;
-
-      sendFrame(image.getCpuImageMat());
-
-      image.release();
    }
 
    public void sendFrame(Mat image)
@@ -139,53 +124,34 @@ public class SRTVideoStreamer
    }
 
    /**
-    * (3*) Add callers.
-    * This can happen any time.
-    * @param callerAddress Address of caller to add
+    * (3*) Connect to a caller
+    * @param callerAddress Address of the caller
+    * @return {@code true} if caller is connected, {@code false} if connection failed.
     */
-   public void queueCallerToConnect(InetSocketAddress callerAddress)
+   public boolean connectToCaller(InetSocketAddress callerAddress)
    {
-      connectionQueue.add(callerAddress);
-   }
+      if (callers.containsKey(callerAddress))
+         return true;
 
-   /**
-    * (4*) Connect to newly added callers.
-    * Since establishing the connection with a caller can take some time,
-    * it is best to call this in a separate thread.
-    * This can happen any time.
-    */
-   public void connectToNewCallers()
-   {
-      while (!connectionQueue.isEmpty())
+      SRTStreamWriter callerOutput = new SRTStreamWriter(encoder, callerAddress, outputFormat, ioOptions, null);
+      if (callerOutput.connect())
       {
-         InetSocketAddress callerAddress = connectionQueue.poll();
-         SRTStreamWriter callerOutput = new SRTStreamWriter(encoder, callerAddress, outputFormat, ioOptions, null);
-         if (callerOutput.connect()) // This call can block for a while
-            callers.putIfAbsent(callerAddress, callerOutput);
+         callers.put(callerAddress, callerOutput);
+         return true;
       }
+
+      return false;
    }
 
    public void removeCaller(InetSocketAddress callerAddress)
    {
       if (callers.containsKey(callerAddress))
          callers.remove(callerAddress).destroy();
-
-      connectionQueue.remove(callerAddress);
    }
 
    public int connectedCallerCount()
    {
       return callers.size();
-   }
-
-   public int queuedCallerCount()
-   {
-      return connectionQueue.size();
-   }
-
-   public int totalCallerCount()
-   {
-      return connectedCallerCount() + queuedCallerCount();
    }
 
    public void destroy()
@@ -199,7 +165,11 @@ public class SRTVideoStreamer
       if (encoder != null)
          encoder.destroy();
 
-      for (SRTStreamWriter callerOutput : callers.values())
-         callerOutput.destroy();
+      Iterator<SRTStreamWriter> callerIterator = callers.values().iterator();
+      while (callerIterator.hasNext())
+      {
+         callerIterator.next().destroy();
+         callerIterator.remove();
+      }
    }
 }
