@@ -24,7 +24,6 @@ import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 // TODO: Add a FFMPEGAudioEncoder
 public abstract class FFMPEGEncoder
 {
-//   protected final AVStream stream;
    protected final AVCodec encoder;
    protected final AVCodecContext encoderContext;
 
@@ -111,6 +110,11 @@ public abstract class FFMPEGEncoder
       }
 
       return error == AVERROR_EAGAIN();
+   }
+
+   public AVRational getTimeBase()
+   {
+      return encoderContext.time_base();
    }
 
    public void destroy()

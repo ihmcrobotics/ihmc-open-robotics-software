@@ -4,7 +4,13 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.avutil.AVRational;
-import org.bytedeco.ffmpeg.global.*;
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avdevice;
+import org.bytedeco.ffmpeg.global.avfilter;
+import org.bytedeco.ffmpeg.global.avformat;
+import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.ffmpeg.global.swresample;
+import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -25,44 +31,63 @@ public class FFMPEGTools
       return rational.num() / (double) rational.den();
    }
 
-   public static void checkError(int returnCode, Pointer pointerToCheck, String message)
+   public static boolean checkError(int returnCode, Pointer pointerToCheck, String message)
    {
-      checkNonZeroError(returnCode, message);
-      checkPointer(pointerToCheck, message);
+      return checkError(returnCode, pointerToCheck, message, true);
    }
 
-   public static void checkPointer(Pointer pointerToCheck, String message)
+   public static boolean checkError(int returnCode, Pointer pointerToCheck, String message, boolean throwException)
+   {
+      return checkNonZeroError(returnCode, message, throwException) && checkPointer(pointerToCheck, message, throwException);
+   }
+
+   public static boolean checkPointer(Pointer pointerToCheck, String message)
+   {
+      return checkPointer(pointerToCheck, message, true);
+   }
+
+   public static boolean checkPointer(Pointer pointerToCheck, String message, boolean throwException)
    {
       if (pointerToCheck == null)
-         handleError(StringTools.format("pointer == null: {}", message), true);
+      {
+         handleError(StringTools.format("pointer == null: {}", message), throwException);
+         return false;
+      }
       else if (pointerToCheck.isNull())
-         handleError(StringTools.format("Pointer isNull() returned true: {}: {}", pointerToCheck.getClass().getSimpleName(), message), true);
+      {
+         handleError(StringTools.format("Pointer isNull() returned true: {}: {}", pointerToCheck.getClass().getSimpleName(), message), throwException);
+         return false;
+      }
+
+      return true;
    }
 
-   public static void checkNegativeError(int returnCode, String message)
+   public static boolean checkNegativeError(int returnCode, String message)
    {
-      checkNegativeError(returnCode, message, true);
+      return checkNegativeError(returnCode, message, true);
    }
 
-   public static void checkNegativeError(int returnCode, String message, boolean throwException)
+   public static boolean checkNegativeError(int returnCode, String message, boolean throwException)
    {
       if (returnCode >= 0)
-         return;
+         return true;
 
       handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
+      return false;
    }
 
-   public static void checkNonZeroError(int returnCode, String message)
+   public static boolean checkNonZeroError(int returnCode, String message)
    {
-      checkNonZeroError(returnCode, message, true);
+      return checkNonZeroError(returnCode, message, true);
    }
 
-   public static void checkNonZeroError(int returnCode, String message, boolean throwException)
+   public static boolean checkNonZeroError(int returnCode, String message, boolean throwException)
    {
       if (returnCode == 0)
-         return;
+         return true;
 
       handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
+      return false;
    }
 
    private static void handleError(Supplier<String> messageSupplier, boolean throwException)

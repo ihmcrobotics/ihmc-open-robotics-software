@@ -4,15 +4,18 @@ import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.RawImage;
 
-import java.time.Instant;
+import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
+/**
+ * Demo for the SRTVideoStreamer. Grabs images from a webcam
+ * and give them to the streamer to be streamed over SRT.
+ * To view the stream, use the following command:
+ * {@code ffplay srt:127.0.0.1:60001 -fflags nobuffer}
+ */
 public class SRTVideoStreamerDemo
 {
    private final VideoCapture videoCapture;
@@ -30,9 +33,14 @@ public class SRTVideoStreamerDemo
       frame = new Mat();
 
       // Read image data from webcam
+      int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
+      int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
       double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
-      videoStreamer = new SRTVideoStreamer(reportedFPS, AV_PIX_FMT_BGR24);
+      // Create and initialize the video streamer
+      videoStreamer = new SRTVideoStreamer();
+      videoStreamer.initialize(imageWidth, imageHeight, reportedFPS, AV_PIX_FMT_BGR24);
+      videoStreamer.queueCaller(InetSocketAddress.createUnresolved("127.0.0.1", 60001));
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTStreamerDemoDestruction"));
 
@@ -41,16 +49,14 @@ public class SRTVideoStreamerDemo
 
    private void run()
    {
-      LogTools.info("Waiting for connection...");
-      videoStreamer.getStreamOutputList().addOutput("127.0.0.1", 60001);
+      LogTools.info("Connecting to caller...");
+      videoStreamer.connectToNewCallers();
 
       LogTools.info("Got a connection! Streaming!");
-      while (!shutdown && videoStreamer.getStreamOutputList().size() > 0)
+      while (!shutdown && videoStreamer.totalCallerCount() > 0)
       {
          videoCapture.read(frame);
-         RawImage image = new RawImage(0, Instant.now(), 0.0f, frame, null, 0.0f, 0.0f, 0.0f, 0.0f, new FramePoint3D(), new FrameQuaternion());
-         videoStreamer.setNextFrame(image);
-         image.release();
+         videoStreamer.setNextFrame(frame);
       }
 
       shutdownReady.set();
