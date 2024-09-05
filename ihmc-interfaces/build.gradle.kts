@@ -30,7 +30,7 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:euclid-geometry:0.21.0")
-   api("us.ihmc:ihmc-pub-sub:0.19.2")
+   api("us.ihmc:ihmc-pub-sub:0.20.0")
    api("us.ihmc:ros2-common-interfaces:0.24.4") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")

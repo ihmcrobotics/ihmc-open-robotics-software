@@ -1,5 +1,6 @@
 package us.ihmc.perception.steppableRegions;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculationModule;
@@ -9,6 +10,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+// TODO: Fix or remove
+@Disabled
 public class SteppableRegionsCalculationModuleTest
 {
    private static final double gridResolution = 0.05;

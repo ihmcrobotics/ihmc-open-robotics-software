@@ -27,7 +27,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-pub-sub:0.19.2")
+   api("us.ihmc:ihmc-pub-sub:0.20.0")
    api("us.ihmc:ros2-common-interfaces:0.24.4")
 }
 
