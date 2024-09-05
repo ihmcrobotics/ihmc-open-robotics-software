@@ -25,6 +25,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: LFS checkout
+        run: |
+          git lfs install --local
+          git lfs fetch
+          git lfs pull
+          git lfs ls-files -l
 
       - name: Check nvidia-smi
         run: |

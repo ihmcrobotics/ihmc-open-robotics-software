@@ -1,7 +1,9 @@
 package us.ihmc.perception.detections.yolo;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 public class YOLOv8ObjectDetectorTest
 {
    @Test

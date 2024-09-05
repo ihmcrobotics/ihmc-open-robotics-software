@@ -1,6 +1,7 @@
 package us.ihmc.perception.cuda;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
@@ -15,6 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CUDAStreamManagerTest
 {
    private static boolean cudaWarningPrinted = false;
+
+   @BeforeEach
+   public void resetStreamManager()
+   {
+      CUDAStreamManager.reset();
+   }
 
    @Test
    public void testCreateAndRelease()
