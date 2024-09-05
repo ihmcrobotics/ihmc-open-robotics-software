@@ -15,7 +15,7 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ff1b5c4bd1e8f71eec4a2c9f547ff0bbd277645f716e7e82450d35505353f061";
+   		return "80a44158d0f237614b762209e265c14b1936ab7fdb1f4d9790c02e9cb39161e7";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -76,6 +78,9 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +97,8 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_3(data.getReceiverPort());
 
+      cdr.write_type_7(data.getConnectionWanted());
+
    }
 
    public static void read(perception_msgs.msg.dds.SRTStreamRequest data, us.ihmc.idl.CDR cdr)
@@ -99,6 +106,8 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       cdr.read_type_d(data.getTopicName());	
       cdr.read_type_d(data.getReceiverAddress());	
       data.setReceiverPort(cdr.read_type_3());
+      	
+      data.setConnectionWanted(cdr.read_type_7());
       	
 
    }
@@ -109,6 +118,7 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_d("topic_name", data.getTopicName());
       ser.write_type_d("receiver_address", data.getReceiverAddress());
       ser.write_type_3("receiver_port", data.getReceiverPort());
+      ser.write_type_7("connection_wanted", data.getConnectionWanted());
    }
 
    @Override
@@ -117,6 +127,7 @@ public class SRTStreamRequestPubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.read_type_d("topic_name", data.getTopicName());
       ser.read_type_d("receiver_address", data.getReceiverAddress());
       data.setReceiverPort(ser.read_type_3("receiver_port"));
+      data.setConnectionWanted(ser.read_type_7("connection_wanted"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SRTStreamRequest src, perception_msgs.msg.dds.SRTStreamRequest dest)

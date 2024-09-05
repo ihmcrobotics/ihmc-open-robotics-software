@@ -20,6 +20,10 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
             * Port to send the stream to
             */
    public int receiver_port_;
+   /**
+            * Whether to connect or disconnect
+            */
+   public boolean connection_wanted_;
 
    public SRTStreamRequest()
    {
@@ -42,6 +46,8 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
       receiver_address_.append(other.receiver_address_);
 
       receiver_port_ = other.receiver_port_;
+
+      connection_wanted_ = other.connection_wanted_;
 
    }
 
@@ -108,6 +114,21 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
       return receiver_port_;
    }
 
+   /**
+            * Whether to connect or disconnect
+            */
+   public void setConnectionWanted(boolean connection_wanted)
+   {
+      connection_wanted_ = connection_wanted;
+   }
+   /**
+            * Whether to connect or disconnect
+            */
+   public boolean getConnectionWanted()
+   {
+      return connection_wanted_;
+   }
+
 
    public static Supplier<SRTStreamRequestPubSubType> getPubSubType()
    {
@@ -132,6 +153,8 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.receiver_port_, other.receiver_port_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.connection_wanted_, other.connection_wanted_, epsilon)) return false;
+
 
       return true;
    }
@@ -151,6 +174,8 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
 
       if(this.receiver_port_ != otherMyClass.receiver_port_) return false;
 
+      if(this.connection_wanted_ != otherMyClass.connection_wanted_) return false;
+
 
       return true;
    }
@@ -166,7 +191,9 @@ public class SRTStreamRequest extends Packet<SRTStreamRequest> implements Settab
       builder.append("receiver_address=");
       builder.append(this.receiver_address_);      builder.append(", ");
       builder.append("receiver_port=");
-      builder.append(this.receiver_port_);
+      builder.append(this.receiver_port_);      builder.append(", ");
+      builder.append("connection_wanted=");
+      builder.append(this.connection_wanted_);
       builder.append("}");
       return builder.toString();
    }

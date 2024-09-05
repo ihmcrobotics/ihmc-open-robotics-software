@@ -58,7 +58,7 @@ public class SRTVideoStreamerDemo
       while (!shutdown && videoStreamer.totalCallerCount() > 0)
       {
          videoCapture.read(frame);
-         videoStreamer.setNextFrame(frame);
+         videoStreamer.sendFrame(frame);
       }
 
       shutdownReady.set();

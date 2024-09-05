@@ -20,6 +20,7 @@ import static org.bytedeco.ffmpeg.global.avformat.av_guess_format;
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
 import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
+// TODO: Make abstract SRTStreamer class and extend to video and audio
 public class SRTVideoStreamer
 {
    private static final String OUTPUT_FORMAT_NAME = "mpegts";
@@ -101,17 +102,17 @@ public class SRTVideoStreamer
       encoder.initialize(encoderOptions);
    }
 
-   public void setNextFrame(RawImage image)
+   public void sendFrame(RawImage image)
    {
       if (image.get() == null)
          return;
 
-      setNextFrame(image.getCpuImageMat());
+      sendFrame(image.getCpuImageMat());
 
       image.release();
    }
 
-   public void setNextFrame(Mat image)
+   public void sendFrame(Mat image)
    {
       encoder.setNextFrame(image); // TODO: Use GpuMat instead
       encoder.encodeNextFrame(this::writeToCallers);

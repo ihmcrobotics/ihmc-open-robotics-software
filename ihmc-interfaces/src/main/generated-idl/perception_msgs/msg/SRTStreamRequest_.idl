@@ -23,6 +23,10 @@ module perception_msgs
          * Port to send the stream to
          */
         unsigned short receiver_port;
+        /**
+         * Whether to connect or disconnect
+         */
+        boolean connection_wanted;
       };
     };
   };

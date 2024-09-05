@@ -65,6 +65,7 @@ public class SRTStreamWriter
 
    public boolean connect()
    {
+      // TODO: Add timeout to this https://ffmpeg.org/pipermail/libav-user/2015-June/008208.html
       // Open the IO
       error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, null, this.ioOptions);
       if (!FFMPEGTools.checkError(error, ioContext, "Opening IO context", false))
