@@ -21,7 +21,7 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 public class SRTVideoStreamer
 {
    private static final String OUTPUT_FORMAT_NAME = "mpegts";
-   private static final String PREFERRED_CODEC = "hevc_nvenc";
+   private static final String PREFERRED_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV420P;
 
    /**

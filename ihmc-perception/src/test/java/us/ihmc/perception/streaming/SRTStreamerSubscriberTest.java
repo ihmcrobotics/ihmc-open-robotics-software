@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.SRTStreamRequest;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -45,6 +46,51 @@ public class SRTStreamerSubscriberTest
    public static void closeSampleImage()
    {
       sampleImage.close();
+   }
+
+   @Test
+   public void testSRTStreamerTimeouts()
+   {
+      double timeout = 5.0; // Nothing should really take more than 5 seconds to fail
+      InetSocketAddress fakeAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+
+      SRTVideoStreamer streamer = new SRTVideoStreamer();
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), FPS, AV_PIX_FMT_BGR24);
+
+      testTimeout(() -> streamer.connectToCaller(fakeAddress), timeout);   // Try connecting to nowhere
+      testTimeout(() -> streamer.sendFrame(sampleImage), timeout);         // Try sending data to nowhere
+      testTimeout(() -> streamer.removeCaller(fakeAddress), timeout);      // Try removing nothing
+      testTimeout(streamer::destroy, timeout);                             // Try destroying
+
+      // If it got here, the test passed!
+   }
+
+   @Test
+   public void testSRTSubscriberTimeouts()
+   {
+      double timeout = 5.0;
+      InetSocketAddress subscriberAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+
+      SRTVideoSubscriber subscriber = new SRTVideoSubscriber(subscriberAddress, AV_PIX_FMT_BGR24);
+      testTimeout(subscriber::connect, timeout);                           // Try connecting to nowhere
+      testTimeout(() -> subscriber.waitForConnection(timeout), timeout);   // Try waiting for a connection to nowhere
+   }
+
+   private void testTimeout(Runnable runnable, double timeout)
+   {
+
+      Thread tryThread = ThreadTools.startAThread(runnable, "TestTimeoutThread");
+      try
+      {
+         tryThread.join((long) Conversions.secondsToMilliseconds(timeout));
+
+         if (tryThread.isAlive())
+            fail("Timed out.");
+      }
+      catch (InterruptedException e)
+      {
+         fail("Test thread interrupted.");
+      }
    }
 
    @Test

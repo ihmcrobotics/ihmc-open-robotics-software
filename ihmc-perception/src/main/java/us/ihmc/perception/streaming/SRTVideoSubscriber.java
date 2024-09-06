@@ -42,11 +42,11 @@ public class SRTVideoSubscriber
 
    public boolean connect()
    {
-      // TODO: add timeout
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, null);
       if (error < 0)
          return false;
 
+      // TODO: add timeout
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
       if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress))
          return false;
