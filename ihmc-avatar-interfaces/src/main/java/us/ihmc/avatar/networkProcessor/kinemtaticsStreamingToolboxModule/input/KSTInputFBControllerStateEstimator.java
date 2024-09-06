@@ -36,7 +36,14 @@ import java.util.Map;
 
 public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimator
 {
-   private static final boolean ENABLE_VALENTINE_POWER = true;
+   /**
+    * If true, the C1 filter is used to estimate the pose. If false, the C0 filter is used.
+    * <p>
+    * The C1 filter is still to be tested thoroughly, but it should provide a smoother estimation of the pose.
+    * Compared to the C0 filter, the C1 filter estimates the input acceleration and double-integrates it to update the velocity and position.
+    * This guarantees continuity in velocity whereas the C0 filter does not.
+    */
+   private static final boolean ENABLE_C1_FILTER = true;
    public static final double SAFE_INPUT_PERIOD_TO_CORRECTION_FACTOR = 1.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -68,7 +75,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       for (RigidBodyReadOnly endEffector : endEffectors)
       {
-         if (ENABLE_VALENTINE_POWER)
+         if (ENABLE_C1_FILTER)
             inputPoseEstimators.put(endEffector, new SingleEndEffectorC1Estimator(endEffector));
          else
             inputPoseEstimators.put(endEffector, new SingleEndEffectorC0Estimator(endEffector));
