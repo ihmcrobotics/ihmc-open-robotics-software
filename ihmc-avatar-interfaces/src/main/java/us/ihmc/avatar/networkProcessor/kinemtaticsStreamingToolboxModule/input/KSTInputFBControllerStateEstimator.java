@@ -5,6 +5,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -17,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -539,11 +541,14 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                clampedInputVelocity.getAngularPart().add(rawAngularDeltaVelocity);
             }
 
-            estimateAcceleration(inputPose, clampedInputVelocity);
-            doubleIntegrateAcceleration(defaultAngularRateLimitation, defaultLinearRateLimitation);
+            // For continuity, we start off from the decayed velocity with is the actual output of this estimator.
+            estimatedVelocity.set(estimatedDecayingVelocity);
+            estimateAcceleration(inputPose, clampedInputVelocity, estimatedPose, estimatedVelocity, estimatedAcceleration);
+            doubleIntegrateAcceleration(0.0, defaultAngularRateLimitation, defaultLinearRateLimitation);
          }
 
          nextTimeTriggerForDecay.set(time + correctionDuration.getValue());
+         inputVelocityDecayFactor.set(0.0);
          lastUpdateTime.set(time);
          rawInputPose.set(inputPose);
          lastInputTimestamp.set(inputTimestamp);
@@ -566,35 +571,51 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
        * <img
        * src="https://latex.codecogs.com/png.image?\dpi{150}\bg{beige}\left\{\begin{matrix}\ddot{x}=a\\\dot{x}^&plus;=\Delta&space;t&space;a&plus;\dot{x}^-\\x^&plus;=\frac{\Delta&space;t^2}{2}a&plus;\Delta&space;t\dot{x}^-&plus;x^-\end{matrix}\right."
        * alt="1DoF equations"><br>
+       * To facilitate applying the decay, we change the integration for the position term to be function of <img
+       * src="https://latex.codecogs.com/png.image?\dot{x}^+">:<br>
+       * <img
+       * src="https://latex.codecogs.com/png.image?\dpi{150}\bg{beige}\left\{\begin{matrix}\ddot{x}=a\\\dot{x}^&plus;=\Delta&space;t&space;a&plus;\dot{x}^-\\x^&plus;=-\frac{\Delta&space;t^2}{2}a&plus;\Delta&space;t\dot{x}^+&plus;x^-\end{matrix}\right."
+       * alt="1DoF equations"><br>
+       *
+       * @param decayFactor        The decay factor used to decay the estimated velocity and acceleration. A value of 0.0 means no decay.
+       * @param maxAngularVelocity The maximum angular velocity allowed.
+       * @param maxLinearVelocity  The maximum linear velocity allowed.
        */
-      private void doubleIntegrateAcceleration(double maxAngularVelocity, double maxLinearVelocity)
+      private void doubleIntegrateAcceleration(double decayFactor, double maxAngularVelocity, double maxLinearVelocity)
       {
-         YoFrameVector3D linearAccelerationWorldFrame = estimatedAcceleration.getLinearPart();
-         YoFrameVector3D linearVelocityWorldFrame = estimatedVelocity.getLinearPart();
-         YoFramePoint3D position = estimatedPose.getPosition();
-         clampAcceleration(linearAccelerationWorldFrame, updateDT, linearVelocityWorldFrame, maxLinearVelocity);
+         // Applying decay on the acceleration:
+         estimatedDecayingAcceleration.getLinearPart().interpolate(estimatedAcceleration.getLinearPart(), EuclidCoreTools.zeroVector3D, decayFactor);
+         estimatedDecayingAcceleration.getAngularPart().interpolate(estimatedAcceleration.getAngularPart(), EuclidCoreTools.zeroVector3D, decayFactor);
 
-         // Position
-         position.scaleAdd(0.5 * updateDT * updateDT, linearAccelerationWorldFrame, position);
-         position.scaleAdd(updateDT, linearVelocityWorldFrame, position);
+         YoFrameVector3D linearAccelerationWorldFrame = estimatedDecayingAcceleration.getLinearPart();
+         YoFrameVector3D angularAccelerationWorldFrame = estimatedDecayingAcceleration.getAngularPart();
+         YoFrameVector3D linearVelocityWorldFrame = estimatedVelocity.getLinearPart();
+         YoFrameVector3D angularVelocityWorldFrame = estimatedVelocity.getAngularPart();
+         clampAcceleration(linearAccelerationWorldFrame, updateDT, linearVelocityWorldFrame, maxLinearVelocity);
+         clampAcceleration(angularAccelerationWorldFrame, updateDT, angularVelocityWorldFrame, maxAngularVelocity);
+         YoFramePoint3D position = estimatedPose.getPosition();
+         YoFrameQuaternion orientation = estimatedPose.getOrientation();
+
          // Linear Velocity
          linearVelocityWorldFrame.scaleAdd(updateDT, linearAccelerationWorldFrame, linearVelocityWorldFrame);
+         estimatedDecayingVelocity.getLinearPart().interpolate(estimatedVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, decayFactor);
+         linearVelocityWorldFrame = estimatedDecayingVelocity.getLinearPart();
+         // Position
+         position.scaleAdd(-0.5 * updateDT * updateDT, linearAccelerationWorldFrame, position);
+         position.scaleAdd(updateDT, linearVelocityWorldFrame, position);
+
+         // Angular Velocity
+         angularVelocityWorldFrame.scaleAdd(updateDT, angularAccelerationWorldFrame, angularVelocityWorldFrame);
+         estimatedDecayingVelocity.getAngularPart().interpolate(estimatedVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, decayFactor);
+         angularVelocityWorldFrame = estimatedVelocity.getAngularPart();
 
          // Orientation
-         YoFrameVector3D angularAccelerationWorldFrame = estimatedAcceleration.getAngularPart();
-         YoFrameVector3D angularVelocityWorldFrame = estimatedVelocity.getAngularPart();
-         YoFrameQuaternion orientation = estimatedPose.getOrientation();
-         clampAcceleration(angularAccelerationWorldFrame, updateDT, angularVelocityWorldFrame, maxAngularVelocity);
-
-         rotationVectorUpdate.setAndScale(0.5 * updateDT * updateDT, angularAccelerationWorldFrame);
+         rotationVectorUpdate.setAndScale(-0.5 * updateDT * updateDT, angularAccelerationWorldFrame);
          rotationVectorUpdate.scaleAdd(updateDT, angularVelocityWorldFrame, rotationVectorUpdate);
          orientationUpdate.setRotationVector(rotationVectorUpdate);
          // Using prepend instead of append because the rotation update is in world frame
          // If the update was in body frame, we would use append.
          orientation.prepend(orientationUpdate);
-
-         // Angular Velocity
-         angularVelocityWorldFrame.scaleAdd(updateDT, angularAccelerationWorldFrame, angularVelocityWorldFrame);
       }
 
       /**
@@ -651,35 +672,39 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
        * @param inputPose     The desired pose <img src="https://latex.codecogs.com/png.image?x^{in}"> in the equations. Not modified.
        * @param inputVelocity The desired velocity <img src="https://latex.codecogs.com/png.image?\dot{x}^{in}"> in the equations. Not modified.
        */
-      private void estimateAcceleration(FramePose3DReadOnly inputPose, SpatialVectorReadOnly inputVelocity)
+      private void estimateAcceleration(FramePose3DReadOnly inputPose,
+                                        SpatialVectorReadOnly inputVelocity,
+                                        FramePose3DReadOnly previousPose,
+                                        SpatialVectorReadOnly previousVelocity,
+                                        FixedFrameSpatialVectorBasics outputAcceleration)
       {
-         YoFrameVector3D estimatedLinearAccelerationWorldFrame = estimatedAcceleration.getLinearPart();
-         YoFrameVector3D estimatedAngularAccelerationWorldFrame = estimatedAcceleration.getAngularPart();
+         FixedFrameVector3DBasics estimatedLinearAccelerationWorldFrame = outputAcceleration.getLinearPart();
+         FixedFrameVector3DBasics estimatedAngularAccelerationWorldFrame = outputAcceleration.getAngularPart();
 
          double kp = 2.0 / (correctionDuration.getValue() * correctionDuration.getValue());
          double kd = 2.0 / correctionDuration.getValue();
 
          // LINEAR FEEDBACK
-         positionVectorError.sub(inputPose.getPosition(), estimatedPose.getPosition());
+         positionVectorError.sub(inputPose.getPosition(), previousPose.getPosition());
          positionVectorError.scale(kp);
-         linearVelocityVectorError.scaleSub(rawVelocityAlpha.getValue(), inputVelocity.getLinearPart(), estimatedVelocity.getLinearPart());
+         linearVelocityVectorError.scaleSub(rawVelocityAlpha.getValue(), inputVelocity.getLinearPart(), previousVelocity.getLinearPart());
          linearVelocityVectorError.scale(kd);
          estimatedLinearAccelerationWorldFrame.add(positionVectorError, linearVelocityVectorError);
 
          // ANGULAR FEEDBACK
-         quaternionError.difference(estimatedPose.getOrientation(), inputPose.getOrientation());
+         quaternionError.difference(previousPose.getOrientation(), inputPose.getOrientation());
          quaternionError.getRotationVector(rotationVectorErrorBodyFrame); // expressed in body-frame estimated
          angularVelocityErrorBodyFrame.scaleSub(rawVelocityAlpha.getValue(),
                                                 inputVelocity.getAngularPart(),
-                                                estimatedVelocity.getAngularPart()); // Velocities are expressed in world frame
-         estimatedPose.inverseTransform(angularVelocityErrorBodyFrame); // This is now in the body-fixed frame
+                                                previousVelocity.getAngularPart()); // Velocities are expressed in world frame
+         previousPose.inverseTransform(angularVelocityErrorBodyFrame); // This is now in the body-fixed frame
 
          rotationVectorErrorBodyFrame.scale(kp);
          angularVelocityErrorBodyFrame.scale(kd);
 
          // This is in body-frame as described by the estimatedPose
          angularAccelerationBodyFrame.add(rotationVectorErrorBodyFrame, angularVelocityErrorBodyFrame);
-         estimatedPose.transform(angularAccelerationBodyFrame, estimatedAngularAccelerationWorldFrame);
+         previousPose.transform(angularAccelerationBodyFrame, estimatedAngularAccelerationWorldFrame);
       }
 
       /**
@@ -691,20 +716,15 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       @Override
       public void predict(double time)
       {
-         estimatedDecayingVelocity.set(rawInputVelocity);
+         double decayFactor = 0.0;
 
          if (time > nextTimeTriggerForDecay.getValue())
          {
-            estimatedDecayingVelocity.setToZero();
-            /*
-            double alpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + updateDT / inputVelocityDecayDuration.getValue());
-            inputVelocityDecayFactor.set(alpha);
-            estimatedDecayingVelocity.getLinearPart().interpolate(rawInputVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
-            estimatedDecayingVelocity.getAngularPart().interpolate(rawInputVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
-            */
+            decayFactor = Math.min(1.0, inputVelocityDecayFactor.getValue() + updateDT / inputVelocityDecayDuration.getValue());
+            inputVelocityDecayFactor.set(decayFactor);
          }
 
-         doubleIntegrateAcceleration(maxAngularVelocity.getValue(), maxLinearVelocity.getValue());
+         doubleIntegrateAcceleration(decayFactor, maxAngularVelocity.getValue(), maxLinearVelocity.getValue());
          lastUpdateTime.set(time);
       }
 
