@@ -21,7 +21,10 @@ permissions:
 jobs:
   build:
 
-    runs-on: [self-hosted, Linux, nvidia]
+    runs-on: ihmc-runner-nvidia
+    container:
+      image: ihmcrobotics/ihmc-runner-nvidia
+      options: --runtime=nvidia --gpus all
 
     steps:
       - uses: actions/checkout@v4
