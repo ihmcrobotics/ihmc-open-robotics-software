@@ -54,6 +54,14 @@ public class CUDAStreamManager
       return streams.size();
    }
 
+   /* package-private */ static synchronized void reset()
+   {
+      while (!streams.isEmpty())
+         streams.remove(0).release();
+
+      streamsGotten = 0;
+   }
+
    private static class ReferencedCUDAStream extends CUstream_st
    {
       private final AtomicLong references = new AtomicLong(0L);

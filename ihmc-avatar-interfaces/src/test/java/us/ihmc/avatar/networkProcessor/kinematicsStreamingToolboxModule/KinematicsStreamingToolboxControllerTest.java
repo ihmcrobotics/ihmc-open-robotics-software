@@ -1,12 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -57,6 +59,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
@@ -84,6 +87,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -118,6 +122,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected ROS2Topic<?> controllerOutputTopic;
    protected ROS2Topic<?> toolboxInputTopic;
    protected ROS2Topic<?> toolboxOutputTopic;
+
+   private List<Runnable> cleanupTasks;
 
    /**
     * Returns a <b>new</b> instance of the robot model that will be modified in this test to create
@@ -177,11 +183,14 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
-      toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                         s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
+      ROS2Subscription<RobotConfigurationData> rcdSubscription = toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                                                                                    s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
+      cleanupTasks.add(rcdSubscription::remove);
 
-      toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
-                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      ROS2Subscription<CapturabilityBasedStatus> cbsSubscription = toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic,
+                                                                                                                             CapturabilityBasedStatus.class),
+                                                                                                      s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      cleanupTasks.add(cbsSubscription::remove);
 
       inputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(toolboxInputTopic, KinematicsStreamingToolboxInputMessage.class));
       statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
@@ -305,9 +314,17 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxController.setCollisionModel(collisionModel);
    }
 
+   @BeforeEach
+   public void setUp()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      cleanupTasks = new ArrayList<>();
+   }
+
    @AfterEach
    public void tearDown()
    {
+
       if (simulationTestHelper != null)
       {
          simulationTestHelper.finishTest(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
@@ -321,7 +338,29 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxController = null;
       robot = null;
       ghost = null;
-      ros2Node = null;
+
+      if (cleanupTasks != null)
+      {
+         for (Runnable cleanupTask : cleanupTasks)
+         {
+            try
+            {
+               cleanupTask.run();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+         cleanupTasks.clear();
+      }
+
+      if (ros2Node != null)
+      {
+         ros2Node.destroy();
+         ros2Node = null;
+      }
+
       inputPublisher = null;
       statePublisher = null;
 
@@ -348,8 +387,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-                                                                                                                  : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
       double toolboxControllerPeriod = toolboxController.getTools().getToolboxControllerPeriod();
 
@@ -479,11 +519,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
       SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
       scs.waitUntilVisualizerFullyUp();
       Platform.runLater(() ->
-      {
-         Button restart = new Button("Restart");
-         restart.setOnAction(event -> simRunner.reset());
-         scs.addCustomGUIControl(restart);
-      });
+                        {
+                           Button restart = new Button("Restart");
+                           restart.setOnAction(event -> simRunner.reset());
+                           scs.addCustomGUIControl(restart);
+                        });
 
       assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
@@ -662,8 +702,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-                                                                                                                  : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
       return time ->
       {
@@ -819,12 +860,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
       @Override
       public String toString()
       {
-         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(toolboxParameters,
-                                                                                                                                                                                               handPositionMeanErrorThreshold,
-                                                                                                                                                                                               handOrientationMeanErrorThreshold,
-                                                                                                                                                                                               messageGeneratorDT,
-                                                                                                                                                                                               messageGenerator,
-                                                                                                                                                                                               simulationDuration);
+         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(
+               toolboxParameters,
+               handPositionMeanErrorThreshold,
+               handOrientationMeanErrorThreshold,
+               messageGeneratorDT,
+               messageGenerator,
+               simulationDuration);
       }
    }
 

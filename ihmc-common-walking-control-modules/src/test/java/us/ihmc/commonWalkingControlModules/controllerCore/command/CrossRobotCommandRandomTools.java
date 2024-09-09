@@ -407,8 +407,7 @@ public class CrossRobotCommandRandomTools
                                                                   Random random,
                                                                   boolean ensureNonEmptyCommand,
                                                                   RigidBodyBasics rootBody,
-                                                                  ReferenceFrame... possibleFrames)
-         throws Exception
+                                                                  ReferenceFrame... possibleFrames) throws Exception
    {
       RecyclingArrayList<T> next = new RecyclingArrayList<>(elementType);
       while (next.size() < size)
@@ -978,6 +977,9 @@ public class CrossRobotCommandRandomTools
          next.enable();
       else
          next.disable();
+
+      if (random.nextBoolean())
+         next.setNullspaceAlpha(random.nextDouble());
 
       return next;
    }
@@ -1913,8 +1915,7 @@ public class CrossRobotCommandRandomTools
 
    public static LinearMomentumRateControlModuleInput nextLinearMomentumRateControlModuleInput(Random random,
                                                                                                RigidBodyBasics rootBody,
-                                                                                               ReferenceFrame... possibleFrames)
-         throws Exception
+                                                                                               ReferenceFrame... possibleFrames) throws Exception
    {
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
       next.setContactStateCommand(new SideDependentList<>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
@@ -2143,7 +2144,8 @@ public class CrossRobotCommandRandomTools
       }
 
       String methodName = "next" + typeToInstantiateRandomly.getSimpleName();
-      List<Method> potentialGenerators = Stream.of(CrossRobotCommandRandomTools.class.getDeclaredMethods()).filter(m -> m.getName().equals(methodName))
+      List<Method> potentialGenerators = Stream.of(CrossRobotCommandRandomTools.class.getDeclaredMethods())
+                                               .filter(m -> m.getName().equals(methodName))
                                                .collect(Collectors.toList());
 
       if (potentialGenerators.size() > 1)
