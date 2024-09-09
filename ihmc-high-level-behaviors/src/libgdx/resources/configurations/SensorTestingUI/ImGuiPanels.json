@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Perception Visualizers" : true,
+    "/ihmc/d455/image/color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/d455/image/color" : false,
+    "/ihmc/zed2/left_color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/left_color" : false,
+    "Settings" : true
+  }
+}

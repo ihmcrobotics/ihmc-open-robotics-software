@@ -217,6 +217,11 @@ public class RealsenseColorDepthImageRetriever
       realsenseGrabThread.stop();
    }
 
+   public boolean isRunning()
+   {
+      return realsenseGrabThread.isRunning();
+   }
+
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());

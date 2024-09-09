@@ -388,7 +388,8 @@ public class ZEDColorDepthImageRetriever
          if (colorImages.get(side) != null)
             colorImages.get(side).release();
       }
-      sl_close_camera(cameraID);
+      if (sl_is_opened(cameraID))
+         sl_close_camera(cameraID);
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
