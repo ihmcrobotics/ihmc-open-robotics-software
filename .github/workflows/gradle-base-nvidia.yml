@@ -21,7 +21,10 @@ permissions:
 jobs:
   build:
 
-    runs-on: [self-hosted, Linux, nvidia]
+    runs-on: [self-hosted, ihmc-runner-nvidia]
+    container:
+      image: ihmcrobotics/ihmc-runner-nvidia:1.0.0
+      options: --runtime=nvidia --gpus all
 
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +37,17 @@ jobs:
           git lfs fetch
           git lfs pull
           git lfs ls-files -l
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.1"
 
       - name: Check nvidia-smi
         run: |
