@@ -26,8 +26,10 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: [self-hosted, linux]
+    container:
+      image: ihmcrobotics/ihmc-runner:1.0.0
+      options: --runtime=nvidia --gpus all
 
     steps:
       - uses: actions/checkout@v4
