@@ -21,7 +21,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: ihmc-runner-nvidia
+    runs-on: [self-hosted, ihmc-runner-nvidia]
     container:
       image: ihmcrobotics/ihmc-runner-nvidia:1.0.0
       options: --runtime=nvidia --gpus all
