@@ -23,7 +23,7 @@ jobs:
 
     runs-on: [self-hosted, ihmc-runner-nvidia]
     container:
-      image: ihmcrobotics/ihmc-runner-nvidia:1.0.0
+      image: ihmcrobotics/ihmc-runner-nvidia:1.0.1
       options: --runtime=nvidia --gpus all
 
     steps:
