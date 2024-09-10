@@ -1,8 +1,10 @@
 package us.ihmc.perception.streaming;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.UUID;
 
@@ -14,6 +16,25 @@ public class StreamingTools
    public static String toSRTAddress(InetSocketAddress address)
    {
       return "srt://" + address.getHostString() + ":" + address.getPort();
+   }
+
+   public static InetSocketAddress getMyAddress()
+   {
+      return new InetSocketAddress(getHostIPAddress(), getOpenPort());
+   }
+
+   public static int getOpenPort()
+   {
+      int port;
+      try (ServerSocket tempSocket = new ServerSocket(0))
+      {
+         port = tempSocket.getLocalPort();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      return port;
    }
 
    public static InetAddress getHostIPAddress()

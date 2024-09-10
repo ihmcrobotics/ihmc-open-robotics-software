@@ -292,6 +292,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
    public static final ROS2Topic<?> STREAMING_MODULE = RELIABLE.withModule(STREAMING_NAME);
    public static final ROS2Topic<SRTStreamMessage> STREAM_CONTROL = STREAMING_MODULE.withType(SRTStreamMessage.class);
+
+   // Realsense
    public static final ROS2Topic<SRTStreamMessage> REALSENSE_STREAM_TOPIC = STREAM_CONTROL.withPrefix(D455_NAME);
    public static final ROS2IOTopicPair<SRTStreamMessage> REALSENSE_COLOR_STREAM = new ROS2IOTopicPair<>(REALSENSE_STREAM_TOPIC.withSuffix("color"));
+   public static final ROS2IOTopicPair<SRTStreamMessage> REALSENSE_DEPTH_STREAM = new ROS2IOTopicPair<>(REALSENSE_STREAM_TOPIC.withSuffix("depth"));
 }

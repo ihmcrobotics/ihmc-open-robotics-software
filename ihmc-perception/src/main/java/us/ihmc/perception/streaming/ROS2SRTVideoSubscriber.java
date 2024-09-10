@@ -31,6 +31,7 @@ public class ROS2SRTVideoSubscriber
    private float depthDiscretization = 0.0f;
 
    private final Mat currentFrame = new Mat();
+   private boolean receivedFirstFrame = false;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2,
@@ -66,6 +67,7 @@ public class ROS2SRTVideoSubscriber
       ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
 
       // Wait to receive ACK
+      // TODO: Add exception handler in case of interrupt
       SRTStreamMessage ackMessage = ackMessageSubscription.getMessageNotification().blockingPoll();
 
       // Subscribe via SRT
@@ -96,7 +98,10 @@ public class ROS2SRTVideoSubscriber
 
       Mat newFrame = videoSubscriber.getNextImage(UPDATE_TIMEOUT);
       if (newFrame != null)
+      {
          newFrame.copyTo(currentFrame);
+         receivedFirstFrame = true;
+      }
    }
 
    public void unsubscribe()
@@ -122,6 +127,16 @@ public class ROS2SRTVideoSubscriber
    public boolean isConnected()
    {
       return videoSubscriber.isConnected();
+   }
+
+   public boolean hasCameraIntrinsics()
+   {
+      return statusMessageSubscriber.hasReceivedFirstMessage();
+   }
+
+   public boolean hasReceivedFirstFrame()
+   {
+      return receivedFirstFrame;
    }
 
    public Mat getCurrentFrame()
