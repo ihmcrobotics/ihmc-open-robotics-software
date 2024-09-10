@@ -8,6 +8,12 @@ uint32 sequence_id
 # The data is assumed to be expressed in world frame.
 geometry_msgs/Point desired_position_in_world
 
+# Whether the desired linear velocity is defined.
+bool has_desired_linear_velocity
+
+# The desired linear velocity of the control frame's origin.
+geometry_msgs/Vector3 desired_linear_velocity_in_world
+
 # The selection matrix is used to determinate which degree of freedom of the center of mass
 # should be controlled.
 # The selection frame coming along with the given selection matrix is used to determine to what
@@ -22,5 +28,11 @@ ihmc_common_msgs/SelectionMatrix3DMessage selection_matrix
 # If no frame is provided, the weight matrix will be applied in the center of mass frame which is
 # aligned with the world axes.
 ihmc_common_msgs/WeightMatrix3DMessage weights
+
+# Constraint on the linear velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 linear_rate_limitation
 
 

@@ -15,7 +15,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0911e08f380e577807757343785ed18699965563fcf46a870a259013e85f4b42";
+   		return "12c1ec8f651134c5a7f6c2edef914f6b8c883136a5a94087d8e2a194cc036aca";
    }
    
    @Override
@@ -70,6 +70,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -110,6 +112,9 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -132,6 +137,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
       cdr.write_type_e(data.getPrivilegedJointAngles());else
           throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
 
+      cdr.write_type_6(data.getNullspaceAlpha());
+
       cdr.write_type_6(data.getPrivilegedWeight());
 
       cdr.write_type_6(data.getPrivilegedGain());
@@ -150,6 +157,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getPrivilegedRootJointOrientation(), cdr);	
       cdr.read_type_e(data.getPrivilegedJointHashCodes());	
       cdr.read_type_e(data.getPrivilegedJointAngles());	
+      data.setNullspaceAlpha(cdr.read_type_6());
+      	
       data.setPrivilegedWeight(cdr.read_type_6());
       	
       data.setPrivilegedGain(cdr.read_type_6());
@@ -169,6 +178,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
       ser.write_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
+      ser.write_type_6("nullspace_alpha", data.getNullspaceAlpha());
       ser.write_type_6("privileged_weight", data.getPrivilegedWeight());
       ser.write_type_6("privileged_gain", data.getPrivilegedGain());
    }
@@ -185,6 +195,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessagePubSubType implement
 
       ser.read_type_e("privileged_joint_hash_codes", data.getPrivilegedJointHashCodes());
       ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
+      data.setNullspaceAlpha(ser.read_type_6("nullspace_alpha"));
       data.setPrivilegedWeight(ser.read_type_6("privileged_weight"));
       data.setPrivilegedGain(ser.read_type_6("privileged_gain"));
    }
