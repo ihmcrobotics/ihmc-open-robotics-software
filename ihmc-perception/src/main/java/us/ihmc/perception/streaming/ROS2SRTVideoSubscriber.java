@@ -1,46 +1,146 @@
 package us.ihmc.perception.streaming;
 
-import perception_msgs.msg.dds.SRTStreamRequest;
+import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.SRTStreamMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.ros2.ROS2Input;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
-public class ROS2SRTVideoSubscriber extends SRTVideoSubscriber
+import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
+import static us.ihmc.perception.streaming.StreamingTools.STATUS_MESSAGE_UUID;
+
+public class ROS2SRTVideoSubscriber
 {
-   private static final double CONNECTION_TIMEOUT = 5.0;
+   private static final double UPDATE_TIMEOUT = 0.5; // half a second
 
    private final ROS2PublishSubscribeAPI ros2;
-   private final ROS2Topic<SRTStreamRequest> streamRequestTopic;
-   private final SRTStreamRequest requestMessage;
+   private final ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair;
+   private final ROS2Input<SRTStreamMessage> statusMessageSubscriber;
 
-   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamRequest> streamRequestTopic, InetSocketAddress inputAddress, int outputAVPixelFormat)
+   private final SRTStreamMessage requestMessage;
+
+   private final SRTVideoSubscriber videoSubscriber;
+   private final CameraIntrinsics cameraIntrinsics;
+   private float depthDiscretization = 0.0f;
+
+   private final Mat currentFrame = new Mat();
+   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
+
+   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2,
+                                 ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair,
+                                 InetSocketAddress inputAddress,
+                                 int outputAVPixelFormat)
    {
-      super(inputAddress, outputAVPixelFormat);
 
       this.ros2 = ros2;
-      this.streamRequestTopic = streamRequestTopic;
+      this.streamMessageTopicPair = streamMessageTopicPair;
 
-      requestMessage = new SRTStreamRequest();
+      statusMessageSubscriber = ros2.subscribe(streamMessageTopicPair.getStatusTopic(),
+                                               statusMessage -> STATUS_MESSAGE_UUID.equals(MessageTools.toUUID(statusMessage.getId())));
+
+      requestMessage = new SRTStreamMessage();
       requestMessage.setReceiverAddress(inputAddress.getHostString());
       requestMessage.setReceiverPort(inputAddress.getPort());
+
+      videoSubscriber = new SRTVideoSubscriber(inputAddress, outputAVPixelFormat);
+      cameraIntrinsics = new CameraIntrinsics();
    }
 
-   public void subscribe()
+   public boolean subscribe()
    {
-      // Keep requesting a connection until connected.
-      while (!isConnected())
+      // Select UUID and create subscription to that ID
+      UUID messageId = UUID.randomUUID();
+      ROS2Input<SRTStreamMessage> ackMessageSubscription = ros2.subscribe(streamMessageTopicPair.getStatusTopic(),
+                                                                          ackMessage -> messageId.equals(MessageTools.toUUID(ackMessage.getId())));
+
+      // Send a request message
+      MessageTools.toMessage(messageId, requestMessage.getId());
+      requestMessage.setConnectionWanted(true);
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+
+      // Wait to receive ACK
+      SRTStreamMessage ackMessage = ackMessageSubscription.getMessageNotification().blockingPoll();
+
+      // Subscribe via SRT
+      boolean success = videoSubscriber.waitForConnection(CONNECTION_TIMEOUT);
+      if (success)
       {
-         requestMessage.setConnectionWanted(true);
-         ros2.publish(streamRequestTopic, requestMessage);
-         waitForConnection(CONNECTION_TIMEOUT);
+         cameraIntrinsics.setWidth(ackMessage.getImageWidth());
+         cameraIntrinsics.setHeight(ackMessage.getImageHeight());
+         cameraIntrinsics.setFx(ackMessage.getFx());
+         cameraIntrinsics.setFy(ackMessage.getFy());
+         cameraIntrinsics.setCx(ackMessage.getCx());
+         cameraIntrinsics.setCy(ackMessage.getCy());
+         depthDiscretization = ackMessage.getDepthDiscretization();
       }
+
+      ackMessageSubscription.destroy();
+
+      return success;
+   }
+
+   public void update()
+   {
+      if (statusMessageSubscriber.hasReceivedFirstMessage())
+      {
+         SRTStreamMessage statusMessage = statusMessageSubscriber.getLatest();
+         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
+      }
+
+      Mat newFrame = videoSubscriber.getNextImage(UPDATE_TIMEOUT);
+      if (newFrame != null)
+         newFrame.copyTo(currentFrame);
    }
 
    public void unsubscribe()
    {
+      if (!videoSubscriber.isConnected())
+         return;
+
+      UUID messageId = UUID.randomUUID();
+      MessageTools.toMessage(messageId, requestMessage.getId());
       requestMessage.setConnectionWanted(false);
-      ros2.publish(streamRequestTopic, requestMessage);
-      disconnect();
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+      videoSubscriber.disconnect();
+   }
+
+   public void destroy()
+   {
+      unsubscribe();
+      statusMessageSubscriber.destroy();
+      videoSubscriber.destroy();
+      currentFrame.close();
+   }
+
+   public boolean isConnected()
+   {
+      return videoSubscriber.isConnected();
+   }
+
+   public Mat getCurrentFrame()
+   {
+      return currentFrame;
+   }
+
+   public RigidBodyTransformReadOnly getSensorTransformToWorld()
+   {
+      return sensorTransformToWorld;
+   }
+
+   public CameraIntrinsics getCameraIntrinsics()
+   {
+      return cameraIntrinsics;
+   }
+
+   public float getDepthDiscretization()
+   {
+      return depthDiscretization;
    }
 }

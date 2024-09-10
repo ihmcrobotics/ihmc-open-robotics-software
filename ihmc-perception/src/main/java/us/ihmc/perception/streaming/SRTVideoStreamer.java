@@ -58,6 +58,8 @@ public class SRTVideoStreamer
    private final AVDictionary encoderOptions;
    private FFMPEGVideoEncoder encoder;
 
+   private boolean initialized = false;
+
    /**
     * (1) Construct the streamer
     */
@@ -95,6 +97,7 @@ public class SRTVideoStreamer
                                        0,
                                        inputAVPixelFormat);
       encoder.initialize(encoderOptions);
+      initialized = true;
    }
 
    public void sendFrame(Mat image)
@@ -152,6 +155,11 @@ public class SRTVideoStreamer
    public int connectedCallerCount()
    {
       return callers.size();
+   }
+
+   public boolean isInitialized()
+   {
+      return initialized;
    }
 
    public void destroy()

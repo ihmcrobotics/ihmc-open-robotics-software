@@ -288,10 +288,10 @@ public final class PerceptionAPI
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
    }
 
+   /* VIDEO STREAMING STUFF */
    public static final ROS2Topic<?> RELIABLE = IHMC_ROOT.withQoS(ROS2QosProfile.RELIABLE());
    public static final ROS2Topic<?> STREAMING_MODULE = RELIABLE.withModule(STREAMING_NAME);
-   public static final ROS2Topic<SRTStreamRequest> REALSENSE_COLOR_STREAM_REQUEST = STREAMING_MODULE.withPrefix(D455_NAME)
-                                                                                                    .withSuffix("color_request")
-                                                                                                    .withType(SRTStreamRequest.class);
-
+   public static final ROS2Topic<SRTStreamMessage> STREAM_CONTROL = STREAMING_MODULE.withType(SRTStreamMessage.class);
+   public static final ROS2Topic<SRTStreamMessage> REALSENSE_STREAM_TOPIC = STREAM_CONTROL.withPrefix(D455_NAME);
+   public static final ROS2IOTopicPair<SRTStreamMessage> REALSENSE_COLOR_STREAM = new ROS2IOTopicPair<>(REALSENSE_STREAM_TOPIC.withSuffix("color"));
 }

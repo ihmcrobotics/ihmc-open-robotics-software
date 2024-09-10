@@ -6,16 +6,22 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.SRTStreamRequest;
+import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.Throttler;
 
 import java.io.IOException;
@@ -23,6 +29,7 @@ import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -173,11 +180,32 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2Topic<SRTStreamRequest> requestTopic = PerceptionAPI.STREAMING_MODULE.withSuffix("ros2_srt_test").withType(SRTStreamRequest.class);
+      ROS2IOTopicPair<SRTStreamMessage> requestTopic = new ROS2IOTopicPair<>(PerceptionAPI.STREAM_CONTROL.withSuffix("ros2_srt_test"));
+
+      float depthDescretization = -1.0f;
+      float fx = 500.0f;
+      float fy = 400.0f;
+      float cx = sampleImage.cols() / 2.0f;
+      float cy = sampleImage.rows() / 2.0f;
+      FramePoint3D testPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.3, 0.4, 0.5);
+      FrameQuaternion testOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), 0.5, 0.4, 0.3);
+
+      // Create an example raw image
+      RawImage rawImage = new RawImage(0L,
+                                       Instant.now(),
+                                       depthDescretization,
+                                       sampleImage,
+                                       null,
+                                       fx,
+                                       fy,
+                                       cx,
+                                       cy,
+                                       testPosition,
+                                       testOrientation);
 
       // Create and initialize the streamer
       ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(requestTopic);
-      streamer.initialize(sampleImage.cols(), sampleImage.rows(), FPS, AV_PIX_FMT_BGR24);
+      streamer.initialize(rawImage, FPS, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
       ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, localAddress, AV_PIX_FMT_BGR24);
@@ -192,7 +220,7 @@ public class SRTStreamerSubscriberTest
          for (int i = 0; i < 2 * FPS; ++i)
          {
             throttler.waitAndRun();
-            streamer.sendFrame(sampleImage);
+            streamer.sendFrame(rawImage);
          }
       }, "ROS2SRTStreamerSend");
 
@@ -204,9 +232,21 @@ public class SRTStreamerSubscriberTest
       assertEquals(1, streamer.connectedCallerCount());
 
       // Ensure we can receive an image
-      Mat receivedImage = subscriber.getNextImage(0.5);
-      assertNotNull(receivedImage);
-      receivedImage.close();
+      subscriber.update();
+      Mat receivedImage = subscriber.getCurrentFrame();
+      assertTrue(OpenCVTools.dimensionsMatch(receivedImage, sampleImage));
+
+      // Ensure we can receive other data
+      assertEquals(depthDescretization, subscriber.getDepthDiscretization());
+      assertEquals(fx, subscriber.getCameraIntrinsics().getFx());
+      assertEquals(fy, subscriber.getCameraIntrinsics().getFy());
+      assertEquals(cx, subscriber.getCameraIntrinsics().getCx());
+      assertEquals(cy, subscriber.getCameraIntrinsics().getCy());
+
+      FramePoint3D receivedPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), subscriber.getSensorTransformToWorld().getTranslation());
+      FrameQuaternion receivedOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), subscriber.getSensorTransformToWorld().getRotation());
+      EuclidCoreTestTools.assertEquals(testPosition, receivedPosition, 1E-5);
+      EuclidCoreTestTools.assertEquals(testOrientation, receivedOrientation, 1E-5);
 
       sendThread.join();
 
