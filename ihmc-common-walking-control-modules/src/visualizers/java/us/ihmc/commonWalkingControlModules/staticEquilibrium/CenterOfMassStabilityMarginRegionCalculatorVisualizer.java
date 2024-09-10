@@ -42,11 +42,8 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
 
       LogTools.info("----- Support Region -----");
 
-      while (!calculator.hasSolvedWholeRegion())
-      {
-         calculator.performCoMRegionQuery();
-         scs2.simulateNow(1);
-      }
+      calculator.performFullRegionUpdate();
+      scs2.simulateNow(1);
 
       ConvexPolygon2DReadOnly supportRegion0 = calculator.getFeasibleCoMRegion();
       for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)

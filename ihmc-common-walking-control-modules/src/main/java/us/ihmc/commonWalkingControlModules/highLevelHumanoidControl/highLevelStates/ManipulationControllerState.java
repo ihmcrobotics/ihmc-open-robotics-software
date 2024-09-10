@@ -29,7 +29,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -256,6 +259,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     null,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
+                                                                    momentumOptimizationSettings.getRhoWeight(),
                                                                     yoTime,
                                                                     gravityZ,
                                                                     graphicsListRegistry,

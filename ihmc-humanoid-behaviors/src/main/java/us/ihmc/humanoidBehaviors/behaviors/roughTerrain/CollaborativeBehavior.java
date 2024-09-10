@@ -43,7 +43,7 @@ public class CollaborativeBehavior extends AbstractBehavior
          {
             try
             {
-               InputStream in = new ByteArrayInputStream(vidPack.getData().toArray());
+               InputStream in = new ByteArrayInputStream(vidPack.getData().copyArray());
                ImageIO.write(ImageIO.read(in), "png", new java.io.File("testImage"));
             }
             catch (IOException e)

@@ -13,11 +13,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
-   api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
-
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ekf:0.7.7")
+   api("us.ihmc:ekf:0.7.8")
 }
 
 testDependencies {

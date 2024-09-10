@@ -502,12 +502,8 @@ public class PerceptionDataLogger
    {
       LogTools.info("Storing Compressed Image: {}", namespace);
 
-      byte[] heapArray = byteArrays.get(namespace);
-      IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-      imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size());
-
       BytePointer bytePointer = channels.get(namespace).getBytePointer();
-      bytePointer.put(heapArray, 0, packet.getData().size());
+      bytePointer.put(packet.getData().getBuffer().array(), 0, packet.getData().size());
       bytePointer.limit(packet.getData().size());
       storeBytesFromPointer(namespace, bytePointer);
 

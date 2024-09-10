@@ -337,4 +337,10 @@ public class MonteCarloFootstepPlanner
    {
       return planning;
    }
+
+
+   public MonteCarloFootstepPlannerParameters getParameters()
+   {
+      return parameters;
+   }
 }

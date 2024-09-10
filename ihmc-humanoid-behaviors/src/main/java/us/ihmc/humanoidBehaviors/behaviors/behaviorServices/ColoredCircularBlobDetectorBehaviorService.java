@@ -58,7 +58,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          RobotConfigurationData robotConfigurationData = robotConfigurationDataQueue.getLatestPacket();
          videoTimestamp = robotConfigurationData.getMonotonicTime();
 
-         latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+         latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().copyArray());
 
 //         openCVColoredCircularBlobDetector.updateFromBufferedImage(latestUnmodifiedCameraImage);
 //         ArrayList<HoughCircleResult> circles = openCVColoredCircularBlobDetector.getCircles();

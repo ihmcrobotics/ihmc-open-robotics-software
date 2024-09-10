@@ -2,7 +2,7 @@ package us.ihmc.atlas.jfxvisualizer;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
 import org.ros.message.Duration;

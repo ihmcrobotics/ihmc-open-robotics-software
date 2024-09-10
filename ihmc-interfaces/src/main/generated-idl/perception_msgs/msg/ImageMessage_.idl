@@ -47,7 +47,7 @@ module perception_msgs
          */
         sequence<octet, 25000000> data;
         /**
-         * The image format. Ordinal of OpenCVImageFormat
+         * The image format. Ordinal of ImageMessageFormat
          */
         octet format;
         /**

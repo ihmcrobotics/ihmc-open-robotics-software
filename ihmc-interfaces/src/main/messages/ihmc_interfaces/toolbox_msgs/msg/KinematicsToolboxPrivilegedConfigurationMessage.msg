@@ -19,13 +19,21 @@ geometry_msgs/Quaternion privileged_root_joint_orientation
 int32[] privileged_joint_hash_codes
 # When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
 float32[] privileged_joint_angles
+
+
+# Specifies the value for the alpha parameter of the nullspace projection.
+# The nullspace projection is computed using a damped least square solver which the alpha parameter is for.
+# The alpha value controls the size of the singularity neighborhood that is used to project the privileged configuration.
+# A small value will result in a small neighborhood (for the arms, the elbows will more easily go straight)
+# and a large value will result in a large neighborhood (for the arms, the elbows will resist going straight).
+# Any negative value will be ignored and result in the solver using its default value.
+float64 nullspace_alpha -1
 # The weight to use in the optimization for the privileged configuration.
 # When remaining close to the privileged configuration is important, raise this weight to a value higher than the 
 # weight of the main objectives.
-# Any value less than zero will be ignored.
-# A value of -1 will result in the solver using its default value.
+# Any negative value will be ignored and result in the solver using its default value.
 float64 privileged_weight -1
 # The feedback proportional gain to use for the privileged configuration.
 # It is coupled to some extent to the privileged_weight
-# A value of -1 will result in the solver using its default value.
+# Any negative value will be ignored and result in the solver using its default value.
 float64 privileged_gain -1

@@ -93,11 +93,9 @@ public class RDXROS2ARViaBackgroundDemo
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
-            highLevelDepthSensorSimulator.setPublishDepthImageROS1(false);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
-            highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             highLevelDepthSensorSimulator.setUseSensorColor(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);

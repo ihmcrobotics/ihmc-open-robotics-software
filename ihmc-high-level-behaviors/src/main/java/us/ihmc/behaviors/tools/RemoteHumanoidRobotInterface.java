@@ -74,8 +74,8 @@ public class RemoteHumanoidRobotInterface
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
       
-      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.withOutput(), this::acceptWalkingStatus);
-      new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), footstepStatusMessage::set);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatus);
+      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), footstepStatusMessage::set);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());

@@ -1,15 +1,21 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.Objects;
 
 /**
  * Command that holds input for the {@link LinearMomentumRateControlModule} coming from the walking controller state
@@ -86,11 +92,11 @@ public class LinearMomentumRateControlModuleInput
    private boolean initializeOnStateChange;
 
    /**
-    * Flag that indicates to the ICP controller that the desired feedback CoP should stay within the bounds of the
-    * support polygon. This should generally be true but can be set to false in certain cases where the support polygon
-    * might not be accurate e.g. when using handholds.
+    * CoM stability region computed by {@link CenterOfMassStabilityMarginRegionCalculator}. This region is enabled when the robot's
+    * upper body is load-bearing, resulting in a modified support region. When this polygon is not empty, the ICP controller can place
+    * the feedback CoP in this modified support region.
     */
-   private boolean keepCoPInsideSupportPolygon;
+   private final FrameConvexPolygon2D multiContactStabilityRegion = new FrameConvexPolygon2D();
 
    /**
     * Is a flag that enables the z-selection in the angular momentum rate command if {@code true}. The desired angular
@@ -244,14 +250,14 @@ public class LinearMomentumRateControlModuleInput
       return initializeOnStateChange;
    }
 
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.keepCoPInsideSupportPolygon = keepCoPInsideSupportPolygon;
+      this.multiContactStabilityRegion.setIncludingFrame(multiContactStabilityRegion);
    }
 
-   public boolean getKeepCoPInsideSupportPolygon()
+   public FrameConvexPolygon2DBasics getMultiContactStabilityRegion()
    {
-      return keepCoPInsideSupportPolygon;
+      return multiContactStabilityRegion;
    }
 
    public void setContactStateCommand(SideDependentList<PlaneContactStateCommand> contactStateCommands)
@@ -278,7 +284,7 @@ public class LinearMomentumRateControlModuleInput
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
       initializeOnStateChange = other.initializeOnStateChange;
-      keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
+      multiContactStabilityRegion.setIncludingFrame(other.multiContactStabilityRegion);
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
       setHasHeightCommand(other.getHasHeightCommand());
@@ -316,7 +322,7 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (initializeOnStateChange ^ other.initializeOnStateChange)
             return false;
-         if (keepCoPInsideSupportPolygon ^ other.keepCoPInsideSupportPolygon)
+         if (!multiContactStabilityRegion.equals(other.multiContactStabilityRegion))
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
             return false;
