@@ -7,6 +7,7 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.ffmpeg.FFMPEGTimeoutCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
@@ -14,8 +15,7 @@ import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.av_dict_copy;
-import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class SRTStreamWriter
 {
@@ -31,6 +31,8 @@ public class SRTStreamWriter
    private final AVDictionary formatOptions;
    private final AVPacket packetCopy;
    private AVStream outputStream;
+
+   private final FFMPEGTimeoutCallback timeoutCallback;
 
    private boolean connected = false;
 
@@ -59,19 +61,23 @@ public class SRTStreamWriter
       packetCopy = av_packet_alloc();
       FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
 
+      timeoutCallback = new FFMPEGTimeoutCallback();
+
       ioContext = new AVIOContext();
       formatContext = new AVFormatContext();
+      formatContext.interrupt_callback(timeoutCallback);
    }
 
-   public boolean connect()
+   public boolean connect(double timeout)
    {
-      // TODO: Add timeout to this https://ffmpeg.org/pipermail/libav-user/2015-June/008208.html
       // Open the IO
-      error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, null, this.ioOptions);
+      timeoutCallback.start(timeout);
+      error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, timeoutCallback, this.ioOptions);
       if (!FFMPEGTools.checkError(error, ioContext, "Opening IO context", false))
          return false;
 
       // Create the output format context
+      timeoutCallback.start(timeout);
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
       if (!FFMPEGTools.checkError(error, formatContext, "Allocating output format context", false))
          return false;
@@ -132,6 +138,8 @@ public class SRTStreamWriter
 
       av_dict_free(formatOptions);
       formatOptions.close();
+
+      timeoutCallback.close();
 
       if (outputStream != null)
          outputStream.close();

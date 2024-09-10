@@ -51,7 +51,7 @@ public class SRTVideoStreamerDemo
    private void run()
    {
       LogTools.info("Connecting to caller...");
-      videoStreamer.connectToCaller(CALLER_ADDRESS);
+      videoStreamer.connectToCaller(CALLER_ADDRESS, -1.0);
 
       LogTools.info("Got a connection! Streaming!");
       while (!shutdown && videoStreamer.connectedCallerCount() > 0)

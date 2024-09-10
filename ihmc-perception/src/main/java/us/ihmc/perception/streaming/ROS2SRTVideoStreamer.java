@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ROS2SRTVideoStreamer extends SRTVideoStreamer
 {
+   private static final double CONNECTION_TIMEOUT = 5.0; // 5 seconds to connect. Otherwise, fail.
+
    private final ROS2Node ros2Node;
    private final ExecutorService callerConnector = Executors.newCachedThreadPool();
 
@@ -30,7 +32,7 @@ public class ROS2SRTVideoStreamer extends SRTVideoStreamer
       SRTStreamRequest request = requestSubscriber.takeNextData();
       InetSocketAddress callerAddress = InetSocketAddress.createUnresolved(request.getReceiverAddressAsString(), request.getReceiverPort());
       if (request.getConnectionWanted())
-         callerConnector.submit(() -> connectToCaller(callerAddress));
+         callerConnector.submit(() -> connectToCaller(callerAddress, CONNECTION_TIMEOUT));
       else
          removeCaller(callerAddress);
    }

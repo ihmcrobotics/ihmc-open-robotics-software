@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 
 public class ROS2SRTVideoSubscriber extends SRTVideoSubscriber
 {
-   private static final double CONNECTION_TIMEOUT = 2.0;
+   private static final double CONNECTION_TIMEOUT = 5.0;
 
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2Topic<SRTStreamRequest> streamRequestTopic;

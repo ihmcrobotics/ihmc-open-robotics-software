@@ -23,6 +23,12 @@ import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +38,9 @@ public class SRTStreamerSubscriberTest
    private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_streaming_test");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final double FPS = 30.0;
+   private static final double TEST_TIMEOUT = 5.0;
+   private static final double CALL_TIMEOUT = 0.5 * TEST_TIMEOUT;
+   private static final double EXTRA_LONG_TIMEOUT = 2.0 * TEST_TIMEOUT;
 
    private static Mat sampleImage;
 
@@ -51,16 +60,15 @@ public class SRTStreamerSubscriberTest
    @Test
    public void testSRTStreamerTimeouts()
    {
-      double timeout = 5.0; // Nothing should really take more than 5 seconds to fail
       InetSocketAddress fakeAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
       SRTVideoStreamer streamer = new SRTVideoStreamer();
       streamer.initialize(sampleImage.cols(), sampleImage.rows(), FPS, AV_PIX_FMT_BGR24);
 
-      testTimeout(() -> streamer.connectToCaller(fakeAddress), timeout);   // Try connecting to nowhere
-      testTimeout(() -> streamer.sendFrame(sampleImage), timeout);         // Try sending data to nowhere
-      testTimeout(() -> streamer.removeCaller(fakeAddress), timeout);      // Try removing nothing
-      testTimeout(streamer::destroy, timeout);                             // Try destroying
+      testTimeout(() -> streamer.connectToCaller(fakeAddress, CALL_TIMEOUT), EXTRA_LONG_TIMEOUT);  // Try connecting to nowhere
+      testTimeout(() -> streamer.sendFrame(sampleImage), TEST_TIMEOUT);                            // Try sending data to nowhere
+      testTimeout(() -> streamer.removeCaller(fakeAddress), TEST_TIMEOUT);                         // Try removing nothing
+      testTimeout(streamer::destroy, TEST_TIMEOUT);                                                // Try destroying
 
       // If it got here, the test passed!
    }
@@ -68,28 +76,42 @@ public class SRTStreamerSubscriberTest
    @Test
    public void testSRTSubscriberTimeouts()
    {
-      double timeout = 5.0;
+      double TIMEOUT = 5.0;
       InetSocketAddress subscriberAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
       SRTVideoSubscriber subscriber = new SRTVideoSubscriber(subscriberAddress, AV_PIX_FMT_BGR24);
-      testTimeout(subscriber::connect, timeout);                           // Try connecting to nowhere
-      testTimeout(() -> subscriber.waitForConnection(timeout), timeout);   // Try waiting for a connection to nowhere
+      testTimeout(() -> subscriber.connect(CALL_TIMEOUT), TIMEOUT);
+      testTimeout(() -> subscriber.waitForConnection(CALL_TIMEOUT), TIMEOUT); // Try waiting for a connection to nowhere
+      testTimeout(() -> subscriber.getNextImage(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
+      testTimeout(subscriber::destroy, TIMEOUT);                              // Try to destroy
    }
 
-   private void testTimeout(Runnable runnable, double timeout)
-   {
+   private static final ExecutorService TIMEOUT_TEST_EXECUTOR = Executors.newSingleThreadExecutor();
 
-      Thread tryThread = ThreadTools.startAThread(runnable, "TestTimeoutThread");
+   @AfterAll
+   public static void shutdownExecutor()
+   {
+      TIMEOUT_TEST_EXECUTOR.shutdownNow();
+   }
+
+   private void testTimeout(Runnable runnable, double TIMEOUT)
+   {
+      Future<?> testResult = TIMEOUT_TEST_EXECUTOR.submit(runnable);
       try
       {
-         tryThread.join((long) Conversions.secondsToMilliseconds(timeout));
-
-         if (tryThread.isAlive())
-            fail("Timed out.");
+         testResult.get(Conversions.secondsToNanoseconds(TIMEOUT), TimeUnit.NANOSECONDS);
       }
-      catch (InterruptedException e)
+      catch (ExecutionException | TimeoutException | InterruptedException exception)
       {
-         fail("Test thread interrupted.");
+         if (exception instanceof  TimeoutException)
+            fail("Failed to terminate before timeout");
+         else
+            throw new RuntimeException(exception);
+      }
+      finally
+      {
+         if (!testResult.isDone())
+            testResult.cancel(true);
       }
    }
 
@@ -109,7 +131,7 @@ public class SRTStreamerSubscriberTest
       Thread streamerConnectThread = ThreadTools.startAThread(() ->
       {
          // Wait for caller to connect
-         streamer.connectToCaller(localAddress);
+         streamer.connectToCaller(localAddress, TEST_TIMEOUT);
 
          // Send 2 seconds of video
          for (int i = 0; i < 2 * FPS; ++i)
@@ -122,7 +144,7 @@ public class SRTStreamerSubscriberTest
       // Initialize a subscriber and connect to streamer
       SRTVideoSubscriber subscriber = new SRTVideoSubscriber(localAddress, AV_PIX_FMT_BGR24);
       assertFalse(subscriber.isConnected());
-      subscriber.connect();
+      subscriber.connect(CALL_TIMEOUT);
 
       // Should be communicating now
       assertEquals(1, streamer.connectedCallerCount());

@@ -128,13 +128,13 @@ public class SRTVideoStreamer
     * @param callerAddress Address of the caller
     * @return {@code true} if caller is connected, {@code false} if connection failed.
     */
-   public boolean connectToCaller(InetSocketAddress callerAddress)
+   public boolean connectToCaller(InetSocketAddress callerAddress, double timeout)
    {
       if (callers.containsKey(callerAddress))
          return true;
 
       SRTStreamWriter callerOutput = new SRTStreamWriter(encoder, callerAddress, outputFormat, ioOptions, null);
-      if (callerOutput.connect())
+      if (callerOutput.connect(timeout))
       {
          callers.put(callerAddress, callerOutput);
          return true;

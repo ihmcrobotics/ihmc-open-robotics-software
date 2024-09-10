@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.perception.ffmpeg.FFMPEGTimeoutCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoDecoder;
 
@@ -25,6 +26,7 @@ public class SRTVideoSubscriber
    private final int outputPixelFormat;
 
    private final AVFormatContext inputFormatContext;
+   private final FFMPEGTimeoutCallback timeoutCallback;
 
    private boolean connected = false;
    private double readFrameTimeout = 1.0;
@@ -36,17 +38,21 @@ public class SRTVideoSubscriber
       outputPixelFormat = outputAVPixelFormat;
 
       srtInputAddress = StreamingTools.toSRTAddress(inputAddress);
+
+      timeoutCallback = new FFMPEGTimeoutCallback();
       inputFormatContext = avformat_alloc_context();
       FFMPEGTools.checkPointer(inputFormatContext, "Allocating input format context");
+      inputFormatContext.interrupt_callback(timeoutCallback);
    }
 
-   public boolean connect()
+   public boolean connect(double timeout)
    {
+      timeoutCallback.start(timeout);
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, null);
       if (error < 0)
          return false;
 
-      // TODO: add timeout
+      timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
       if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress))
          return false;
@@ -65,7 +71,8 @@ public class SRTVideoSubscriber
       do
       {
          // Try to connect
-         connect();
+         // This is not guaranteed to wait for the timeout duration, so we try again if it fails
+         connect(timeoutSeconds);
 
          // Check if connection failed
          if (!connected)
@@ -154,5 +161,6 @@ public class SRTVideoSubscriber
       avformat_free_context(inputFormatContext);
 
       inputFormatContext.close();
+      timeoutCallback.close();
    }
 }
