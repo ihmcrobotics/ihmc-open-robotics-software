@@ -24,6 +24,8 @@ import java.util.function.Supplier;
  */
 public class StandAloneRealsenseProcess
 {
+   private static ROS2Node ros2Node;
+
    private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "213522252883");
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
    private static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_TOPIC = PerceptionAPI.D455_DEPTH_IMAGE;
@@ -46,7 +48,7 @@ public class StandAloneRealsenseProcess
                                                                       REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier,
-                                                                      realsenseDemandNode);
+                                                                      realsenseDemandNode::isDemanded);
 
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
 
@@ -76,11 +78,12 @@ public class StandAloneRealsenseProcess
       realsenseImagePublisher.destroy();
       realsenseImageRetriever.destroy();
       realsenseDemandNode.destroy();
+      ros2Node.destroy();
    }
 
    public static void main(String[] args)
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_realsense_process");
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_realsense_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       StandAloneRealsenseProcess standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Helper, null);
