@@ -74,7 +74,7 @@ public class RapidHeightMapManager
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          OpenCVTools.convertFloatToShort(latestDepthImage, heightMapBytedecoImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
       else
-         latestDepthImage.copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
+         latestDepthImage.convertTo(heightMapBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1);
 
       if (resetHeightMapRequested.poll())
       {
