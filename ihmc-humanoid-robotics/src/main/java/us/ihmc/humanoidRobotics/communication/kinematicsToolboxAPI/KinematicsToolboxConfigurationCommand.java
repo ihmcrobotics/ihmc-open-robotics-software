@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
@@ -101,10 +100,10 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       jointsToDeactivate.clear();
       for (int i = 0; i < message.getJointsToDeactivate().size(); i++)
-         jointsToDeactivate.add((OneDoFJointBasics) jointHashCodeResolver.castAndGetJoint(message.getJointsToDeactivate().get(i)));
+         jointsToDeactivate.add(jointHashCodeResolver.castAndGetJoint(message.getJointsToDeactivate().get(i)));
       jointsToActivate.clear();
       for (int i = 0; i < message.getJointsToActivate().size(); i++)
-         jointsToActivate.add((OneDoFJointBasics) jointHashCodeResolver.castAndGetJoint(message.getJointsToActivate().get(i)));
+         jointsToActivate.add(jointHashCodeResolver.castAndGetJoint(message.getJointsToActivate().get(i)));
    }
 
    public double getJointVelocityWeight()

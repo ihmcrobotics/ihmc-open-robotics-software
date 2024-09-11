@@ -40,7 +40,6 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -80,7 +79,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
    private final Map<RigidBodyBasics, RigidBodyBasics> endEffectorToPrimaryBaseMap = new HashMap<>();
-   private final Map<RigidBodyBasics, GeometricJacobian> rootJacobians = new HashMap<>();
 
    private final YoBoolean enableAutoSupportPolygon = new YoBoolean("enableAutoSupportPolygon", registry);
    /**
@@ -102,11 +100,19 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final RecyclingArrayList<ContactingRigidBody> contactingRigidBodies = new RecyclingArrayList<>(ContactingRigidBody::new);
    /**
-    * Updated during the initialization phase, this is where the robot's center of mass position is
-    * stored so it can be held in place during the optimization process such that the solution will be
-    * statically reachable.
+    * Desired center of mass position to hold in place during the optimization process.
+    * <p>
+    * It is updated such as it is located in between the feet in the x and y directions.
+    * An offset cna be added to the x and y coordinates to move the center of mass around using the {@link #centerOfMassOffset}.
+    * </p>
     */
    private final YoFramePoint3D centerOfMassPositionToHold = new YoFramePoint3D("centerOfMassPositionToHold", worldFrame, registry);
+   /**
+    * User defined offset to move the center of mass around.
+    * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
+    * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
+    */
+   // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
 
    /**
@@ -209,12 +215,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
 
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
-      desiredFullRobotModel.getRootBody()
-                           .subtreeStream()
-                           .forEach(rigidBody -> rootJacobians.put(rigidBody,
-                                                                   new GeometricJacobian(desiredFullRobotModel.getElevator(),
-                                                                                         rigidBody,
-                                                                                         ReferenceFrame.getWorldFrame())));
       Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       supportRigidBodyWeight.set(200.0);
@@ -377,6 +377,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
       updateCoMPositionAndFootPoses();
+      // TODO Add API to switch between the two methods for deciding what CoM position to hold.
+      //  Method1:
+      //   Initialize the CoM position to the current position and keep it constant during the run.
+      //   The first issue was that the CoM wouldn't update when the robot feet were slipping.
+      //   The second issue was that the CoM wouldn't start from a stable position, e.g. to much forward or backward.
+      //      centerOfMassPositionToHold.setFromReferenceFrame(centerOfMassFrame); // This is method 1.
+      //  Method2:
+      //   Initialize the CoM position to be in between the feet and keep updating it so it moves with the feet.
+      //   Add an offset to control the stability of the CoM.
+      updateCoMPositionToHold();
 
       // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
       holdSupportRigidBodies.set(true);
@@ -523,24 +533,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
          initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
-      updateCoMPositionToHold();
    }
 
-   private final FramePoint3D tempMidFeet = new FramePoint3D();
+   private final Point3D tempMidFeet = new Point3D();
    private final Vector2D tempOffset = new Vector2D();
 
    protected void updateCoMPositionToHold()
    {
-      centerOfMassPositionToHold.setFromReferenceFrame(centerOfMassFrame);
-
-      tempMidFeet.setToZero(worldFrame);
-
       if (shrunkSupportPolygon.isUpToDate() && !shrunkSupportPolygon.isEmpty())
       {
          tempMidFeet.set(shrunkSupportPolygon.getCentroid(), 0.0);
       }
       else
       {
+         tempMidFeet.setToZero();
+
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyTransform soleFramePose = desiredFullRobotModel.getSoleFrame(robotSide).getTransformToRoot();

@@ -50,7 +50,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
             * For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
             * A command that persists is overridden if another is received for the same body.
-            * Priviliged configuration inputs are not affected by this flag.
+            * Privileged configuration inputs are not affected by this flag.
             * In case persistence of inputs is not desired, use this flag to disable it.
             * When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
             */
@@ -241,7 +241,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
             * For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
             * A command that persists is overridden if another is received for the same body.
-            * Priviliged configuration inputs are not affected by this flag.
+            * Privileged configuration inputs are not affected by this flag.
             * In case persistence of inputs is not desired, use this flag to disable it.
             * When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
             */
@@ -253,7 +253,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
             * By default, the kinematics toolbox will preserve all input that has been provided until it is reinitialized.
             * For instance, if the user sends a command for controlling a certain body, the command will persist even if the user stops sending it.
             * A command that persists is overridden if another is received for the same body.
-            * Priviliged configuration inputs are not affected by this flag.
+            * Privileged configuration inputs are not affected by this flag.
             * In case persistence of inputs is not desired, use this flag to disable it.
             * When persistence is disabled, it is strongly recommended to use KinematicsToolboxInputCollectionMessage to send inputs to the toolbox.
             */

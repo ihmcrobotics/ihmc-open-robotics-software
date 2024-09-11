@@ -289,7 +289,7 @@ public class KSTStreamingState implements State
       inputWeightDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / parameters.getInputWeightDecayDuration(),
                                                                                                  toolboxControllerPeriod));
 
-      Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
+      Collection<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
       activeInputStateEstimator.set(parameters.getInputStateEstimatorType());
       inputStateEstimatorsMap.put(InputStateEstimatorType.FIRST_ORDER_LPF,
                                   new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry));
@@ -330,9 +330,17 @@ public class KSTStreamingState implements State
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
 
       tools.resetUserInvalidInputFlag();
-      tools.getParameters().getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
-      tools.getParameters().getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
-      ikCommandInputManager.submitMessage(tools.getParameters().getDefaultSolverConfiguration());
+      KinematicsStreamingToolboxParameters kstParameters = tools.getParameters();
+      kstParameters.getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
+      kstParameters.getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
+      ikCommandInputManager.submitMessage(kstParameters.getDefaultSolverConfiguration());
+
+      if (kstParameters.getSolverNullspaceAlpha() > 0.0 && Double.isFinite(kstParameters.getSolverNullspaceAlpha()))
+         ikController.setPrivilegedNullspaceAlpha(kstParameters.getSolverNullspaceAlpha(), true);
+      if (kstParameters.getSolverPrivilegedDefaultWeight() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultWeight()))
+         ikController.setPrivilegedWeight(kstParameters.getSolverPrivilegedDefaultWeight(), true);
+      if (kstParameters.getSolverPrivilegedDefaultGain() > 0.0 && Double.isFinite(kstParameters.getSolverPrivilegedDefaultGain()))
+         ikController.setPrivilegedConfigurationGain(kstParameters.getSolverPrivilegedDefaultGain(), true);
 
       /*
        * The desiredFullRobotModel can either be at the current configuration or at a configuration
@@ -490,7 +498,7 @@ public class KSTStreamingState implements State
 
          // Reset the list to keep track of the bodies that are not controlled
          uncontrolledRigidBodies.clear();
-         List<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
+         List<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();
 
          for (int i = 0; i < controllableRigidBodies.size(); i++)
          {
@@ -642,7 +650,7 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      tools.getIKController().updateInternal();
+      ikController.updateInternal();
 
       // Updating some statistics
       if (tools.hasNewInputCommand())

@@ -144,8 +144,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                                                      desiredOrientation);
       simulationTestHelper.publishToController(footTrajectoryMessage);
 
-      return simulationTestHelper.simulateNow(timeToPickupFoot
-                                              + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      return simulationTestHelper.simulateNow(
+            timeToPickupFoot + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
    }
 
    //Put the foot back on the ground, this doesn't have any special ground checks, it's just easier to read this way
@@ -175,8 +175,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       loadBearingMessage.setLoadBearingRequest(LoadBearingRequest.LOAD.toByte());
       simulationTestHelper.publishToController(loadBearingMessage);
 
-      return simulationTestHelper.simulateNow(0.2 + trajectoryTime
-                                              + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+      return simulationTestHelper.simulateNow(
+            0.2 + trajectoryTime + simulationTestHelper.getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
    }
 
    //moves the foot to a position using getRandomPositionInSphere

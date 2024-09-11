@@ -181,7 +181,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       if (desiredPose.containsNaN())
          return false;
       if (hasDesiredVelocity && this.desiredVelocity.containsNaN())
-            return false;
+         return false;
 
       return true;
    }

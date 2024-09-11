@@ -348,9 +348,17 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator("", totalMass.getValue(), registry, yoGraphicsListRegistry);
-      multiContactRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
-      wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
+      if (enableUpperBodyLoadBearing())
+      {
+         multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator("", totalMass.getValue(), registry, yoGraphicsListRegistry);
+         multiContactRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
+         wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
+      }
+      else
+      {
+         multiContactRegionCalculator = null;
+         wholeBodyContactState = null;
+      }
 
       String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
@@ -1061,6 +1069,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void onWholeBodyContactsChanged()
    {
+      if (!enableUpperBodyLoadBearing())
+         return;
       wholeBodyContactsChanged.set(true);
       multiContactRegionCalculator.clear();
    }
@@ -1077,6 +1087,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void updateMultiContactCoMRegion()
    {
+      if (!enableUpperBodyLoadBearing())
+         return;
+
       multiContactCoMTimer.startMeasurement();
 
       // Update basis vector transforms and actuation constraints
@@ -1111,6 +1124,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       multiContactCoMTimer.stopMeasurement();
    }
 
+   /**
+    * Note this is just a defensive check against null-pointers. The rigid body control manager will not create a load-bearing state
+    * when there aren't hand contacts, which will prevent any subsequent calls related to the multi-contact region.
+    */
+   public boolean enableUpperBodyLoadBearing()
+   {
+      boolean containsHandContactPoints = contactableBodies.size() > 2;
+      return containsHandContactPoints;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
@@ -1129,7 +1152,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                     0.01,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
-      group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
+      if (multiContactRegionCalculator != null)
+         group.addChild(multiContactRegionCalculator.getSCS2YoGraphics());
       return group;
    }
 }

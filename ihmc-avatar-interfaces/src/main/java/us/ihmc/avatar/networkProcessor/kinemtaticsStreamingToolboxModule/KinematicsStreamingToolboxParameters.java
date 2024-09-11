@@ -265,6 +265,9 @@ public class KinematicsStreamingToolboxParameters
    private Map<String, Double> jointCustomPositionLowerLimits;
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
    private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
+   private double solverNullspaceAlpha;
+   private double solverPrivilegedDefaultWeight;
+   private double solverPrivilegedDefaultGain;
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -351,6 +354,11 @@ public class KinematicsStreamingToolboxParameters
 
       defaultSolverConfiguration.setJointVelocityWeight(1.0);
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
+
+      // Use the solver's default values for the following:
+      solverNullspaceAlpha = -1.0;
+      solverPrivilegedDefaultWeight = -1.0;
+      solverPrivilegedDefaultGain = -1.0;
 
       inputFilterMaxLinearDelta = 0.5;
       inputFilterMaxAngularDelta = Double.POSITIVE_INFINITY;
@@ -656,6 +664,21 @@ public class KinematicsStreamingToolboxParameters
    public KinematicsToolboxConfigurationMessage getDefaultSolverConfiguration()
    {
       return defaultSolverConfiguration;
+   }
+
+   public double getSolverNullspaceAlpha()
+   {
+      return solverNullspaceAlpha;
+   }
+
+   public double getSolverPrivilegedDefaultWeight()
+   {
+      return solverPrivilegedDefaultWeight;
+   }
+
+   public double getSolverPrivilegedDefaultGain()
+   {
+      return solverPrivilegedDefaultGain;
    }
 
    public void setClockType(ClockType clockType)
@@ -1020,5 +1043,20 @@ public class KinematicsStreamingToolboxParameters
    public void setInitialConfigurationMap(Map<String, Double> initialConfigurationMap)
    {
       this.initialConfigurationMap = initialConfigurationMap;
+   }
+
+   public void setSolverNullspaceAlpha(double solverNullspaceAlpha)
+   {
+      this.solverNullspaceAlpha = solverNullspaceAlpha;
+   }
+
+   public void setSolverPrivilegedDefaultWeight(double solverPrivilegedDefaultWeight)
+   {
+      this.solverPrivilegedDefaultWeight = solverPrivilegedDefaultWeight;
+   }
+
+   public void setSolverPrivilegedDefaultGain(double solverPrivilegedDefaultGain)
+   {
+      this.solverPrivilegedDefaultGain = solverPrivilegedDefaultGain;
    }
 }

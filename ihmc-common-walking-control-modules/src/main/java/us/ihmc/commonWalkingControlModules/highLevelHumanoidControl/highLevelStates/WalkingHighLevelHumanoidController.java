@@ -44,10 +44,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -98,7 +100,6 @@ import java.util.stream.Stream;
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    private static final boolean ENABLE_LEG_ELASTICITY_DEBUGGATOR = false;
-   private static final boolean CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION = true;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -151,6 +152,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final LegElasticityDebuggator legElasticityDebuggator;
 
    private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
+   private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -780,7 +782,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       feetManager.compute();
 
       boolean isUpperBodyLoadBearing = false;
-      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = null;
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
@@ -789,24 +790,27 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          {
             bodyManager.compute();
 
-            if (bodyManager.isLoadBearing())
+            if (bodyManager.isLoadBearing() && controllerToolbox.enableUpperBodyLoadBearing())
                isUpperBodyLoadBearing = true;
          }
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
+      CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactRegionCalculator();
+      boolean useMultiContactStabilityRegion = false;
 
       if (isUpperBodyLoadBearing)
       {
          updateWholeBodyContactState();
          controllerToolbox.updateMultiContactCoMRegion();
-         if (CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION && controllerToolbox.getMultiContactRegionCalculator().hasSolvedWholeRegion())
-            multiContactStabilityRegion = controllerToolbox.getMultiContactRegionCalculator().getFeasibleCoMRegion();
+         useMultiContactStabilityRegion = multiContactRegionCalculator.hasSolvedWholeRegion();
       }
-      else
+      else if (multiContactRegionCalculator != null)
       {
-         controllerToolbox.getMultiContactRegionCalculator().clear();
+         multiContactRegionCalculator.clear();
       }
+
+      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleCoMRegion() : zeroRegion;
 
       pelvisOrientationManager.compute();
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())

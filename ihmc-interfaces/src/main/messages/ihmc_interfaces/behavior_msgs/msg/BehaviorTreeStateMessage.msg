@@ -5,10 +5,11 @@
 
 byte ROOT_NODE = 0
 byte BASIC_NODE = 1
-byte ACTION_SEQUENCE = 2
-byte DOOR_TRAVERSAL = 3
-byte TRASH_CAN_INTERACTION = 4
-byte BUILDING_EXPLORATION = 5
+byte AI2R_NODE = 2
+byte ACTION_SEQUENCE = 3
+byte DOOR_TRAVERSAL = 4
+byte TRASH_CAN_INTERACTION = 5
+byte BUILDING_EXPLORATION = 6
 
 byte CHEST_ORIENTATION_ACTION = 10
 byte FOOTSTEP_PLAN_ACTION = 11
@@ -40,6 +41,8 @@ uint32[<=1000] behavior_tree_indices
 behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
 
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
+
+behavior_msgs/AI2RNodeStateMessage[<=1] ai2r_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 

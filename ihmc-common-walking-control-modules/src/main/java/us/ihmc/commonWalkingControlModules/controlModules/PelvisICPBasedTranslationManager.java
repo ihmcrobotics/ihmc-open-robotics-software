@@ -164,7 +164,7 @@ public class PelvisICPBasedTranslationManager
          return;
       }
 
-      if (multiContactStabilityRegion != null)
+      if (!multiContactStabilityRegion.isEmpty())
       { // Upper body is load-bearing
          supportFrame = multiContactStabilityRegion.getReferenceFrame();
          supportPolygon = multiContactStabilityRegion;

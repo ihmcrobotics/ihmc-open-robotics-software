@@ -13,6 +13,18 @@ public class KinematicsToolboxPrivilegedConfigurationParameters extends JointPri
    @Override
    public double getDefaultWeight()
    {
-      return 2.0;
+      return 0.025;
+   }
+
+   @Override
+   public double getDefaultConfigurationGain()
+   {
+      return 50.0;
+   }
+
+   @Override
+   public double getDefaultMaxVelocity()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 }
