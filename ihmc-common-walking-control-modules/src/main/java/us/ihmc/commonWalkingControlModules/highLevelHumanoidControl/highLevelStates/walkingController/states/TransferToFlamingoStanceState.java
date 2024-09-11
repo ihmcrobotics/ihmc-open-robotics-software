@@ -45,9 +45,6 @@ public class TransferToFlamingoStanceState extends TransferState
 
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
 
-      // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
 

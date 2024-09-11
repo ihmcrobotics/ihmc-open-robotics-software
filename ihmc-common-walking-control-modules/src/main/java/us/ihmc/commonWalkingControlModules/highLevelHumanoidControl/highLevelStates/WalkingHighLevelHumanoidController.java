@@ -587,9 +587,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       balanceManager.disablePelvisXYControl();
 
-      double stepTime = walkingMessageHandler.getDefaultStepTime();
-      pelvisOrientationManager.setTrajectoryTime(stepTime);
-
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
