@@ -109,7 +109,7 @@ public class SensorTester
       file.createNewFile();
 
       BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-      writer.write("Depth Distances (m)");
+      writer.write("Depth Distances (m)\n");
 
       for (double distance : centerDepthValues)
       {

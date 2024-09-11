@@ -221,7 +221,7 @@ public class RDXSensorTestingUI
             zedPointCloudRenderer.updateMesh();
 
             if (showRealsenseCrossSection.get())
-               realsensePointCloudRenderer.setPointsToRender(realsenseCrossSectionPointCloud, Color.RED);
+               realsensePointCloudRenderer.setPointsToRender(realsenseCrossSectionPointCloud, Color.BLUE);
             else
                realsensePointCloudRenderer.setPointsToRender(new ArrayList<>());
 
