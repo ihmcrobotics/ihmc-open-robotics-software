@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -35,7 +36,7 @@ public class KinematicsToolboxMessageFactory
     * By default the weight of the task is set to {@value #DEFAULT_LOW_WEIGHT} such that the rigid-body
     * will be held in place only if the other tasks are reachable from the current pose.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to hold the current pose of.
     * @return the message ready to send to the {@code KinematicsToolboxModule}.
     */
@@ -68,7 +69,7 @@ public class KinematicsToolboxMessageFactory
     * will be held in place only if the other tasks are reachable from the current pose.
     * </p>
     *
-    * @param rigidBody the rigid-body to hold in desired frame.
+    * @param rigidBody    the rigid-body to hold in desired frame.
     * @param desiredFrame the desired frame to hold rigid-body at.
     * @return the message ready to send to the {@code KinematicsToolboxModule}.
     */
@@ -102,7 +103,7 @@ public class KinematicsToolboxMessageFactory
     * will be held in place only if the other tasks are reachable from the current pose.
     * </p>
     *
-    * @param rigidBody the rigid-body to hold in desired frame.
+    * @param rigidBody    the rigid-body to hold in desired frame.
     * @param desiredFrame the desired frame to hold rigid-body at.
     * @return the message ready to send to the {@code KinematicsToolboxModule}.
     */
@@ -135,7 +136,7 @@ public class KinematicsToolboxMessageFactory
     * By default the weight of the task is set to {@value #DEFAULT_LOW_WEIGHT} such that the rigid-body
     * will be held in place only if the other tasks are reachable from the current orientation.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to hold the current orientation of.
     * @return the message ready to send to the {@code KinematicsToolboxModule}.
     */
@@ -167,7 +168,7 @@ public class KinematicsToolboxMessageFactory
     * rather strong weight for the center of mass. As result, the solution should be very close to the
     * current center of mass position.
     * </p>
-    * 
+    *
     * @param rootBody the root body of the robot for which the center of mass is to be held in place.
     * @param holdX    whether the x-coordinate should be maintained.
     * @param holdY    whether the y-coordinate should be maintained.
@@ -222,14 +223,14 @@ public class KinematicsToolboxMessageFactory
     * that configuration and thus may delay the convergence to the solution. It is therefore preferable
     * to send the privileged configuration as soon as possible.
     * </p>
-    * 
+    *
     * @param fullRobotModel        the robot that is currently at the desired privileged configuration.
     *                              Not modified.
     * @param useDesiredJointAngles whether the privileged joint angles are using
     *                              {@link OneDoFJointBasics#getqDesired()} or
     *                              {@link OneDoFJointBasics#getQ()}.
     * @return the message containing the new privileged configuration ready to be sent to the
-    *         {@code KinematicsToolboxModule}.
+    *       {@code KinematicsToolboxModule}.
     */
    public static KinematicsToolboxPrivilegedConfigurationMessage privilegedConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
    {
@@ -257,6 +258,38 @@ public class KinematicsToolboxMessageFactory
                                                     privilegedRootJointOrientation,
                                                     jointHashCodes,
                                                     privilegedJointAngles);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
+
+      return message;
+   }
+
+   /**
+    * Create a new configuration message holding a new initial robot configuration for the
+    * {@code KinematicsToolboxController} to use by extracting the joint angles out of the given
+    * {@code fullRobotModel}.
+    * <p>
+    *
+    * @param fullRobotModel the robot that is currently at the desired privileged configuration.
+    *                       Not modified.
+    * @return the message containing the new privileged configuration ready to be sent to the
+    *       {@code KinematicsToolboxModule}.
+    */
+   public static KinematicsToolboxInitialConfigurationMessage initialConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      KinematicsToolboxInitialConfigurationMessage message = new KinematicsToolboxInitialConfigurationMessage();
+
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      int[] jointHashCodes = new int[oneDoFJoints.length];
+      float[] initialJointAngles = new float[oneDoFJoints.length];
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointHashCodes[i] = oneDoFJoints[i].hashCode();
+         initialJointAngles[i] = (float) oneDoFJoints[i].getQ();
+      }
+
+      MessageTools.packInitialJointAngles(message, jointHashCodes, initialJointAngles);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;

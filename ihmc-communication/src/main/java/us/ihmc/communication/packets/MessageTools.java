@@ -1,13 +1,47 @@
 package us.ihmc.communication.packets;
 
-import controller_msgs.msg.dds.*;
-import gnu.trove.list.array.*;
-import ihmc_common_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
+import ihmc_common_msgs.msg.dds.Box3DMessage;
+import ihmc_common_msgs.msg.dds.Capsule3DMessage;
+import ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage;
+import ihmc_common_msgs.msg.dds.Cylinder3DMessage;
+import ihmc_common_msgs.msg.dds.Ellipsoid3DMessage;
+import ihmc_common_msgs.msg.dds.InstantMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
+import ihmc_common_msgs.msg.dds.Ramp3DMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.UUIDMessage;
+import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import org.apache.logging.log4j.Level;
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.DetectedFacesPacket;
+import perception_msgs.msg.dds.HeatMapPacket;
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanParametersMessage;
+import perception_msgs.msg.dds.ObjectDetectorResultPacket;
+import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import std_msgs.msg.dds.Bool;
-import toolbox_msgs.msg.dds.*;
-import us.ihmc.commons.Conversions;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -18,7 +52,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Ellipsoid3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Ellipsoid3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,7 +75,11 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -46,9 +93,12 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 public class MessageTools
 {
@@ -1078,9 +1128,20 @@ public class MessageTools
       message.getPrivilegedJointAngles().add(jointAngles);
    }
 
+   public static void packInitialJointAngles(KinematicsToolboxInitialConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
+   {
+      if (jointHashCodes.length != jointAngles.length)
+         throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
+
+      message.getInitialJointHashCodes().reset();
+      message.getInitialJointHashCodes().add(jointHashCodes);
+      message.getInitialJointAngles().reset();
+      message.getInitialJointAngles().add(jointAngles);
+   }
+
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
-      lidarScanMessage.getScan().reset();
+      lidarScanMessage.getScan().resetQuick();
       LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> scan[i].getElement(j));
    }
 
@@ -1344,18 +1405,6 @@ public class MessageTools
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
    }
 
-   public static void toMessage(Duration duration, DurationMessage durationMessage)
-   {
-      durationMessage.setSeconds(duration.getSeconds());
-      durationMessage.setNanos(duration.getNano());
-   }
-
-   public static Duration toDuration(DurationMessage durationMessage)
-   {
-      long totalNanos = Conversions.secondsToNanoseconds(durationMessage.getSeconds()) + durationMessage.getNanos();
-      return Duration.ofNanos(totalNanos);
-   }
-
    public static void toMessage(UUID uuid, UUIDMessage uuidMessage)
    {
       uuidMessage.setLeastSignificantBits(uuid.getLeastSignificantBits());
@@ -1491,9 +1540,9 @@ public class MessageTools
     */
    public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
    {
-      byteSequence.clear();
+      byteSequence.resetQuick();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
-      byteSequence.addAll(longStringBytes);
+      byteSequence.add(longStringBytes);
    }
 
    /**
@@ -1501,7 +1550,7 @@ public class MessageTools
     */
    public static String unpackLongStringFromByteSequence(IDLSequence.Byte byteSequence)
    {
-      byte[] longStringData = byteSequence.toArray();
+      byte[] longStringData = byteSequence.copyArray();
       return new String(longStringData, StandardCharsets.US_ASCII);
    }
 

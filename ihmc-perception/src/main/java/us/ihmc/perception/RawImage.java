@@ -111,7 +111,7 @@ public class RawImage
       try (BytePointer compressedImageData = new BytePointer(imageMessage.getData().size());
            Mat compressedImageMat = new Mat(1, imageMessage.getData().size(), opencv_core.CV_8UC1))
       {
-         compressedImageData.put(imageMessage.getData().toArray());
+         compressedImageData.put(imageMessage.getData().getBuffer().array(), 0, imageMessage.getData().size());
          compressedImageMat.data(compressedImageData);
          Mat imageMat = new Mat();
          opencv_imgcodecs.imdecode(compressedImageMat, opencv_imgcodecs.IMREAD_UNCHANGED, imageMat);

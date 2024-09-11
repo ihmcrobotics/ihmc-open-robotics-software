@@ -187,7 +187,7 @@ public class FiducialDetectorFromCameraImages
 
    public void detect(VideoPacket videoPacket)
    {
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().copyArray());
       detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
              HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
 

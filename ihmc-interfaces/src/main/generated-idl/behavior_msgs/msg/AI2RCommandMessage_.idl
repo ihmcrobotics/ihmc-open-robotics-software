@@ -1,0 +1,20 @@
+#ifndef __behavior_msgs__msg__AI2RCommandMessage__idl__
+#define __behavior_msgs__msg__AI2RCommandMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::AI2RCommandMessage_")
+      struct AI2RCommandMessage
+      {
+        boolean unused_placeholder_field;
+      };
+    };
+  };
+};
+
+#endif

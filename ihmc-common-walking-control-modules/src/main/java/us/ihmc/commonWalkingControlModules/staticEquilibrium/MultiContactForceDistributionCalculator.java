@@ -78,7 +78,7 @@ public class MultiContactForceDistributionCalculator
       rhoDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints();
       rhoToForce.reshape(forceDecisionVariables, rhoDecisionVariables);
 
-      MatrixTools.setMatrixBlock(rhoToForce, 0, 0, comOptimizationModule.rhoToForce, 0, 0, rhoToForce.getNumRows(), rhoToForce.getNumCols(), 1.0);
+      MatrixTools.setMatrixBlock(rhoToForce, 0, 0, comOptimizationModule.getRhoToForceTransformationMatrix(), 0, 0, rhoToForce.getNumRows(), rhoToForce.getNumCols(), 1.0);
 
       /* Compute constraint matrices */
       CommonOps_DDRM.mult(Aeq, rhoToForce, Aeq_rho);

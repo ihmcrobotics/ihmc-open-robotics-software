@@ -30,8 +30,8 @@ public class PubSubStatsTools
    public static void printLargePayloadWarning(CommonAttributes attributes, int payloadSize)
    {
       LogTools.warn(1, "Message payload is high for topic: %s Type: %s Size: %s"
-                          .formatted(attributes.getHumanReadableTopicName(),
-                                     attributes.getHumanReadableTopicDataTypeName(),
+                          .formatted(attributes.getTopicName(),
+                                     attributes.getTopicDataType().getName(),
                                      getHumanReadableByteSize(payloadSize)));
    }
 }

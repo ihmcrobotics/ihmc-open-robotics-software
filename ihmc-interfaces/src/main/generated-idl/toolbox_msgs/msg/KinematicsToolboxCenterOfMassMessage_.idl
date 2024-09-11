@@ -2,6 +2,7 @@
 #define __toolbox_msgs__msg__KinematicsToolboxCenterOfMassMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 #include "ihmc_common_msgs/msg/./SelectionMatrix3DMessage_.idl"
 #include "ihmc_common_msgs/msg/./WeightMatrix3DMessage_.idl"
 module toolbox_msgs
@@ -28,6 +29,14 @@ module toolbox_msgs
          */
         geometry_msgs::msg::dds::Point desired_position_in_world;
         /**
+         * Whether the desired linear velocity is defined.
+         */
+        boolean has_desired_linear_velocity;
+        /**
+         * The desired linear velocity of the control frame's origin.
+         */
+        geometry_msgs::msg::dds::Vector3 desired_linear_velocity_in_world;
+        /**
          * The selection matrix is used to determinate which degree of freedom of the center of mass
          * should be controlled.
          * The selection frame coming along with the given selection matrix is used to determine to what
@@ -44,6 +53,13 @@ module toolbox_msgs
          * aligned with the world axes.
          */
         ihmc_common_msgs::msg::dds::WeightMatrix3DMessage weights;
+        /**
+         * Constraint on the linear velocity for tracking this input.
+         * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+         * Set to <= 0.0 to use the default value.
+         */
+        @defaultValue(value=-1.0)
+        double linear_rate_limitation;
       };
     };
   };

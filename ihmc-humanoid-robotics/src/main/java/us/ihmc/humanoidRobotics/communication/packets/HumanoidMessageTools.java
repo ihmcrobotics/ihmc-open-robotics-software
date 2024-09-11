@@ -586,7 +586,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().reset();
+      message.getConfigurationSpaceNamesToExplore().resetQuick();
       message.getExplorationRangeUpperLimits().reset();
       message.getExplorationRangeLowerLimits().reset();
 
@@ -616,7 +616,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().reset();
+      message.getConfigurationSpaceNamesToExplore().resetQuick();
       message.getExplorationRangeUpperLimits().reset();
       message.getExplorationRangeLowerLimits().reset();
 
@@ -2672,7 +2672,7 @@ public class HumanoidMessageTools
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      reachingManifoldMessage.getManifoldConfigurationSpaceNames().reset();
+      reachingManifoldMessage.getManifoldConfigurationSpaceNames().resetQuick();
       reachingManifoldMessage.getManifoldLowerLimits().reset();
       reachingManifoldMessage.getManifoldUpperLimits().reset();
       reachingManifoldMessage.getManifoldConfigurationSpaceNames().add(configurationSpaces);

@@ -91,11 +91,9 @@ public class RDXFFMPEGL515DepthLoggingDemo
             l515.setSensorEnabled(true);
             l515.setPublishPointCloudROS2(false);
             l515.setRenderPointCloudDirectly(false);
-            l515.setPublishDepthImageROS1(false);
             l515.setDebugCoordinateFrame(false);
             l515.setRenderColorVideoDirectly(true);
             l515.setRenderDepthVideoDirectly(true);
-            l515.setPublishColorImageROS1(false);
             l515.setPublishColorImageROS2(false);
             CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
             baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);

@@ -16,7 +16,7 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.19")
+   api("us.ihmc:ihmc-convex-optimization:0.17.21")
    api("us.ihmc:robot-environment-awareness:source")
 }
 

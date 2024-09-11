@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,15 +24,10 @@ public class CUDACompressionToolsTest
    private static Path zedDepth16UPath;
 
    @BeforeAll
-   public static void loadFiles()
+   public static void loadFiles() throws URISyntaxException
    {
-      WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(RawImageTest.class);
-
-      WorkspaceFile zedColorBGRFile = new WorkspaceFile(resourceDirectory, "zedColorBGR.raw");
-      WorkspaceFile zedDepth16UFile = new WorkspaceFile(resourceDirectory, "zedDepth16U.raw");
-
-      zedColorBGRPath = zedColorBGRFile.getFilesystemFile();
-      zedDepth16UPath = zedDepth16UFile.getFilesystemFile();
+      zedColorBGRPath = Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI());
+      zedDepth16UPath = Path.of(RawImageTest.class.getResource("zedDepth16U.raw").toURI());
    }
 
    @Test

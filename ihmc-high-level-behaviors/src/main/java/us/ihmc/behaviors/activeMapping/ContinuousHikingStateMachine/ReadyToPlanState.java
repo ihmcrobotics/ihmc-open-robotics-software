@@ -3,7 +3,7 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
@@ -106,12 +106,11 @@ public class ReadyToPlanState implements State
       // Set up the imminent stance and goal poses in which to plan from
       continuousPlanner.setImminentStanceToPlanFrom();
       SideDependentList<FramePose3D> goalPoses = getGoalPosesBasedOnPlanningMode();
-      continuousPlanner.setGoalWaypointPoses(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT));
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), goalPoses);
       debugger.setPlanningMode(planningMode);
 
       // Plan to the goal and log the plan
-      continuousPlanner.planToGoal(commandMessage.get());
+      continuousPlanner.planToGoal(commandMessage.get(), goalPoses);
       continuousPlanner.logFootStePlan();
 
       if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get()
@@ -210,10 +209,9 @@ public class ReadyToPlanState implements State
       SideDependentList<FramePose3D> latestWayPoint = new SideDependentList<>();
       latestWayPoint.put(RobotSide.LEFT, leftFootPose);
       latestWayPoint.put(RobotSide.RIGHT, rightFootPose);
-      continuousPlanner.setGoalWaypointPoses(latestWayPoint.get(RobotSide.LEFT), latestWayPoint.get(RobotSide.RIGHT));
 
       LogTools.info("Added waypoint for WALK_TO_GOAL");
       walkToGoalWayPointPoses.add(latestWayPoint);
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), latestWayPoint);
    }
 }

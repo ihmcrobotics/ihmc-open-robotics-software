@@ -131,7 +131,7 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private void dispatchVideoPacket(VideoPacket message)
    {
-      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().toArray());
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(message.getData().copyArray());
       stereoREAModule.updateLatestBufferedImage(bufferedImage);
       latestBufferedImage.set(bufferedImage);
       messager.submitMessage(LidarImageFusionAPI.CameraPositionState, message.getPosition());
