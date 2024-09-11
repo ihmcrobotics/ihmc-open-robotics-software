@@ -51,12 +51,12 @@ public class SRTStreamWriter
       // Copy the IO options
       this.ioOptions = new AVDictionary();
       error = av_dict_copy(this.ioOptions, ioOptions, 0);
-      FFMPEGTools.checkError(error, this.ioOptions, "Copying IO options");
+      FFMPEGTools.checkNegativeError(error, "Copying IO options");
 
       // Copy the format options
       this.formatOptions = new AVDictionary();
       error = av_dict_copy(this.formatOptions, formatOptions, 0);
-      FFMPEGTools.checkError(error, this.ioOptions, "Copying format options");
+      FFMPEGTools.checkNegativeError(error, "Copying format options");
 
       packetCopy = av_packet_alloc();
       FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
@@ -73,12 +73,14 @@ public class SRTStreamWriter
       // Open the IO
       timeoutCallback.start(timeout);
       error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, timeoutCallback, this.ioOptions);
+      timeoutCallback.stop();
       if (error < 0)
          return false;
 
       // Create the output format context
       timeoutCallback.start(timeout);
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
+      timeoutCallback.stop();
       if (!FFMPEGTools.checkError(error, formatContext, "Allocating output format context", false))
          return false;
       formatContext.pb(ioContext);

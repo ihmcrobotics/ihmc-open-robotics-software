@@ -16,10 +16,8 @@ import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
 
 // TODO: Make abstract SRTSubscriber class and extend to video and audio
-public class SRTVideoSubscriber
+public class SRTVideoReceiver
 {
-   private static final int RETRY_SLEEP_DURATION_MS = 8;
-
    private final String srtInputAddress;
 
    private FFMPEGVideoDecoder decoder;
@@ -33,7 +31,7 @@ public class SRTVideoSubscriber
 
    int error;
 
-   public SRTVideoSubscriber(InetSocketAddress inputAddress, int outputAVPixelFormat)
+   public SRTVideoReceiver(InetSocketAddress inputAddress, int outputAVPixelFormat)
    {
       outputPixelFormat = outputAVPixelFormat;
 
@@ -49,12 +47,14 @@ public class SRTVideoSubscriber
    {
       timeoutCallback.start(timeout);
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, null);
+      timeoutCallback.stop();
       if (error < 0)
          return false;
 
       timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
-      if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress))
+      timeoutCallback.stop();
+      if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress, false))
          return false;
 
       decoder = new FFMPEGVideoDecoder(inputFormatContext, outputPixelFormat);
@@ -86,7 +86,7 @@ public class SRTVideoSubscriber
                break;
 
             // Wait a little and retry
-            ThreadTools.sleep(RETRY_SLEEP_DURATION_MS);
+            ThreadTools.sleep(ThreadTools.REASONABLE_WAITING_SLEEP_DURATION_MS);
          }
       } while (!connected);
 
@@ -124,7 +124,7 @@ public class SRTVideoSubscriber
                break;
 
             // Wait a bit and retry
-            ThreadTools.sleep(RETRY_SLEEP_DURATION_MS);
+            ThreadTools.sleep(ThreadTools.REASONABLE_WAITING_SLEEP_DURATION_MS);
          }
       } while (error < 0);
 

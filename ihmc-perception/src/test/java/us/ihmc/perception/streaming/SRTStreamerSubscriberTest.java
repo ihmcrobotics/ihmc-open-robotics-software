@@ -86,7 +86,7 @@ public class SRTStreamerSubscriberTest
       double TIMEOUT = 5.0;
       InetSocketAddress subscriberAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
-      SRTVideoSubscriber subscriber = new SRTVideoSubscriber(subscriberAddress, AV_PIX_FMT_BGR24);
+      SRTVideoReceiver subscriber = new SRTVideoReceiver(subscriberAddress, AV_PIX_FMT_BGR24);
       testTimeout(() -> subscriber.connect(CALL_TIMEOUT), TIMEOUT);
       testTimeout(() -> subscriber.waitForConnection(CALL_TIMEOUT), TIMEOUT); // Try waiting for a connection to nowhere
       testTimeout(() -> subscriber.getNextImage(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
@@ -149,7 +149,7 @@ public class SRTStreamerSubscriberTest
       }, "SRTStreamerTestConnection");
 
       // Initialize a subscriber and connect to streamer
-      SRTVideoSubscriber subscriber = new SRTVideoSubscriber(localAddress, AV_PIX_FMT_BGR24);
+      SRTVideoReceiver subscriber = new SRTVideoReceiver(localAddress, AV_PIX_FMT_BGR24);
       assertFalse(subscriber.isConnected());
       subscriber.connect(CALL_TIMEOUT);
 

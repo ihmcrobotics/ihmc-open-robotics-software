@@ -114,8 +114,13 @@ public class SRTVideoStreamer
       while (callerIterator.hasNext())
       {
          SRTStreamWriter callerWriter = callerIterator.next();
+
          if (!callerWriter.isConnected())
+         {
+            callerWriter.destroy();
+            callerIterator.remove();
             continue;
+         }
 
          writeSucceeded = callerWriter.write(packetToWrite);
          if (!writeSucceeded)

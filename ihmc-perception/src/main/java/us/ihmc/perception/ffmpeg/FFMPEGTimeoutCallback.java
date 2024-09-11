@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FFMPEGTimeoutCallback extends AVIOInterruptCB
 {
+   private final Callback_Pointer callbackPointer;
    private final AtomicInteger interruptFlag = new AtomicInteger(0);
 
    private long timeout;
@@ -22,7 +23,7 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
    public FFMPEGTimeoutCallback()
    {
       // Set up callback pointer
-      Callback_Pointer callbackPointer = new Callback_Pointer()
+      callbackPointer = new Callback_Pointer()
       {
          @Override
          public int call(Pointer pointer)
@@ -97,5 +98,6 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
       stop(true);
 
       super.close();
+      callbackPointer.close();
    }
 }

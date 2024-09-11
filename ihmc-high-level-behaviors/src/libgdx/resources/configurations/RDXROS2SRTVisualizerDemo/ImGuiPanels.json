@@ -1,0 +1,8 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "Perception Visualizers" : true,
+    "Stream Visualizer###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:Stream Visualizer" : false
+  }
+}

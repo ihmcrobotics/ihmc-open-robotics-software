@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -39,13 +38,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    public void update()
    {
       super.update();
-      if (subscriber.isConnected())
-      {
-         subscriber.update();
-         getFrequency().ping();
-         if (subscriber.hasCameraIntrinsics() && subscriber.hasReceivedFirstFrame())
-            updateImage();
-      }
+      updateImage();
       getOpenCVVideoVisualizer().setActive(isActive());
       getOpenCVVideoVisualizer().update();
    }
@@ -54,9 +47,17 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    {
       getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
       {
-         CameraIntrinsics imageIntrinsics = subscriber.getCameraIntrinsics();
-         getOpenCVVideoVisualizer().updateImageDimensions(imageIntrinsics.getWidth(), imageIntrinsics.getHeight());
-         subscriber.getCurrentFrame().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+         if (subscriber.isConnected())
+         {
+            subscriber.update();
+            getFrequency().ping();
+            if (subscriber.hasCameraIntrinsics() && subscriber.hasReceivedFirstFrame())
+            {
+               CameraIntrinsics imageIntrinsics = subscriber.getCameraIntrinsics();
+               getOpenCVVideoVisualizer().updateImageDimensions(imageIntrinsics.getWidth(), imageIntrinsics.getHeight());
+               subscriber.getCurrentFrame().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+            }
+         }
       });
    }
 

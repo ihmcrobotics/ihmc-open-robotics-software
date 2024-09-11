@@ -1,5 +1,7 @@
 package us.ihmc.perception.streaming;
 
+import us.ihmc.commons.Conversions;
+
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -7,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class StreamingTools
 {
    public static final UUID STATUS_MESSAGE_UUID = new UUID(0L, 0L);
    public static final double CONNECTION_TIMEOUT = 5.0; // 5 seconds to connect.
+   public static final long CONNECTION_TIMEOUT_NANOS = Conversions.secondsToNanoseconds(CONNECTION_TIMEOUT);
 
    public static String toSRTAddress(InetSocketAddress address)
    {

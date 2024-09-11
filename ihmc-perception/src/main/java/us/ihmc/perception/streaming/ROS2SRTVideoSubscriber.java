@@ -2,6 +2,7 @@ package us.ihmc.perception.streaming;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamMessage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -9,9 +10,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 import static us.ihmc.perception.streaming.StreamingTools.STATUS_MESSAGE_UUID;
@@ -26,7 +32,11 @@ public class ROS2SRTVideoSubscriber
 
    private final SRTStreamMessage requestMessage;
 
-   private final SRTVideoSubscriber videoSubscriber;
+   private final ThreadPoolExecutor subscriptionMaintainer = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+   private Future<?> connectionMaintainer;
+   private volatile boolean connectionDesired = false;
+
+   private final SRTVideoReceiver videoSubscriber;
    private final CameraIntrinsics cameraIntrinsics;
    private float depthDiscretization = 0.0f;
 
@@ -50,30 +60,43 @@ public class ROS2SRTVideoSubscriber
       requestMessage.setReceiverAddress(inputAddress.getHostString());
       requestMessage.setReceiverPort(inputAddress.getPort());
 
-      videoSubscriber = new SRTVideoSubscriber(inputAddress, outputAVPixelFormat);
+      videoSubscriber = new SRTVideoReceiver(inputAddress, outputAVPixelFormat);
       cameraIntrinsics = new CameraIntrinsics();
    }
 
-   public boolean subscribe()
+   public synchronized void subscribe()
    {
+      connectionDesired = true;
+      subscriptionMaintainer.purge();
+      connectionMaintainer = subscriptionMaintainer.submit(this::maintainConnection);
+   }
+
+   private void maintainConnection()
+   {
+      while (connectionDesired)
+      {
+         if (!videoSubscriber.isConnected())
+            sendConnectionRequest();
+
+         // This is interruptable, unlike ThreadTools.sleep()
+         MissingThreadTools.sleep(0.5);
+      }
+   }
+
+   private void sendConnectionRequest()
+   {
+      Object messageReceived = new Object();
+
       // Select UUID and create subscription to that ID
       UUID messageId = UUID.randomUUID();
       ROS2Input<SRTStreamMessage> ackMessageSubscription = ros2.subscribe(streamMessageTopicPair.getStatusTopic(),
                                                                           ackMessage -> messageId.equals(MessageTools.toUUID(ackMessage.getId())));
-
-      // Send a request message
-      MessageTools.toMessage(messageId, requestMessage.getId());
-      requestMessage.setConnectionWanted(true);
-      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
-
-      // Wait to receive ACK
-      // TODO: Add exception handler in case of interrupt
-      SRTStreamMessage ackMessage = ackMessageSubscription.getMessageNotification().blockingPoll();
-
-      // Subscribe via SRT
-      boolean success = videoSubscriber.waitForConnection(CONNECTION_TIMEOUT);
-      if (success)
+      ackMessageSubscription.addCallback(ackMessage ->
       {
+         // Subscribe via SRT
+         videoSubscriber.waitForConnection(CONNECTION_TIMEOUT);
+
+         // get camera intrinsics from ACK message
          cameraIntrinsics.setWidth(ackMessage.getImageWidth());
          cameraIntrinsics.setHeight(ackMessage.getImageHeight());
          cameraIntrinsics.setFx(ackMessage.getFx());
@@ -81,20 +104,37 @@ public class ROS2SRTVideoSubscriber
          cameraIntrinsics.setCx(ackMessage.getCx());
          cameraIntrinsics.setCy(ackMessage.getCy());
          depthDiscretization = ackMessage.getDepthDiscretization();
+
+         synchronized (messageReceived)
+         {
+            messageReceived.notify();
+         }
+      });
+
+      // Send a request message
+      MessageTools.toMessage(messageId, requestMessage.getId());
+      requestMessage.setConnectionWanted(true);
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+
+      // Wait to receive ACK
+      synchronized (messageReceived)
+      {
+         try
+         {
+            messageReceived.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
+         }
+         catch (InterruptedException ignored)
+         {
+         }
       }
 
       ackMessageSubscription.destroy();
-
-      return success;
    }
 
-   public void update()
+   public synchronized void update()
    {
-      if (statusMessageSubscriber.hasReceivedFirstMessage())
-      {
-         SRTStreamMessage statusMessage = statusMessageSubscriber.getLatest();
-         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
-      }
+      if (!videoSubscriber.isConnected() || !connectionDesired)
+         return;
 
       Mat newFrame = videoSubscriber.getNextImage(UPDATE_TIMEOUT);
       if (newFrame != null)
@@ -102,12 +142,19 @@ public class ROS2SRTVideoSubscriber
          newFrame.copyTo(currentFrame);
          receivedFirstFrame = true;
       }
+
+      if (statusMessageSubscriber.hasReceivedFirstMessage())
+      {
+         SRTStreamMessage statusMessage = statusMessageSubscriber.getLatest();
+         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
+      }
    }
 
-   public void unsubscribe()
+   public synchronized void unsubscribe()
    {
-      if (!videoSubscriber.isConnected())
-         return;
+      connectionDesired = false;
+      if (connectionMaintainer != null && !connectionMaintainer.isDone())
+         connectionMaintainer.cancel(false);
 
       UUID messageId = UUID.randomUUID();
       MessageTools.toMessage(messageId, requestMessage.getId());

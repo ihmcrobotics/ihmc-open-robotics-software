@@ -9,17 +9,17 @@ import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
-public class SRTVideoSubscriberDemo
+public class SRTVideoReceiverDemo
 {
    private static final InetSocketAddress CALLER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
-   private final SRTVideoSubscriber videoSubscriber;
+   private final SRTVideoReceiver videoSubscriber;
    private boolean shutdown = false;
    private final Notification shutdownReady = new Notification();
 
-   private SRTVideoSubscriberDemo()
+   private SRTVideoReceiverDemo()
    {
-      videoSubscriber = new SRTVideoSubscriber(CALLER_ADDRESS, AV_PIX_FMT_BGR24);
+      videoSubscriber = new SRTVideoReceiver(CALLER_ADDRESS, AV_PIX_FMT_BGR24);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTSubscriberDemoDestruction"));
       run();
    }
@@ -62,6 +62,6 @@ public class SRTVideoSubscriberDemo
 
    public static void main(String[] args)
    {
-      new SRTVideoSubscriberDemo();
+      new SRTVideoReceiverDemo();
    }
 }
