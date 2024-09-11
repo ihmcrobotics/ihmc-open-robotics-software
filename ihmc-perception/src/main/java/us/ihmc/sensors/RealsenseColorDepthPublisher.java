@@ -48,6 +48,7 @@ import java.util.function.Supplier;
  * Use this to retrieve files from ihmc-mini-2
  * rsync -aP ihmc-mini-2:/home/ihmc/.ihmc/logs/perception/20230226_172530_PerceptionLog.hdf5 /home/robotlab/.ihmc/logs/perception/
  */
+@Deprecated
 public class RealsenseColorDepthPublisher
 {
    private static final double OUTPUT_PERIOD = UnitConversions.hertzToSeconds(20.0);

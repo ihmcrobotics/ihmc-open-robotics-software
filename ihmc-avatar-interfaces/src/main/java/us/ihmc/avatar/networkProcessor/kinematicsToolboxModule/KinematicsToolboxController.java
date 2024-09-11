@@ -1845,7 +1845,7 @@ public class KinematicsToolboxController extends ToolboxController
          LogTools.error("Privileged max velocity must be a positive finite number. Requested value: " + privilegedMaxVelocity);
          return;
       }
-      
+
       if (updateDefaultValue)
          this.defaultPrivilegedMaxVelocity = privilegedMaxVelocity;
       this.privilegedMaxVelocity.set(privilegedMaxVelocity);
