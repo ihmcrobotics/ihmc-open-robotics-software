@@ -1,11 +1,14 @@
 package us.ihmc.perception.streaming;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class StreamingTools
@@ -25,37 +28,39 @@ public class StreamingTools
 
    public static int getOpenPort()
    {
-      int port;
       try (ServerSocket tempSocket = new ServerSocket(0))
       {
-         port = tempSocket.getLocalPort();
+         return tempSocket.getLocalPort();
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      return port;
    }
 
    public static InetAddress getHostIPAddress()
    {
       try
       {
-         return NetworkInterface.networkInterfaces().filter(networkInterface ->
+         Optional<InetAddress> myIpv4Address = NetworkInterface.networkInterfaces()
+         .filter(networkInterface ->
          {
             try
             {
-               return networkInterface.isUp() && !networkInterface.isLoopback();
+               return networkInterface.isUp() && ! networkInterface.isLoopback();
             }
-            catch (SocketException e)
+            catch (SocketException exception)
             {
-               throw new RuntimeException(e);
+               throw new RuntimeException(exception);
             }
-         }).map(networkInterface -> networkInterface.getInetAddresses().nextElement()).findAny().get();
+         })
+         .flatMap(NetworkInterface::inetAddresses)
+         .filter(address -> address instanceof Inet4Address).findAny();
+         return myIpv4Address.orElse(null);
       }
       catch (SocketException e)
       {
-         throw new IllegalStateException("Could not find host IP address");
+         throw new RuntimeException(e);
       }
    }
 }

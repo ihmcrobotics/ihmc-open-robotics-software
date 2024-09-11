@@ -63,11 +63,13 @@ public class ROS2SRTVideoStreamer
 
       // See if caller wants to connect or disconnect
       if (request.getConnectionWanted())
-      {  // Connecting: send ACK message and attempt to connect via SRT
+      {
+         // Start waiting for a connection
+         callerConnector.submit(() -> videoStreamer.connectToCaller(callerAddress, CONNECTION_TIMEOUT));
+
+         // Send ACK saying I'm ready
          ackMessage.getId().set(request.getId());
          statusMessagePublisher.publish(ackMessage);
-         // Since connecting to the caller might take a while, it's done asynchronously
-         callerConnector.submit(() -> videoStreamer.connectToCaller(callerAddress, CONNECTION_TIMEOUT));
       }
       else // Disconnecting: just remove the caller
          videoStreamer.removeCaller(callerAddress);
@@ -124,5 +126,10 @@ public class ROS2SRTVideoStreamer
    public int connectedCallerCount()
    {
       return videoStreamer.connectedCallerCount();
+   }
+
+   public boolean isInitialized()
+   {
+      return videoStreamer.isInitialized();
    }
 }

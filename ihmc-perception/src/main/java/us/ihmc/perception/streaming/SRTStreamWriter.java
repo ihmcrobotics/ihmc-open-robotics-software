@@ -73,7 +73,7 @@ public class SRTStreamWriter
       // Open the IO
       timeoutCallback.start(timeout);
       error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, timeoutCallback, this.ioOptions);
-      if (!FFMPEGTools.checkError(error, ioContext, "Opening IO context", false))
+      if (error < 0)
          return false;
 
       // Create the output format context
@@ -149,6 +149,8 @@ public class SRTStreamWriter
    {
       if (!connected)
          return;
+
+      LogTools.info("Disconnecting from {}", srtAddress);
 
       error = av_write_trailer(formatContext);
       FFMPEGTools.checkNegativeError(error, "Writing trailer");
