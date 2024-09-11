@@ -8,7 +8,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.jboss.netty.buffer.ChannelBuffer;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -95,18 +94,18 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
                      try
                      {
 
-                        ChannelBuffer nettyImageData = ros1Image.getData();
-                        ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
-                        int arrayOffset = nettyImageData.arrayOffset();
-                        dataByteBuffer.position(arrayOffset);
-                        ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
+//                        ChannelBuffer nettyImageData = ros1Image.getData();
+//                        ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
+//                        int arrayOffset = nettyImageData.arrayOffset();
+//                        dataByteBuffer.position(arrayOffset);
+//                        ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
 //                        byte[] nettyBackingArray = nettyImageData.array();
 //                        int dataLength = nettyBackingArray.length - arrayOffset;
 //                        ByteBuffer offsetByteBuffer = ByteBuffer.wrap(nettyBackingArray, arrayOffset, dataLength);
 //                        ByteBuffer offsetByteBuffer = new ByteBuffer(0, 0, dataLength, dataLength, nettyBackingArray, arrayOffset);
 //                        System.out.println(dataByteBuffer.isDirect());
 
-                        BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
+                        BytePointer imageDataPointer = null;
                         inputImageMat.data(imageDataPointer);
 
                         opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, opencv_imgproc.COLOR_BGR2YUV_I420);

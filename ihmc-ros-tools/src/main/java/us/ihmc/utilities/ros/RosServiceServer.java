@@ -2,9 +2,9 @@ package us.ihmc.utilities.ros;
 
 import org.ros.exception.ServiceException;
 import org.ros.internal.message.Message;
-import org.ros.node.ConnectedNode;
+//import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceResponseBuilder;
-import org.ros.node.service.ServiceServer;
+//import org.ros.node.service.ServiceServer;
 
 /**
  * 
@@ -17,11 +17,11 @@ public abstract class RosServiceServer<Q extends Message, R extends Message> imp
 {
    private final String requestType;
 
-   private ServiceServer<Q, R> server;
+//   private ServiceServer<Q, R> server;
 
    private final Object syncObject = new Object();
 
-   private ConnectedNode connectedNode = null;
+//   private ConnectedNode connectedNode = null;
    private String attachedServiceName = null;
 
    public RosServiceServer(String requestType)
@@ -29,23 +29,23 @@ public abstract class RosServiceServer<Q extends Message, R extends Message> imp
       this.requestType = requestType;
    }
 
-   public ServiceServer<Q, R> getServer()
-   {
-      return server;
-   }
+//   public ServiceServer<Q, R> getServer()
+//   {
+//      return server;
+//   }
 
    public String getRequestType()
    {
       return requestType;
    }
 
-   public void setServiceServer(ServiceServer<Q, R> server, ConnectedNode connectedNode, String attachedServiceName)
-   {
-      this.connectedNode = connectedNode;
-      this.attachedServiceName = attachedServiceName;
-      this.server = server;
-      connected();
-   }
+//   public void setServiceServer(ServiceServer<Q, R> server, ConnectedNode connectedNode, String attachedServiceName)
+//   {
+//      this.connectedNode = connectedNode;
+//      this.attachedServiceName = attachedServiceName;
+//      this.server = server;
+//      connected();
+//   }
 
 
    @Override
@@ -62,19 +62,19 @@ public abstract class RosServiceServer<Q extends Message, R extends Message> imp
 
    public void waitTillConnected()
    {
-      while (server == null)
-      {
-         synchronized (syncObject)
-         {
-            try
-            {
-               syncObject.wait();
-            }
-            catch (InterruptedException e)
-            {
-            }
-         }
-      }
+//      while (server == null)
+//      {
+//         synchronized (syncObject)
+//         {
+//            try
+//            {
+//               syncObject.wait();
+//            }
+//            catch (InterruptedException e)
+//            {
+//            }
+//         }
+//      }
    }
 
  

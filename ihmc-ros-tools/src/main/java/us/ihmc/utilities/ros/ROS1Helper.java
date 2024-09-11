@@ -1,18 +1,13 @@
 package us.ihmc.utilities.ros;
 
-import geometry_msgs.PoseStamped;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
-import sensor_msgs.CompressedImage;
-import sensor_msgs.Image;
-import sensor_msgs.PointCloud2;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
@@ -109,16 +104,16 @@ public class ROS1Helper implements RosNodeInterface
       scheduleTentativeReconnect();
    }
 
-   public RosTopicPublisher<PoseStamped> publishPose(String topicName)
-   {
-      boolean latched = false; // TODO: What does this mean?
-      RosTopicPublisher<PoseStamped> publisher = new RosTopicPublisher<PoseStamped>(PoseStamped._TYPE, latched)
-      {
-         // ???
-      };
-      attachPublisher(topicName, publisher);
-      return publisher;
-   }
+//   public RosTopicPublisher<PoseStamped> publishPose(String topicName)
+//   {
+//      boolean latched = false; // TODO: What does this mean?
+//      RosTopicPublisher<PoseStamped> publisher = new RosTopicPublisher<PoseStamped>(PoseStamped._TYPE, latched)
+//      {
+//         // ???
+//      };
+//      attachPublisher(topicName, publisher);
+//      return publisher;
+//   }
 
    @Override
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
@@ -128,47 +123,47 @@ public class ROS1Helper implements RosNodeInterface
       scheduleTentativeReconnect();
    }
 
-   public AbstractRosTopicSubscriber<PoseStamped> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
-   {
-      AbstractRosTopicSubscriber<PoseStamped> subscriber = new AbstractRosTopicSubscriber<PoseStamped>(PoseStamped._TYPE)
-      {
-         @Override
-         public void onNewMessage(PoseStamped poseStamped)
-         {
-            callback.accept(poseStamped);
-         }
-      };
-      attachSubscriber(topicName, subscriber);
-      return subscriber;
-   }
+//   public AbstractRosTopicSubscriber<PoseStamped> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
+//   {
+//      AbstractRosTopicSubscriber<PoseStamped> subscriber = new AbstractRosTopicSubscriber<PoseStamped>(PoseStamped._TYPE)
+//      {
+//         @Override
+//         public void onNewMessage(PoseStamped poseStamped)
+//         {
+//            callback.accept(poseStamped);
+//         }
+//      };
+//      attachSubscriber(topicName, subscriber);
+//      return subscriber;
+//   }
 
-   public AbstractRosTopicSubscriber<PointCloud2> subscribeToPointCloud2ViaCallback(String topicName, Consumer<PointCloud2> callback)
-   {
-      AbstractRosTopicSubscriber<PointCloud2> subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
-      {
-         @Override
-         public void onNewMessage(PointCloud2 pointCloud2)
-         {
-            callback.accept(pointCloud2);
-         }
-      };
-      attachSubscriber(topicName, subscriber);
-      return subscriber;
-   }
+//   public AbstractRosTopicSubscriber<PointCloud2> subscribeToPointCloud2ViaCallback(String topicName, Consumer<PointCloud2> callback)
+//   {
+//      AbstractRosTopicSubscriber<PointCloud2> subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
+//      {
+//         @Override
+//         public void onNewMessage(PointCloud2 pointCloud2)
+//         {
+//            callback.accept(pointCloud2);
+//         }
+//      };
+//      attachSubscriber(topicName, subscriber);
+//      return subscriber;
+//   }
 
-   public AbstractRosTopicSubscriber<Image> subscribeToImageViaCallback(String topicName, Consumer<Image> callback)
-   {
-      AbstractRosTopicSubscriber<Image> subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
-      {
-         @Override
-         public void onNewMessage(Image image)
-         {
-            callback.accept(image);
-         }
-      };
-      attachSubscriber(topicName, subscriber);
-      return subscriber;
-   }
+//   public AbstractRosTopicSubscriber<Image> subscribeToImageViaCallback(String topicName, Consumer<Image> callback)
+//   {
+//      AbstractRosTopicSubscriber<Image> subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
+//      {
+//         @Override
+//         public void onNewMessage(Image image)
+//         {
+//            callback.accept(image);
+//         }
+//      };
+//      attachSubscriber(topicName, subscriber);
+//      return subscriber;
+//   }
 
    @Override
    public void removeSubscriber(RosTopicSubscriberInterface<? extends Message> subscriber)

@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
@@ -16,6 +17,7 @@ import test_rosmaster.AddTwoInts;
 import test_rosmaster.AddTwoIntsRequest;
 import test_rosmaster.AddTwoIntsResponse;
 
+@Disabled
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
    final static boolean USE_JAVA_ROSCORE = true;

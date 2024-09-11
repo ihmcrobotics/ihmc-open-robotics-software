@@ -3,8 +3,7 @@ package us.ihmc.atlas.jfxvisualizer;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
+//import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import sensor_msgs.PointCloud2;
@@ -237,15 +236,15 @@ public class AtlasHeightMapTopicConverter
       message.setIsDense(true);
       message.setFields(pointType.getPointField());
 
-      ChannelBuffer buffer = new LittleEndianHeapChannelBuffer(dataLength);
-      for (int i = 0; i < points.length; i++)
-      {
-         buffer.writeFloat((float) points[i].getX());
-         buffer.writeFloat((float) points[i].getY());
-         buffer.writeFloat((float) points[i].getZ());
-         buffer.writeFloat(100.0f);
-      }
-      message.setData(buffer);
+//      ChannelBuffer buffer = new LittleEndianHeapChannelBuffer(dataLength);
+//      for (int i = 0; i < points.length; i++)
+//      {
+//         buffer.writeFloat((float) points[i].getX());
+//         buffer.writeFloat((float) points[i].getY());
+//         buffer.writeFloat((float) points[i].getZ());
+//         buffer.writeFloat(100.0f);
+//      }
+//      message.setData(buffer);
 
       return message;
    }

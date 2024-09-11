@@ -31,7 +31,7 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
         Header header = message.getHeader();
 
         header.setStamp(t);
-        header.setFrameId(frameID);
+//        header.setFrameId(frameID);
         header.setSeq(seq++);
 
         //double f = videoSettings.getWidth()/2.0 / Math.tan(videoSettings.getFieldOfView()/2.0);

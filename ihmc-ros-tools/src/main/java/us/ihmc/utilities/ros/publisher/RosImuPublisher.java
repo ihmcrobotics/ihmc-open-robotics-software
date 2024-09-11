@@ -40,15 +40,15 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       localAngularVelocity.setZ(angularVelocity.getZ());
       
       Header header = newMessageFromType(Header._TYPE);
-      header.setFrameId(frameId);
+//      header.setFrameId(frameId);
       header.setStamp(Time.fromNano(timestamp));
       header.setSeq(counter);
       counter++;
             
-      message.setHeader(header);
-      message.setLinearAcceleration(localLinearAcceleration);
-      message.setOrientation(localOrientation);
-      message.setAngularVelocity(localAngularVelocity);
+//      message.setHeader(header);
+//      message.setLinearAcceleration(localLinearAcceleration);
+//      message.setOrientation(localOrientation);
+//      message.setAngularVelocity(localAngularVelocity);
       
       publish(message);
    }

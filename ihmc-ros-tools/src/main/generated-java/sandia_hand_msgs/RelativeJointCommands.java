@@ -7,6 +7,6 @@ public interface RelativeJointCommands extends org.ros.internal.message.Message 
   void setHeader(std_msgs.Header value);
   float[] getPosition();
   void setPosition(float[] value);
-  org.jboss.netty.buffer.ChannelBuffer getMaxEffort();
-  void setMaxEffort(org.jboss.netty.buffer.ChannelBuffer value);
+//  org.jboss.netty.buffer.ChannelBuffer getMaxEffort();
+//  void setMaxEffort(org.jboss.netty.buffer.ChannelBuffer value);
 }
