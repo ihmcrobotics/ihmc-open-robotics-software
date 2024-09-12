@@ -3,6 +3,7 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
@@ -40,8 +41,8 @@ public class ROS2SRTVideoSubscriber
    private final Mat currentFrame = new Mat();
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
+   private final Notification newFrameReceived = new Notification();
    private volatile boolean connectionDesired = false;
-   private boolean receivedFirstFrame = false;
 
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2,
                                  ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair,
@@ -83,7 +84,7 @@ public class ROS2SRTVideoSubscriber
       if (newFrame != null)
       {
          newFrame.copyTo(currentFrame);
-         receivedFirstFrame = true;
+         newFrameReceived.set();
       }
 
       if (statusMessageSubscription.hasReceivedFirstMessage())
@@ -123,9 +124,9 @@ public class ROS2SRTVideoSubscriber
       return statusMessageSubscription.hasReceivedFirstMessage();
    }
 
-   public boolean hasReceivedFirstFrame()
+   public boolean newFrameAvailable()
    {
-      return receivedFirstFrame;
+      return newFrameReceived.poll();
    }
 
    public Mat getCurrentFrame()

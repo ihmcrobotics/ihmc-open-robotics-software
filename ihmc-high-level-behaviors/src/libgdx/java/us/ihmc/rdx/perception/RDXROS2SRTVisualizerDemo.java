@@ -17,9 +17,6 @@ public class RDXROS2SRTVisualizerDemo
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXPerceptionVisualizersPanel visualizersPanel = new RDXPerceptionVisualizersPanel();
-   private final RDXROS2SRTVideoStreamVisualizer streamVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
-                                                                                                        "Stream Visualizer",
-                                                                                                        PerceptionAPI.REALSENSE_COLOR_STREAM);
 
    private RDXROS2SRTVisualizerDemo()
    {
@@ -28,7 +25,18 @@ public class RDXROS2SRTVisualizerDemo
          @Override
          public void create()
          {
-            visualizersPanel.addVisualizer(streamVisualizer);
+            RDXROS2SRTVideoStreamVisualizer zedLeftColorVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
+                                                                                                         "ZED Color Left",
+                                                                                                         PerceptionAPI.ZED_LEFT_COLOR_STREAM);
+            RDXROS2SRTVideoStreamVisualizer zedRightColorVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
+                                                                                                          "ZED Color Right",
+                                                                                                          PerceptionAPI.ZED_RIGHT_COLOR_STREAM);
+            RDXROS2SRTVideoStreamVisualizer zedDepthVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
+                                                                                                     "ZED Depth",
+                                                                                                     PerceptionAPI.ZED_DEPTH_STREAM);
+            visualizersPanel.addVisualizer(zedLeftColorVisualizer);
+            visualizersPanel.addVisualizer(zedRightColorVisualizer);
+            visualizersPanel.addVisualizer(zedDepthVisualizer);
             visualizersPanel.create();
 
             baseUI.getImGuiPanelManager().addPanel(visualizersPanel);

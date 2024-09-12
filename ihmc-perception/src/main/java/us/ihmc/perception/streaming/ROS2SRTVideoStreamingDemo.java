@@ -5,19 +5,15 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensors.RealsenseColorDepthImageRetriever;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 
-public class ROS2SRTVideoStreamerDemo
+public class ROS2SRTVideoStreamingDemo
 {
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2")
                                                                                         .toAbsolutePath()
@@ -26,13 +22,13 @@ public class ROS2SRTVideoStreamerDemo
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_video_streamer_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(PerceptionAPI.REALSENSE_COLOR_STREAM);
+   private final ROS2SRTSensorStreamer streamer = new ROS2SRTSensorStreamer();
    private final ZEDColorDepthImageRetrieverSVO imageRetriever;
 
    private volatile boolean running = true;
    private final Notification doneNotification = new Notification();
 
-   private ROS2SRTVideoStreamerDemo()
+   private ROS2SRTVideoStreamingDemo()
    {
       imageRetriever = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RecordMode.PLAYBACK, SVO_FILE_NAME);
       imageRetriever.start();
@@ -41,11 +37,24 @@ public class ROS2SRTVideoStreamerDemo
 
       while (running)
       {
-         RawImage colorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
-         if (!streamer.isInitialized())
-            streamer.initialize(colorImage, 20.0, avutil.AV_PIX_FMT_BGR24);
-         streamer.sendFrame(colorImage);
-         colorImage.release();
+         RawImage leftColorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
+         RawImage rightColorImage = imageRetriever.getLatestRawColorImage(RobotSide.RIGHT);
+         RawImage depthImage = imageRetriever.getLatestRawDepthImage();
+
+         if (!streamer.hasStream(PerceptionAPI.ZED_DEPTH_STREAM))
+         {
+            streamer.addStream(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage, 30.0, avutil.AV_PIX_FMT_BGR24);
+            streamer.addStream(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage, 30.0, avutil.AV_PIX_FMT_BGR24);
+            streamer.addStream(PerceptionAPI.ZED_DEPTH_STREAM, depthImage, 30.0, avutil.AV_PIX_FMT_GRAY16);
+         }
+
+         streamer.sendFrame(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage);
+         streamer.sendFrame(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage);
+         streamer.sendFrame(PerceptionAPI.ZED_DEPTH_STREAM, depthImage);
+
+         leftColorImage.release();
+         rightColorImage.release();
+         depthImage.release();
       }
 
       doneNotification.set();
@@ -64,6 +73,6 @@ public class ROS2SRTVideoStreamerDemo
 
    public static void main(String[] args)
    {
-      new ROS2SRTVideoStreamerDemo();
+      new ROS2SRTVideoStreamingDemo();
    }
 }

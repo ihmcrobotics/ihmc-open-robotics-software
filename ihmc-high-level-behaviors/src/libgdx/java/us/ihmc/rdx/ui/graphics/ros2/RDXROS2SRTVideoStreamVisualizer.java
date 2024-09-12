@@ -12,7 +12,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
 
-// FIXME: This doesn't shut down properly... idk why
 public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualizer<SRTStreamMessage>
 {
    private final ROS2IOTopicPair<SRTStreamMessage> streamTopic;
@@ -52,7 +51,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
          {
             subscriber.update();
             getFrequency().ping();
-            if (subscriber.hasCameraIntrinsics() && subscriber.hasReceivedFirstFrame())
+            if (subscriber.hasCameraIntrinsics() && subscriber.newFrameAvailable())
             {
                CameraIntrinsics imageIntrinsics = subscriber.getCameraIntrinsics();
                getOpenCVVideoVisualizer().updateImageDimensions(imageIntrinsics.getWidth(), imageIntrinsics.getHeight());
