@@ -69,7 +69,6 @@ public class StandAloneRealsenseProcess
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
-                                                                      REALSENSE_SERIAL_NUMBER,
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                       realsenseFrameSupplier,
                                                                       realsenseDemandNode::isDemanded);
