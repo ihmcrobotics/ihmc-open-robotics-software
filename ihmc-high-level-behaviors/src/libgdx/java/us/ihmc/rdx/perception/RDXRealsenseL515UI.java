@@ -35,7 +35,6 @@ import java.nio.ByteOrder;
 
 public class RDXRealsenseL515UI
 {
-   private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F1121365");
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
@@ -83,7 +82,7 @@ public class RDXRealsenseL515UI
 
             realsenseDeviceManager = new RealsenseDeviceManager(yoRegistry, yoGraphicsListRegistry);
 
-            l515 = realsenseDeviceManager.createFullFeaturedL515(SERIAL_NUMBER);
+            l515 = realsenseDeviceManager.createFullFeaturedL515();
             l515.enableColor(1280, 720, 30);
             l515.initialize();
 
