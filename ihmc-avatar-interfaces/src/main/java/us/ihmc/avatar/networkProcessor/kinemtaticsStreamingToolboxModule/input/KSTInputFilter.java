@@ -3,7 +3,9 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -63,23 +65,82 @@ public class KSTInputFilter
       boundingBox.getSize().set(bbxSize);
    }
 
+   public boolean isInputValid(KinematicsToolboxCenterOfMassCommand input, KinematicsToolboxCenterOfMassCommand previousInput)
+   {
+      if (enableBBXFilter.getValue() && !boundingBox.isPointInside(input.getDesiredPosition()))
+      {
+         LogTools.warn("Invalid CoM input. Input outside bounding box");
+         return false;
+      }
+
+      if (previousInput != null)
+      {
+         double linearDelta = input.getDesiredPosition().distance(previousInput.getDesiredPosition());
+         if (linearDelta > maxLinearDelta.getValue())
+         {
+            LogTools.warn("Invalid CoM input. Linear delta {} > maximum delta {}", linearDelta, maxLinearDelta.getValue());
+            return false;
+         }
+      }
+
+      if (input.getDesiredPosition().containsNaN())
+      {
+         LogTools.warn("NaN position for CoM command");
+         return false;
+      }
+
+      if (input.getHasDesiredVelocity())
+      {
+         if (input.getDesiredVelocity().containsNaN())
+         {
+            LogTools.warn("NaN velocity for CoM command");
+            return false;
+         }
+         double linearVelocity = input.getDesiredVelocity().norm();
+         if (linearVelocity > maxLinearVelocity.getValue())
+            return false;
+      }
+
+      return true;
+   }
+
    public boolean isInputValid(KinematicsToolboxRigidBodyCommand input, KinematicsToolboxRigidBodyCommand previousInput)
    {
       if (enableBBXFilter.getValue() && !boundingBox.isPointInside(input.getDesiredPose().getPosition()))
+      {
+         LogTools.warn("Invalid rigid body input. Input outside bounding box");
          return false;
+      }
 
       if (previousInput != null)
       {
          double linearDelta = input.getDesiredPose().getPositionDistance(previousInput.getDesiredPose());
          if (linearDelta > maxLinearDelta.getValue())
+         {
+            LogTools.warn("Invalid rigid body input. Linear delta {} > maximum delta {}", linearDelta, maxLinearDelta.getValue());
             return false;
+         }
          double angularDelta = input.getDesiredPose().getOrientationDistance(previousInput.getDesiredPose());
          if (angularDelta > maxAngularDelta.getValue())
+         {
+            LogTools.warn("Invalid rigid body input. Angular delta {} > maximum delta {}", angularDelta, maxAngularDelta.getValue());
             return false;
+         }
+      }
+
+      if (input.getDesiredPose().containsNaN())
+      {
+         LogTools.warn("NaN pose for end-effector: {}", input.getEndEffector().getName());
+         return false;
       }
 
       if (input.getHasDesiredVelocity())
       {
+         if (input.getDesiredVelocity().containsNaN())
+         {
+            LogTools.warn("NaN velocity for end-effector: {}", input.getEndEffector().getName());
+            return false;
+         }
          double linearVelocity = input.getDesiredVelocity().getLinearPart().norm();
          if (linearVelocity > maxLinearVelocity.getValue())
             return false;

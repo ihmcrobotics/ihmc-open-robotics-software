@@ -4,13 +4,28 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Base API for the IHMC control API.
@@ -83,6 +98,7 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsToolboxConfigurationMessage.class);
       inputMessageClasses.add(KinematicsToolboxSupportRegionMessage.class);
       inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxInitialConfigurationMessage.class);
       inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
       inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
 
