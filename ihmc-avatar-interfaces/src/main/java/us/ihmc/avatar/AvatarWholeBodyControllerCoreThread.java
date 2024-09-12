@@ -14,6 +14,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -65,6 +66,8 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
 
+      //TODO This should be called in here
+      // This is previously called in AvatarControllerThread
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
 
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
@@ -110,5 +113,29 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          throw new RuntimeException(e);
       }
       wholeBodyControllerCoreThreadTimer.stopMeasurement();
+   }
+
+   @Override
+   public YoRegistry getYoVariableRegistry()
+   {
+      return null;
+   }
+
+   @Override
+   public FullHumanoidRobotModel getFullRobotModel()
+   {
+      return null;
+   }
+
+   @Override
+   public HumanoidRobotContextData getHumanoidRobotContextData()
+   {
+      return null;
+   }
+
+   @Override
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }
