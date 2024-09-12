@@ -22,6 +22,7 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.Throttler;
 
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class SRTStreamerSubscriberTest
    }
 
    @Test
-   public void testSRTStreamerAndSubscriber() throws InterruptedException
+   public void testSRTStreamerAndReceiver() throws InterruptedException
    {
       InetSocketAddress localAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
       Throttler throttler = new Throttler();
@@ -226,6 +227,7 @@ public class SRTStreamerSubscriberTest
 
       // Try subscribing
       subscriber.subscribe();
+      MissingThreadTools.sleep(StreamingTools.CONNECTION_TIMEOUT);
 
       // Should be communicating now
       assertTrue(subscriber.isConnected());

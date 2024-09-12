@@ -26,7 +26,7 @@ public class SRTVideoReceiver
    private final AVFormatContext inputFormatContext;
    private final FFMPEGTimeoutCallback timeoutCallback;
 
-   private boolean connected = false;
+   private volatile boolean connected = false;
    private double readFrameTimeout = 1.0;
 
    int error;

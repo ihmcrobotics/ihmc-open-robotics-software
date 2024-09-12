@@ -3,25 +3,17 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 import static us.ihmc.perception.streaming.StreamingTools.STATUS_MESSAGE_UUID;
@@ -37,33 +29,25 @@ public class ROS2SRTVideoSubscriber
    private final ROS2Input<SRTStreamMessage> statusMessageSubscription;
    private final ROS2Input<SRTStreamMessage> ackMessageSubscription;
    private final Object ackMessageReceivedNotification = new Object();
+   private Thread subscriptionMaintainer;
 
    private final SRTStreamMessage requestMessage;
-
-   private final ExecutorService taskExecutor = Executors.newFixedThreadPool(4);
-   private Future<?> subscriptionMaintenanceTask;
-   private Future<?> connectionRequestTask;
-   private Future<?> subscriptionTask;
-   private Future<?> unsubscriptionTask;
-
-   private volatile boolean connectionDesired = false;
-   private final Lock connectionLock = new ReentrantLock();
-   private final Condition connectionDesiredCondition = connectionLock.newCondition();
-
    private final SRTVideoReceiver videoReceiver;
+
    private final CameraIntrinsics cameraIntrinsics;
    private float depthDiscretization = 0.0f;
 
    private final Mat currentFrame = new Mat();
-   private boolean receivedFirstFrame = false;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
+
+   private volatile boolean connectionDesired = false;
+   private boolean receivedFirstFrame = false;
 
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2,
                                  ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair,
                                  InetSocketAddress inputAddress,
                                  int outputAVPixelFormat)
    {
-
       this.ros2 = ros2;
       this.streamMessageTopicPair = streamMessageTopicPair;
 
@@ -76,132 +60,30 @@ public class ROS2SRTVideoSubscriber
       requestMessage = new SRTStreamMessage();
       requestMessage.setReceiverAddress(inputAddress.getHostString());
       requestMessage.setReceiverPort(inputAddress.getPort());
+      MessageTools.toMessage(subscriberId, requestMessage.getId());
 
       videoReceiver = new SRTVideoReceiver(inputAddress, outputAVPixelFormat);
       cameraIntrinsics = new CameraIntrinsics();
-
-      subscriptionMaintenanceTask = taskExecutor.submit(this::maintainConnection);
    }
 
-   public void subscribe()
+   public synchronized void subscribe()
    {
-      cancelSubscriptionTasks();
-      subscriptionTask = taskExecutor.submit(() ->
-      {
-         connectionLock.lock();
-         try
-         {
-            LogTools.warn("Signaling connection desired");
-            connectionDesired = true;
-            connectionDesiredCondition.signal();
-         }
-         finally
-         {
-            connectionLock.unlock();
-         }
-      });
+      connectionDesired = true;
+
+      stopMaintenanceThread();
+      subscriptionMaintainer = ThreadTools.startAsDaemon(this::maintainConnection, "ROS2SRTVideoSubscriptionMaintainer");
    }
 
-   private void maintainConnection()
+   public synchronized void update()
    {
-      while (true)
+      if (!videoReceiver.isConnected() || !connectionDesired)
+         return;
+
+      Mat newFrame = videoReceiver.getNextImage(UPDATE_TIMEOUT);
+      if (newFrame != null)
       {
-         connectionLock.lock();
-         try
-         {
-            while (!connectionDesired)
-               connectionDesiredCondition.await();
-
-            if (!videoReceiver.isConnected())
-            {
-               LogTools.warn("Sending connection request");
-               connectionRequestTask = taskExecutor.submit(this::sendConnectionRequest);
-               connectionRequestTask.get();
-            }
-         }
-         catch (InterruptedException e)
-         {
-            LogTools.error("Maintenance Interrupted");
-            break;
-         }
-         catch (ExecutionException e)
-         {
-            LogTools.error("Request Execution Failed");
-            break;
-         }
-         finally
-         {
-            connectionLock.unlock();
-         }
-
-         MissingThreadTools.sleep(UPDATE_TIMEOUT);
-      }
-   }
-
-   private void sendConnectionRequest()
-   {
-      // Send a request message
-      MessageTools.toMessage(subscriberId, requestMessage.getId());
-      requestMessage.setConnectionWanted(true);
-      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
-
-      // Wait to receive ACK
-      synchronized (ackMessageReceivedNotification)
-      {
-         try
-         {
-            LogTools.warn("Waiting to receive ACK");
-            ackMessageReceivedNotification.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
-            LogTools.warn("Stopped waiting for ACK");
-         }
-         catch (InterruptedException ignored)
-         {
-            LogTools.error("Send Connection Interrupted");
-            return;
-         }
-      }
-
-      // Subscribe via SRT
-      videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
-   }
-
-   private void receiveACKMessage(SRTStreamMessage ackMessage)
-   {
-      synchronized (ackMessageReceivedNotification)
-      {
-         LogTools.warn("Received ACK");
-         ackMessageReceivedNotification.notify();
-      }
-
-      // get camera intrinsics from ACK message
-      cameraIntrinsics.setWidth(ackMessage.getImageWidth());
-      cameraIntrinsics.setHeight(ackMessage.getImageHeight());
-      cameraIntrinsics.setFx(ackMessage.getFx());
-      cameraIntrinsics.setFy(ackMessage.getFy());
-      cameraIntrinsics.setCx(ackMessage.getCx());
-      cameraIntrinsics.setCy(ackMessage.getCy());
-      depthDiscretization = ackMessage.getDepthDiscretization();
-   }
-
-   public void update()
-   {
-      connectionLock.lock();
-      try
-      {
-         if (!videoReceiver.isConnected() || !connectionDesired)
-            return;
-
-         LogTools.warn("Updating");
-         Mat newFrame = videoReceiver.getNextImage(UPDATE_TIMEOUT);
-         if (newFrame != null)
-         {
-            newFrame.copyTo(currentFrame);
-            receivedFirstFrame = true;
-         }
-      }
-      finally
-      {
-         connectionLock.unlock();
+         newFrame.copyTo(currentFrame);
+         receivedFirstFrame = true;
       }
 
       if (statusMessageSubscription.hasReceivedFirstMessage())
@@ -211,47 +93,19 @@ public class ROS2SRTVideoSubscriber
       }
    }
 
-   public void unsubscribe()
+   public synchronized void unsubscribe()
    {
-      cancelSubscriptionTasks();
-      unsubscriptionTask = taskExecutor.submit(() ->
-      {
-         try
-         {
-            connectionLock.lockInterruptibly();
+      connectionDesired = false;
+      stopMaintenanceThread();
 
-            LogTools.warn("Unsubscribing");
-            connectionDesired = false;
-
-            UUID messageId = UUID.randomUUID();
-            MessageTools.toMessage(messageId, requestMessage.getId());
-            requestMessage.setConnectionWanted(false);
-            ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
-            videoReceiver.disconnect();
-         }
-         catch (InterruptedException ignored) {}
-         finally
-         {
-            connectionLock.unlock();
-         }
-      });
-   }
-
-   private void cancelSubscriptionTasks()
-   {
-      if (connectionRequestTask != null)
-         connectionRequestTask.cancel(true);
-      if (subscriptionTask != null)
-         subscriptionTask.cancel(true);
-      if (unsubscriptionTask != null)
-         unsubscriptionTask.cancel(true);
+      requestMessage.setConnectionWanted(false);
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+      videoReceiver.disconnect();
    }
 
    public void destroy()
    {
       unsubscribe();
-
-      taskExecutor.shutdown();
 
       statusMessageSubscription.destroy();
       ackMessageSubscription.destroy();
@@ -292,5 +146,62 @@ public class ROS2SRTVideoSubscriber
    public float getDepthDiscretization()
    {
       return depthDiscretization;
+   }
+
+   private void maintainConnection()
+   {
+      try
+      {
+         while (connectionDesired)
+         {
+            if (!videoReceiver.isConnected())
+            {
+               sendConnectionRequest();
+
+               synchronized (ackMessageReceivedNotification)
+               {
+                  ackMessageReceivedNotification.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
+               }
+            }
+
+            Thread.sleep((long) Conversions.secondsToMilliseconds(UPDATE_TIMEOUT));
+         }
+      }
+      catch (InterruptedException ignored) {}
+   }
+
+   private void sendConnectionRequest()
+   {
+      // Send a request message
+      requestMessage.setConnectionWanted(true);
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+   }
+
+   private void receiveACKMessage(SRTStreamMessage ackMessage)
+   {
+      if (connectionDesired && !videoReceiver.isConnected())
+      {
+         videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
+
+         // get camera intrinsics from ACK message
+         cameraIntrinsics.setWidth(ackMessage.getImageWidth());
+         cameraIntrinsics.setHeight(ackMessage.getImageHeight());
+         cameraIntrinsics.setFx(ackMessage.getFx());
+         cameraIntrinsics.setFy(ackMessage.getFy());
+         cameraIntrinsics.setCx(ackMessage.getCx());
+         cameraIntrinsics.setCy(ackMessage.getCy());
+         depthDiscretization = ackMessage.getDepthDiscretization();
+      }
+
+      synchronized (ackMessageReceivedNotification)
+      {
+         ackMessageReceivedNotification.notify();
+      }
+   }
+
+   private void stopMaintenanceThread()
+   {
+      if (subscriptionMaintainer != null)
+         subscriptionMaintainer.interrupt();
    }
 }
