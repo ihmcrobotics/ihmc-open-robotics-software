@@ -23,6 +23,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -223,6 +224,9 @@ public class RapidHeightMapExtractor
 
          // Upload input depth image
          terrainMapStatistics.startDepthUploadTime();
+         System.out.println(inputDepthImage.getBytedecoOpenCVMat());
+
+
          inputDepthImage.writeOpenCLImage(openCLManager);
          terrainMapStatistics.endDepthUploadTime();
 
@@ -321,9 +325,9 @@ public class RapidHeightMapExtractor
 
 
          // Use for debugging by printing to console the height map and contact map values
-         //PerceptionDebugTools.printMat("Internal Original Height Map", globalHeightMapImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
+//         PerceptionDebugTools.printMat("Internal Original Height Map", inputDepthImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
          //PerceptionDebugTools.printMat("Internal Snap Height Map", snapHeightImage.getBytedecoOpenCVMat(), 600, 600, 900, 900, 10);
-         //PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
+         PerceptionDebugTools.printMat("Cropped Height Map", croppedHeightMapImage, 4);
          //PerceptionDebugTools.printMat("Cropped Snap Height Map", croppedSnappedMapImage, 4);
 
          if (false && computeSteppability)
