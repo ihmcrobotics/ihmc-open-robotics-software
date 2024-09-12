@@ -48,6 +48,7 @@ import java.util.function.Supplier;
  * Use this to retrieve files from ihmc-mini-2
  * rsync -aP ihmc-mini-2:/home/ihmc/.ihmc/logs/perception/20230226_172530_PerceptionLog.hdf5 /home/robotlab/.ihmc/logs/perception/
  */
+@Deprecated
 public class RealsenseColorDepthPublisher
 {
    private static final double OUTPUT_PERIOD = UnitConversions.hertzToSeconds(20.0);
@@ -81,8 +82,7 @@ public class RealsenseColorDepthPublisher
    private volatile boolean running = true;
    private final Notification destroyedNotification = new Notification();
 
-   public RealsenseColorDepthPublisher(String serialNumber,
-                                       RealsenseConfiguration realsenseConfiguration,
+   public RealsenseColorDepthPublisher(RealsenseConfiguration realsenseConfiguration,
                                        ROS2Topic<ImageMessage> depthTopic,
                                        ROS2Topic<ImageMessage> colorTopic,
                                        Supplier<ReferenceFrame> sensorFrameUpdater)
@@ -92,7 +92,7 @@ public class RealsenseColorDepthPublisher
       this.sensorFrameUpdater = sensorFrameUpdater;
 
       realsenseDeviceManager = new RealsenseDeviceManager();
-      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
          destroy();
@@ -291,8 +291,7 @@ public class RealsenseColorDepthPublisher
 
       // L515: [F1121365, F0245563], D455: [215122254074]
       String realsenseSerialNumber = System.getProperty("d455.serial.number", "213522252883");
-      RealsenseColorDepthPublisher realsensePublisher = new RealsenseColorDepthPublisher(realsenseSerialNumber,
-                                                                                         RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
+      RealsenseColorDepthPublisher realsensePublisher = new RealsenseColorDepthPublisher(RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
                                                                                          PerceptionAPI.D455_DEPTH_IMAGE,
                                                                                          PerceptionAPI.D455_COLOR_IMAGE,
                                                                                          ReferenceFrame::getWorldFrame);
