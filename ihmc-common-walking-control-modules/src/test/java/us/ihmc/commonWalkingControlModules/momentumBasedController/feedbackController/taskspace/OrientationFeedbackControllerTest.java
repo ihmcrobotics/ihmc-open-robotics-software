@@ -55,7 +55,7 @@ public class OrientationFeedbackControllerTest
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfJoint);
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBodyBasics elevator = randomFloatingChain.getElevator();
-      RigidBodyBasics endEffector = joints.get(joints.size() -1).getSuccessor();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
       FrameOrientation3DReadOnly bodyFixedOrientationToControl = EuclidFrameRandomTools.nextFrameQuaternion(random, endEffector.getBodyFixedFrame());
 
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
@@ -76,7 +76,10 @@ public class OrientationFeedbackControllerTest
       toolbox.setupForInverseDynamicsSolver(null);
 
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
-      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector,
+                                                                                                      toolbox,
+                                                                                                      feedbackControllerToolbox,
+                                                                                                      registry);
 
       OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
       orientationFeedbackControlCommand.set(elevator, endEffector);
@@ -105,7 +108,7 @@ public class OrientationFeedbackControllerTest
 
       FrameVector3D rotationError = new FrameVector3D();
 
-      for (int i=0; i<100; i++)
+      for (int i = 0; i < 100; i++)
       {
          orientationFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand output = orientationFeedbackController.getInverseDynamicsOutput();
@@ -127,15 +130,12 @@ public class OrientationFeedbackControllerTest
          errorOrientation.normalizeAndLimitToPi();
          errorOrientation.getRotationVector(rotationError);
 
-//         errorMagnitude = errorOrientation.norm();
          errorMagnitude = rotationError.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          Assertions.assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
-
       }
    }
-
 
    @Test
    public void testCompareAgainstSpatialController() throws Exception
