@@ -1,5 +1,6 @@
 package us.ihmc.perception.streaming;
 
+import org.apache.logging.log4j.core.util.ExecutorServices;
 import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -107,16 +108,7 @@ public class ROS2SRTVideoStreamer
    {
       videoStreamer.destroy();
 
-      callerConnector.shutdown();
-      try
-      {
-         if (!callerConnector.awaitTermination(3, TimeUnit.SECONDS))
-            callerConnector.shutdownNow();
-      }
-      catch (InterruptedException e)
-      {
-         callerConnector.shutdownNow();
-      }
+      ExecutorServices.shutdown(callerConnector, 2, TimeUnit.SECONDS, getClass().getSimpleName());
 
       statusMessagePublisher.remove();
       requestMessageSubscription.destroy();

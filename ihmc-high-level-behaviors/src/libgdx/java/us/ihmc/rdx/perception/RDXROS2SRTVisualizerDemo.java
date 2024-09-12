@@ -50,6 +50,7 @@ public class RDXROS2SRTVisualizerDemo
          {
             visualizersPanel.destroy();
             baseUI.dispose();
+            ros2Node.destroy();
          }
       });
    }

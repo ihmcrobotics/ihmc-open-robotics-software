@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
 
-// TODO: Make abstract SRTSubscriber class and extend to video and audio
 public class SRTVideoReceiver
 {
    private final String srtInputAddress;

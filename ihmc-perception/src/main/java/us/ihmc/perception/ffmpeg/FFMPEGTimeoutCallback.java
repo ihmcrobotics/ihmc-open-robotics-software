@@ -1,5 +1,6 @@
 package us.ihmc.perception.ffmpeg;
 
+import org.apache.logging.log4j.core.util.ExecutorServices;
 import org.bytedeco.ffmpeg.avformat.AVIOInterruptCB;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.commons.Conversions;
@@ -96,6 +97,7 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
    public void close()
    {
       stop(true);
+      ExecutorServices.shutdown(timeoutExecutor, 2, TimeUnit.SECONDS, getClass().getSimpleName());
 
       super.close();
       callbackPointer.close();
