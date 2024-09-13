@@ -427,7 +427,8 @@ public class SCS2AvatarSimulationFactory
                                                     null,
                                                     ros2Node,
                                                     gravity.get(),
-                                                    kinematicsSimulation.get());
+                                                    kinematicsSimulation.get(),
+                                                    true);
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())

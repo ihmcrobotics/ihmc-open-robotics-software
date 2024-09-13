@@ -87,6 +87,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    private final ExecutionTimer controllerThreadTimer;
+   private final boolean wbccThreadRun;
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
@@ -97,9 +98,11 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
                                  double gravity,
-                                 boolean kinematicsSimulation)
+                                 boolean kinematicsSimulation,
+                                 boolean wbccThreadRun)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
+      this.wbccThreadRun = wbccThreadRun;
       if (robotInitialSetup != null)
       {
          robotInitialSetup.initializeFullRobotModel(controllerFullRobotModel);
@@ -304,12 +307,16 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       //TODO this should be removed.
       // New Thread (WBCCThread) will replace this action
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
-
-      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      if(!wbccThreadRun)
       {
-         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+         LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+         for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+         {
+            jointDesiredOutputList.getJointDesiredOutput(i).clear();
+         }
       }
+
    }
 
    @Override
