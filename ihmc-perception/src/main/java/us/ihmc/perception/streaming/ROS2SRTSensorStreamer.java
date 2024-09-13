@@ -1,15 +1,20 @@
 package us.ihmc.perception.streaming;
 
+import org.apache.logging.log4j.core.util.ExecutorServices;
 import perception_msgs.msg.dds.SRTStreamMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.perception.RawImage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ROS2SRTSensorStreamer
 {
    private final Map<ROS2IOTopicPair<SRTStreamMessage>, ROS2SRTVideoStreamer> videoStreamers = new HashMap<>();
+   private final ExecutorService sendFrameExecutor = Executors.newCachedThreadPool();
 
    public ROS2SRTSensorStreamer()
    {
@@ -33,13 +38,17 @@ public class ROS2SRTSensorStreamer
       if (frame.get() == null)
          return;
 
-      videoStreamers.get(streamTopic).sendFrame(frame);
-
-      frame.release();
+      sendFrameExecutor.submit(() ->
+      {
+         videoStreamers.get(streamTopic).sendFrame(frame);
+         frame.release();
+      });
    }
 
    public void destroy()
    {
+      ExecutorServices.shutdown(sendFrameExecutor, 2, TimeUnit.SECONDS, getClass().getSimpleName());
+
       for (ROS2SRTVideoStreamer videoStreamer : videoStreamers.values())
          videoStreamer.destroy();
    }

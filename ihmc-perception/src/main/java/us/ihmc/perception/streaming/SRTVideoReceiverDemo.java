@@ -37,7 +37,7 @@ public class SRTVideoReceiverDemo
 
       while (!shutdown && videoSubscriber.isConnected())
       {
-         Mat frame = videoSubscriber.getNextImage(0.5);
+         Mat frame = videoSubscriber.getNextFrame(0.5);
          if (frame == null)
             break;
 

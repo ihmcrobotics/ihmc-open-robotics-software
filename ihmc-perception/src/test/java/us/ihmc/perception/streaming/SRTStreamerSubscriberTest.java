@@ -90,7 +90,7 @@ public class SRTStreamerSubscriberTest
       SRTVideoReceiver subscriber = new SRTVideoReceiver(subscriberAddress, AV_PIX_FMT_BGR24);
       testTimeout(() -> subscriber.connect(CALL_TIMEOUT), TIMEOUT);
       testTimeout(() -> subscriber.waitForConnection(CALL_TIMEOUT), TIMEOUT); // Try waiting for a connection to nowhere
-      testTimeout(() -> subscriber.getNextImage(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
+      testTimeout(() -> subscriber.getNextFrame(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
       testTimeout(subscriber::destroy, TIMEOUT);                              // Try to destroy
    }
 
@@ -159,7 +159,7 @@ public class SRTStreamerSubscriberTest
       assertTrue(subscriber.isConnected());
 
       // Ensure we can receive an image
-      Mat receivedImage = subscriber.getNextImage(0.5);
+      Mat receivedImage = subscriber.getNextFrame(0.5);
       assertNotNull(receivedImage);
       receivedImage.close();
 
@@ -235,7 +235,7 @@ public class SRTStreamerSubscriberTest
 
       // Ensure we can receive an image
       subscriber.update();
-      Mat receivedImage = subscriber.getCurrentFrame();
+      Mat receivedImage = subscriber.getNextFrame();
       assertTrue(OpenCVTools.dimensionsMatch(receivedImage, sampleImage));
 
       // Ensure we can receive other data

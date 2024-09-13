@@ -91,7 +91,7 @@ public class ROS2SRTVideoStreamer
       requestMessageSubscription.addCallback(this::processStreamRequests);
    }
 
-   public void sendFrame(RawImage image)
+   public synchronized void sendFrame(RawImage image)
    {
       if (image.get() == null)
          return;
@@ -104,11 +104,11 @@ public class ROS2SRTVideoStreamer
       image.release();
    }
 
-   public void destroy()
+   public synchronized void destroy()
    {
-      videoStreamer.destroy();
-
       ExecutorServices.shutdown(callerConnector, 2, TimeUnit.SECONDS, getClass().getSimpleName());
+
+      videoStreamer.destroy();
 
       statusMessagePublisher.remove();
       requestMessageSubscription.destroy();

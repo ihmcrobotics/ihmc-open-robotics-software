@@ -97,11 +97,11 @@ public class SRTVideoReceiver
       if (!connected)
          return;
 
+      connected = false;
+
       avformat_close_input(inputFormatContext);
       decoder.destroy();
       decoder = null;
-
-      connected = false;
    }
 
    private int getNextPacket(AVPacket packetToPack)
@@ -138,7 +138,7 @@ public class SRTVideoReceiver
       return 0;
    }
 
-   public Mat getNextImage(double timeout)
+   public Mat getNextFrame(double timeout)
    {
       if (!connected)
          return null;

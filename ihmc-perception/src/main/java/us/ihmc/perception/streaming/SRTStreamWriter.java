@@ -15,7 +15,8 @@ import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.ffmpeg.global.avutil.av_dict_copy;
+import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTStreamWriter
 {
@@ -68,7 +69,7 @@ public class SRTStreamWriter
       formatContext.interrupt_callback(timeoutCallback);
    }
 
-   public boolean connect(double timeout)
+   public synchronized boolean connect(double timeout)
    {
       // Open the IO
       timeoutCallback.start(timeout);
@@ -98,7 +99,7 @@ public class SRTStreamWriter
       return true;
    }
 
-   public boolean write(AVPacket packetToWrite)
+   public synchronized boolean write(AVPacket packetToWrite)
    {
       if (connected)
       {
@@ -121,7 +122,7 @@ public class SRTStreamWriter
       return connected;
    }
 
-   public void destroy()
+   public synchronized void destroy()
    {
       if (connected)
          disconnect();
@@ -147,7 +148,7 @@ public class SRTStreamWriter
          outputStream.close();
    }
 
-   private void disconnect()
+   private synchronized void disconnect()
    {
       if (!connected)
          return;
