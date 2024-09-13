@@ -15,8 +15,7 @@ import java.util.UUID;
 public class StreamingTools
 {
    public static final UUID STATUS_MESSAGE_UUID = new UUID(0L, 0L);
-   public static final double CONNECTION_TIMEOUT = 5.0; // 5 seconds to connect.
-   public static final long CONNECTION_TIMEOUT_NANOS = Conversions.secondsToNanoseconds(CONNECTION_TIMEOUT);
+   public static final double CONNECTION_TIMEOUT = 2.0; // 2 seconds to connect.
 
    public static String toSRTAddress(InetSocketAddress address)
    {

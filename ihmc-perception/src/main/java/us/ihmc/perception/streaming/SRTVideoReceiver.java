@@ -11,9 +11,10 @@ import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoDecoder;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class SRTVideoReceiver
 {
@@ -44,9 +45,19 @@ public class SRTVideoReceiver
 
    public boolean connect(double timeout)
    {
+      AVDictionary srtOptions = new AVDictionary();
+      av_dict_set(srtOptions, "connect_timeout", String.valueOf((int) Conversions.secondsToMilliseconds(timeout)), 0);
+      av_dict_set(srtOptions, "listen_timeout", String.valueOf((int) Conversions.nanosecondsToMicroseconds(Conversions.secondsToNanoseconds(timeout))), 0);
+      av_dict_set(srtOptions, "timeout", String.valueOf((int) Conversions.secondsToMilliseconds(timeout)), 0);
+
       timeoutCallback.start(timeout);
-      error = avformat_open_input(inputFormatContext, srtInputAddress, null, null);
+      error = avformat_open_input(inputFormatContext, srtInputAddress, null, srtOptions);
       timeoutCallback.stop();
+
+      FFMPEGTools.checkDictionaryAfterUse(srtOptions);
+
+      av_dict_free(srtOptions);
+
       if (error < 0)
          return false;
 
@@ -110,7 +121,9 @@ public class SRTVideoReceiver
       do
       {
          // Try reading a packet from the stream
+         timeoutCallback.start(ThreadTools.REASONABLE_WAITING_SLEEP_DURATION_MS, TimeUnit.MILLISECONDS);
          error = av_read_frame(inputFormatContext, packetToPack);
+         timeoutCallback.stop();
 
          if (error < 0) // Failed to read packet
          {

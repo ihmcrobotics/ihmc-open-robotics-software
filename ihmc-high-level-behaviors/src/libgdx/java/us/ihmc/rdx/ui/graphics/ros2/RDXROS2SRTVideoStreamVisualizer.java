@@ -74,8 +74,8 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    @Override
    public void destroy()
    {
+      subscriber.destroy();
       super.destroy();
       getOpenCVVideoVisualizer().destroy();
-      subscriber.destroy();
    }
 }

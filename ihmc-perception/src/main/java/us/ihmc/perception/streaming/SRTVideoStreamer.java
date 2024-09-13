@@ -35,7 +35,6 @@ public class SRTVideoStreamer
                          entry("peerlatency", "0"),
                          entry("mss", "1360"),
                          entry("payload_size", "1316"),
-                         entry("fc", "42"),
                          entry("rcvbuf", "55944"));
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */

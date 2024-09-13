@@ -2,6 +2,7 @@ package us.ihmc.perception.ffmpeg;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
+import org.bytedeco.ffmpeg.avutil.AVDictionaryEntry;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
@@ -159,5 +160,18 @@ public class FFMPEGTools
    {
       for (Map.Entry<String, String> option : options.entrySet())
          av_dict_set(dictionaryToSet, option.getKey(), option.getValue(), 0);
+   }
+
+   public static void checkDictionaryAfterUse(AVDictionary dictionary)
+   {
+      if (av_dict_count(dictionary) == 0)
+         return;
+
+      StringBuilder notFoundEntriesString = new StringBuilder("The following entries did not match available options:\n");
+      AVDictionaryEntry entry = null;
+      while ((entry = av_dict_iterate(dictionary, entry)) != null)
+         notFoundEntriesString.append("\t").append(entry.key().getString()).append(":").append(entry.value().getString()).append("\n");
+
+      LogTools.warn(notFoundEntriesString);
    }
 }

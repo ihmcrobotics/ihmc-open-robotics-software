@@ -63,6 +63,7 @@ public class FFMPEGDecoder
       AVDictionary optionsCopy = new AVDictionary();
       av_dict_copy(optionsCopy, codecOptions, 0);
       error = avcodec_open2(decoderContext, decoder, optionsCopy);
+      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
       av_dict_free(optionsCopy);
       FFMPEGTools.checkNegativeError(error, "Opening codec");
    }

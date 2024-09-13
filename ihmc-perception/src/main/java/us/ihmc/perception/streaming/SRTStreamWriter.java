@@ -78,6 +78,8 @@ public class SRTStreamWriter
       if (error < 0)
          return false;
 
+      FFMPEGTools.checkDictionaryAfterUse(ioOptions);
+
       // Create the output format context
       timeoutCallback.start(timeout);
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
@@ -92,6 +94,8 @@ public class SRTStreamWriter
       error = avformat_write_header(formatContext, formatOptions);
       if (!FFMPEGTools.checkNegativeError(error, "Sending header to caller", false))
          return false;
+
+      FFMPEGTools.checkDictionaryAfterUse(formatOptions);
 
       LogTools.info("Connected to {}", srtAddress);
 

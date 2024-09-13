@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import static us.ihmc.perception.streaming.StreamingTools.STATUS_MESSAGE_UUID;
 
 public class ROS2SRTVideoSubscriber
 {
-   private static final double UPDATE_TIMEOUT = 0.5; // half a second
+   private static final double UPDATE_TIMEOUT = 0.25; // quarter of a second
 
    private final UUID subscriberId = UUID.randomUUID();
 
@@ -71,7 +72,7 @@ public class ROS2SRTVideoSubscriber
       videoReceiver = new SRTVideoReceiver(inputAddress, outputAVPixelFormat);
       cameraIntrinsics = new CameraIntrinsics();
 
-      subscriptionThread = ThreadTools.startAsDaemon(this::subscription, "ROS2SRTVideoSubscription");
+      subscriptionThread = ThreadTools.startAThread(this::subscription, "ROS2SRTVideoSubscription");
    }
 
    public void addNewFrameConsumer(Consumer<Mat> newFrameConsumer)
@@ -95,23 +96,20 @@ public class ROS2SRTVideoSubscriber
          subscriptionDesired.set(false);
          subscriptionThread.interrupt();
       }
-
-      videoReceiver.disconnect();
-      requestMessage.setConnectionWanted(false);
-      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
    }
 
    public void destroy()
    {
       shutDown = true;
-
       unsubscribe();
-
-      statusMessageSubscription.destroy();
-      ackMessageSubscription.destroy();
-      videoReceiver.destroy();
-      if (nextFrame != null)
-         nextFrame.close();
+      try
+      {
+         subscriptionThread.join();
+      }
+      catch (InterruptedException exception)
+      {
+         LogTools.error("Interrupted while waiting for {} thread to shut down.", subscriptionThread.getName());
+      }
    }
 
    public boolean isConnected()
@@ -141,13 +139,19 @@ public class ROS2SRTVideoSubscriber
 
    private void subscription()
    {
+      // Maintain subscription while not shutting down
       while (!shutDown)
       {
          try
          {
-            // Wait until subscription is desired
+            // If we don't want to be subscribed, but we're connected, then unsubscribe
+            if (!subscriptionDesired.get() && videoReceiver.isConnected())
+               disconnectFromStreamer();
+
+            // If we don't want to be subscribed, wait until subscription is desired
             while (!subscriptionDesired.get() && !shutDown)
             {
+               LogTools.warn("Waiting for subscription request");
                synchronized (subscriptionDesired)
                {
                   LogTools.warn("Waiting for subscription request");
@@ -155,9 +159,9 @@ public class ROS2SRTVideoSubscriber
                }
             }
 
-            // Connect if not connected
+            // If we want to be subscribed, but we're not connected, then try to connect
             if (subscriptionDesired.get() && !videoReceiver.isConnected() && !connectToStreamer())
-               Thread.sleep((long) Conversions.secondsToMilliseconds(UPDATE_TIMEOUT)); // If connection failed, wait a bit and try again later
+               MissingThreadTools.sleep(UPDATE_TIMEOUT); // I believe this is interruptible, unlike ThreadTools.sleep()
 
             // If connected, get the next frame and give it to consumers
             if (subscriptionDesired.get() && videoReceiver.isConnected())
@@ -165,6 +169,22 @@ public class ROS2SRTVideoSubscriber
          }
          catch (InterruptedException ignored) {}
       }
+
+      if (videoReceiver.isConnected())
+         disconnectFromStreamer();
+
+      statusMessageSubscription.destroy();
+      ackMessageSubscription.destroy();
+      videoReceiver.destroy();
+      if (nextFrame != null)
+         nextFrame.close();
+   }
+
+   private synchronized void disconnectFromStreamer()
+   {
+      requestMessage.setConnectionWanted(false);
+      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
+      videoReceiver.disconnect();
    }
 
    private boolean connectToStreamer() throws InterruptedException
@@ -175,48 +195,23 @@ public class ROS2SRTVideoSubscriber
       ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
 
       // Wait for ACK or timeout
+      LogTools.warn("Waiting to receive ACK");
       synchronized (ackMessageReceivedNotification)
       {
-         LogTools.warn("Waiting to receive ACK");
          ackMessageReceivedNotification.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
       }
 
       return videoReceiver.isConnected();
    }
 
-   private void update()
-   {
-      // Get the next frame
-      // TODO: Does this need to be synchronized?
-      synchronized (subscriptionDesired)
-      {
-         nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
-      }
-
-      // Get updated sensor data
-      if (statusMessageSubscription.hasReceivedFirstMessage())
-      {
-         SRTStreamMessage statusMessage = statusMessageSubscription.getLatest();
-         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
-      }
-
-      // Give frame to consumers
-      if (nextFrame != null)
-         newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
-   }
-
    private void receiveACKMessage(SRTStreamMessage ackMessage)
    {
       LogTools.warn("Received ACK");
-      synchronized (subscriptionDesired)
-      {
-         if (!subscriptionDesired.get() || videoReceiver.isConnected())
-            return;
+      if (!subscriptionDesired.get() || videoReceiver.isConnected())
+         return;
 
-         // TODO: Does this need to be synchronized?
-         LogTools.warn("Waiting for SRT connection");
-         videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
-      }
+      LogTools.warn("Waiting for SRT connection");
+      videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
 
       // get camera intrinsics from ACK message
       cameraIntrinsics.setWidth(ackMessage.getImageWidth());
@@ -232,5 +227,22 @@ public class ROS2SRTVideoSubscriber
          LogTools.warn("Notifying ACK received");
          ackMessageReceivedNotification.notify();
       }
+   }
+
+   private synchronized void update()
+   {
+      // Get the next frame
+      nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
+
+      // Get updated sensor data
+      if (statusMessageSubscription.hasReceivedFirstMessage())
+      {
+         SRTStreamMessage statusMessage = statusMessageSubscription.getLatest();
+         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
+      }
+
+      // Give frame to consumers
+      if (nextFrame != null)
+         newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
    }
 }

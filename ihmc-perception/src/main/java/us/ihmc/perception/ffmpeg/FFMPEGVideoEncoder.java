@@ -86,6 +86,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       AVDictionary optionsCopy = new AVDictionary();
       av_dict_copy(optionsCopy, codecOptions, 0);
       error = avcodec_open2(encoderContext, encoder, optionsCopy);
+      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
       av_dict_free(optionsCopy);
       FFMPEGTools.checkNegativeError(error, "Opening codec");
    }
