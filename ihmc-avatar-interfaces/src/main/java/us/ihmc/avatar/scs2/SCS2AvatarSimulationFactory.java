@@ -177,6 +177,7 @@ public class SCS2AvatarSimulationFactory
       setupSimulationOutputWriter();
       setupStateEstimationThread();
       setupControllerThread();
+      setupWholeBodyControllerCoreThread();
       setupStepGeneratorThread();
       setupIKStreamingRTControllerThread();
       setupMultiThreadedRobotController();
@@ -435,6 +436,19 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
    }
 
+   private void setupWholeBodyControllerCoreThread()
+   {
+      String robotName = robotModel.get().getSimpleRobotName();
+      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+
+      RealtimeROS2Node ros2Node = null;
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         ros2Node = realtimeROS2Node.get();
+      }
+
+      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(contextDataFactory, null, robotModel.get(), null, ros2Node);
+   }
    private void setupStepGeneratorThread()
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
@@ -510,6 +524,7 @@ public class SCS2AvatarSimulationFactory
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
    }
+
 
    private void setupMultiThreadedRobotController()
    {
@@ -590,6 +605,7 @@ public class SCS2AvatarSimulationFactory
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       tasks.add(stepGeneratorTask);
+      tasks.add(wholeBodyControllerCoreTask);
       if (ikStreamingRTTask != null)
          tasks.add(ikStreamingRTTask);
       if (handControlTask != null)
@@ -697,6 +713,7 @@ public class SCS2AvatarSimulationFactory
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
+            wholeBodyControllerCoreThread.initialize();
             //            ikStreamingRTThread.initialize(); // TODO Not sure if that's needed.
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
 

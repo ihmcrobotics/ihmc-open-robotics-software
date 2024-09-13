@@ -164,12 +164,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
-      if (outputProcessor != null)
-      {
-         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
-         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
-         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
-      }
+      //TODO looks like should be moved to "new" thread
+//      if (outputProcessor != null)
+//      {
+//         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
+//         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+//         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
+//      }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
@@ -307,14 +308,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       //TODO this should be removed.
       // New Thread (WBCCThread) will replace this action
-      if(!wbccThreadRun)
-      {
-         LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      // in the EsitmatorThread, the initialize method clear the jointDesiredOutputList. So, let it be here.
 
-         for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
-         {
-            jointDesiredOutputList.getJointDesiredOutput(i).clear();
-         }
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
       }
 
    }

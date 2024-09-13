@@ -578,6 +578,8 @@ public class AvatarSimulationFactory
 
    private void setupPositionControlledJointsForSimulation()
    {
+      //TODO This should be changed from controllerThread to AvatarWholeBodyControllerCoreThread
+
       RobotController lowLevelController = robotModel.get().getSimulationLowLevelControllerFactory()
                                                      .createLowLevelController(controllerThread.getFullRobotModel(),
                                                                                humanoidFloatingRootJointRobot,
