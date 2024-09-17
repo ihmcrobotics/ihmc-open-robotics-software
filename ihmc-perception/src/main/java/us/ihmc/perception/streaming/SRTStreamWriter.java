@@ -6,7 +6,6 @@ import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFMPEGTimeoutCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
@@ -97,8 +96,6 @@ public class SRTStreamWriter
 
       FFMPEGTools.checkDictionaryAfterUse(formatOptions);
 
-      LogTools.info("Connected to {}", srtAddress);
-
       connected = true;
       return true;
    }
@@ -157,13 +154,9 @@ public class SRTStreamWriter
       if (!connected)
          return;
 
-      LogTools.info("Disconnecting from {}", srtAddress);
-
       error = av_write_trailer(formatContext);
       FFMPEGTools.checkNegativeError(error, "Writing trailer");
 
       connected = false;
-
-      LogTools.info("Disconnected from {}", srtAddress);
    }
 }

@@ -151,10 +151,8 @@ public class ROS2SRTVideoSubscriber
             // If we don't want to be subscribed, wait until subscription is desired
             while (!subscriptionDesired.get() && !shutDown)
             {
-               LogTools.warn("Waiting for subscription request");
                synchronized (subscriptionDesired)
                {
-                  LogTools.warn("Waiting for subscription request");
                   subscriptionDesired.wait();
                }
             }
@@ -189,13 +187,11 @@ public class ROS2SRTVideoSubscriber
 
    private boolean connectToStreamer() throws InterruptedException
    {
-      LogTools.warn("Sending connection request");
       // Send a request message
       requestMessage.setConnectionWanted(true);
       ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
 
       // Wait for ACK or timeout
-      LogTools.warn("Waiting to receive ACK");
       synchronized (ackMessageReceivedNotification)
       {
          ackMessageReceivedNotification.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
@@ -206,11 +202,9 @@ public class ROS2SRTVideoSubscriber
 
    private void receiveACKMessage(SRTStreamMessage ackMessage)
    {
-      LogTools.warn("Received ACK");
       if (!subscriptionDesired.get() || videoReceiver.isConnected())
          return;
 
-      LogTools.warn("Waiting for SRT connection");
       videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
 
       // get camera intrinsics from ACK message
@@ -224,7 +218,6 @@ public class ROS2SRTVideoSubscriber
 
       synchronized (ackMessageReceivedNotification)
       {
-         LogTools.warn("Notifying ACK received");
          ackMessageReceivedNotification.notify();
       }
    }
@@ -243,6 +236,9 @@ public class ROS2SRTVideoSubscriber
 
       // Give frame to consumers
       if (nextFrame != null)
+      {
          newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
+         nextFrame.close();
+      }
    }
 }

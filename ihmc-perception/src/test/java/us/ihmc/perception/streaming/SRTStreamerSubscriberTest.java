@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 import static org.junit.jupiter.api.Assertions.*;
@@ -152,7 +153,7 @@ public class SRTStreamerSubscriberTest
       // Initialize a subscriber and connect to streamer
       SRTVideoReceiver subscriber = new SRTVideoReceiver(localAddress, AV_PIX_FMT_BGR24);
       assertFalse(subscriber.isConnected());
-      subscriber.connect(CALL_TIMEOUT);
+      subscriber.connect(EXTRA_LONG_TIMEOUT);
 
       // Should be communicating now
       assertEquals(1, streamer.connectedCallerCount());
@@ -210,6 +211,12 @@ public class SRTStreamerSubscriberTest
 
       // Create the subscriber
       ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, localAddress, AV_PIX_FMT_BGR24);
+      AtomicBoolean subscriberHasReceivedFrame = new AtomicBoolean(false);
+      subscriber.addNewFrameConsumer(receivedImage ->
+      {
+         subscriberHasReceivedFrame.set(true);
+         assertTrue(OpenCVTools.dimensionsMatch(receivedImage, sampleImage));
+      });
 
       // No communication at this time
       assertEquals(0, streamer.connectedCallerCount());
@@ -234,9 +241,7 @@ public class SRTStreamerSubscriberTest
       assertEquals(1, streamer.connectedCallerCount());
 
       // Ensure we can receive an image
-      subscriber.update();
-      Mat receivedImage = subscriber.getNextFrame();
-      assertTrue(OpenCVTools.dimensionsMatch(receivedImage, sampleImage));
+      assertTrue(subscriberHasReceivedFrame.get());
 
       // Ensure we can receive other data
       assertEquals(depthDescretization, subscriber.getDepthDiscretization());

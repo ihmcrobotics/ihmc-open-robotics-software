@@ -53,13 +53,11 @@ public class SRTVideoReceiver
       timeoutCallback.start(timeout);
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, srtOptions);
       timeoutCallback.stop();
-
-      FFMPEGTools.checkDictionaryAfterUse(srtOptions);
-
-      av_dict_free(srtOptions);
-
       if (error < 0)
          return false;
+
+      FFMPEGTools.checkDictionaryAfterUse(srtOptions);
+      av_dict_free(srtOptions);
 
       timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
