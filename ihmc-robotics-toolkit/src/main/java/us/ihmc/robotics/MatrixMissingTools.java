@@ -6,6 +6,8 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.CholeskyDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -501,6 +503,28 @@ public class MatrixMissingTools
             resultToPack.set(temporaryMatrix);
          }
       }
+   }
+
+   /**
+    * Computes the square root of a positive definite matrix using Cholesky decomposition.
+    * The result is stored in the provided resultToPack matrix.
+    *
+    * @param input the matrix to compute the square root of. Not modified.
+    * @param resultToPack the matrix to store the result in. Modified.
+    * @throws IllegalArgumentException if the input and resultToPack matrices have incompatible sizes.
+    * @throws RuntimeException if the input matrix is not positive definite.
+    */
+   public static void sqrt(DMatrixRMaj input, DMatrixRMaj resultToPack) {
+      if (input.numCols != resultToPack.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
+      if (input.numRows != resultToPack.numRows)
+         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
+
+      CholeskyDecomposition_F64<DMatrixRMaj> cholesky = DecompositionFactory_DDRM.chol(input.numRows, true);
+      if (!cholesky.decompose(input)) {
+         throw new RuntimeException("Matrix is not positive definite.");
+      }
+      resultToPack.set(cholesky.getT(null));
    }
 
    /**
