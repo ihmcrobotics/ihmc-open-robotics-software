@@ -24,19 +24,6 @@ public class SRTVideoStreamer
    private static final String PREFERRED_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV420P;
 
-   /**
-    * For available options, see <a href="https://www.ffmpeg.org/ffmpeg-protocols.html#srt">FFMPEG srt documentation.</a>
-    * To get a decent SRT configuration, see <a href="https://srtlab.github.io/srt-cookbook/protocol/configuration.html">SRT Configuration Calculator</a>
-    */
-   private static final Map<String, String> SRT_IO_OPTIONS
-         = Map.ofEntries(entry("mode", "listener"),
-                         entry("transtype", "live"),
-                         entry("rcvlatency", "0"),
-                         entry("peerlatency", "0"),
-                         entry("mss", "1360"),
-                         entry("payload_size", "1316"),
-                         entry("rcvbuf", "55944"));
-
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> HEVC_NVENC_OPTIONS
          = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
@@ -64,8 +51,11 @@ public class SRTVideoStreamer
     */
    public SRTVideoStreamer()
    {
+      Map<String, String> srtIOOptions = StreamingTools.getLiveSRTOptions();
+      srtIOOptions.put("mode", "listener");
+
       ioOptions = new AVDictionary();
-      FFMPEGTools.setAVDictionary(ioOptions, SRT_IO_OPTIONS);
+      FFMPEGTools.setAVDictionary(ioOptions, srtIOOptions);
 
       encoderOptions = new AVDictionary();
       FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);

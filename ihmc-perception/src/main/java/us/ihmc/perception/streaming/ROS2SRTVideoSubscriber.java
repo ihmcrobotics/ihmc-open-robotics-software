@@ -73,6 +73,10 @@ public class ROS2SRTVideoSubscriber
       cameraIntrinsics = new CameraIntrinsics();
 
       subscriptionThread = ThreadTools.startAThread(this::subscription, "ROS2SRTVideoSubscription");
+
+      // This was added to solve a shutdown bug where FFMPEG would hang after receiving SIGINT, causing the destroy method to never be called.
+      // Allowing the JVM to call the destroy method on SIGINT fixes the issue.
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Destruction"));
    }
 
    public void addNewFrameConsumer(Consumer<Mat> newFrameConsumer)

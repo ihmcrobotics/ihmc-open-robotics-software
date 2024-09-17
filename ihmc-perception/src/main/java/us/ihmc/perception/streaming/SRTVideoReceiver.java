@@ -11,10 +11,12 @@ import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoDecoder;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
+import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTVideoReceiver
 {
@@ -23,6 +25,7 @@ public class SRTVideoReceiver
    private FFMPEGVideoDecoder decoder;
    private final int outputPixelFormat;
 
+   private final AVDictionary srtOptions;
    private final AVFormatContext inputFormatContext;
    private final FFMPEGTimeoutCallback timeoutCallback;
 
@@ -38,6 +41,9 @@ public class SRTVideoReceiver
       srtInputAddress = StreamingTools.toSRTAddress(inputAddress);
 
       timeoutCallback = new FFMPEGTimeoutCallback();
+
+      srtOptions = new AVDictionary();
+
       inputFormatContext = avformat_alloc_context();
       FFMPEGTools.checkPointer(inputFormatContext, "Allocating input format context");
       inputFormatContext.interrupt_callback(timeoutCallback);
@@ -45,11 +51,15 @@ public class SRTVideoReceiver
 
    public boolean connect(double timeout)
    {
-      AVDictionary srtOptions = new AVDictionary();
-      av_dict_set(srtOptions, "connect_timeout", String.valueOf((int) Conversions.secondsToMilliseconds(timeout)), 0);
-      av_dict_set(srtOptions, "listen_timeout", String.valueOf((int) Conversions.nanosecondsToMicroseconds(Conversions.secondsToNanoseconds(timeout))), 0);
-      av_dict_set(srtOptions, "timeout", String.valueOf((int) Conversions.secondsToMilliseconds(timeout)), 0);
+      long timeoutMicroseconds = Conversions.nanosecondsToMicroseconds(Conversions.secondsToNanoseconds(timeout));
 
+      // Set the SRT options
+      Map<String, String> srtOptionMap = StreamingTools.getLiveSRTOptions();
+      srtOptionMap.put("mode", "caller");
+      srtOptionMap.put("timeout", String.valueOf(timeoutMicroseconds));
+      FFMPEGTools.setAVDictionary(srtOptions, srtOptionMap);
+
+      // Connect to streamer
       timeoutCallback.start(timeout);
       error = avformat_open_input(inputFormatContext, srtInputAddress, null, srtOptions);
       timeoutCallback.stop();
@@ -57,14 +67,15 @@ public class SRTVideoReceiver
          return false;
 
       FFMPEGTools.checkDictionaryAfterUse(srtOptions);
-      av_dict_free(srtOptions);
 
+      // Receive a few packets to get stream info
       timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
       timeoutCallback.stop();
       if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress, false))
          return false;
 
+      // Create and initialize the decoder for the stream
       decoder = new FFMPEGVideoDecoder(inputFormatContext, outputPixelFormat);
       decoder.initialize(null, this::getNextPacket);
 
@@ -168,6 +179,7 @@ public class SRTVideoReceiver
       if (isConnected())
          disconnect();
 
+      av_dict_free(srtOptions);
       avformat_free_context(inputFormatContext);
 
       inputFormatContext.close();

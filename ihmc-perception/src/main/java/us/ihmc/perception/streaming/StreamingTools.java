@@ -1,7 +1,5 @@
 package us.ihmc.perception.streaming;
 
-import us.ihmc.commons.Conversions;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -9,13 +7,36 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.util.Map.entry;
 
 public class StreamingTools
 {
    public static final UUID STATUS_MESSAGE_UUID = new UUID(0L, 0L);
    public static final double CONNECTION_TIMEOUT = 2.0; // 2 seconds to connect.
+
+   // SRT Stuff
+
+   /**
+    * For available options, see <a href="https://www.ffmpeg.org/ffmpeg-protocols.html#srt">FFMPEG srt documentation.</a>
+    * To get a decent SRT configuration, see <a href="https://srtlab.github.io/srt-cookbook/protocol/configuration.html">SRT Configuration Calculator</a>
+    */
+   private static final Map<String, String> LIVE_SRT_OPTIONS
+         = Map.ofEntries(entry("transtype", "live"),
+                         entry("smoother", "live"),
+                         entry("rcvlatency", "0"),
+                         entry("peerlatency", "0"),
+                         entry("mss", "1360"),           // Max packet size of MPEG-TS
+                         entry("payload_size", "1316")); // Payload size of MPEG-TS
+
+   public static Map<String, String> getLiveSRTOptions()
+   {
+      return new HashMap<>(LIVE_SRT_OPTIONS);
+   }
 
    public static String toSRTAddress(InetSocketAddress address)
    {
