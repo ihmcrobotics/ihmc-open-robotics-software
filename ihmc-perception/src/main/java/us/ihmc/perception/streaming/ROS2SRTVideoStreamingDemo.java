@@ -9,6 +9,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -23,13 +24,14 @@ public class ROS2SRTVideoStreamingDemo
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
    private final ROS2SRTSensorStreamer streamer = new ROS2SRTSensorStreamer();
-   private final ZEDColorDepthImageRetrieverSVO imageRetriever;
+   private final ZEDColorDepthImageRetriever imageRetriever;
 
    private volatile boolean running = true;
    private final Notification doneNotification = new Notification();
 
    private ROS2SRTVideoStreamingDemo()
    {
+//      imageRetriever = new ZEDColorDepthImageRetriever(0, ReferenceFrame::getWorldFrame, () -> true, () -> true);
       imageRetriever = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RecordMode.PLAYBACK, SVO_FILE_NAME);
       imageRetriever.start();
 
