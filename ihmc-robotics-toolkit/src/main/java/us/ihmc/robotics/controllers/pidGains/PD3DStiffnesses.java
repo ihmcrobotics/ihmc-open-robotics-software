@@ -175,7 +175,7 @@ public interface PD3DStiffnesses extends PD3DStiffnessesReadOnly
     * @param integralGain     the new integral gain for the three dimensions.
     * @param maxIntegralError the new maximum integral error.
     */
-   public default void setStiffnesses(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
+   public default void setProportionalStiffnesses(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
    {
       setProportionalStiffnesses(proportionalGain);
       setDerivativeStiffnesses(derivativeGain);
@@ -200,6 +200,15 @@ public interface PD3DStiffnesses extends PD3DStiffnessesReadOnly
    {
       setProportionalStiffnesses(other.getProportionalStiffnesses());
       setDerivativeStiffnesses(other.getDerivativeStiffnesses());
+      setMaxFeedbackAndFeedbackRate(other.getMaximumFeedback(), other.getMaximumFeedbackRate());
+      setMaxDerivativeError(other.getMaximumDerivativeError());
+      setMaxProportionalError(other.getMaximumProportionalError());
+   }
+
+   public default void set(PID3DGainsReadOnly other)
+   {
+      setProportionalStiffnesses(other.getProportionalGains());
+      setDerivativeStiffnesses(other.getDerivativeGains());
       setMaxFeedbackAndFeedbackRate(other.getMaximumFeedback(), other.getMaximumFeedbackRate());
       setMaxDerivativeError(other.getMaximumDerivativeError());
       setMaxProportionalError(other.getMaximumProportionalError());
