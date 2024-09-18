@@ -1,82 +1,43 @@
 package us.ihmc.perception.streaming;
 
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.SRTStreamMessage;
-import us.ihmc.commons.Conversions;
+import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.ros2.ROS2Topic;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
-import static us.ihmc.perception.streaming.StreamingTools.STATUS_MESSAGE_UUID;
 
 public class ROS2SRTVideoSubscriber
 {
    private static final double UPDATE_TIMEOUT = 0.25; // quarter of a second
 
-   private final UUID subscriberId = UUID.randomUUID();
-
-   private final ROS2PublishSubscribeAPI ros2;
-   private final ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair;
-   private final ROS2Input<SRTStreamMessage> statusMessageSubscription;
-   private final ROS2Input<SRTStreamMessage> ackMessageSubscription;
-   private final Object ackMessageReceivedNotification = new Object();
-
-   private final SRTStreamMessage requestMessage;
+   private final ROS2StreamStatusMonitor streamStatusMonitor;
    private final SRTVideoReceiver videoReceiver;
 
    private Mat nextFrame;
-   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
-   private final CameraIntrinsics cameraIntrinsics;
-   private float depthDiscretization = 0.0f;
-
    private final List<Consumer<Mat>> newFrameConsumers = new ArrayList<>();
 
    private final Thread subscriptionThread;
    private final AtomicBoolean subscriptionDesired = new AtomicBoolean(false);
-   private volatile boolean shutDown = false;
+   private volatile boolean shutdown = false;
 
-   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2,
-                                 ROS2IOTopicPair<SRTStreamMessage> streamMessageTopicPair,
-                                 InetSocketAddress inputAddress,
-                                 int outputAVPixelFormat)
+   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, int outputAVPixelFormat)
    {
-      this.ros2 = ros2;
-      this.streamMessageTopicPair = streamMessageTopicPair;
+      streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
+      videoReceiver = new SRTVideoReceiver(outputAVPixelFormat);
+      subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
 
-      statusMessageSubscription = ros2.subscribe(streamMessageTopicPair.getStatusTopic(),
-                                                 statusMessage -> STATUS_MESSAGE_UUID.equals(MessageTools.toUUID(statusMessage.getId())));
-      ackMessageSubscription = ros2.subscribe(streamMessageTopicPair.getStatusTopic(),
-                                              ackMessage -> subscriberId.equals(MessageTools.toUUID(ackMessage.getId())));
-      ackMessageSubscription.addCallback(this::receiveACKMessage);
-
-      requestMessage = new SRTStreamMessage();
-      requestMessage.setReceiverAddress(inputAddress.getHostString());
-      requestMessage.setReceiverPort(inputAddress.getPort());
-      MessageTools.toMessage(subscriberId, requestMessage.getId());
-
-      videoReceiver = new SRTVideoReceiver(inputAddress, outputAVPixelFormat);
-      cameraIntrinsics = new CameraIntrinsics();
-
-      subscriptionThread = ThreadTools.startAThread(this::subscription, "ROS2SRTVideoSubscription");
-
-      // This was added to solve a shutdown bug where FFMPEG would hang after receiving SIGINT, causing the destroy method to never be called.
-      // Allowing the JVM to call the destroy method on SIGINT fixes the issue.
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getSimpleName() + "Destruction"));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
    }
 
    public void addNewFrameConsumer(Consumer<Mat> newFrameConsumer)
@@ -104,7 +65,7 @@ public class ROS2SRTVideoSubscriber
 
    public void destroy()
    {
-      shutDown = true;
+      shutdown = true;
       unsubscribe();
       try
       {
@@ -121,128 +82,75 @@ public class ROS2SRTVideoSubscriber
       return videoReceiver.isConnected();
    }
 
-   public boolean hasCameraIntrinsics()
+   public ReferenceFrame getSensorFrame()
    {
-      return statusMessageSubscription.hasReceivedFirstMessage();
+      return streamStatusMonitor.getSensorFrame();
    }
 
    public RigidBodyTransformReadOnly getSensorTransformToWorld()
    {
-      return sensorTransformToWorld;
+      return streamStatusMonitor.getSensorTransformToWorld();
    }
 
    public CameraIntrinsics getCameraIntrinsics()
    {
-      return cameraIntrinsics;
+      return streamStatusMonitor.getCameraIntrinsics();
    }
 
    public float getDepthDiscretization()
    {
-      return depthDiscretization;
+      return streamStatusMonitor.getDepthDiscretization();
    }
 
-   private void subscription()
+   private void subscriptionUpdate()
    {
-      // Maintain subscription while not shutting down
-      while (!shutDown)
+      while (!shutdown)
       {
          try
          {
-            // If we don't want to be subscribed, but we're connected, then unsubscribe
-            if (!subscriptionDesired.get() && videoReceiver.isConnected())
-               disconnectFromStreamer();
-
             // If we don't want to be subscribed, wait until subscription is desired
-            while (!subscriptionDesired.get() && !shutDown)
+            if (!subscriptionDesired.get())
             {
+               if (videoReceiver.isConnected())
+                  videoReceiver.disconnect();
+
                synchronized (subscriptionDesired)
                {
                   subscriptionDesired.wait();
                }
+               continue;
             }
 
-            // If we want to be subscribed, but we're not connected, then try to connect
-            if (subscriptionDesired.get() && !videoReceiver.isConnected() && !connectToStreamer())
-               MissingThreadTools.sleep(UPDATE_TIMEOUT); // I believe this is interruptible, unlike ThreadTools.sleep()
+            // SUBSCRIPTION IS DESIRED
+            // If there's no stream, wait for the stream
+            if (!streamStatusMonitor.isStreaming())
+            {
+               streamStatusMonitor.waitForStream(UPDATE_TIMEOUT);
+               continue;
+            }
 
-            // If connected, get the next frame and give it to consumers
-            if (subscriptionDesired.get() && videoReceiver.isConnected())
-               update();
+            // VIDEO IS BEING STREAMED
+            // If we're not connected, try to connect
+            if (!videoReceiver.isConnected())
+            {
+               videoReceiver.connect(streamStatusMonitor.getStreamerAddress(), CONNECTION_TIMEOUT);
+               continue;
+            }
+
+            // RECEIVER IS CONNECTED
+            // Get the latest image and give it to consumers
+            nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
+            if (nextFrame != null)
+            {
+               newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
+               nextFrame.close();
+            }
          }
          catch (InterruptedException ignored) {}
       }
 
-      if (videoReceiver.isConnected())
-         disconnectFromStreamer();
-
-      statusMessageSubscription.destroy();
-      ackMessageSubscription.destroy();
       videoReceiver.destroy();
       if (nextFrame != null)
          nextFrame.close();
-   }
-
-   private synchronized void disconnectFromStreamer()
-   {
-      requestMessage.setConnectionWanted(false);
-      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
-      videoReceiver.disconnect();
-   }
-
-   private boolean connectToStreamer() throws InterruptedException
-   {
-      // Send a request message
-      requestMessage.setConnectionWanted(true);
-      ros2.publish(streamMessageTopicPair.getCommandTopic(), requestMessage);
-
-      // Wait for ACK or timeout
-      synchronized (ackMessageReceivedNotification)
-      {
-         ackMessageReceivedNotification.wait((long) Conversions.secondsToMilliseconds(CONNECTION_TIMEOUT));
-      }
-
-      return videoReceiver.isConnected();
-   }
-
-   private void receiveACKMessage(SRTStreamMessage ackMessage)
-   {
-      if (!subscriptionDesired.get() || videoReceiver.isConnected())
-         return;
-
-      videoReceiver.waitForConnection(CONNECTION_TIMEOUT);
-
-      // get camera intrinsics from ACK message
-      cameraIntrinsics.setWidth(ackMessage.getImageWidth());
-      cameraIntrinsics.setHeight(ackMessage.getImageHeight());
-      cameraIntrinsics.setFx(ackMessage.getFx());
-      cameraIntrinsics.setFy(ackMessage.getFy());
-      cameraIntrinsics.setCx(ackMessage.getCx());
-      cameraIntrinsics.setCy(ackMessage.getCy());
-      depthDiscretization = ackMessage.getDepthDiscretization();
-
-      synchronized (ackMessageReceivedNotification)
-      {
-         ackMessageReceivedNotification.notify();
-      }
-   }
-
-   private synchronized void update()
-   {
-      // Get the next frame
-      nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
-
-      // Get updated sensor data
-      if (statusMessageSubscription.hasReceivedFirstMessage())
-      {
-         SRTStreamMessage statusMessage = statusMessageSubscription.getLatest();
-         sensorTransformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition());
-      }
-
-      // Give frame to consumers
-      if (nextFrame != null)
-      {
-         newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
-         nextFrame.close();
-      }
    }
 }

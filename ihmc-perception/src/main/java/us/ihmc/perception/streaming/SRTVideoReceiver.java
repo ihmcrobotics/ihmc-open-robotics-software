@@ -20,8 +20,6 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTVideoReceiver
 {
-   private final String srtInputAddress;
-
    private FFMPEGVideoDecoder decoder;
    private final int outputPixelFormat;
 
@@ -34,11 +32,9 @@ public class SRTVideoReceiver
 
    int error;
 
-   public SRTVideoReceiver(InetSocketAddress inputAddress, int outputAVPixelFormat)
+   public SRTVideoReceiver(int outputAVPixelFormat)
    {
       outputPixelFormat = outputAVPixelFormat;
-
-      srtInputAddress = StreamingTools.toSRTAddress(inputAddress);
 
       timeoutCallback = new FFMPEGTimeoutCallback();
 
@@ -49,7 +45,12 @@ public class SRTVideoReceiver
       inputFormatContext.interrupt_callback(timeoutCallback);
    }
 
-   public boolean connect(double timeout)
+   public boolean connect(InetSocketAddress streamerAddress, double timeout)
+   {
+      return connect(StreamingTools.toSRTAddress(streamerAddress), timeout);
+   }
+
+   public boolean connect(String streamerSRTAddress, double timeout)
    {
       long timeoutMicroseconds = Conversions.nanosecondsToMicroseconds(Conversions.secondsToNanoseconds(timeout));
 
@@ -60,9 +61,7 @@ public class SRTVideoReceiver
       FFMPEGTools.setAVDictionary(srtOptions, srtOptionMap);
 
       // Connect to streamer
-      timeoutCallback.start(timeout);
-      error = avformat_open_input(inputFormatContext, srtInputAddress, null, srtOptions);
-      timeoutCallback.stop();
+      error = avformat_open_input(inputFormatContext, streamerSRTAddress, null, srtOptions);
       if (error < 0)
          return false;
 
@@ -72,7 +71,7 @@ public class SRTVideoReceiver
       timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
       timeoutCallback.stop();
-      if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + srtInputAddress, false))
+      if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + streamerSRTAddress, false))
          return false;
 
       // Create and initialize the decoder for the stream
@@ -82,34 +81,6 @@ public class SRTVideoReceiver
       connected = true;
 
       return true;
-   }
-
-   public boolean waitForConnection(double timeoutSeconds)
-   {
-      long startTime = System.nanoTime();
-      do
-      {
-         // Try to connect
-         // This is not guaranteed to wait for the timeout duration, so we try again if it fails
-         connect(timeoutSeconds);
-
-         // Check if connection failed
-         if (!connected)
-         {
-            // Calculate time spent
-            long currentTime = System.nanoTime();
-            double timeTaken = Conversions.nanosecondsToSeconds(currentTime - startTime);
-
-            // Waited too long. Stop trying
-            if (timeTaken > timeoutSeconds && timeoutSeconds >= 0)
-               break;
-
-            // Wait a little and retry
-            ThreadTools.sleep(ThreadTools.REASONABLE_WAITING_SLEEP_DURATION_MS);
-         }
-      } while (!connected);
-
-      return connected;
    }
 
    public void disconnect()

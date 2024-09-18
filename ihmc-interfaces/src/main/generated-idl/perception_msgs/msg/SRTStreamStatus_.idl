@@ -1,0 +1,43 @@
+#ifndef __perception_msgs__msg__SRTStreamStatus__idl__
+#define __perception_msgs__msg__SRTStreamStatus__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SRTStreamStatus_")
+      struct SRTStreamStatus
+      {
+        /**
+         * Connection information
+         */
+        string streamer_address;
+        unsigned short streamer_port;
+        boolean is_streaming;
+        float expected_publish_frequency;
+        /**
+         * Camera intrinsics
+         */
+        unsigned short image_width;
+        unsigned short image_height;
+        float fx;
+        float fy;
+        float cx;
+        float cy;
+        float depth_discretization;
+        /**
+         * Sensor pose
+         */
+        geometry_msgs::msg::dds::Point position;
+        geometry_msgs::msg::dds::Quaternion orientation;
+      };
+    };
+  };
+};
+
+#endif

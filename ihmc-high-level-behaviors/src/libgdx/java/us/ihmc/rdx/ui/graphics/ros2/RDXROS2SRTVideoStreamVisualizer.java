@@ -2,29 +2,27 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.SRTStreamMessage;
-import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
-import us.ihmc.perception.streaming.StreamingTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
 
-public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualizer<SRTStreamMessage>
+public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualizer<SRTStreamStatus>
 {
-   private final ROS2IOTopicPair<SRTStreamMessage> streamTopic;
+   private final ROS2Topic<SRTStreamStatus> streamTopic;
    private final ROS2SRTVideoSubscriber subscriber;
 
-   public RDXROS2SRTVideoStreamVisualizer(ROS2PublishSubscribeAPI ros2, String title, ROS2IOTopicPair<SRTStreamMessage> streamTopic)
+   public RDXROS2SRTVideoStreamVisualizer(ROS2PublishSubscribeAPI ros2, String title, ROS2Topic<SRTStreamStatus> streamTopic)
    {
       super(title, title, false);
 
       this.streamTopic = streamTopic;
 
-      subscriber = new ROS2SRTVideoSubscriber(ros2, streamTopic, StreamingTools.getMyAddress(), avutil.AV_PIX_FMT_RGBA);
+      subscriber = new ROS2SRTVideoSubscriber(ros2, streamTopic, avutil.AV_PIX_FMT_RGBA);
       subscriber.addNewFrameConsumer(this::updateImage);
 
       setActivenessChangeCallback(isActive ->
@@ -66,9 +64,9 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    }
 
    @Override
-   public ROS2Topic<SRTStreamMessage> getTopic()
+   public ROS2Topic<SRTStreamStatus> getTopic()
    {
-      return streamTopic.getStatusTopic();
+      return streamTopic;
    }
 
    @Override

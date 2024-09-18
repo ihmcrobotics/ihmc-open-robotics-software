@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "SRTStreamMessage" defined in "SRTStreamMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "SRTStreamStatus" defined in "SRTStreamStatus_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from SRTStreamMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit SRTStreamMessage_.idl instead.
+* This file was automatically generated from SRTStreamStatus_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SRTStreamStatus_.idl instead.
 *
 */
-public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.SRTStreamMessage>
+public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.SRTStreamStatus>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::SRTStreamMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::SRTStreamStatus_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e50ff0485dee68b9d9b97b5acac4f1239b255b3f802f67811d2d47cc939153fa";
+   		return "f1c4661f39967ba831746964347dde0a6385011960bd8584a8ce88ca834e4afd";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.SRTStreamMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.SRTStreamStatus data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,12 +52,12 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
@@ -81,23 +81,24 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.SRTStreamMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.SRTStreamStatus data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.SRTStreamMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.SRTStreamStatus data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getId(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReceiverAddress().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStreamerAddress().length() + 1;
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -129,16 +130,17 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.CDR cdr)
    {
-      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getId(), cdr);
-      if(data.getReceiverAddress().length() <= 255)
-      cdr.write_type_d(data.getReceiverAddress());else
-          throw new RuntimeException("receiver_address field exceeds the maximum length");
+      if(data.getStreamerAddress().length() <= 255)
+      cdr.write_type_d(data.getStreamerAddress());else
+          throw new RuntimeException("streamer_address field exceeds the maximum length");
 
-      cdr.write_type_3(data.getReceiverPort());
+      cdr.write_type_3(data.getStreamerPort());
 
-      cdr.write_type_7(data.getConnectionWanted());
+      cdr.write_type_7(data.getIsStreaming());
+
+      cdr.write_type_5(data.getExpectedPublishFrequency());
 
       cdr.write_type_3(data.getImageWidth());
 
@@ -158,13 +160,14 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
    }
 
-   public static void read(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.CDR cdr)
    {
-      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getId(), cdr);	
-      cdr.read_type_d(data.getReceiverAddress());	
-      data.setReceiverPort(cdr.read_type_3());
+      cdr.read_type_d(data.getStreamerAddress());	
+      data.setStreamerPort(cdr.read_type_3());
       	
-      data.setConnectionWanted(cdr.read_type_7());
+      data.setIsStreaming(cdr.read_type_7());
+      	
+      data.setExpectedPublishFrequency(cdr.read_type_5());
       	
       data.setImageWidth(cdr.read_type_3());
       	
@@ -186,13 +189,12 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getId());
-
-      ser.write_type_d("receiver_address", data.getReceiverAddress());
-      ser.write_type_3("receiver_port", data.getReceiverPort());
-      ser.write_type_7("connection_wanted", data.getConnectionWanted());
+      ser.write_type_d("streamer_address", data.getStreamerAddress());
+      ser.write_type_3("streamer_port", data.getStreamerPort());
+      ser.write_type_7("is_streaming", data.getIsStreaming());
+      ser.write_type_5("expected_publish_frequency", data.getExpectedPublishFrequency());
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_5("fx", data.getFx());
@@ -207,13 +209,12 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SRTStreamMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SRTStreamStatus data)
    {
-      ser.read_type_a("id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getId());
-
-      ser.read_type_d("receiver_address", data.getReceiverAddress());
-      data.setReceiverPort(ser.read_type_3("receiver_port"));
-      data.setConnectionWanted(ser.read_type_7("connection_wanted"));
+      ser.read_type_d("streamer_address", data.getStreamerAddress());
+      data.setStreamerPort(ser.read_type_3("streamer_port"));
+      data.setIsStreaming(ser.read_type_7("is_streaming"));
+      data.setExpectedPublishFrequency(ser.read_type_5("expected_publish_frequency"));
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
       data.setFx(ser.read_type_5("fx"));
@@ -227,15 +228,15 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.SRTStreamMessage src, perception_msgs.msg.dds.SRTStreamMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.SRTStreamStatus src, perception_msgs.msg.dds.SRTStreamStatus dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.SRTStreamMessage createData()
+   public perception_msgs.msg.dds.SRTStreamStatus createData()
    {
-      return new perception_msgs.msg.dds.SRTStreamMessage();
+      return new perception_msgs.msg.dds.SRTStreamStatus();
    }
    @Override
    public int getTypeSize()
@@ -249,24 +250,24 @@ public class SRTStreamMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.SRTStreamMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.SRTStreamMessage src, perception_msgs.msg.dds.SRTStreamMessage dest)
+   public void copy(perception_msgs.msg.dds.SRTStreamStatus src, perception_msgs.msg.dds.SRTStreamStatus dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public SRTStreamMessagePubSubType newInstance()
+   public SRTStreamStatusPubSubType newInstance()
    {
-      return new SRTStreamMessagePubSubType();
+      return new SRTStreamStatusPubSubType();
    }
 }

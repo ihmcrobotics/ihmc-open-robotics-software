@@ -6,11 +6,9 @@ import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
-import us.ihmc.perception.ffmpeg.FFMPEGTimeoutCallback;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
-
-import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
@@ -21,86 +19,61 @@ public class SRTStreamWriter
 {
    private final FFMPEGVideoEncoder encoder;
 
-   private final String srtAddress;
+   private final AVIOContext srtContext;
+
    private final AVOutputFormat outputFormat;
-
-   private final AVIOContext ioContext;
-   private final AVDictionary ioOptions;
-
    private final AVFormatContext formatContext;
    private final AVDictionary formatOptions;
    private final AVPacket packetCopy;
    private AVStream outputStream;
 
-   private final FFMPEGTimeoutCallback timeoutCallback;
-
    private boolean connected = false;
 
    private int error;
 
-   public SRTStreamWriter(FFMPEGVideoEncoder encoder,
-                          InetSocketAddress outputAddress,
-                          AVOutputFormat outputFormat,
-                          AVDictionary ioOptions,
-                          AVDictionary formatOptions)
+   public SRTStreamWriter(FFMPEGVideoEncoder encoder, AVIOContext srtContext, AVOutputFormat outputFormat, AVDictionary formatOptions)
    {
       this.encoder = encoder;
+      this.srtContext = srtContext;
       this.outputFormat = outputFormat;
-      srtAddress = StreamingTools.toSRTAddress(outputAddress);
-
-      // Copy the IO options
-      this.ioOptions = new AVDictionary();
-      error = av_dict_copy(this.ioOptions, ioOptions, 0);
-      FFMPEGTools.checkNegativeError(error, "Copying IO options");
 
       // Copy the format options
       this.formatOptions = new AVDictionary();
       error = av_dict_copy(this.formatOptions, formatOptions, 0);
       FFMPEGTools.checkNegativeError(error, "Copying format options");
 
+      formatContext = new AVFormatContext();
+
       packetCopy = av_packet_alloc();
       FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
-
-      timeoutCallback = new FFMPEGTimeoutCallback();
-
-      ioContext = new AVIOContext();
-      formatContext = new AVFormatContext();
-      formatContext.interrupt_callback(timeoutCallback);
    }
 
-   public synchronized boolean connect(double timeout)
+   public boolean startOutput()
    {
-      // Open the IO
-      timeoutCallback.start(timeout);
-      error = avio_open2(ioContext, srtAddress, AVIO_FLAG_WRITE, timeoutCallback, this.ioOptions);
-      timeoutCallback.stop();
-      if (error < 0)
-         return false;
-
-      FFMPEGTools.checkDictionaryAfterUse(ioOptions);
-
       // Create the output format context
-      timeoutCallback.start(timeout);
+      LogTools.debug("Allocating output context");
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
-      timeoutCallback.stop();
-      if (!FFMPEGTools.checkError(error, formatContext, "Allocating output format context", false))
+      if (!FFMPEGTools.checkError(error, formatContext, "Allocating output format context"))
          return false;
-      formatContext.pb(ioContext);
+      formatContext.pb(srtContext);
 
-      // Get an output stream
+      // Get an output stream from the encoder
+      LogTools.debug("Got a new stream from encoder");
       outputStream = encoder.newStream(formatContext);
 
+      // Write a header to the caller
+      LogTools.debug("Writing header to caller");
       error = avformat_write_header(formatContext, formatOptions);
       if (!FFMPEGTools.checkNegativeError(error, "Sending header to caller", false))
          return false;
 
       FFMPEGTools.checkDictionaryAfterUse(formatOptions);
 
-      connected = true;
-      return true;
+      LogTools.debug("Successfully started connection with caller");
+      return connected = true;
    }
 
-   public synchronized boolean write(AVPacket packetToWrite)
+   public boolean write(AVPacket packetToWrite)
    {
       if (connected)
       {
@@ -110,7 +83,10 @@ public class SRTStreamWriter
          packetCopy.stream_index(outputStream.index());
          error = av_interleaved_write_frame(formatContext, packetCopy);
          if (error < 0)
+         {
             connected = false;
+            LogTools.debug("Connection failed with caller while writing packet");
+         }
 
          av_packet_unref(packetCopy);
       }
@@ -118,21 +94,25 @@ public class SRTStreamWriter
       return connected;
    }
 
-   public boolean isConnected()
+   public void endOutput()
    {
-      return connected;
+      if (!connected)
+         return;
+
+      LogTools.debug("Writing trailer to caller");
+      error = av_write_trailer(formatContext);
+      FFMPEGTools.checkNegativeError(error, "Writing trailer");
+      LogTools.debug("Successfully ended connection with caller");
+
+      connected = false;
    }
 
-   public synchronized void destroy()
+   public void destroy()
    {
-      if (connected)
-         disconnect();
+      endOutput();
 
-      avio_closep(ioContext);
-      ioContext.close();
-
-      av_dict_free(ioOptions);
-      ioOptions.close();
+      avio_closep(srtContext);
+      srtContext.close();
 
       av_packet_free(packetCopy);
       packetCopy.close();
@@ -143,20 +123,12 @@ public class SRTStreamWriter
       av_dict_free(formatOptions);
       formatOptions.close();
 
-      timeoutCallback.close();
-
       if (outputStream != null)
          outputStream.close();
    }
 
-   private synchronized void disconnect()
+   public boolean isConnected()
    {
-      if (!connected)
-         return;
-
-      error = av_write_trailer(formatContext);
-      FFMPEGTools.checkNegativeError(error, "Writing trailer");
-
-      connected = false;
+      return connected;
    }
 }

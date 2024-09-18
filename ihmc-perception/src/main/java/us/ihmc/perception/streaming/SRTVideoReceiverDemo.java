@@ -11,7 +11,7 @@ import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
 public class SRTVideoReceiverDemo
 {
-   private static final InetSocketAddress CALLER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+   private static final InetSocketAddress STREAMER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
    private final SRTVideoReceiver videoSubscriber;
    private boolean shutdown = false;
@@ -19,21 +19,21 @@ public class SRTVideoReceiverDemo
 
    private SRTVideoReceiverDemo()
    {
-      videoSubscriber = new SRTVideoReceiver(CALLER_ADDRESS, AV_PIX_FMT_BGR24);
+      videoSubscriber = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTSubscriberDemoDestruction"));
       run();
    }
 
    private void run()
    {
-      if (!videoSubscriber.waitForConnection(10.0))
+      if (!videoSubscriber.connect(STREAMER_ADDRESS, 10.0))
       {
-         LogTools.info("Could not establish a connection with {}", CALLER_ADDRESS.getHostString());
+         LogTools.info("Could not establish a connection with {}", STREAMER_ADDRESS.getHostString());
          shutdownReady.set();
          return;
       }
 
-      LogTools.info("Connected to {}", CALLER_ADDRESS.getHostString());
+      LogTools.info("Connected to {}", STREAMER_ADDRESS.getHostString());
 
       while (!shutdown && videoSubscriber.isConnected())
       {
@@ -46,7 +46,7 @@ public class SRTVideoReceiverDemo
          frame.close();
       }
 
-      LogTools.info("Disconnecting from {}", CALLER_ADDRESS.getHostString());
+      LogTools.info("Disconnecting from {}", STREAMER_ADDRESS.getHostString());
       videoSubscriber.disconnect();
       shutdownReady.set();
    }

@@ -6,13 +6,12 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.SRTStreamMessage;
+import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,6 +21,7 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.Throttler;
 
@@ -69,30 +69,25 @@ public class SRTStreamerSubscriberTest
    @Test
    public void testSRTStreamerTimeouts()
    {
-      InetSocketAddress fakeAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
-
       SRTVideoStreamer streamer = new SRTVideoStreamer();
       streamer.initialize(sampleImage.cols(), sampleImage.rows(), FPS, AV_PIX_FMT_BGR24);
 
-      testTimeout(() -> streamer.connectToCaller(fakeAddress, CALL_TIMEOUT), EXTRA_LONG_TIMEOUT);  // Try connecting to nowhere
       testTimeout(() -> streamer.sendFrame(sampleImage), TEST_TIMEOUT);                            // Try sending data to nowhere
-      testTimeout(() -> streamer.removeCaller(fakeAddress), TEST_TIMEOUT);                         // Try removing nothing
       testTimeout(streamer::destroy, TEST_TIMEOUT);                                                // Try destroying
 
       // If it got here, the test passed!
    }
 
    @Test
-   public void testSRTSubscriberTimeouts()
+   public void testSRTReceiverTimeouts()
    {
       double TIMEOUT = 5.0;
-      InetSocketAddress subscriberAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+      InetSocketAddress streamerAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
-      SRTVideoReceiver subscriber = new SRTVideoReceiver(subscriberAddress, AV_PIX_FMT_BGR24);
-      testTimeout(() -> subscriber.connect(CALL_TIMEOUT), TIMEOUT);
-      testTimeout(() -> subscriber.waitForConnection(CALL_TIMEOUT), TIMEOUT); // Try waiting for a connection to nowhere
-      testTimeout(() -> subscriber.getNextFrame(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
-      testTimeout(subscriber::destroy, TIMEOUT);                              // Try to destroy
+      SRTVideoReceiver receiver = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
+      testTimeout(() -> receiver.connect(streamerAddress, CALL_TIMEOUT), TIMEOUT);
+      testTimeout(() -> receiver.getNextFrame(CALL_TIMEOUT), TIMEOUT);      // Try to get an image from nowhere
+      testTimeout(receiver::destroy, TIMEOUT);                              // Try to destroy
    }
 
    private static final ExecutorService TIMEOUT_TEST_EXECUTOR = Executors.newSingleThreadExecutor();
@@ -132,16 +127,13 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // Initialize the streamer
-      SRTVideoStreamer streamer = new SRTVideoStreamer();
+      SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
       streamer.initialize(sampleImage.cols(), sampleImage.rows(), FPS, AV_PIX_FMT_BGR24);
       assertEquals(0, streamer.connectedCallerCount());
 
-      // In a separate thread, wait for the subscriber to connect
+      // In a separate thread, wait for the receiver to connect
       Thread streamerConnectThread = ThreadTools.startAThread(() ->
       {
-         // Wait for caller to connect
-         streamer.connectToCaller(localAddress, TEST_TIMEOUT);
-
          // Send 2 seconds of video
          for (int i = 0; i < 2 * FPS; ++i)
          {
@@ -150,28 +142,28 @@ public class SRTStreamerSubscriberTest
          }
       }, "SRTStreamerTestConnection");
 
-      // Initialize a subscriber and connect to streamer
-      SRTVideoReceiver subscriber = new SRTVideoReceiver(localAddress, AV_PIX_FMT_BGR24);
-      assertFalse(subscriber.isConnected());
-      subscriber.connect(EXTRA_LONG_TIMEOUT);
+      // Initialize a receiver and connect to streamer
+      SRTVideoReceiver receiver = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
+      assertFalse(receiver.isConnected());
+      receiver.connect(localAddress, EXTRA_LONG_TIMEOUT);
 
       // Should be communicating now
       assertEquals(1, streamer.connectedCallerCount());
-      assertTrue(subscriber.isConnected());
+      assertTrue(receiver.isConnected());
 
       // Ensure we can receive an image
-      Mat receivedImage = subscriber.getNextFrame(0.5);
+      Mat receivedImage = receiver.getNextFrame(0.5);
       assertNotNull(receivedImage);
       receivedImage.close();
 
       streamerConnectThread.join();
 
       streamer.destroy();
-      subscriber.destroy();
+      receiver.destroy();
 
       // No communication
       assertEquals(0, streamer.connectedCallerCount());
-      assertFalse(subscriber.isConnected());
+      assertFalse(receiver.isConnected());
    }
 
    @Test
@@ -182,7 +174,7 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2IOTopicPair<SRTStreamMessage> requestTopic = new ROS2IOTopicPair<>(PerceptionAPI.STREAM_CONTROL.withSuffix("ros2_srt_test"));
+      ROS2Topic<SRTStreamStatus> requestTopic = PerceptionAPI.STREAM_STATUS.withSuffix("ros2_srt_test");
 
       float depthDescretization = -1.0f;
       float fx = 500.0f;
@@ -206,11 +198,11 @@ public class SRTStreamerSubscriberTest
                                        testOrientation);
 
       // Create and initialize the streamer
-      ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(requestTopic);
+      ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(ROS2_NODE, requestTopic, localAddress);
       streamer.initialize(rawImage, FPS, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
-      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, localAddress, AV_PIX_FMT_BGR24);
+      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, AV_PIX_FMT_BGR24);
       AtomicBoolean subscriberHasReceivedFrame = new AtomicBoolean(false);
       subscriber.addNewFrameConsumer(receivedImage ->
       {

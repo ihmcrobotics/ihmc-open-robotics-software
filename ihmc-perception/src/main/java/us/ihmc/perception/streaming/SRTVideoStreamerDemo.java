@@ -14,12 +14,10 @@ import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
  * Demo for the SRTVideoStreamer. Grabs images from a webcam
  * and give them to the streamer to be streamed over SRT.
  * To view the stream, use the following command:
- * {@code ffplay srt:127.0.0.1:60001 -fflags nobuffer}
+ * {@code ffplay srt://streamer-address:streamer-port -fflags nobuffer}
  */
 public class SRTVideoStreamerDemo
 {
-   private static final InetSocketAddress CALLER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
-
    private final VideoCapture videoCapture;
    private final Mat frame;
    private final SRTVideoStreamer videoStreamer;
@@ -40,7 +38,9 @@ public class SRTVideoStreamerDemo
       double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       // Create and initialize the video streamer
-      videoStreamer = new SRTVideoStreamer();
+      InetSocketAddress streamerAddress = StreamingTools.getMyAddress();
+      LogTools.info("Starting streamer on {}", streamerAddress);
+      videoStreamer = new SRTVideoStreamer(streamerAddress);
       videoStreamer.initialize(imageWidth, imageHeight, reportedFPS, AV_PIX_FMT_BGR24);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTStreamerDemoDestruction"));
@@ -50,11 +50,7 @@ public class SRTVideoStreamerDemo
 
    private void run()
    {
-      LogTools.info("Connecting to caller...");
-      videoStreamer.connectToCaller(CALLER_ADDRESS, -1.0);
-
-      LogTools.info("Got a connection! Streaming!");
-      while (!shutdown && videoStreamer.connectedCallerCount() > 0)
+      while (!shutdown)
       {
          videoCapture.read(frame);
          videoStreamer.sendFrame(frame);

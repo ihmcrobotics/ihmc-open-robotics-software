@@ -1,21 +1,15 @@
 package us.ihmc.perception.ffmpeg;
 
 import org.apache.logging.log4j.core.util.ExecutorServices;
-import org.bytedeco.ffmpeg.avformat.AVIOInterruptCB;
-import org.bytedeco.javacpp.Pointer;
 import us.ihmc.commons.Conversions;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class FFMPEGTimeoutCallback extends AVIOInterruptCB
+public class FFMPEGTimeoutCallback extends FFMPEGInterruptCallback
 {
-   private final Callback_Pointer callbackPointer;
-   private final AtomicInteger interruptFlag = new AtomicInteger(0);
-
    private long timeout;
    private TimeUnit timeUnit;
    private final ExecutorService timeoutExecutor;
@@ -23,17 +17,6 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
 
    public FFMPEGTimeoutCallback()
    {
-      // Set up callback pointer
-      callbackPointer = new Callback_Pointer()
-      {
-         @Override
-         public int call(Pointer pointer)
-         {
-            return interruptFlag.getAndSet(0);
-         }
-      };
-      callback(callbackPointer);
-
       timeoutExecutor = Executors.newSingleThreadExecutor();
    }
 
@@ -42,7 +25,7 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
       try
       {
          timeUnit.sleep(timeout);
-         interruptFlag.set(1);
+         interrupt();
       }
       catch (InterruptedException ignored) {}
    }
@@ -88,18 +71,18 @@ public class FFMPEGTimeoutCallback extends AVIOInterruptCB
     */
    public void stop(boolean interrupt)
    {
-      interruptFlag.set(interrupt ? 1 : 0);
-      if (futureTimeout != null && !futureTimeout.isDone())
+      if (interrupt)
+         interrupt();
+      if (futureTimeout != null)
          futureTimeout.cancel(true);
    }
 
    @Override
-   public void close()
+   public boolean releaseReference()
    {
       stop(true);
-      ExecutorServices.shutdown(timeoutExecutor, 2, TimeUnit.SECONDS, getClass().getSimpleName());
+      ExecutorServices.shutdown(timeoutExecutor, 1, TimeUnit.SECONDS, getClass().getSimpleName());
 
-      super.close();
-      callbackPointer.close();
+      return super.releaseReference();
    }
 }

@@ -1,19 +1,24 @@
 package us.ihmc.perception.streaming;
 
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
+import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.ffmpeg.FFMPEGInterruptCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Map.entry;
-import static org.bytedeco.ffmpeg.global.avformat.av_guess_format;
+import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
 import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
@@ -36,37 +41,53 @@ public class SRTVideoStreamer
                          entry("cq", "0"),            // Quality level (0 = auto, 1 = nearly lossless, 51 = low quality)
                          entry("multipass", "0"));    // Disable multipass
 
-   private final AVDictionary ioOptions;
-   private final AVOutputFormat outputFormat;
-
-   private final Map<InetSocketAddress, SRTStreamWriter> callers = new ConcurrentHashMap<>();
-
    private final AVDictionary encoderOptions;
    private FFMPEGVideoEncoder encoder;
 
+   private final AVOutputFormat outputFormat;
+   private final FFMPEGInterruptCallback interruptCallback;
+
+   private final Thread callerConnector;
+   private final Map<String, String> liveSRTOptions;
+   private final String srtAddress;
+   private final Set<SRTStreamWriter> callers = ConcurrentHashMap.newKeySet();
+
+   private volatile boolean running = true;
    private boolean initialized = false;
 
    /**
-    * (1) Construct the streamer
+    * Constructs a streamer, automatically detecting an address and available port
     */
    public SRTVideoStreamer()
    {
-      Map<String, String> srtIOOptions = StreamingTools.getLiveSRTOptions();
-      srtIOOptions.put("mode", "listener");
+      this(StreamingTools.getMyAddress());
+   }
 
-      ioOptions = new AVDictionary();
-      FFMPEGTools.setAVDictionary(ioOptions, srtIOOptions);
+   /**
+    * Constructs a streamer, specifying the IP address and socket to output the stream on.
+    * @param outputAddress IPv4 address and socket to output the stream on.
+    */
+   public SRTVideoStreamer(InetSocketAddress outputAddress)
+   {
+      srtAddress = StreamingTools.toSRTAddress(outputAddress);
+
+      interruptCallback = new FFMPEGInterruptCallback();
+
+      liveSRTOptions = StreamingTools.getLiveSRTOptions();
+      liveSRTOptions.put("mode", "listener");
 
       encoderOptions = new AVDictionary();
       FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
 
       outputFormat = av_guess_format(OUTPUT_FORMAT_NAME, null, null);
+
+      callerConnector = ThreadTools.startAsDaemon(this::connectToCallers, getClass().getSimpleName() + "CallerConnector");
    }
 
    /**
-    * (2) Initialize the streamer
-    * @param imageWidth Witdh of images being streamed
-    * @param imageHeight Height of images being stream
+    * Initialize the streamer to encode images
+    * @param imageWidth Width of images being streamed
+    * @param imageHeight Height of images being streamed
     * @param inputFPS FPS at which images will be provided
     * @param inputAVPixelFormat Pixel format of images being provided (Must be one of AV_PIX_FMT_*)
     */
@@ -89,9 +110,9 @@ public class SRTVideoStreamer
       initialized = true;
    }
 
-   public void sendFrame(Mat image)
+   public void sendFrame(Mat frame)
    {
-      encoder.setNextFrame(image); // TODO: Use GpuMat instead
+      encoder.setNextFrame(frame); // TODO: Use GpuMat instead
       encoder.encodeNextFrame(this::writeToCallers);
    }
 
@@ -99,7 +120,7 @@ public class SRTVideoStreamer
    {
       boolean writeSucceeded;
 
-      Iterator<SRTStreamWriter> callerIterator = callers.values().iterator();
+      Iterator<SRTStreamWriter> callerIterator = callers.iterator();
       while (callerIterator.hasNext())
       {
          SRTStreamWriter callerWriter = callerIterator.next();
@@ -120,32 +141,6 @@ public class SRTVideoStreamer
       }
    }
 
-   /**
-    * (3*) Connect to a caller
-    * @param callerAddress Address of the caller
-    * @return {@code true} if caller is connected, {@code false} if connection failed.
-    */
-   public boolean connectToCaller(InetSocketAddress callerAddress, double timeout)
-   {
-      if (callers.containsKey(callerAddress))
-         return true;
-
-      SRTStreamWriter callerOutput = new SRTStreamWriter(encoder, callerAddress, outputFormat, ioOptions, null);
-      if (callerOutput.connect(timeout))
-      {
-         callers.put(callerAddress, callerOutput);
-         return true;
-      }
-
-      return false;
-   }
-
-   public void removeCaller(InetSocketAddress callerAddress)
-   {
-      if (callers.containsKey(callerAddress))
-         callers.remove(callerAddress).destroy();
-   }
-
    public int connectedCallerCount()
    {
       return callers.size();
@@ -158,8 +153,25 @@ public class SRTVideoStreamer
 
    public void destroy()
    {
-      av_dict_free(ioOptions);
-      ioOptions.close();
+      LogTools.debug("Shutting down {}", getClass().getSimpleName());
+      running = false;
+
+      interruptCallback.interrupt();
+      try
+      {
+         callerConnector.join();
+      }
+      catch (InterruptedException e)
+      {
+         interruptCallback.interrupt();
+      }
+
+      Iterator<SRTStreamWriter> callerIterator = callers.iterator();
+      while (callerIterator.hasNext())
+      {
+         callerIterator.next().destroy();
+         callerIterator.remove();
+      }
 
       av_dict_free(encoderOptions);
       encoderOptions.close();
@@ -167,11 +179,42 @@ public class SRTVideoStreamer
       if (encoder != null)
          encoder.destroy();
 
-      Iterator<SRTStreamWriter> callerIterator = callers.values().iterator();
-      while (callerIterator.hasNext())
+      interruptCallback.close();
+   }
+
+   private void connectToCallers()
+   {
+      LogTools.debug("Starting {} thread on {}", callerConnector.getName(), srtAddress);
+
+      while (running)
       {
-         callerIterator.next().destroy();
-         callerIterator.remove();
+         // Set the SRT options
+         AVDictionary srtOptions = new AVDictionary();
+         FFMPEGTools.setAVDictionary(srtOptions, liveSRTOptions);
+
+         // Wait for caller connection
+         LogTools.debug("Waiting for connection on {}", srtAddress);
+         AVIOContext callerSRTContext = new AVIOContext();
+         int error = avio_open2(callerSRTContext, srtAddress, AVIO_FLAG_WRITE, interruptCallback, srtOptions);
+
+         // Check whether connection succeeded
+         if (error >= 0)
+         {
+            // Ensure options are set correctly
+            FFMPEGTools.checkDictionaryAfterUse(srtOptions);
+
+            LogTools.debug("Got a connection on {}", srtAddress);
+            SRTStreamWriter callerWriter = new SRTStreamWriter(encoder, callerSRTContext, outputFormat, null);
+            if (callerWriter.startOutput())
+               callers.add(callerWriter);
+            else
+               callerWriter.destroy();
+         }
+
+         av_dict_free(srtOptions);
+         srtOptions.close();
       }
+
+      LogTools.debug("{} thread listening on {} ended", callerConnector.getName(), srtAddress);
    }
 }
