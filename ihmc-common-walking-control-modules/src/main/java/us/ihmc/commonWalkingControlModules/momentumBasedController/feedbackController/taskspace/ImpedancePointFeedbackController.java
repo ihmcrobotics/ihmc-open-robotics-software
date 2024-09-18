@@ -109,7 +109,6 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
 
-
    private final RigidBodyTwistProvider rigidBodyTwistProvider;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;

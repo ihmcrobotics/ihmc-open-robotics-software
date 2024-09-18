@@ -33,11 +33,31 @@ public interface PDSE3Stiffnesses extends PDSE3StiffnessesReadOnly
    }
 
    /**
+    * Sets the position gains to the provided PD stiffness.
+    *
+    * @param positionStiffnesses the new gains for position control.
+    */
+   public default void setPositionStiffnesses(PID3DGainsReadOnly positionStiffnesses)
+   {
+      getPositionStiffnesses().set(positionStiffnesses);
+   }
+
+   /**
     * Sets the orientation gains to the provided PD stiffness.
     *
     * @param orientationStiffnesses the new gains for orientation control.
     */
    public default void setOrientationStiffnesses(PD3DStiffnessesReadOnly orientationStiffnesses)
+   {
+      getOrientationStiffnesses().set(orientationStiffnesses);
+   }
+
+   /**
+    * Sets the orientation gains to the provided PD stiffness.
+    *
+    * @param orientationStiffnesses the new gains for orientation control.
+    */
+   public default void setOrientationStiffnesses(PID3DGainsReadOnly orientationStiffnesses)
    {
       getOrientationStiffnesses().set(orientationStiffnesses);
    }
@@ -172,5 +192,17 @@ public interface PDSE3Stiffnesses extends PDSE3StiffnessesReadOnly
    {
       setOrientationStiffnesses(other.getOrientationStiffnesses());
       setPositionStiffnesses(other.getPositionStiffnesses());
+   }
+
+   /**
+    * Copies the gains and parameters from the provided {@link PDSE3Stiffnesses}
+    * parameters into this.
+    *
+    * @param other the new gains.
+    */
+   public default void set(PIDSE3GainsReadOnly other)
+   {
+      setOrientationStiffnesses(other.getOrientationGains());
+      setPositionStiffnesses(other.getPositionGains());
    }
 }
