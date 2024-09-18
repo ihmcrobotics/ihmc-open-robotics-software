@@ -525,7 +525,7 @@ public class MatrixMissingTools
    }
 
    /**
-    * Computes the square root of a positive definite matrix using single Value decomposition.
+    * Computes the square root of a positive definite matrix using Cholesky decomposition.
     * The result is stored in the provided resultToPack matrix.
     *
     * @param input the matrix to compute the square root of. Not modified.
@@ -539,26 +539,18 @@ public class MatrixMissingTools
       if (input.numRows != resultToPack.numRows)
          throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
-      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(input.numRows, input.numCols, true, true, false);
-      if (!svd.decompose(input)) {
-         throw new RuntimeException("SVD decomposition failed.");
+      CholeskyDecomposition_F64<DMatrixRMaj> cholesky = DecompositionFactory_DDRM.chol(input.numRows, true);
+      if (!cholesky.decompose(input)) {
+         throw new RuntimeException("Cholesky decomposition failed.");
       }
 
-      DMatrixRMaj U = svd.getU(null, false);
-      DMatrixRMaj W = svd.getW(null);
-      DMatrixRMaj Vt = svd.getV(null, true);
-
-      // Compute the square root of the singular values
-      for (int i = 0; i < W.numRows; i++) {
-         W.set(i, i, Math.sqrt(W.get(i, i)));
+      DMatrixRMaj L = cholesky.getT(null);
+      for (int i = 0; i < L.numRows; i++) {
+         L.set(i, i, Math.sqrt(L.get(i, i)));
       }
 
-      // Reconstruct the square root matrix
-      DMatrixRMaj temp = new DMatrixRMaj(U.numRows, W.numCols);
-      CommonOps_DDRM.mult(U, W, temp);
-      CommonOps_DDRM.mult(temp, Vt, resultToPack);
+      CommonOps_DDRM.multTransB(L, L, resultToPack);
    }
-
    /**
     * Comparing elements of two matrices.
     * This method results true when all elements in a is less than b. <br>
