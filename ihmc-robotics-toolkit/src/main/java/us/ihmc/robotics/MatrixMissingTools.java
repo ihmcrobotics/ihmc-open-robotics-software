@@ -8,6 +8,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition_F64;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -101,6 +102,24 @@ public class MatrixMissingTools
             else
                mat.unsafe_set(row, col, 0.0);
          }
+      }
+   }
+
+
+   public static void diagonal(DMatrixRMaj matrix, DMatrixRMaj diagMatrixToPack) {
+      if (matrix.getNumRows() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The input matrix must be square.");
+      }
+      if (diagMatrixToPack.getNumRows() != matrix.getNumRows() || diagMatrixToPack.getNumCols() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The diagonal matrix must have the same dimensions as the input matrix.");
+      }
+
+      // Set all elements to zero
+      CommonOps_DDRM.fill(diagMatrixToPack, 0.0);
+
+      // Set the diagonal elements
+      for (int i = 0; i < matrix.getNumRows(); i++) {
+         diagMatrixToPack.set(i, i, matrix.get(i, i));
       }
    }
 
@@ -506,7 +525,7 @@ public class MatrixMissingTools
    }
 
    /**
-    * Computes the square root of a positive definite matrix using Cholesky decomposition.
+    * Computes the square root of a positive definite matrix using single Value decomposition.
     * The result is stored in the provided resultToPack matrix.
     *
     * @param input the matrix to compute the square root of. Not modified.
@@ -520,11 +539,24 @@ public class MatrixMissingTools
       if (input.numRows != resultToPack.numRows)
          throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
-      CholeskyDecomposition_F64<DMatrixRMaj> cholesky = DecompositionFactory_DDRM.chol(input.numRows, true);
-      if (!cholesky.decompose(input)) {
-         throw new RuntimeException("Matrix is not positive definite.");
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(input.numRows, input.numCols, true, true, false);
+      if (!svd.decompose(input)) {
+         throw new RuntimeException("SVD decomposition failed.");
       }
-      resultToPack.set(cholesky.getT(null));
+
+      DMatrixRMaj U = svd.getU(null, false);
+      DMatrixRMaj W = svd.getW(null);
+      DMatrixRMaj Vt = svd.getV(null, true);
+
+      // Compute the square root of the singular values
+      for (int i = 0; i < W.numRows; i++) {
+         W.set(i, i, Math.sqrt(W.get(i, i)));
+      }
+
+      // Reconstruct the square root matrix
+      DMatrixRMaj temp = new DMatrixRMaj(U.numRows, W.numCols);
+      CommonOps_DDRM.mult(U, W, temp);
+      CommonOps_DDRM.mult(temp, Vt, resultToPack);
    }
 
    /**

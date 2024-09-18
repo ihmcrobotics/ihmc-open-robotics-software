@@ -18,6 +18,9 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PD3DStiffnesses;
+import us.ihmc.robotics.controllers.pidGains.PD3DStiffnessesReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPD3DStiffnesses;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -57,7 +60,7 @@ public class ImpedancePointFeedbackControlCommand implements FeedbackControlComm
    private final FrameVector3D referenceForce = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final ZeroablePID3DGains gains = new ZeroablePID3DGains();
+   private final PD3DStiffnesses gains = new DefaultPD3DStiffnesses();
    /**
     * This is the reference frame in which the linear part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.
@@ -181,7 +184,7 @@ public class ImpedancePointFeedbackControlCommand implements FeedbackControlComm
     *
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(PID3DGainsReadOnly gains)
+   public void setGains(PD3DStiffnessesReadOnly gains)
    {
       this.gains.set(gains);
    }
@@ -554,7 +557,7 @@ public class ImpedancePointFeedbackControlCommand implements FeedbackControlComm
       return spatialAccelerationCommand;
    }
 
-   public PID3DGains getGains()
+   public PD3DStiffnesses getGains()
    {
       return gains;
    }

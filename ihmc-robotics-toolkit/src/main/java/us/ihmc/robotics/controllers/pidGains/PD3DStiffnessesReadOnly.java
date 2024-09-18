@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers.pidGains;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.matrix.Matrix3D;
 
 import java.util.Arrays;
@@ -60,11 +61,41 @@ public interface PD3DStiffnessesReadOnly
     * Will pack the proportional stiffness matrix. The matrix will be a diagonal
     * matrix with the diagonal elements set to the proportional stiffnesss.
     *
-    * @param proportialStiffnessMatrixToPack the matrix in which the stiffnesss are stored. Modified.
+    * @param proportionalStiffnessMatrixToPack the matrix in which the stiffnesss are stored. Modified.
     */
-   public default void getProportionalStiffnessMatrix(Matrix3D proportialStiffnessMatrixToPack)
+   public default void getProportionalStiffnessMatrix(Matrix3D proportionalStiffnessMatrixToPack)
    {
-      setMatrixDiagonal(getProportionalStiffnesses(), proportialStiffnessMatrixToPack);
+      setMatrixDiagonal(getProportionalStiffnesses(), proportionalStiffnessMatrixToPack);
+   }
+
+   public default void getProportionalStiffnessMatrix(DMatrixRMaj proportionalStiffnessMatrixToPack)
+   {
+      setMatrixDiagonal(getProportionalStiffnesses(), proportionalStiffnessMatrixToPack);
+   }
+
+   /**
+    * Will pack the proportional stiffness matrix (6x6). The matrix will be a diagonal
+    * matrix with the diagonal elements set to the proportional stiffnesss.
+    *
+    * @param proportionalStiffnessMatrixToPack the matrix in which the stiffnesss are stored. Modified.
+    */
+   public default void getFullProportionalStiffnessMatrix(DMatrixRMaj proportionalStiffnessMatrixToPack, int startIndex)
+   {
+      double[] proportionalStiffnesses = getProportionalStiffnesses();
+      proportionalStiffnessMatrixToPack.reshape(6, 6);
+      proportionalStiffnessMatrixToPack.zero();
+
+      for (int i = 0; i < 6; i++)
+      {
+         if (i >= startIndex && i < startIndex + proportionalStiffnesses.length)
+         {
+            proportionalStiffnessMatrixToPack.set(i, i, proportionalStiffnesses[i - startIndex]);
+         }
+         else
+         {
+            proportionalStiffnessMatrixToPack.set(i, i, 1.0);
+         }
+      }
    }
 
    /**
@@ -79,6 +110,10 @@ public interface PD3DStiffnessesReadOnly
       setMatrixDiagonal(getDerivativeStiffnesses(), derivativeStiffnessMatrixToPack);
    }
 
+   public default void getDerivativeStiffnessMatrix(DMatrixRMaj derivativeStiffnessMatrixToPack)
+   {
+      setMatrixDiagonal(getDerivativeStiffnesses(), derivativeStiffnessMatrixToPack);
+   }
 
    /**
     * Helper method to fill the stiffness matrices. Will set the matrix to a diagonal
@@ -95,6 +130,16 @@ public interface PD3DStiffnessesReadOnly
       for (int i = 0; i < 3; i++)
       {
          matrixToFill.setElement(i, i, diagonalElements[i]);
+      }
+   }
+
+   static void setMatrixDiagonal(double[] diagonalElements, DMatrixRMaj matrixToFill)
+   {
+      matrixToFill.reshape(diagonalElements.length, diagonalElements.length);
+      matrixToFill.zero();
+      for (int i = 0; i < diagonalElements.length; i++)
+      {
+         matrixToFill.set(i, i, diagonalElements[i]);
       }
    }
 
