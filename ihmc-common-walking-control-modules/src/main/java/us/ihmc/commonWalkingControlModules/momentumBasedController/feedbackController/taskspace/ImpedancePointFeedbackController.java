@@ -29,7 +29,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
@@ -37,7 +36,6 @@ import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-//import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
@@ -47,13 +45,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
-import static us.ihmc.robotics.MatrixMissingTools.power;
 
 public class ImpedancePointFeedbackController implements FeedbackControllerInterface
 {
@@ -109,14 +105,8 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPD3DStiffnesses gains = new DefaultYoPD3DStiffnesses("_stiffness", GainCoupling.NONE, null, null);
-   private final Matrix3D tempGainMatrix = new Matrix3D();
-   private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final YoTranslationFrame controlFrame;
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
-
-   private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj massInverseMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
 
 
@@ -313,6 +303,12 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
    private final FrameVector3D derivativeFeedback = new FrameVector3D();
 
+   private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj massInverseMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
+   private final Matrix3D inverseInertiaMatrix3D = new Matrix3D();
+
    @Override
    public void computeInverseDynamics()
    {
@@ -336,28 +332,22 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
       CommonOps_DDRM.extract(massInverseMatrix, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, subMassInverseMatrix, 0, 0);
 
-//      System.out.println("JointIndices: " + Arrays.toString(jointIndices));
-//      System.out.println("massInverseMatrix: " + massInverseMatrix);
-//      System.out.println("subMassInverseMatrix: " + subMassInverseMatrix);
-//      System.out.println("Jacobian: " + jacobianMatrix);
-
-      DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(jointIndices.length, jointIndices.length);
+      inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
       CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, inverseInertiaMatrix);
       inverseInertiaTempMatrix.reshape(3,3);
 //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
       CommonOps_DDRM.extract(inverseInertiaMatrix, 3, 6, 3, 6, inverseInertiaTempMatrix, 0, 0);
 
-      Matrix3D tempMatrix = new Matrix3D();
-      tempMatrix.set(inverseInertiaTempMatrix);
+      inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
 
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
 
-      tempMatrix.transform(proportionalFeedback);
-      tempMatrix.transform(derivativeFeedback);
+      inverseInertiaMatrix3D.transform(proportionalFeedback);
+      inverseInertiaMatrix3D.transform(derivativeFeedback);
 
       feedForwardLinearAcceleration.setIncludingFrame(yoFeedForwardLinearAcceleration);
       feedForwardLinearAcceleration.changeFrame(controlFrame);
@@ -426,6 +416,8 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
       yoAchievedLinearVelocity.setCommandId(currentCommandId);
    }
 
+   private final Matrix3D tempMatrix3D = new Matrix3D();
+
    /**
     * Computes the feedback term resulting from the error in position:<br>
     * x<sub>FB</sub> = kp * (x<sub>desired</sub> - x<sub>current</sub>)
@@ -462,8 +454,8 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      gains.getProportionalStiffnessMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack);
+      gains.getProportionalStiffnessMatrix(tempMatrix3D);
+      tempMatrix3D.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
@@ -471,6 +463,8 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempDiagDerivativeGainMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
 
    /**
     * Computes the feedback term resulting from the error in linear velocity:<br>
@@ -509,8 +503,8 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
 
       feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
-      gains.getDerivativeStiffnessMatrix(tempGainMatrix);
-      if (tempGainMatrix.containsNaN())
+      gains.getDerivativeStiffnessMatrix(tempMatrix3D);
+      if (tempMatrix3D.containsNaN())
       {
          gains.getFullProportionalStiffnessMatrix(tempMatrix, 3);
 
@@ -525,14 +519,15 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
-         DMatrixRMaj tempDiagDerivativeGainMatrix = new DMatrixRMaj(6, 6);
+         tempDiagDerivativeGainMatrix.reshape(tempDerivativeGainMatrix.getNumRows(), tempDerivativeGainMatrix.getNumCols());
          MatrixMissingTools.diagonal(tempDerivativeGainMatrix, tempDiagDerivativeGainMatrix);
-         DMatrixRMaj lowerRight3x3Matrix = new DMatrixRMaj(3, 3);
-         CommonOps_DDRM.extract(tempDiagDerivativeGainMatrix, 3, 6, 3, 6, lowerRight3x3Matrix, 0, 0);
-         tempGainMatrix.set(lowerRight3x3Matrix);
+         //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
+         tempMatrix.reshape(3, 3);
+         CommonOps_DDRM.extract(tempDiagDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
+         tempMatrix3D.set(tempMatrix);
       }
 
-      tempGainMatrix.transform(feedbackTermToPack);
+      tempMatrix3D.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
    }
