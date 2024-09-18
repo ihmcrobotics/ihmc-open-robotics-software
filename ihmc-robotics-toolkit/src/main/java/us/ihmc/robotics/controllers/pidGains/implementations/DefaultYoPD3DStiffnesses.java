@@ -4,8 +4,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.controllers.pidGains.DampingUpdater;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-//import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-//import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PD3DStiffnessesReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
 import us.ihmc.yoVariables.registry.YoRegistry;
