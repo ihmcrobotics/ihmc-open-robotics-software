@@ -5,6 +5,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;

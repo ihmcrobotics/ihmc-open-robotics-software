@@ -36,7 +36,6 @@ public class FFMPEGWebcamUDPStreamingDemo
       // Read image data from webcam
       int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-      double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       // Open UDP IO
       error = avio_open(ioContext, "udp://127.0.0.1:60001", AVIO_FLAG_WRITE);
@@ -55,7 +54,6 @@ public class FFMPEGWebcamUDPStreamingDemo
                                             imageWidth,
                                             imageHeight,
                                             AV_PIX_FMT_YUV420P,
-                                            reportedFPS,
                                             4,
                                             0,
                                             AV_PIX_FMT_BGR24);

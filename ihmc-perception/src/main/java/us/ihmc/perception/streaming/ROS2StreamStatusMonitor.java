@@ -30,7 +30,7 @@ public class ROS2StreamStatusMonitor
    private final Timer messageTimer;
 
    private InetSocketAddress streamerAddress;
-   private double expectedUpdatePeriod = -1.0;
+   private double expectedUpdatePeriod = Conversions.hertzToSeconds(30.0);
    private final AtomicBoolean isStreaming;
 
    private final CameraIntrinsics cameraIntrinsics;
@@ -63,6 +63,22 @@ public class ROS2StreamStatusMonitor
       return isStreaming.get();
    }
 
+   public void waitForStream()
+   {
+      waitForStream(DefaultExceptionHandler.PRINT_MESSAGE);
+   }
+
+   public void waitForStream(ExceptionHandler exceptionHandler)
+   {
+      if (isStreaming.get())
+         return;
+
+      synchronized (isStreaming)
+      {
+         ExceptionTools.handle(() -> isStreaming.wait(), exceptionHandler);
+      }
+   }
+
    public void waitForStream(double timeout)
    {
       waitForStream(timeout, DefaultExceptionHandler.PROCEED_SILENTLY);
@@ -70,6 +86,9 @@ public class ROS2StreamStatusMonitor
 
    public void waitForStream(double timeout, ExceptionHandler exceptionHandler)
    {
+      if (isStreaming.get())
+         return;
+
       synchronized (isStreaming)
       {
          ExceptionTools.handle(() -> isStreaming.wait((long) Conversions.secondsToMilliseconds(timeout)), exceptionHandler);
@@ -103,12 +122,11 @@ public class ROS2StreamStatusMonitor
       messageSubscription.destroy();
    }
 
-   private synchronized void receiveMessage(SRTStreamStatus statusMessage)
+   private void receiveMessage(SRTStreamStatus statusMessage)
    {
       messageTimer.reset();
 
       streamerAddress = InetSocketAddress.createUnresolved(statusMessage.getStreamerAddressAsString(), statusMessage.getStreamerPort());
-      boolean wasStreaming = isStreaming.getAndSet(statusMessage.getIsStreaming());
       expectedUpdatePeriod = Conversions.hertzToSeconds(statusMessage.getExpectedPublishFrequency());
 
       cameraIntrinsics.setWidth(statusMessage.getImageWidth());
@@ -121,12 +139,11 @@ public class ROS2StreamStatusMonitor
 
       sensorFrame.update(transformToWorld -> transformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition()));
 
-      if (isStreaming.get() && !wasStreaming)
+      synchronized (isStreaming)
       {
-         synchronized (isStreaming)
-         {
+         boolean wasStreaming = isStreaming.getAndSet(statusMessage.getIsStreaming());
+         if (isStreaming.get() && !wasStreaming)
             isStreaming.notifyAll();
-         }
       }
    }
 
@@ -134,6 +151,8 @@ public class ROS2StreamStatusMonitor
    {
       while (running)
       {
+         waitForStream();
+
          if (isStreaming.get())
          {
             throttler.waitAndRun(expectedUpdatePeriod);

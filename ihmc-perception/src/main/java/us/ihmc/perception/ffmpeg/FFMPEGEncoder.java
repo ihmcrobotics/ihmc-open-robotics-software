@@ -27,7 +27,6 @@ public abstract class FFMPEGEncoder
    protected final AVCodec encoder;
    protected final AVCodecContext encoderContext;
 
-   protected long nextPresentationTimestamp = 0L;
    protected final AVFrame nextFrame;
    protected final AVPacket encodedPacket;
 
@@ -71,12 +70,6 @@ public abstract class FFMPEGEncoder
       return stream;
    }
 
-   protected void assignNextFrame(Consumer<AVFrame> nextFrameAssignment)
-   {
-      nextFrameAssignment.accept(nextFrame);
-      nextFrame.pts(nextPresentationTimestamp++);
-   }
-
    public boolean encodeAndWriteNextFrame(AVFormatContext outputContext, AVStream stream)
    {
       return encodeNextFrame(packet ->
@@ -109,7 +102,7 @@ public abstract class FFMPEGEncoder
          av_packet_unref(encodedPacket);
       }
 
-      return error == AVERROR_EAGAIN();
+      return error != AVERROR_EOF();
    }
 
    public AVRational getTimeBase()

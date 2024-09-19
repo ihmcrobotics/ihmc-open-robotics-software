@@ -40,7 +40,6 @@ public class FFMPEGWebcamHTTPStreamingDemo
       // Get image info
       int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-      double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       // Make server listen for clients
       AVDictionary serverOptions = new AVDictionary();
@@ -62,7 +61,7 @@ public class FFMPEGWebcamHTTPStreamingDemo
 
          // Start a client handler thread
          LogTools.info("Got client #{}", i);
-         ThreadTools.startAThread(new ClientHandler(clientContext, imageWidth, imageHeight, reportedFPS), "ClientThread" + i);
+         ThreadTools.startAThread(new ClientHandler(clientContext, imageWidth, imageHeight), "ClientThread" + i);
       }
    }
 
@@ -84,7 +83,7 @@ public class FFMPEGWebcamHTTPStreamingDemo
       private boolean keepGoing = true;
       private boolean disconnected = false;
 
-      private ClientHandler(AVIOContext clientContext, int imageWidth, int imageHeight, double outputFrameRate)
+      private ClientHandler(AVIOContext clientContext, int imageWidth, int imageHeight)
       {
          // Create an output context for the client
          outputContext = new AVFormatContext();
@@ -99,7 +98,6 @@ public class FFMPEGWebcamHTTPStreamingDemo
                                                imageWidth,
                                                imageHeight,
                                                AV_PIX_FMT_YUV420P,
-                                               outputFrameRate,
                                                10,
                                                2,
                                                AV_PIX_FMT_BGR24);

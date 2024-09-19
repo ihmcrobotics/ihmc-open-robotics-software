@@ -5,6 +5,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.net.InetSocketAddress;
 
@@ -14,6 +15,8 @@ public class ROS2SRTVideoStreamer
    private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
 
    private final SRTVideoStreamer videoStreamer;
+
+   private final FrequencyCalculator sendFrequencyCalculator;
 
    public ROS2SRTVideoStreamer(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic)
    {
@@ -29,6 +32,8 @@ public class ROS2SRTVideoStreamer
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
 
       videoStreamer = new SRTVideoStreamer(streamOutputAddress);
+
+      sendFrequencyCalculator = new FrequencyCalculator();
    }
 
    public void initialize(RawImage exampleImage, double inputFPS, int inputPixelFormat)
@@ -48,6 +53,9 @@ public class ROS2SRTVideoStreamer
 
       videoStreamer.sendFrame(frame.getCpuImageMat());
 
+      sendFrequencyCalculator.ping();
+      float frequency = (float) sendFrequencyCalculator.getFrequency();
+      statusMessage.setExpectedPublishFrequency(Math.max(1.0f, frequency));
       statusMessage.setIsStreaming(true);
       statusMessage.setImageWidth(frame.getImageWidth());
       statusMessage.setImageHeight(frame.getImageHeight());

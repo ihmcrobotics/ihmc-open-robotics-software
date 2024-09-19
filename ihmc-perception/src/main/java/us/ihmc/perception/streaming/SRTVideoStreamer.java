@@ -5,7 +5,6 @@ import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFMPEGInterruptCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
@@ -81,7 +80,9 @@ public class SRTVideoStreamer
 
       outputFormat = av_guess_format(OUTPUT_FORMAT_NAME, null, null);
 
-      callerConnector = ThreadTools.startAsDaemon(this::connectToCallers, getClass().getSimpleName() + "CallerConnector");
+      callerConnector = new Thread(this::connectToCallers, getClass().getSimpleName() + "CallerConnector");
+      callerConnector.setDaemon(true);
+      callerConnector.start();
    }
 
    /**
@@ -102,7 +103,6 @@ public class SRTVideoStreamer
                                        imageWidth,
                                        imageHeight,
                                        OUTPUT_PIXEL_FORMAT,
-                                       inputFPS,
                                        gopSize,
                                        0,
                                        inputAVPixelFormat);

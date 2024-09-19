@@ -52,7 +52,6 @@ public class FFMPEGWebcamSRTStreamingDemo
       // Get image info
       int imageWidth = (int) webcam.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
       int imageHeight = (int) webcam.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-      double reportedFPS = webcam.get(opencv_videoio.CAP_PROP_FPS);
 
       for (int i = 0; ; i++)
       {
@@ -68,7 +67,7 @@ public class FFMPEGWebcamSRTStreamingDemo
          error = avio_open2(serverContext, "srt://127.0.0.1:60001", AVIO_FLAG_WRITE, null, serverOptions);
          FFMPEGTools.checkNegativeError(error, "Opening Connection");
 
-         ThreadTools.startAThread(new CallerHandler(serverContext, imageWidth, imageHeight, reportedFPS), "CallerThread" + i);
+         ThreadTools.startAThread(new CallerHandler(serverContext, imageWidth, imageHeight), "CallerThread" + i);
 
          av_dict_free(serverOptions);
          serverOptions.close();
@@ -94,7 +93,7 @@ public class FFMPEGWebcamSRTStreamingDemo
       private boolean keepGoing = true;
       private boolean disconnected = false;
 
-      private CallerHandler(AVIOContext serverContext, int imageWidth, int imageHeight, double outputFPS)
+      private CallerHandler(AVIOContext serverContext, int imageWidth, int imageHeight)
       {
          AVOutputFormat outputFormat = av_guess_format("h264", null, null);
 
@@ -112,7 +111,6 @@ public class FFMPEGWebcamSRTStreamingDemo
                                                imageWidth,
                                                imageHeight,
                                                AV_PIX_FMT_YUV420P,
-                                               outputFPS,
                                                10,
                                                2,
                                                AV_PIX_FMT_BGR24);

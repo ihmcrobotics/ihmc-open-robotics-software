@@ -5,10 +5,10 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
-import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.Conversions;
 
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_open2;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
@@ -22,7 +22,6 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
    private final int outputWidth;
    private final int outputHeight;
    private final int outputPixelFormat;
-   private final double outputFrameRate;
 
    private final int groupOfPicturesSize;
    private final int maxBFrames;
@@ -33,13 +32,14 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
 
    private SwsContext swsContext;
 
+   private long firstFrameTime = -1L;
+
    public FFMPEGVideoEncoder(AVOutputFormat outputFormat,
                              String preferredCodecName,
                              int bitRate,
                              int outputWidth,
                              int outputHeight,
                              int outputPixelFormat,
-                             double outputFrameRate,
                              int groupOfPicturesSize,
                              int maxBFrames,
                              int inputPixelFormat)
@@ -49,7 +49,6 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       this.outputWidth = outputWidth;
       this.outputHeight = outputHeight;
       this.outputPixelFormat = outputPixelFormat;
-      this.outputFrameRate = outputFrameRate;
       this.groupOfPicturesSize = groupOfPicturesSize;
       this.maxBFrames = maxBFrames;
       this.inputPixelFormat = inputPixelFormat;
@@ -61,7 +60,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
    @Override
    public void initialize(AVDictionary codecOptions)
    {
-      timeBase = avutil.av_inv_q(avutil.av_d2q(outputFrameRate, 4096));
+      timeBase = av_make_q(1, (int) Conversions.secondsToNanoseconds(1.0));
 
       inputFrame.format(inputPixelFormat);
       // input frame width & height initialized upon reception of first image
@@ -104,22 +103,27 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
 
    public void setNextFrame(Mat frame)
    {
-      assignNextFrame(nextFrame ->
-      {
-         if (inputFrame.width() < 0 && inputFrame.height() < 0)
-            initializeInputFrame(frame);
+      long currentTime = System.nanoTime();
 
-         if (swsContext != null)
-         {
-            inputFrame.data(0, frame.data());
-            error = sws_scale_frame(swsContext, nextFrame, inputFrame);
-            FFMPEGTools.checkNegativeError(error, "Scaling frame");
-         }
-         else
-         {
-            nextFrame.data(0, frame.data());
-         }
-      });
+      if (inputFrame.width() < 0 && inputFrame.height() < 0)
+      {
+         initializeInputFrame(frame);
+         firstFrameTime = currentTime;
+      }
+
+      if (swsContext != null)
+      {
+         inputFrame.data(0, frame.data());
+         error = sws_scale_frame(swsContext, nextFrame, inputFrame);
+         FFMPEGTools.checkNegativeError(error, "Scaling frame");
+      }
+      else
+      {
+         nextFrame.data(0, frame.data());
+      }
+
+      long timeElapsed = currentTime - firstFrameTime;
+      nextFrame.pts(timeElapsed);
    }
 
    private void initializeInputFrame(Mat firstFrame)

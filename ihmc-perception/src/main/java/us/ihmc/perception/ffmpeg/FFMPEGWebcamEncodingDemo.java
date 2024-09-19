@@ -33,7 +33,6 @@ public class FFMPEGWebcamEncodingDemo
 
       int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-      double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       AVFormatContext outputContext = new AVFormatContext();
       error = avformat_alloc_output_context2(outputContext, null, null, RESULT_FILE_NAME);
@@ -46,7 +45,6 @@ public class FFMPEGWebcamEncodingDemo
                                                                imageWidth,
                                                                imageHeight,
                                                                AV_PIX_FMT_YUV420P,
-                                                               reportedFPS,
                                                                10,
                                                                2,
                                                                AV_PIX_FMT_BGR24);
