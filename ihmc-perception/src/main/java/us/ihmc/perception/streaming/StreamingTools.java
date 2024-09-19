@@ -10,16 +10,12 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.Map.entry;
 
 public class StreamingTools
 {
-   public static final UUID STATUS_MESSAGE_UUID = new UUID(0L, 0L);
    public static final double CONNECTION_TIMEOUT = 2.0; // 2 seconds to connect.
-
-   // SRT Stuff
 
    /**
     * For available options, see <a href="https://www.ffmpeg.org/ffmpeg-protocols.html#srt">FFMPEG srt documentation.</a>
@@ -28,8 +24,8 @@ public class StreamingTools
    private static final Map<String, String> LIVE_SRT_OPTIONS
          = Map.ofEntries(entry("transtype", "live"),
                          entry("smoother", "live"),
-                         entry("rcvlatency", "0"),
-                         entry("peerlatency", "0"),
+                         entry("rcvlatency", "20"),
+                         entry("peerlatency", "20"),     // 20ms of buffer delay for packet loss correction
                          entry("mss", "1360"),           // Max packet size of MPEG-TS
                          entry("payload_size", "1316")); // Payload size of MPEG-TS
 
@@ -69,7 +65,7 @@ public class StreamingTools
          {
             try
             {
-               return networkInterface.isUp() && ! networkInterface.isLoopback();
+               return networkInterface.isUp() && !networkInterface.isLoopback();
             }
             catch (SocketException exception)
             {

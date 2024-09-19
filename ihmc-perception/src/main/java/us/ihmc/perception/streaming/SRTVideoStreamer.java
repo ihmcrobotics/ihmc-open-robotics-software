@@ -32,13 +32,9 @@ public class SRTVideoStreamer
    private static final Map<String, String> HEVC_NVENC_OPTIONS
          = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
                          entry("tune", "ull"),        // "Ultra low latency"
-                         entry("level", "auto"),      // Encoding level restriction
-                         entry("rc", "vbr"),          // Rate control: variable bitrate mode
-                         entry("gpu", "any"),         // Use any GPU
+                         entry("rc", "vbr"),          // Rate control: variable bit rate mode
                          entry("delay", "0"),         // No delay to frame output
-                         entry("zerolatency", "1"),   // Don't introduce reordering delay
-                         entry("cq", "0"),            // Quality level (0 = auto, 1 = nearly lossless, 51 = low quality)
-                         entry("multipass", "0"));    // Disable multipass
+                         entry("zerolatency", "1"));  // Don't introduce reordering delay
 
    private final AVDictionary encoderOptions;
    private FFMPEGVideoEncoder encoder;

@@ -41,9 +41,6 @@ public class ROS2StreamStatusMonitor
 
    public ROS2StreamStatusMonitor(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic)
    {
-      messageSubscription = ros2.subscribe(streamTopic);
-      messageSubscription.addCallback(this::receiveMessage);
-
       isStreaming = new AtomicBoolean(false);
       cameraIntrinsics = new CameraIntrinsics();
       sensorFrame = new MutableReferenceFrame();
@@ -51,6 +48,9 @@ public class ROS2StreamStatusMonitor
       throttler = new Throttler();
       messageTimer = new Timer();
       messageMonitor = ThreadTools.startAsDaemon(this::monitorMessageFrequency, "StreamStatusMonitor");
+
+      messageSubscription = ros2.subscribe(streamTopic);
+      messageSubscription.addCallback(this::receiveMessage);
    }
 
    public InetSocketAddress getStreamerAddress()

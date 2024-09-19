@@ -19,7 +19,7 @@ import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
 {
-   private static final double UPDATE_TIMEOUT = 0.25; // quarter of a second
+   private static final double UPDATE_TIMEOUT = 0.5; // half a second
 
    private final ROS2StreamStatusMonitor streamStatusMonitor;
    private final SRTVideoReceiver videoReceiver;
@@ -111,9 +111,7 @@ public class ROS2SRTVideoSubscriber
             // If we don't want to be subscribed, wait until subscription is desired
             if (!subscriptionDesired.get())
             {
-               if (videoReceiver.isConnected())
-                  videoReceiver.disconnect();
-
+               videoReceiver.disconnect();
                synchronized (subscriptionDesired)
                {
                   subscriptionDesired.wait();
@@ -125,6 +123,7 @@ public class ROS2SRTVideoSubscriber
             // If there's no stream, wait for the stream
             if (!streamStatusMonitor.isStreaming())
             {
+               videoReceiver.disconnect();
                streamStatusMonitor.waitForStream(UPDATE_TIMEOUT);
                continue;
             }
