@@ -107,14 +107,14 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
    private final FramePoint3D contactPointInBody = new FramePoint3D();
-   private final FramePose3D desiredContactPoseWorld = new FramePose3D();
+   private final FramePose3D contactPoseWorld = new FramePose3D();
    private final PoseReferenceFrame desiredContactFrameFixedInWorld;
 
    /* Yo-Contact frame components */
    private final YoFrameVector3D contactNormal;
    private final YoFramePoint3D currentContactPointInWorld;
-   private final YoFramePoint3D yoDesiredContactPosition;
-   private final YoFrameQuaternion yoDesiredContactOrientation;
+   private final YoFramePoint3D yoContactFramePosition;
+   private final YoFrameQuaternion yoContactFrameOrientation;
    private final YoFramePoint3D yoContactPointInBodyFrame;
 
    /* Trajectory handlers */
@@ -168,8 +168,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       coefficientOfFriction = new YoDouble(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector3D(bodyName + "ContactNormal", worldFrame, parentRegistry);
       currentContactPointInWorld = new YoFramePoint3D(bodyName + "currentContactPoint", worldFrame, registry);
-      yoDesiredContactPosition = new YoFramePoint3D(bodyName + "_DesiredContactPosition", worldFrame, registry);
-      yoDesiredContactOrientation = new YoFrameQuaternion(bodyName + "_DesiredContactOrientation", worldFrame, registry);
+      yoContactFramePosition = new YoFramePoint3D(bodyName + "_ContactFramePosition", worldFrame, registry);
+      yoContactFrameOrientation = new YoFrameQuaternion(bodyName + "_ContactFrameOrientation", worldFrame, registry);
 
       bodyBarelyLoaded = new GlitchFilteredYoBoolean(bodyName + "BarelyLoaded", registry, 60);
       jointspaceControlActive = new YoBoolean(bodyName + "JointspaceControlActive", registry);
@@ -234,8 +234,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       graphicsListRegistry.registerYoGraphic(listName, controllerDesiredForce);
       graphics.add(controllerDesiredForce);
 
-      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingControlFrame", yoDesiredContactPosition,
-                                                                                    yoDesiredContactOrientation,
+      YoGraphicCoordinateSystem contactControlFrame = new YoGraphicCoordinateSystem(bodyName + "LoadBearingContactFrame",
+                                                                                    yoContactFramePosition,
+                                                                                    yoContactFrameOrientation,
                                                                                     0.17,
                                                                                     YoAppearance.LightGray());
       graphicsListRegistry.registerYoGraphic(listName, contactControlFrame);
@@ -270,8 +271,17 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.addPointInContact(getYoContactPointInBodyFrame());
       planeContactStateCommand.setHasContactStateChanged(false);
 
-      double alphaLoaded = EuclidCoreTools.clamp(timeInState / loadBearingParameters.getHandLoadDuration(), 0.0, 1.0);
-      double rhoWeightInterpolated = EuclidCoreTools.interpolate(RHO_WEIGHT_INITIAL, nominalRhoWeight, alphaLoaded);
+      double rhoWeightInterpolated;
+
+      if (loadBearingParameters.doSmoothHandLoading())
+      {
+         double alphaLoaded = EuclidCoreTools.clamp(timeInState / loadBearingParameters.getHandLoadDuration(), 0.0, 1.0);
+         rhoWeightInterpolated = EuclidCoreTools.interpolate(RHO_WEIGHT_INITIAL, nominalRhoWeight, alphaLoaded);
+      }
+      else
+      {
+         rhoWeightInterpolated = nominalRhoWeight;
+      }
 
       for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
       {
@@ -297,7 +307,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       {
          pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointInBody);
          pointFeedbackControlCommand.setGainsFrame(desiredContactFrameFixedInWorld);
-         pointFeedbackControlCommand.setInverseDynamics(desiredContactPoseWorld.getPosition(), zeroWorld, zeroWorld);
+         pointFeedbackControlCommand.setInverseDynamics(contactPoseWorld.getPosition(), zeroWorld, zeroWorld);
          pointFeedbackControlCommand.setWeightsForSolver(linearWeight);
 
          double kp = loadBearingParameters.getHoldPositionStiffness();
@@ -338,14 +348,14 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.contactNormal.set(contactNormalInWorldFrame);
 
       // Compute desired contact pose, which is static in world, has an origin at the contact point and has Z pointing parallel to the contact normal
-      desiredContactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
-      desiredContactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
-      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, desiredContactPoseWorld.getOrientation());
-      desiredContactFrameFixedInWorld.setPoseAndUpdate(desiredContactPoseWorld);
+      contactPoseWorld.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      contactPoseWorld.getPosition().setMatchingFrame(this.contactPointInBody);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, contactNormalInWorldFrame, contactPoseWorld.getOrientation());
+      desiredContactFrameFixedInWorld.setPoseAndUpdate(contactPoseWorld);
 
       // Update yovariables
-      yoDesiredContactPosition.setMatchingFrame(desiredContactPoseWorld.getPosition());
-      yoDesiredContactOrientation.setMatchingFrame(desiredContactPoseWorld.getOrientation());
+      yoContactFramePosition.setMatchingFrame(contactPoseWorld.getPosition());
+      yoContactFrameOrientation.setMatchingFrame(contactPoseWorld.getOrientation());
       this.yoContactPointInBodyFrame.set(contactPointInBodyFrame);
 
       // Update active control modes
@@ -397,7 +407,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       {
          return false;
       }
-
+      
       return true;
    }
 
@@ -431,8 +441,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       hideGraphics();
 
-      yoDesiredContactPosition.setToNaN();
-      yoDesiredContactOrientation.setToNaN();
+      yoContactFramePosition.setToNaN();
+      yoContactFrameOrientation.setToNaN();
       currentContactPointInWorld.setToNaN();
 
       jointControlHelper.overrideTrajectory();
@@ -562,8 +572,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
                                                                     yoControllerDesiredForce,
                                                                     0.0075,
                                                                     ColorDefinitions.Red()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame", yoDesiredContactPosition,
-                                                                               yoDesiredContactOrientation,
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(bodyToControl.getName() + "ContactControlFrame", yoContactFramePosition,
+                                                                               yoContactFrameOrientation,
                                                                                0.12,
                                                                                ColorDefinitions.LightGray()));
       return group;
