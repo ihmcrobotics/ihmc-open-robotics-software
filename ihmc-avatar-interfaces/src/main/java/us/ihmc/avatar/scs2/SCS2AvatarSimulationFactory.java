@@ -506,10 +506,10 @@ public class SCS2AvatarSimulationFactory
                                                                             contextDataFactory,
                                                                             robotModel.get().getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters.get());
-      if (enableSCS1YoGraphics.get())
+//      if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(ikStreamingRTThread.getSCS1YoGraphicsListRegistry()));
-      if (enableSCS2YoGraphics.get())
-         simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
+//      if (enableSCS2YoGraphics.get())
+//         simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
    }
 
    private void setupMultiThreadedRobotController()

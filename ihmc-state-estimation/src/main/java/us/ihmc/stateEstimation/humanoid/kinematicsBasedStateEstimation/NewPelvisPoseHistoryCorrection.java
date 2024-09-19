@@ -117,7 +117,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.pelvisReferenceFrame = rootJoint.getFrameAfterJoint();
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoRegistry("newPelvisPoseHistoryCorrection");
-      parentRegistry.addChild(registry);
+
+      // TODO do not merge, temporarily adding to reduce yovariables
+//      parentRegistry.addChild(registry);
 
       enableProcessNewPackets = new YoBoolean("enableProcessNewPackets", registry);
       enableProcessNewPackets.set(true);

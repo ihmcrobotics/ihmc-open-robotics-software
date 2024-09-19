@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -21,6 +20,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,6 +77,10 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble resetTime = new YoDouble("resetTime", registry);
    private final YoDouble resetDuration = new YoDouble("resetDuration", registry);
 
+   private final YoDouble icpOffsetMaxRate;
+   private final RateLimitedYoVariable rateLimitedICPOffsetX;
+   private final RateLimitedYoVariable rateLimitedICPOffsetY;
+
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame midFeetZUpFrame;
@@ -92,6 +96,9 @@ public class PelvisICPBasedTranslationManager
    private final FrameVector2D tempICPOffset = new FrameVector2D();
    private final FrameVector2D icpOffsetWhenResetRequested = new FrameVector2D();
    private final FrameVector2D icpOffsetForReset = new FrameVector2D();
+   private final FramePoint2D icpDesiredProjected = new FramePoint2D();
+   private final FrameVector2D icpOffsetAfterProjection = new FrameVector2D();
+   private final FrameVector2D pelvisPositionCumulatedErrorClamped = new FrameVector2D();
 
    private final YoLong lastCommandId;
 
@@ -141,6 +148,12 @@ public class PelvisICPBasedTranslationManager
       isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisTrajectoryCommands", registry);
       numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
+      icpOffsetMaxRate = new YoDouble(namePrefix + "icpOffsetMaxRate", registry);
+      icpOffsetMaxRate.set(0.04);
+
+      rateLimitedICPOffsetX = new RateLimitedYoVariable(namePrefix + "icpOffsetX_rl", registry, icpOffsetMaxRate, controlDT);
+      rateLimitedICPOffsetY = new RateLimitedYoVariable(namePrefix + "icpOffsetY_rl", registry, icpOffsetMaxRate, controlDT);
+
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
 
@@ -166,17 +179,17 @@ public class PelvisICPBasedTranslationManager
 
       if (!multiContactStabilityRegion.isEmpty())
       { // Upper body is load-bearing
-         supportFrame = multiContactStabilityRegion.getReferenceFrame();
+         changeSupportFrame(multiContactStabilityRegion.getReferenceFrame());
          supportPolygon = multiContactStabilityRegion;
       }
       else if (supportLeg == null)
       { // Double support
-         supportFrame = midFeetZUpFrame;
+         changeSupportFrame(midFeetZUpFrame);
          supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       }
       else
       { // Single support
-         supportFrame = soleZUpFrames.get(supportLeg);
+         changeSupportFrame(soleZUpFrames.get(supportLeg));
          supportPolygon = bipedSupportPolygons.getFootPolygonInSoleZUpFrame(supportLeg);
       }
 
@@ -220,6 +233,7 @@ public class PelvisICPBasedTranslationManager
                }
             }
          }
+
          tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
          desiredPelvisPosition.set(tempPosition);
@@ -260,6 +274,22 @@ public class PelvisICPBasedTranslationManager
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
       isRunning.set(true);
+   }
+
+   private void changeSupportFrame(ReferenceFrame supportFrame)
+   {
+      if (this.supportFrame == null)
+      {
+         this.supportFrame = supportFrame;
+         return;
+      }
+
+      tempError2d.setIncludingFrame(this.supportFrame, rateLimitedICPOffsetX.getValue(), rateLimitedICPOffsetY.getValue());
+      tempError2d.changeFrame(supportFrame);
+      rateLimitedICPOffsetX.set(tempError2d.getX());
+      rateLimitedICPOffsetY.set(tempError2d.getY());
+
+      this.supportFrame = supportFrame;
    }
 
    private final FrameSE3TrajectoryPoint trajectoryPointLocal = new FrameSE3TrajectoryPoint();
@@ -619,13 +649,34 @@ public class PelvisICPBasedTranslationManager
 
       else
       {
-         desiredICPToModify.add(tempICPOffset);
+         icpDesiredProjected.setReferenceFrame(supportFrame);
+         icpOffsetAfterProjection.setReferenceFrame(supportFrame);
+
+         icpDesiredProjected.add(desiredICPToModify, tempICPOffset);
+
          desiredCoPToModify.add(tempICPOffset);
          desiredCoMToModify.add(tempICPOffset);
 
          convexPolygonShrinker.scaleConvexPolygon(supportPolygon, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
-         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
+         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(icpDesiredProjected);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredCoPToModify);
+
+         icpOffsetAfterProjection.sub(icpDesiredProjected, desiredICPToModify);
+
+         // update cumulated error based on projection
+         if (integralGain.getValue() > 1.0e-4)
+         {
+            pelvisPositionCumulatedErrorClamped.setIncludingFrame(icpOffsetAfterProjection);
+            pelvisPositionCumulatedErrorClamped.changeFrame(worldFrame);
+            pelvisPositionCumulatedErrorClamped.sub(proportionalTerm);
+            pelvisPositionCumulatedErrorClamped.scale(1.0 / integralGain.getValue());
+            pelvisPositionCumulatedError.set(pelvisPositionCumulatedErrorClamped);
+         }
+
+         rateLimitedICPOffsetX.update(icpOffsetAfterProjection.getX());
+         rateLimitedICPOffsetY.update(icpOffsetAfterProjection.getY());
+
+         desiredICPToModify.add(rateLimitedICPOffsetX.getValue(), rateLimitedICPOffsetY.getValue());
 
          icpOffsetWhenResetRequested.setIncludingFrame(desiredICPToModify);
          icpOffsetWhenResetRequested.sub(originalICPToModify);
