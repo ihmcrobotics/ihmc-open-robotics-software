@@ -19,15 +19,6 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
 {
    private static final int SCALE_METHOD = SWS_BICUBIC;
 
-   private final int outputWidth;
-   private final int outputHeight;
-   private final int outputPixelFormat;
-
-   private final int groupOfPicturesSize;
-   private final int maxBFrames;
-
-   private final int inputPixelFormat;
-
    private final AVFrame inputFrame;
 
    private SwsContext swsContext;
@@ -46,20 +37,9 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
    {
       super(outputFormat, preferredCodecName, bitRate);
 
-      this.outputWidth = outputWidth;
-      this.outputHeight = outputHeight;
-      this.outputPixelFormat = outputPixelFormat;
-      this.groupOfPicturesSize = groupOfPicturesSize;
-      this.maxBFrames = maxBFrames;
-      this.inputPixelFormat = inputPixelFormat;
-
       inputFrame = av_frame_alloc();
       FFMPEGTools.checkPointer(inputFrame, "Allocating input frame");
-   }
 
-   @Override
-   public void initialize(AVDictionary codecOptions)
-   {
       timeBase = av_make_q(1, (int) Conversions.secondsToNanoseconds(1.0));
 
       inputFrame.format(inputPixelFormat);
@@ -81,13 +61,6 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       encoderContext.pix_fmt(outputPixelFormat);
       encoderContext.gop_size(groupOfPicturesSize);
       encoderContext.max_b_frames(maxBFrames);
-
-      AVDictionary optionsCopy = new AVDictionary();
-      av_dict_copy(optionsCopy, codecOptions, 0);
-      error = avcodec_open2(encoderContext, encoder, optionsCopy);
-      FFMPEGTools.checkNegativeError(error, "Opening codec");
-      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
-      av_dict_free(optionsCopy);
    }
 
    @Override
@@ -136,7 +109,7 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       error = av_frame_get_buffer(inputFrame, 0);
       FFMPEGTools.checkNegativeError(error, "Getting input frame buffer");
 
-      if (inputWidth != outputWidth || inputHeight != outputHeight || inputPixelFormat != outputPixelFormat)
+      if (inputWidth != nextFrame.width() || inputHeight != nextFrame.height() || inputFrame.format() != nextFrame.format())
          initializeSwsContext();
    }
 

@@ -60,7 +60,15 @@ public abstract class FFMPEGEncoder
       initialize(null);
    }
 
-   public abstract void initialize(AVDictionary codecOptions);
+   public void initialize(AVDictionary codecOptions)
+   {
+      AVDictionary optionsCopy = new AVDictionary();
+      av_dict_copy(optionsCopy, codecOptions, 0);
+      error = avcodec_open2(encoderContext, encoder, optionsCopy);
+      FFMPEGTools.checkNegativeError(error, "Opening codec");
+      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
+      av_dict_free(optionsCopy);
+   }
 
    public AVStream newStream(AVFormatContext outputContext)
    {
