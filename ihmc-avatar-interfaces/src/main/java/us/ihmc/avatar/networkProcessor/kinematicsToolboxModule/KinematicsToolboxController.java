@@ -1,5 +1,19 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.function.Consumer;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
@@ -128,6 +142,8 @@ public class KinematicsToolboxController extends ToolboxController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
+   private final boolean publishOutputStatus;
+
    /**
     * Reference to the desired robot's root body.
     */
@@ -228,7 +244,7 @@ public class KinematicsToolboxController extends ToolboxController
     * current privileged configuration can be changed at any time by sending a
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
-   private final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
+   protected final YoDouble privilegedWeight = new YoDouble("privilegedWeight", registry);
    private double defaultPrivilegedWeight;
    /**
     * To make the robot get closer to the privileged configuration, a feedback control is used to
@@ -243,20 +259,20 @@ public class KinematicsToolboxController extends ToolboxController
     * core. Should probably remain equal to {@link Double#POSITIVE_INFINITY} so the solution converges
     * quicker.
     */
-   private final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
+   protected final YoDouble privilegedMaxVelocity = new YoDouble("privilegedMaxVelocity", registry);
    private double defaultPrivilegedMaxVelocity;
    /**
     * Defines a robot configuration that this IK start from and also defines the privileged joint
     * configuration.
     */
    protected TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = null;
-   private boolean submitPrivilegedConfigurationCommand = true;
+   protected boolean submitPrivilegedConfigurationCommand = true;
    /**
     * This reference to {@link PrivilegedConfigurationCommand} is used internally only to figure out if
     * the current privileged configuration used in the controller core is to be updated or not. It is
     * usually updated once right after the initialization phase.
     */
-   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   protected final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    /**
     * The {@link #commandInputManager} is used as a 'thread-barrier'. When receiving a new user input,
     * this manager automatically copies the data in the corresponding command that can then be used
@@ -433,6 +449,20 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoVector3D linearMomentumRateWeight = new YoVector3D("linearMomentumRateWeight", registry);
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
+   protected Consumer<KinematicsToolboxRigidBodyCommand> rigidBodyCommandMutator = command -> {};
+
+   public KinematicsToolboxController(CommandInputManager commandInputManager,
+                                      StatusMessageOutputManager statusOutputManager,
+                                      FloatingJointBasics rootJoint,
+                                      OneDoFJointBasics[] desiredOneDoFJoints,
+                                      Collection<? extends RigidBodyBasics> controllableRigidBodies,
+                                      double updateDT,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoRegistry parentRegistry)
+   {
+      this(commandInputManager, statusOutputManager, rootJoint, desiredOneDoFJoints, controllableRigidBodies, updateDT, true, yoGraphicsListRegistry, parentRegistry);
+   }
+
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
     *                                messages or commands to be processed to the
@@ -455,6 +485,7 @@ public class KinematicsToolboxController extends ToolboxController
                                       OneDoFJointBasics[] desiredOneDoFJoints,
                                       Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                       double updateDT,
+                                      boolean publishOutputStatus,
                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoRegistry parentRegistry)
    {
@@ -465,6 +496,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.controllableRigidBodies = controllableRigidBodies == null ? null : new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      this.publishOutputStatus = publishOutputStatus;
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
@@ -956,7 +988,8 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (timeLastSolutionPublished.getValue() == 0.0 || currentTime - timeLastSolutionPublished.getValue() >= publishSolutionPeriod.getValue())
       {
-         reportMessage(inverseKinematicsSolution);
+         if (publishOutputStatus)
+            reportMessage(inverseKinematicsSolution);
          timeLastSolutionPublished.set(currentTime);
       }
 
@@ -1120,6 +1153,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand command = commands.get(i);
+            rigidBodyCommandMutator.accept(command);
             RigidBodyBasics endEffector = command.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(command, rootBody, spatialGains, rigidBodyCommand);
@@ -1197,6 +1231,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             noCommandReceived = false;
             KinematicsToolboxRigidBodyCommand input = rigidBodyInputs.get(j);
+            rigidBodyCommandMutator.accept(input);
             RigidBodyBasics endEffector = input.getEndEffector();
             SpatialFeedbackControlCommand rigidBodyCommand = userFBCommands.addSpatialFeedbackControlCommand();
             KinematicsToolboxHelper.consumeRigidBodyCommand(input, rootBody, spatialGains, rigidBodyCommand);

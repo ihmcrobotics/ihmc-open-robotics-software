@@ -4,7 +4,9 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -19,10 +21,12 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
@@ -32,13 +36,15 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -51,12 +57,14 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.yoVariables.euclid.YoVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -193,13 +201,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final ConcurrentCopier<MultiContactBalanceStatus> concurrentMultiContactBalanceStatusCopier = new ConcurrentCopier<>(MultiContactBalanceStatus::new);
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
-   private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
 
    private final ExecutionTimer multiContactRegionLPSolveTimer = new ExecutionTimer("multiContactRegionLPSolveTimer", registry);
    private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
+   private final KinematicsToolboxMultiContactManager multiContactManager;
+
+   private final boolean runWithPostureOptimizer;
+   private final KinematicsToolboxSupportRegionDebug supportRegionDebug = new KinematicsToolboxSupportRegionDebug();
+   private final YoDouble unoptimizedCenterOfMassStabilityMargin = new YoDouble("unoptimizedCenterOfMassStabilityMargin", registry);
+   private final YoFrameConvexPolygon2D unoptimizedStabilityRegion = new YoFrameConvexPolygon2D("unoptimizedStabilityRegion", ReferenceFrame.getWorldFrame(), 18, registry);
+
+   private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -213,6 +228,25 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
            desiredFullRobotModel,
            createListOfControllableRigidBodies(desiredFullRobotModel),
            updateDT,
+           true,
+           yoGraphicsListRegistry,
+           parentRegistry);
+   }
+
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              double updateDT,
+                                              boolean runWithPostureOptimizer,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
+   {
+      this(commandInputManager,
+           statusOutputManager,
+           desiredFullRobotModel,
+           createListOfControllableRigidBodies(desiredFullRobotModel),
+           updateDT,
+           runWithPostureOptimizer,
            yoGraphicsListRegistry,
            parentRegistry);
    }
@@ -233,6 +267,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                               double updateDT,
+                                              boolean runWithPostureOptimizer,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
@@ -242,11 +277,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
-            yoGraphicsListRegistry,
+            runWithPostureOptimizer,
+            new YoGraphicsListRegistry(),
             parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
+      this.runWithPostureOptimizer = runWithPostureOptimizer;
 
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
       Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
@@ -256,6 +293,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator(desiredFullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
+      multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState, multiContactRegionCalculator, desiredFullRobotModel, desiredReferenceFrames.getCenterOfMassFrame(), updateDT, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -275,6 +313,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
+      rigidBodyCommandMutator = this::mutateExternalWeights;
+
+      YoArtifactPolygon multiContactCoMRegionArtifact = new YoArtifactPolygon("Multi-Contact CoM Region Ext",
+                                                                              unoptimizedStabilityRegion, new Color(120, 130, 10), false, 5);
+      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), multiContactCoMRegionArtifact);
    }
 
    /**
@@ -408,6 +451,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          initializePrivilegedConfiguration();
       }
 
+      if (isUpperBodyLoadBearing.getValue())
+      {
+         initializePostureAdjustment();
+      }
+
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
       updateCoMPositionAndFootPoses();
       // TODO Add API to switch between the two methods for deciding what CoM position to hold.
@@ -511,6 +559,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
       {
          HumanoidKinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(HumanoidKinematicsToolboxConfigurationCommand.class);
+         LogTools.info("Received IK toolbox configuration message, hold com xy = " + command.holdCurrentCenterOfMassXYPosition());
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
@@ -573,10 +622,27 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
             updateSupportPolygonConstraint(activeContactPointPositions);
          }
+
+         if (runWithPostureOptimizer)
+            multiContactManager.update();
       }
 
       super.updateInternal();
-      updateContactInfo();
+      //      updateContactInfo();
+
+      if (!runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      {
+         //         LogTools.info("reporting s.r. debug status");
+         supportRegionDebug.setCenterOfMassStabilityMargin(multiContactRegionCalculator.getCenterOfMassStabilityMargin());
+
+         supportRegionDebug.getMultiContactFeasibleComRegion().clear();
+         for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
+         {
+            supportRegionDebug.getMultiContactFeasibleComRegion().add().set(multiContactRegionCalculator.getOptimizedVertex(i));
+         }
+
+         reportMessage(supportRegionDebug);
+      }
 
       executionTimer.stopMeasurement();
    }
@@ -586,6 +652,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       // Overriding the default implementation to reduce the number of times the reference frames are updated.
       desiredReferenceFrames.updateFrames();
+      centerOfMass.setMatchingFrame(desiredReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
    }
 
    /**
@@ -637,6 +704,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       centerOfMassPositionToHold.setX(tempMidFeet.getX() + tempOffset.getX());
       centerOfMassPositionToHold.setY(tempMidFeet.getY() + tempOffset.getY());
+   }
+
+   public void updateUnoptimizedStablityData(KinematicsToolboxSupportRegionDebug supportRegionDebug)
+   {
+      unoptimizedCenterOfMassStabilityMargin.set(supportRegionDebug.getCenterOfMassStabilityMargin());
+
+      unoptimizedStabilityRegion.clear();
+      for (int i = 0; i < supportRegionDebug.getMultiContactFeasibleComRegion().size(); i++)
+      {
+         unoptimizedStabilityRegion.addVertex(supportRegionDebug.getMultiContactFeasibleComRegion().get(i));
+      }
+      unoptimizedStabilityRegion.update();
    }
 
    /**
@@ -751,7 +830,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          return;
       }
 
+      //      if (isUpperBodyLoadBearing.getValue())
+      //         return;
+
       updateCoMPositionToHold();
+
+      // Ignore com xy position to hold
       CenterOfMassFeedbackControlCommand feedbackControlCommand = bufferToPack.addCenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(getDefaultSpatialGains().getPositionGains());
       feedbackControlCommand.setWeightForSolver(momentumWeight.getDoubleValue());
@@ -821,6 +905,27 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
    }
 
+   private void mutateExternalWeights(KinematicsToolboxRigidBodyCommand command)
+   {
+      if (!isUpperBodyLoadBearing.getValue())
+         return;
+
+      if (runWithPostureOptimizer && (command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.LEFT) || command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT)))
+      {
+         double activationAlpha = multiContactManager.getActivationAlpha();
+         double orientationWeightRatio = 1.0 - activationAlpha;
+
+         if (orientationWeightRatio < 1.0e-6)
+         {
+            command.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, false);
+         }
+         else
+         {
+            command.getWeightMatrix().getAngularPart().scale(orientationWeightRatio);
+         }
+      }
+   }
+
    private void initializeWholeBodyContactState()
    {
       multiContactRegionCalculator.clear();
@@ -840,6 +945,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       wholeBodyContactState.update();
       multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
+   }
+
+   private void initializePostureAdjustment()
+   {
+      if (runWithPostureOptimizer)
+         multiContactManager.initialize(privilegedConfigurationCommand);
    }
 
    private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
@@ -898,12 +1009,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldSupportRigidBodyCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
+
+      if (runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      {
+         multiContactManager.addPostureFeedbackCommands(bufferToPack);
+      }
    }
 
    @Override
    protected void getAdditionalInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
       addJointLimitReductionCommand(bufferToPack);
+
+      if (runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      {
+         multiContactManager.addPostureInverseKinematicsCommands(bufferToPack);
+      }
    }
 
    public YoDouble getMomentumWeight()

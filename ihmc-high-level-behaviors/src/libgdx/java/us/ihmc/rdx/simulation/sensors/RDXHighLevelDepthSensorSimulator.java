@@ -349,8 +349,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       {
          if (ros2Node != null)
          {
-            if (publishPointCloudROS2.get())
-               publishPointCloudROS2();
+//            if (publishPointCloudROS2.get())
+//               publishPointCloudROS2();
          }
       }
    }

@@ -7,10 +7,10 @@ public enum VRTrackedSegmentType
 {
    // TODO Override parameters in robot dependent class
    // Hands defaults are 20 and 1. Reduce the orientation to 0.25 for the nub forearms
-   LEFT_HAND("Left Hand", RobotSide.LEFT, -1.0, -1.0),
-   RIGHT_HAND("Right Hand", RobotSide.RIGHT, -1.0, -1.0),
-   LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 1.0),
-   RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 1.0),
+   LEFT_HAND("Left Hand", RobotSide.LEFT, -1.0, 1.5),
+   RIGHT_HAND("Right Hand", RobotSide.RIGHT, -1.0, -1.0, 0.0, 0.0, 1.5, -1.0, -1.0),
+   LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 0.0),
+   RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 0.0),
    CHEST("Chest", null, 0.0, 0.0, 0.0, 0.0, 5.0, 1.5, 1.5),
    WAIST("Waist", null, 0.0, -1.0, 50.0, 50.0, -1.0, 1.5, 1.5),
    LEFT_ANKLE("Left Ankle", RobotSide.LEFT, 0.0, 0.0),
@@ -22,6 +22,15 @@ public enum VRTrackedSegmentType
    private final double angularRateLimitation;
    private final Vector3D positionWeight = new Vector3D();
    private final Vector3D orientationWeight = new Vector3D();
+
+   VRTrackedSegmentType(String segmentName, RobotSide robotSide, double positionWeight, double orientationWeight)
+   {
+      this(segmentName, robotSide, positionWeight, orientationWeight, -1.0, -1.0);
+   }
+   VRTrackedSegmentType(String segmentName, RobotSide robotSide, double positionWeight, double orientationWeight, double linearRateLimitation, double angularRateLimitation)
+   {
+      this(segmentName, robotSide, positionWeight, positionWeight, orientationWeight, orientationWeight, orientationWeight, linearRateLimitation, angularRateLimitation);
+   }
 
    VRTrackedSegmentType(String segmentName,
                         RobotSide robotSide,
@@ -39,15 +48,6 @@ public enum VRTrackedSegmentType
       this.angularRateLimitation = angularRateLimitation;
       positionWeight.set(positionXYWeight, positionXYWeight, positionZWeight);
       orientationWeight.set(orientationXWeight, orientationYWeight, orientationZWeight);
-   }
-
-   VRTrackedSegmentType(String segmentName, RobotSide robotSide, double positionWeight, double orientationWeight)
-   {
-      this(segmentName, robotSide, positionWeight, orientationWeight, -1.0, -1.0);
-   }
-   VRTrackedSegmentType(String segmentName, RobotSide robotSide, double positionWeight, double orientationWeight, double linearRateLimitation, double angularRateLimitation)
-   {
-      this(segmentName, robotSide, positionWeight, positionWeight, orientationWeight, orientationWeight, orientationWeight, linearRateLimitation, angularRateLimitation);
    }
 
    public String getSegmentName()
@@ -92,7 +92,8 @@ public enum VRTrackedSegmentType
 
    public static VRTrackedSegmentType[] getTrackerTypes()
    {
-      return new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
+      return new VRTrackedSegmentType[0];
+//      return new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
    }
 
    public static VRTrackedSegmentType[] getControllerTypes()
