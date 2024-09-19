@@ -119,6 +119,7 @@ public class KSTTools
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
                    DoubleProvider time,
+                   boolean runPostureOptimizer,
                    YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
    {
@@ -176,6 +177,7 @@ public class KSTTools
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
                                                              toolboxControllerPeriod,
+                                                             runPostureOptimizer,
                                                              yoGraphicsListRegistry,
                                                              registry);
 
@@ -276,6 +278,8 @@ public class KSTTools
             latestInput = new KinematicsStreamingToolboxInputCommand();
 
          latestInput.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class));
+
+//         ikController.updateUnoptimizedStablityData(latestInput);
 
          for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
          {

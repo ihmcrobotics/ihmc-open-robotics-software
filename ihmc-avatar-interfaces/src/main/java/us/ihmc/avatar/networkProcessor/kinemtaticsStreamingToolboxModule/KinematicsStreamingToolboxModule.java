@@ -11,6 +11,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
@@ -30,8 +31,10 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
@@ -56,6 +59,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private ROS2PublisherBasics<WholeBodyStreamingMessage> streamingMessagePublisher;
 
+   private final boolean runPostureOptimizer;
    RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
@@ -68,6 +72,15 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer,
                                            PubSubImplementation pubSubImplementation)
    {
+      this(robotModel, parameters, true, startYoVariableServer, pubSubImplementation);
+   }
+
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                           KinematicsStreamingToolboxParameters parameters,
+                                           boolean runPostureOptimizer,
+                                           boolean startYoVariableServer,
+                                           PubSubImplementation pubSubImplementation)
+   {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
@@ -75,12 +88,15 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
             (int) (parameters.getToolboxUpdatePeriod() * 1000),
             pubSubImplementation);
 
+      this.runPostureOptimizer = runPostureOptimizer;
+
       setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
                                                             statusOutputManager,
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
+                                                            runPostureOptimizer,
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setRobotStateUpdater(robotStateUpdater);
@@ -88,9 +104,19 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
-      controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
-      controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
+
+      if (runPostureOptimizer)
+      {
+         controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
+         controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
+
+         ROS2Topic<KinematicsToolboxSupportRegionDebug> topic = KinematicsStreamingToolboxModule.getOutputStatusDebugTopic(robotModel.getSimpleRobotName());
+         ROS2Input<KinematicsToolboxSupportRegionDebug> externalStatus = new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+         externalStatus.addCallback(controller::updateKinematicsSupportRegionDebug);
+      }
+
       startYoVariableServer();
+
       if (yoVariableServer != null)
       {
          JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
@@ -113,6 +139,12 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          initialConfigurationMap.put(jointName, standPrepParameters.getSetpoint(jointName));
       }
       return initialConfigurationMap;
+   }
+
+   @Override
+   public DataServerSettings createYoVariableServerSettings()
+   {
+      return super.createYoVariableServerSettings(runPostureOptimizer);
    }
 
    @Override
@@ -174,6 +206,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
+      status.add(KinematicsToolboxSupportRegionDebug.class);
       status.add(ControllerCrashNotificationPacket.class);
       return status;
    }
@@ -233,6 +266,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
       return ControllerAPI.getTopic(getOutputTopic(robotName), KinematicsToolboxOutputStatus.class);
+   }
+
+   public static ROS2Topic<KinematicsToolboxSupportRegionDebug> getOutputStatusDebugTopic(String robotName)
+   {
+      return ControllerAPI.getTopic(getOutputTopic(robotName), KinematicsToolboxSupportRegionDebug.class);
    }
 
    public static ROS2Topic<ControllerCrashNotificationPacket> getOutputCrashNotificationTopic(String robotName)

@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,6 +51,7 @@ public class RDXVRModeManager
    private ImBoolean interactablesEnabled;
    private ControllerStatusTracker controllerStatusTracker;
    private RDXManualFootstepPlacement footstepPlacer;
+   private RDXHandConfigurationManager handManager;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -94,6 +96,7 @@ public class RDXVRModeManager
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
             controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
             footstepPlacer = teleoperationPanel.getLocomotionManager().getManualFootstepPlacement();
+            handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
       }
@@ -109,7 +112,8 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     sceneGraph,
                                                                     controllerStatusTracker,
-                                                                    footstepPlacer);
+                                                                    footstepPlacer,
+                                                                    handManager);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 
@@ -129,6 +133,11 @@ public class RDXVRModeManager
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
       RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
+   }
+
+   public void setHandManager(RDXHandConfigurationManager handManager)
+   {
+      kinematicsStreamingMode.setHandManager(handManager);
    }
 
    public void processVRInput(RDXVRContext vrContext)

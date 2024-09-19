@@ -30,6 +30,18 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
           */
    public static final byte CURRENT_TOOLBOX_STATE_RUNNING = (byte) 3;
    /**
+          * Low margin, high sensitivity
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_OPTIMIZER = (byte) 0;
+   /**
+          * Medium margin or low margin + low sensitivity
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_FREEZE = (byte) 1;
+   /**
+          * High margin
+          */
+   public static final byte POSTURE_OPTIMIZER_MODE_NOMINAL = (byte) 2;
+   /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
@@ -74,6 +86,11 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             * CoM stability margin if upper body is load-bearing
             */
    public double center_of_mass_stability_margin_ = -1.0;
+   /**
+            * CoM stability margin sensitivity with respect to the robot's posture
+            */
+   public double com_stability_posture_sensitivity_ = -1.0;
+   public byte posture_optimizer_state_ = (byte) 2;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -114,6 +131,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       closest_edge_index_ = other.closest_edge_index_;
 
       center_of_mass_stability_margin_ = other.center_of_mass_stability_margin_;
+
+      com_stability_posture_sensitivity_ = other.com_stability_posture_sensitivity_;
+
+      posture_optimizer_state_ = other.posture_optimizer_state_;
 
       solution_quality_ = other.solution_quality_;
 
@@ -251,6 +272,30 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return center_of_mass_stability_margin_;
    }
 
+   /**
+            * CoM stability margin sensitivity with respect to the robot's posture
+            */
+   public void setComStabilityPostureSensitivity(double com_stability_posture_sensitivity)
+   {
+      com_stability_posture_sensitivity_ = com_stability_posture_sensitivity;
+   }
+   /**
+            * CoM stability margin sensitivity with respect to the robot's posture
+            */
+   public double getComStabilityPostureSensitivity()
+   {
+      return com_stability_posture_sensitivity_;
+   }
+
+   public void setPostureOptimizerState(byte posture_optimizer_state)
+   {
+      posture_optimizer_state_ = posture_optimizer_state;
+   }
+   public byte getPostureOptimizerState()
+   {
+      return posture_optimizer_state_;
+   }
+
    public void setSolutionQuality(double solution_quality)
    {
       solution_quality_ = solution_quality;
@@ -303,6 +348,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_of_mass_stability_margin_, other.center_of_mass_stability_margin_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.com_stability_posture_sensitivity_, other.com_stability_posture_sensitivity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.posture_optimizer_state_, other.posture_optimizer_state_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -334,6 +383,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if(this.closest_edge_index_ != otherMyClass.closest_edge_index_) return false;
 
       if(this.center_of_mass_stability_margin_ != otherMyClass.center_of_mass_stability_margin_) return false;
+
+      if(this.com_stability_posture_sensitivity_ != otherMyClass.com_stability_posture_sensitivity_) return false;
+
+      if(this.posture_optimizer_state_ != otherMyClass.posture_optimizer_state_) return false;
 
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
@@ -371,6 +424,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.closest_edge_index_);      builder.append(", ");
       builder.append("center_of_mass_stability_margin=");
       builder.append(this.center_of_mass_stability_margin_);      builder.append(", ");
+      builder.append("com_stability_posture_sensitivity=");
+      builder.append(this.com_stability_posture_sensitivity_);      builder.append(", ");
+      builder.append("posture_optimizer_state=");
+      builder.append(this.posture_optimizer_state_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

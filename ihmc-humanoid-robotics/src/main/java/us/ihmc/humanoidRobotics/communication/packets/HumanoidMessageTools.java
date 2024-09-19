@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.euclid.tools.EuclidCoreTools.acos;
 import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 
 import java.awt.image.BufferedImage;
@@ -154,6 +155,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
