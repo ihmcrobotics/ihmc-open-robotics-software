@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -79,6 +81,18 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
+      this(commandInputManager, statusOutputManager, parameters, desiredFullRobotModel, fullRobotModelFactory, true, yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager,
+                                               KinematicsStreamingToolboxParameters parameters,
+                                               FullHumanoidRobotModel desiredFullRobotModel,
+                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                               boolean runPostureOptimizer,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry,
+                                               YoRegistry parentRegistry)
+   {
       super(statusOutputManager, parentRegistry);
 
       if (parameters.getClockType() == ClockType.CPU_CLOCK)
@@ -94,6 +108,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            desiredFullRobotModel,
                            fullRobotModelFactory,
                            time,
+                           runPostureOptimizer,
                            yoGraphicsListRegistry,
                            registry);
 
@@ -140,6 +155,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       tools.getIKController().setCollisionModel(collisionModel);
+   }
+
+   public void updateKinematicsSupportRegionDebug(KinematicsToolboxSupportRegionDebug supportRegionDebug)
+   {
+      tools.getIKController().updateUnoptimizedStablityData(supportRegionDebug);
    }
 
    private StateMachine<KSTState, State> createStateMachine(DoubleProvider timeProvider)

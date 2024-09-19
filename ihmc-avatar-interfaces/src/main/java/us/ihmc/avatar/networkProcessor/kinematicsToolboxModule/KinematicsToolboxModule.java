@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -172,6 +173,7 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
+      status.add(KinematicsToolboxSupportRegionDebug.class);
       return status;
    }
 

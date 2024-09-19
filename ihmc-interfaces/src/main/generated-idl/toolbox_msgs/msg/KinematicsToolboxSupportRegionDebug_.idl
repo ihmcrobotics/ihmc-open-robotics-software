@@ -1,0 +1,29 @@
+#ifndef __toolbox_msgs__msg__KinematicsToolboxSupportRegionDebug__idl__
+#define __toolbox_msgs__msg__KinematicsToolboxSupportRegionDebug__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsToolboxSupportRegionDebug_")
+      struct KinematicsToolboxSupportRegionDebug
+      {
+        /**
+         * Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
+         */
+        sequence<geometry_msgs::msg::dds::Point, 18> multi_contact_feasible_com_region;
+        /**
+         * CoM stability margin if upper body is load-bearing
+         */
+        @defaultValue(value=-1.0)
+        double center_of_mass_stability_margin;
+      };
+    };
+  };
+};
+
+#endif

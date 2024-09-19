@@ -319,17 +319,20 @@ public class RDXTeleoperationManager extends RDXPanel
                    armManager.executeDesiredArmCommand(side);
                 }
                });
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.OPEN, false, false));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.CLOSE, false, false));
-               interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
+
+               // TODO commented out because causing a RuntimeException
+//               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.OPEN, false, false));
+//               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.CLOSE, false, false));
+//               interactableHands.get(side).setGotoDoorAvoidanceArmAngles(() -> armManager.executeDoorAvoidanceArmAngles(side));
+
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
          }
 
          wholeBodyIKManager.setInteractables(interactableHands, interactableFeet, interactableChest, interactablePelvis);
 
-         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
-         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
+//         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+//         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);

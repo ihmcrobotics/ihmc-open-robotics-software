@@ -526,7 +526,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
       if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
          controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
-      
+
       if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
          controllerToolbox.setupMultiContactPostureAdjustmentProvider();
 

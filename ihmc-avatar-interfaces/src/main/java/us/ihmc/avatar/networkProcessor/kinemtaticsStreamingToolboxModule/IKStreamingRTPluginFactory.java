@@ -246,6 +246,10 @@ public class IKStreamingRTPluginFactory
                                                                                unpackedMessages.clear();
                                                                             });
 
+//         ROS2Topic<KinematicsToolboxSupportRegionDebug> topic = KinematicsStreamingToolboxModule.getOutputStatusDebugTopic(robotName);
+//         ROS2Input<KinematicsToolboxSupportRegionDebug> externalStatus = new ROS2Input<>(ros2Node, topic.getType(), topic);
+//         externalStatus.addCallback(kinematicsStreamingToolboxController::updateKinematicsSupportRegionDebug);
+
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
          HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(desiredFullRobotModel.getOneDoFJoints().length);
@@ -361,7 +365,7 @@ public class IKStreamingRTPluginFactory
       public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
       {
          // FIXME There's duplicate YoGraphics
-         return new YoGraphicsListRegistry();
+         return yoGraphicsListRegistry;
       }
 
       @Override
