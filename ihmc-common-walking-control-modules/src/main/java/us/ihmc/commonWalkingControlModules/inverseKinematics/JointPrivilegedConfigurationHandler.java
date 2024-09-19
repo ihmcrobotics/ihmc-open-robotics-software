@@ -27,6 +27,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class JointPrivilegedConfigurationHandler
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private static final boolean DEBUG = false;
 
    private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
    private boolean hasDefaultConfigurationWeightChanged = true;
@@ -252,7 +253,7 @@ public class JointPrivilegedConfigurationHandler
 
             if (!jointsWithConfiguration.contains(configuredJoint))
                jointsWithConfiguration.add(configuredJoint);
-            else
+            else if (DEBUG)
                LogTools.warn("Overwriting privileged acceleration for joint " + configuredJoint.getName() + ".");
          }
       }
@@ -290,7 +291,7 @@ public class JointPrivilegedConfigurationHandler
 
             if (!jointsWithConfiguration.contains(configuredJoint))
                jointsWithConfiguration.add(configuredJoint);
-            else
+            else if (DEBUG)
                LogTools.warn("Overwriting privileged velocity for joint " + configuredJoint.getName() + ".");
          }
       }
@@ -386,7 +387,7 @@ public class JointPrivilegedConfigurationHandler
 
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
-               else
+               else if (DEBUG)
                   LogTools.warn("Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
             }
 
@@ -398,7 +399,7 @@ public class JointPrivilegedConfigurationHandler
 
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
-               else
+               else if (DEBUG)
                   LogTools.warn("Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
 
