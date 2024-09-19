@@ -38,9 +38,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.PD3DStiffnesses;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPD3DStiffnesses;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -87,12 +85,12 @@ public final class ImpedancePointFeedbackControllerTest
       FramePoint3D desiredPosition = EuclidFrameRandomTools.nextFramePoint3D(random, baseBody.getBodyFixedFrame());
       FrameVector3D zero = new FrameVector3D(desiredPosition.getReferenceFrame());
 
-      PD3DStiffnesses stiffnesses = new DefaultPD3DStiffnesses();
-      stiffnesses.setProportionalStiffnesses(5.0);
-      stiffnesses.setDerivativeStiffnesses(Double.NaN);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(5.0);
+      gains.setDerivativeGains(Double.NaN);
       ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
       impedancePointFeedbackControlCommand.set(baseBody, endEffector);
-      impedancePointFeedbackControlCommand.setGains(stiffnesses);
+      impedancePointFeedbackControlCommand.setGains(gains);
       impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
       impedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
       impedancePointFeedbackController.setEnabled(true);
@@ -167,11 +165,9 @@ public final class ImpedancePointFeedbackControllerTest
 
       ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
       impedancePointFeedbackControlCommand.set(elevator, endEffector);
-      PD3DStiffnesses stiffnesses = new DefaultPD3DStiffnesses();
-      stiffnesses.setProportionalStiffnesses(100.0);
-      stiffnesses.setDerivativeStiffnesses(Double.NaN);
-//      stiffnesses.setDerivativeStiffnesses(50.0);
-      impedancePointFeedbackControlCommand.setGains(stiffnesses);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(5.0);
+      gains.setDerivativeGains(Double.NaN);
       impedancePointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       ImpedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
@@ -256,10 +252,9 @@ public final class ImpedancePointFeedbackControllerTest
 
       ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
       impedancePointFeedbackControlCommand.set(elevator, endEffector);
-      PD3DStiffnesses stiffnesses = new DefaultPD3DStiffnesses();
-      stiffnesses.setProportionalStiffnesses(20.0);
-      stiffnesses.setDerivativeStiffnesses(Double.NaN);
-      impedancePointFeedbackControlCommand.setGains(stiffnesses);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(5.0);
+      gains.setDerivativeGains(Double.NaN);
       impedancePointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       ImpedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
@@ -367,7 +362,7 @@ public final class ImpedancePointFeedbackControllerTest
 
       ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
       impedancePointFeedbackControlCommand.set(elevator, endEffector);
-      PD3DStiffnesses stiffnesses = new DefaultPD3DStiffnesses();
+      PID3DGains gains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
@@ -396,15 +391,15 @@ public final class ImpedancePointFeedbackControllerTest
          positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
-         stiffnesses.setProportionalStiffnesses(proportionalGain);
-         stiffnesses.setDerivativeStiffnesses(derivativeGain);
-         stiffnesses.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         gains.setProportionalGains(proportionalGain);
+         gains.setDerivativeGains(derivativeGain);
+         gains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
 
 
-         PD3DStiffnesses positionStiffness = new DefaultPD3DStiffnesses();
-         positionStiffness.set(positionGains);
-         positionStiffness.setDerivativeStiffnesses(Double.NaN);
-         impedancePointFeedbackControlCommand.setGains(positionStiffness);
+         PID3DGains positionGain = new DefaultPID3DGains();
+         positionGain.set(positionGains);
+         positionGain.setDerivativeGains(Double.NaN);
+         impedancePointFeedbackControlCommand.setGains(positionGain);
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
          FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);

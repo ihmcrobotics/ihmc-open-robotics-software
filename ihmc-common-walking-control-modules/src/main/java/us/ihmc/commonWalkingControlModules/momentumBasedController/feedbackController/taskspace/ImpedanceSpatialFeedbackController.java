@@ -40,9 +40,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
-import us.ihmc.robotics.controllers.pidGains.YoPDSE3Stiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPDSE3Stiffnesses;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -130,9 +130,9 @@ public class ImpedanceSpatialFeedbackController implements FeedbackControllerInt
    protected final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
    protected final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   protected final YoPDSE3Stiffnesses gains = new DefaultYoPDSE3Stiffnesses("_stiffness", GainCoupling.NONE, null);
-   protected final YoPD3DStiffnesses positionGains;
-   protected final YoPD3DStiffnesses orientationGains;
+   protected final YoPIDSE3Gains gains;
+   protected final YoPID3DGains positionGains;
+   protected final YoPID3DGains orientationGains;
    protected final Matrix3D tempGainMatrix = new Matrix3D();
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
@@ -194,9 +194,9 @@ public class ImpedanceSpatialFeedbackController implements FeedbackControllerInt
 
       String endEffectorName = endEffector.getName();
       dt = ccToolbox.getControlDT();
-      gains.set(fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, false, true));
-      positionGains = gains.getPositionStiffnesses();
-      orientationGains = gains.getOrientationStiffnesses();
+      gains = fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, false, true);
+      positionGains = gains.getPositionGains();
+      orientationGains = gains.getOrientationGains();
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
       YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
@@ -545,10 +545,10 @@ public class ImpedanceSpatialFeedbackController implements FeedbackControllerInt
       else
          angularFeedbackTermToPack.changeFrame(controlFrame);
 
-      positionGains.getProportionalStiffnessMatrix(tempGainMatrix);
+      positionGains.getProportionalGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(linearFeedbackTermToPack);
 
-      orientationGains.getProportionalStiffnessMatrix(tempGainMatrix);
+      orientationGains.getProportionalGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(angularFeedbackTermToPack);
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
@@ -619,12 +619,12 @@ public class ImpedanceSpatialFeedbackController implements FeedbackControllerInt
       linearFeedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
       angularFeedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
-      positionGains.getDerivativeStiffnessMatrix(tempGainMatrix);
-      orientationGains.getDerivativeStiffnessMatrix(tempMatrix3D);
+      positionGains.getDerivativeGainMatrix(tempGainMatrix);
+      orientationGains.getDerivativeGainMatrix(tempMatrix3D);
       if (tempGainMatrix.containsNaN() || tempMatrix3D.containsNaN())
       {
-         positionGains.getFullProportionalStiffnessMatrix(tempLinearMatrix, 3);
-         orientationGains.getFullProportionalStiffnessMatrix(tempAngularMatrix, 0);
+         positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
+         orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
          CommonOps_DDRM.mult(tempLinearMatrix, tempLinearMatrix, tempMatrix);
 
          sqrtProportionalGainMatrix.reshape(6,6);

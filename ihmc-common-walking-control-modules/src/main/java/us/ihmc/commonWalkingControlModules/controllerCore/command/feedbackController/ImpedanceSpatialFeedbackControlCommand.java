@@ -26,14 +26,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-//import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-//import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-//import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-//import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.PD3DStiffnessesReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PDSE3Stiffnesses;
-import us.ihmc.robotics.controllers.pidGains.PDSE3StiffnessesReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPDSE3Stiffnesses;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -84,7 +80,7 @@ public class ImpedanceSpatialFeedbackControlCommand implements FeedbackControlCo
    private final FrameVector3D referenceForce = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final DefaultPDSE3Stiffnesses gains = new DefaultPDSE3Stiffnesses();
+   private final ZeroablePIDSE3Gains gains = new ZeroablePIDSE3Gains();
    /**
     * This is the reference frame in which the angular part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.
@@ -267,7 +263,7 @@ public class ImpedanceSpatialFeedbackControlCommand implements FeedbackControlCo
     *
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(PDSE3StiffnessesReadOnly gains)
+   public void setGains(PIDSE3GainsReadOnly gains)
    {
       this.gains.set(gains);
    }
@@ -277,9 +273,9 @@ public class ImpedanceSpatialFeedbackControlCommand implements FeedbackControlCo
     *
     * @param orientationStiffnesses the new set of orientation gains to use. Not modified.
     */
-   public void setOrientationGains(PD3DStiffnessesReadOnly orientationStiffnesses)
+   public void setOrientationGains(PID3DGainsReadOnly orientationStiffnesses)
    {
-      this.gains.setOrientationStiffnesses(orientationStiffnesses);
+      this.gains.setOrientationGains(orientationStiffnesses);
    }
 
    /**
@@ -287,9 +283,9 @@ public class ImpedanceSpatialFeedbackControlCommand implements FeedbackControlCo
     *
     * @param positionStiffnesses the new set of position gains to use. Not modified.
     */
-   public void setPositionGains(PD3DStiffnessesReadOnly positionStiffnesses)
+   public void setPositionGains(PID3DGainsReadOnly positionStiffnesses)
    {
-      this.gains.setPositionStiffnesses(positionStiffnesses);
+      this.gains.setPositionGains(positionStiffnesses);
    }
 
    /**
@@ -1243,7 +1239,7 @@ public class ImpedanceSpatialFeedbackControlCommand implements FeedbackControlCo
       return spatialAccelerationCommand;
    }
 
-   public PDSE3Stiffnesses getGains()
+   public PIDSE3Gains getGains()
    {
       return gains;
    }

@@ -37,8 +37,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
+//import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
+//import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
+//import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+//import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -104,7 +108,7 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
    private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   private final YoPD3DStiffnesses gains = new DefaultYoPD3DStiffnesses("_stiffness", GainCoupling.NONE, null, null);
+   private final YoPID3DGains gains;
    private final YoTranslationFrame controlFrame;
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
@@ -163,7 +167,7 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
 
       String endEffectorName = endEffector.getName();
       dt = ccToolbox.getControlDT();
-      gains.set(fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, false, true));
+      gains = fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, false, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = fbToolbox.getOrCreateImpedancePointFeedbackControlFrame(endEffector, controllerIndex, true);
@@ -453,7 +457,7 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      gains.getProportionalStiffnessMatrix(tempMatrix3D);
+      gains.getProportionalGainMatrix(tempMatrix3D);
       tempMatrix3D.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
@@ -502,10 +506,10 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
 
       feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
-      gains.getDerivativeStiffnessMatrix(tempMatrix3D);
+      gains.getDerivativeGainMatrix(tempMatrix3D);
       if (tempMatrix3D.containsNaN())
       {
-         gains.getFullProportionalStiffnessMatrix(tempMatrix, 3);
+         gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);

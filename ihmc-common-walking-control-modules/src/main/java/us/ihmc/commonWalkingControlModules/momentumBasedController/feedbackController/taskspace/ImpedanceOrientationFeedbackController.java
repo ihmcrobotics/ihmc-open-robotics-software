@@ -34,8 +34,10 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
+//import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
+//import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -108,7 +110,7 @@ public class ImpedanceOrientationFeedbackController implements FeedbackControlle
    private final VirtualTorqueCommand virtualModelControlOutput = new VirtualTorqueCommand();
    private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
 
-   private final YoPD3DStiffnesses gains = new DefaultYoPD3DStiffnesses("_stiffness", GainCoupling.NONE, null, null);
+   private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
    private final YoOrientationFrame controlFrame;
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
@@ -170,7 +172,7 @@ public class ImpedanceOrientationFeedbackController implements FeedbackControlle
 
       String endEffectorName = endEffector.getName();
       dt = ccToolbox.getControlDT();
-      gains.set(fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, false, true));
+      gains = fbToolbox.getOrCreateOrientationGains(endEffector, controllerIndex, false, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       controlFrame = fbToolbox.getOrCreateOrientationFeedbackControlFrame(endEffector, controllerIndex, true);
@@ -485,7 +487,7 @@ public class ImpedanceOrientationFeedbackController implements FeedbackControlle
       else
          feedbackTermToPack.changeFrame(controlFrame);
 
-      gains.getProportionalStiffnessMatrix(tempGainMatrix);
+      gains.getProportionalGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(feedbackTermToPack);
 
       feedbackTermToPack.changeFrame(controlFrame);
@@ -536,10 +538,10 @@ public class ImpedanceOrientationFeedbackController implements FeedbackControlle
 
       feedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
-      gains.getDerivativeStiffnessMatrix(tempMatrix3D);
+      gains.getDerivativeGainMatrix(tempMatrix3D);
       if (tempMatrix3D.containsNaN())
       {
-         gains.getFullProportionalStiffnessMatrix(tempMatrix, 3);
+         gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);

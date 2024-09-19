@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.ImpedanceSpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
@@ -36,11 +37,8 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.PDSE3Stiffnesses;
-import us.ihmc.robotics.controllers.pidGains.YoPD3DStiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPD3DStiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPDSE3Stiffnesses;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPD3DStiffnesses;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.Assert;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -84,11 +82,11 @@ public final class ImpedanceSpatialFeedbackControllerTest
       // Create a command with baseBody as base and desired values in the baseBody frame.
       FramePose3D desiredPose = EuclidFrameRandomTools.nextFramePose3D(random, baseBody.getBodyFixedFrame());
       SpatialVector zero = new SpatialVector(desiredPose.getReferenceFrame());
-      PDSE3Stiffnesses gains = new DefaultPDSE3Stiffnesses();
-      gains.setPositionProportionalStiffnesses(2.0);
-      gains.setPositionDerivativeStiffnesses(Double.NaN);
-      gains.setOrientationProportionalStiffnesses(2.0);
-      gains.setOrientationDerivativeStiffnesses(Double.NaN);
+      PIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.setPositionProportionalGains(1.5);
+      gains.setPositionDerivativeGains(Double.NaN);
+      gains.setOrientationProportionalGains(1.5);
+      gains.setOrientationDerivativeGains(Double.NaN);
       ImpedanceSpatialFeedbackControlCommand impedanceSpatialFeedbackControlCommand = new ImpedanceSpatialFeedbackControlCommand();
       impedanceSpatialFeedbackControlCommand.set(baseBody, endEffector);
       impedanceSpatialFeedbackControlCommand.setGains(gains);
@@ -167,9 +165,9 @@ public final class ImpedanceSpatialFeedbackControllerTest
 
       ImpedanceSpatialFeedbackControlCommand impedanceSpatialFeedbackControlCommand = new ImpedanceSpatialFeedbackControlCommand();
       impedanceSpatialFeedbackControlCommand.set(elevator, endEffector);
-      DefaultPDSE3Stiffnesses gains = new DefaultPDSE3Stiffnesses();
-      gains.getPositionStiffnesses().setProportialAndDerivativeStiffnesses(0.1, Double.NaN);
-      gains.getOrientationStiffnesses().setProportialAndDerivativeStiffnesses(0.1, Double.NaN);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(0.1, Double.NaN);
+      gains.getOrientationGains().setProportialAndDerivativeGains(0.1, Double.NaN);
       impedanceSpatialFeedbackControlCommand.setGains(gains);
       impedanceSpatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       impedanceSpatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -271,9 +269,9 @@ public final class ImpedanceSpatialFeedbackControllerTest
 
       ImpedanceSpatialFeedbackControlCommand impedanceSpatialFeedbackControlCommand = new ImpedanceSpatialFeedbackControlCommand();
       impedanceSpatialFeedbackControlCommand.set(elevator, endEffector);
-      DefaultPDSE3Stiffnesses gains = new DefaultPDSE3Stiffnesses();
-      gains.getPositionStiffnesses().setProportialAndDerivativeStiffnesses(1.0, Double.NaN);
-      gains.getOrientationStiffnesses().setProportialAndDerivativeStiffnesses(1.0, Double.NaN);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(1.0, Double.NaN);
+      gains.getOrientationGains().setProportialAndDerivativeGains(1.0, Double.NaN);
       impedanceSpatialFeedbackControlCommand.setGains(gains);
       impedanceSpatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       impedanceSpatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
