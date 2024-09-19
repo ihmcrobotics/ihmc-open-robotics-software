@@ -82,7 +82,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
       if (rawOrientation == null)
       {
          throw new NullPointerException(getClass().getSimpleName() + " must be constructed with a non null "
-               + "position variable to call update(), otherwise use update(double)");
+               + "orientation variable to call update(), otherwise use update(orientation)");
       }
 
       update(rawOrientation);
