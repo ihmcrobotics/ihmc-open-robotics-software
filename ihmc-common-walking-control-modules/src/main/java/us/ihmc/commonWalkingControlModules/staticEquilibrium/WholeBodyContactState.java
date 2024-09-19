@@ -39,7 +39,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMass
 
 public class WholeBodyContactState implements WholeBodyContactStateInterface
 {
-   private static final boolean INCLUDE_GRAVITY_CORIOLIS_TORQUES = true;
+   private static final boolean INCLUDE_GRAVITY_CORIOLIS_TORQUES = false;
 
    private final RecyclingArrayList<ContactPoint> contactPoints = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(ContactPoint::new));
    private final Map<RigidBodyBasics, GeometricJacobian> contactJacobians = new HashMap<>();
