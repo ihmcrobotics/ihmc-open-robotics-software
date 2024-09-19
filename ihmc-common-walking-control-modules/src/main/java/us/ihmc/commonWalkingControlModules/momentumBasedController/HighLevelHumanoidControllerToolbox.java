@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.MultiContactPostureAdjustmentCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -171,6 +173,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
    private final YoBoolean wholeBodyContactsChanged = new YoBoolean("wholeBodyContactsChanged", registry);
    private final WholeBodyContactState wholeBodyContactState;
+
+   private WholeBodyPostureAdjustmentProvider postureAdjustmentProvider = WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider();
 
    private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTotalTimer", registry);
    private final ExecutionTimer contactStateUpdateTimer = new ExecutionTimer("contactStateUpdateTimer", registry);
@@ -433,6 +437,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
+      postureAdjustmentProvider.update();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -1108,16 +1113,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       if (multiContactRegionCalculator.hasSolvedWholeRegion())
       {
          // Update one edge of the region
-         int edgeToUpdateIndex = multiContactRegionCalculator.getQueryCounter();
-         multiContactRegionCalculator.performUpdateForNextEdge();
+         int vertexToUpdateIndex = multiContactRegionCalculator.getQueryCounter();
+         multiContactRegionCalculator.performUpdateForNextVertex();
 
          // Perform fixed-basis update for lowest margin edge
-         multiContactRegionCalculator.performFastUpdateForLowestMarginEdge(edgeToUpdateIndex);
+         multiContactRegionCalculator.performFastUpdateForLowestMarginEdge(vertexToUpdateIndex);
       }
       else
       {
          // Query new direction until initial region has been constructed
-         multiContactRegionCalculator.performUpdateForNextEdge();
+         multiContactRegionCalculator.performUpdateForNextVertex();
       }
       multiContactRegionLPSolveTimer.stopMeasurement();
 
@@ -1132,6 +1137,21 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    {
       boolean containsHandContactPoints = contactableBodies.size() > 2;
       return containsHandContactPoints;
+   }
+
+   public void setupMultiContactPostureAdjustmentProvider()
+   {
+      postureAdjustmentProvider = new MultiContactPostureAdjustmentCalculator(multiContactRegionCalculator,
+                                                                              wholeBodyContactState,
+                                                                              fullRobotModel,
+                                                                              centerOfMassFrame,
+                                                                              controlDT,
+                                                                              registry);
+   }
+
+   public WholeBodyPostureAdjustmentProvider getPostureAdjustmentProvider()
+   {
+      return postureAdjustmentProvider;
    }
 
    @Override
