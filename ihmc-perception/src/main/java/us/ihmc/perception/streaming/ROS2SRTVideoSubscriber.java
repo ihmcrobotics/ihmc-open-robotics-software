@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_FATAL;
+import static org.bytedeco.ffmpeg.global.avutil.av_log_set_level;
 import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
@@ -33,6 +35,8 @@ public class ROS2SRTVideoSubscriber
 
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, int outputAVPixelFormat)
    {
+      av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
+
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
       videoReceiver = new SRTVideoReceiver(outputAVPixelFormat);
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");

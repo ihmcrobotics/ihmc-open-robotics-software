@@ -35,13 +35,12 @@ public class SRTVideoStreamerDemo
       // Read image data from webcam
       int imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-      double reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
 
       // Create and initialize the video streamer
       InetSocketAddress streamerAddress = StreamingTools.getMyAddress();
       LogTools.info("Starting streamer on {}", streamerAddress);
       videoStreamer = new SRTVideoStreamer(streamerAddress);
-      videoStreamer.initialize(imageWidth, imageHeight, reportedFPS, AV_PIX_FMT_BGR24);
+      videoStreamer.initialize(imageWidth, imageHeight, AV_PIX_FMT_BGR24);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTStreamerDemoDestruction"));
 

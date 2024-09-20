@@ -167,7 +167,7 @@ public abstract class FFMPEGEncoder
          if (encoder != null && !encoder.isNull())
             return encoder;
 
-         LogTools.error("Failed to find valid encoder " + preferredEncoderName + " - attempting to default to another");
+         LogTools.warn("Failed to find preferred encoder ({}). Attempting to default to another", preferredEncoderName);
       }
 
       encoder = avcodec_find_encoder(outputFormat.video_codec());

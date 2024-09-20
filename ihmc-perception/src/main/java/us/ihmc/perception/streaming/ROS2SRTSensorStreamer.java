@@ -26,10 +26,21 @@ public class ROS2SRTSensorStreamer
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName().toLowerCase() + "_node");
    }
 
-   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage, double inputFPS, int inputAVPixelFormat)
+   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
+                         RawImage exampleImage,
+                         int inputAVPixelFormat)
+   {
+      addStream(streamTopic, exampleImage, inputAVPixelFormat, -1, false);
+   }
+
+   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
+                         RawImage exampleImage,
+                         int inputAVPixelFormat,
+                         int intermediateColorConversion,
+                         boolean useHardwareAcceleration)
    {
       ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, streamTopic);
-      videoStreamer.initialize(exampleImage, inputFPS, inputAVPixelFormat);
+      videoStreamer.initialize(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration);
       videoStreamers.put(streamTopic, videoStreamer);
    }
 

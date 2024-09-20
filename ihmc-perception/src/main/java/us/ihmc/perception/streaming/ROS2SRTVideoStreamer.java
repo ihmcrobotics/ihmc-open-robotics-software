@@ -36,14 +36,14 @@ public class ROS2SRTVideoStreamer
       sendFrequencyCalculator = new FrequencyCalculator();
    }
 
-   public void initialize(RawImage exampleImage, double inputFPS, int inputPixelFormat)
+   public void initialize(RawImage exampleImage, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      initialize(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputFPS, inputPixelFormat);
+      initialize(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
    }
 
-   public void initialize(int imageWidth, int imageHeight, double inputFPS, int inputPixelFormat)
+   public void initialize(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      videoStreamer.initialize(imageWidth, imageHeight, inputFPS, inputPixelFormat);
+      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
    }
 
    public synchronized void sendFrame(RawImage frame)
@@ -51,7 +51,10 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      videoStreamer.sendFrame(frame.getCpuImageMat());
+      if (videoStreamer.isUsingHardwareAcceleration())
+         videoStreamer.sendFrame(frame.getGpuImageMat());
+      else
+         videoStreamer.sendFrame(frame.getCpuImageMat());
 
       sendFrequencyCalculator.ping();
       float frequency = (float) sendFrequencyCalculator.getFrequency();

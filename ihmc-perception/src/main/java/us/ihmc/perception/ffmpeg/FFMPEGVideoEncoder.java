@@ -42,9 +42,9 @@ public abstract class FFMPEGVideoEncoder extends FFMPEGEncoder
    }
 
    /**
-    * If set, the input mat will first undergo the specified color conversion before being sent to the encoder.
+    * OpenCV color conversion (i.e. one of {@code opencv_imgproc.COLOR_*}) to apply such that the input image matches the input pixel format.
     * This may be useful as some encoders only accept certain pixel formats.
-    * @param opencvImgprocColorConversion One of opencv_imgproc.COLOR_*
+    * @param opencvImgprocColorConversion One of {@code opencv_imgproc.COLOR_*}
     */
    public void setIntermediateColorConversion(int opencvImgprocColorConversion)
    {

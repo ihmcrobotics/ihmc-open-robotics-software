@@ -4,8 +4,9 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.ffmpeg.FFMPEGHardwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFMPEGInterruptCallback;
 import us.ihmc.perception.ffmpeg.FFMPEGSoftwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
@@ -26,8 +27,10 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 public class SRTVideoStreamer
 {
    private static final String OUTPUT_FORMAT_NAME = "mpegts";
-   private static final String PREFERRED_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
+   private static final String PREFERRED_CODEC = "h264_nvenc"; // TODO: use other codec if CUDA not available
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV420P;
+   private static final int GOP_SIZE = 5; // send 5 P frames between key frames
+   private static final int MAX_B_FRAMES = 0; // don't use B frames
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> HEVC_NVENC_OPTIONS
@@ -86,30 +89,59 @@ public class SRTVideoStreamer
     * Initialize the streamer to encode images
     * @param imageWidth Width of images being streamed
     * @param imageHeight Height of images being streamed
-    * @param inputFPS FPS at which images will be provided
     * @param inputAVPixelFormat Pixel format of images being provided (Must be one of AV_PIX_FMT_*)
     */
-   public void initialize(int imageWidth, int imageHeight, double inputFPS, int inputAVPixelFormat)
+   public void initialize(int imageWidth,
+                          int imageHeight,
+                          int inputAVPixelFormat)
    {
-      int bitRate = imageWidth * imageHeight;
-      int gopSize = (int) inputFPS / 10; // Send key frames every 0.1 seconds
+      initialize(imageWidth, imageHeight, inputAVPixelFormat, -1, false);
+   }
 
-      encoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
-                                               PREFERRED_CODEC,
-                                               bitRate,
-                                               imageWidth,
-                                               imageHeight,
-                                               OUTPUT_PIXEL_FORMAT,
-                                               gopSize,
-                                               0,
-                                               inputAVPixelFormat);
+   /**
+    * Initialize the streamer to encode images
+    * @param imageWidth Width of images being streamed
+    * @param imageHeight Height of images being streamed
+    * @param inputAVPixelFormat Pixel format of images being provided (Must be one of AV_PIX_FMT_*)
+    * @param intermediateColorConversion OpenCV color conversion to apply such that the input image matches the inputAVPixelFormat.
+    *                                    To not perform a color conversion, pass in a negative value.
+    */
+   public void initialize(int imageWidth,
+                          int imageHeight,
+                          int inputAVPixelFormat,
+                          int intermediateColorConversion,
+                          boolean useHardwareAcceleration)
+   {
+      int bitRate = 10 * imageWidth * imageHeight;
+
+      if (useHardwareAcceleration)
+         encoder = new FFMPEGHardwareVideoEncoder(outputFormat,
+                                                  PREFERRED_CODEC,
+                                                  bitRate,
+                                                  imageWidth,
+                                                  imageHeight,
+                                                  GOP_SIZE,
+                                                  MAX_B_FRAMES,
+                                                  inputAVPixelFormat);
+      else
+         encoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
+                                                  PREFERRED_CODEC,
+                                                  bitRate,
+                                                  imageWidth,
+                                                  imageHeight,
+                                                  OUTPUT_PIXEL_FORMAT,
+                                                  GOP_SIZE,
+                                                  MAX_B_FRAMES,
+                                                  inputAVPixelFormat);
+
+      encoder.setIntermediateColorConversion(intermediateColorConversion);
       encoder.initialize(encoderOptions);
       initialized = true;
    }
 
-   public void sendFrame(Mat frame)
+   public void sendFrame(Pointer frame)
    {
-      encoder.setNextFrame(frame); // TODO: Use GpuMat instead
+      encoder.setNextFrame(frame);
       encoder.encodeNextFrame(this::writeToCallers);
    }
 
@@ -146,6 +178,11 @@ public class SRTVideoStreamer
    public boolean isInitialized()
    {
       return initialized;
+   }
+
+   public boolean isUsingHardwareAcceleration()
+   {
+      return encoder instanceof FFMPEGHardwareVideoEncoder;
    }
 
    public void destroy()
