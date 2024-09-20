@@ -6,53 +6,69 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+import us.ihmc.wholeBodyController.CenterOfMassCalibrationTool;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
+import static us.ihmc.avatar.AvatarControllerThread.createListOfJointsToIgnore;
 
 public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThreadInterface
 {
+   private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
+
    private final YoRegistry registry = new YoRegistry("WholeBodyControllerCore");
    private final YoDouble wholeBodyControllerCoreTime = new YoDouble("WholeBodyControllerCoreTime", registry);
-   private final FullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel controllerCoreFullRobotModel;
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
    private final YoLong timeStamp = new YoLong("TimeStampWholeBodyControllerCore", registry);
    private final YoLong timeStampOffset = new YoLong("TimestampOffsetWholeBodyControllerCore", registry);
    private final HumanoidRobotContextData humanoidRobotContextData;
    private final YoBoolean runWholeBodyControllerCore = new YoBoolean("RunWholeBodyControllerCore", registry);
-//   private final List<Supplier<YoGraphicDefinition> scs2YoGraphicHolders = new ArrayList<>();
+   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
    private final ModularRobotController wholeBodyControllerCoreCalculator = new ModularRobotController("WBCC");
-//   private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
+   //   private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
 
    public AvatarWholeBodyControllerCoreThread(HumanoidRobotContextDataFactory contextDataFactory,
                                               StatusMessageOutputManager walkingOutputManager,
-                                              DRCRobotModel drcRobotModel,
+                                              DRCRobotModel robotModel,
+                                              HumanoidRobotSensorInformation sensorInformation,
                                               DRCOutputProcessor outputProcessor,
                                               RealtimeROS2Node realtimeROS2Node)
    {
-      this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
-      ForceSensorDataHolder forceSensorDataHolderForWholeBodyControllerCore = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      this.controllerCoreFullRobotModel = robotModel.createFullRobotModel();
+      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerCoreFullRobotModel.getOneDoFJoints().length);
+      ForceSensorDataHolder forceSensorDataHolderForWholeBodyControllerCore = new ForceSensorDataHolder(Arrays.asList(controllerCoreFullRobotModel.getForceSensorDefinitions()));
       CenterOfMassDataHolder centerOfMassDataHolderForWholeBodyControllerCore = new CenterOfMassDataHolder();
-      CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore = new CenterOfPressureDataHolder(fullRobotModel);
-      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore = new CenterOfPressureDataHolder(controllerCoreFullRobotModel);
+      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
@@ -60,10 +76,11 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
-      contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
+      contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-//      wholeBodyControllerCoreCalculator = createWholeBodyControllerCoreCalculator();
+      JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerCoreFullRobotModel, robotModel, sensorInformation);
+      //      wholeBodyControllerCoreCalculator = createWholeBodyControllerCoreCalculator();
       if (outputProcessor != null)
       {
          outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
@@ -72,21 +89,39 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       }
    }
 
-//   private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel wbccModel,
-//                                                                          YoDouble yoTime,
-//                                                                          double wbccDT,
-//                                                                          double gravity,
-//                                                                          ForceSensorDataHolderReadOnly forceSensorDataHolderForWBCC,
-//                                                                          CenterOfMassDataHolderReadOnly centerOfMassDataHolderForWBCC,
-//                                                                          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-//                                                                          HumanoidRobotSensorInformation sensorInformation,
-//                                                                          JointDesiredOutputListBasics lowLevelControllerOutput,
-//                                                                          YoRegistry registry,
-//                                                                          boolean kinematicsSimulation,
-//                                                                          JointBasics...jointToIgnore)
-//   {
-//
-//   }
+   private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel controllerCoreModel,
+                                                                          HighLevelHumanoidControllerFactory controllerFactory,
+                                                                          YoDouble yoTime,
+                                                                          double wbccDT,
+                                                                          double gravity,
+                                                                          ForceSensorDataHolderReadOnly forceSensorDataHolderForControllerCore,
+                                                                          CenterOfMassDataHolderReadOnly centerOfMassDataHolderForControllerCore,
+                                                                          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                                          HumanoidRobotSensorInformation sensorInformation,
+                                                                          JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                                          YoRegistry registry,
+                                                                          boolean kinematicsSimulation,
+                                                                          JointBasics... jointToIgnore)
+   {
+      if (CREATE_COM_CALIBRATION_TOOL)
+      {
+         try
+         {
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerCoreModel,
+                                                                                                      forceSensorDataHolderForControllerCore,
+                                                                                                      yoGraphicsListRegistry,
+                                                                                                      registry);
+            controllerFactory.addUpdatable(centerOfMassCalibrationTool);
+         }
+         catch (Exception e)
+         {
+            System.err.println("Couldn't create CenterOfMassCalibrationTool");
+         }
+      }
+      ModularRobotController modularRobotController = new ModularRobotController("WholeBodyControllerCore");
+
+      return modularRobotController;
+   }
 
    public void initialize()
    {
@@ -115,7 +150,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    @Override
    public void run()
    {
-//      wholeBodyControllerCoreThreadTimer.startMeasurement();
+      //      wholeBodyControllerCoreThreadTimer.startMeasurement();
       // TODO getWholeBodyControllerCoreRan() should be called in the controllerThread.
       // This tells the controlThread that the wholeBodyControllerCore runs
       //runWholeBodyControllerCore.set(humanoidRobotContextData.getWholeBodyControllerCoreRan());
@@ -126,7 +161,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
 
       try
       {
-         HumanoidRobotContextTools.updateRobot(fullRobotModel, humanoidRobotContextData.getProcessedJointData());
+         HumanoidRobotContextTools.updateRobot(controllerCoreFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          timeStamp.set(humanoidRobotContextData.getTimestamp());
          if (firstTick.getValue())
          {
@@ -134,31 +169,31 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
             timeStampOffset.set(timeStamp.getValue());
          }
          wholeBodyControllerCoreTime.set(Conversions.nanosecondsToSeconds(timeStamp.getValue() - timeStampOffset.getValue()));
-         if(firstTick.getValue())
+         if (firstTick.getValue())
          {
             wholeBodyControllerCoreCalculator.initialize();
             firstTick.set(false);
          }
          wholeBodyControllerCoreCalculator.doControl();
-         humanoidRobotContextData.setWholeBodyControllerCoreRan(true);
+         humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
       }
       catch (Exception e)
       {
          throw new RuntimeException(e);
       }
-//      wholeBodyControllerCoreThreadTimer.stopMeasurement();
+      //      wholeBodyControllerCoreThreadTimer.stopMeasurement();
    }
 
    @Override
    public YoRegistry getYoVariableRegistry()
    {
-      return null;
+      return registry;
    }
 
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      return null;
+      return controllerCoreFullRobotModel;
    }
 
    @Override
@@ -166,6 +201,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    {
       return humanoidRobotContextData;
    }
+
    public JointDesiredOutputListBasics getDesiredJointDataHolder()
    {
       return humanoidRobotContextData.getJointDesiredOutputList();
@@ -174,8 +210,16 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
-//      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-//      for (int i=0; i< scs2YoGraphicHolders.size(); i++)
-      return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (int i = 0; i < scs2YoGraphicHolders.size(); i++)
+      {
+         group.addChild(scs2YoGraphicHolders.get(i).get());
+      }
+      return group;
+   }
+
+   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
+   {
+      return yoGraphicsListRegistry;
    }
 }

@@ -442,13 +442,19 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       RealtimeROS2Node ros2Node = null;
-      if(realtimeROS2Node.hasBeenSet())
+      if (realtimeROS2Node.hasBeenSet())
       {
          ros2Node = realtimeROS2Node.get();
       }
 
-      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(contextDataFactory, null, robotModel.get(), null, ros2Node);
+      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(contextDataFactory,
+                                                                              null,
+                                                                              robotModel.get(),
+                                                                              robotModel.get().getSensorInformation(),
+                                                                              null,
+                                                                              ros2Node);
    }
+
    private void setupStepGeneratorThread()
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
@@ -524,7 +530,6 @@ public class SCS2AvatarSimulationFactory
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(ikStreamingRTThread.getSCS2YoGraphics());
    }
-
 
    private void setupMultiThreadedRobotController()
    {
@@ -664,6 +669,14 @@ public class SCS2AvatarSimulationFactory
                                       enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null);
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
+
+         yoVariableServer.addRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(),
+                                      enableSCS1YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS2YoGraphics.get() ? wholeBodyControllerCoreThread.getSCS2YoGraphics() : null);
+         wholeBodyControllerCoreTask.addCallbackPostTask(() -> yoVariableServer.update(wholeBodyControllerCoreThread.getHumanoidRobotContextData()
+                                                                                                                    .getTimestamp(),
+                                                                                       wholeBodyControllerCoreThread.getYoVariableRegistry()));
+
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
                                       enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
@@ -691,6 +704,9 @@ public class SCS2AvatarSimulationFactory
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(wholeBodyControllerCoreThread.getYoVariableRegistry(),
+                                                       wholeBodyControllerCoreTask,
+                                                       robotController.getYoRegistry()));
       if (ikStreamingRTTask != null)
          mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
       if (handControlThread != null)

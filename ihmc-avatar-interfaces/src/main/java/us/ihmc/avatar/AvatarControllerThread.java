@@ -165,12 +165,12 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
       //TODO looks like should be moved to "new" thread
-//      if (outputProcessor != null)
-//      {
-//         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
-//         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
-//         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
-//      }
+      if (outputProcessor != null)
+      {
+         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
+         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
+      }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
