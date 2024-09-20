@@ -3,66 +3,59 @@ package us.ihmc.perception.ffmpeg;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
-import org.bytedeco.ffmpeg.avutil.AVDictionary;
-import org.bytedeco.ffmpeg.avutil.AVFrame;
-import org.bytedeco.ffmpeg.swscale.SwsContext;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.javacpp.Pointer;
 import us.ihmc.commons.Conversions;
 
-import static org.bytedeco.ffmpeg.global.avcodec.avcodec_open2;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
-import static org.bytedeco.ffmpeg.global.avutil.*;
-import static org.bytedeco.ffmpeg.global.swscale.*;
+import static org.bytedeco.ffmpeg.global.avutil.av_make_q;
 
-public class FFMPEGVideoEncoder extends FFMPEGEncoder
+public abstract class FFMPEGVideoEncoder extends FFMPEGEncoder
 {
-   private static final int SCALE_METHOD = SWS_BICUBIC;
-
-   private final AVFrame inputFrame;
-
-   private SwsContext swsContext;
-
+   private int colorConversion = -1;
    private long firstFrameTime = -1L;
 
    public FFMPEGVideoEncoder(AVOutputFormat outputFormat,
-                             String preferredCodecName,
+                             String preferredEncoderName,
                              int bitRate,
                              int outputWidth,
                              int outputHeight,
-                             int outputPixelFormat,
                              int groupOfPicturesSize,
-                             int maxBFrames,
-                             int inputPixelFormat)
+                             int maxBFrames)
    {
-      super(outputFormat, preferredCodecName, bitRate);
+      super(outputFormat, preferredEncoderName, bitRate);
 
-      inputFrame = av_frame_alloc();
-      FFMPEGTools.checkPointer(inputFrame, "Allocating input frame");
-
+      // Use nanosecond precision for timebase
       timeBase = av_make_q(1, (int) Conversions.secondsToNanoseconds(1.0));
 
-      inputFrame.format(inputPixelFormat);
-      // input frame width & height initialized upon reception of first image
-      inputFrame.width(-1);
-      inputFrame.height(-1);
-
-      nextFrame.format(outputPixelFormat);
-      nextFrame.width(outputWidth);
-      nextFrame.height(outputHeight);
-      error = av_frame_get_buffer(nextFrame, 0);
-      FFMPEGTools.checkNegativeError(error, "Getting next frame buffer");
-
+      // Set encoder context parameters
+      encoderContext.time_base(timeBase);
       encoderContext.bit_rate(bitRate);
       encoderContext.codec_id(encoder.id());
       encoderContext.width(outputWidth);
       encoderContext.height(outputHeight);
-      encoderContext.time_base(timeBase);
-      encoderContext.pix_fmt(outputPixelFormat);
       encoderContext.gop_size(groupOfPicturesSize);
       encoderContext.max_b_frames(maxBFrames);
+
+      // Set size of frame to encode
+      frameToEncode.width(outputWidth);
+      frameToEncode.height(outputHeight);
    }
 
+   /**
+    * If set, the input mat will first undergo the specified color conversion before being sent to the encoder.
+    * This may be useful as some encoders only accept certain pixel formats.
+    * @param opencvImgprocColorConversion One of opencv_imgproc.COLOR_*
+    */
+   public void setIntermediateColorConversion(int opencvImgprocColorConversion)
+   {
+      colorConversion = opencvImgprocColorConversion;
+   }
+
+   /**
+    * Get a new stream to go with the provided output context.
+    * @param outputContext Output context of the stream to be created.
+    * @return An AVStream from the encoder with the provided output context.
+    */
    @Override
    public AVStream newStream(AVFormatContext outputContext)
    {
@@ -74,72 +67,34 @@ public class FFMPEGVideoEncoder extends FFMPEGEncoder
       return stream;
    }
 
-   public void setNextFrame(Mat frame)
-   {
-      long currentTime = System.nanoTime();
-
-      if (inputFrame.width() < 0 && inputFrame.height() < 0)
-      {
-         initializeInputFrame(frame);
-         firstFrameTime = currentTime;
-      }
-
-      if (swsContext != null)
-      {
-         inputFrame.data(0, frame.data());
-         error = sws_scale_frame(swsContext, nextFrame, inputFrame);
-         FFMPEGTools.checkNegativeError(error, "Scaling frame");
-      }
-      else
-      {
-         nextFrame.data(0, frame.data());
-      }
-
-      long timeElapsed = currentTime - firstFrameTime;
-      nextFrame.pts(timeElapsed);
-   }
-
-   private void initializeInputFrame(Mat firstFrame)
-   {
-      int inputWidth = firstFrame.cols();
-      int inputHeight = firstFrame.rows();
-
-      inputFrame.width(inputWidth);
-      inputFrame.height(inputHeight);
-      error = av_frame_get_buffer(inputFrame, 0);
-      FFMPEGTools.checkNegativeError(error, "Getting input frame buffer");
-
-      if (inputWidth != nextFrame.width() || inputHeight != nextFrame.height() || inputFrame.format() != nextFrame.format())
-         initializeSwsContext();
-   }
-
-   private void initializeSwsContext()
-   {
-      swsContext = sws_getContext(inputFrame.width(),
-                                  inputFrame.height(),
-                                  inputFrame.format(),
-                                  encoderContext.width(),
-                                  encoderContext.height(),
-                                  encoderContext.pix_fmt(),
-                                  SCALE_METHOD,
-                                  null,
-                                  null,
-                                  (DoublePointer) null);
-      FFMPEGTools.checkPointer(swsContext, "Initializing swsContext");
-   }
-
+   /**
+    * Assign the frame to be encoded with the provided image.
+    * @param image Pointer to an object containing the image to be encoded
+    */
    @Override
-   public void destroy()
+   public final void setNextFrame(Pointer image)
    {
-      super.destroy();
+      // Set the frame PTS based on time since first frame
+      long currentTime = System.nanoTime();
+      if (firstFrameTime < 0L)
+         firstFrameTime = currentTime;
+      long timeElapsed = currentTime - firstFrameTime;
+      frameToEncode.pts(timeElapsed);
 
-      av_frame_free(inputFrame);
-      inputFrame.close();
-
-      if (swsContext != null)
-      {
-         sws_freeContext(swsContext);
-         swsContext.close();
-      }
+      // Set the AVFrame's image
+      prepareFrameForEncoding(image);
    }
+
+   protected int getColorConversion()
+   {
+      return colorConversion;
+   }
+
+   /**
+    * Prepare the {@link #frameToEncode} to be encoded.
+    * This includes any preprocessing (e.g. color conversions, resizing, etc.)
+    * that leads up to the frame being encoded.
+    * @param imageToEncode Pointer to an object containing the image to be encoded
+    */
+   protected abstract void prepareFrameForEncoding(Pointer imageToEncode);
 }

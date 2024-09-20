@@ -11,6 +11,7 @@ import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
+import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
 import java.util.function.Consumer;
@@ -27,7 +28,7 @@ public abstract class FFMPEGEncoder
    protected final AVCodec encoder;
    protected final AVCodecContext encoderContext;
 
-   protected final AVFrame nextFrame;
+   protected final AVFrame frameToEncode;
    protected final AVPacket encodedPacket;
 
    protected AVRational timeBase;
@@ -48,18 +49,25 @@ public abstract class FFMPEGEncoder
       encoderContext = avcodec_alloc_context3(encoder);
       FFMPEGTools.checkPointer(encoderContext, "Allocating codec context");
 
-      nextFrame = av_frame_alloc();
-      FFMPEGTools.checkPointer(nextFrame, "Allocating input frame");
+      frameToEncode = av_frame_alloc();
+      FFMPEGTools.checkPointer(frameToEncode, "Allocating input frame");
 
       if ((outputFormat.flags() & avformat.AVFMT_GLOBALHEADER) != 0)
          encoderContext.flags(encoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
    }
 
+   /**
+    * Initialize the encoder with default options
+    */
    public void initialize()
    {
       initialize(null);
    }
 
+   /**
+    * Initialize the encoder with provided options
+    * @param codecOptions Options for the encoder.
+    */
    public void initialize(AVDictionary codecOptions)
    {
       AVDictionary optionsCopy = new AVDictionary();
@@ -70,6 +78,11 @@ public abstract class FFMPEGEncoder
       av_dict_free(optionsCopy);
    }
 
+   /**
+    * Get a new stream to go with the provided output context.
+    * @param outputContext Output context of the stream to be created.
+    * @return An AVStream from the encoder with the provided output context.
+    */
    public AVStream newStream(AVFormatContext outputContext)
    {
       AVStream stream = avformat_new_stream(outputContext, encoder);
@@ -77,6 +90,12 @@ public abstract class FFMPEGEncoder
 
       return stream;
    }
+
+   /**
+    * Assign the frame to be encoded with the provided data.
+    * @param data Pointer to an object containing information about the frame to encode.
+    */
+   public abstract void setNextFrame(Pointer data);
 
    public boolean encodeAndWriteNextFrame(AVFormatContext outputContext, AVStream stream)
    {
@@ -90,10 +109,15 @@ public abstract class FFMPEGEncoder
       });
    }
 
+   /**
+    * Encode the frame assigned using {@link #setNextFrame(Pointer)}.
+    * @param packetConsumer Method to use the encoded packets generated from the frame.
+    * @return true if the encoder can keep going, false if EOF was reached.
+    */
    public boolean encodeNextFrame(Consumer<AVPacket> packetConsumer)
    {
       int error;
-      error = avcodec_send_frame(encoderContext, nextFrame);
+      error = avcodec_send_frame(encoderContext, frameToEncode);
       FFMPEGTools.checkNegativeError(error, "Sending frame");
 
       while (error >= 0)
@@ -120,12 +144,12 @@ public abstract class FFMPEGEncoder
 
    public void destroy()
    {
-      nextFrame.close();
+      frameToEncode.close();
       encodeNextFrame(null);
 
       avcodec_close(encoderContext);
       avcodec_free_context(encoderContext);
-      av_frame_free(nextFrame);
+      av_frame_free(frameToEncode);
       av_packet_free(encodedPacket);
 
       encoder.close();

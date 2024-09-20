@@ -39,15 +39,15 @@ public class FFMPEGWebcamEncodingDemo
       FFMPEGTools.checkPointer(outputContext, "Allocating output context");
       FFMPEGTools.checkNegativeError(error, "Allocating output context");
 
-      FFMPEGVideoEncoder videoEncoder = new FFMPEGVideoEncoder(outputContext.oformat(),
-                                                               "h264_nvenc",
-                                                               400000,
-                                                               imageWidth,
-                                                               imageHeight,
-                                                               AV_PIX_FMT_YUV420P,
-                                                               10,
-                                                               2,
-                                                               AV_PIX_FMT_BGR24);
+      FFMPEGVideoEncoder videoEncoder = new FFMPEGSoftwareVideoEncoder(outputContext.oformat(),
+                                                                       "h264_nvenc",
+                                                                       400000,
+                                                                       imageWidth,
+                                                                       imageHeight,
+                                                                       AV_PIX_FMT_YUV420P,
+                                                                       10,
+                                                                       2,
+                                                                       AV_PIX_FMT_BGR24);
 
       videoEncoder.initialize();
       AVStream outputStream = videoEncoder.newStream(outputContext);

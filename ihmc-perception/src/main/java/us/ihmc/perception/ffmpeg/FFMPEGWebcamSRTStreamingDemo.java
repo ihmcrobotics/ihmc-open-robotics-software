@@ -88,7 +88,7 @@ public class FFMPEGWebcamSRTStreamingDemo
       private final AVFormatContext outputContext;
       private final AVStream outputStream;
       private final AVPacket packetCopy;
-      private final FFMPEGVideoEncoder videoEncoder;
+      private final FFMPEGSoftwareVideoEncoder videoEncoder;
       private int error;
       private boolean keepGoing = true;
       private boolean disconnected = false;
@@ -105,15 +105,15 @@ public class FFMPEGWebcamSRTStreamingDemo
          packetCopy = av_packet_alloc();
          FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
 
-         videoEncoder = new FFMPEGVideoEncoder(outputFormat,
-                                               "hevc_nvenc",
+         videoEncoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
+                                                       "hevc_nvenc",
                                                imageWidth * imageHeight,
-                                               imageWidth,
-                                               imageHeight,
-                                               AV_PIX_FMT_YUV420P,
-                                               10,
-                                               2,
-                                               AV_PIX_FMT_BGR24);
+                                                       imageWidth,
+                                                       imageHeight,
+                                                       AV_PIX_FMT_YUV420P,
+                                                       10,
+                                                       2,
+                                                       AV_PIX_FMT_BGR24);
 
          AVDictionary encoderOptions = new AVDictionary();
          FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);

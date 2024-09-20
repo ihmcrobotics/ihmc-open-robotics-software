@@ -7,6 +7,7 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFMPEGInterruptCallback;
+import us.ihmc.perception.ffmpeg.FFMPEGSoftwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFMPEGTools;
 import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
 
@@ -93,15 +94,15 @@ public class SRTVideoStreamer
       int bitRate = imageWidth * imageHeight;
       int gopSize = (int) inputFPS / 10; // Send key frames every 0.1 seconds
 
-      encoder = new FFMPEGVideoEncoder(outputFormat,
-                                       PREFERRED_CODEC,
-                                       bitRate,
-                                       imageWidth,
-                                       imageHeight,
-                                       OUTPUT_PIXEL_FORMAT,
-                                       gopSize,
-                                       0,
-                                       inputAVPixelFormat);
+      encoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
+                                               PREFERRED_CODEC,
+                                               bitRate,
+                                               imageWidth,
+                                               imageHeight,
+                                               OUTPUT_PIXEL_FORMAT,
+                                               gopSize,
+                                               0,
+                                               inputAVPixelFormat);
       encoder.initialize(encoderOptions);
       initialized = true;
    }

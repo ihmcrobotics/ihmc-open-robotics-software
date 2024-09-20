@@ -24,7 +24,7 @@ public class FFMPEGWebcamUDPStreamingDemo
    private final AVFormatContext outputContext = new AVFormatContext();
    private final AVStream outputStream;
    private final AVIOContext ioContext = new AVIOContext();
-   private final FFMPEGVideoEncoder videoEncoder;
+   private final FFMPEGSoftwareVideoEncoder videoEncoder;
 
    private int error;
    private boolean done = false;
@@ -48,15 +48,15 @@ public class FFMPEGWebcamUDPStreamingDemo
       outputContext.flush_packets(1);
 
       // Initialize video encoder
-      videoEncoder = new FFMPEGVideoEncoder(outputContext.oformat(),
-                                            "h264_nvenc",
-                                            400000,
-                                            imageWidth,
-                                            imageHeight,
-                                            AV_PIX_FMT_YUV420P,
-                                            4,
-                                            0,
-                                            AV_PIX_FMT_BGR24);
+      videoEncoder = new FFMPEGSoftwareVideoEncoder(outputContext.oformat(),
+                                                    "h264_nvenc",
+                                                    400000,
+                                                    imageWidth,
+                                                    imageHeight,
+                                                    AV_PIX_FMT_YUV420P,
+                                                    4,
+                                                    0,
+                                                    AV_PIX_FMT_BGR24);
 
       // Set flags for low latency
       AVDictionary encoderFlags = new AVDictionary();
