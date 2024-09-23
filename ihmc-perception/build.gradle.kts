@@ -70,7 +70,7 @@ mainDependencies {
    api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64") {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
-   api("us.ihmc:zed-java-api:4.1.2") {
+   api("us.ihmc:zed-java-api:4.1.4") {
       exclude(group = "org.bytedeco")
    }
    val hdf5Version = "1.14.1-1.5.9"
