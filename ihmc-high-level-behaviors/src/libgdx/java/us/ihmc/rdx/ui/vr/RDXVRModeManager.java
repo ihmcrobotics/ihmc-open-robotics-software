@@ -135,11 +135,6 @@ public class RDXVRModeManager
       RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
    }
 
-   public void setHandManager(RDXHandConfigurationManager handManager)
-   {
-      kinematicsStreamingMode.setHandManager(handManager);
-   }
-
    public void processVRInput(RDXVRContext vrContext)
    {
       if (vrModeControls.getRenderOnLeftHand().get())
