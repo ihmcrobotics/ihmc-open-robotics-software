@@ -149,7 +149,8 @@ public class RDXVRKinematicsStreamingMode
    private int rightIndex = -1;
    private RDXMultiContactRegionGraphic polygonGraphic;
 
-   private static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
+   public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
+   public static final Vector3D HAND_CONTACT_NORMAL_IN_WORLD = new Vector3D();
    private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.3;
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
@@ -728,10 +729,13 @@ public class RDXVRKinematicsStreamingMode
          contactPoint.changeFrame(syncedRobot.getFullRobotModel().getHand(robotSide).getBodyFixedFrame());
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
-         // Contact normal is hard-coded
-         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+         // Contact normal is hard-coded - HARDWARE
+//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+
+         // Contact normal is hard-coded - SIMULATION
+         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 
