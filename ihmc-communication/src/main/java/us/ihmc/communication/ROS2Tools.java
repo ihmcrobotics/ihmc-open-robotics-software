@@ -78,6 +78,15 @@ public final class ROS2Tools
       return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
    }
 
+   /**
+    * Creates a ROS2 node that only communicates over the loopback address within the host machine.
+    * Other machines will not be able to receive messages published using this node.
+    * This is useful when publishing large messages for intra-process communication, as to not overwhelm the network.
+    *
+    * @param pubSubImplementation the implementation to use.
+    * @param nodeName             the name of the new ROS node.
+    * @return the loopback ROS node
+    */
    public static ROS2Node createLoopbackROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), InetAddress.getLoopbackAddress());
