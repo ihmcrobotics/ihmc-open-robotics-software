@@ -191,12 +191,12 @@ class ROS2ToolsTest
             failed.set(true);
       });
 
-      InetAddress outsiderAddress = getOutputAddress();
+      InetAddress outsiderAddress = getPhysicalAddress();
       LogTools.info("Outsider node on {}", outsiderAddress);
       ROS2Node outsiderNode = new ROS2Node(PubSubImplementation.FAST_RTPS,
                                            getClass().getSimpleName(),
                                            new RTPSCommunicationFactory().getDomainId(),
-                                           getOutputAddress());
+                                           outsiderAddress);
       ROS2Subscription<String> outsideSubscriber = outsiderNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(String.class), subscriber ->
       {
          LogTools.error("Outsider node should NOT receive any messages");
@@ -219,7 +219,7 @@ class ROS2ToolsTest
       outsideSubscriber.remove();
    }
 
-   private InetAddress getOutputAddress() throws IOException
+   private InetAddress getPhysicalAddress() throws IOException
    {
       Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
       while (interfaces.hasMoreElements())
