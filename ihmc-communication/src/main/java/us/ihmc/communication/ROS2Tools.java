@@ -8,6 +8,7 @@ import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
+import java.net.InetAddress;
 import java.util.function.Consumer;
 
 /**
@@ -75,6 +76,11 @@ public final class ROS2Tools
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
+   }
+
+   public static ROS2Node createLoopbackROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   {
+      return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), InetAddress.getLoopbackAddress());
    }
 
    /**
