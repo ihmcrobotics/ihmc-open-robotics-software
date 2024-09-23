@@ -6,9 +6,9 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.perception.ffmpeg.FFMPEGTimeoutCallback;
-import us.ihmc.perception.ffmpeg.FFMPEGTools;
-import us.ihmc.perception.ffmpeg.FFMPEGVideoDecoder;
+import us.ihmc.perception.ffmpeg.FFmpegTimeoutCallback;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
+import us.ihmc.perception.ffmpeg.FFmpegVideoDecoder;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -21,12 +21,12 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTVideoReceiver
 {
-   private FFMPEGVideoDecoder decoder;
+   private FFmpegVideoDecoder decoder;
    private final int outputPixelFormat;
 
    private final AVDictionary srtOptions;
    private final AVFormatContext inputFormatContext;
-   private final FFMPEGTimeoutCallback timeoutCallback;
+   private final FFmpegTimeoutCallback timeoutCallback;
 
    private boolean connected = false;
    private boolean firstRead = false;
@@ -40,12 +40,12 @@ public class SRTVideoReceiver
    {
       outputPixelFormat = outputAVPixelFormat;
 
-      timeoutCallback = new FFMPEGTimeoutCallback();
+      timeoutCallback = new FFmpegTimeoutCallback();
 
       srtOptions = new AVDictionary();
 
       inputFormatContext = avformat_alloc_context();
-      FFMPEGTools.checkPointer(inputFormatContext, "Allocating input format context");
+      FFmpegTools.checkPointer(inputFormatContext, "Allocating input format context");
       inputFormatContext.interrupt_callback(timeoutCallback);
    }
 
@@ -62,24 +62,24 @@ public class SRTVideoReceiver
       Map<String, String> srtOptionMap = StreamingTools.getLiveSRTOptions();
       srtOptionMap.put("mode", "caller");
       srtOptionMap.put("timeout", String.valueOf(timeoutMicroseconds));
-      FFMPEGTools.setAVDictionary(srtOptions, srtOptionMap);
+      FFmpegTools.setAVDictionary(srtOptions, srtOptionMap);
 
       // Connect to streamer
       error = avformat_open_input(inputFormatContext, streamerSRTAddress, null, srtOptions);
       if (error < 0)
          return false;
 
-      FFMPEGTools.checkDictionaryAfterUse(srtOptions);
+      FFmpegTools.checkDictionaryAfterUse(srtOptions);
 
       // Receive a few packets to get stream info
       timeoutCallback.start(timeout);
       error = avformat_find_stream_info(inputFormatContext, (AVDictionary) null);
       timeoutCallback.stop();
-      if (!FFMPEGTools.checkNegativeError(error, "Finding stream info on " + streamerSRTAddress, false))
+      if (!FFmpegTools.checkNegativeError(error, "Finding stream info on " + streamerSRTAddress, false))
          return false;
 
       // Create and initialize the decoder for the stream
-      decoder = new FFMPEGVideoDecoder(inputFormatContext, outputPixelFormat);
+      decoder = new FFmpegVideoDecoder(inputFormatContext, outputPixelFormat);
       decoder.initialize(null, this::getNextPacket);
 
       connected = true;

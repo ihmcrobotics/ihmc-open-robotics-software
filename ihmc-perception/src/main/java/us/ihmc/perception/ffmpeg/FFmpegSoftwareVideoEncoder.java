@@ -12,7 +12,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
 
-public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
+public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
 {
    private static final int SCALE_METHOD = SWS_BICUBIC;
    private SwsContext swsContext;
@@ -20,7 +20,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
    private final AVFrame frameToScale;
    private final Mat tempMat;
 
-   public FFMPEGSoftwareVideoEncoder(AVOutputFormat outputFormat,
+   public FFmpegSoftwareVideoEncoder(AVOutputFormat outputFormat,
                                      String preferredCodecName,
                                      int bitRate,
                                      int outputWidth,
@@ -35,7 +35,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
       tempMat = new Mat();
 
       frameToScale = av_frame_alloc();
-      FFMPEGTools.checkPointer(frameToScale, "Allocating input frame");
+      FFmpegTools.checkPointer(frameToScale, "Allocating input frame");
       frameToScale.format(inputPixelFormat);
       // this frame's width & height initialized upon reception of first image
       frameToScale.width(-1);
@@ -44,7 +44,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
       // Set the output pixel format and allocate memory for the frame
       frameToEncode.format(outputPixelFormat);
       error = av_frame_get_buffer(frameToEncode, 0);
-      FFMPEGTools.checkNegativeError(error, "Getting next frame buffer");
+      FFmpegTools.checkNegativeError(error, "Getting next frame buffer");
 
       encoderContext.pix_fmt(outputPixelFormat);
    }
@@ -71,7 +71,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
          // Scale the frame and put data in the frame to encode
          frameToScale.data(0, image.data());
          error = sws_scale_frame(swsContext, frameToEncode, frameToScale);
-         FFMPEGTools.checkNegativeError(error, "Scaling frame");
+         FFmpegTools.checkNegativeError(error, "Scaling frame");
       }
       else // No scaling needed; put data directly into frame to encode
          frameToEncode.data(0, image.data());
@@ -83,7 +83,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
       frameToScale.width(inputImageSize.width());
       frameToScale.height(inputImageSize.height());
       error = av_frame_get_buffer(frameToScale, 0);
-      FFMPEGTools.checkNegativeError(error, "Getting input frame buffer");
+      FFmpegTools.checkNegativeError(error, "Getting input frame buffer");
 
       // Initialize the scaling context
       swsContext = sws_getContext(frameToScale.width(),
@@ -96,7 +96,7 @@ public class FFMPEGSoftwareVideoEncoder extends FFMPEGVideoEncoder
                                   null,
                                   null,
                                   (DoublePointer) null);
-      FFMPEGTools.checkPointer(swsContext, "Initializing swsContext");
+      FFmpegTools.checkPointer(swsContext, "Initializing swsContext");
    }
 
    @Override

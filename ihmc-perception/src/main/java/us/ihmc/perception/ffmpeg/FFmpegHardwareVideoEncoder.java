@@ -17,7 +17,7 @@ import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_HW_CONFIG_METHOD_HW_FR
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_get_hw_config;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
-public class FFMPEGHardwareVideoEncoder extends FFMPEGVideoEncoder
+public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
 {
    private final AVCodecHWConfig hardwareConfiguration;
    private final AVBufferRef hardwareDeviceContext;
@@ -27,7 +27,7 @@ public class FFMPEGHardwareVideoEncoder extends FFMPEGVideoEncoder
    private final Size outputSize;
    private final GpuMat tempGpuMat;
 
-   public FFMPEGHardwareVideoEncoder(AVOutputFormat outputFormat,
+   public FFmpegHardwareVideoEncoder(AVOutputFormat outputFormat,
                                      String preferredCodecName,
                                      int bitRate,
                                      int outputWidth,
@@ -43,7 +43,7 @@ public class FFMPEGHardwareVideoEncoder extends FFMPEGVideoEncoder
 
       // Find the hardware configuration for the encoder
       hardwareConfiguration = getCodecHardwareConfiguration(encoder);
-      FFMPEGTools.checkPointer(hardwareConfiguration, "Finding encoder hardware configuration.");
+      FFmpegTools.checkPointer(hardwareConfiguration, "Finding encoder hardware configuration.");
       Objects.requireNonNull(hardwareConfiguration); // just here to silence a warning, even though checkPointer does the job :(
 
       // Create hardware related contexts
@@ -51,7 +51,7 @@ public class FFMPEGHardwareVideoEncoder extends FFMPEGVideoEncoder
       error = av_hwdevice_ctx_create(hardwareDeviceContext, hardwareConfiguration.device_type(), (String) null, null, 0);
 
       hardwareFramesReference = av_hwframe_ctx_alloc(hardwareDeviceContext);
-      FFMPEGTools.checkPointer(hardwareFramesReference, "Creating frame context");
+      FFmpegTools.checkPointer(hardwareFramesReference, "Creating frame context");
 
       hardwareFramesContext = new AVHWFramesContext(hardwareFramesReference.data());
       hardwareFramesContext.format(hardwareConfiguration.pix_fmt());
@@ -60,17 +60,17 @@ public class FFMPEGHardwareVideoEncoder extends FFMPEGVideoEncoder
       hardwareFramesContext.height(outputHeight);
       hardwareFramesContext.initial_pool_size(2 * groupOfPicturesSize);
       error = av_hwframe_ctx_init(hardwareFramesReference);
-      FFMPEGTools.checkNegativeError(error, "Initializing frame context");
+      FFmpegTools.checkNegativeError(error, "Initializing frame context");
 
       // Set the frame to be encoded accordingly
       frameToEncode.format(hardwareConfiguration.pix_fmt());
       error = av_hwframe_get_buffer(hardwareFramesReference, frameToEncode, 0);
-      FFMPEGTools.checkError(error, frameToEncode.hw_frames_ctx(), "Getting next frame buffer");
+      FFmpegTools.checkError(error, frameToEncode.hw_frames_ctx(), "Getting next frame buffer");
 
       // Set encoder parameters accordingly
       encoderContext.pix_fmt(hardwareConfiguration.pix_fmt());
       encoderContext.hw_frames_ctx(av_buffer_ref(hardwareFramesReference));
-      FFMPEGTools.checkPointer(encoderContext.hw_frames_ctx(), "Allocating hardware frames");
+      FFmpegTools.checkPointer(encoderContext.hw_frames_ctx(), "Allocating hardware frames");
 
       av_buffer_unref(hardwareFramesReference);
    }

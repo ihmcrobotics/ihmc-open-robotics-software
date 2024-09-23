@@ -13,7 +13,7 @@ import java.util.function.Function;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
 
-public class FFMPEGVideoDecoder extends FFMPEGDecoder
+public class FFmpegVideoDecoder extends FFmpegDecoder
 {
    private static final int SCALE_METHOD = SWS_BICUBIC;
 
@@ -29,12 +29,12 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
    private final AVFrame outputFrame;
    private Mat outputImage;
 
-   public FFMPEGVideoDecoder(AVFormatContext inputContext, int outputPixelFormat)
+   public FFmpegVideoDecoder(AVFormatContext inputContext, int outputPixelFormat)
    {
       this(inputContext, -1, -1, -1, -1, outputPixelFormat);
    }
 
-   public FFMPEGVideoDecoder(AVFormatContext inputContext,
+   public FFmpegVideoDecoder(AVFormatContext inputContext,
                              int wantedStreamIndex,
                              int relatedStreamIndex,
                              int outputWidth,
@@ -48,7 +48,7 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
       this.outputPixelFormat = outputPixelFormat;
 
       outputFrame = av_frame_alloc();
-      FFMPEGTools.checkPointer(outputFrame, "Allocating output frame");
+      FFmpegTools.checkPointer(outputFrame, "Allocating output frame");
    }
 
    @Override
@@ -83,7 +83,7 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
                                   null,
                                   null,
                                   (DoublePointer) null);
-      FFMPEGTools.checkPointer(swsContext, "Initializing swsContext");
+      FFmpegTools.checkPointer(swsContext, "Initializing swsContext");
    }
 
    public Mat getNextFrame()
@@ -96,14 +96,14 @@ public class FFMPEGVideoDecoder extends FFMPEGDecoder
          if (swsContext != null)
          {
             error = sws_scale_frame(swsContext, outputFrame, decodedFrame);
-            FFMPEGTools.checkNegativeError(error, "Scaling decoded frame to output frame");
-            outputImage = FFMPEGTools.avFrameToMat(outputFrame);
+            FFmpegTools.checkNegativeError(error, "Scaling decoded frame to output frame");
+            outputImage = FFmpegTools.avFrameToMat(outputFrame);
          }
          else
          {
             error = av_frame_ref(outputFrame, decodedFrame);
-            FFMPEGTools.checkNegativeError(error, "Copying decoded frame to output frame");
-            outputImage = FFMPEGTools.avFrameToMat(outputFrame);
+            FFmpegTools.checkNegativeError(error, "Copying decoded frame to output frame");
+            outputImage = FFmpegTools.avFrameToMat(outputFrame);
             av_frame_unref(outputFrame);
          }
       });

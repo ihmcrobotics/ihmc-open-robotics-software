@@ -23,7 +23,7 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 
 // TODO: Add a FFMPEGAudioEncoder
-public abstract class FFMPEGEncoder
+public abstract class FFmpegEncoder
 {
    protected final AVCodec encoder;
    protected final AVCodecContext encoderContext;
@@ -36,21 +36,21 @@ public abstract class FFMPEGEncoder
 
    protected int error;
 
-   public FFMPEGEncoder(AVOutputFormat outputFormat, String preferredEncoderName, int bitRate)
+   public FFmpegEncoder(AVOutputFormat outputFormat, String preferredEncoderName, int bitRate)
    {
       this.bitRate = bitRate;
 
       encoder = findEncoder(preferredEncoderName, outputFormat);
-      FFMPEGTools.checkPointer(encoder, "Finding encoder");
+      FFmpegTools.checkPointer(encoder, "Finding encoder");
 
       encodedPacket = av_packet_alloc();
-      FFMPEGTools.checkPointer(encodedPacket, "Allocating next packet");
+      FFmpegTools.checkPointer(encodedPacket, "Allocating next packet");
 
       encoderContext = avcodec_alloc_context3(encoder);
-      FFMPEGTools.checkPointer(encoderContext, "Allocating codec context");
+      FFmpegTools.checkPointer(encoderContext, "Allocating codec context");
 
       frameToEncode = av_frame_alloc();
-      FFMPEGTools.checkPointer(frameToEncode, "Allocating input frame");
+      FFmpegTools.checkPointer(frameToEncode, "Allocating input frame");
 
       if ((outputFormat.flags() & avformat.AVFMT_GLOBALHEADER) != 0)
          encoderContext.flags(encoderContext.flags() | avcodec.AV_CODEC_FLAG_GLOBAL_HEADER);
@@ -73,8 +73,8 @@ public abstract class FFMPEGEncoder
       AVDictionary optionsCopy = new AVDictionary();
       av_dict_copy(optionsCopy, codecOptions, 0);
       error = avcodec_open2(encoderContext, encoder, optionsCopy);
-      FFMPEGTools.checkNegativeError(error, "Opening codec");
-      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
+      FFmpegTools.checkNegativeError(error, "Opening codec");
+      FFmpegTools.checkDictionaryAfterUse(optionsCopy);
       av_dict_free(optionsCopy);
    }
 
@@ -86,7 +86,7 @@ public abstract class FFMPEGEncoder
    public AVStream newStream(AVFormatContext outputContext)
    {
       AVStream stream = avformat_new_stream(outputContext, encoder);
-      FFMPEGTools.checkPointer(stream, "Creating new stream");
+      FFmpegTools.checkPointer(stream, "Creating new stream");
 
       return stream;
    }
@@ -105,7 +105,7 @@ public abstract class FFMPEGEncoder
          encodedPacket.stream_index(stream.index());
 
          error = av_interleaved_write_frame(outputContext, packet);
-         FFMPEGTools.checkNegativeError(error, "Writing packet");
+         FFmpegTools.checkNegativeError(error, "Writing packet");
       });
    }
 
@@ -118,7 +118,7 @@ public abstract class FFMPEGEncoder
    {
       int error;
       error = avcodec_send_frame(encoderContext, frameToEncode);
-      FFMPEGTools.checkNegativeError(error, "Sending frame");
+      FFmpegTools.checkNegativeError(error, "Sending frame");
 
       while (error >= 0)
       {
@@ -126,7 +126,7 @@ public abstract class FFMPEGEncoder
          if (error == AVERROR_EAGAIN() || error == AVERROR_EOF())
             break;
          else
-            FFMPEGTools.checkNegativeError(error, "Receiving packet");
+            FFmpegTools.checkNegativeError(error, "Receiving packet");
 
          if (packetConsumer != null)
             packetConsumer.accept(encodedPacket);

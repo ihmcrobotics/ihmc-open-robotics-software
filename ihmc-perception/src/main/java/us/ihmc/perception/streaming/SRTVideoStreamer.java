@@ -6,11 +6,11 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.ffmpeg.FFMPEGHardwareVideoEncoder;
-import us.ihmc.perception.ffmpeg.FFMPEGInterruptCallback;
-import us.ihmc.perception.ffmpeg.FFMPEGSoftwareVideoEncoder;
-import us.ihmc.perception.ffmpeg.FFMPEGTools;
-import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
+import us.ihmc.perception.ffmpeg.FFmpegHardwareVideoEncoder;
+import us.ihmc.perception.ffmpeg.FFmpegInterruptCallback;
+import us.ihmc.perception.ffmpeg.FFmpegSoftwareVideoEncoder;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
+import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
 
 import java.net.InetSocketAddress;
 import java.util.Iterator;
@@ -40,10 +40,10 @@ public class SRTVideoStreamer
                          entry("zerolatency", "1"));  // Don't introduce reordering delay
 
    private final AVDictionary encoderOptions;
-   private FFMPEGVideoEncoder encoder;
+   private FFmpegVideoEncoder encoder;
 
    private final AVOutputFormat outputFormat;
-   private final FFMPEGInterruptCallback interruptCallback;
+   private final FFmpegInterruptCallback interruptCallback;
 
    private final Thread callerConnector;
    private final Map<String, String> liveSRTOptions;
@@ -69,13 +69,13 @@ public class SRTVideoStreamer
    {
       srtAddress = StreamingTools.toSRTAddress(outputAddress);
 
-      interruptCallback = new FFMPEGInterruptCallback();
+      interruptCallback = new FFmpegInterruptCallback();
 
       liveSRTOptions = StreamingTools.getLiveSRTOptions();
       liveSRTOptions.put("mode", "listener");
 
       encoderOptions = new AVDictionary();
-      FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
+      FFmpegTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
 
       outputFormat = av_guess_format(OUTPUT_FORMAT_NAME, null, null);
 
@@ -120,7 +120,7 @@ public class SRTVideoStreamer
          av_dict_set(encoderOptions, "tune", "lossless", 0);
 
       if (useHardwareAcceleration)
-         encoder = new FFMPEGHardwareVideoEncoder(outputFormat,
+         encoder = new FFmpegHardwareVideoEncoder(outputFormat,
                                                   PREFERRED_CODEC,
                                                   bitRate,
                                                   imageWidth,
@@ -129,7 +129,7 @@ public class SRTVideoStreamer
                                                   MAX_B_FRAMES,
                                                   inputAVPixelFormat);
       else
-         encoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
+         encoder = new FFmpegSoftwareVideoEncoder(outputFormat,
                                                   PREFERRED_CODEC,
                                                   bitRate,
                                                   imageWidth,
@@ -187,7 +187,7 @@ public class SRTVideoStreamer
 
    public boolean isUsingHardwareAcceleration()
    {
-      return encoder instanceof FFMPEGHardwareVideoEncoder;
+      return encoder instanceof FFmpegHardwareVideoEncoder;
    }
 
    public void destroy()
@@ -229,7 +229,7 @@ public class SRTVideoStreamer
       {
          // Set the SRT options
          AVDictionary srtOptions = new AVDictionary();
-         FFMPEGTools.setAVDictionary(srtOptions, liveSRTOptions);
+         FFmpegTools.setAVDictionary(srtOptions, liveSRTOptions);
 
          // Wait for caller connection
          LogTools.debug("Waiting for connection on {}", srtAddress);
@@ -240,7 +240,7 @@ public class SRTVideoStreamer
          if (error >= 0)
          {
             // Ensure options are set correctly
-            FFMPEGTools.checkDictionaryAfterUse(srtOptions);
+            FFmpegTools.checkDictionaryAfterUse(srtOptions);
 
             LogTools.debug("Got a connection on {}", srtAddress);
             SRTStreamWriter callerWriter = new SRTStreamWriter(encoder, callerSRTContext, outputFormat, null);

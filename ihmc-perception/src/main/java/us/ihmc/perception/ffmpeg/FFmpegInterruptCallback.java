@@ -5,12 +5,12 @@ import org.bytedeco.javacpp.Pointer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class FFMPEGInterruptCallback extends AVIOInterruptCB
+public class FFmpegInterruptCallback extends AVIOInterruptCB
 {
    private final Callback_Pointer callbackPointer;
    private final AtomicInteger interruptFlag = new AtomicInteger(0);
 
-   public FFMPEGInterruptCallback()
+   public FFmpegInterruptCallback()
    {
       // Set up callback pointer
       callbackPointer = new Callback_Pointer()

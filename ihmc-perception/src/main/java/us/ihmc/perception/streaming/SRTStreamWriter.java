@@ -7,8 +7,8 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.ffmpeg.FFMPEGTools;
-import us.ihmc.perception.ffmpeg.FFMPEGVideoEncoder;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
+import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
@@ -17,7 +17,7 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTStreamWriter
 {
-   private final FFMPEGVideoEncoder encoder;
+   private final FFmpegVideoEncoder encoder;
 
    private final AVIOContext srtContext;
 
@@ -31,7 +31,7 @@ public class SRTStreamWriter
 
    private int error;
 
-   public SRTStreamWriter(FFMPEGVideoEncoder encoder, AVIOContext srtContext, AVOutputFormat outputFormat, AVDictionary formatOptions)
+   public SRTStreamWriter(FFmpegVideoEncoder encoder, AVIOContext srtContext, AVOutputFormat outputFormat, AVDictionary formatOptions)
    {
       this.encoder = encoder;
       this.srtContext = srtContext;
@@ -40,12 +40,12 @@ public class SRTStreamWriter
       // Copy the format options
       this.formatOptions = new AVDictionary();
       error = av_dict_copy(this.formatOptions, formatOptions, 0);
-      FFMPEGTools.checkNegativeError(error, "Copying format options");
+      FFmpegTools.checkNegativeError(error, "Copying format options");
 
       formatContext = new AVFormatContext();
 
       packetCopy = av_packet_alloc();
-      FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
+      FFmpegTools.checkPointer(packetCopy, "Allocating a packet");
    }
 
    public boolean startOutput()
@@ -53,7 +53,7 @@ public class SRTStreamWriter
       // Create the output format context
       LogTools.debug("Allocating output context");
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
-      if (!FFMPEGTools.checkError(error, formatContext, "Allocating output format context"))
+      if (!FFmpegTools.checkError(error, formatContext, "Allocating output format context"))
          return false;
       formatContext.pb(srtContext);
 
@@ -64,10 +64,10 @@ public class SRTStreamWriter
       // Write a header to the caller
       LogTools.debug("Writing header to caller");
       error = avformat_write_header(formatContext, formatOptions);
-      if (!FFMPEGTools.checkNegativeError(error, "Sending header to caller", false))
+      if (!FFmpegTools.checkNegativeError(error, "Sending header to caller", false))
          return false;
 
-      FFMPEGTools.checkDictionaryAfterUse(formatOptions);
+      FFmpegTools.checkDictionaryAfterUse(formatOptions);
 
       LogTools.debug("Successfully started connection with caller");
       return connected = true;
@@ -101,7 +101,7 @@ public class SRTStreamWriter
 
       LogTools.debug("Writing trailer to caller");
       error = av_write_trailer(formatContext);
-      FFMPEGTools.checkNegativeError(error, "Writing trailer");
+      FFmpegTools.checkNegativeError(error, "Writing trailer");
       LogTools.debug("Successfully ended connection with caller");
 
       connected = false;

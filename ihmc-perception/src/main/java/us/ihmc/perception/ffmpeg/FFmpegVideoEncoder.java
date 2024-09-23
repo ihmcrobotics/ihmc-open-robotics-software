@@ -9,12 +9,12 @@ import us.ihmc.commons.Conversions;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
 import static org.bytedeco.ffmpeg.global.avutil.av_make_q;
 
-public abstract class FFMPEGVideoEncoder extends FFMPEGEncoder
+public abstract class FFmpegVideoEncoder extends FFmpegEncoder
 {
    private int colorConversion = -1;
    private long firstFrameTime = -1L;
 
-   public FFMPEGVideoEncoder(AVOutputFormat outputFormat,
+   public FFmpegVideoEncoder(AVOutputFormat outputFormat,
                              String preferredEncoderName,
                              int bitRate,
                              int outputWidth,
@@ -62,7 +62,7 @@ public abstract class FFMPEGVideoEncoder extends FFMPEGEncoder
       AVStream stream = super.newStream(outputContext);
 
       error = avcodec_parameters_from_context(stream.codecpar(), encoderContext);
-      FFMPEGTools.checkNegativeError(error, "Copying parameters from codec to stream");
+      FFmpegTools.checkNegativeError(error, "Copying parameters from codec to stream");
 
       return stream;
    }

@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
-public class FFMPEGTools
+public class FFmpegTools
 {
    public static double rationalToFloatingPoint(AVRational rational)
    {

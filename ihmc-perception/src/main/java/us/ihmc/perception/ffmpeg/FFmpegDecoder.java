@@ -15,7 +15,7 @@ import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.av_find_best_stream;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
-public class FFMPEGDecoder
+public class FFmpegDecoder
 {
    protected final AVFormatContext inputContext;
    protected final AVStream streamToDecode;
@@ -30,30 +30,30 @@ public class FFMPEGDecoder
 
    protected int error;
 
-   public FFMPEGDecoder(AVFormatContext inputContext, int wantedStreamIndex, int relatedStreamIndex, int avMediaType)
+   public FFmpegDecoder(AVFormatContext inputContext, int wantedStreamIndex, int relatedStreamIndex, int avMediaType)
    {
       this.inputContext = inputContext;
 
       // Find the stream to decode, and decoder to use
       decoder = new AVCodec();
       int streamIndex = av_find_best_stream(inputContext, avMediaType, wantedStreamIndex, relatedStreamIndex, decoder, 0);
-      FFMPEGTools.checkNegativeError(streamIndex, "Finding best stream index");
-      FFMPEGTools.checkPointer(decoder, "Finding stream decoder");
+      FFmpegTools.checkNegativeError(streamIndex, "Finding best stream index");
+      FFmpegTools.checkPointer(decoder, "Finding stream decoder");
       streamToDecode = inputContext.streams(streamIndex);
 
       // Create decoder context
       decoderContext = avcodec_alloc_context3(decoder);
-      FFMPEGTools.checkPointer(decoderContext, "Allocating codec context");
+      FFmpegTools.checkPointer(decoderContext, "Allocating codec context");
 
       // Copy stream parameters to codec context
       error = avcodec_parameters_to_context(decoderContext, streamToDecode.codecpar());
-      FFMPEGTools.checkNegativeError(error, "Copying parameters from stream to codec");
+      FFmpegTools.checkNegativeError(error, "Copying parameters from stream to codec");
 
       // Allocate space for packet and frame
       nextPacket = av_packet_alloc();
-      FFMPEGTools.checkPointer(nextPacket, "Allocating encoded packet");
+      FFmpegTools.checkPointer(nextPacket, "Allocating encoded packet");
       decodedFrame = av_frame_alloc();
-      FFMPEGTools.checkPointer(decodedFrame, "Allocating decoded frame");
+      FFmpegTools.checkPointer(decodedFrame, "Allocating decoded frame");
    }
 
    public void initialize(AVDictionary codecOptions, Function<AVPacket, Integer> packetProvider)
@@ -63,8 +63,8 @@ public class FFMPEGDecoder
       AVDictionary optionsCopy = new AVDictionary();
       av_dict_copy(optionsCopy, codecOptions, 0);
       error = avcodec_open2(decoderContext, decoder, optionsCopy);
-      FFMPEGTools.checkNegativeError(error, "Opening codec");
-      FFMPEGTools.checkDictionaryAfterUse(optionsCopy);
+      FFmpegTools.checkNegativeError(error, "Opening codec");
+      FFmpegTools.checkDictionaryAfterUse(optionsCopy);
       av_dict_free(optionsCopy);
    }
 
@@ -80,7 +80,7 @@ public class FFMPEGDecoder
             // Handle the errors
             if (error == AVERROR_EOF())
                return false;
-            FFMPEGTools.checkNegativeError(error, "Sending packet");
+            FFmpegTools.checkNegativeError(error, "Sending packet");
          }
 
          // Try to receive decoded frame
@@ -90,7 +90,7 @@ public class FFMPEGDecoder
          if (error == AVERROR_EOF()) // No more frames to receive, don't throw exceptions
             return false;
          else if (error != AVERROR_EAGAIN())// Bad error. Throw exceptions
-            FFMPEGTools.checkNegativeError(error, "Receiving decoded frame");
+            FFmpegTools.checkNegativeError(error, "Receiving decoded frame");
 
          // Go again if libav tells us to
          sendAPacket = error == AVERROR_EAGAIN();

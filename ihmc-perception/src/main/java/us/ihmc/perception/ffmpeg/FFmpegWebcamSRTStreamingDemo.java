@@ -21,7 +21,7 @@ import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
-public class FFMPEGWebcamSRTStreamingDemo
+public class FFmpegWebcamSRTStreamingDemo
 {
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> HEVC_NVENC_OPTIONS
@@ -39,7 +39,7 @@ public class FFMPEGWebcamSRTStreamingDemo
    private final Mat image = new Mat();
    private final TypedNotification<Mat> imageNotification = new TypedNotification<>();
 
-   private FFMPEGWebcamSRTStreamingDemo()
+   private FFmpegWebcamSRTStreamingDemo()
    {
       int error;
 
@@ -59,13 +59,13 @@ public class FFMPEGWebcamSRTStreamingDemo
          AVDictionary serverOptions = new AVDictionary();
          Map<String, String> srtOptions = StreamingTools.getLiveSRTOptions();
          srtOptions.put("mode", "listener");
-         FFMPEGTools.setAVDictionary(serverOptions, srtOptions);
+         FFmpegTools.setAVDictionary(serverOptions, srtOptions);
 
          // Listen for caller
          AVIOContext serverContext = new AVIOContext();
 
          error = avio_open2(serverContext, "srt://127.0.0.1:60001", AVIO_FLAG_WRITE, null, serverOptions);
-         FFMPEGTools.checkNegativeError(error, "Opening Connection");
+         FFmpegTools.checkNegativeError(error, "Opening Connection");
 
          ThreadTools.startAThread(new CallerHandler(serverContext, imageWidth, imageHeight), "CallerThread" + i);
 
@@ -88,7 +88,7 @@ public class FFMPEGWebcamSRTStreamingDemo
       private final AVFormatContext outputContext;
       private final AVStream outputStream;
       private final AVPacket packetCopy;
-      private final FFMPEGSoftwareVideoEncoder videoEncoder;
+      private final FFmpegSoftwareVideoEncoder videoEncoder;
       private int error;
       private boolean keepGoing = true;
       private boolean disconnected = false;
@@ -99,13 +99,13 @@ public class FFMPEGWebcamSRTStreamingDemo
 
          outputContext = new AVFormatContext();
          error = avformat_alloc_output_context2(outputContext, outputFormat, (String) null, null);
-         FFMPEGTools.checkError(error, outputContext, "Allocating output context");
+         FFmpegTools.checkError(error, outputContext, "Allocating output context");
          outputContext.pb(serverContext);
 
          packetCopy = av_packet_alloc();
-         FFMPEGTools.checkPointer(packetCopy, "Allocating a packet");
+         FFmpegTools.checkPointer(packetCopy, "Allocating a packet");
 
-         videoEncoder = new FFMPEGSoftwareVideoEncoder(outputFormat,
+         videoEncoder = new FFmpegSoftwareVideoEncoder(outputFormat,
                                                        "hevc_nvenc",
                                                imageWidth * imageHeight,
                                                        imageWidth,
@@ -116,7 +116,7 @@ public class FFMPEGWebcamSRTStreamingDemo
                                                        AV_PIX_FMT_BGR24);
 
          AVDictionary encoderOptions = new AVDictionary();
-         FFMPEGTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
+         FFmpegTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
 
          videoEncoder.initialize(encoderOptions);
 
@@ -172,6 +172,6 @@ public class FFMPEGWebcamSRTStreamingDemo
 
    public static void main(String[] args)
    {
-      new FFMPEGWebcamSRTStreamingDemo();
+      new FFmpegWebcamSRTStreamingDemo();
    }
 }

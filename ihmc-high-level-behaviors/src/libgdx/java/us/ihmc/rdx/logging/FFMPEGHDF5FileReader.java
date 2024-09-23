@@ -20,7 +20,7 @@ import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.ffmpeg.FFMPEGTools;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -65,9 +65,9 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
-      FFMPEGTools.checkNonZeroError(avformat.avformat_open_input(avFormatContext, file, null, null), "Initializing format context");
+      FFmpegTools.checkNonZeroError(avformat.avformat_open_input(avFormatContext, file, null, null), "Initializing format context");
 
-      FFMPEGTools.checkNonZeroError(avformat.avformat_find_stream_info(avFormatContext, (AVDictionary) null), "Finding stream information");
+      FFmpegTools.checkNonZeroError(avformat.avformat_find_stream_info(avFormatContext, (AVDictionary) null), "Finding stream information");
 
       openCodecContext();
 
@@ -103,7 +103,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       rgbFrame.height(height);
       rgbFrame.format(avutil.AV_PIX_FMT_RGBA);
 
-      FFMPEGTools.checkNonZeroError(avutil.av_frame_get_buffer(rgbFrame, 0), "Allocating buffer for rgbFrame");
+      FFmpegTools.checkNonZeroError(avutil.av_frame_get_buffer(rgbFrame, 0), "Allocating buffer for rgbFrame");
 
       if (decoderContext.pix_fmt() != avutil.AV_PIX_FMT_RGBA)
       {
@@ -117,7 +117,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
                                              null,
                                              null,
                                              (DoublePointer) null);
-         FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
+         FFmpegTools.checkPointer(swsContext, "Allocating SWS context");
       }
 
       hdf5Manager = new HDF5Manager(hdf5File, hdf5.H5F_ACC_RDONLY);
@@ -130,17 +130,17 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    private void openCodecContext()
    {
       streamIndex = avformat.av_find_best_stream(avFormatContext, avutil.AVMEDIA_TYPE_VIDEO, -1, -1, (AVCodec) null, 0);
-      FFMPEGTools.checkNegativeError(streamIndex, "Finding video stream");
+      FFmpegTools.checkNegativeError(streamIndex, "Finding video stream");
 
       AVStream stream = avFormatContext.streams(streamIndex);
       AVCodec decoder = avcodec.avcodec_find_decoder(stream.codecpar().codec_id());
-      FFMPEGTools.checkPointer(decoder, "Finding codec");
+      FFmpegTools.checkPointer(decoder, "Finding codec");
 
       decoderContext = avcodec.avcodec_alloc_context3(decoder);
-      FFMPEGTools.checkPointer(decoderContext, "Allocating decoder context");
+      FFmpegTools.checkPointer(decoderContext, "Allocating decoder context");
 
-      FFMPEGTools.checkNonZeroError(avcodec.avcodec_parameters_to_context(decoderContext, stream.codecpar()), "Copying codec parameters to decoder context");
-      FFMPEGTools.checkNonZeroError(avcodec.avcodec_open2(decoderContext, decoder, (AVDictionary) null), "Opening codec");
+      FFmpegTools.checkNonZeroError(avcodec.avcodec_parameters_to_context(decoderContext, stream.codecpar()), "Copying codec parameters to decoder context");
+      FFmpegTools.checkNonZeroError(avcodec.avcodec_open2(decoderContext, decoder, (AVDictionary) null), "Opening codec");
    }
 
    @Override
@@ -163,7 +163,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       }
       while (packet.stream_index() != streamIndex);
 
-      FFMPEGTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
+      FFmpegTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
 
       // Note: Video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
       do
@@ -171,7 +171,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
          returnCode = avcodec.avcodec_receive_frame(decoderContext, videoFrame);
       }
       while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
-      FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
+      FFmpegTools.checkNegativeError(returnCode, "Decoding frame from packet");
 
       avcodec.av_packet_unref(packet); // This is NOT freeing the packet, which is done later
 
@@ -189,7 +189,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       if (load && !loadNextFrame()) // Do not call loadNextFrame if load is false
          return -1; // EOF
 
-      FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
+      FFmpegTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
 
       if (swsContext == null)
       {

@@ -8,14 +8,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public class FFMPEGTimeoutCallback extends FFMPEGInterruptCallback
+public class FFmpegTimeoutCallback extends FFmpegInterruptCallback
 {
    private long timeout;
    private TimeUnit timeUnit;
    private final ExecutorService timeoutExecutor;
    private Future<?> futureTimeout;
 
-   public FFMPEGTimeoutCallback()
+   public FFmpegTimeoutCallback()
    {
       timeoutExecutor = Executors.newSingleThreadExecutor();
    }
