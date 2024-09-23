@@ -12,6 +12,7 @@ import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -23,7 +24,6 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final String realsenseSerialNumber;
    private final RealsenseConfiguration realsenseConfiguration;
    private RealsenseDeviceManager realsenseManager;
    private RealsenseDevice realsense = null;
@@ -53,14 +53,12 @@ public class RealsenseColorDepthImageRetriever
    private int numberOfFailedReads = 0;
 
    public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
-                                            String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
                                             BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
-      this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.demandSupplier = realsenseDemandSupplier;
 
@@ -243,7 +241,7 @@ public class RealsenseColorDepthImageRetriever
       }
 
       realsenseManager = new RealsenseDeviceManager();
-      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
+      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseConfiguration);
 
       if (realsense != null && realsense.getDevice() != null)
       {

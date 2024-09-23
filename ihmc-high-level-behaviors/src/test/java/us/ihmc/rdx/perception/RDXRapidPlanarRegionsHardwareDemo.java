@@ -55,7 +55,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
 
             realsenseDeviceManager = new RealsenseDeviceManager();
             //                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
-            l515 = realsenseDeviceManager.createFullFeaturedL515("F1121365");
+            l515 = realsenseDeviceManager.createFullFeaturedL515();
             l515.initialize();
          }
 
@@ -72,7 +72,7 @@ public class RDXRapidPlanarRegionsHardwareDemo
                   openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
                   realsenseDeviceManager = new RealsenseDeviceManager();
-                  l515 = realsenseDeviceManager.createFullFeaturedL515("F1121365");
+                  l515 = realsenseDeviceManager.createFullFeaturedL515();
                   l515.initialize();
                }
 

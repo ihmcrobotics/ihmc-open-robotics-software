@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.Skully;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.parameters.AbstractParameterReader;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -100,7 +99,7 @@ public class ParameterLoaderHelper
          String message = "I think something is off in your parameter file.";
          String additionalInfo = "Parameters in registry: " + registry.collectSubtreeParameters().size() + "\n" + "Parameters using their default value: "
                + defaultParameters.size() + "\n" + "Parameters in XML with no match: " + unmatchedParameters.size();
-         Skully.say(message, additionalInfo);
+         LogTools.warn(message + "\n" + additionalInfo);
       }
    }
 }

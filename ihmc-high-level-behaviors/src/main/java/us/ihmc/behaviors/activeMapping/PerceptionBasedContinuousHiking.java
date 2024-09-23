@@ -29,7 +29,7 @@ public class PerceptionBasedContinuousHiking
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public PerceptionBasedContinuousHiking(DRCRobotModel robotModel, String realsenseSerialNumber)
+   public PerceptionBasedContinuousHiking(DRCRobotModel robotModel)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -53,8 +53,7 @@ public class PerceptionBasedContinuousHiking
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
 
-      perceptionTask = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
-                                                              robotModel.getSimpleRobotName(),
+      perceptionTask = new TerrainPerceptionProcessWithDriver(robotModel.getSimpleRobotName(),
                                                               robotModel.getCollisionBoxProvider(),
                                                               robotModel.createFullRobotModel(),
                                                               RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
