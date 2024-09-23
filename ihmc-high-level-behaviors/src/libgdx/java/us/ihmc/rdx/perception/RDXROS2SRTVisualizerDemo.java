@@ -27,13 +27,13 @@ public class RDXROS2SRTVisualizerDemo
          {
             RDXROS2SRTVideoStreamVisualizer zedLeftColorVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
                                                                                                          "ZED Color Left",
-                                                                                                         PerceptionAPI.ZED_LEFT_COLOR_STREAM);
+                                                                                                         PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS);
             RDXROS2SRTVideoStreamVisualizer zedRightColorVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
                                                                                                           "ZED Color Right",
-                                                                                                          PerceptionAPI.ZED_RIGHT_COLOR_STREAM);
+                                                                                                          PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS);
             RDXROS2SRTVideoStreamVisualizer zedDepthVisualizer = new RDXROS2SRTVideoStreamVisualizer(ros2Helper,
                                                                                                      "ZED Depth",
-                                                                                                     PerceptionAPI.ZED_DEPTH_STREAM);
+                                                                                                     PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS);
             visualizersPanel.addVisualizer(zedLeftColorVisualizer);
             visualizersPanel.addVisualizer(zedRightColorVisualizer);
             visualizersPanel.addVisualizer(zedDepthVisualizer);

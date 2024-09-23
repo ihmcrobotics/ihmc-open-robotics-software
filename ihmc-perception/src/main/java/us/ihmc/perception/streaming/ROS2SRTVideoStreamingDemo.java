@@ -10,8 +10,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
-import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
 
 public class ROS2SRTVideoStreamingDemo
@@ -43,16 +41,16 @@ public class ROS2SRTVideoStreamingDemo
          RawImage rightColorImage = imageRetriever.getLatestRawColorImage(RobotSide.RIGHT);
          RawImage depthImage = imageRetriever.getLatestRawDepthImage();
 
-         if (!streamer.hasStream(PerceptionAPI.ZED_DEPTH_STREAM))
+         if (!streamer.hasStream(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS))
          {
-            streamer.addBGRStream(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage, true);
-            streamer.addBGRStream(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage, true);
-            streamer.addDepthStream(PerceptionAPI.ZED_DEPTH_STREAM, depthImage);
+            streamer.addBGRStream(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, leftColorImage, true);
+            streamer.addBGRStream(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, rightColorImage, true);
+            streamer.addDepthStream(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, depthImage);
          }
 
-         streamer.sendFrame(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage);
-         streamer.sendFrame(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage);
-         streamer.sendFrame(PerceptionAPI.ZED_DEPTH_STREAM, depthImage);
+         streamer.sendFrame(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, leftColorImage);
+         streamer.sendFrame(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, rightColorImage);
+         streamer.sendFrame(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, depthImage);
 
          leftColorImage.release();
          rightColorImage.release();

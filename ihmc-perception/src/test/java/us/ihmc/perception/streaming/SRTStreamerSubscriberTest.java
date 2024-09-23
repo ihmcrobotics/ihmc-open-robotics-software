@@ -174,7 +174,7 @@ public class SRTStreamerSubscriberTest
       throttler.setFrequency(FPS);
 
       // ROS2 topic for the streamer and subscriber
-      ROS2Topic<SRTStreamStatus> requestTopic = PerceptionAPI.STREAM_STATUS.withSuffix("ros2_srt_test");
+      ROS2Topic<SRTStreamStatus> requestTopic = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("ros2_srt_test");
 
       float depthDescretization = -1.0f;
       float fx = 500.0f;
