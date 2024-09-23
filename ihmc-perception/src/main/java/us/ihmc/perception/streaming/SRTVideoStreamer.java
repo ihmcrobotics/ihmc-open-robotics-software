@@ -20,8 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Map.entry;
 import static org.bytedeco.ffmpeg.global.avformat.*;
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV420P;
-import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 // TODO: Make abstract SRTStreamer class and extend to video and audio
 public class SRTVideoStreamer
@@ -95,7 +94,7 @@ public class SRTVideoStreamer
                           int imageHeight,
                           int inputAVPixelFormat)
    {
-      initialize(imageWidth, imageHeight, inputAVPixelFormat, -1, false);
+      initialize(imageWidth, imageHeight, inputAVPixelFormat, -1, false, false);
    }
 
    /**
@@ -105,14 +104,20 @@ public class SRTVideoStreamer
     * @param inputAVPixelFormat Pixel format of images being provided (Must be one of AV_PIX_FMT_*)
     * @param intermediateColorConversion OpenCV color conversion to apply such that the input image matches the inputAVPixelFormat.
     *                                    To not perform a color conversion, pass in a negative value.
+    * @param streamLosslessly If true, attempts to stream lossless video. The stream may not be truly lossless as color conversions may introduce error.
+    * @param useHardwareAcceleration Whether to use hardware acceleration
     */
    public void initialize(int imageWidth,
                           int imageHeight,
                           int inputAVPixelFormat,
                           int intermediateColorConversion,
+                          boolean streamLosslessly,
                           boolean useHardwareAcceleration)
    {
       int bitRate = 10 * imageWidth * imageHeight;
+
+      if (streamLosslessly)
+         av_dict_set(encoderOptions, "tune", "lossless", 0);
 
       if (useHardwareAcceleration)
          encoder = new FFMPEGHardwareVideoEncoder(outputFormat,

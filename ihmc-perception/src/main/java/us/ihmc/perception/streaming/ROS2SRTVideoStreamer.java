@@ -36,14 +36,40 @@ public class ROS2SRTVideoStreamer
       sendFrequencyCalculator = new FrequencyCalculator();
    }
 
-   public void initialize(RawImage exampleImage, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
+   public void initialize(RawImage exampleImage, int inputPixelFormat)
    {
-      initialize(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+      initialize(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat);
    }
 
-   public void initialize(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
+   public void initialize(int imageWidth,
+                          int imageHeight,
+                          int inputPixelFormat)
    {
-      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+      initialize(imageWidth, imageHeight, inputPixelFormat, -1, false, false);
+   }
+
+   public void initialize(RawImage exampleImage,
+                          int inputPixelFormat,
+                          int intermediateColorConversion,
+                          boolean streamLosslessly,
+                          boolean useHardwareAcceleration)
+   {
+      initialize(exampleImage.getImageWidth(),
+                 exampleImage.getImageHeight(),
+                 inputPixelFormat,
+                 intermediateColorConversion,
+                 streamLosslessly,
+                 useHardwareAcceleration);
+   }
+
+   public void initialize(int imageWidth,
+                          int imageHeight,
+                          int inputPixelFormat,
+                          int intermediateColorConversion,
+                          boolean streamLosslessly,
+                          boolean useHardwareAcceleration)
+   {
+      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, useHardwareAcceleration);
    }
 
    public synchronized void sendFrame(RawImage frame)

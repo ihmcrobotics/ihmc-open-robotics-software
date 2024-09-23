@@ -1,7 +1,5 @@
 package us.ihmc.perception.streaming;
 
-import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -47,9 +45,9 @@ public class ROS2SRTVideoStreamingDemo
 
          if (!streamer.hasStream(PerceptionAPI.ZED_DEPTH_STREAM))
          {
-            streamer.addStream(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage, avutil.AV_PIX_FMT_BGR0, opencv_imgproc.COLOR_BGR2BGRA, true);
-            streamer.addStream(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage, avutil.AV_PIX_FMT_BGR0, opencv_imgproc.COLOR_BGR2BGRA, true);
-            streamer.addStream(PerceptionAPI.ZED_DEPTH_STREAM, depthImage, avutil.AV_PIX_FMT_GRAY16);
+            streamer.addBGRStream(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage, true);
+            streamer.addBGRStream(PerceptionAPI.ZED_RIGHT_COLOR_STREAM, rightColorImage, true);
+            streamer.addDepthStream(PerceptionAPI.ZED_DEPTH_STREAM, depthImage);
          }
 
          streamer.sendFrame(PerceptionAPI.ZED_LEFT_COLOR_STREAM, leftColorImage);

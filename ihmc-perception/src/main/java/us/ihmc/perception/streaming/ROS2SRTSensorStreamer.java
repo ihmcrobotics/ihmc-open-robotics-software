@@ -14,6 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.bytedeco.ffmpeg.global.avutil.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2BGRA;
+
 public class ROS2SRTSensorStreamer
 {
    private final ROS2Node ros2Node;
@@ -26,21 +29,35 @@ public class ROS2SRTSensorStreamer
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName().toLowerCase() + "_node");
    }
 
+   public void addBGRStream(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage, boolean useHardwareAcceleration)
+   {
+      if (useHardwareAcceleration)
+         addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR0, COLOR_BGR2BGRA, false, true);
+      else
+         addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR24);
+   }
+
+   public void addDepthStream(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage)
+   {
+      addStream(streamTopic, exampleImage, AV_PIX_FMT_GRAY16, -1, true, false);
+   }
+
    public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
                          RawImage exampleImage,
                          int inputAVPixelFormat)
    {
-      addStream(streamTopic, exampleImage, inputAVPixelFormat, -1, false);
+      addStream(streamTopic, exampleImage, inputAVPixelFormat, -1, false, false);
    }
 
    public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
                          RawImage exampleImage,
                          int inputAVPixelFormat,
                          int intermediateColorConversion,
+                         boolean streamLosslessly,
                          boolean useHardwareAcceleration)
    {
       ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, streamTopic);
-      videoStreamer.initialize(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+      videoStreamer.initialize(exampleImage, inputAVPixelFormat, intermediateColorConversion, streamLosslessly, useHardwareAcceleration);
       videoStreamers.put(streamTopic, videoStreamer);
    }
 
