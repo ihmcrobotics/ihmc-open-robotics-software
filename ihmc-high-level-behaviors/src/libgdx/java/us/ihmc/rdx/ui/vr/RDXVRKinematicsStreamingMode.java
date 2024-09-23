@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.msg.dds.ObjectCarryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang.mutable.MutableBoolean;
@@ -19,6 +20,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -63,6 +65,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -1138,5 +1141,8 @@ public class RDXVRKinematicsStreamingMode
       boolean close = handsAreOpen.get(side).booleanValue();
       handsAreOpen.get(side).setValue(!close);
       handManager.publishHandCommand(side, close ? SakeHandPreset.CLOSE : SakeHandPreset.FULLY_OPEN, false, false);
+
+      ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotModel.getSimpleRobotName());
+      ros2ControllerHelper.publish(objectCarryTopic, new ObjectCarryMessage());
    }
 }
