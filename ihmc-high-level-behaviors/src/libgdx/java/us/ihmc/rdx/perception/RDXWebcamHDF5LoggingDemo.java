@@ -2,7 +2,6 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 /**

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.logging;
+package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
@@ -17,7 +17,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.imgui.ImGuiDirectory;
 import us.ihmc.tools.IHMCCommonPaths;
 

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.logging;
+package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
