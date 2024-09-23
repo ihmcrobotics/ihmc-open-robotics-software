@@ -3,11 +3,9 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-<<<<<<< HEAD
-=======
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
->>>>>>> c81dc9a45d6 (Setting up multi-contact controls while VR streaming to load/unload the hand and lock the loaded hand in place on the IK side. Setting up a debug ROS message for the support region)
+import controller_msgs.msg.dds.ObjectCarryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang.mutable.MutableBoolean;
@@ -22,6 +20,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -66,6 +65,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -412,7 +412,6 @@ public class RDXVRKinematicsStreamingMode
 
            // TODO discuss and possibly remap to different button...
 
-<<<<<<< HEAD
            //           double trajectoryTime = 1.5;
            //           GoHomeMessage homePelvis = new GoHomeMessage();
            //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
@@ -429,24 +428,6 @@ public class RDXVRKinematicsStreamingMode
            //           prescientFootstepStreaming.reset();
            //           pausedForWalking = false;
            //           reintializingToolbox = false;
-=======
-//           double trajectoryTime = 1.5;
-//           GoHomeMessage homePelvis = new GoHomeMessage();
-//           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-//           homePelvis.setTrajectoryTime(trajectoryTime);
-//           ros2ControllerHelper.publishToController(homePelvis);
-//
-//           GoHomeMessage homeChest = new GoHomeMessage();
-//           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-//           homeChest.setTrajectoryTime(trajectoryTime);
-//
-//           RDXBaseUI.pushNotification("Commanding home pose...");
-//           ros2ControllerHelper.publishToController(homeChest);
-//
-//           prescientFootstepStreaming.reset();
-//           pausedForWalking = false;
-//           reintializingToolbox = false;
->>>>>>> c81dc9a45d6 (Setting up multi-contact controls while VR streaming to load/unload the hand and lock the loaded hand in place on the IK side. Setting up a debug ROS message for the support region)
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -603,15 +584,10 @@ public class RDXVRKinematicsStreamingMode
                                                                                   segmentType.getPositionWeight(),
                                                                                   segmentType.getOrientationWeight(),
                                                                                   segmentType.getLinearRateLimitation(),
-<<<<<<< HEAD
-                                                                                  segmentType.getAngularRateLimitation());
-               // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
-=======
                                                                                   segmentType.getAngularRateLimitation(),
                                                                                   false);
                // TODO. Linear desired velocities from controller/trackers are probably wrong now because of scaling.
                // TODO. Figure out if they are really needed
->>>>>>> c81dc9a45d6 (Setting up multi-contact controls while VR streaming to load/unload the hand and lock the loaded hand in place on the IK side. Setting up a debug ROS message for the support region)
                if (segmentType.isHandRelated())
                {
                   // Check arm scaling state not changed -> disabled
@@ -1180,5 +1156,8 @@ public class RDXVRKinematicsStreamingMode
       boolean close = handsAreOpen.get(side).booleanValue();
       handsAreOpen.get(side).setValue(!close);
       handManager.publishHandCommand(side, close ? SakeHandPreset.CLOSE : SakeHandPreset.FULLY_OPEN, false, false);
+
+      ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotModel.getSimpleRobotName());
+      ros2ControllerHelper.publish(objectCarryTopic, new ObjectCarryMessage());
    }
 }
