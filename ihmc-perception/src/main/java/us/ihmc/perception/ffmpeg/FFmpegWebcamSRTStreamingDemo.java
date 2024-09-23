@@ -95,7 +95,7 @@ public class FFmpegWebcamSRTStreamingDemo
 
       private CallerHandler(AVIOContext serverContext, int imageWidth, int imageHeight)
       {
-         AVOutputFormat outputFormat = av_guess_format("h264", null, null);
+         AVOutputFormat outputFormat = av_guess_format("mpegts", null, null);
 
          outputContext = new AVFormatContext();
          error = avformat_alloc_output_context2(outputContext, outputFormat, (String) null, null);
@@ -107,12 +107,12 @@ public class FFmpegWebcamSRTStreamingDemo
 
          videoEncoder = new FFmpegSoftwareVideoEncoder(outputFormat,
                                                        "hevc_nvenc",
-                                               imageWidth * imageHeight,
+                                                       10 * imageWidth * imageHeight,
                                                        imageWidth,
                                                        imageHeight,
                                                        AV_PIX_FMT_YUV420P,
                                                        10,
-                                                       2,
+                                                       0,
                                                        AV_PIX_FMT_BGR24);
 
          AVDictionary encoderOptions = new AVDictionary();
