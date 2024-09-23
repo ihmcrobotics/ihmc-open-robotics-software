@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.GoHomeMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -304,7 +303,7 @@ public class RDXVRKinematicsStreamingMode
          if (leftJoystickButton.bChanged() && !leftJoystickButton.bState() &&
              !kinematicsRecorder.isReplayingEnabled().get() && !kinematicsRecorder.isRecordingEnabled().get())
          { // reinitialize toolbox
-            LogTools.warn("Reinitializing toolbox. Forcing initial IK configuration to current robot configuration");
+            LogTools.warn("Reinitializing toolbox. Forcing initial lower-body IK configuration to current robot configuration");
             if (enabled.get())
             {
                sleepToolbox();
@@ -319,10 +318,12 @@ public class RDXVRKinematicsStreamingMode
                   int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
                   int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
 
+                  // TODO extract this initial configuration in robot specific class
                   initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
                   initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
                   initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
                   initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
+                  // TODO add also default for wrist joints if they exist
                }
                ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                        .getSimpleRobotName()), initialConfigMessage);
@@ -348,22 +349,24 @@ public class RDXVRKinematicsStreamingMode
            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
            sendHandCommand(RobotSide.RIGHT, handConfiguration);
 
-           double trajectoryTime = 1.5;
-           GoHomeMessage homePelvis = new GoHomeMessage();
-           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-           homePelvis.setTrajectoryTime(trajectoryTime);
-           ros2ControllerHelper.publishToController(homePelvis);
+           // TODO discuss and possibly remap to different button...
 
-           GoHomeMessage homeChest = new GoHomeMessage();
-           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-           homeChest.setTrajectoryTime(trajectoryTime);
-
-           RDXBaseUI.pushNotification("Commanding home pose...");
-           ros2ControllerHelper.publishToController(homeChest);
-
-           prescientFootstepStreaming.reset();
-           pausedForWalking = false;
-           reintializingToolbox = false;
+           //           double trajectoryTime = 1.5;
+           //           GoHomeMessage homePelvis = new GoHomeMessage();
+           //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+           //           homePelvis.setTrajectoryTime(trajectoryTime);
+           //           ros2ControllerHelper.publishToController(homePelvis);
+           //
+           //           GoHomeMessage homeChest = new GoHomeMessage();
+           //           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+           //           homeChest.setTrajectoryTime(trajectoryTime);
+           //
+           //           RDXBaseUI.pushNotification("Commanding home pose...");
+           //           ros2ControllerHelper.publishToController(homeChest);
+           //
+           //           prescientFootstepStreaming.reset();
+           //           pausedForWalking = false;
+           //           reintializingToolbox = false;
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -483,8 +486,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                   segmentType.getOrientationWeight(),
                                                                                   segmentType.getLinearRateLimitation(),
                                                                                   segmentType.getAngularRateLimitation());
-               // TODO. Linear desired velocities from controller/trackers are probably wrong now because of scaling.
-               // TODO. Figure out if they are really needed
+               // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
                if (segmentType.isHandRelated())
                {
                   // Check arm scaling state not changed -> disabled

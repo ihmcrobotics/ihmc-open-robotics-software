@@ -264,8 +264,7 @@ public class WalkingCommandConsumer
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
-         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(
-               HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
          SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
          JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
          taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
@@ -538,8 +537,7 @@ public class WalkingCommandConsumer
          {
             if (command.getLoad())
             {
-               handManagers.get(robotSide)
-                           .load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
+               handManagers.get(robotSide).load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
             }
             else
             {
