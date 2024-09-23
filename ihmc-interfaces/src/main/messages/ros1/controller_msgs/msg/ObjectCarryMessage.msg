@@ -1,0 +1,4 @@
+
+bool pickup_object
+
+
