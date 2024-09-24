@@ -84,10 +84,10 @@ public final class SpatialFeedbackControllerTest
       FramePose3D desiredPose = EuclidFrameRandomTools.nextFramePose3D(random, baseBody.getBodyFixedFrame());
       SpatialVector zero = new SpatialVector(desiredPose.getReferenceFrame());
       PIDSE3Gains gains = new DefaultPIDSE3Gains();
-      gains.setPositionProportionalGains(500.0);
-      gains.setPositionDerivativeGains(50.0);
-      gains.setOrientationProportionalGains(500.0);
-      gains.setOrientationDerivativeGains(50.0);
+      gains.setPositionProportionalGains(5.0);
+      gains.setPositionDerivativeGains(Double.NaN);
+      gains.setOrientationProportionalGains(5.0);
+      gains.setOrientationDerivativeGains(Double.NaN);
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(baseBody, endEffector);
       spatialFeedbackControlCommand.setGains(gains);

@@ -1,20 +1,24 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import java.util.List;
+import java.util.Random;
+
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-//import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.ImpedancePointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -42,9 +46,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.List;
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class ImpedancePointFeedbackControllerTest
@@ -69,12 +70,11 @@ public final class ImpedancePointFeedbackControllerTest
 
       // Create the feedback controller for the end effector.
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
-      System.out.println("joints = " + joints);
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, joints, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
-      ImpedancePointFeedbackController impedancePointFeedbackController = new ImpedancePointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
       // Scramble the joint states.
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
@@ -84,16 +84,16 @@ public final class ImpedancePointFeedbackControllerTest
       // Create a command with baseBody as base and desired values in the baseBody frame.
       FramePoint3D desiredPosition = EuclidFrameRandomTools.nextFramePoint3D(random, baseBody.getBodyFixedFrame());
       FrameVector3D zero = new FrameVector3D(desiredPosition.getReferenceFrame());
-
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
-      ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
-      impedancePointFeedbackControlCommand.set(baseBody, endEffector);
-      impedancePointFeedbackControlCommand.setGains(gains);
-      impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
-      impedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
-      impedancePointFeedbackController.setEnabled(true);
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(baseBody, endEffector);
+      pointFeedbackControlCommand.setGains(gains);
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
+      pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+      pointFeedbackController.setEnabled(true);
+      pointFeedbackController.setImpedanceEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
@@ -103,8 +103,8 @@ public final class ImpedancePointFeedbackControllerTest
 
       for (int i = 0; i < simulationTime / controlDT; i++)
       {
-         impedancePointFeedbackController.computeInverseDynamics();
-         SpatialAccelerationCommand spatialAccelerationCommand = impedancePointFeedbackController.getInverseDynamicsOutput();
+         pointFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
          assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
          NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
 
@@ -161,17 +161,19 @@ public final class ImpedancePointFeedbackControllerTest
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
-      ImpedancePointFeedbackController ImpedancePointFeedbackController = new ImpedancePointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
-      ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
-      impedancePointFeedbackControlCommand.set(elevator, endEffector);
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(elevator, endEffector);
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
-      impedancePointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      ImpedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
-      ImpedancePointFeedbackController.setEnabled(true);
+      pointFeedbackControlCommand.setGains(gains);
+      pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+      pointFeedbackController.setEnabled(true);
+      pointFeedbackController.setImpedanceEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
@@ -189,8 +191,8 @@ public final class ImpedancePointFeedbackControllerTest
 
       for (int i = 0; i < 100; i++)
       {
-         ImpedancePointFeedbackController.computeInverseDynamics();
-         SpatialAccelerationCommand output = ImpedancePointFeedbackController.getInverseDynamicsOutput();
+         pointFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
@@ -248,17 +250,19 @@ public final class ImpedancePointFeedbackControllerTest
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
-      ImpedancePointFeedbackController ImpedancePointFeedbackController = new ImpedancePointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
-      ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
-      impedancePointFeedbackControlCommand.set(elevator, endEffector);
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(elevator, endEffector);
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
-      impedancePointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      ImpedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
-      ImpedancePointFeedbackController.setEnabled(true);
+      pointFeedbackControlCommand.setGains(gains);
+      pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+      pointFeedbackController.setEnabled(true);
+      pointFeedbackController.setImpedanceEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
@@ -294,8 +298,8 @@ public final class ImpedancePointFeedbackControllerTest
 
       for (int i = 0; i < 100; i++)
       {
-         ImpedancePointFeedbackController.computeInverseDynamics();
-         SpatialAccelerationCommand output = ImpedancePointFeedbackController.getInverseDynamicsOutput();
+         pointFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
          motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, new DMatrixRMaj(motionQPInput.taskJacobian), tempJtW); // J^T W
@@ -355,14 +359,14 @@ public final class ImpedancePointFeedbackControllerTest
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      ImpedancePointFeedbackController impedancePointFeedbackController = new ImpedancePointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
       SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
-      impedancePointFeedbackController.setEnabled(true);
+      pointFeedbackController.setEnabled(true);
       spatialFeedbackController.setEnabled(true);
 
-      ImpedancePointFeedbackControlCommand impedancePointFeedbackControlCommand = new ImpedancePointFeedbackControlCommand();
-      impedancePointFeedbackControlCommand.set(elevator, endEffector);
-      PID3DGains gains = new DefaultPID3DGains();
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(elevator, endEffector);
+      PID3DGains positionGains = new DefaultPID3DGains();
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
@@ -372,7 +376,7 @@ public final class ImpedancePointFeedbackControllerTest
       NativeQPInputTypeA pointMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
       NativeQPInputTypeA spatialMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
-      SpatialAccelerationCommand pointControllerOutput = impedancePointFeedbackController.getInverseDynamicsOutput();
+      SpatialAccelerationCommand pointControllerOutput = pointFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
 
       for (int i = 0; i < 300; i++)
@@ -386,20 +390,11 @@ public final class ImpedancePointFeedbackControllerTest
          double derivativeGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
          double integralGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
          double maxIntegralError = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         PID3DGains positionGains = new DefaultPID3DGains();
          positionGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
          positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
-         gains.setProportionalGains(proportionalGain);
-         gains.setDerivativeGains(derivativeGain);
-         gains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
-
-
-         PID3DGains positionGain = new DefaultPID3DGains();
-         positionGain.set(positionGains);
-         positionGain.setDerivativeGains(Double.NaN);
-         impedancePointFeedbackControlCommand.setGains(positionGain);
+         pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
          FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
@@ -407,17 +402,17 @@ public final class ImpedancePointFeedbackControllerTest
          FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
 
-         impedancePointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
 
-         impedancePointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
          spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
-         impedancePointFeedbackController.submitFeedbackControlCommand(impedancePointFeedbackControlCommand);
+         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
 
          spatialFeedbackController.computeInverseDynamics();
-         impedancePointFeedbackController.computeInverseDynamics();
+         pointFeedbackController.computeInverseDynamics();
 
          motionQPInputCalculator.convertSpatialAccelerationCommand(pointControllerOutput, pointMotionQPInput);
          motionQPInputCalculator.convertSpatialAccelerationCommand(spatialControllerOutput, spatialMotionQPInput);
