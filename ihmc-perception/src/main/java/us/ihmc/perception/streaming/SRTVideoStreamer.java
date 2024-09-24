@@ -49,7 +49,7 @@ public class SRTVideoStreamer
     */
    public SRTVideoStreamer()
    {
-      this(StreamingTools.getMyAddress());
+      this(StreamingTools.getHostAddress());
    }
 
    /**

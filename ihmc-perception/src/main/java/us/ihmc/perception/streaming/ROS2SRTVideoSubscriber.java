@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -94,6 +95,11 @@ public class ROS2SRTVideoSubscriber
    public RigidBodyTransformReadOnly getSensorTransformToWorld()
    {
       return streamStatusMonitor.getSensorTransformToWorld();
+   }
+
+   public FramePose3DReadOnly getSensorPose()
+   {
+      return streamStatusMonitor.getSensorPose();
    }
 
    public CameraIntrinsics getCameraIntrinsics()

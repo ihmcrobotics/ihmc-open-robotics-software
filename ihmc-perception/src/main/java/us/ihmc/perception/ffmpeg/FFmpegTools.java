@@ -16,6 +16,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair.ImageType;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
@@ -30,6 +31,52 @@ public class FFmpegTools
    public static double rationalToFloatingPoint(AVRational rational)
    {
       return rational.num() / (double) rational.den();
+   }
+
+   public static int imageTypeToAVPixelFormat(ImageType imageType)
+   {
+      return switch (imageType)
+      {
+         case COLOR -> AV_PIX_FMT_BGR24;
+         case DEPTH -> AV_PIX_FMT_GRAY16();
+      };
+   }
+
+   public static int avPixelFormatToOpenCVType(int pixelFormat)
+   {
+      return switch (pixelFormat)
+      {
+         case AV_PIX_FMT_GRAY8 -> opencv_core.CV_8UC1;
+         case AV_PIX_FMT_BGR24, AV_PIX_FMT_RGB24 -> opencv_core.CV_8UC3;
+         case AV_PIX_FMT_RGBA, AV_PIX_FMT_BGRA -> opencv_core.CV_8UC4;
+         case AV_PIX_FMT_GRAY16BE, AV_PIX_FMT_GRAY16LE -> opencv_core.CV_16UC1;
+         default -> throw new NotImplementedException("Either the pixel format cannot be matched to an OpenCV type, or the match has not been implemented.");
+      };
+   }
+
+   public static Mat avFrameToMat(AVFrame frame)
+   {
+      int openCVType = avPixelFormatToOpenCVType(frame.format());
+      return new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
+   }
+
+   public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)
+   {
+      for (Map.Entry<String, String> option : options.entrySet())
+         av_dict_set(dictionaryToSet, option.getKey(), option.getValue(), 0);
+   }
+
+   public static void checkDictionaryAfterUse(AVDictionary dictionary)
+   {
+      if (av_dict_count(dictionary) == 0)
+         return;
+
+      StringBuilder notFoundEntriesString = new StringBuilder("The following entries did not match available options:\n");
+      AVDictionaryEntry entry = null;
+      while ((entry = av_dict_iterate(dictionary, entry)) != null)
+         notFoundEntriesString.append("\t").append(entry.key().getString()).append(":").append(entry.value().getString()).append("\n");
+
+      LogTools.warn(notFoundEntriesString);
    }
 
    public static boolean checkError(int returnCode, Pointer pointerToCheck, String message)
@@ -117,24 +164,6 @@ public class FFmpegTools
          map.put(key, value);
    }
 
-   public static int avPixelFormatToOpenCVType(int pixelFormat)
-   {
-      return switch (pixelFormat)
-      {
-         case AV_PIX_FMT_GRAY8 -> opencv_core.CV_8UC1;
-         case AV_PIX_FMT_BGR24, AV_PIX_FMT_RGB24 -> opencv_core.CV_8UC3;
-         case AV_PIX_FMT_RGBA, AV_PIX_FMT_BGRA -> opencv_core.CV_8UC4;
-         case AV_PIX_FMT_GRAY16BE, AV_PIX_FMT_GRAY16LE -> opencv_core.CV_16UC1;
-         default -> throw new NotImplementedException("Either the pixel format cannot be matched to an OpenCV type, or the match has not been implemented.");
-      };
-   }
-
-   public static Mat avFrameToMat(AVFrame frame)
-   {
-      int openCVType = avPixelFormatToOpenCVType(frame.format());
-      return new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
-   }
-
    public static void listLicenses()
    {
       HashMap<String, String> licenses = new HashMap<>();
@@ -154,24 +183,5 @@ public class FFmpegTools
                        });
 
       LogTools.debug(licensesStringBuilder.toString());
-   }
-
-   public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)
-   {
-      for (Map.Entry<String, String> option : options.entrySet())
-         av_dict_set(dictionaryToSet, option.getKey(), option.getValue(), 0);
-   }
-
-   public static void checkDictionaryAfterUse(AVDictionary dictionary)
-   {
-      if (av_dict_count(dictionary) == 0)
-         return;
-
-      StringBuilder notFoundEntriesString = new StringBuilder("The following entries did not match available options:\n");
-      AVDictionaryEntry entry = null;
-      while ((entry = av_dict_iterate(dictionary, entry)) != null)
-         notFoundEntriesString.append("\t").append(entry.key().getString()).append(":").append(entry.value().getString()).append("\n");
-
-      LogTools.warn(notFoundEntriesString);
    }
 }

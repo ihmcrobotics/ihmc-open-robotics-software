@@ -7,7 +7,9 @@ import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -36,6 +38,7 @@ public class ROS2StreamStatusMonitor
    private final CameraIntrinsics cameraIntrinsics;
    private float depthDiscretization;
    private final MutableReferenceFrame sensorFrame;
+   private final FramePose3D sensorPose; // updated upon access
 
    private boolean running = true;
 
@@ -44,6 +47,7 @@ public class ROS2StreamStatusMonitor
       isStreaming = new AtomicBoolean(false);
       cameraIntrinsics = new CameraIntrinsics();
       sensorFrame = new MutableReferenceFrame();
+      sensorPose = new FramePose3D();
 
       throttler = new Throttler();
       messageTimer = new Timer();
@@ -115,6 +119,16 @@ public class ROS2StreamStatusMonitor
       return sensorFrame.getTransformToParent();
    }
 
+   public FramePose3DReadOnly getSensorPose()
+   {
+      synchronized (sensorFrame)
+      {
+         sensorPose.setToZero(getSensorFrame());
+      }
+      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+      return sensorPose;
+   }
+
    public void destroy()
    {
       running = false;
@@ -137,7 +151,10 @@ public class ROS2StreamStatusMonitor
       cameraIntrinsics.setCy(statusMessage.getCy());
       depthDiscretization = statusMessage.getDepthDiscretization();
 
-      sensorFrame.update(transformToWorld -> transformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition()));
+      synchronized (sensorFrame)
+      {
+         sensorFrame.update(transformToWorld -> transformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition()));
+      }
 
       synchronized (isStreaming)
       {

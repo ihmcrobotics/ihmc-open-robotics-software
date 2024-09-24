@@ -20,7 +20,7 @@ public class ROS2SRTVideoStreamer
 
    public ROS2SRTVideoStreamer(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic)
    {
-      this(ros2Node, streamTopic, StreamingTools.getMyAddress());
+      this(ros2Node, streamTopic, StreamingTools.getHostAddress());
    }
 
    public ROS2SRTVideoStreamer(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic, InetSocketAddress streamOutputAddress)

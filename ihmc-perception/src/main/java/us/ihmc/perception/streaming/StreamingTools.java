@@ -33,6 +33,7 @@ public class StreamingTools
    {
       return new HashMap<>(LIVE_SRT_OPTIONS);
    }
+
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> H264_NVENC_STREAMING_OPTIONS
          = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
@@ -51,7 +52,7 @@ public class StreamingTools
       return "srt://" + address.getHostString() + ":" + address.getPort();
    }
 
-   public static InetSocketAddress getMyAddress()
+   public static InetSocketAddress getHostAddress()
    {
       return new InetSocketAddress(getHostIPAddress(), getOpenPort());
    }
