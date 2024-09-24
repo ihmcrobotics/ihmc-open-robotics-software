@@ -52,6 +52,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                       ReferenceFrame baseFrame,
                                       YoDouble yoTime,
                                       boolean enableFunctionGenerators,
+                                      boolean enableImpedanceControl,
                                       YoRegistry parentRegistry,
                                       YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -82,6 +83,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
+                                                          enableImpedanceControl,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);

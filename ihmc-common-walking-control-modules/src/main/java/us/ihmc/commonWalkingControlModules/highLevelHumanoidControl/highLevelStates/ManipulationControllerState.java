@@ -243,6 +243,7 @@ public class ManipulationControllerState extends HighLevelControllerState
       ContactablePlaneBody contactableBody = null;
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyToControl.getName());
+      boolean enableImpedanceControl = walkingControllerParameters.enableImpedanceControl(bodyToControl.getName());
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -259,6 +260,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     null,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
+                                                                    enableImpedanceControl,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     yoTime,
                                                                     gravityZ,

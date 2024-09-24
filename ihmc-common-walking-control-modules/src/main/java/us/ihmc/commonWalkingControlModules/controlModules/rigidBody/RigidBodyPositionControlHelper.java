@@ -123,6 +123,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          BooleanProvider useBaseFrameForControl,
                                          BooleanProvider useWeightFromMessage,
                                          boolean enableFunctionGenerators,
+                                         boolean enableImpedanceControl,
                                          DoubleProvider time,
                                          YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
@@ -174,6 +175,11 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + Axis3D.values()[axisIdx] + "_FG", time, registry));
          }
+      }
+
+      if (enableImpedanceControl)
+      {
+         System.out.println("Impedance control is enabled: " + bodyName);
       }
    }
 

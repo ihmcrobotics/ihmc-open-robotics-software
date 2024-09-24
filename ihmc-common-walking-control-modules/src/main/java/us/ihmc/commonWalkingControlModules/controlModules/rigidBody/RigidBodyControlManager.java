@@ -99,6 +99,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
+                                  boolean enableImpedanceControl,
                                   double nominalRhoWeight,
                                   YoDouble yoTime,
                                   double controlDT,
@@ -132,6 +133,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
                                                                                                    enableFunctionGenerators,
+                                                                                                   enableImpedanceControl,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -151,6 +153,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
+                                                                                             enableImpedanceControl,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -172,6 +175,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
+                                                                                     enableImpedanceControl,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)

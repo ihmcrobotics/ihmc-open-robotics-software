@@ -109,6 +109,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
+                                            boolean enableImpedanceControl,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -152,6 +153,11 @@ public class RigidBodyOrientationControlHelper
       {
          functionGenerator = null;
          functionGeneratorAxis = null;
+      }
+
+      if (enableImpedanceControl)
+      {
+         System.out.println("Impedance control is enabled: " + bodyName);
       }
    }
 

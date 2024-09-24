@@ -252,6 +252,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
+      boolean enableImpedanceControl = walkingControllerParameters.enableImpedanceControl(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -268,6 +269,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     loadBearingParameters,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
+                                                                    enableImpedanceControl,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     yoTime,
                                                                     controlDT,
