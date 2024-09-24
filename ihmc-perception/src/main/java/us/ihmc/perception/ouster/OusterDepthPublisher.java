@@ -6,6 +6,8 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.perception.imageMessage.ImageFormat.CompressionType;
+import us.ihmc.perception.imageMessage.ImageFormat.PixelFormat;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
@@ -14,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Topic;
@@ -107,7 +108,8 @@ public class OusterDepthPublisher
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
+      PixelFormat.GRAY16.packImageMessage(outputImageMessage);
+      CompressionType.PNG.packImageMessage(outputImageMessage);
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);

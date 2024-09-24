@@ -43,6 +43,6 @@ public enum CameraModel
          }
       }
 
-      throw new RuntimeException("Missing format " + imageMessage.getFormat());
+      throw new RuntimeException("Missing format " + imageMessage.getCameraModel());
    }
 }

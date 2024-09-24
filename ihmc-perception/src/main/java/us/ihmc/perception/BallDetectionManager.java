@@ -9,9 +9,10 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.imageMessage.ImageFormat.CompressionType;
+import us.ihmc.perception.imageMessage.ImageFormat.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 
 import java.time.Instant;
@@ -125,7 +126,8 @@ public class BallDetectionManager
             imageMessage.setSequenceNumber(maskImageSequenceNumber++);
             imageMessage.setDepthDiscretization(-1.0f);
             CameraModel.PINHOLE.packMessageFormat(imageMessage);
-            ImageMessageFormat.GRAY_PNG_8UC1.packMessageFormat(imageMessage);
+            PixelFormat.GRAY8.packImageMessage(imageMessage);
+            CompressionType.PNG.packImageMessage(imageMessage);
             ros2Helper.publish(PerceptionAPI.BALL_SEGMENTATION_IMAGE, imageMessage);
          }
 

@@ -17,9 +17,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.imageMessage.ImageFormat.CompressionType;
+import us.ihmc.perception.imageMessage.ImageFormat.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -136,7 +137,8 @@ public class PerceptionMessageTools
                                                float depthToMetersRatio)
    {
       packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+      PixelFormat.GRAY16.packImageMessage(depthImageMessage);
+      CompressionType.PNG.packImageMessage(depthImageMessage);
    }
 
    public static void packJPGCompressedColorImage(BytePointer compressedColorPointer,
@@ -149,7 +151,8 @@ public class PerceptionMessageTools
                                                   float depthToMetersRatio)
    {
       packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
+      PixelFormat.YUVI420.packImageMessage(colorImageMessage);
+      CompressionType.JPEG.packImageMessage(colorImageMessage);
    }
 
    public static void packImageMessage(ImageMessage imageMessage,

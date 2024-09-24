@@ -48,6 +48,13 @@ public class OpenCVTools
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }
 
+   public static void cudaClampTo8BitUnsignedChar(GpuMat source, GpuMat destination, double min, double max)
+   {
+      int normType = opencv_core.NORM_MINMAX;
+      int depthType = opencv_core.CV_8U; // converting to 8 bit
+      opencv_cudaarithm.normalize(source, destination, min, max, normType, depthType);
+   }
+
    public static void transferDepth16UC1ToLower8UC3(Mat source, Mat destination)
    {
       BytePointer data = source.data();

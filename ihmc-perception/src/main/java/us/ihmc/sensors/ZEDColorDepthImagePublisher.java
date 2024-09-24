@@ -6,10 +6,11 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.ImageFormat.CompressionType;
+import us.ihmc.perception.imageMessage.ImageFormat.PixelFormat;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -154,7 +155,8 @@ public class ZEDColorDepthImagePublisher
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1.packMessageFormat(depthImageMessage);
+         PixelFormat.GRAY16.packImageMessage(depthImageMessage);
+         CompressionType.ZSTD_JPEG_HYBRID.packImageMessage(depthImageMessage);
 
          // Close GpuMat
          depthPNGPointer.close();
@@ -241,7 +243,8 @@ public class ZEDColorDepthImagePublisher
          colorImageMessage.setSequenceNumber(colorImageToPublish.getSequenceNumber());
          colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-         ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
+         PixelFormat.BGR8.packImageMessage(colorImageMessage);
+         CompressionType.JPEG.packImageMessage(colorImageMessage);
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());
