@@ -429,6 +429,7 @@ public class MotionQPInputCalculator
       DMatrixRMaj objective = commandToConvert.getObjective();
       DMatrixRMaj selectionMatrix = commandToConvert.getSelectionMatrix();
       DMatrixRMaj weightMatrix = commandToConvert.getWeightMatrix();
+      DMatrixRMaj gradientMatrix = commandToConvert.getGradientMatrix();
 
       int taskSize = selectionMatrix.getNumRows();
       // TODO check the weights to determine the task size as well.
@@ -825,7 +826,7 @@ public class MotionQPInputCalculator
    {
       if (convertLinearMomentumRateCostCommand(commandToConvert, tempBInput))
       {
-         qpInputToPack.getTaskWeightMatrix().set(tempBInput.getTaskWeightMatrix());
+         qpInputToPack.setWeight(tempBInput.getWeight());
          qpInputToPack.getDirectCostHessian().set(tempBInput.getDirectCostHessian());
          qpInputToPack.getDirectCostGradient().set(tempBInput.getDirectCostGradient());
          qpInputToPack.getTaskJacobian().set(tempBInput.getTaskJacobian());
@@ -855,30 +856,61 @@ public class MotionQPInputCalculator
          return false;
 
       qpInputToPack.reshape(taskSize);
-      qpInputToPack.setUseWeightScalar(false);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(Wrench.SIZE, Wrench.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, 3);
-      commandToConvert.getWeightMatrix(tempTaskWeight);
-      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+      qpInputToPack.setWeight(commandToConvert.getWeight());
 
       // Compute the hessian: H = S * H * S^T
       tempTaskWeight.set(commandToConvert.getMomentumRateHessian());
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.directCostHessian);
 
+      // Compute the gradient: g = S * g
+      CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
+
       // Compute the task Jacobian: J = S * A
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
 
-      // Compute the gradient: g = S * g
-      CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
-
       // Compute the task convective term: p = S * ADot qDot
       DMatrixRMaj convectiveTerm = getCentroidalMomentumConvectiveTerm();
       CommonOps_DDRM.mult(tempSelectionMatrix, convectiveTerm, qpInputToPack.taskConvectiveTerm);
+
+      recordTaskJacobian(qpInputToPack.taskJacobian);
+
+      return true;
+   }
+
+   /**
+    * Converts a {@link QPCostCommand} into a {@link NativeQPInputTypeB}.
+    *
+    * @return true if the command was successfully converted.
+    */
+   public boolean convertQPCostCommand(QPCostCommand commandToConvert, NativeQPInputTypeB qpInputToPack)
+   {
+      tempSelectionMatrix.zero();
+      int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
+
+      if (taskSize == 0)
+         return false;
+
+      qpInputToPack.reshape(taskSize);
+
+      // Set the weight
+      qpInputToPack.setWeight(commandToConvert.getWeight());
+
+      // Set the hessian
+      qpInputToPack.directCostHessian.set(commandToConvert.getCostHessian());
+
+      // Set the gradient
+      qpInputToPack.directCostGradient.set(commandToConvert.getCostGradient());
+
+      // Set the task Jacobian
+      qpInputToPack.taskJacobian.set(commandToConvert.getStateJacobian());
+
+      // Compute the task convective term: p = -b
+      qpInputToPack.taskConvectiveTerm.scale(-1.0, commandToConvert.getStateObjective());
 
       recordTaskJacobian(qpInputToPack.taskJacobian);
 

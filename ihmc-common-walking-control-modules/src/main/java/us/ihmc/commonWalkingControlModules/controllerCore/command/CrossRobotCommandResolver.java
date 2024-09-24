@@ -632,7 +632,7 @@ public class CrossRobotCommandResolver
       out.setCommandId(in.getCommandId());
       out.setMomentumRateHessian(in.getMomentumRateHessian());
       out.setMomentumRateGradient(in.getMomentumRateGradient());
-      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      out.setWeight(in.getWeight());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
@@ -644,6 +644,16 @@ public class CrossRobotCommandResolver
       out.getObjective().set(in.getObjective());
       out.getJacobian().set(in.getJacobian());
       out.setDoNullSpaceProjection(in.isNullspaceProjected());
+   }
+
+   public void resolveQPCostCommand(QPCostCommand in, QPCostCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.setWeight(in.getWeight());
+      out.setCostHessian(in.getCostHessian());
+      out.setCostGradient(in.getCostGradient());
+      out.setStateJacobian(in.getStateJacobian());
+      out.setStateObjective(in.getStateObjective());
    }
 
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)

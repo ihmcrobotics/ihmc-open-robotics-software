@@ -1279,7 +1279,7 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setLinearMomentumRateHessian(nextDMatrixRMaj(random, 3, 3));
       next.setLinearMomentumRateGradient(nextDMatrixRMaj(random, 1, 3));
-      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setWeight(random.nextDouble());
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
 
       return next;

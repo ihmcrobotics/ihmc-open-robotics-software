@@ -307,10 +307,7 @@ public class InverseDynamicsQPSolver
 
    public void addQPInput(NativeQPInputTypeB input, QPInputDomain inputDomain)
    {
-      if (input.useWeightScalar())
-         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeightScalar(), input.directCostHessian, input.directCostGradient, inputDomain);
-      else
-         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.taskWeightMatrix, input.directCostHessian, input.directCostGradient, inputDomain);
+      addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeight(), input.directCostHessian, input.directCostGradient, inputDomain);
    }
 
    /**
