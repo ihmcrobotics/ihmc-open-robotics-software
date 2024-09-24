@@ -329,6 +329,7 @@ public class ImpedancePointFeedbackController implements FeedbackControllerInter
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
+//      Warning: getting the inertia Matrix is a costly operation.
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       CommonOps_DDRM.invert(massInverseMatrix);
