@@ -185,7 +185,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "IsOrientationFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
-      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerImpedanceEnabled", fbToolbox.getRegistry());
+      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isOrientationFBControllerImpedanceEnabled", fbToolbox.getRegistry());
       isImpedanceEnabled.set(false);
 
       yoDesiredOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, DESIRED, isEnabled, true);
@@ -315,6 +315,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
+
+      setImpedanceEnabled(command.getIsImpedanceEnabled());
 
       //      TODO: Clean up the Garbage creation
       JointBasics[] jointPath = MultiBodySystemTools.createJointPath(base, endEffector);
@@ -776,7 +778,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       CommonOps_DDRM.invert(massInverseMatrix);
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(massInverseMatrix, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, subMassInverseMatrix, 0, 0);
+      CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);

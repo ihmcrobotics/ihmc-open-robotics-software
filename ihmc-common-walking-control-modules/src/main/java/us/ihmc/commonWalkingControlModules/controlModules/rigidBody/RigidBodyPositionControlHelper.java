@@ -147,6 +147,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -175,11 +176,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + Axis3D.values()[axisIdx] + "_FG", time, registry));
          }
-      }
-
-      if (enableImpedanceControl)
-      {
-         System.out.println("Impedance control is enabled: " + bodyName);
       }
    }
 

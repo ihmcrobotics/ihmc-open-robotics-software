@@ -305,6 +305,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
 
+      setImpedanceEnabled(command.getIsImpedanceEnabled());
 
 //      TODO: Clean up the Garbage creation
       JointBasics[] jointPath = MultiBodySystemTools.createJointPath(base, endEffector);
@@ -812,7 +813,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       CommonOps_DDRM.invert(massInverseMatrix);
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(massInverseMatrix, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, subMassInverseMatrix, 0, 0);
+      CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);

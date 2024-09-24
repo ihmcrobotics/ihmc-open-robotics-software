@@ -215,7 +215,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
-      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerImpedanceEnabled", fbToolbox.getRegistry());
+      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerImpedanceEnabled", fbToolbox.getRegistry());
       isImpedanceEnabled.set(false);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
@@ -359,6 +359,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
+
+      setImpedanceEnabled(command.getIsImpedanceEnabled());
 
       JointBasics[] jointPath = MultiBodySystemTools.createJointPath(base, endEffector);
       List<Integer> allJointIndices = new ArrayList<>();
@@ -1082,7 +1084,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       CommonOps_DDRM.invert(massInverseMatrix);
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(massInverseMatrix, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, jointIndices[0], jointIndices[jointIndices.length - 1] + 1, subMassInverseMatrix, 0, 0);
+
+      CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);

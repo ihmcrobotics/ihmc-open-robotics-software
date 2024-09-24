@@ -122,6 +122,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setSelectionMatrixToIdentity();
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
+
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)

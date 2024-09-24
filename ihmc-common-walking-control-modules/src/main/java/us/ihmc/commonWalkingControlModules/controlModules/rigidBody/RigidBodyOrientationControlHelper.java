@@ -132,6 +132,7 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -153,11 +154,6 @@ public class RigidBodyOrientationControlHelper
       {
          functionGenerator = null;
          functionGeneratorAxis = null;
-      }
-
-      if (enableImpedanceControl)
-      {
-         System.out.println("Impedance control is enabled: " + bodyName);
       }
    }
 
