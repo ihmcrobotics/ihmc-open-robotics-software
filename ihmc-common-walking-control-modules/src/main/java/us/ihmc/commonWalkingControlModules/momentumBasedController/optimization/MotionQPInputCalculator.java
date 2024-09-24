@@ -912,7 +912,7 @@ public class MotionQPInputCalculator
       // Compute the task convective term: p = -b
       qpInputToPack.taskConvectiveTerm.scale(-1.0, commandToConvert.getStateObjective());
 
-      recordTaskJacobian(qpInputToPack.taskJacobian);
+//      recordTaskJacobian(qpInputToPack.taskJacobian);
 
       return true;
    }

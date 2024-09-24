@@ -481,16 +481,16 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("This task does not fit.");
       }
 
-      // Compute: f += J^T W g
-      solver_f.multAddBlock(taskWeight, taskJacobian, directCostGradient, offset, 0);
+      // Compute: f += w J^T W g
+      solver_f.multAddBlockTransA(taskWeight, taskJacobian, directCostGradient, offset, 0);
 
-      // J^T (Q + H)
+      // w J^T H
       tempJtW.multTransA(taskWeight, taskJacobian, directCostHessian);
 
-      // Compute: H += J^T (H + Q) J
+      // Compute: H += w J^T H J
       solver_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
 
-      // Compute: f += J^T (Q + H) b
+      // Compute: f += w J^T H b
       solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
    }
 
