@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.Map.entry;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
@@ -30,14 +29,6 @@ public class SRTVideoStreamer
    private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV420P;
    private static final int GOP_SIZE = 5; // send 5 P frames between key frames
    private static final int MAX_B_FRAMES = 0; // don't use B frames
-
-   /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
-   private static final Map<String, String> HEVC_NVENC_OPTIONS
-         = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
-                         entry("tune", "ull"),        // "Ultra low latency"
-                         entry("rc", "vbr"),          // Rate control: variable bit rate mode
-                         entry("delay", "0"),         // No delay to frame output
-                         entry("zerolatency", "1"));  // Don't introduce reordering delay
 
    private final AVDictionary encoderOptions;
    private FFmpegVideoEncoder encoder;
@@ -75,7 +66,7 @@ public class SRTVideoStreamer
       liveSRTOptions.put("mode", "listener");
 
       encoderOptions = new AVDictionary();
-      FFmpegTools.setAVDictionary(encoderOptions, HEVC_NVENC_OPTIONS);
+      FFmpegTools.setAVDictionary(encoderOptions, StreamingTools.getH264NVENCStreamingOptions());
 
       outputFormat = av_guess_format(OUTPUT_FORMAT_NAME, null, null);
 

@@ -33,6 +33,18 @@ public class StreamingTools
    {
       return new HashMap<>(LIVE_SRT_OPTIONS);
    }
+   /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
+   private static final Map<String, String> H264_NVENC_STREAMING_OPTIONS
+         = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
+                         entry("tune", "ull"),        // "Ultra low latency"
+                         entry("rc", "vbr"),          // Rate control: variable bit rate mode
+                         entry("delay", "0"),         // No delay to frame output
+                         entry("zerolatency", "1"));  // Don't introduce reordering delay
+
+   public static Map<String, String> getH264NVENCStreamingOptions()
+   {
+      return new HashMap<>(H264_NVENC_STREAMING_OPTIONS);
+   }
 
    public static String toSRTAddress(InetSocketAddress address)
    {
