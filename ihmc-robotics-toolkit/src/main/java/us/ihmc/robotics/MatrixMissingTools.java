@@ -8,6 +8,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition_F64;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
@@ -525,7 +526,7 @@ public class MatrixMissingTools
    }
 
    /**
-    * Computes the square root of a positive definite matrix using Cholesky decomposition.
+    * Computes the square root of a positive definite matrix using the Eigenvalue decomposition.
     * The result is stored in the provided resultToPack matrix.
     *
     * @param input the matrix to compute the square root of. Not modified.
@@ -539,17 +540,26 @@ public class MatrixMissingTools
       if (input.numRows != resultToPack.numRows)
          throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
-      CholeskyDecomposition_F64<DMatrixRMaj> cholesky = DecompositionFactory_DDRM.chol(input.numRows, true);
-      if (!cholesky.decompose(input)) {
-         throw new RuntimeException("Cholesky decomposition failed.");
+      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(input.numRows, true);
+      if (!eig.decompose(input)) {
+         throw new RuntimeException("Eigenvalue decomposition failed.");
       }
 
-      DMatrixRMaj L = cholesky.getT(null);
-      for (int i = 0; i < L.numRows; i++) {
-         L.set(i, i, Math.sqrt(L.get(i, i)));
+      DMatrixRMaj V = new DMatrixRMaj(input.numRows, input.numCols);
+      DMatrixRMaj D = new DMatrixRMaj(input.numRows, input.numCols);
+
+      for (int i = 0; i < input.numRows; i++) {
+         DMatrixRMaj eigenVector = eig.getEigenVector(i);
+         double eigenValue = eig.getEigenvalue(i).getReal();
+         if (eigenVector != null) {
+            CommonOps_DDRM.insert(eigenVector, V, 0, i);
+            D.set(i, i, Math.sqrt(eigenValue));
+         }
       }
 
-      CommonOps_DDRM.multTransB(L, L, resultToPack);
+      DMatrixRMaj temp = new DMatrixRMaj(input.numRows, input.numCols);
+      CommonOps_DDRM.mult(V, D, temp);
+      CommonOps_DDRM.multTransB(temp, V, resultToPack);
    }
    /**
     * Comparing elements of two matrices.

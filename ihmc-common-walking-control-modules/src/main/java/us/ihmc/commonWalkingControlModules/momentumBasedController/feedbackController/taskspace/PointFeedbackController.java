@@ -673,6 +673,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
          tempMatrix.reshape(3, 3);
          CommonOps_DDRM.extract(tempDiagDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
          tempGainMatrix.set(tempMatrix);
+
+         System.out.println("Derivative Gain Matrix: ");
+         System.out.println(tempGainMatrix);
       }
       tempGainMatrix.transform(feedbackTermToPack);
 
