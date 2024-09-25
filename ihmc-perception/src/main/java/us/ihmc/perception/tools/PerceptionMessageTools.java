@@ -131,6 +131,12 @@ public class PerceptionMessageTools
       }
    }
 
+   public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
+   {
+      imageMessage.getData().resetQuick();
+      imageMessage.getData().getBuffer().put(dataPointer.asByteBuffer());
+   }
+
    public static void packCompressedDepthImage(BytePointer compressedDepthPointer,
                                                ImageMessage depthImageMessage,
                                                Pose3DReadOnly cameraPose,
@@ -155,7 +161,7 @@ public class PerceptionMessageTools
                                                   float depthToMetersRatio)
    {
       packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, aquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
-      PixelFormat.YUVI420.packImageMessage(colorImageMessage);
+      PixelFormat.YUV_I420.packImageMessage(colorImageMessage);
       CompressionType.JPEG.packImageMessage(colorImageMessage);
    }
 

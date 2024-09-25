@@ -1,5 +1,6 @@
 package us.ihmc.perception.imageMessage;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -11,7 +12,6 @@ import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.opencv.OpenCVTools;
 
-// TODO: Write tests
 public class ImageMessageDecoder
 {
    private final ImageMessageDecompressionInput messageDataExtractor = new ImageMessageDecompressionInput();
@@ -40,12 +40,31 @@ public class ImageMessageDecoder
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
          case JPEG, PNG -> opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
+         case NVCOMP ->
+         {
+            if (cudaCompressionTools != null)
+            {
+               BytePointer encodedData = messageDataExtractor.getInputPointer();
+               BytePointer decodedData = cudaCompressionTools.decompress(encodedData, encodedData.limit());
+               imageToPack.data(decodedData);
+            }
+         }
          case ZSTD_JPEG_HYBRID ->
          {
             if (cudaCompressionTools != null)
                cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
          }
-         case UNCOMPRESSED -> imageToPack.data(messageDataExtractor.getInputPointer());
+         case UNCOMPRESSED ->
+         {
+            if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerElement)
+            {
+               Mat correctSizedMat = new Mat(messageToDecode.getImageHeight(), messageToDecode.getImageWidth(), lastImagePixelFormat.toOpenCVType());
+               correctSizedMat.copyTo(imageToPack);
+               correctSizedMat.close();
+            }
+            imageToPack.data(messageDataExtractor.getInputPointer().position(0));
+         }
+         default -> throw new IllegalStateException("Unexpected value: " + CompressionType.fromImageMessage(messageToDecode));
       }
    }
 
@@ -70,10 +89,18 @@ public class ImageMessageDecoder
             imageToPack.upload(decompressedImage);
             decompressedImage.close();
          }
+         case NVCOMP ->
+         {
+            BytePointer encodedData = messageDataExtractor.getInputPointer();
+            BytePointer decodedData = cudaCompressionTools.decompress(encodedData, encodedData.limit());
+            Mat cpuImage = new Mat(imageToPack.size(), imageToPack.type(), decodedData);
+            imageToPack.upload(cpuImage);
+            cpuImage.close();
+         }
          case ZSTD_JPEG_HYBRID -> cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
          case UNCOMPRESSED ->
          {
-            Mat cpuImage = new Mat(imageToPack.size(), imageToPack.type(), messageDataExtractor.getInputPointer());
+            Mat cpuImage = new Mat(imageToPack.size(), lastImagePixelFormat.toOpenCVType(), messageDataExtractor.getInputPointer());
             imageToPack.upload(cpuImage);
             cpuImage.close();
          }
@@ -86,7 +113,7 @@ public class ImageMessageDecoder
 
       switch (lastImagePixelFormat)
       {
-         case YUVI420 -> opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_YUV2RGBA_I420);
+         case YUV_I420 -> opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_YUV2RGBA_I420);
          case BGR8 -> opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2RGBA);
          case BGRA8 -> opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGRA2RGBA);
          case RGB8 -> opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_RGB2RGBA);
@@ -107,7 +134,13 @@ public class ImageMessageDecoder
 
       switch (lastImagePixelFormat)
       {
-         case YUVI420 -> opencv_cudaimgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_YUV2RGBA_I420);
+         case YUV_I420 ->
+         {  // FIXME: YUV_I420 is not supported on the GPU :(
+            Mat cpuImage = new Mat();
+            imageToPack.download(cpuImage);
+            opencv_imgproc.cvtColor(cpuImage, cpuImage, opencv_imgproc.COLOR_YUV2RGBA_I420);
+            imageToPack.upload(cpuImage);
+         }
          case BGR8 -> opencv_cudaimgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2RGBA);
          case BGRA8 -> opencv_cudaimgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGRA2RGBA);
          case RGB8 -> opencv_cudaimgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_RGB2RGBA);

@@ -6,6 +6,7 @@ public enum CompressionType
 {
    JPEG,
    PNG,
+   NVCOMP,
    ZSTD_JPEG_HYBRID,
    UNCOMPRESSED;
 
