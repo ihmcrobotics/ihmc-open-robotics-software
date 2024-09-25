@@ -18,6 +18,9 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.file.Paths;
 import java.util.*;
@@ -46,11 +49,15 @@ public class KinematicsRecordReplay
    private int selectedNodeIndex = 0;
    private final Map<String, FramePose3D> previousFramePose = new HashMap<>();
    private final Map<String, FramePose3D> firstFramePose = new HashMap<>();
+   private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames;
+   private boolean requestRecordReplay;
 
-   public KinematicsRecordReplay(SceneGraph sceneGraph, ImBoolean enabledKinematicsStreaming)
+   public KinematicsRecordReplay(SceneGraph sceneGraph, ImBoolean enabledKinematicsStreaming, SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
    {
       this.sceneGraph = sceneGraph;
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
+      this.handDesiredControlFrames = handDesiredControlFrames;
+
       trajectoryRecorder.setNumberOfParts(numberOfParts.get()); // default to 2
       for (int n = 0; n < numberOfParts.get(); n++)
          framesToRecordHistory.add(new ArrayList<>());
@@ -64,6 +71,11 @@ public class KinematicsRecordReplay
       framesToRecordHistory.clear();
       for (int n = 0; n < numberOfParts.get(); n++)
          framesToRecordHistory.add(new ArrayList<>());
+   }
+
+   public void requestRecordReplay()
+   {
+      requestRecordReplay = true;
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -121,6 +133,61 @@ public class KinematicsRecordReplay
          }
          isUserMoving = false;
       }
+   }
+
+   public void onUpdateStart()
+   {
+      requestRecordReplay = false;
+
+      if (isRecording)
+         trajectoryRecorder.onUpdateStart();
+   }
+
+   public void onUpdateEnd()
+   {
+      if (requestRecordReplay && enablerRecording.get())
+      { // Toggle record state
+         if (isRecording)
+         {
+            LogTools.info("Finished recording!");
+            isRecording = false;
+            trajectoryRecorder.onRecordEnd();
+         }
+         else
+         {
+            LogTools.info("Starting to record!");
+            isRecording = true;
+            trajectoryRecorder.onRecordStart();
+         }
+      }
+
+      else if (requestRecordReplay && enablerReplay.get())
+      { // Toggle replay State
+         if (isReplaying)
+         {
+            LogTools.info("Finished replayed!");
+            isReplaying = false;
+            trajectoryRecorder.onReplayEnd();
+         }
+         else
+         {
+            LogTools.info("Starting to replay!");
+            isReplaying = true;
+            trajectoryRecorder.onReplayStart();
+         }
+      }
+   }
+
+   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerClicked, double forwardJoystickValue, double lateralJoystickValue)
+   {
+      if (!isRecording)
+         return;
+      trajectoryRecorder.recordControllerData(robotSide,
+                                              aButtonPressed,
+                                              triggerClicked,
+                                              forwardJoystickValue,
+                                              lateralJoystickValue,
+                                              handDesiredControlFrames.get(robotSide).getReferenceFrame());
    }
 
    /**
@@ -237,7 +304,7 @@ public class KinematicsRecordReplay
          updateNumberOfParts();
       if (ImGui.checkbox(labels.get("Record Motion"), enablerRecording))
       {
-         setRecording(enablerRecording.get());
+//         setRecording(enablerRecording.get());
       }
       ImGui.sameLine();
       ImGui.inputText(labels.get("Record Folder"), recordPath);
