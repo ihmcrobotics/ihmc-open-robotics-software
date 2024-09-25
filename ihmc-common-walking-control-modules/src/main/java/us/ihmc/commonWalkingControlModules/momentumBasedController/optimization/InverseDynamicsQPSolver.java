@@ -364,20 +364,6 @@ public class InverseDynamicsQPSolver
       addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight,directCostHessian, directCostGradient, getVariableOffset(inputDomain));
    }
 
-   public void addQPTask(NativeMatrix taskJacobian,
-                         NativeMatrix taskConvectiveTerm,
-                         NativeMatrix taskWeight,
-                         NativeMatrix directCostHessian,
-                         NativeMatrix directCostGradient,
-                         QPInputDomain inputDomain)
-   {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
-      {
-         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
-      }
-      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight, directCostHessian, directCostGradient, getVariableOffset(inputDomain));
-   }
-
    /**
     * Sets up an objective similarly to {@link #addQPTask} but with an identity Jacobian, J=I:
     * <p>
@@ -437,35 +423,6 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += - J^T W Objective
       solver_f.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
-   }
-
-   private void addTaskInternal(NativeMatrix taskJacobian,
-                                NativeMatrix taskConvectiveTerm,
-                                NativeMatrix taskWeight,
-                                NativeMatrix directCostHessian,
-                                NativeMatrix directCostGradient,
-                                int offset)
-   {
-      int variables = taskJacobian.getNumCols();
-      if (offset + variables > problemSize)
-      {
-         throw new RuntimeException("This task does not fit.");
-      }
-
-      // J^T Q
-      tempJtW.multTransA(taskJacobian, taskWeight);
-
-      // Compute: f += J^T Q g
-      solver_f.multAddBlock(tempJtW, directCostGradient, offset, 0);
-
-      // J^T (Q + H)
-      tempJtW.multAddTransA(taskJacobian, directCostHessian);
-
-      // Compute: H += J^T (H + Q) J
-      solver_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
-
-      // Compute: f += J^T (Q + H) b
-      solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
    }
 
    private void addTaskInternal(NativeMatrix taskJacobian,
