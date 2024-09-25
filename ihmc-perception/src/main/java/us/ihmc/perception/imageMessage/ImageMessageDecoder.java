@@ -1,7 +1,5 @@
 package us.ihmc.perception.imageMessage;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -11,13 +9,13 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.imageMessage.ImageFormat.CompressionType;
-import us.ihmc.perception.imageMessage.ImageFormat.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 
 // TODO: Write tests
 public class ImageMessageDecoder
 {
+   private final ImageMessageDecompressionInput messageDataExtractor = new ImageMessageDecompressionInput();
+
    private CUDACompressionTools cudaCompressionTools = null;
    private CUDAJPEGProcessor cudaJpegDecoder = null;
 
@@ -35,60 +33,47 @@ public class ImageMessageDecoder
    public void decodeMessage(ImageMessage messageToDecode, Mat imageToPack)
    {
       resizeToMessageDimensions(messageToDecode, imageToPack);
+      messageDataExtractor.extract(messageToDecode);
 
       lastImagePixelFormat = PixelFormat.fromImageMessage(messageToDecode);
 
-      BytePointer encodedData = new BytePointer(messageToDecode.getData().getBuffer().array());
-      encodedData.limit(messageToDecode.getData().size());
-
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
-         case JPEG, PNG ->
-         {
-            Mat compressedDataMat = new Mat(1, messageToDecode.getData().size(), opencv_core.CV_8UC1, encodedData);
-            opencv_imgcodecs.imdecode(compressedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
-            compressedDataMat.close();
-         }
+         case JPEG, PNG -> opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
          case ZSTD_JPEG_HYBRID ->
          {
             if (cudaCompressionTools != null)
-               cudaCompressionTools.decompressDepth(encodedData, imageToPack); // FIXME: Something don't work here
+               cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
          }
-         case UNCOMPRESSED -> imageToPack.data(encodedData);
+         case UNCOMPRESSED -> imageToPack.data(messageDataExtractor.getInputPointer());
       }
    }
 
    public void decodeMessage(ImageMessage messageToDecode, GpuMat imageToPack)
    {
       resizeToMessageDimensions(messageToDecode, imageToPack);
+      messageDataExtractor.extract(messageToDecode);
 
       lastImagePixelFormat = PixelFormat.fromImageMessage(messageToDecode);
-
-      BytePointer encodedData = new BytePointer(messageToDecode.getData().getBuffer().array());
-      encodedData.limit(messageToDecode.getData().size());
 
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
          case JPEG ->
          {
-            cudaJpegDecoder.decodeToBGR(encodedData, encodedData.limit(), imageToPack);
+            cudaJpegDecoder.decodeToBGR(messageDataExtractor.getInputPointer(), messageDataExtractor.getInputPointer().limit(), imageToPack);
             lastImagePixelFormat = PixelFormat.BGR8;
          }
          case PNG ->
          {
-            Mat compressedDataMat = new Mat(1, messageToDecode.getData().size());
             Mat decompressedImage = new Mat();
-            compressedDataMat.data(encodedData);
-            opencv_imgcodecs.imdecode(compressedDataMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
+            opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
             imageToPack.upload(decompressedImage);
-            compressedDataMat.close();
             decompressedImage.close();
          }
-         case ZSTD_JPEG_HYBRID -> cudaCompressionTools.decompressDepth(encodedData, imageToPack);
+         case ZSTD_JPEG_HYBRID -> cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
          case UNCOMPRESSED ->
          {
-            Mat cpuImage = new Mat();
-            cpuImage.data(encodedData);
+            Mat cpuImage = new Mat(imageToPack.size(), imageToPack.type(), messageDataExtractor.getInputPointer());
             imageToPack.upload(cpuImage);
             cpuImage.close();
          }
@@ -148,6 +133,8 @@ public class ImageMessageDecoder
          cudaCompressionTools.destroy();
       if (cudaJpegDecoder != null)
          cudaJpegDecoder.destroy();
+
+      messageDataExtractor.destroy();
    }
 
    private void resizeToMessageDimensions(ImageMessage imageMessage, Mat imageToResize)
