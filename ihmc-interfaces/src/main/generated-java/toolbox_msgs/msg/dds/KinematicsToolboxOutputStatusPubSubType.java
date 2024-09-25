@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d3a508130586c15eec10fb435411fae9bebac94663720c3af18594317bb4cf40";
+   		return "1e4d88e07bae32d3c8bdda754fd9e3e80ad4b9baae1be17c4d634d5b1a005d50";
    }
    
    @Override
@@ -79,6 +79,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -133,6 +135,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -170,6 +175,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getComStabilityPostureSensitivity());
 
+      cdr.write_type_9(data.getPostureOptimizerState());
+
       cdr.write_type_6(data.getSolutionQuality());
 
    }
@@ -194,6 +201,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setCenterOfMassStabilityMargin(cdr.read_type_6());
       	
       data.setComStabilityPostureSensitivity(cdr.read_type_6());
+      	
+      data.setPostureOptimizerState(cdr.read_type_9());
       	
       data.setSolutionQuality(cdr.read_type_6());
       	
@@ -220,6 +229,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_2("closest_edge_index", data.getClosestEdgeIndex());
       ser.write_type_6("center_of_mass_stability_margin", data.getCenterOfMassStabilityMargin());
       ser.write_type_6("com_stability_posture_sensitivity", data.getComStabilityPostureSensitivity());
+      ser.write_type_9("posture_optimizer_state", data.getPostureOptimizerState());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
@@ -243,6 +253,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setClosestEdgeIndex(ser.read_type_2("closest_edge_index"));
       data.setCenterOfMassStabilityMargin(ser.read_type_6("center_of_mass_stability_margin"));
       data.setComStabilityPostureSensitivity(ser.read_type_6("com_stability_posture_sensitivity"));
+      data.setPostureOptimizerState(ser.read_type_9("posture_optimizer_state"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 

@@ -14,6 +14,13 @@ byte CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD = 2
 # The toolbox has been initialized properly and is running.
 byte CURRENT_TOOLBOX_STATE_RUNNING = 3
 
+# Low margin, high sensitivity
+byte POSTURE_OPTIMIZER_MODE_OPTIMIZER = 0
+# Medium margin or low margin + low sensitivity
+byte POSTURE_OPTIMIZER_MODE_FREEZE = 1
+# High margin
+byte POSTURE_OPTIMIZER_MODE_NOMINAL = 2
+
 # Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
 byte current_toolbox_state 0
 
@@ -43,5 +50,7 @@ int32 closest_edge_index -1
 float64 center_of_mass_stability_margin -1.0
 # CoM stability margin sensitivity with respect to the robot's posture
 float64 com_stability_posture_sensitivity -1.0
+
+byte posture_optimizer_state 2
 
 float64 solution_quality -1

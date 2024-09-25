@@ -140,7 +140,9 @@ public class KinematicsRecordReplay
       requestRecordReplay = false;
 
       if (isRecording)
+      {
          trajectoryRecorder.onUpdateStart();
+      }
    }
 
    public void onUpdateEnd()
@@ -151,6 +153,7 @@ public class KinematicsRecordReplay
          {
             LogTools.info("Finished recording!");
             isRecording = false;
+            trajectoryRecorder.setPath(recordPath.get());
             trajectoryRecorder.onRecordEnd();
          }
          else
@@ -167,24 +170,28 @@ public class KinematicsRecordReplay
          {
             LogTools.info("Finished replayed!");
             isReplaying = false;
-            trajectoryRecorder.onReplayEnd();
          }
          else
          {
             LogTools.info("Starting to replay!");
-            isReplaying = true;
-            trajectoryRecorder.onReplayStart();
+            isReplaying = trajectoryRecorder.onReplayStart(replayPath.get());
          }
+      }
+
+      else if (isReplaying)
+      {
+         isReplaying = trajectoryRecorder.onUpdateEnd();
       }
    }
 
-   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerClicked, double forwardJoystickValue, double lateralJoystickValue)
+   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, double forwardJoystickValue, double lateralJoystickValue)
    {
       if (!isRecording)
          return;
+
       trajectoryRecorder.recordControllerData(robotSide,
                                               aButtonPressed,
-                                              triggerClicked,
+                                              triggerPressed,
                                               forwardJoystickValue,
                                               lateralJoystickValue,
                                               handDesiredControlFrames.get(robotSide).getReferenceFrame());
@@ -279,22 +286,29 @@ public class KinematicsRecordReplay
    /**
     * Pack frame with frame from replay
     */
-   public void framePoseToPack(FramePose3D framePose)
+   public void framePoseToPack(RobotSide robotSide, FramePose3D framePose)
    {
-      framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
-      // Read file with stored trajectories: read set point per timestep until file is over
-      double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
-      if (sceneNodeFrame != null)
-         framePose.changeFrame(sceneNodeFrame);
-      // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-      framePose.getOrientation().set(dataPoint);
-      framePose.getPosition().set(4, dataPoint);
-      if (sceneNodeFrame != null)
-         framePose.changeFrame(ReferenceFrame.getWorldFrame());
-      if (trajectoryRecorder.hasDoneReplay())
+//      framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
+//      // Read file with stored trajectories: read set point per timestep until file is over
+//      double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
+//      if (sceneNodeFrame != null)
+//         framePose.changeFrame(sceneNodeFrame);
+//      // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
+//      framePose.getOrientation().set(dataPoint);
+//      framePose.getPosition().set(4, dataPoint);
+//      if (sceneNodeFrame != null)
+//         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+//      if (trajectoryRecorder.hasDoneReplay())
+//      {
+//         isReplaying = false;
+//         enablerReplay.set(false);
+//      }
+
+      if (isReplaying)
       {
-         isReplaying = false;
-         enablerReplay.set(false);
+         if (robotSide == null)
+            return;
+         trajectoryRecorder.packDesiredHandControlFrame(robotSide, framePose);
       }
    }
 
@@ -369,11 +383,13 @@ public class KinematicsRecordReplay
       }
    }
 
-   private void setRecording(boolean enablerRecording)
+   private void setRecording(boolean enableRecording)
    {
-      if (enablerRecording != this.enablerRecording.get())
-         this.enablerRecording.set(enablerRecording);
-      if (enablerRecording)
+      LogTools.info("Enable recording: " + enableRecording);
+
+      if (enableRecording != this.enablerRecording.get())
+         this.enablerRecording.set(enableRecording);
+      if (enableRecording)
       {
          this.enablerReplay.set(false); // check no concurrency replay and record
       }
@@ -413,5 +429,30 @@ public class KinematicsRecordReplay
    public boolean isReplaying()
    {
       return isReplaying;
+   }
+
+   public boolean getAButtonPressed(RobotSide robotSide)
+   {
+      return trajectoryRecorder.getAButtonPressed(robotSide);
+   }
+
+   public boolean getTriggerPressed(RobotSide robotSide)
+   {
+      return trajectoryRecorder.getTriggerPressed(robotSide);
+   }
+
+   public double getLateralJoystickValue(RobotSide robotSide)
+   {
+      return trajectoryRecorder.getLateralJoystick(robotSide);
+   }
+
+   public double getForwardJoystickValue(RobotSide robotSide)
+   {
+      return trajectoryRecorder.getForwardJoystick(robotSide);
+   }
+
+   public String getReplayPath()
+   {
+      return replayPath.get();
    }
 }

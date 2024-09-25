@@ -74,6 +74,7 @@ public final class ControllerAPI
       inputMessageClasses.add(MomentumTrajectoryMessage.class);
       inputMessageClasses.add(CenterOfMassTrajectoryMessage.class);
       inputMessageClasses.add(HandWrenchTrajectoryMessage.class);
+      inputMessageClasses.add(ObjectCarryMessage.class);
 
       // Commands supported by the fast-walking controller, not in this repo
       inputMessageClasses.add(DirectionalControlInputMessage.class);
