@@ -1,5 +1,10 @@
 package us.ihmc.behaviors.tools;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +31,7 @@ public class TrajectoryRecordReplay
    private boolean doneReplaying = false;
    private boolean concatenated = false;
    private String recordFileName = "";
+   private final List<JoystickData> joystickData = new ArrayList<>();
 
    public TrajectoryRecordReplay(String filePath, int numberParts)
    {
@@ -81,6 +87,21 @@ public class TrajectoryRecordReplay
       dataMatrix.add(localValues);
    }
 
+   public void onUpdateStart()
+   {
+      joystickData.add(new JoystickData());
+   }
+
+   public void recordControllerData(RobotSide robotSide,
+                                    boolean aButtonPressed,
+                                    boolean triggerClicked,
+                                    double forwardJoystickValue,
+                                    double lateralJoystickValue,
+                                    ReferenceFrame desiredControlFrame)
+   {
+      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerClicked, forwardJoystickValue, lateralJoystickValue, desiredControlFrame);
+   }
+
    /**
     * Useful if we are recording trajectories of different parts but not in the same scope
     * and we want to concatenate them into one single row to have a single csv file
@@ -120,6 +141,26 @@ public class TrajectoryRecordReplay
             splitDataMatrix.add(splitRow);
          }
       }
+   }
+
+   public void onRecordStart()
+   {
+      joystickData.clear();
+   }
+
+   public void onRecordEnd()
+   {
+
+   }
+
+   public void onReplayStart()
+   {
+
+   }
+
+   public void onReplayEnd()
+   {
+
    }
 
    public void saveRecording()
@@ -272,5 +313,47 @@ public class TrajectoryRecordReplay
    public void setRecordFileName(String recordFileName)
    {
       this.recordFileName = recordFileName;
+   }
+
+   private class JoystickData
+   {
+      private boolean leftAButtonPressed;
+      private boolean leftTriggerClicked;
+      private double leftForwardJoystickValue;
+      private double leftLateralJoystickValue;
+      private final FramePose3D leftDesiredControllerPose = new FramePose3D();
+
+      private boolean rightAButtonPressed;
+      private boolean rightTriggerClicked;
+      private double rightForwardJoystickValue;
+      private double rightLateralJoystickValue;
+      private final FramePose3D rightDesiredControllerPose = new FramePose3D();
+
+      void set(RobotSide robotSide,
+               boolean aButtonPressed,
+               boolean triggerClicked,
+               double forwardJoystickValue,
+               double lateralJoystickValue,
+               ReferenceFrame desiredControlFrame)
+      {
+         if (robotSide == RobotSide.LEFT)
+         {
+            leftAButtonPressed = aButtonPressed;
+            leftTriggerClicked = triggerClicked;
+            leftForwardJoystickValue = forwardJoystickValue;
+            leftLateralJoystickValue = lateralJoystickValue;
+            leftDesiredControllerPose.setToZero(desiredControlFrame);
+            leftDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+         {
+            rightAButtonPressed = aButtonPressed;
+            rightTriggerClicked = triggerClicked;
+            rightForwardJoystickValue = forwardJoystickValue;
+            rightLateralJoystickValue = lateralJoystickValue;
+            rightDesiredControllerPose.setToZero(desiredControlFrame);
+            rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+      }
    }
 }
