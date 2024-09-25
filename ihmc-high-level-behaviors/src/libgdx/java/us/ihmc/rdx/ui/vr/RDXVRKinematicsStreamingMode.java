@@ -327,7 +327,22 @@ public class RDXVRKinematicsStreamingMode
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+
          boolean leftAButtonPressed = aButton.bChanged() && !aButton.bState();
+         boolean leftTriggerPressed = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
+         double lateralJoystickValue = controller.getJoystickActionData().x();
+         double forwardJoystickValue = controller.getJoystickActionData().y();
+
+         if (kinematicsRecorder.isReplaying())
+         { // overwrite with recorded values
+            leftAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.LEFT);
+            leftTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.LEFT);
+            lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.LEFT);
+            forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.LEFT);
+         }
+
          if (leftAButtonPressed)
          {
             streamToController.set(!streamToController.get());
@@ -335,21 +350,13 @@ public class RDXVRKinematicsStreamingMode
                streamingDisabled.set();
          }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         boolean leftTriggerClicked = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
-
-         if (leftTriggerClicked)
+         if (leftTriggerPressed)
          {
             performHandAction(RobotSide.LEFT);
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
-         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
          gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-
-         double lateralJoystickValue = controller.getJoystickActionData().x();
-         double forwardJoystickValue = controller.getJoystickActionData().y();
 
          if (forwardJoystickValue != 0.0)
          {
@@ -359,7 +366,7 @@ public class RDXVRKinematicsStreamingMode
             if (Math.abs(forwardJoystickValue) > COM_CONTROL_JOYSTICK_THRESHOLD)
                comJoystickZInput.setZ(comJoystickZInput.getZ() + Math.signum(forwardJoystickValue) * COM_JOYSTICK_INCREMENT);
 
-            LogTools.info(comJoystickZInput.getZ());
+//            LogTools.info(comJoystickZInput.getZ());
             comJoystickZInput.changeFrame(ReferenceFrame.getWorldFrame());
          }
 
@@ -374,8 +381,8 @@ public class RDXVRKinematicsStreamingMode
             kinematicsRecorder.requestRecordReplay();
          }
 
-         if (isReplaying)
-            wakeUpToolbox();
+//         if (isReplaying)
+//            wakeUpToolbox();
 
          if (leftJoystickButtonClicked && !isReplaying && !isRecording)
          { // reinitialize toolbox
@@ -408,24 +415,33 @@ public class RDXVRKinematicsStreamingMode
             }
          }
 
-         kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerClicked, forwardJoystickValue, lateralJoystickValue);
+         kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+
          boolean rightAButtonPressed = aButton.bChanged() && !aButton.bState();
+         boolean rightTriggerPressed = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
+         double forwardJoystickValue = controller.getJoystickActionData().y();
+         double lateralJoystickValue = -controller.getJoystickActionData().x();
+
+         if (kinematicsRecorder.isReplaying())
+         { // overwrite with recorded values
+            rightAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.RIGHT);
+            rightTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.RIGHT);
+            lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.RIGHT);
+            forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.RIGHT);
+         }
 
          if (rightAButtonPressed)
          {
             setEnabled(!enabled.get());
          }
 
-         // NOTE: Implement hand open close for controller trigger button.
-         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-         boolean rightTriggerClicked = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
-
-         if (rightTriggerClicked)
+         if (rightTriggerPressed)
          { // do not want to close grippers while interacting with the panel
             performHandAction(RobotSide.RIGHT);
 
@@ -451,10 +467,6 @@ public class RDXVRKinematicsStreamingMode
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
 
-         // Use right joystick values to control CoM x, y
-         double forwardJoystickValue = controller.getJoystickActionData().y();
-         double lateralJoystickValue = -controller.getJoystickActionData().x();
-
          if (forwardJoystickValue != 0.0 || lateralJoystickValue != 0.0)
          {
             comJoystickXYInput.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
@@ -471,7 +483,7 @@ public class RDXVRKinematicsStreamingMode
             comJoystickXYInput.changeFrame(ReferenceFrame.getWorldFrame());
          }
 
-         kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerClicked, forwardJoystickValue, lateralJoystickValue);
+         kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue);
       });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
@@ -507,7 +519,7 @@ public class RDXVRKinematicsStreamingMode
                      {
                         KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                            trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
-                                                                                           segmentType.getSegmentName(),
+                                                                                           null,
                                                                                            segmentType.getPositionWeight(),
                                                                                            segmentType.getOrientationWeight(),
                                                                                            segmentType.getLinearRateLimitation(),
@@ -562,7 +574,7 @@ public class RDXVRKinematicsStreamingMode
                {
                   KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(segmentType.getSegmentSide()),
                                                                                      handDesiredControlFrames.get(segmentType.getSegmentSide()).getReferenceFrame(),
-                                                                                     segmentType.getSegmentName(),
+                                                                                     segmentType.getSegmentSide(),
                                                                                      segmentType.getPositionWeight(),
                                                                                      segmentType.getOrientationWeight(),
                                                                                      segmentType.getLinearRateLimitation(),
@@ -601,7 +613,7 @@ public class RDXVRKinematicsStreamingMode
             {
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                   motionRetargeting.getDesiredFrame(segmentType),
-                                                                                  segmentType.getSegmentName(),
+                                                                                  null,
                                                                                   segmentType.getPositionWeight(),
                                                                                   segmentType.getOrientationWeight(),
                                                                                   segmentType.getLinearRateLimitation(),
@@ -714,6 +726,8 @@ public class RDXVRKinematicsStreamingMode
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
+
+      kinematicsRecorder.onUpdateEnd();
    }
 
    /**
@@ -840,7 +854,7 @@ public class RDXVRKinematicsStreamingMode
 
    private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
                                                                     ReferenceFrame desiredControlFrame,
-                                                                    String frameName,
+                                                                    RobotSide robotSide,
                                                                     Vector3D positionWeight,
                                                                     Vector3D orientationWeight,
                                                                     double linearMomentumLimit,
@@ -855,8 +869,9 @@ public class RDXVRKinematicsStreamingMode
 
       // Record motion if in recording mode
 //      kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
+
       if (kinematicsRecorder.isReplaying())
-         kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+         kinematicsRecorder.framePoseToPack(robotSide, tempFramePose); //get values of tempFramePose from replay
 
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
@@ -1181,7 +1196,18 @@ public class RDXVRKinematicsStreamingMode
       handsAreOpen.get(side).setValue(!close);
       handManager.publishHandCommand(side, close ? SakeHandPreset.CLOSE : SakeHandPreset.FULLY_OPEN, false, false);
 
-      ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotModel.getSimpleRobotName());
-      ros2ControllerHelper.publish(objectCarryTopic, new ObjectCarryMessage());
+      // TODO need to figure out a better option for how to distinguish open/close from carrying an object
+
+      if (side == RobotSide.RIGHT)
+         return;
+
+      ObjectCarryMessage objectCarryMessage = new ObjectCarryMessage();
+      double objectMass = 10.0;
+      objectCarryMessage.setObjectMass(objectMass);
+      objectCarryMessage.setIsPickingUp(true);
+      objectCarryMessage.setRobotSide(side.toByte());
+
+      LogTools.info("publishing object carry message");
+      ros2ControllerHelper.publishToController(objectCarryMessage);
    }
 }

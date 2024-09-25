@@ -35,6 +35,24 @@ module toolbox_msgs
       const octet CURRENT_TOOLBOX_STATE_RUNNING =
       3;
 
+      /**
+       * Low margin, high sensitivity
+       */
+      const octet POSTURE_OPTIMIZER_MODE_OPTIMIZER =
+      0;
+
+      /**
+       * Medium margin or low margin + low sensitivity
+       */
+      const octet POSTURE_OPTIMIZER_MODE_FREEZE =
+      1;
+
+      /**
+       * High margin
+       */
+      const octet POSTURE_OPTIMIZER_MODE_NOMINAL =
+      2;
+
 
       /**
        * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
@@ -95,6 +113,8 @@ module toolbox_msgs
          */
         @defaultValue(value=-1.0)
         double com_stability_posture_sensitivity;
+        @defaultValue(value=2)
+        octet posture_optimizer_state;
         @defaultValue(value=-1.0)
         double solution_quality;
       };

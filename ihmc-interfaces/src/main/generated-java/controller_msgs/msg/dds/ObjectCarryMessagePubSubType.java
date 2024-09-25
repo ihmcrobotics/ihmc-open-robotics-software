@@ -15,7 +15,7 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5c2443de27ea5ce07d24480c449c223c974fcfe0891c3794038dca74a2922341";
+   		return "ffb4e563bfe57ac26f669c9c72ae26ae2c3450027976335e666392acc9f2f6a1";
    }
    
    @Override
@@ -54,6 +54,10 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -70,19 +74,33 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.ObjectCarryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getPickupObject());
+      cdr.write_type_9(data.getRobotSide());
+
+      cdr.write_type_7(data.getIsPickingUp());
+
+      cdr.write_type_6(data.getObjectMass());
 
    }
 
    public static void read(controller_msgs.msg.dds.ObjectCarryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setPickupObject(cdr.read_type_7());
+      data.setRobotSide(cdr.read_type_9());
+      	
+      data.setIsPickingUp(cdr.read_type_7());
+      	
+      data.setObjectMass(cdr.read_type_6());
       	
 
    }
@@ -90,13 +108,18 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(controller_msgs.msg.dds.ObjectCarryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("pickup_object", data.getPickupObject());
+      ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_7("is_picking_up", data.getIsPickingUp());
+      ser.write_type_6("object_mass", data.getObjectMass());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ObjectCarryMessage data)
    {
-      data.setPickupObject(ser.read_type_7("pickup_object"));   }
+      data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setIsPickingUp(ser.read_type_7("is_picking_up"));
+      data.setObjectMass(ser.read_type_6("object_mass"));
+   }
 
    public static void staticCopy(controller_msgs.msg.dds.ObjectCarryMessage src, controller_msgs.msg.dds.ObjectCarryMessage dest)
    {
