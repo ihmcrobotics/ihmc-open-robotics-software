@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -27,6 +26,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -79,6 +79,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
    private boolean hasContactStateChanged = false;
+
+   private final double nominalMass;
+   private double objectCarryMass;
+   private boolean isCarryingObject = false;
+   private final RateLimitedYoVariable alphaLoadedCarriedObject;
 
    public RigidBodyControlManager(RigidBodyBasics bodyToControl,
                                   RigidBodyBasics baseBody,
@@ -221,6 +226,18 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                     + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
       this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
+      nominalMass = bodyToControl.getInertia().getMass();
+
+      if (contactableBody == null)
+      {
+         alphaLoadedCarriedObject = null;
+      }
+      else
+      {
+         double loadDuration = 2.0;
+         alphaLoadedCarriedObject = new RateLimitedYoVariable(namePrefix + "alphaLoadedCarry", registry, 1.0 / loadDuration, controlDT);
+      }
+
       stateMachine = setupStateMachine(namePrefix, yoTime, defaultControlMode);
       parentRegistry.addChild(registry);
    }
@@ -301,6 +318,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       stateMachine.doAction();
 
       externalWrenchManager.doAction(Double.NaN);
+
+      if (alphaLoadedCarriedObject != null)
+      {
+         alphaLoadedCarriedObject.update(isCarryingObject ? 1.0 : 0.0);
+         bodyToControl.getInertia().setMass(nominalMass + alphaLoadedCarriedObject.getValue() * objectCarryMass);
+      }
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -415,6 +438,19 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       {
          externalWrenchManager.clear();
       }
+   }
+
+   public void handObjectCarryCommand(ObjectCarryCommand objectCarryCommand)
+   {
+      if (alphaLoadedCarriedObject == null)
+         return;
+
+      LogTools.info("Received object carry command!");
+
+      isCarryingObject = objectCarryCommand.isPickingUp();
+
+      if (isCarryingObject)
+         objectCarryMass = objectCarryCommand.getObjectMass();
    }
 
    /**

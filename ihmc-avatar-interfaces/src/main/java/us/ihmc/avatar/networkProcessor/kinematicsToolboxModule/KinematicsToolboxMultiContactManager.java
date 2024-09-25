@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -18,10 +17,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -29,6 +26,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
@@ -79,7 +77,7 @@ public class KinematicsToolboxMultiContactManager
    private final Vector3D pelvisRotationVectorAdjustment = new Vector3D();
    private final Quaternion pelvisRotationQuaternionAdjustment = new Quaternion();
 
-   private final YoEnum<Mode> mode = new YoEnum<>("postureOptimizerMode", registry, Mode.class, false);
+   private final YoEnum<PostureOptimizerState> mode = new YoEnum<>("postureOptimizerMode", registry, PostureOptimizerState.class, false);
 
    /* Posture optimization state */
    private final YoDouble postureSensitivityThreshold = new YoDouble("postureSensitivityThreshold", registry);
@@ -108,14 +106,28 @@ public class KinematicsToolboxMultiContactManager
    private final YoDouble maxPostureAdjustmentRate = new YoDouble("maxPostureAdjustmentRate", registry);
    private final RateLimitedYoVariable activationAlpha;
 
-   private enum Mode
+   public enum PostureOptimizerState
    {
       /* Low margin, high sensitivity */
       OPTIMIZER,
       /* Medium margin or low margin + low sensitivity */
       FREEZE,
       /* High margin */
-      NOMINAL
+      NOMINAL;
+
+      private static final PostureOptimizerState[] values = values();
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+
+      public static PostureOptimizerState fromByte(byte enumAsByte)
+      {
+         if (enumAsByte == -1)
+            return null;
+         return values[enumAsByte];
+      }
    }
 
    private enum StabilityMarginLevel
@@ -187,8 +199,8 @@ public class KinematicsToolboxMultiContactManager
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
 
       double defaultPostureSensitivityThreshold = 0.085;
-      double defaultStabilityMarginThresholdLow = 0.1; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
-      double defaultStabilityMarginThresholdHigh = 0.15; // 0.12;
+      double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
+      double defaultStabilityMarginThresholdHigh = 0.16; // 0.12;
 
       postureSensitivityThreshold.set(defaultPostureSensitivityThreshold);
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
@@ -197,14 +209,14 @@ public class KinematicsToolboxMultiContactManager
       maxPostureAdjustmentRate.set(0.15);
       qdMultiplier.set(0.3);
       postureOptimizationWeight.set(2.0);
-      mode.set(Mode.NOMINAL);
+      mode.set(PostureOptimizerState.NOMINAL);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize(PrivilegedConfigurationCommand privilegedConfigurationCommand)
    {
-      mode.set(Mode.NOMINAL);
+      mode.set(PostureOptimizerState.NOMINAL);
       isPostureSensitivityHigh.set(false);
       activationAlpha.set(0.0);
 
@@ -272,41 +284,63 @@ public class KinematicsToolboxMultiContactManager
       }
 
       // Update activation status
-      Mode currentMode = mode.getValue();
-      Mode newMode;
+      PostureOptimizerState currentMode = mode.getValue();
+      PostureOptimizerState newMode;
 
       if (stabilityMarginLevel.getValue() == StabilityMarginLevel.HIGH)
       {
-         newMode = Mode.NOMINAL;
+         newMode = PostureOptimizerState.NOMINAL;
       }
       else if (stabilityMarginLevel.getValue() == StabilityMarginLevel.LOW && isPostureSensitivityHigh.getValue())
       {
-         newMode = Mode.OPTIMIZER;
+         newMode = PostureOptimizerState.OPTIMIZER;
       }
       else
       {
-         newMode = Mode.FREEZE;
+         newMode = PostureOptimizerState.FREEZE;
       }
 
-      if (newMode == Mode.OPTIMIZER && currentMode != Mode.OPTIMIZER)
+      mode.set(newMode);
+
+      if (newMode == PostureOptimizerState.OPTIMIZER && currentMode != PostureOptimizerState.OPTIMIZER)
       {
          onOptimizerEnabled();
       }
 
+      if (mode.getValue() == PostureOptimizerState.OPTIMIZER)
+      {
+         // do optimizer update
+         updateTowardsOptimizedPosture();
+      }
+      else if (mode.getValue() == PostureOptimizerState.NOMINAL)
+      {
+         // do nominal update
+         updateTowardsNominalPosture();
+      }
+      else
+      {
+         // freeze, do nothing
+      }
+
+      if (mode.getValue() == PostureOptimizerState.NOMINAL)
+      {
+         activationAlpha.update(0.0);
+      }
+      else if (mode.getValue() == PostureOptimizerState.OPTIMIZER)
+      {
+         activationAlpha.update(1.0);
+      }
+   }
+
+   private void updateTowardsOptimizedPosture()
+   {
       // Update privileged configuration
       for (int i = 0; i < qPrivOptimized.length; i++)
       {
-         if (mode.getValue() == Mode.OPTIMIZER)
-         {
-            double qdOffsetSetpoint = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(SPATIAL_DIMENSIONS + i);
-            qdOffsetSetpoint = EuclidCoreTools.clamp(qdOffsetSetpoint, maxPostureAdjustmentRate.getValue());
-            double qOffsetSetpoint = qPrivOptimized[i].getValue() + updateDT * qdOffsetSetpoint;
-            qPrivOptimized[i].set(qOffsetSetpoint);
-         }
-         else if (mode.getValue() == Mode.NOMINAL)
-         {
-            qPrivOptimized[i].set(qPrivNominal[i].getValue());
-         }
+         double qdOffsetSetpoint = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(SPATIAL_DIMENSIONS + i);
+         qdOffsetSetpoint = EuclidCoreTools.clamp(qdOffsetSetpoint, maxPostureAdjustmentRate.getValue());
+         double qOffsetSetpoint = qPrivOptimized[i].getValue() + updateDT * qdOffsetSetpoint;
+         qPrivOptimized[i].set(qOffsetSetpoint);
 
          double qPrivilieged = qPrivOptimized[i].getValue();
          OneDoFJointBasics joint = wholeBodyContactState.getOneDoFJoints()[i];
@@ -316,33 +350,34 @@ public class KinematicsToolboxMultiContactManager
          qPrivOptimizedRateLimited[i].update(qPrivilieged);
       }
 
-      if (mode.getValue() == Mode.OPTIMIZER)
+      int linearZIndex = 5;
+      double qdPelvisHeight = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(linearZIndex);
+      double qPelvisHeight = optimizedPelvisHeight.getValue() + updateDT * qdPelvisHeight;
+      qPelvisHeight = EuclidCoreTools.clamp(qPelvisHeight, minOptimizedPelvisHeight.getValue(), maxOptimizedPelvisHeight.getValue());
+      optimizedPelvisHeight.update(qPelvisHeight);
+
+      tempVector.set(0, postureOptimizer.getOptimizedWholeBodyVelocity());
+      pelvisRotationVectorAdjustment.setAndScale(qdMultiplier.getValue() * updateDT, tempVector);
+      pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
+      integratedPelvisOrientation.append(pelvisRotationQuaternionAdjustment);
+
+      // TODO clamp to max yaw/pitch/roll
+
+      optimizedPelvisOrientation.set(integratedPelvisOrientation);
+      optimizedPelvisOrientationRateLimited.update();
+   }
+
+   private void updateTowardsNominalPosture()
+   {
+      // Update privileged configuration
+      for (int i = 0; i < qPrivOptimized.length; i++)
       {
-         int linearZIndex = 5;
-         double qdPelvisHeight = qdMultiplier.getValue() * postureOptimizer.getOptimizedWholeBodyVelocity().get(linearZIndex);
-         double qPelvisHeight = optimizedPelvisHeight.getValue() + updateDT * qdPelvisHeight;
-         qPelvisHeight = EuclidCoreTools.clamp(qPelvisHeight, minOptimizedPelvisHeight.getValue(), maxOptimizedPelvisHeight.getValue());
-         optimizedPelvisHeight.update(qPelvisHeight);
-
-         tempVector.set(0, postureOptimizer.getOptimizedWholeBodyVelocity());
-         pelvisRotationVectorAdjustment.setAndScale(qdMultiplier.getValue() * updateDT, tempVector);
-         pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
-         integratedPelvisOrientation.append(pelvisRotationQuaternionAdjustment);
-
-         // TODO clamp to max yaw/pitch/roll
-
-         optimizedPelvisOrientation.set(integratedPelvisOrientation);
-         optimizedPelvisOrientationRateLimited.update();
+         qPrivOptimized[i].set(qPrivNominal[i].getValue());
+         double qPrivileged = qPrivOptimized[i].getValue();
+         qPrivOptimizedRateLimited[i].update(qPrivileged);
       }
 
-      if (mode.getValue() == Mode.NOMINAL)
-      {
-         activationAlpha.update(0.0);
-      }
-      else if (mode.getValue() == Mode.OPTIMIZER)
-      {
-         activationAlpha.update(1.0);
-      }
+      // TODO towards nominal pelvis height/orientation
    }
 
    private void onOptimizerEnabled()
@@ -366,12 +401,17 @@ public class KinematicsToolboxMultiContactManager
 
    public boolean isActivated()
    {
-      return mode.getValue() != Mode.NOMINAL;
+      return mode.getValue() != PostureOptimizerState.NOMINAL;
    }
 
    public double getActivationAlpha()
    {
       return activationAlpha.getValue();
+   }
+
+   public PostureOptimizerState getCurrentState()
+   {
+      return mode.getValue();
    }
 
    public void addPostureFeedbackCommands(FeedbackControlCommandBuffer bufferToPack)

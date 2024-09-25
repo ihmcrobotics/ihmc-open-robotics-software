@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ObjectCarryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ObjectCarryCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -40,11 +42,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -113,6 +117,8 @@ public class KSTTools
    };
    private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
 
+   private final SideDependentList<ObjectCarryManager> objectCarryManagers = new SideDependentList<>();
+
    public KSTTools(CommandInputManager commandInputManager,
                    StatusMessageOutputManager statusOutputManager,
                    KinematicsStreamingToolboxParameters parameters,
@@ -168,6 +174,12 @@ public class KSTTools
 
             joint.setJointLimitUpper(entry.getValue());
          }
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ObjectCarryManager objectCarryManager = new ObjectCarryManager(robotSide, parameters.getToolboxUpdatePeriod(), registry);
+         objectCarryManagers.put(robotSide, objectCarryManager);
       }
 
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(),
@@ -231,6 +243,11 @@ public class KSTTools
 
    public void update()
    {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         objectCarryManagers.get(robotSide).update();
+      }
+
       inputFilter.update();
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxConfigurationCommand.class))
@@ -316,6 +333,44 @@ public class KSTTools
       else
       {
          hasNewInputCommand.set(false);
+      }
+   }
+
+   public void onObjectCarryMessageReceived(ObjectCarryMessage objectCarryMessage)
+   {
+      RobotSide robotSide = RobotSide.fromByte(objectCarryMessage.getRobotSide());
+      objectCarryManagers.get(robotSide).handleCommand(objectCarryMessage);
+   }
+
+   private class ObjectCarryManager
+   {
+      private final SpatialInertiaBasics handInertia;
+      private final double nominalMass;
+      private double objectCarryMass;
+      private boolean isCarryingObject = false;
+      private final RateLimitedYoVariable alphaLoadedCarriedObject;
+
+      public ObjectCarryManager(RobotSide robotSide, double controlDT, YoRegistry registry)
+      {
+         handInertia = desiredFullRobotModel.getHand(robotSide).getInertia();
+         nominalMass = handInertia.getMass();
+         double loadDuration = 2.0;
+         alphaLoadedCarriedObject = new RateLimitedYoVariable(robotSide + "alphaLoadedCarry", registry, 1.0 / loadDuration, controlDT);
+      }
+
+      void handleCommand(ObjectCarryMessage objectCarryMessage)
+      {
+         LogTools.info("Received object carry command!");
+
+         isCarryingObject = objectCarryMessage.getIsPickingUp();
+         if (isCarryingObject)
+            objectCarryMass = objectCarryMessage.getObjectMass();
+      }
+
+      void update()
+      {
+         alphaLoadedCarriedObject.update(isCarryingObject ? 1.0 : 0.0);
+         handInertia.setMass(nominalMass + alphaLoadedCarriedObject.getValue() * objectCarryMass);
       }
    }
 
