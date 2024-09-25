@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ObjectCarryMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -238,6 +239,11 @@ public class KinematicsStreamingToolboxController extends ToolboxController
             tools.getIKCommandInputManager().submitCommands(tools.getCommandInputManager().pollNewCommands(commandType));
          }
       }
+   }
+
+   public void onObjectCarryMessageReceived(ObjectCarryMessage objectCarryMessage)
+   {
+      tools.onObjectCarryMessageReceived(objectCarryMessage);
    }
 
    @Override

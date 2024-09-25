@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.ObjectCarryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -24,11 +25,13 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ObjectCarryCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -170,6 +173,13 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
             s.takeNextData(capturabilityBasedStatus, null);
             controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
          }
+      });
+
+      ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotName);
+      ros2Node.createSubscription(objectCarryTopic, s ->
+      {
+         LogTools.info("received object carry message");
+         controller.onObjectCarryMessageReceived(s.takeNextData());
       });
    }
 

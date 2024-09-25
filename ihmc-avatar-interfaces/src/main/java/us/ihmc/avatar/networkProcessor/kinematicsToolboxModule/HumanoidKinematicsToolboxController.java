@@ -624,7 +624,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          }
 
          if (runWithPostureOptimizer)
+         {
             multiContactManager.update();
+            inverseKinematicsSolution.setPostureOptimizerState(multiContactManager.getCurrentState().toByte());
+//            LogTools.info(multiContactManager.getCurrentState() + ", " + multiContactManager.getCurrentState().toByte());
+         }
       }
 
       super.updateInternal();

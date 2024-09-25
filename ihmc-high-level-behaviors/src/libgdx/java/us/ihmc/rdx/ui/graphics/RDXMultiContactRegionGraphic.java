@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxMultiContactManager.PostureOptimizerState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -36,7 +38,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXMultiContactRegionGraphic implements RenderableProvider
 {
-   public static final Color POLYGON_GRAPHIC_COLOR = new Color(0.867f, 0.91f, 0.203f, 1.0f);
+   public static final Color NOMINAL_POLYGON_GRAPHIC_COLOR = Color.valueOf("DEE933");
+   public static final Color OPTIMIZER_POLYGON_GRAPHIC_COLOR = Color.valueOf("EB3D40");
+   public static final Color FREEZE_POLYGON_GRAPHIC_COLOR = Color.valueOf("3D46EB");
+
    private static final boolean SHOW_EDGE_PROXIMITY_POLYGON = false;
    private static final double STABILITY_GRAPHIC_HEIGHT = 2.0;
 
@@ -48,6 +53,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    private int minimumEdgeIndex;
    private double minimumEdgeDistance;
+   private PostureOptimizerState postureOptimizerState = PostureOptimizerState.NOMINAL;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
@@ -68,6 +74,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
    public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus)
    {
+//      LogTools.info(kinematicsToolboxOutputStatus.getPostureOptimizerState());
+      postureOptimizerState = PostureOptimizerState.fromByte(kinematicsToolboxOutputStatus.getPostureOptimizerState());
+
       newMultiContactSupportRegion.clear();
       Object<Point3D> supportRegion = kinematicsToolboxOutputStatus.getMultiContactFeasibleComRegion();
 
@@ -109,11 +118,11 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
          Point2DReadOnly v0 = multiContactSupportRegion.getVertex(i);
          Point2DReadOnly v1 = multiContactSupportRegion.getNextVertex(i);
 
-         Color color = i == minimumEdgeIndex ? Color.RED : POLYGON_GRAPHIC_COLOR;
+         Color color = i == minimumEdgeIndex ? Color.RED : getPolygonColor();
          meshBuilder.addLine(v0.getX(), v0.getY(), footZ, v1.getX(), v1.getY(), footZ, 0.01f, color);
       }
 
-      meshBuilder.addPolygon(transform, multiContactSupportRegion, POLYGON_GRAPHIC_COLOR);
+      meshBuilder.addPolygon(transform, multiContactSupportRegion, getPolygonColor());
 
       comXYAtFootHeight.setToZero(centerOfMassFrame);
       comXYAtFootHeight.changeFrame(ReferenceFrame.getWorldFrame());
@@ -158,7 +167,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
          closestProximityEdge.addVertex(0.5 * vertexDistance, 0.5 * STABILITY_GRAPHIC_HEIGHT);
          closestProximityEdge.update();
 
-         meshBuilder.addPolygon(transform, closestProximityEdge, POLYGON_GRAPHIC_COLOR);
+         meshBuilder.addPolygon(transform, closestProximityEdge, getPolygonColor());
       }
 
       modelBuilder.begin();
@@ -177,6 +186,22 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       lastModel = modelBuilder.end();
       modelInstance = new ModelInstance(lastModel);
+   }
+
+   private Color getPolygonColor()
+   {
+      if (postureOptimizerState == PostureOptimizerState.NOMINAL)
+      {
+         return NOMINAL_POLYGON_GRAPHIC_COLOR;
+      }
+      else if (postureOptimizerState == PostureOptimizerState.FREEZE)
+      {
+         return FREEZE_POLYGON_GRAPHIC_COLOR;
+      }
+      else // optimizer mode
+      {
+         return OPTIMIZER_POLYGON_GRAPHIC_COLOR;
+      }
    }
 
    private void updateMinimumEdge()
