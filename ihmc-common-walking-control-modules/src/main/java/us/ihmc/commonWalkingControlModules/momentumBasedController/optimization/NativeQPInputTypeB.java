@@ -24,11 +24,11 @@ public class NativeQPInputTypeB
     * w (0.5 * u^T * H * u + g * u)
     * </p>
     * <p>
-    *    u = A * x + b
+    *    u = J * x + b
     * </p>
     * where:
     * <ul>
-    * <li>A is {@link #taskJacobian}</li>
+    * <li>J is {@link #taskJacobian}</li>
     * <li>b is {@link #taskConvectiveTerm}</li>
     * <li>u is the general objective</li>
     * <li>H is {@link #directCostHessian}</li>

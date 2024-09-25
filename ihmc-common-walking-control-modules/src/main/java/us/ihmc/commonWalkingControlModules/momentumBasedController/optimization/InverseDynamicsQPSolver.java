@@ -305,6 +305,14 @@ public class InverseDynamicsQPSolver
       }
    }
 
+   /**
+    * Sets up an objective
+    * <p>
+    *    min w ( (J x + b)^T * H * (J x + b) + G (J x + b) )
+    * </p>
+    * @param input
+    * @param inputDomain
+    */
    public void addQPInput(NativeQPInputTypeB input, QPInputDomain inputDomain)
    {
       addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeight(), input.directCostHessian, input.directCostGradient, inputDomain);
@@ -350,6 +358,14 @@ public class InverseDynamicsQPSolver
       addTaskInternal(taskJacobian, taskObjective, taskWeight, getVariableOffset(inputDomain));
    }
 
+   /**
+    * Sets up an objective
+    * <p>
+    *    min w ( (J x + b)^T * H * (J x + b) + G (J x + b) )
+    * </p>
+    * @param input
+    * @param inputDomain
+    */
    public void addQPTask(NativeMatrix taskJacobian,
                          NativeMatrix taskConvectiveTerm,
                          double taskWeight,
@@ -361,7 +377,7 @@ public class InverseDynamicsQPSolver
       {
          throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
       }
-      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight,directCostHessian, directCostGradient, getVariableOffset(inputDomain));
+      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight, directCostHessian, directCostGradient, getVariableOffset(inputDomain));
    }
 
    /**
@@ -425,6 +441,14 @@ public class InverseDynamicsQPSolver
       solver_f.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
    }
 
+   /**
+    * Sets up an objective
+    * <p>
+    *    min w ( 0.5 * (J x + b)^T * H * (J x + b) + g (J x + b) )
+    * </p>
+    * @param input
+    * @param inputDomain
+    */
    private void addTaskInternal(NativeMatrix taskJacobian,
                                 NativeMatrix taskConvectiveTerm,
                                 double taskWeight,
@@ -438,8 +462,12 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("This task does not fit.");
       }
 
-      // Compute: f += w J^T W g
-      solver_f.multAddBlockTransA(taskWeight, taskJacobian, directCostGradient, offset, 0);
+      // Expanding out, and you get
+      // w ( 0.5 (J x + b)^T * H * (J x + b) + (J x + b)^T g )
+      // w ( 0.5 x^T J^T H J x + x^T (J^T g + J^T H b) + (0.5 b^T H + g  ) b )
+      // so then
+      // f =
+
 
       // w J^T H
       tempJtW.multTransA(taskWeight, taskJacobian, directCostHessian);
@@ -449,6 +477,9 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += w J^T H b
       solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
+
+      // Compute: f += w J^T g
+      solver_f.multAddBlockTransA(taskWeight, taskJacobian, directCostGradient, offset, 0);
    }
 
    public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, QPInputDomain inputDomain)
