@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -84,7 +86,15 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
          synchronized (imageMessageSwapReference)
          {
             imageMessageB = imageMessageSwapReference.getForThreadTwo();
-            decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
+            PixelFormat imagePixelFormat = PixelFormat.fromImageMessage(imageMessageB);
+            if (imagePixelFormat == PixelFormat.GRAY16)
+            {
+               decoder.decodeMessage(imageMessageB, decompressedImage);
+               OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, decompressedImage, 0.0, 255.0);
+               OpenCVTools.convertGrayToRGBA(decompressedImage, decompressedImage);
+            }
+            else
+               decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
          }
 
          synchronized (this) // synchronize with the update method
