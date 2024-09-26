@@ -156,7 +156,7 @@ public class ZEDColorDepthImagePublisher
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
          PixelFormat.GRAY16.packImageMessage(depthImageMessage);
-         CompressionType.ZSTD_JPEG_HYBRID.packImageMessage(depthImageMessage);
+         CompressionType.ZSTD_NVJPEG_HYBRID.packImageMessage(depthImageMessage);
 
          // Close GpuMat
          depthPNGPointer.close();

@@ -3,7 +3,6 @@ package us.ihmc.perception.imageMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ImageMessageDecoderTest
 {
+   private static final double LOSSY_COMPRESSION_EPSILON = 3.0;
+   private static final double LOSSLESS_COMPRESSION_EPSILON = 1E-6;
+
    private static Mat zedColorBGR;
    private static Mat zedDepth16U;
 
@@ -50,14 +52,14 @@ public class ImageMessageDecoderTest
          if (pixelFormat != PixelFormat.GRAY16)
          {
             LogTools.info("Testing Color PNG Compression: {}", pixelFormat.name());
-            testDecompression(this::opencvPNGCompression, zedColorBGR, pixelFormat, 0.001);
+            testDecompression(this::opencvPNGCompression, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
             System.out.println();
          }
       }
 
       // Test depth compression
       LogTools.info("Testing Depth PNG Compression");
-      testDecompression(this::opencvPNGCompression, zedDepth16U, PixelFormat.GRAY16, 0.001);
+      testGeneralDecompression(this::opencvPNGCompression, zedDepth16U, PixelFormat.GRAY16, LOSSLESS_COMPRESSION_EPSILON);
       System.out.println();
    }
 
@@ -68,15 +70,76 @@ public class ImageMessageDecoderTest
       {  // Test the color formats
          if (pixelFormat != PixelFormat.GRAY16)
          {
-            LogTools.info("Testing Color PNG Compression: {}", pixelFormat.name());
-            testDecompression(this::packUncompressed, zedColorBGR, pixelFormat, 0.001);
+            LogTools.info("Testing Color Uncompressed: {}", pixelFormat.name());
+            testDecompression(this::packUncompressed, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
             System.out.println();
          }
       }
 
       // Test depth compression
-      LogTools.info("Testing Depth PNG Compression");
-      testDecompression(this::packUncompressed, zedDepth16U, PixelFormat.GRAY16, 0.001);
+      LogTools.info("Testing Depth Uncompressed");
+      testGeneralDecompression(this::packUncompressed, zedDepth16U, PixelFormat.GRAY16, LOSSLESS_COMPRESSION_EPSILON);
+      System.out.println();
+   }
+
+   @Test
+   public void testOpenCVJpeg()
+   {
+      for (PixelFormat pixelFormat : PixelFormat.values())
+      {  // Test the color formats
+         if (pixelFormat != PixelFormat.GRAY16)
+         {
+            LogTools.info("Testing Color JPEG Compression: {}", pixelFormat.name());
+            testDecompression(this::opencvJpegCompression, zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
+            System.out.println();
+         }
+      }
+   }
+
+   @Test
+   public void testNVJPEG()
+   {
+      PixelFormat[] nvjpegSupportedFormats = {PixelFormat.BGR8, PixelFormat.RGB8, PixelFormat.GRAY8};
+
+      for (PixelFormat pixelFormat : nvjpegSupportedFormats)
+      {
+         LogTools.info("Testing NVJPEG Compression: {}", pixelFormat);
+         BiConsumer<Mat, ImageMessage> nvjpegMethod = switch (pixelFormat)
+         {
+            case GRAY8 -> this::nvjpegGrayCompression;
+            case BGR8 -> this::nvjpegBGRCompression;
+            case RGB8 -> this::nvjpegRGBCompression;
+            default -> throw new IllegalStateException("How did you get here???");
+         };
+         testDecompression(nvjpegMethod, zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
+      }
+      System.out.println();
+   }
+
+   @Test
+   public void testNVCOMP()
+   {
+      for (PixelFormat pixelFormat : PixelFormat.values())
+      {  // Test the color formats
+         if (pixelFormat != PixelFormat.GRAY16)
+         {
+            LogTools.info("Testing Color NVCOMP Compression: {}", pixelFormat.name());
+            testDecompression(this::nvcompCompression, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
+            System.out.println();
+         }
+      }
+
+      // Test depth compression
+      LogTools.info("Testing Depth NVCOMP Compression");
+      testGeneralDecompression(this::nvcompCompression, zedDepth16U, PixelFormat.GRAY16, LOSSLESS_COMPRESSION_EPSILON);
+      System.out.println();
+   }
+
+   @Test
+   public void testHybridDepthCompression()
+   {
+      LogTools.info("Testing Hybri Depth Compression");
+      testGeneralDecompression(this::hybridDepthCompression, zedDepth16U, PixelFormat.GRAY16, LOSSY_COMPRESSION_EPSILON);
       System.out.println();
    }
 
@@ -85,8 +148,21 @@ public class ImageMessageDecoderTest
                                   PixelFormat encodedPixelFormat,
                                   double decompressionEpsilon)
    {
-      Mat colorConvertedInputImage = convertBGRToPixelFormat(inputImage, encodedPixelFormat);
-      Mat colorConvertedRGBAInputImage = convertPixelFormatToRGBA(colorConvertedInputImage, encodedPixelFormat);
+      testGeneralDecompression(compressionFunction, inputImage, encodedPixelFormat, decompressionEpsilon);
+      testDecompressionToRGBA(compressionFunction, inputImage, encodedPixelFormat, decompressionEpsilon);
+   }
+
+   private void testGeneralDecompression(BiConsumer<Mat, ImageMessage> compressionFunction,
+                                         Mat inputImage,
+                                         PixelFormat encodedPixelFormat,
+                                         double decompressionEpsilon)
+   {
+      Mat colorConvertedInputImage = new Mat();
+      if (inputImage.type() == opencv_core.CV_16UC1)
+         inputImage.copyTo(colorConvertedInputImage);
+      else
+         PixelFormat.BGR8.convertToPixelFormat(inputImage, colorConvertedInputImage, encodedPixelFormat);
+      Mat expectedImage = new Mat();
 
       ImageMessage message = new ImageMessage();
       message.setImageWidth(colorConvertedInputImage.cols());
@@ -100,8 +176,9 @@ public class ImageMessageDecoderTest
       // TEST CPU DECODING
       Mat cpuDecodedImage = new Mat();
       decoder.decodeMessage(message, cpuDecodedImage);
+      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
-      double averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedImage, colorConvertedInputImage);
+      double averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedImage, expectedImage);
       LogTools.info("CPU Difference: {}", averagePixelDifferenceAfterDecoding);
       assertEquals(0.0, averagePixelDifferenceAfterDecoding, decompressionEpsilon);
       cpuDecodedImage.close();
@@ -111,18 +188,43 @@ public class ImageMessageDecoderTest
       Mat gpuDownloadedImage = new Mat();
       decoder.decodeMessage(message, gpuDecodedImage);
       gpuDecodedImage.download(gpuDownloadedImage);
+      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
-      averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedImage, colorConvertedInputImage);
+      averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedImage, expectedImage);
       LogTools.info("GPU Difference: {}", averagePixelDifferenceAfterDecoding);
       assertEquals(0.0, averagePixelDifferenceAfterDecoding, decompressionEpsilon);
       gpuDecodedImage.close();
       gpuDownloadedImage.close();
 
+      colorConvertedInputImage.close();
+      expectedImage.close();
+      decoder.destroy();
+   }
+
+   private void testDecompressionToRGBA(BiConsumer<Mat, ImageMessage> compressionFunction,
+                                        Mat inputImage,
+                                        PixelFormat encodedPixelFormat,
+                                        double decompressionEpsilon)
+   {
+      Mat colorConvertedInputImage = new Mat();
+      PixelFormat.BGR8.convertToPixelFormat(inputImage, colorConvertedInputImage, encodedPixelFormat);
+      Mat expectedImage = new Mat();
+
+      ImageMessage message = new ImageMessage();
+      message.setImageWidth(colorConvertedInputImage.cols());
+      message.setImageHeight(colorConvertedInputImage.rows());
+      encodedPixelFormat.packImageMessage(message);
+
+      compressionFunction.accept(colorConvertedInputImage, message);
+
+      ImageMessageDecoder decoder = new ImageMessageDecoder();
+
       // TEST CPU RGBA DECODING
       Mat cpuDecodedRGBAImage = new Mat();
       decoder.decodeMessageToRGBA(message, cpuDecodedRGBAImage);
+      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
-      averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedRGBAImage, colorConvertedRGBAInputImage);
+      double averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedRGBAImage, expectedImage);
       LogTools.info("CPU RGBA Difference: {}", averagePixelDifferenceAfterDecoding);
       assertEquals(0.0, averagePixelDifferenceAfterDecoding, decompressionEpsilon);
       assertEquals(PixelFormat.RGBA8, decoder.getDecodedImagePixelFormat());
@@ -133,8 +235,9 @@ public class ImageMessageDecoderTest
       Mat gpuDownloadedRGBAImage = new Mat();
       decoder.decodeMessageToRGBA(message, gpuDecodedRGBAImage);
       gpuDecodedRGBAImage.download(gpuDownloadedRGBAImage);
+      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
-      averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedRGBAImage, colorConvertedRGBAInputImage);
+      averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedRGBAImage, expectedImage);
       LogTools.info("GPU RGBA Difference: {}", averagePixelDifferenceAfterDecoding);
       assertEquals(0.0, averagePixelDifferenceAfterDecoding, decompressionEpsilon);
       assertEquals(PixelFormat.RGBA8, decoder.getDecodedImagePixelFormat());
@@ -142,7 +245,7 @@ public class ImageMessageDecoderTest
       gpuDownloadedRGBAImage.close();
 
       colorConvertedInputImage.close();
-      colorConvertedRGBAInputImage.close();
+      expectedImage.close();
       decoder.destroy();
    }
 
@@ -174,16 +277,39 @@ public class ImageMessageDecoderTest
       jpegData.close();
    }
 
-   private void hybridDepthCompression(Mat image, ImageMessage message)
+   private void nvjpegBGRCompression(Mat image, ImageMessage message)
    {
-      CUDACompressionTools compressionTools = new CUDACompressionTools();
+      nvjpegCompression(image, message, PixelFormat.BGR8);
+   }
 
-      BytePointer compressedData = compressionTools.compressDepth(image);
-      PerceptionMessageTools.packImageMessageData(message, compressedData);
-      CompressionType.ZSTD_JPEG_HYBRID.packImageMessage(message);
+   private void nvjpegRGBCompression(Mat image, ImageMessage message)
+   {
+      nvjpegCompression(image, message, PixelFormat.RGB8);
+   }
 
-      compressionTools.destroy();
-      compressedData.close();
+   private void nvjpegGrayCompression(Mat image, ImageMessage message)
+   {
+      nvjpegCompression(image, message, PixelFormat.GRAY8);
+   }
+
+   private void nvjpegCompression(Mat image, ImageMessage message, PixelFormat pixelFormat)
+   {
+      CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor();
+
+      BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(image));
+      switch (pixelFormat)
+      {
+         case GRAY8 -> jpegProcessor.encodeGray(image, encodedData);
+         case BGR8 -> jpegProcessor.encodeBGR(image, encodedData);
+         case RGB8 -> jpegProcessor.encodeRGB(image, encodedData);
+         default -> throw new UnsupportedOperationException();
+      }
+
+      PerceptionMessageTools.packImageMessageData(message, encodedData);
+      CompressionType.NVJPEG.packImageMessage(message);
+
+      encodedData.close();
+      jpegProcessor.destroy();
    }
 
    private void nvcompCompression(Mat image, ImageMessage message)
@@ -198,74 +324,15 @@ public class ImageMessageDecoderTest
       compressedData.close();
    }
 
-   private void nvjpegColorCompression(Mat image, ImageMessage message)
+   private void hybridDepthCompression(Mat image, ImageMessage message)
    {
-      CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor();
+      CUDACompressionTools compressionTools = new CUDACompressionTools();
 
-      BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(image));
-      jpegProcessor.encodeBGR(image, encodedData);
+      BytePointer compressedData = compressionTools.compressDepth(image);
+      PerceptionMessageTools.packImageMessageData(message, compressedData);
+      CompressionType.ZSTD_NVJPEG_HYBRID.packImageMessage(message);
 
-      PerceptionMessageTools.packImageMessageData(message, encodedData);
-      CompressionType.JPEG.packImageMessage(message);
-
-      encodedData.close();
-      jpegProcessor.destroy();
-   }
-
-   private Mat convertBGRToPixelFormat(Mat bgrImage, PixelFormat pixelFormat)
-   {
-      int colorConversion = bgrToPixelFormat(pixelFormat);
-      if (colorConversion < 0)
-         return bgrImage.clone();
-
-      Mat newImage = new Mat();
-      opencv_imgproc.cvtColor(bgrImage, newImage, colorConversion);
-      return newImage;
-   }
-
-   private Mat convertPixelFormatToRGBA(Mat image, PixelFormat pixelFormat)
-   {
-      Mat newImage = new Mat();
-      if (image.type() == opencv_core.CV_16UC1)
-      {
-         OpenCVTools.clampTo8BitUnsignedChar(image, newImage, 0.0, 255.0);
-         OpenCVTools.convertGrayToRGBA(newImage, newImage);
-      }
-      else
-      {
-         int colorConversion = pixelFormatToRGBA(pixelFormat);
-         if (colorConversion < 0)
-            image.copyTo(newImage);
-         else
-            opencv_imgproc.cvtColor(image, newImage, colorConversion);
-      }
-
-      return newImage;
-   }
-
-   private static int bgrToPixelFormat(PixelFormat pixelFormat)
-   {
-      return switch (pixelFormat)
-      {
-         case YUV_I420 -> opencv_imgproc.COLOR_BGR2YUV_I420;
-         case BGRA8 -> opencv_imgproc.COLOR_BGR2BGRA;
-         case RGB8 -> opencv_imgproc.COLOR_BGR2RGB;
-         case RGBA8 -> opencv_imgproc.COLOR_BGR2RGBA;
-         case GRAY8 -> opencv_imgproc.COLOR_BGR2GRAY;
-         case BGR8, GRAY16 -> -1;
-      };
-   }
-
-   private static int pixelFormatToRGBA(PixelFormat pixelFormat)
-   {
-      return switch (pixelFormat)
-      {
-         case YUV_I420 -> opencv_imgproc.COLOR_YUV2RGBA_I420;
-         case BGR8 -> opencv_imgproc.COLOR_BGR2RGBA;
-         case BGRA8 -> opencv_imgproc.COLOR_BGRA2RGBA;
-         case RGB8 -> opencv_imgproc.COLOR_RGB2RGBA;
-         case GRAY8 -> opencv_imgproc.COLOR_GRAY2RGBA;
-         case RGBA8, GRAY16 -> -1;
-      };
+      compressionTools.destroy();
+      compressedData.close();
    }
 }
