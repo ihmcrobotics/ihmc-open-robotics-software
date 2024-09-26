@@ -268,6 +268,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       }
       nullspaceQPObjectiveCommands.clear();
 
+      // TODO make computing this optional
       computePrivilegedJointAccelerations();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)

@@ -6,6 +6,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 /**
  * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound. Has a
  * maximum number of rows and columns and an actual number of rows and columns. If you set with a
@@ -326,5 +329,14 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
    public YoDouble getYoDouble(int row, int col)
    {
       return variables[row][col];
+   }
+
+   @Override
+   public String toString()
+   {
+      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      MatrixIO.print(new PrintStream(stream), this);
+
+      return stream.toString();
    }
 }
