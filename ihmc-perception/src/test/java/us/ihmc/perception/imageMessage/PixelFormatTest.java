@@ -26,39 +26,26 @@ public class PixelFormatTest
 {
    private static Mat bgrImage;
    private static final Map<PixelFormat, Mat> pixelFormatToImageMap = new HashMap<>();
-   private static final Map<PixelFormat, GpuMat> pixelFormatToGpuImageMap = new HashMap<>();
 
    @BeforeAll
    public static void initializeImages() throws URISyntaxException, IOException
-   {
+   {  // Initialize images in various pixel formats
       Path zedColorBGRPath = Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI());
       byte[] colorBytes = Files.readAllBytes(zedColorBGRPath);
       bgrImage = new Mat(720, 1280, opencv_core.CV_8UC3, new BytePointer(colorBytes));
       pixelFormatToImageMap.put(PixelFormat.BGR8, bgrImage);
-      GpuMat gpuBGRImage = new GpuMat();
-      gpuBGRImage.upload(bgrImage);
-      pixelFormatToGpuImageMap.put(PixelFormat.BGR8, gpuBGRImage);
 
       Mat bgraImage = new Mat();
       opencv_imgproc.cvtColor(bgrImage, bgraImage, opencv_imgproc.COLOR_BGR2BGRA);
       pixelFormatToImageMap.put(PixelFormat.BGRA8, bgraImage);
-      GpuMat gpuBGRAImage = new GpuMat();
-      gpuBGRAImage.upload(bgraImage);
-      pixelFormatToGpuImageMap.put(PixelFormat.BGRA8, gpuBGRAImage);
 
       Mat rgbImage = new Mat();
       opencv_imgproc.cvtColor(bgrImage, rgbImage, opencv_imgproc.COLOR_BGR2RGB);
       pixelFormatToImageMap.put(PixelFormat.RGB8, rgbImage);
-      GpuMat gpuRGBImage = new GpuMat();
-      gpuRGBImage.upload(rgbImage);
-      pixelFormatToGpuImageMap.put(PixelFormat.RGB8, gpuRGBImage);
 
       Mat rgbaImage = new Mat();
       opencv_imgproc.cvtColor(bgrImage, rgbaImage, opencv_imgproc.COLOR_BGR2RGBA);
       pixelFormatToImageMap.put(PixelFormat.RGBA8, rgbaImage);
-      GpuMat gpuRGBAImage = new GpuMat();
-      gpuRGBAImage.upload(rgbaImage);
-      pixelFormatToGpuImageMap.put(PixelFormat.RGBA8, gpuRGBAImage);
    }
 
    @AfterAll
@@ -66,9 +53,6 @@ public class PixelFormatTest
    {
       for (Mat image : pixelFormatToImageMap.values())
          image.close();
-
-      for (GpuMat gpuImage : pixelFormatToGpuImageMap.values())
-         gpuImage.close();
    }
 
    @AfterEach
@@ -173,7 +157,8 @@ public class PixelFormatTest
       expectedRGBAResult.close();
 
       Mat originalRGBAImage = pixelFormatToImageMap.get(PixelFormat.RGBA8);
-      GpuMat gpuOriginalRGBAImage = pixelFormatToGpuImageMap.get(PixelFormat.RGBA8);
+      GpuMat gpuOriginalRGBAImage = new GpuMat();
+      gpuOriginalRGBAImage.upload(originalRGBAImage);
 
       // Test RGBA to YUV
       LogTools.info("Testing CPU Conversion from RGBA to {}", pixelFormat);
@@ -193,5 +178,6 @@ public class PixelFormatTest
       gpuResultImage.close();
 
       gpuOriginalImage.close();
+      gpuOriginalRGBAImage.close();
    }
 }

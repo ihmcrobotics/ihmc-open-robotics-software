@@ -86,7 +86,7 @@ public class ImageMessageDecoderTest
    public void testOpenCVJpeg()
    {
       for (PixelFormat pixelFormat : PixelFormat.values())
-      {  // Test the color formats
+      {  // Only test the color formats for jpeg
          if (pixelFormat != PixelFormat.GRAY16)
          {
             LogTools.info("Testing Color JPEG Compression: {}", pixelFormat.name());
@@ -98,20 +98,13 @@ public class ImageMessageDecoderTest
 
    @Test
    public void testNVJPEG()
-   {
+   {  // Only these formats have been tested to work with NVJPEG. A few other formats (like YUV_I420) might also work, but have not been verified.
       PixelFormat[] nvjpegSupportedFormats = {PixelFormat.BGR8, PixelFormat.RGB8, PixelFormat.GRAY8};
 
       for (PixelFormat pixelFormat : nvjpegSupportedFormats)
       {
          LogTools.info("Testing NVJPEG Compression: {}", pixelFormat);
-         BiConsumer<Mat, ImageMessage> nvjpegMethod = switch (pixelFormat)
-         {
-            case GRAY8 -> this::nvjpegGrayCompression;
-            case BGR8 -> this::nvjpegBGRCompression;
-            case RGB8 -> this::nvjpegRGBCompression;
-            default -> throw new IllegalStateException("How did you get here???");
-         };
-         testDecompression(nvjpegMethod, zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
+         testDecompression(getNVJPEGCompressionFunction(pixelFormat), zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
       }
       System.out.println();
    }
@@ -147,36 +140,40 @@ public class ImageMessageDecoderTest
                                   Mat inputImage,
                                   PixelFormat encodedPixelFormat,
                                   double decompressionEpsilon)
-   {
+   {  // Test both general decompression and decompression to RGBA
       testGeneralDecompression(compressionFunction, inputImage, encodedPixelFormat, decompressionEpsilon);
       testDecompressionToRGBA(compressionFunction, inputImage, encodedPixelFormat, decompressionEpsilon);
    }
 
+   // This test works for both color and depth images
    private void testGeneralDecompression(BiConsumer<Mat, ImageMessage> compressionFunction,
-                                         Mat inputImage,
-                                         PixelFormat encodedPixelFormat,
+                                         Mat image,
+                                         PixelFormat encodingInputPixelFormat,
                                          double decompressionEpsilon)
-   {
-      Mat colorConvertedInputImage = new Mat();
-      if (inputImage.type() == opencv_core.CV_16UC1)
-         inputImage.copyTo(colorConvertedInputImage);
+   {  // Ensure encoder input is in desired pixel format
+      Mat encoderInputImage = new Mat();
+      if (image.type() == opencv_core.CV_16UC1)
+         image.copyTo(encoderInputImage);
       else
-         PixelFormat.BGR8.convertToPixelFormat(inputImage, colorConvertedInputImage, encodedPixelFormat);
+         PixelFormat.BGR8.convertToPixelFormat(image, encoderInputImage, encodingInputPixelFormat);
       Mat expectedImage = new Mat();
 
+      // Create and pack parts of the image message
       ImageMessage message = new ImageMessage();
-      message.setImageWidth(colorConvertedInputImage.cols());
-      message.setImageHeight(colorConvertedInputImage.rows());
-      encodedPixelFormat.packImageMessage(message);
+      message.setImageWidth(encoderInputImage.cols());
+      message.setImageHeight(encoderInputImage.rows());
+      encodingInputPixelFormat.packImageMessage(message);
 
-      compressionFunction.accept(colorConvertedInputImage, message);
+      // Compress the image and pack into image message
+      compressionFunction.accept(encoderInputImage, message);
 
+      // Create a decoder
       ImageMessageDecoder decoder = new ImageMessageDecoder();
 
       // TEST CPU DECODING
       Mat cpuDecodedImage = new Mat();
       decoder.decodeMessage(message, cpuDecodedImage);
-      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
+      encodingInputPixelFormat.convertToPixelFormat(encoderInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
       double averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedImage, expectedImage);
       LogTools.info("CPU Difference: {}", averagePixelDifferenceAfterDecoding);
@@ -188,7 +185,7 @@ public class ImageMessageDecoderTest
       Mat gpuDownloadedImage = new Mat();
       decoder.decodeMessage(message, gpuDecodedImage);
       gpuDecodedImage.download(gpuDownloadedImage);
-      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
+      encodingInputPixelFormat.convertToPixelFormat(encoderInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
       averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedImage, expectedImage);
       LogTools.info("GPU Difference: {}", averagePixelDifferenceAfterDecoding);
@@ -196,33 +193,36 @@ public class ImageMessageDecoderTest
       gpuDecodedImage.close();
       gpuDownloadedImage.close();
 
-      colorConvertedInputImage.close();
+      // close stuff
+      encoderInputImage.close();
       expectedImage.close();
       decoder.destroy();
    }
 
+   // This test only works with color images (depth cannot be converted to RGBA without being hacky)
    private void testDecompressionToRGBA(BiConsumer<Mat, ImageMessage> compressionFunction,
-                                        Mat inputImage,
+                                        Mat image,
                                         PixelFormat encodedPixelFormat,
                                         double decompressionEpsilon)
-   {
-      Mat colorConvertedInputImage = new Mat();
-      PixelFormat.BGR8.convertToPixelFormat(inputImage, colorConvertedInputImage, encodedPixelFormat);
+   {  // Ensure encoder input is in desired pixel format
+      Mat encoderInputImage = new Mat();
+      PixelFormat.BGR8.convertToPixelFormat(image, encoderInputImage, encodedPixelFormat);
       Mat expectedImage = new Mat();
 
       ImageMessage message = new ImageMessage();
-      message.setImageWidth(colorConvertedInputImage.cols());
-      message.setImageHeight(colorConvertedInputImage.rows());
+      message.setImageWidth(encoderInputImage.cols());
+      message.setImageHeight(encoderInputImage.rows());
       encodedPixelFormat.packImageMessage(message);
 
-      compressionFunction.accept(colorConvertedInputImage, message);
+      // Compress the image and pack into the message
+      compressionFunction.accept(encoderInputImage, message);
 
       ImageMessageDecoder decoder = new ImageMessageDecoder();
 
       // TEST CPU RGBA DECODING
       Mat cpuDecodedRGBAImage = new Mat();
       decoder.decodeMessageToRGBA(message, cpuDecodedRGBAImage);
-      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
+      encodedPixelFormat.convertToPixelFormat(encoderInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
       double averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(cpuDecodedRGBAImage, expectedImage);
       LogTools.info("CPU RGBA Difference: {}", averagePixelDifferenceAfterDecoding);
@@ -235,7 +235,7 @@ public class ImageMessageDecoderTest
       Mat gpuDownloadedRGBAImage = new Mat();
       decoder.decodeMessageToRGBA(message, gpuDecodedRGBAImage);
       gpuDecodedRGBAImage.download(gpuDownloadedRGBAImage);
-      encodedPixelFormat.convertToPixelFormat(colorConvertedInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
+      encodedPixelFormat.convertToPixelFormat(encoderInputImage, expectedImage, decoder.getDecodedImagePixelFormat());
 
       averagePixelDifferenceAfterDecoding = OpenCVTools.averagePixelDifference(gpuDownloadedRGBAImage, expectedImage);
       LogTools.info("GPU RGBA Difference: {}", averagePixelDifferenceAfterDecoding);
@@ -244,13 +244,14 @@ public class ImageMessageDecoderTest
       gpuDecodedRGBAImage.close();
       gpuDownloadedRGBAImage.close();
 
-      colorConvertedInputImage.close();
+      // Close stuff
+      encoderInputImage.close();
       expectedImage.close();
       decoder.destroy();
    }
 
    private void packUncompressed(Mat image, ImageMessage message)
-   {
+   {  // Limit of image data must be set correctly to pack uncompressed data
       PerceptionMessageTools.packImageMessageData(message, image.data().limit(OpenCVTools.dataSize(image)));
       CompressionType.UNCOMPRESSED.packImageMessage(message);
    }
@@ -277,39 +278,27 @@ public class ImageMessageDecoderTest
       jpegData.close();
    }
 
-   private void nvjpegBGRCompression(Mat image, ImageMessage message)
+   private BiConsumer<Mat, ImageMessage> getNVJPEGCompressionFunction(PixelFormat pixelFormat)
    {
-      nvjpegCompression(image, message, PixelFormat.BGR8);
-   }
-
-   private void nvjpegRGBCompression(Mat image, ImageMessage message)
-   {
-      nvjpegCompression(image, message, PixelFormat.RGB8);
-   }
-
-   private void nvjpegGrayCompression(Mat image, ImageMessage message)
-   {
-      nvjpegCompression(image, message, PixelFormat.GRAY8);
-   }
-
-   private void nvjpegCompression(Mat image, ImageMessage message, PixelFormat pixelFormat)
-   {
-      CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor();
-
-      BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(image));
-      switch (pixelFormat)
+      return (image, message) ->
       {
-         case GRAY8 -> jpegProcessor.encodeGray(image, encodedData);
-         case BGR8 -> jpegProcessor.encodeBGR(image, encodedData);
-         case RGB8 -> jpegProcessor.encodeRGB(image, encodedData);
-         default -> throw new UnsupportedOperationException();
-      }
+         CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor();
 
-      PerceptionMessageTools.packImageMessageData(message, encodedData);
-      CompressionType.NVJPEG.packImageMessage(message);
+         BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(image));
+         switch (pixelFormat)
+         {
+            case GRAY8 -> jpegProcessor.encodeGray(image, encodedData);
+            case BGR8 -> jpegProcessor.encodeBGR(image, encodedData);
+            case RGB8 -> jpegProcessor.encodeRGB(image, encodedData);
+            default -> throw new UnsupportedOperationException();
+         }
 
-      encodedData.close();
-      jpegProcessor.destroy();
+         PerceptionMessageTools.packImageMessageData(message, encodedData);
+         CompressionType.NVJPEG.packImageMessage(message);
+
+         encodedData.close();
+         jpegProcessor.destroy();
+      };
    }
 
    private void nvcompCompression(Mat image, ImageMessage message)
