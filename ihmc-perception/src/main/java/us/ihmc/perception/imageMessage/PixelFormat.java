@@ -26,16 +26,9 @@ public enum PixelFormat
    public final int elementsPerPixel;
    /** Number of bytes that represent 1 pixel */
    public final long bytesPerPixel;
-   /**
-    * One of {@code opencv_imgproc.COLOR_*} to achieve a conversion from this pixel format to RGBA.
-    * -1 if the conversion is not possible
-    */
+   /** One of {@code opencv_imgproc.COLOR_*} to achieve a conversion from this pixel format to RGBA. -1 if the conversion is not possible */
    private final int opencvToRGBAConversion;
-
-   /**
-    * One of {@code opencv_imgproc.COLOR_*} to achieve a conversion from RGBA to this pixel format.
-    * -1 if the conversion is not possible
-    */
+   /** One of {@code opencv_imgproc.COLOR_*} to achieve a conversion from RGBA to this pixel format. -1 if the conversion is not possible */
    private final int opencvFromRGBAConversion;
 
    PixelFormat(int bytesPerElement, int elementsPerPixel, int opencvToRGBAConversion, int opencvFromRGBAConversion)
@@ -67,6 +60,16 @@ public enum PixelFormat
       };
    }
 
+   /**
+    * Converts the pixel format of {@code source} from {@code this} pixel format to the {@code targetPixelFormat}.
+    * This method uses a two-step process of first converting the image to RGBA, then to the target pixel format.
+    * Although this method is convenient, it is not recommended when fast color conversions are required.
+    * In such a case, use {@code opencv_imgproc.cvtColor(source, destination, colorConversion)} instead to accomplish the conversion in one step.
+    * @param source Source image in {@code this} pixel format.
+    * @param destination Destination image, will be in {@code targetPixelFormat}.
+    * @param targetPixelFormat The desired pixel format
+    * @return {@code true} if the conversion was successful, {@code false} if the conversion could not be done.
+    */
    public boolean convertToPixelFormat(Mat source, Mat destination, PixelFormat targetPixelFormat)
    {
       if (this == targetPixelFormat)
@@ -78,6 +81,16 @@ public enum PixelFormat
       return this.convertToRGBA(source, destination) && targetPixelFormat.convertFromRGBA(destination, destination);
    }
 
+   /**
+    * Converts the pixel format of {@code source} from {@code this} pixel format to the {@code targetPixelFormat}.
+    * This method uses a two-step process of first converting the image to RGBA, then to the target pixel format.
+    * Although this method is convenient, it is not recommended when fast color conversions are required.
+    * In such a case, use {@code opencv_cudaimgproc.cvtColor(source, destination, colorConversion)} instead to accomplish the conversion in one step.
+    * @param source Source image in {@code this} pixel format.
+    * @param destination Destination image, will be in {@code targetPixelFormat}.
+    * @param targetPixelFormat The desired pixel format
+    * @return {@code true} if the conversion was successful, {@code false} if the conversion could not be done.
+    */
    public boolean convertToPixelFormat(GpuMat source, GpuMat destination, PixelFormat targetPixelFormat)
    {
       if (this == targetPixelFormat)

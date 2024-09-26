@@ -30,6 +30,12 @@ public class ImageMessageDecoder
       }
    }
 
+   /**
+    * Decode the image contained within the {@code messageToDecode}, and pack it into the {@code imageToPack}.
+    * Use {@link #getDecodedImagePixelFormat()} to get the pixel format of the decoded image.
+    * @param messageToDecode The message containing image data
+    * @param imageToPack The image into which the decoded image will be packed.
+    */
    public void decodeMessage(ImageMessage messageToDecode, Mat imageToPack)
    {
       resizeToMessageDimensions(messageToDecode, imageToPack);
@@ -80,10 +86,15 @@ public class ImageMessageDecoder
             }
             imageToPack.data(messageDataExtractor.getInputPointer().position(0));
          }
-         default -> throw new IllegalStateException("Unexpected value: " + CompressionType.fromImageMessage(messageToDecode));
       }
    }
 
+   /**
+    * Decode the image contained within the {@code messageToDecode}, and pack it into the {@code imageToPack}.
+    * Use {@link #getDecodedImagePixelFormat()} to get the pixel format of the decoded image.
+    * @param messageToDecode The message containing image data
+    * @param imageToPack The image into which the decoded image will be packed.
+    */
    public void decodeMessage(ImageMessage messageToDecode, GpuMat imageToPack)
    {
       resizeToMessageDimensions(messageToDecode, imageToPack);
@@ -141,6 +152,12 @@ public class ImageMessageDecoder
       }
    }
 
+   /**
+    * Decode the image contained within the {@code messageToDecode}, converts it into RGBA, and pack it into the {@code imageToPack}.
+    * If the decoded image cannot be converted to RGBA, it will remain in its original pixel format.
+    * @param messageToDecode The message containing image data
+    * @param imageToPack The image into which the decoded RGBA image will be packed.
+    */
    public void decodeMessageToRGBA(ImageMessage messageToDecode, Mat imageToPack)
    {
       decodeMessage(messageToDecode, imageToPack);
@@ -150,6 +167,12 @@ public class ImageMessageDecoder
          LogTools.warn("Attempted conversion from {} to {} failed.", lastImagePixelFormat, PixelFormat.RGBA8);
    }
 
+   /**
+    * Decode the image contained within the {@code messageToDecode}, converts it into RGBA, and pack it into the {@code imageToPack}.
+    * If the decoded image cannot be converted to RGBA, it will remain in its original pixel format.
+    * @param messageToDecode The message containing image data
+    * @param imageToPack The image into which the decoded RGBA image will be packed.
+    */
    public void decodeMessageToRGBA(ImageMessage messageToDecode, GpuMat imageToPack)
    {
       decodeMessage(messageToDecode, imageToPack);
@@ -159,6 +182,9 @@ public class ImageMessageDecoder
          LogTools.warn("Attempted conversion from {} to {} failed.", lastImagePixelFormat, PixelFormat.RGBA8);
    }
 
+   /**
+    * @return The pixel format of the last decoded image.
+    */
    public PixelFormat getDecodedImagePixelFormat()
    {
       return lastImagePixelFormat;
