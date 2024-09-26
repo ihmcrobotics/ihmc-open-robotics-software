@@ -136,8 +136,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
-
    private final YoBoolean allowUpperBodyMotionDuringLocomotion = new YoBoolean("allowUpperBodyMotionDuringLocomotion", registry);
 
    private final CommandInputManager commandInputManager;
@@ -760,15 +758,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT
                              || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
-         if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
-         {
-            commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
-         }
-         else
-         {
-            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
-            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
-         }
+         walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+         controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
       }
    }
 
