@@ -171,7 +171,7 @@ public class RealsenseColorDepthImagePublisher
          colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
          PixelFormat.BGR8.packImageMessage(colorImageMessage);
-         CompressionType.JPEG.packImageMessage(colorImageMessage);
+         CompressionType.NVJPEG.packImageMessage(colorImageMessage);
 
          ros2ColorImagePublisher.publish(colorImageMessage);
          lastColorSequenceNumber = colorImageToPublish.getSequenceNumber();

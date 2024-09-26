@@ -122,7 +122,7 @@ public class BlackflyImagePublisher
          distortedImageMessage.setSequenceNumber(imageToPublish.getSequenceNumber());
          CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(distortedImageMessage);
          PixelFormat.BGR8.packImageMessage(distortedImageMessage);
-         CompressionType.JPEG.packImageMessage(distortedImageMessage);
+         CompressionType.NVJPEG.packImageMessage(distortedImageMessage);
          ros2DistoredImagePublisher.publish(distortedImageMessage);
 
          lastImageSequenceNumber = imageToPublish.getSequenceNumber();

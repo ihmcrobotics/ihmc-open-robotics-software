@@ -244,7 +244,7 @@ public class ZEDColorDepthImagePublisher
          colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
          CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
          PixelFormat.BGR8.packImageMessage(colorImageMessage);
-         CompressionType.JPEG.packImageMessage(colorImageMessage);
+         CompressionType.NVJPEG.packImageMessage(colorImageMessage);
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());
