@@ -154,9 +154,9 @@ public class ZEDColorDepthImagePublisher
          depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-         PixelFormat.GRAY16.packImageMessage(depthImageMessage);
-         CompressionType.ZSTD_NVJPEG_HYBRID.packImageMessage(depthImageMessage);
+         depthImageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
+         depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+         depthImageMessage.setCompressionType(CompressionType.ZSTD_NVJPEG_HYBRID.toByte());
 
          // Close GpuMat
          depthPNGPointer.close();
@@ -242,9 +242,9 @@ public class ZEDColorDepthImagePublisher
          colorImageMessage.getOrientation().set(colorImageToPublish.getOrientation());
          colorImageMessage.setSequenceNumber(colorImageToPublish.getSequenceNumber());
          colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
-         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-         PixelFormat.BGR8.packImageMessage(colorImageMessage);
-         CompressionType.NVJPEG.packImageMessage(colorImageMessage);
+         colorImageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
+         colorImageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
+         colorImageMessage.setCompressionType(CompressionType.NVJPEG.toByte());
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());

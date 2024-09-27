@@ -40,14 +40,19 @@ public enum PixelFormat
       this.opencvFromRGBAConversion = opencvFromRGBAConversion;
    }
 
-   public void packImageMessage(ImageMessage imageMessageToPack)
+   public byte toByte()
    {
-      imageMessageToPack.setPixelFormat((byte) ordinal());
+      return (byte) ordinal();
+   }
+
+   public static PixelFormat fromByte(byte pixelFormatAsByte)
+   {
+      return values()[pixelFormatAsByte];
    }
 
    public static PixelFormat fromImageMessage(ImageMessage imageMessage)
    {
-      return values()[imageMessage.getPixelFormat()];
+      return fromByte(imageMessage.getPixelFormat());
    }
 
    public int toOpenCVType()

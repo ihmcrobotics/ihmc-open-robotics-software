@@ -11,13 +11,18 @@ public enum CompressionType
    ZSTD_NVJPEG_HYBRID,
    UNCOMPRESSED;
 
-   public void packImageMessage(ImageMessage imageMessageToPack)
+   public byte toByte()
    {
-      imageMessageToPack.setCompressionType((byte) ordinal());
+      return (byte) ordinal();
+   }
+
+   public static CompressionType fromByte(byte compressionTypeAsByte)
+   {
+      return values()[compressionTypeAsByte];
    }
 
    public static CompressionType fromImageMessage(ImageMessage imageMessage)
    {
-      return values()[imageMessage.getCompressionType()];
+      return fromByte(imageMessage.getCompressionType());
    }
 }

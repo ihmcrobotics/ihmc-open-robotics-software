@@ -28,6 +28,11 @@ public enum CameraModel
 
    public static final CameraModel[] values = values();
 
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
    public void packMessageFormat(ImageMessage imageMessage)
    {
       imageMessage.setCameraModel((byte) ordinal());

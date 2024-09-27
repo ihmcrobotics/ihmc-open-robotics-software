@@ -125,9 +125,9 @@ public class BallDetectionManager
             imageMessage.getOrientation().set(colorImage.getOrientation());
             imageMessage.setSequenceNumber(maskImageSequenceNumber++);
             imageMessage.setDepthDiscretization(-1.0f);
-            CameraModel.PINHOLE.packMessageFormat(imageMessage);
-            PixelFormat.GRAY8.packImageMessage(imageMessage);
-            CompressionType.PNG.packImageMessage(imageMessage);
+            imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
+            imageMessage.setPixelFormat(PixelFormat.GRAY8.toByte());
+            imageMessage.setCompressionType(CompressionType.PNG.toByte());
             ros2Helper.publish(PerceptionAPI.BALL_SEGMENTATION_IMAGE, imageMessage);
          }
 

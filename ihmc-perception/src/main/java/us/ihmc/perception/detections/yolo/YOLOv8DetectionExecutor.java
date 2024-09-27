@@ -336,9 +336,9 @@ public class YOLOv8DetectionExecutor
       imageMessage.getOrientation().set(colorImage.getOrientation());
       imageMessage.setSequenceNumber(colorImage.getSequenceNumber());
       imageMessage.setDepthDiscretization(colorImage.getDepthDiscretization());
-      CameraModel.PINHOLE.packMessageFormat(imageMessage);
-      PixelFormat.BGR8.packImageMessage(imageMessage);
-      CompressionType.JPEG.packImageMessage(imageMessage);
+      imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
+      imageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
+      imageMessage.setCompressionType(CompressionType.JPEG.toByte());
 
       annotatedImagePublisher.publish(imageMessage);
 

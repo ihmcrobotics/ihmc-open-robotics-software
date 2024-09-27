@@ -163,8 +163,8 @@ public class StructuralPerceptionProcessWithDriver
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      PixelFormat.GRAY16.packImageMessage(outputImageMessage);
-      CompressionType.PNG.packImageMessage(outputImageMessage);
+      outputImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+      outputImageMessage.setCompressionType(CompressionType.PNG.toByte());
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);

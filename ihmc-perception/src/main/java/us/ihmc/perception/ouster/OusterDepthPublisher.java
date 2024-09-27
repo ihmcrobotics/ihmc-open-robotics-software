@@ -108,14 +108,14 @@ public class OusterDepthPublisher
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      PixelFormat.GRAY16.packImageMessage(outputImageMessage);
-      CompressionType.PNG.packImageMessage(outputImageMessage);
+      outputImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+      outputImageMessage.setCompressionType(CompressionType.PNG.toByte());
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
       outputImageMessage.setFocalLengthXPixels(depthWidth / (2.0f * (float) Math.PI)); // These are nominal values approximated by Duncan & Tomasz
       outputImageMessage.setFocalLengthYPixels(depthHeight / ((float) Math.PI / 2.0f));
-      CameraModel.OUSTER.packMessageFormat(outputImageMessage);
+      outputImageMessage.setCameraModel(CameraModel.OUSTER.toByte());
       MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
       MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
       imagePublisher.publish(outputImageMessage);

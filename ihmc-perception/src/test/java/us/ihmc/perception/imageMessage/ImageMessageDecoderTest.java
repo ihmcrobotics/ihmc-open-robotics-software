@@ -162,7 +162,7 @@ public class ImageMessageDecoderTest
       ImageMessage message = new ImageMessage();
       message.setImageWidth(encoderInputImage.cols());
       message.setImageHeight(encoderInputImage.rows());
-      encodingInputPixelFormat.packImageMessage(message);
+      message.setPixelFormat(encodingInputPixelFormat.toByte());
 
       // Compress the image and pack into image message
       compressionFunction.accept(encoderInputImage, message);
@@ -212,7 +212,7 @@ public class ImageMessageDecoderTest
       ImageMessage message = new ImageMessage();
       message.setImageWidth(encoderInputImage.cols());
       message.setImageHeight(encoderInputImage.rows());
-      encodedPixelFormat.packImageMessage(message);
+      message.setPixelFormat(encodedPixelFormat.toByte());
 
       // Compress the image and pack into the message
       compressionFunction.accept(encoderInputImage, message);
@@ -253,7 +253,7 @@ public class ImageMessageDecoderTest
    private void packUncompressed(Mat image, ImageMessage message)
    {  // Limit of image data must be set correctly to pack uncompressed data
       PerceptionMessageTools.packImageMessageData(message, image.data().limit(OpenCVTools.dataSize(image)));
-      CompressionType.UNCOMPRESSED.packImageMessage(message);
+      message.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
    }
 
    private void opencvPNGCompression(Mat image, ImageMessage message)
@@ -262,7 +262,7 @@ public class ImageMessageDecoderTest
       opencv_imgcodecs.imencode(".png", image, pngData);
 
       PerceptionMessageTools.packImageMessageData(message, pngData);
-      CompressionType.PNG.packImageMessage(message);
+      message.setCompressionType(CompressionType.PNG.toByte());
 
       pngData.close();
    }
@@ -273,7 +273,7 @@ public class ImageMessageDecoderTest
       opencv_imgcodecs.imencode(".jpg", image, jpegData);
 
       PerceptionMessageTools.packImageMessageData(message, jpegData);
-      CompressionType.JPEG.packImageMessage(message);
+      message.setCompressionType(CompressionType.JPEG.toByte());
 
       jpegData.close();
    }
@@ -294,7 +294,7 @@ public class ImageMessageDecoderTest
          }
 
          PerceptionMessageTools.packImageMessageData(message, encodedData);
-         CompressionType.NVJPEG.packImageMessage(message);
+         message.setCompressionType(CompressionType.NVJPEG.toByte());
 
          encodedData.close();
          jpegProcessor.destroy();
@@ -307,7 +307,7 @@ public class ImageMessageDecoderTest
 
       BytePointer compressedData = compressionTools.compress(image);
       PerceptionMessageTools.packImageMessageData(message, compressedData);
-      CompressionType.NVCOMP.packImageMessage(message);
+      message.setCompressionType(CompressionType.NVCOMP.toByte());
 
       compressionTools.destroy();
       compressedData.close();
@@ -319,7 +319,7 @@ public class ImageMessageDecoderTest
 
       BytePointer compressedData = compressionTools.compressDepth(image);
       PerceptionMessageTools.packImageMessageData(message, compressedData);
-      CompressionType.ZSTD_NVJPEG_HYBRID.packImageMessage(message);
+      message.setCompressionType(CompressionType.ZSTD_NVJPEG_HYBRID.toByte());
 
       compressionTools.destroy();
       compressedData.close();

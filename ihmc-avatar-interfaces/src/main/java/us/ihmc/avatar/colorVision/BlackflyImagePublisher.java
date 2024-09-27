@@ -120,9 +120,9 @@ public class BlackflyImagePublisher
          distortedImageMessage.getPosition().set(imageToPublish.getPosition());
          distortedImageMessage.getOrientation().set(imageToPublish.getOrientation());
          distortedImageMessage.setSequenceNumber(imageToPublish.getSequenceNumber());
-         CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(distortedImageMessage);
-         PixelFormat.BGR8.packImageMessage(distortedImageMessage);
-         CompressionType.NVJPEG.packImageMessage(distortedImageMessage);
+         distortedImageMessage.setCameraModel(CameraModel.EQUIDISTANT_FISHEYE.toByte());
+         distortedImageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
+         distortedImageMessage.setCompressionType(CompressionType.NVJPEG.toByte());
          ros2DistoredImagePublisher.publish(distortedImageMessage);
 
          lastImageSequenceNumber = imageToPublish.getSequenceNumber();

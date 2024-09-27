@@ -93,9 +93,9 @@ public class OusterDepthImagePublisher
          depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         CameraModel.OUSTER.packMessageFormat(depthImageMessage);
-         PixelFormat.GRAY16.packImageMessage(depthImageMessage);
-         CompressionType.PNG.packImageMessage(depthImageMessage);
+         depthImageMessage.setCameraModel(CameraModel.OUSTER.toByte());
+         depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+         depthImageMessage.setCompressionType(CompressionType.PNG.toByte());
          MessageTools.packIDLSequence(ouster.getBeamAltitudeAnglesBuffer(), depthImageMessage.getOusterBeamAltitudeAngles());
          MessageTools.packIDLSequence(ouster.getBeamAzimuthAnglesBuffer(), depthImageMessage.getOusterBeamAzimuthAngles());
 
