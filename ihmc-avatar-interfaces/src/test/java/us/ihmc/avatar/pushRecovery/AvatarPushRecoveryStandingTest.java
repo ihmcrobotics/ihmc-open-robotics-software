@@ -13,7 +13,6 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -389,21 +388,12 @@ public abstract class AvatarPushRecoveryStandingTest
       double duration = 0.3;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
-      @SuppressWarnings("unchecked")
-      final YoEnum<PushRecoveryStateEnum> pushRecoveryState = (YoEnum<PushRecoveryStateEnum>) simulationTestHelper.findVariable("PushRecoveryHighLevelHumanoidController",
-                                                                                                                                "pushRecoveryCurrentState");
+
       final YoInteger numberOfRecoveryStepsTaken = (YoInteger) simulationTestHelper.findVariable("numberOfRecoveryStepsTaken");
       final YoInteger maxNumberOfSteps = (YoInteger) simulationTestHelper.findVariable("maxNumberOfRecoveryStepsToTake");
       maxNumberOfSteps.set(1);
 
       AtomicBoolean tookStep = new AtomicBoolean(false);
-      pushRecoveryState.addListener(state ->
-      {
-         if (pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT
-               || pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT)
-            tookStep.set(true);
-      });
-      pushRobotController.queueForceDelayed(new PushRecoveryTransferStartCondition(pushRecoveryState), 0.02, forceDirection, magnitude, duration);
 
       assertFalse(simulationTestHelper.simulateNow(4.0));
 
@@ -476,23 +466,6 @@ public abstract class AvatarPushRecoveryStandingTest
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, pushDuration);
       assertTrue(simulationTestHelper.simulateNow(simulationDuration));
       assertTrue(currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING), "Not back to walking");
-   }
-
-   private class PushRecoveryTransferStartCondition implements StateTransitionCondition
-   {
-      private final YoEnum<PushRecoveryStateEnum> pushRecoveryState;
-
-      public PushRecoveryTransferStartCondition(YoEnum<PushRecoveryStateEnum> pushRecoveryState)
-      {
-         this.pushRecoveryState = pushRecoveryState;
-      }
-
-      @Override
-      public boolean testCondition(double time)
-      {
-         return pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT
-               || pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
-      }
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
