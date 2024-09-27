@@ -148,7 +148,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final RigidBodyBasics rootBody;
    protected RigidBodyBasics base;
-   protected RigidBodyBasics testBase;
+   protected RigidBodyBasics bodyBase;
    protected ReferenceFrame controlBaseFrame;
    protected ReferenceFrame angularGainsFrame;
    protected ReferenceFrame linearGainsFrame;
@@ -360,11 +360,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
-      testBase = base.getChildrenJoints().get(0).getSuccessor();
+      bodyBase = base.getChildrenJoints().get(0).getSuccessor();
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
 
-      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(testBase, endEffector);
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
       List<Integer> allJointIndices = new ArrayList<>();
 
       for (JointBasics joint : jointPath)
@@ -781,7 +781,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj tempDiagDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final Matrix3D tempMatrix3D = new Matrix3D();
 
@@ -850,26 +849,15 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          CommonOps_DDRM.mult(tempAngularMatrix, tempLinearMatrix, tempMatrix);
 
-         System.out.println("K_r: ");
-         tempMatrix.print();
-
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);
 
          MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
 
-         System.out.println("Squared Proportional Gain Matrix: ");
-         sqrtProportionalGainMatrix.print();
-
          tempMatrix.set(inverseInertiaMatrix);
 
-         System.out.println("Inverse Inertia Matrix: ");
-         tempMatrix.print();
          CommonOps_DDRM.invert(tempMatrix);
          MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
-
-         System.out.print("Sqrt Inertia Matrix: ");
-         sqrtInertiaMatrix.print();
 
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
@@ -882,11 +870,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          CommonOps_DDRM.extract(tempDerivativeGainMatrix, 0, 3,0, 3, tempMatrix, 0, 0);
          tempMatrix3D.set(tempMatrix);
          tempMatrix3D.transform(angularFeedbackTermToPack);
-
-         System.out.println("Derivative Gain Matrix: ");
-         tempDerivativeGainMatrix.print();
-         System.out.println("Linear Feedback Term: " + linearFeedbackTermToPack);
-         System.out.println("Angular Feedback Term: " + angularFeedbackTermToPack);
       }
       else
       {
@@ -1091,7 +1074,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(testBase, endEffector);
+      jacobianCalculator.setKinematicChain(bodyBase, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 

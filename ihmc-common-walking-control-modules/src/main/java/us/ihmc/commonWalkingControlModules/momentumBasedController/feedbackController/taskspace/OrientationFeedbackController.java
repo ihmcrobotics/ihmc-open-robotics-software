@@ -120,6 +120,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
    private RigidBodyBasics base;
+   protected RigidBodyBasics bodyBase;
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame angularGainsFrame;
 
@@ -314,12 +315,11 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       currentCommandId = command.getCommandId();
       base = command.getBase();
-      controlBaseFrame = command.getControlBaseFrame();
+      bodyBase = base.getChildrenJoints().get(0).getSuccessor();
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
 
-      //      TODO: Clean up the Garbage creation
-      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(base, endEffector);
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
       List<Integer> allJointIndices = new ArrayList<>();
 
       for (JointBasics joint : jointPath)
@@ -620,7 +620,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj tempDiagDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
 
    /**
@@ -677,11 +676,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
-         tempDiagDerivativeGainMatrix.reshape(tempDerivativeGainMatrix.getNumRows(), tempDerivativeGainMatrix.getNumCols());
-         MatrixMissingTools.diagonal(tempDerivativeGainMatrix, tempDiagDerivativeGainMatrix);
-         //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
          tempMatrix.reshape(3, 3);
-         CommonOps_DDRM.extract(tempDiagDerivativeGainMatrix, 0, 3, 0, 3, tempMatrix, 0, 0);
+         CommonOps_DDRM.extract(tempDerivativeGainMatrix, 0, 3, 0, 3, tempMatrix, 0, 0);
          tempGainMatrix.set(tempMatrix);
       }
       tempGainMatrix.transform(feedbackTermToPack);

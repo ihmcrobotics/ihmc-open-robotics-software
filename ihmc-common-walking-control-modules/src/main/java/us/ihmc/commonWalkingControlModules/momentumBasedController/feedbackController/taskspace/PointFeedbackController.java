@@ -116,6 +116,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
    private RigidBodyBasics base;
+   protected RigidBodyBasics bodyBase;
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame linearGainsFrame;
 
@@ -304,11 +305,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
+      bodyBase = base.getChildrenJoints().get(0).getSuccessor();
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
 
-//      TODO: Clean up the Garbage creation
-      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(base, endEffector);
+      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
       List<Integer> allJointIndices = new ArrayList<>();
 
       for (JointBasics joint : jointPath)
@@ -409,7 +410,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
          inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
          inverseInertiaMatrix3D.transform(proportionalFeedback);
          inverseInertiaMatrix3D.transform(derivativeFeedback);
-         inverseInertiaMatrix3D.transform(integralFeedback);
       }
 
       desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
@@ -612,7 +612,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj tempDiagDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
 
    /**
@@ -667,11 +666,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
-         tempDiagDerivativeGainMatrix.reshape(tempDerivativeGainMatrix.getNumRows(), tempDerivativeGainMatrix.getNumCols());
-         MatrixMissingTools.diagonal(tempDerivativeGainMatrix, tempDiagDerivativeGainMatrix);
-         //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
          tempMatrix.reshape(3, 3);
-         CommonOps_DDRM.extract(tempDiagDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
+         CommonOps_DDRM.extract(tempDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
          tempGainMatrix.set(tempMatrix);
 
          System.out.println("Derivative Gain Matrix: ");
