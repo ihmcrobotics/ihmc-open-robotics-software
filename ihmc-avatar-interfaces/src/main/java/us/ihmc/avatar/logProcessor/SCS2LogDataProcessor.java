@@ -47,6 +47,23 @@ public class SCS2LogDataProcessor
    private final TIntArrayList comXs = new TIntArrayList();
    private final TIntArrayList comYs = new TIntArrayList();
 
+   private final YoVariable leftFootPolygon_0_x ;
+   private final YoVariable leftFootPolygon_0_y ;
+   private final YoVariable leftFootPolygon_1_x ;
+   private final YoVariable leftFootPolygon_1_y ;
+   private final YoVariable leftFootPolygon_2_x ;
+   private final YoVariable leftFootPolygon_2_y ;
+   private final YoVariable leftFootPolygon_3_x ;
+   private final YoVariable leftFootPolygon_3_y ;
+   private final YoVariable rightFootPolygon_0_x;
+   private final YoVariable rightFootPolygon_0_y;
+   private final YoVariable rightFootPolygon_1_x;
+   private final YoVariable rightFootPolygon_1_y;
+   private final YoVariable rightFootPolygon_2_x;
+   private final YoVariable rightFootPolygon_2_y;
+   private final YoVariable rightFootPolygon_3_x;
+   private final YoVariable rightFootPolygon_3_y;
+
    public SCS2LogDataProcessor()
    {
       try
@@ -64,6 +81,24 @@ public class SCS2LogDataProcessor
                "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.LinearMomentumRateControlModule.centerOfMassX");
          yoCenterOfMassY = rootRegistry.findVariable(
                "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.LinearMomentumRateControlModule.centerOfMassY");
+
+         String footPolygonPrefix = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerToolbox.BipedSupportPolygons.";
+         leftFootPolygon_0_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_x");
+         leftFootPolygon_0_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_y");
+         leftFootPolygon_1_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_x");
+         leftFootPolygon_1_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_y");
+         leftFootPolygon_2_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_x");
+         leftFootPolygon_2_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_y");
+         leftFootPolygon_3_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_x");
+         leftFootPolygon_3_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_y");
+         rightFootPolygon_0_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_x");
+         rightFootPolygon_0_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_y");
+         rightFootPolygon_1_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_x");
+         rightFootPolygon_1_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_y");
+         rightFootPolygon_2_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_x");
+         rightFootPolygon_2_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_y");
+         rightFootPolygon_3_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_x");
+         rightFootPolygon_3_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_y");
 
          logSession.startSessionThread();
          MissingThreadTools.sleep(0.1);
@@ -112,6 +147,27 @@ public class SCS2LogDataProcessor
       if (currentNumberOfFootsteps != lastNumberOfFoosteps)
       {
          LogTools.info("tick: %d/%d  footstep: %d -> %d".formatted(tick, numberOfEntries, lastNumberOfFoosteps, currentNumberOfFootsteps));
+
+         svgGraphics2D.drawPolygon(new int[] {metersToMMX(leftFootPolygon_0_x.getValueAsDouble()),
+                                              metersToMMX(leftFootPolygon_1_x.getValueAsDouble()),
+                                              metersToMMX(leftFootPolygon_2_x.getValueAsDouble()),
+                                              metersToMMX(leftFootPolygon_3_x.getValueAsDouble())},
+                                   new int[] {metersToMMY(leftFootPolygon_0_y.getValueAsDouble()),
+                                              metersToMMY(leftFootPolygon_1_y.getValueAsDouble()),
+                                              metersToMMY(leftFootPolygon_2_y.getValueAsDouble()),
+                                              metersToMMY(leftFootPolygon_3_y.getValueAsDouble())},
+                                   4);
+
+         svgGraphics2D.drawPolygon(new int[] {metersToMMX(rightFootPolygon_0_x.getValueAsDouble()),
+                                              metersToMMX(rightFootPolygon_1_x.getValueAsDouble()),
+                                              metersToMMX(rightFootPolygon_2_x.getValueAsDouble()),
+                                              metersToMMX(rightFootPolygon_3_x.getValueAsDouble())},
+                                   new int[] {metersToMMY(rightFootPolygon_0_y.getValueAsDouble()),
+                                              metersToMMY(rightFootPolygon_1_y.getValueAsDouble()),
+                                              metersToMMY(rightFootPolygon_2_y.getValueAsDouble()),
+                                              metersToMMY(rightFootPolygon_3_y.getValueAsDouble())},
+                                   4);
+
          lastFootstepTime = currentTime;
       }
       lastNumberOfFoosteps = currentNumberOfFootsteps;
@@ -124,12 +180,12 @@ public class SCS2LogDataProcessor
 
             if (comXs.isEmpty())
             {
-               robotStartToDocumentCenter.sub(currentCenterOfMass);
+               robotStartToDocumentCenter.add(-currentCenterOfMass.getX(), currentCenterOfMass.getY());
             }
 
             LogTools.info("Drawing CoM at {}", currentCenterOfMass);
-            comXs.add((int) convertToMillimeters(currentCenterOfMass.getX() + robotStartToDocumentCenter.getX()));
-            comYs.add((int) convertToMillimeters(currentCenterOfMass.getY() + robotStartToDocumentCenter.getY()));
+            comXs.add(metersToMMX(currentCenterOfMass.getX()));
+            comYs.add(metersToMMY(currentCenterOfMass.getY()));
 
             lastCenterOfMass.set(currentCenterOfMass);
             lastCoMPlotTime = currentTime;
@@ -137,6 +193,16 @@ public class SCS2LogDataProcessor
       }
 
       ++tick;
+   }
+
+   private int metersToMMX(double x)
+   {
+      return (int) convertToMillimeters(x + robotStartToDocumentCenter.getX());
+   }
+
+   private int metersToMMY(double y)
+   {
+      return (int) -convertToMillimeters(y + robotStartToDocumentCenter.getY());
    }
 
    private long convertToMillimeters(double meters)
