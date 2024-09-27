@@ -153,11 +153,6 @@ jobs:
     with:
       subproject: 'ihmc-whole-body-controller'
       test-category: 'fast'
-  promp:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'promp'
-      test-category: 'fast'
   robot-environment-awareness:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
