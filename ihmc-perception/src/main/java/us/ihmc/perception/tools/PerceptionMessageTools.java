@@ -122,15 +122,6 @@ public class PerceptionMessageTools
       MessageTools.packIDLSequence(dataByteBuffer, imageMessage.getData());
    }
 
-   public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
-   {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < dataBytePointer.limit(); i++)
-      {
-         imageMessage.getData().add(dataBytePointer.get(i));
-      }
-   }
-
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
    {
       imageMessage.getData().resetQuick();
@@ -174,7 +165,7 @@ public class PerceptionMessageTools
                                        int width,
                                        float depthToMetersRatio)
    {
-      packImageMessageData(dataBytePointer, imageMessage);
+      packImageMessageData(imageMessage, dataBytePointer);
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());

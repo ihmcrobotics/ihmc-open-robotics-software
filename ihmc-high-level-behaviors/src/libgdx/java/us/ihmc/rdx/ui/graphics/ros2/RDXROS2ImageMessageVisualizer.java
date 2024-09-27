@@ -71,15 +71,22 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
 
    private void queueRenderImage(Subscriber<ImageMessage> subscriber)
    {
+      // A new message arrived, update the receive-frequency text
+      getFrequency().ping();
+
+      // Pack the message data into thread 1's image message object
       ImageMessage imageMessageA = imageMessageSwapReference.getForThreadOne();
       imageMessageA.getData().resetQuick();
       subscriber.takeNextData(imageMessageA, sampleInfo);
-      getFrequency().ping();
 
+      // Update some message statistics
       messageSizeReadout.update(imageMessageA.getData().size());
       sequenceDiscontinuityPlot.update(imageMessageA.getSequenceNumber());
+
+      // Hand the image message over to thread 2 for image decoding & visualization
       imageMessageSwapReference.swap();
 
+      // This is thread 2!
       getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
       {
          ImageMessage imageMessageB;
@@ -87,6 +94,12 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
          {
             imageMessageB = imageMessageSwapReference.getForThreadTwo();
             PixelFormat imagePixelFormat = PixelFormat.fromImageMessage(imageMessageB);
+
+            /*
+             * Depth images can't be directly converted to RGBA, so we must first convert it into an 8 bit gray image by clamping the values,
+             * and then convert from gray to RGBA. This also helps "brighten" the depth image when the range of depth values is small.
+             * This is purely for visualization, and the resulting RGBA image cannot be used to measure depth.
+             */
             if (imagePixelFormat == PixelFormat.GRAY16)
             {
                decoder.decodeMessage(imageMessageB, decompressedImage);
@@ -98,8 +111,9 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
          }
 
          synchronized (this) // synchronize with the update method
-         {
+         {  // Update the visualization dimensions to match the image
             getOpenCVVideoVisualizer().updateImageDimensions(imageMessageB.getImageWidth(), imageMessageB.getImageHeight());
+            // Copy the decompressed image to the image being visualized
             decompressedImage.copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
          }
       });
