@@ -10,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
@@ -25,6 +26,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.SwapReference;
@@ -53,17 +55,21 @@ public class RDXZEDArUcoMarkerDemo
    private final OpenCVArUcoMarkerDetectionResults arUcoResults;
    private final SwapReference<List<FramePose3D>> arUcoMarkerPoses = new SwapReference<>(new ArrayList<>(), new ArrayList<>());
 
+   private ROS2Node ros2Node;
+
    private volatile boolean done = false;
 
    public RDXZEDArUcoMarkerDemo()
    {
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "-ROS2Node");
+
       imageRetriever = new ZEDColorDepthImageRetriever(0, ReferenceFrame::getWorldFrame, () -> true, () -> true, true);
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
       sensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
 
       baseUI = new RDXBaseUI("ArUco Marker Demo");
       pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED Point Cloud",
-                                                                    PubSubImplementation.FAST_RTPS,
+                                                                    ros2Node,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
       perceptionVisualizersPanel = new RDXPerceptionVisualizersPanel();
@@ -138,6 +144,8 @@ public class RDXZEDArUcoMarkerDemo
    {
       imageRetriever.destroy();
       imagePublisher.destroy();
+
+      ros2Node.destroy();
    }
 
    private void runUI()
