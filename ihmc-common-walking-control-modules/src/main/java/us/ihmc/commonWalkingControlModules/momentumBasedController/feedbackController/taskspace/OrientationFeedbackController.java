@@ -315,6 +315,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       currentCommandId = command.getCommandId();
       base = command.getBase();
+      controlBaseFrame = command.getControlBaseFrame();
       bodyBase = base.getChildrenJoints().get(0).getSuccessor();
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
