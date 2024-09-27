@@ -273,8 +273,8 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * If true, the rigid body jointspace control state for the given rigid body will be setup
-    * with function generators
+    * If true, the rigid body spatial control state for the given rigid body will be setup
+    * with impedance control
     */
    public boolean enableImpedanceControl(String rigidBodyName)
    {
