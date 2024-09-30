@@ -18,6 +18,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -26,6 +27,17 @@ import static us.ihmc.perception.cuda.CUDATools.*;
 public class CUDACompressionTools
 {
    private static final boolean NVCOMP_AVAILABLE = hasCUDADevice() && hasNVCOMP();
+   static
+   {
+      if (!NVCOMP_AVAILABLE)
+      {
+         StringBuilder message = new StringBuilder("NVCOMP was not found.");
+         if (hasCUDADevice())
+            message.append(" To install NVCOMP, see instructions in ihmc-perception/README.md");
+         LogTools.warn(message);
+      }
+   }
+
    private static final long CHUNK_SIZE = 1 << 16;
 
    private final Mat depthMSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(65280.0));
