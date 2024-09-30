@@ -4,9 +4,11 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.Conversions;
 
 import java.util.function.Function;
 
@@ -29,6 +31,9 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
    private final AVFrame outputFrame;
    private Mat outputImage;
 
+   private final AVRational millisecondTimebase;
+   private long lastFrameTimestamp = -1L;
+
    public FFmpegVideoDecoder(AVFormatContext inputContext, int outputPixelFormat)
    {
       this(inputContext, -1, -1, -1, -1, outputPixelFormat);
@@ -46,6 +51,8 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       this.outputWidth = outputWidth;
       this.outputHeight = outputHeight;
       this.outputPixelFormat = outputPixelFormat;
+
+      millisecondTimebase = av_make_q(1, (int) Conversions.secondsToMilliseconds(1.0));
 
       outputFrame = av_frame_alloc();
       FFmpegTools.checkPointer(outputFrame, "Allocating output frame");
@@ -93,6 +100,8 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
 
       boolean gotAFrame = decodeNextFrame(decodedFrame ->
       {
+         lastFrameTimestamp = av_rescale_q(decodedFrame.best_effort_timestamp(), streamToDecode.time_base(), millisecondTimebase);
+
          if (swsContext != null)
          {
             error = sws_scale_frame(swsContext, outputFrame, decodedFrame);
@@ -112,6 +121,14 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
          return null;
 
       return outputImage;
+   }
+
+   /**
+    * @return The timestamp of the last frame gotten through {@link #getNextFrame()}
+    */
+   public long getLastFrameTimestamp()
+   {
+      return lastFrameTimestamp;
    }
 
    @Override

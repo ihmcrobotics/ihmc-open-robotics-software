@@ -25,8 +25,8 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
 public class SRTVideoStreamer
 {
    private static final String OUTPUT_FORMAT_NAME = "mpegts";
-   private static final String PREFERRED_CODEC = "h264_nvenc"; // TODO: use other codec if CUDA not available
-   private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV420P;
+   private static final String PREFERRED_CODEC = "hevc_nvenc"; // TODO: use other codec if CUDA not available
+   private static final int OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
    private static final int GOP_SIZE = 5; // send 5 P frames between key frames
    private static final int MAX_B_FRAMES = 0; // don't use B frames
 
@@ -143,22 +143,12 @@ public class SRTVideoStreamer
 
    private void writeToCallers(AVPacket packetToWrite)
    {
-      boolean writeSucceeded;
-
       Iterator<SRTStreamWriter> callerIterator = callers.iterator();
       while (callerIterator.hasNext())
       {
          SRTStreamWriter callerWriter = callerIterator.next();
 
-         if (!callerWriter.isConnected())
-         {
-            callerWriter.destroy();
-            callerIterator.remove();
-            continue;
-         }
-
-         writeSucceeded = callerWriter.write(packetToWrite);
-         if (!writeSucceeded)
+         if (!callerWriter.write(packetToWrite))
          {
             callerWriter.destroy();
             callerIterator.remove();
@@ -234,11 +224,7 @@ public class SRTVideoStreamer
             FFmpegTools.checkDictionaryAfterUse(srtOptions);
 
             LogTools.debug("Got a connection on {}", srtAddress);
-            SRTStreamWriter callerWriter = new SRTStreamWriter(encoder, callerSRTContext, outputFormat, null);
-            if (callerWriter.startOutput())
-               callers.add(callerWriter);
-            else
-               callerWriter.destroy();
+            callers.add(new SRTStreamWriter(encoder, callerSRTContext, outputFormat, null));
          }
 
          av_dict_free(srtOptions);

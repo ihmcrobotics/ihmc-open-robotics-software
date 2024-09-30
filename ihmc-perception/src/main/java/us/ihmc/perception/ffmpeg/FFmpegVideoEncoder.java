@@ -25,7 +25,7 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
       super(outputFormat, preferredEncoderName, bitRate);
 
       // Use nanosecond precision for timebase
-      timeBase = av_make_q(1, (int) Conversions.secondsToNanoseconds(1.0));
+      timeBase = av_make_q(1, (int) Conversions.secondsToMilliseconds(1.0));
 
       // Set encoder context parameters
       encoderContext.time_base(timeBase);
@@ -75,7 +75,7 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
    public final void setNextFrame(Pointer image)
    {
       // Set the frame PTS based on time since first frame
-      long currentTime = System.nanoTime();
+      long currentTime = System.currentTimeMillis();
       if (firstFrameTime < 0L)
          firstFrameTime = currentTime;
       long timeElapsed = currentTime - firstFrameTime;
@@ -88,6 +88,11 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
    protected int getColorConversion()
    {
       return colorConversion;
+   }
+
+   public long getStartTime()
+   {
+      return firstFrameTime;
    }
 
    /**

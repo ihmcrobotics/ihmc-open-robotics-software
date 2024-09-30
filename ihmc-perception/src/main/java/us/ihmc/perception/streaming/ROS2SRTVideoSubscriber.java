@@ -28,6 +28,7 @@ public class ROS2SRTVideoSubscriber
    private final SRTVideoReceiver videoReceiver;
 
    private Mat nextFrame;
+   private long frameTimestamp = -1;
    private final List<Consumer<Mat>> newFrameConsumers = new ArrayList<>();
 
    private final Thread subscriptionThread;
@@ -112,6 +113,11 @@ public class ROS2SRTVideoSubscriber
       return streamStatusMonitor.getDepthDiscretization();
    }
 
+   public long getFrameTimestamp()
+   {
+      return frameTimestamp;
+   }
+
    private void subscriptionUpdate()
    {
       while (!shutdown)
@@ -149,6 +155,7 @@ public class ROS2SRTVideoSubscriber
             // RECEIVER IS CONNECTED
             // Get the latest image and give it to consumers
             nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
+            frameTimestamp = videoReceiver.getLastFrameTimestamp();
             if (nextFrame != null)
             {
                newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));

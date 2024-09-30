@@ -47,6 +47,7 @@ public class SRTVideoReceiver
       inputFormatContext = avformat_alloc_context();
       FFmpegTools.checkPointer(inputFormatContext, "Allocating input format context");
       inputFormatContext.interrupt_callback(timeoutCallback);
+      inputFormatContext.use_wallclock_as_timestamps(1);
    }
 
    public boolean connect(InetSocketAddress streamerAddress, double timeout)
@@ -164,6 +165,11 @@ public class SRTVideoReceiver
          packetFlagsToMatch = AV_PKT_FLAG_KEY;
 
       return decoder.getNextFrame();
+   }
+
+   public long getLastFrameTimestamp()
+   {
+      return decoder.getLastFrameTimestamp();
    }
 
    public boolean isConnected()

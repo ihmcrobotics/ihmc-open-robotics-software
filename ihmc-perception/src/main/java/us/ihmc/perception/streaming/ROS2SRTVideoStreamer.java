@@ -1,6 +1,7 @@
 package us.ihmc.perception.streaming;
 
 import perception_msgs.msg.dds.SRTStreamStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -25,6 +26,8 @@ public class ROS2SRTVideoStreamer
 
    public ROS2SRTVideoStreamer(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic, InetSocketAddress streamOutputAddress)
    {
+      LogTools.info("Streaming {} on {}", streamTopic.getName(), streamOutputAddress);
+
       statusMessage = new SRTStreamStatus();
       statusMessage.setStreamerAddress(streamOutputAddress.getHostString());
       statusMessage.setStreamerPort(streamOutputAddress.getPort());

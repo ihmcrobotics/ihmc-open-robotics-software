@@ -48,13 +48,14 @@ public class SRTStreamWriter
       FFmpegTools.checkPointer(packetCopy, "Allocating a packet");
    }
 
-   public boolean startOutput()
+   private boolean startOutput()
    {
       // Create the output format context
       LogTools.debug("Allocating output context");
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
       if (!FFmpegTools.checkError(error, formatContext, "Allocating output format context"))
          return false;
+      formatContext.start_time_realtime(1000 * encoder.getStartTime());
       formatContext.pb(srtContext);
 
       // Get an output stream from the encoder
@@ -70,11 +71,14 @@ public class SRTStreamWriter
       FFmpegTools.checkDictionaryAfterUse(formatOptions);
 
       LogTools.debug("Successfully started connection with caller");
-      return connected = true;
+      return true;
    }
 
    public boolean write(AVPacket packetToWrite)
    {
+      if (outputStream == null)
+         connected = startOutput();
+
       if (connected)
       {
          av_packet_ref(packetCopy, packetToWrite);
