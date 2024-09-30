@@ -14,7 +14,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -249,13 +248,7 @@ public class SCS2LogDataProcessor
       }
       svgGraphics2D.drawPolyline(comXs, comYs, comXs.length);
 
-      Path savePath = Paths.get("%s.svg".formatted(LOG_PATH.getFileName()));
-      int i = 1;
-      while (Files.exists(savePath))
-      {
-         savePath = LOG_PATH.getFileName().resolve("_%d.svg".formatted(i++));
-      }
-
+      Path savePath = LOG_PATH.resolve(LOG_PATH.getFileName().toString() + "_OverheadPlot.svg");
       LogTools.info("Saving to {}", savePath);
 
       try (FileWriter writer = new FileWriter(savePath.toFile()))
