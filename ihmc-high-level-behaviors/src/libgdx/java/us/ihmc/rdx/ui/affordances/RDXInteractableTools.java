@@ -20,7 +20,8 @@ public class RDXInteractableTools
       }
       if (modelFileGeometryDefinition == null || modelFileGeometryDefinition.getFileName() == null)
       {
-         LogTools.error("Interactables need a model file or implementation of shape visuals");
+         LogTools.error("Interactables for {} need a model file or implementation of shape visuals", rigidBodyDefinition.getName());
+         return null;
       }
       return modelFileGeometryDefinition.getFileName();
    }

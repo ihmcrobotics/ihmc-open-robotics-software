@@ -31,13 +31,12 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
-import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
+import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -91,8 +90,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
 
    private final RDXPelvisHeightSlider pelvisHeightSlider;
-   private final RDXChestOrientationSlider chestPitchSlider;
-   private final RDXChestOrientationSlider chestYawSlider;
+   private final RDXHumanoidDoFsWidgets dofsWidgets;
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
    private RDXRobotCollisionModel contactCollisionModel;
@@ -151,18 +149,12 @@ public class RDXTeleoperationManager extends RDXPanel
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
-      syncedRobot = communicationHelper.newSyncedRobot();
+      syncedRobot = communicationHelper.newSyncedRobot(false);
 
       robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
-
-      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
-      // TODO this should update the GDX desired Robot
-      chestPitchSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, ros2Helper, teleoperationParameters);
-      // TODO this should update the GDX desired robot.
-      chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, ros2Helper, teleoperationParameters);
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
@@ -186,6 +178,9 @@ public class RDXTeleoperationManager extends RDXPanel
                                      interactableHands,
                                      wholeBodyIKManager::getEnabled);
 
+      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
+      dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
+
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
    }
 
@@ -193,6 +188,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       this.baseUI = baseUI;
       desiredRobot.create();
+      dofsWidgets.getDesiredRobot().create();
 
       // This button is created before locomotion manager to make the toolbar button ordering correct
       RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
@@ -365,6 +361,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       syncedRobot.update();
       desiredRobot.update();
+      dofsWidgets.getDesiredRobot().update();
 
       locomotionManager.update();
       armManager.update(interactablesEnabled.get());
@@ -524,8 +521,7 @@ public class RDXTeleoperationManager extends RDXPanel
       robotLowLevelMessenger.renderImGuiWidgets();
 
       pelvisHeightSlider.renderImGuiWidgets();
-      chestPitchSlider.renderImGuiWidgets();
-      chestYawSlider.renderImGuiWidgets();
+      dofsWidgets.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
 
@@ -661,6 +657,7 @@ public class RDXTeleoperationManager extends RDXPanel
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          desiredRobot.getRenderables(renderables, pool, sceneLevels);
+         dofsWidgets.getDesiredRobot().getRenderables(renderables, pool, sceneLevels);
 
          if (showGraphics.get())
          {
@@ -688,14 +685,17 @@ public class RDXTeleoperationManager extends RDXPanel
    public void clearInteractablesAndLocomotionGraphics()
    {
       locomotionManager.deleteAll();
+      dofsWidgets.reset();
 
       for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
          robotPartInteractable.delete();
    }
+
    public void destroy()
    {
       desiredRobot.destroy();
       locomotionManager.destroy();
+      dofsWidgets.destroy();
    }
 
    public ImBoolean getInteractablesEnabled()

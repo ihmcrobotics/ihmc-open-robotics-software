@@ -27,6 +27,11 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       this(robotModel, ros2Node, robotModel.createFullRobotModel());
    }
 
+   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean enforceUniqueReferenceFrames)
+   {
+      this(robotModel, ros2Node, robotModel.createFullRobotModel(enforceUniqueReferenceFrames));
+   }
+
    public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());

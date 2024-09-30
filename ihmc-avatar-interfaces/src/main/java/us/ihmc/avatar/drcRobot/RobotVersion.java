@@ -9,6 +9,11 @@ public interface RobotVersion
       return false;
    }
 
+   default boolean hasHead()
+   {
+      return true;
+   }
+
    default boolean hasBothArms()
    {
       return hasArm(RobotSide.LEFT) && hasArm(RobotSide.RIGHT);
