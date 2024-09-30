@@ -8,10 +8,11 @@ import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.ffmpeg.FFmpegTools;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 
@@ -23,14 +24,14 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
    private final ROS2SRTVideoSubscriber subscriber;
 
    private final ImageMessage imageMessage;
-   private ImageMessageDataPacker messageDataPacker;
    private long frameSequenceNumber = 0L;
 
    public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
       imageMessage = new ImageMessage();
-      ImageMessageFormat.fromImageType(streamTopicPair.imageType()).packMessageFormat(imageMessage);
-      CameraModel.PINHOLE.packMessageFormat(imageMessage); // assume pinhole for now
+      imageMessage.setPixelFormat(PixelFormat.fromImageType(streamTopicPair.imageType()).toByte());
+      imageMessage.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
+      imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
       publisher = publisherNode.createPublisher(streamTopicPair.imageMessageTopic());
@@ -49,14 +50,11 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
    private void republishFrameAsImageMessage(Mat frame)
    {
-      if (messageDataPacker == null)
-         messageDataPacker = new ImageMessageDataPacker(OpenCVTools.dataSize(frame));
-
       // Set acquisition time as now... this isn't super accurate though
       MessageTools.toMessage(Instant.now(), imageMessage.getAcquisitionTime());
 
       // Pack the uncompressed data
-      messageDataPacker.pack(imageMessage, frame.data());
+      PerceptionMessageTools.packImageMessageData(imageMessage, frame.data().limit(OpenCVTools.dataSize(frame)));
 
       // Set the camera intrinsics
       CameraIntrinsics cameraIntrinsics = subscriber.getCameraIntrinsics();

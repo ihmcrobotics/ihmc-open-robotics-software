@@ -6,10 +6,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterNetServer;
-import us.ihmc.perception.tools.ImageMessageDecompressionInput;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
@@ -31,13 +30,13 @@ import java.nio.ByteBuffer;
  */
 public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 {
+   protected final ImageMessageDecoder imageMessageDecoder = new ImageMessageDecoder();
    protected final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private ROS2Topic<ImageMessage> topic;
-//   private final ImPlotDoublePlot delayPlot;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
-   protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
+   protected final SwapReference<ImageMessage> imageMessageSwapReference = new SwapReference<>(ImageMessage::new);
    private final ResettableExceptionHandlingExecutorService channelDecompressionThreadExecutor;
    private final Runnable decompressionAsynchronousThread = this::decompressionAsynchronousThread;
    private boolean initialized = false;
@@ -100,8 +99,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
             imageWidth = imageMessage.getImageWidth();
             imageHeight = imageMessage.getImageHeight();
             totalNumberOfPixels = imageHeight * imageWidth;
-            int bytesPerPixel = ImageMessageFormat.getFormat(imageMessage).getBytesPerPixel();
-            decompressionInputSwapReference.initializeBoth(decompressionInput -> decompressionInput.setup(totalNumberOfPixels * bytesPerPixel));
+            imageMessageSwapReference.initializeBoth(message -> message.set(imageMessage));
 
             initialize(openCLManager);
             initialized = true;
@@ -119,8 +117,8 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          // Using an internal swap reference to the unpacked data, we can allow ROS 2
          // to not have to wait for compression to finish and also not have to copy
          // the unpacked result to a decompression input buffer.
-         decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
-         decompressionInputSwapReference.swap();
+         imageMessageSwapReference.getForThreadOne().set(imageMessage);
+         imageMessageSwapReference.swap();
          // FIXME: This call prints "no afterExecute handlers" warnings whe the Ouster Fisheye point cloud's refresh rate is too fast
          channelDecompressionThreadExecutor.clearQueueAndExecute(decompressionAsynchronousThread);
 
@@ -149,6 +147,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public void destroy()
    {
       channelDecompressionThreadExecutor.destroy();
+      imageMessageDecoder.destroy();
    }
 
    public ROS2Topic<ImageMessage> getTopic()

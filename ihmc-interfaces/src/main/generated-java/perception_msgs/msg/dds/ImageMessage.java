@@ -41,9 +41,13 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public us.ihmc.idl.IDLSequence.Byte  data_;
    /**
-            * The image format. Ordinal of ImageMessageFormat
+            * The pixel format. Ordinal of ImageFormat's PixelFormat
             */
-   public byte format_;
+   public byte pixel_format_;
+   /**
+            * The compression type. Ordinal of ImageFormat's CompressionType
+            */
+   public byte compression_type_;
    /**
             * Position of the focal point at sensor data acquisition
             */
@@ -112,7 +116,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       depth_discretization_ = other.depth_discretization_;
 
       data_.set(other.data_);
-      format_ = other.format_;
+      pixel_format_ = other.pixel_format_;
+
+      compression_type_ = other.compression_type_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
@@ -217,18 +223,33 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
    /**
-            * The image format. Ordinal of ImageMessageFormat
+            * The pixel format. Ordinal of ImageFormat's PixelFormat
             */
-   public void setFormat(byte format)
+   public void setPixelFormat(byte pixel_format)
    {
-      format_ = format;
+      pixel_format_ = pixel_format;
    }
    /**
-            * The image format. Ordinal of ImageMessageFormat
+            * The pixel format. Ordinal of ImageFormat's PixelFormat
             */
-   public byte getFormat()
+   public byte getPixelFormat()
    {
-      return format_;
+      return pixel_format_;
+   }
+
+   /**
+            * The compression type. Ordinal of ImageFormat's CompressionType
+            */
+   public void setCompressionType(byte compression_type)
+   {
+      compression_type_ = compression_type;
+   }
+   /**
+            * The compression type. Ordinal of ImageFormat's CompressionType
+            */
+   public byte getCompressionType()
+   {
+      return compression_type_;
    }
 
 
@@ -371,7 +392,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.data_, other.data_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.format_, other.format_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pixel_format_, other.pixel_format_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.compression_type_, other.compression_type_, epsilon)) return false;
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
@@ -412,7 +435,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       if(this.depth_discretization_ != otherMyClass.depth_discretization_) return false;
 
       if (!this.data_.equals(otherMyClass.data_)) return false;
-      if(this.format_ != otherMyClass.format_) return false;
+      if(this.pixel_format_ != otherMyClass.pixel_format_) return false;
+
+      if(this.compression_type_ != otherMyClass.compression_type_) return false;
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
@@ -450,8 +475,10 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.depth_discretization_);      builder.append(", ");
       builder.append("data=");
       builder.append(this.data_);      builder.append(", ");
-      builder.append("format=");
-      builder.append(this.format_);      builder.append(", ");
+      builder.append("pixel_format=");
+      builder.append(this.pixel_format_);      builder.append(", ");
+      builder.append("compression_type=");
+      builder.append(this.compression_type_);      builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
