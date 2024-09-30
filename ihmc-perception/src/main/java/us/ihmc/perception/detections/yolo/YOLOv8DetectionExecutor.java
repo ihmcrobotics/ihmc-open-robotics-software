@@ -23,11 +23,12 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -335,8 +336,9 @@ public class YOLOv8DetectionExecutor
       imageMessage.getOrientation().set(colorImage.getOrientation());
       imageMessage.setSequenceNumber(colorImage.getSequenceNumber());
       imageMessage.setDepthDiscretization(colorImage.getDepthDiscretization());
-      CameraModel.PINHOLE.packMessageFormat(imageMessage);
-      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
+      imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
+      imageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
+      imageMessage.setCompressionType(CompressionType.JPEG.toByte());
 
       annotatedImagePublisher.publish(imageMessage);
 

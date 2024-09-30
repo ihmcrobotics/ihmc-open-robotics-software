@@ -1,4 +1,4 @@
-package us.ihmc.perception.tools;
+package us.ihmc.perception.imageMessage;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
