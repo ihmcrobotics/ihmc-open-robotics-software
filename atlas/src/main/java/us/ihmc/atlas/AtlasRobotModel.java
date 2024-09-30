@@ -14,7 +14,6 @@ import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.atlas.parameters.AtlasICPSplitFractionCalculatorParameters;
 import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasPushRecoveryControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -44,7 +43,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -112,7 +110,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
-   private final AtlasPushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
 
@@ -203,7 +200,6 @@ public class AtlasRobotModel implements DRCRobotModel
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
-      pushRecoveryControllerParameters = new AtlasPushRecoveryControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
    }
 
@@ -307,12 +303,6 @@ public class AtlasRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
-   }
-
-   @Override
-   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
-   {
-      return pushRecoveryControllerParameters;
    }
 
    @Override
