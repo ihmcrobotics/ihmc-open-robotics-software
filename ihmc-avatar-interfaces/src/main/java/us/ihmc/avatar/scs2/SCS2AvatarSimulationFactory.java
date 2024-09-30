@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
@@ -841,7 +840,6 @@ public class SCS2AvatarSimulationFactory
       DRCRobotModel robotModel = this.robotModel.get();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      PushRecoveryControllerParameters pushRecoveryControllerParameters = robotModel.getPushRecoveryControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -866,19 +864,14 @@ public class SCS2AvatarSimulationFactory
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    pushRecoveryControllerParameters,
                                                                                                     copTrajectoryParameters,
                                                                                                     robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-      if (pushRecoveryControllerParameters != null)
-         controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
-      controllerFactory.addRequestableTransition(WALKING, PUSH_RECOVERY);
-      controllerFactory.addFinishedTransition(PUSH_RECOVERY, WALKING);
 
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);

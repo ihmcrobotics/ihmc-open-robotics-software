@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -99,7 +98,6 @@ public class DRCFlatGroundWalkingTrack
 
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      PushRecoveryControllerParameters pushRecoveryControllerParameters = model.getPushRecoveryControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = model.getCoPTrajectoryParameters();
       SplitFractionCalculatorParametersReadOnly splitFractionParameters = model.getSplitFractionCalculatorParameters();
       HumanoidRobotSensorInformation sensorInformation = model.getSensorInformation();
@@ -122,7 +120,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    pushRecoveryControllerParameters,
                                                                                                     copTrajectoryParameters,
                                                                                                     splitFractionParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());

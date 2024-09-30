@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -82,7 +81,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
    {
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      PushRecoveryControllerParameters pushRecoveryControllerParameters = robotModel.getPushRecoveryControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -107,7 +105,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    pushRecoveryControllerParameters,
                                                                                                     copTrajectoryParameters);
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();

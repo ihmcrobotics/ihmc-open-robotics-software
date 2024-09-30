@@ -1,7 +1,6 @@
 package us.ihmc.avatar.simulationStarter;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.PUSH_RECOVERY;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.ROS2Tools;
@@ -110,7 +108,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters;
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
@@ -156,7 +153,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.pushRecoveryControllerParameters = robotModel.getPushRecoveryControllerParameters();
       this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       this.splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
@@ -512,7 +508,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 pushRecoveryControllerParameters,
                                                                  copTrajectoryParameters,
                                                                  splitFractionParameters);
       setupHighLevelStates(controllerFactory);
@@ -584,13 +579,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-      if (pushRecoveryControllerParameters != null)
-         controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
-      controllerFactory.addRequestableTransition(WALKING, PUSH_RECOVERY);
-      controllerFactory.addFinishedTransition(PUSH_RECOVERY, WALKING);
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()

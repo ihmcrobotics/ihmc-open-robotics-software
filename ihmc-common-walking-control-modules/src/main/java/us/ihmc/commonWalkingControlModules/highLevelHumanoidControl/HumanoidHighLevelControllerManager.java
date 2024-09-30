@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -91,7 +90,6 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              HighLevelControllerName initialControllerState,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
@@ -116,7 +114,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       controllerFactoryHelper = new HighLevelControllerFactoryHelper();
       controllerFactoryHelper.setCommandInputManager(commandInputManager);
       controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
-      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters, pushRecoveryControllerParameters);
+      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters);
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
