@@ -14,6 +14,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -69,10 +70,9 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       channelDecompressionThreadExecutor = MissingThreadTools.newSingleThreadExecutor("ChannelDecompressionThread", daemon, queueSize);
    }
 
-   public void subscribe(RealtimeROS2Node realtimeROS2Node, Object imageMessagesSyncObject)
+   public void subscribe(ROS2Node ros2Node, Object imageMessagesSyncObject)
    {
-      realtimeROS2Node.createSubscription(topic, subscriber ->
-      {
+      ros2Node.createSubscription(topic, subscriber -> {
          synchronized (imageMessagesSyncObject)
          {
             imageMessage.getData().resetQuick();

@@ -339,7 +339,7 @@ public class RDXSceneGraphDemo
       // ZED2 colored point cloud visualizer
       {
          RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
-                                                                                                                     PubSubImplementation.FAST_RTPS,
+                                                                                                                     ros2Node,
                                                                                                                      PerceptionAPI.ZED2_DEPTH,
                                                                                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(
                                                                                                                            RobotSide.LEFT));
