@@ -4,6 +4,7 @@ import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUnits;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.log.LogSession;
@@ -14,22 +15,23 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class SCS2LogDataProcessor
 {
-   /** Path to the log folder containing robotData.log */
-   private static final Path LOG_PATH = System.getProperty("log.path") == null ? null : Paths.get(System.getProperty("log.path"));
    /** Square document size in meters. */
    private static final double DOCUMENT_SIZE = Double.parseDouble(System.getProperty("document.size", "15.0"));
 
+   private Path logPath;
    private LogSession logSession;
    private YoRegistry rootRegistry;
    private SVGGraphics2D svgGraphics2D;
    private long tick = 0;
    private int numberOfEntries;
+   private boolean processingLog = false;
 
    private final Point2D robotStartToDocumentCenter = new Point2D(DOCUMENT_SIZE / 2.0, DOCUMENT_SIZE / 2.0);
 
@@ -72,15 +74,38 @@ public class SCS2LogDataProcessor
 
    public SCS2LogDataProcessor()
    {
+      this(System.getProperty("log.path") == null ? null : Paths.get(System.getProperty("log.path")));
+
+      if (logPath == null)
+      {
+         LogTools.error("Must pass -Dlog.path=/path/to/log");
+      }
+   }
+
+   /** @param logPath Path to the log folder containing robotData.log */
+   public SCS2LogDataProcessor(Path logPath)
+   {
+      this.logPath = logPath;
+
+      if (logPath == null || !Files.exists(logPath) || !Files.exists(logPath.resolve("robotData.log")))
+      {
+         LogTools.error("Log path not valid: %s".formatted(logPath));
+         this.logPath = null;
+      }
+   }
+
+   public void processLogAsync()
+   {
+      ThreadTools.startAsDaemon(this::processLog, "SCS2LogDataProcessorThread");
+   }
+
+   private void processLog()
+   {
+      processingLog = true;
+
       try
       {
-         if (LOG_PATH == null)
-         {
-            LogTools.error("Must pass -Dlog.path=/path/to/log");
-            return;
-         }
-
-         logSession = new LogSession(LOG_PATH.toFile(), null);
+         logSession = new LogSession(logPath.toFile(), null);
          logSession.addAfterReadCallback(this::afterRead);
          rootRegistry = logSession.getRootRegistry();
 
@@ -134,25 +159,34 @@ public class SCS2LogDataProcessor
       {
          throw new RuntimeException(e);
       }
+      finally
+      {
+         processingLog = false;
+      }
    }
 
    private void afterRead(double currentTime)
    {
+      int currentLogPosition = logSession.getLogDataReader().getCurrentLogPosition();
+      if (currentLogPosition % 10000 == 0)
+         LogTools.info("(%d/%d)".formatted(currentLogPosition, numberOfEntries));
+
       if (leftLastFootState != ConstraintType.FULL && leftFootState.getValueAsString().equals(ConstraintType.FULL.name()))
       {
-         LogTools.info("Recording left footstep");
+         LogTools.info("(%d/%d) Recording left footstep".formatted(currentLogPosition, numberOfEntries));
          newLeftStep = true;
          leftFullSupportTime = currentTime;
       }
-      leftLastFootState = ConstraintType.valueOf(leftFootState.getValueAsString());
+      leftLastFootState = leftFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(leftFootState.getValueAsString());
 
       if (rightLastFootState != ConstraintType.FULL && rightFootState.getValueAsString().equals(ConstraintType.FULL.name()))
       {
-         LogTools.info("Recording left footstep");
+         LogTools.info("(%d/%d) Recording left footstep".formatted(currentLogPosition, numberOfEntries));
          newRightStep = true;
          rightFullSupportTime = currentTime;
       }
-      rightLastFootState = ConstraintType.valueOf(rightFootState.getValueAsString());
+      rightLastFootState = rightFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(rightFootState.getValueAsString());
+      
 
 
       if (newLeftStep && currentTime - leftFullSupportTime > 0.1)
@@ -195,7 +229,7 @@ public class SCS2LogDataProcessor
                robotStartToDocumentCenter.add(-currentCenterOfMass.getX(), currentCenterOfMass.getY());
             }
 
-            LogTools.info("Extracting CoM at {}", currentCenterOfMass);
+            LogTools.info("(%d/%d) Extracting CoM at %s", currentLogPosition, numberOfEntries, currentCenterOfMass);
             coms.add().set(currentCenterOfMass);
 
             lastCenterOfMass.set(currentCenterOfMass);
@@ -239,16 +273,19 @@ public class SCS2LogDataProcessor
                                    4);
       }
 
-      int[] comXs = new int[coms.size()];
-      int[] comYs = new int[coms.size()];
-      for (int i = 0; i < coms.size(); i++)
+      if (!coms.isEmpty())
       {
-         comXs[i] = metersToMMX(coms.get(i).getX());
-         comYs[i] = metersToMMY(coms.get(i).getY());
+         int[] comXs = new int[coms.size()];
+         int[] comYs = new int[coms.size()];
+         for (int i = 0; i < coms.size(); i++)
+         {
+            comXs[i] = metersToMMX(coms.get(i).getX());
+            comYs[i] = metersToMMY(coms.get(i).getY());
+         }
+         svgGraphics2D.drawPolyline(comXs, comYs, comXs.length);
       }
-      svgGraphics2D.drawPolyline(comXs, comYs, comXs.length);
 
-      Path savePath = LOG_PATH.resolve(LOG_PATH.getFileName().toString() + "_OverheadPlot.svg");
+      Path savePath = logPath.resolve(logPath.getFileName().toString() + "_OverheadPlot.svg");
       LogTools.info("Saving to {}", savePath);
 
       try (FileWriter writer = new FileWriter(savePath.toFile()))
@@ -271,7 +308,7 @@ public class SCS2LogDataProcessor
 
    private int metersToMMY(double y)
    {
-      return (int) -convertToMillimeters(y + robotStartToDocumentCenter.getY());
+      return (int) convertToMillimeters(y + robotStartToDocumentCenter.getY());
    }
 
    private long convertToMillimeters(double meters)
@@ -279,8 +316,18 @@ public class SCS2LogDataProcessor
       return (long) (meters * 1000.0);
    }
 
+   public boolean isLogValid()
+   {
+      return logPath != null;
+   }
+
+   public boolean isProcessingLog()
+   {
+      return processingLog;
+   }
+
    public static void main(String[] args)
    {
-      new SCS2LogDataProcessor();
+      new SCS2LogDataProcessor().processLog();
    }
 }
