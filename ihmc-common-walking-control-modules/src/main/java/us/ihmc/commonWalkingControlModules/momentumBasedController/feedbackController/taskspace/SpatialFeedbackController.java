@@ -41,6 +41,9 @@ import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,12 +57,14 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
+import us.ihmc.yoVariables.variable.YoBoolean;
+
 public class SpatialFeedbackController implements FeedbackControllerInterface
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoBoolean isEnabled;
-   private final YoBoolean isImpedanceEnabled;
+   protected final YoBoolean isImpedanceEnabled;
 
    protected final FBPose3D yoDesiredPose;
    protected final FBPose3D yoCurrentPose;
@@ -165,6 +170,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final int controllerIndex;
    protected int currentCommandId;
 
+   YoFrameVector3D yoPositionFeedback;
+   YoFrameVector3D yoOrientationFeedback;
+   YoFrameVector3D yoLinearAcceleration;
+   YoFrameVector3D yoAngularAcceleration;
+
    public SpatialFeedbackController(RigidBodyBasics endEffector,
                                     WholeBodyControlCoreToolbox ccToolbox,
                                     FeedbackControllerToolbox fbToolbox,
@@ -218,6 +228,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerImpedanceEnabled", fbToolbox.getRegistry());
       isImpedanceEnabled.set(false);
+
+      yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", controlFrame, parentRegistry);
+      yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", controlFrame, parentRegistry);
+      yoLinearAcceleration = new YoFrameVector3D(endEffector.getName() + "positionAcceleration", controlFrame, parentRegistry);
+      yoAngularAcceleration = new YoFrameVector3D(endEffector.getName() + "orientationAcceleration", controlFrame, parentRegistry);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled, true);
@@ -492,7 +507,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (computeIntegralTerm)
          computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
 
-      if (isImpedanceEnabled()){
+      yoPositionFeedback.set(linearProportionalFeedback);
+      yoPositionFeedback.add(linearDerivativeFeedback);
+      yoOrientationFeedback.set(angularProportionalFeedback);
+      yoOrientationFeedback.add(angularDerivativeFeedback);
+
+      if (isImpedanceEnabled())
+      {
          inverseInertiaTempMatrix.reshape(3,3);
          //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
          CommonOps_DDRM.extract(inverseInertiaMatrix, 3, 6, 3, 6, inverseInertiaTempMatrix, 0, 0);
@@ -554,6 +575,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredAcceleration.setCommandId(currentCommandId);
 
       addCoriolisAcceleration(desiredLinearAcceleration);
+
+      yoLinearAcceleration.set(desiredLinearAcceleration);
+      yoAngularAcceleration.set(desiredAngularAcceleration);
 
       inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
    }
