@@ -41,9 +41,6 @@ public class CUDACompressionTools
 
    public CUDACompressionTools()
    {
-      if (!hasNVCOMP())
-         throw new UnsatisfiedLinkError("NVCOMP was not found. To install NVCOMP, see instructions in ihmc-perception/README.md");
-
       stream = CUDAStreamManager.getStream();
 
       nvcompBatchedZstdOpts_t zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
