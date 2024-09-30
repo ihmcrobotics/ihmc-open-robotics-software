@@ -115,7 +115,19 @@ public class CUDACompressionTools
     */
    public BytePointer decompress(BytePointer compressedData, long compressedDataSize)
    {
-      return decompress(compressedData, compressedDataSize, false, stream);
+      return decompress(compressedData, compressedDataSize, false);
+   }
+
+   /**
+    * Decompress data which was compressed using nvCOMP
+    * @param compressedData Pointer to compressed data (can point to host or device memory)
+    * @param compressedDataSize Size of the compressed data, in bytes
+    * @param outputToDevice Whether to keep decompressed data on device
+    * @return BytePointer to decompressed data, with limit set as the size of the decompressed data
+    */
+   public BytePointer decompress(BytePointer compressedData, long compressedDataSize, boolean outputToDevice)
+   {
+      return decompress(compressedData, compressedDataSize, outputToDevice, stream);
    }
 
    /**

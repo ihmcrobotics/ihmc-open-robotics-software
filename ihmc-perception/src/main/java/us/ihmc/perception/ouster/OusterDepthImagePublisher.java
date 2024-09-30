@@ -4,15 +4,16 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -92,8 +93,9 @@ public class OusterDepthImagePublisher
          depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
          depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
          depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         CameraModel.OUSTER.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+         depthImageMessage.setCameraModel(CameraModel.OUSTER.toByte());
+         depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+         depthImageMessage.setCompressionType(CompressionType.PNG.toByte());
          MessageTools.packIDLSequence(ouster.getBeamAltitudeAnglesBuffer(), depthImageMessage.getOusterBeamAltitudeAngles());
          MessageTools.packIDLSequence(ouster.getBeamAzimuthAnglesBuffer(), depthImageMessage.getOusterBeamAzimuthAngles());
 

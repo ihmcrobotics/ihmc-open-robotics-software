@@ -15,7 +15,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "861742e3ba65a4001a48beb5dfe643935ac3c8bc1b1014cd07c2e7a9b324d057";
+   		return "a98c6c2593feb49d5e7c2c4f4a5ccdf269778d3599042184874c1ed0cfe801c2";
    }
    
    @Override
@@ -63,6 +63,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -118,6 +120,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
@@ -164,7 +169,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
-      cdr.write_type_9(data.getFormat());
+      cdr.write_type_9(data.getPixelFormat());
+
+      cdr.write_type_9(data.getCompressionType());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
@@ -200,7 +207,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setDepthDiscretization(cdr.read_type_5());
       	
       cdr.read_type_e(data.getData());	
-      data.setFormat(cdr.read_type_9());
+      data.setPixelFormat(cdr.read_type_9());
+      	
+      data.setCompressionType(cdr.read_type_9());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
@@ -229,7 +238,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_e("data", data.getData());
-      ser.write_type_9("format", data.getFormat());
+      ser.write_type_9("pixel_format", data.getPixelFormat());
+      ser.write_type_9("compression_type", data.getCompressionType());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
@@ -253,7 +263,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setImageHeight(ser.read_type_3("image_height"));
       data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       ser.read_type_e("data", data.getData());
-      data.setFormat(ser.read_type_9("format"));
+      data.setPixelFormat(ser.read_type_9("pixel_format"));
+      data.setCompressionType(ser.read_type_9("compression_type"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
