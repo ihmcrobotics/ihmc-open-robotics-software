@@ -1686,7 +1686,8 @@ public class CrossRobotCommandRandomTools
                                                                    centerOfPressureDataHolder,
                                                                    robotMotionStatusHolder,
                                                                    jointDesiredOutputList,
-                                                                   sensorDataContext);
+                                                                   sensorDataContext,
+                                                                   null);
       next.setTimestamp(random.nextLong());
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());

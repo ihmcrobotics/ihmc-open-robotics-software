@@ -1,12 +1,5 @@
 package us.ihmc.avatar;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -20,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,11 +26,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.sensors.*;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -70,6 +59,13 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public class AvatarEstimatorThreadFactory
 {
@@ -103,6 +99,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
    private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>("humanoidRobotContextJointData");
    private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> desiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
+   private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccDesiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
 
    private final OptionalFactoryField<FloatingJointBasics> rootJointField = new OptionalFactoryField<>("rootJoint");
    private final OptionalFactoryField<OneDoFJointBasics[]> oneDoFJointsField = new OptionalFactoryField<>("oneDoFJoints");
@@ -589,6 +586,7 @@ public class AvatarEstimatorThreadFactory
          contextDataFactory.setJointDesiredOutputList(getDesiredJointDataHolder());
          contextDataFactory.setProcessedJointData(getHumanoidRobotContextJointData());
          contextDataFactory.setSensorDataContext(getSensorDataContext());
+         contextDataFactory.setWBCCJointDesiredOutputList(getWBCCDesiredJointDataHolder());
          humanoidRobotContextDataField.set(contextDataFactory.createHumanoidRobotContextData());
       }
       return humanoidRobotContextDataField.get();
@@ -599,6 +597,12 @@ public class AvatarEstimatorThreadFactory
       if (!desiredJointDataHolderField.hasValue())
          desiredJointDataHolderField.set(new LowLevelOneDoFJointDesiredDataHolder(getControllableOneDoFJoints()));
       return desiredJointDataHolderField.get();
+   }
+   public LowLevelOneDoFJointDesiredDataHolder getWBCCDesiredJointDataHolder()
+   {
+      if (!wbccDesiredJointDataHolderField.hasValue())
+         wbccDesiredJointDataHolderField.set(new LowLevelOneDoFJointDesiredDataHolder(getControllableOneDoFJoints()));
+      return wbccDesiredJointDataHolderField.get();
    }
 
    public RobotMotionStatusHolder getRobotMotionStatusFromController()

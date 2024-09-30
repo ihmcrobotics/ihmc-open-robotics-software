@@ -113,12 +113,14 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder wbccDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setWBCCJointDesiredOutputList(wbccDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
@@ -165,12 +167,12 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
       //TODO looks like should be moved to "new" thread
-      if (outputProcessor != null)
-      {
-         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
-         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
-         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
-      }
+//      if (outputProcessor != null)
+//      {
+//         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
+//         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+//         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
+//      }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }

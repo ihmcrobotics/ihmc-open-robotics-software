@@ -1,9 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -33,6 +29,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
@@ -67,12 +67,14 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(fullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder wbccDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setWBCCJointDesiredOutputList(wbccDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();

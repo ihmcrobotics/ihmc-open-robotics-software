@@ -69,12 +69,14 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       CenterOfMassDataHolder centerOfMassDataHolderForWholeBodyControllerCore = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForWholeBodyControllerCore = new CenterOfPressureDataHolder(controllerCoreFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder wbccDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForWholeBodyControllerCore);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setWBCCJointDesiredOutputList(wbccDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();

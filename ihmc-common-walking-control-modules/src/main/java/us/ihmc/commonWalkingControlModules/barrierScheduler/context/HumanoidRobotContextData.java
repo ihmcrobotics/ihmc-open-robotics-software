@@ -84,6 +84,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * The desired joint data to be set on the robot. Set by the controller.
     */
    private final LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
+   /**
+    * The output joint data from the WBCC. set by the WholeBodyController.
+    * TODO This will be deleted after finishing moving WBCC from controllerThread to WBCCThread.
+    */
+   private final LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredoutputList;
 
    public HumanoidRobotContextData()
    {
@@ -94,6 +99,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
       sensorDataContext = new SensorDataContext();
+      wbccJointDesiredoutputList = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
@@ -102,7 +108,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
                                    CenterOfPressureDataHolder centerOfPressureDataHolder,
                                    RobotMotionStatusHolder robotMotionStatusHolder,
                                    LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
-                                   SensorDataContext sensorDataContext)
+                                   SensorDataContext sensorDataContext,
+                                   LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredoutputList)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
@@ -111,6 +118,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.sensorDataContext = sensorDataContext;
+      this.wbccJointDesiredoutputList = wbccJointDesiredoutputList;
    }
 
    public HumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel)
@@ -122,6 +130,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
+      wbccJointDesiredoutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
    }
 
    public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
@@ -133,6 +142,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       sensorDataContext = new SensorDataContext(joints);
+      wbccJointDesiredoutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
