@@ -1107,9 +1107,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
-//      System.out.println("Jacobian Matrix: ");
-//      jacobianMatrix.print();
-
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
 
