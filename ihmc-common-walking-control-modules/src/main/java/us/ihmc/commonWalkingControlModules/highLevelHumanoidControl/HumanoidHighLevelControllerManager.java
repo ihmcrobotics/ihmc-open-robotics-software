@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
@@ -54,6 +50,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {
@@ -231,6 +231,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       highLevelControllerTimer.stopMeasurement();
 
+      // TODO This should be moved to the WholeBodyControllerCore Thread.
+      // new Thread will update the joint with desired values
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
@@ -342,6 +344,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
       }
 
+      // lowLevelControllerOutput is the source for contextData
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 

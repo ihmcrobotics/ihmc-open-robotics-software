@@ -89,6 +89,8 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForWholeBodyControllerCore);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
+
+      desiredJointDataHolder.set(wbccDesiredJointDataHolder);
    }
 
    private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel controllerCoreModel,
@@ -120,6 +122,9 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
             System.err.println("Couldn't create CenterOfMassCalibrationTool");
          }
       }
+
+
+
       ModularRobotController modularRobotController = new ModularRobotController("WholeBodyControllerCore");
 
       return modularRobotController;
