@@ -21,12 +21,11 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.perception.opencv.OpenCVTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-import static us.ihmc.perception.cuda.CUDATools.hasCUDADevice;
+import static us.ihmc.perception.cuda.CUDATools.*;
 
 public class CUDACompressionTools
 {
-   private static final boolean CUDA_AVAILABLE = hasCUDADevice();
+   private static final boolean NVCOMP_AVAILABLE = hasCUDADevice() && hasNVCOMP();
    private static final long CHUNK_SIZE = 1 << 16;
 
    private final Mat depthMSBExtractorCPU = new Mat(1, 1, opencv_core.CV_16UC1, new Scalar(65280.0));
@@ -42,6 +41,9 @@ public class CUDACompressionTools
 
    public CUDACompressionTools()
    {
+      if (!hasNVCOMP())
+         throw new UnsatisfiedLinkError("NVCOMP was not found. To install NVCOMP, see instructions in ihmc-perception/README.md");
+
       stream = CUDAStreamManager.getStream();
 
       nvcompBatchedZstdOpts_t zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();
@@ -117,7 +119,7 @@ public class CUDACompressionTools
     */
    public BytePointer compressDepth(Mat depthImage)
    {
-      if (!CUDA_AVAILABLE)
+      if (!NVCOMP_AVAILABLE)
          return new BytePointer(1);
 
       try (Mat depthLSB = extractDepthLSB(depthImage);
@@ -141,7 +143,7 @@ public class CUDACompressionTools
     */
    public BytePointer compressDepth(GpuMat depthImage)
    {
-      if (!CUDA_AVAILABLE)
+      if (!NVCOMP_AVAILABLE)
          return new BytePointer(1);
 
       try (GpuMat depthLSB = extractDepthLSB(depthImage);
@@ -175,7 +177,7 @@ public class CUDACompressionTools
     */
    public void decompressDepth(BytePointer compressedDepthData, GpuMat decompressedDepth)
    {
-      if (!CUDA_AVAILABLE)
+      if (!NVCOMP_AVAILABLE)
          return;
 
       BytePointer[] depthData = unpackCompressedDepth(compressedDepthData);
@@ -309,7 +311,7 @@ public class CUDACompressionTools
     */
    public static BytePointer compress(BytePointer data, long dataSize, PimplManager compressionManager, CUstream_st cudaStream)
    {
-      if (!CUDA_AVAILABLE)
+      if (!NVCOMP_AVAILABLE)
          return new BytePointer(1);
 
       try (BytePointer uncompressedDeviceBuffer = new BytePointer();
@@ -351,7 +353,7 @@ public class CUDACompressionTools
     */
    public static BytePointer decompress(BytePointer compressedData, long compressedDataSize, boolean outputToDevice, CUstream_st cudaStream)
    {
-      if (!CUDA_AVAILABLE)
+      if (!NVCOMP_AVAILABLE)
          return new BytePointer(1);
 
       try (BytePointer compressedDeviceBuffer = new BytePointer();
