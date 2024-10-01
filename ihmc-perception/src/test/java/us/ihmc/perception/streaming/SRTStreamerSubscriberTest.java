@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,8 +73,8 @@ public class SRTStreamerSubscriberTest
       SRTVideoStreamer streamer = new SRTVideoStreamer();
       streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24);
 
-      testTimeout(() -> streamer.sendFrame(sampleImage), TEST_TIMEOUT);                            // Try sending data to nowhere
-      testTimeout(streamer::destroy, TEST_TIMEOUT);                                                // Try destroying
+      testTimeout(() -> streamer.sendFrame(sampleImage, Instant.now()), TEST_TIMEOUT); // Try sending data to nowhere
+      testTimeout(streamer::destroy, TEST_TIMEOUT);                                    // Try destroying
 
       // If it got here, the test passed!
    }
@@ -138,7 +139,7 @@ public class SRTStreamerSubscriberTest
          for (int i = 0; i < 2 * FPS; ++i)
          {
             throttler.waitAndRun();
-            streamer.sendFrame(sampleImage);
+            streamer.sendFrame(sampleImage, Instant.now());
          }
       }, "SRTStreamerTestConnection");
 
@@ -164,6 +165,53 @@ public class SRTStreamerSubscriberTest
       // No communication
       assertEquals(0, streamer.connectedCallerCount());
       assertFalse(receiver.isConnected());
+   }
+
+   @Test
+   public void testTimestampValues() throws InterruptedException
+   {
+      InetSocketAddress localAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+      Throttler throttler = new Throttler();
+      throttler.setFrequency(FPS);
+
+      // Initialize the streamer
+      SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24);
+      assertEquals(0, streamer.connectedCallerCount());
+
+      AtomicLong firstFrameTime = new AtomicLong(-1L);
+
+      // In a separate thread, wait for the receiver to connect
+      Thread streamerConnectThread = ThreadTools.startAThread(() ->
+      {
+         // Send 2 seconds of video
+         for (int i = 0; i < 2 * FPS; ++i)
+         {
+            throttler.waitAndRun();
+            Instant frameInstant = Instant.now().minusSeconds(5L); // 5 seconds in the past.
+            firstFrameTime.compareAndSet(-1L, frameInstant.toEpochMilli());
+            streamer.sendFrame(sampleImage, frameInstant);
+         }
+      }, "SRTStreamerTestConnection");
+
+      // Initialize a receiver and connect to streamer
+      SRTVideoReceiver receiver = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
+      assertFalse(receiver.isConnected());
+      receiver.connect(localAddress, EXTRA_LONG_TIMEOUT);
+
+      // Receive a frame
+
+      Mat frame = receiver.getNextFrame(0.5);
+      if (frame != null)
+         frame.close();
+      long frameTimestamp = receiver.getLastFrameTimestamp();
+
+      assertEquals(firstFrameTime.get(), frameTimestamp);
+
+      streamerConnectThread.join();
+
+      streamer.destroy();
+      receiver.destroy();
    }
 
    @Test

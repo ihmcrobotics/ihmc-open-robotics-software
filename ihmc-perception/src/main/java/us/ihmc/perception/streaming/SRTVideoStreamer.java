@@ -6,6 +6,7 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ffmpeg.FFmpegHardwareVideoEncoder;
 import us.ihmc.perception.ffmpeg.FFmpegInterruptCallback;
 import us.ihmc.perception.ffmpeg.FFmpegSoftwareVideoEncoder;
@@ -13,6 +14,7 @@ import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -135,7 +137,14 @@ public class SRTVideoStreamer
       initialized = true;
    }
 
-   public void sendFrame(Pointer frame)
+   public void sendFrame(Pointer frame, Instant frameAcquisitionTime)
+   {
+      encoder.setNextFrameAcquisitionTime(frameAcquisitionTime.toEpochMilli());
+      encoder.setNextFrame(frame);
+      encoder.encodeNextFrame(this::writeToCallers);
+   }
+
+   public void sendFrame(RawImage frame)
    {
       encoder.setNextFrame(frame);
       encoder.encodeNextFrame(this::writeToCallers);

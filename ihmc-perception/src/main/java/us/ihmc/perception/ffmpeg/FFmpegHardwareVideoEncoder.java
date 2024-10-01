@@ -10,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.perception.RawImage;
 
 import java.util.Objects;
 
@@ -73,6 +74,13 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       FFmpegTools.checkPointer(encoderContext.hw_frames_ctx(), "Allocating hardware frames");
 
       av_buffer_unref(hardwareFramesReference);
+   }
+
+   @Override
+   public void setNextFrame(RawImage image)
+   {
+      setNextFrameAcquisitionTime(image.getAcquisitionTime().toEpochMilli());
+      setNextFrame(image.getGpuImageMat());
    }
 
    @Override

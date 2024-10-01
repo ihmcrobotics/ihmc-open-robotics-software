@@ -80,10 +80,7 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      if (videoStreamer.isUsingHardwareAcceleration())
-         videoStreamer.sendFrame(frame.getGpuImageMat());
-      else
-         videoStreamer.sendFrame(frame.getCpuImageMat());
+      videoStreamer.sendFrame(frame);
 
       sendFrequencyCalculator.ping();
       float frequency = (float) sendFrequencyCalculator.getFrequency();

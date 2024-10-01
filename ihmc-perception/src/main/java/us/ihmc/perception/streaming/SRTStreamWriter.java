@@ -55,7 +55,6 @@ public class SRTStreamWriter
       error = avformat_alloc_output_context2(formatContext, outputFormat, (String) null, null);
       if (!FFmpegTools.checkError(error, formatContext, "Allocating output format context"))
          return false;
-      formatContext.start_time_realtime(1000 * encoder.getStartTime());
       formatContext.pb(srtContext);
 
       // Get an output stream from the encoder

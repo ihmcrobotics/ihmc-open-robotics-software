@@ -8,6 +8,7 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.perception.RawImage;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
@@ -47,6 +48,13 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
       FFmpegTools.checkNegativeError(error, "Getting next frame buffer");
 
       encoderContext.pix_fmt(outputPixelFormat);
+   }
+
+   @Override
+   public void setNextFrame(RawImage image)
+   {
+      setNextFrameAcquisitionTime(image.getAcquisitionTime().toEpochMilli());
+      setNextFrame(image.getCpuImageMat());
    }
 
    @Override

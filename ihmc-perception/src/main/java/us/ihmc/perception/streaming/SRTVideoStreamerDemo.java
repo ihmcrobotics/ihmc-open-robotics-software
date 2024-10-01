@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
 
 import java.net.InetSocketAddress;
+import java.time.Instant;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
@@ -52,7 +53,7 @@ public class SRTVideoStreamerDemo
       while (!shutdown)
       {
          videoCapture.read(frame);
-         videoStreamer.sendFrame(frame);
+         videoStreamer.sendFrame(frame, Instant.now());
       }
 
       shutdownReady.set();

@@ -5,6 +5,7 @@ import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.commons.Conversions;
+import us.ihmc.perception.RawImage;
 
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
 import static org.bytedeco.ffmpeg.global.avutil.av_make_q;
@@ -13,6 +14,7 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
 {
    private int colorConversion = -1;
    private long firstFrameTime = -1L;
+   private long nextFrameTime = -1L;
 
    public FFmpegVideoEncoder(AVOutputFormat outputFormat,
                              String preferredEncoderName,
@@ -60,6 +62,7 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
    public AVStream newStream(AVFormatContext outputContext)
    {
       AVStream stream = super.newStream(outputContext);
+      stream.start_time(0L); // This encoder always starts PTS with 0
 
       error = avcodec_parameters_from_context(stream.codecpar(), encoderContext);
       FFmpegTools.checkNegativeError(error, "Copying parameters from codec to stream");
@@ -73,16 +76,36 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
     */
    @Override
    public final void setNextFrame(Pointer image)
-   {
+   {  // If next frame time has not been set, use current time
+      if (nextFrameTime < 0L)
+         nextFrameTime = System.currentTimeMillis();
+
       // Set the frame PTS based on time since first frame
-      long currentTime = System.currentTimeMillis();
       if (firstFrameTime < 0L)
-         firstFrameTime = currentTime;
-      long timeElapsed = currentTime - firstFrameTime;
+         firstFrameTime = nextFrameTime;
+      long timeElapsed = nextFrameTime - firstFrameTime;
       frameToEncode.pts(timeElapsed);
 
       // Set the AVFrame's image
       prepareFrameForEncoding(image);
+
+      // Reset next frame time to be invalid
+      nextFrameTime = -1L;
+   }
+
+   /**
+    * Set the acquisition time of the next frame to be provided.
+    * This must be called BEFORE {@link #setNextFrame(Pointer)}.
+    * @param nextFrameAcquisitionTime Milliseconds since the Unix epoch when the frame was acquired.
+    */
+   public void setNextFrameAcquisitionTime(long nextFrameAcquisitionTime)
+   {
+      nextFrameTime = nextFrameAcquisitionTime;
+   }
+
+   public long getStartTime()
+   {
+      return firstFrameTime;
    }
 
    protected int getColorConversion()
@@ -90,10 +113,12 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
       return colorConversion;
    }
 
-   public long getStartTime()
-   {
-      return firstFrameTime;
-   }
+   /**
+    * Assign the frame to be encoded with the provided RawImage.
+    * The next frame acquisition time is set using the RawImage's acquisition time.
+    * @param image {@link RawImage} containing the data to be encoded.
+    */
+   public abstract void setNextFrame(RawImage image);
 
    /**
     * Prepare the {@link #frameToEncode} to be encoded.
