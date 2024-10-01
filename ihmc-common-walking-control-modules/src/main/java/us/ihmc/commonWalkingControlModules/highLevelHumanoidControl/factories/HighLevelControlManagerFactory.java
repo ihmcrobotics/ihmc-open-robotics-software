@@ -254,6 +254,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
       boolean enableImpedanceControl = walkingControllerParameters.enableImpedanceControl(bodyName);
 
+      if (enableImpedanceControl){
+         taskspacePositionGains = walkingControllerParameters.getImpedanceHandPositionControlGains();
+         taskspaceOrientationGains = walkingControllerParameters.getImpedanceHandOrientationControlGains();
+      }
+
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
                                                                     elevator,

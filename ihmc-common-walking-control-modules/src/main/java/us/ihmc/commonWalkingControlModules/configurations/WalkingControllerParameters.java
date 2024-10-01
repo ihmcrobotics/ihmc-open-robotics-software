@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
@@ -234,6 +235,16 @@ public abstract class WalkingControllerParameters
    public List<GroupParameter<PID3DConfiguration>> getTaskspacePositionControlGains()
    {
       return new ArrayList<>();
+   }
+
+   public PID3DGains getImpedanceHandPositionControlGains()
+   {
+      return null;
+   }
+
+   public PID3DGains getImpedanceHandOrientationControlGains()
+   {
+      return null;
    }
 
    /**
