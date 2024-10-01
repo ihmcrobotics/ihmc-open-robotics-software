@@ -9,6 +9,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -277,7 +278,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
-            runWithPostureOptimizer,
+            KinematicsStreamingToolboxModule.PUBLISH_TO_CONTROLLER,
             new YoGraphicsListRegistry(),
             parentRegistry);
 

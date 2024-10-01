@@ -9,3 +9,6 @@ bool is_picking_up
 
 # Mass of the object being picked up
 float64 object_mass
+
+# World-frame offset from hand control frame to bag com
+geometry_msgs/Vector3 hand_to_bag_com_offset

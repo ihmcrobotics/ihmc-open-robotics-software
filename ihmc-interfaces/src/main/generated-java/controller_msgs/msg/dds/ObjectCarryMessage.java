@@ -22,9 +22,14 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
             * Mass of the object being picked up
             */
    public double object_mass_;
+   /**
+            * World-frame offset from hand control frame to bag com
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D hand_to_bag_com_offset_;
 
    public ObjectCarryMessage()
    {
+      hand_to_bag_com_offset_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public ObjectCarryMessage(ObjectCarryMessage other)
@@ -41,6 +46,7 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
 
       object_mass_ = other.object_mass_;
 
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.hand_to_bag_com_offset_, hand_to_bag_com_offset_);
    }
 
    /**
@@ -89,6 +95,15 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
    }
 
 
+   /**
+            * World-frame offset from hand control frame to bag com
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getHandToBagComOffset()
+   {
+      return hand_to_bag_com_offset_;
+   }
+
+
    public static Supplier<ObjectCarryMessagePubSubType> getPubSubType()
    {
       return ObjectCarryMessagePubSubType::new;
@@ -112,6 +127,7 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_mass_, other.object_mass_, epsilon)) return false;
 
+      if (!this.hand_to_bag_com_offset_.epsilonEquals(other.hand_to_bag_com_offset_, epsilon)) return false;
 
       return true;
    }
@@ -131,6 +147,7 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
 
       if(this.object_mass_ != otherMyClass.object_mass_) return false;
 
+      if (!this.hand_to_bag_com_offset_.equals(otherMyClass.hand_to_bag_com_offset_)) return false;
 
       return true;
    }
@@ -146,7 +163,9 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       builder.append("is_picking_up=");
       builder.append(this.is_picking_up_);      builder.append(", ");
       builder.append("object_mass=");
-      builder.append(this.object_mass_);
+      builder.append(this.object_mass_);      builder.append(", ");
+      builder.append("hand_to_bag_com_offset=");
+      builder.append(this.hand_to_bag_com_offset_);
       builder.append("}");
       return builder.toString();
    }

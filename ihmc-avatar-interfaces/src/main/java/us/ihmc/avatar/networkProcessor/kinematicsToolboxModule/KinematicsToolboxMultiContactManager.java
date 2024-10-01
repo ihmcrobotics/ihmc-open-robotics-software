@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class KinematicsToolboxMultiContactManager
 {
-   private static final boolean MODIFY_POSTURE_WITH_PRIVILEGED_CONFIGURATION = true;
+   private static final boolean MODIFY_POSTURE_WITH_PRIVILEGED_CONFIGURATION = false;
    private static final double JOINT_LIMIT_REDUCTION_PERCENTAGE = 0.05;
    private static final double JOINTSPACE_KP = 50.0;
    private static final double PELVIS_POSTURE_KP = 1200.0;
@@ -80,6 +80,7 @@ public class KinematicsToolboxMultiContactManager
    private final YoEnum<PostureOptimizerState> mode = new YoEnum<>("postureOptimizerMode", registry, PostureOptimizerState.class, false);
 
    /* Posture optimization state */
+   private double postureSensitivityHysteresisEpsilon = 0.01;
    private final YoDouble postureSensitivityThreshold = new YoDouble("postureSensitivityThreshold", registry);
    private final GlitchFilteredYoBoolean isPostureSensitivityHigh = new GlitchFilteredYoBoolean("isPostureSensitivityHigh", registry, 12);
 
@@ -198,7 +199,7 @@ public class KinematicsToolboxMultiContactManager
 
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
 
-      double defaultPostureSensitivityThreshold = 0.085;
+      double defaultPostureSensitivityThreshold = 0.065;
       double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
       double defaultStabilityMarginThresholdHigh = 0.16; // 0.12;
 
@@ -208,7 +209,7 @@ public class KinematicsToolboxMultiContactManager
 
       maxPostureAdjustmentRate.set(0.15);
       qdMultiplier.set(0.3);
-      postureOptimizationWeight.set(2.0);
+      postureOptimizationWeight.set(0.25);
       mode.set(PostureOptimizerState.NOMINAL);
 
       parentRegistry.addChild(registry);
@@ -262,7 +263,8 @@ public class KinematicsToolboxMultiContactManager
 
       if (hasPostureSensitivity)
       {
-         isPostureSensitivityHigh.update(postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold.getValue());
+         double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
+         isPostureSensitivityHigh.update(postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold);
 
          if (multiContactRegionCalculator.getCenterOfMassStabilityMargin() < stabilityMarginThresholdLow.getValue())
          {

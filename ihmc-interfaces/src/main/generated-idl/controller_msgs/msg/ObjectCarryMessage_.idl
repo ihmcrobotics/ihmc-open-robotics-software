@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__ObjectCarryMessage__idl__
 #define __controller_msgs__msg__ObjectCarryMessage__idl__
 
+#include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
 {
   module msg
@@ -30,6 +31,10 @@ module controller_msgs
          * Mass of the object being picked up
          */
         double object_mass;
+        /**
+         * World-frame offset from hand control frame to bag com
+         */
+        geometry_msgs::msg::dds::Vector3 hand_to_bag_com_offset;
       };
     };
   };
