@@ -47,9 +47,13 @@ module perception_msgs
          */
         sequence<octet, 25000000> data;
         /**
-         * The image format. Ordinal of ImageMessageFormat
+         * The pixel format. Ordinal of ImageFormat's PixelFormat
          */
-        octet format;
+        octet pixel_format;
+        /**
+         * The compression type. Ordinal of ImageFormat's CompressionType
+         */
+        octet compression_type;
         /**
          * Position of the focal point at sensor data acquisition
          */

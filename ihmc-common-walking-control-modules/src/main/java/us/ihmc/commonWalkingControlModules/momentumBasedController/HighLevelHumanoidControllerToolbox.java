@@ -38,6 +38,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -138,8 +139,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final JointBasics[] controlledJoints;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
-
-   private final SideDependentList<Wrench> handWrenches = new SideDependentList<>();
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
@@ -291,12 +290,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          yoCoPError.put(robotSide,
                         new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
-
-         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         if (hand != null)
-         {
-            handWrenches.put(robotSide, new Wrench());
-         }
       }
 
       if (wristForceSensors == null)
@@ -612,6 +605,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       }
 
       return isCoPDampened;
+   }
+
+   public SpatialVectorReadOnly getEstimatedExternalHandWrench(RobotSide robotSide)
+   {
+      return handWrenchCalculators == null ? null : handWrenchCalculators.get(robotSide).getFilteredWrench();
    }
 
    public void setHighCoPDampingParameters(boolean enable, double duration, double copErrorThreshold)

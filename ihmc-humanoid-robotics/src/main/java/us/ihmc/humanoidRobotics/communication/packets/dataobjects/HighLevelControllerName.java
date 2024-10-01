@@ -31,8 +31,8 @@ public enum HighLevelControllerName
    CUSTOM1,
    @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
    FALLING_STATE,
-   @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC push recovery algorithms")
-   PUSH_RECOVERY,
+   @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC fast walking algorithms")
+   QUICKSTER,
    EXTERNAL_TRANSITION_STATE,
    EXTERNAL;
 
