@@ -113,14 +113,14 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
-      LowLevelOneDoFJointDesiredDataHolder wbccDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
-      contextDataFactory.setWBCCJointDesiredOutputList(wbccDesiredJointDataHolder);
+      contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
@@ -154,7 +154,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   centerOfMassDataHolderForController,
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
-                                                  desiredJointDataHolder,
+                                                  wholeBodyControllerCoreDesiredJointDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
                                                   kinematicsSimulation,

@@ -194,6 +194,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
       avatarSimulation.setMasterContext(masterContext);
       avatarSimulation.setControllerThread(controllerThread);
+      avatarSimulation.setWholeBodyControllerCoreThread(wholeBodyControllerCoreThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
       avatarSimulation.setIKStreamingRTThread(ikStreamingRTThread);
@@ -450,8 +451,11 @@ public class SCS2AvatarSimulationFactory
                                                                               null,
                                                                               robotModel.get(),
                                                                               robotModel.get().getSensorInformation(),
+                                                                              highLevelHumanoidControllerFactory.get(),
                                                                               null,
-                                                                              ros2Node);
+                                                                              ros2Node,
+                                                                              gravity.get(),
+                                                                              kinematicsSimulation.get());
    }
 
    private void setupStepGeneratorThread()
