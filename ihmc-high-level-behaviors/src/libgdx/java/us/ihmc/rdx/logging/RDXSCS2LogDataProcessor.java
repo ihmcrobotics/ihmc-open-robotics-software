@@ -76,10 +76,14 @@ public class RDXSCS2LogDataProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 2, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 4, tableFlags))
                {
-                  ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed);
-                  ImGui.tableSetupColumn(labels.get("Process"), ImGuiTableColumnFlags.WidthFixed);
+                  float charWidth = ImGuiTools.calcTextSizeX("A");
+                  ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Process"), ImGuiTableColumnFlags.WidthFixed, 15 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Size"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Footsteps"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
+
                   ImGui.tableSetupScrollFreeze(0, 1);
                   ImGui.tableHeadersRow();
 
@@ -97,13 +101,30 @@ public class RDXSCS2LogDataProcessor
                      {
                         if (logProcessor.isProcessingLog())
                         {
-                           ImGui.text("Processing...");
+                           ImGui.text("(%.2f%%) %d/%d ".formatted(100.0 * logProcessor.getLogCurrentTick() / (double) logProcessor.getNumberOfEntries(),
+                                                                  logProcessor.getLogCurrentTick(),
+                                                                  logProcessor.getNumberOfEntries()));
+                           ImGui.sameLine();
+                           if (ImGuiTools.textWithUnderlineOnHover("Stop") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                           {
+                              logProcessor.gatherStatsAsync();
+                           }
                         }
                         else
                         {
-                           if (ImGuiTools.textWithUnderlineOnHover("Process log") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                           if (logProcessor.getNumberOfEntries() <= 0)
                            {
-                              logProcessor.processLogAsync();
+                              if (ImGuiTools.textWithUnderlineOnHover("Gather stats") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                              {
+                                 logProcessor.gatherStatsAsync();
+                              }
+                           }
+                           else
+                           {
+                              if (ImGuiTools.textWithUnderlineOnHover("Process log") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                              {
+                                 logProcessor.processLogAsync();
+                              }
                            }
                         }
                      }
@@ -111,6 +132,11 @@ public class RDXSCS2LogDataProcessor
                      {
                         ImGui.textColored(ImGuiTools.RED, "Invalid");
                      }
+
+                     ImGui.tableNextColumn();
+                     ImGui.text("" + logProcessor.getNumberOfEntries());
+                     ImGui.tableNextColumn();
+                     ImGui.text("" + logProcessor.getNumberOfFootstepsStat());
                   }
 
                   ImGui.endTable();
@@ -136,6 +162,7 @@ public class RDXSCS2LogDataProcessor
 
    private void refreshDirectoryListing()
    {
+      logDirectories.clear();
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryOfLogsPath))
       {
          for (Path path : stream)

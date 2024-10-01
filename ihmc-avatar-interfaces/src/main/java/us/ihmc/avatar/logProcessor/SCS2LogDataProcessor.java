@@ -2,15 +2,13 @@ package us.ihmc.avatar.logProcessor;
 
 import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGUnits;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.awt.*;
 import java.io.FileWriter;
@@ -18,7 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class SCS2LogDataProcessor
 {
@@ -26,51 +24,18 @@ public class SCS2LogDataProcessor
    private static final double DOCUMENT_SIZE = Double.parseDouble(System.getProperty("document.size", "15.0"));
 
    private Path logPath;
-   private LogSession logSession;
-   private YoRegistry rootRegistry;
+   private Path jsonPath;
+   private Path svgPath;
    private SVGGraphics2D svgGraphics2D;
    private long tick = 0;
    private int numberOfEntries;
+   private int currentLogPosition;
    private boolean processingLog = false;
+   private boolean requestStopProcessing = false;
+   private SCS2LogLocomotionData locomotionData;
 
-   private final Point2D robotStartToDocumentCenter = new Point2D(DOCUMENT_SIZE / 2.0, DOCUMENT_SIZE / 2.0);
-
-   private YoVariable yoCurrentNumberOfFootsteps;
-   private YoVariable leftFootState;
-   private YoVariable rightFootState;
-   private ConstraintType leftLastFootState = ConstraintType.SWING;
-   private ConstraintType rightLastFootState = ConstraintType.SWING;
-   private Double leftFullSupportTime = Double.NaN;
-   private Double rightFullSupportTime = Double.NaN;
-   private boolean newLeftStep = false;
-   private boolean newRightStep = false;
-   private YoVariable leftFootPolygon_0_x ;
-   private YoVariable leftFootPolygon_0_y ;
-   private YoVariable leftFootPolygon_1_x ;
-   private YoVariable leftFootPolygon_1_y ;
-   private YoVariable leftFootPolygon_2_x ;
-   private YoVariable leftFootPolygon_2_y ;
-   private YoVariable leftFootPolygon_3_x ;
-   private YoVariable leftFootPolygon_3_y ;
-   private YoVariable rightFootPolygon_0_x;
-   private YoVariable rightFootPolygon_0_y;
-   private YoVariable rightFootPolygon_1_x;
-   private YoVariable rightFootPolygon_1_y;
-   private YoVariable rightFootPolygon_2_x;
-   private YoVariable rightFootPolygon_2_y;
-   private YoVariable rightFootPolygon_3_x;
-   private YoVariable rightFootPolygon_3_y;
-   private final ArrayList<double[]> leftFootsteps = new ArrayList<>();
-   private final ArrayList<double[]> rightFootsteps = new ArrayList<>();
-
-   private final Point2D currentCenterOfMass = new Point2D();
-   private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
-   private YoVariable yoCenterOfMassX;
-   private YoVariable yoCenterOfMassY;
-   private final double comPlotProximityToFootsteps = 5.0;
-   private final double comPlotResolution = 0.1;
-   private double lastCoMPlotTime = Double.NaN;
-   private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
+   private int numberOfFootstepsStat = -1;
+   private int numberOfComsStat = -1;
 
    public SCS2LogDataProcessor()
    {
@@ -91,52 +56,22 @@ public class SCS2LogDataProcessor
       {
          LogTools.error("Log path not valid: %s".formatted(logPath));
          this.logPath = null;
+         return;
       }
+
+      jsonPath = logPath.resolve("statistics.json");
+      svgPath = logPath.resolve(logPath.getFileName().toString() + "_OverheadPlot.svg");
+
+      loadStats();
    }
 
-   public void processLogAsync()
-   {
-      ThreadTools.startAsDaemon(this::processLog, "SCS2LogDataProcessorThread");
-   }
-
-   private void processLog()
+   private void runLogSession(Consumer<LogSession> logSessionConsumer)
    {
       processingLog = true;
 
       try
       {
-         logSession = new LogSession(logPath.toFile(), null);
-         logSession.addAfterReadCallback(this::afterRead);
-         rootRegistry = logSession.getRootRegistry();
-
-         String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-
-         String momentumRateControl = highLevelController + "WalkingControllerState.LinearMomentumRateControlModule.";
-         yoCenterOfMassX = rootRegistry.findVariable(momentumRateControl + "centerOfMassX");
-         yoCenterOfMassY = rootRegistry.findVariable(momentumRateControl + "centerOfMassY");
-
-         String walkingMessageHandler = highLevelController + "HighLevelHumanoidControllerFactory.WalkingMessageHandler.";
-         yoCurrentNumberOfFootsteps = rootRegistry.findVariable(walkingMessageHandler + "currentNumberOfFootsteps");
-         String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
-         leftFootState = rootRegistry.findVariable(feetManager + "leftFootControlModule.leftFootCurrentState");
-         rightFootState = rootRegistry.findVariable(feetManager + "rightFootControlModule.rightFootCurrentState");
-         String footPolygonPrefix = highLevelController + "HighLevelHumanoidControllerToolbox.BipedSupportPolygons.";
-         leftFootPolygon_0_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_x");
-         leftFootPolygon_0_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_y");
-         leftFootPolygon_1_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_x");
-         leftFootPolygon_1_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_y");
-         leftFootPolygon_2_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_x");
-         leftFootPolygon_2_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_y");
-         leftFootPolygon_3_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_x");
-         leftFootPolygon_3_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_y");
-         rightFootPolygon_0_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_x");
-         rightFootPolygon_0_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_y");
-         rightFootPolygon_1_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_x");
-         rightFootPolygon_1_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_y");
-         rightFootPolygon_2_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_x");
-         rightFootPolygon_2_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_y");
-         rightFootPolygon_3_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_x");
-         rightFootPolygon_3_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_y");
+         LogSession logSession = new LogSession(logPath.toFile(), null);
 
          logSession.startSessionThread();
          MissingThreadTools.sleep(0.1);
@@ -144,16 +79,12 @@ public class SCS2LogDataProcessor
          numberOfEntries = logSession.getLogDataReader().getNumberOfEntries();
          LogTools.info("numberOfEntries: %d".formatted(numberOfEntries));
 
-         for (int i = 0; i < numberOfEntries; i++)
-         {
-            logSession.runTick();
-         }
+         logSessionConsumer.accept(logSession);
 
          MissingThreadTools.sleep(0.1);
 
          logSession.stopSessionThread();
-
-         drawSVG();
+         logSession.shutdownSession();
       }
       catch (IOException e)
       {
@@ -165,81 +96,73 @@ public class SCS2LogDataProcessor
       }
    }
 
-   private void afterRead(double currentTime)
+   public void processLogAsync()
    {
-      int currentLogPosition = logSession.getLogDataReader().getCurrentLogPosition();
-      if (currentLogPosition % 10000 == 0)
-         LogTools.info("(%d/%d)".formatted(currentLogPosition, numberOfEntries));
-
-      if (leftLastFootState != ConstraintType.FULL && leftFootState.getValueAsString().equals(ConstraintType.FULL.name()))
-      {
-         LogTools.info("(%d/%d) Recording left footstep".formatted(currentLogPosition, numberOfEntries));
-         newLeftStep = true;
-         leftFullSupportTime = currentTime;
-      }
-      leftLastFootState = leftFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(leftFootState.getValueAsString());
-
-      if (rightLastFootState != ConstraintType.FULL && rightFootState.getValueAsString().equals(ConstraintType.FULL.name()))
-      {
-         LogTools.info("(%d/%d) Recording left footstep".formatted(currentLogPosition, numberOfEntries));
-         newRightStep = true;
-         rightFullSupportTime = currentTime;
-      }
-      rightLastFootState = rightFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(rightFootState.getValueAsString());
-      
-
-
-      if (newLeftStep && currentTime - leftFullSupportTime > 0.1)
-      {
-         leftFootsteps.add(new double[] {leftFootPolygon_0_x.getValueAsDouble(),
-                                         leftFootPolygon_1_x.getValueAsDouble(),
-                                         leftFootPolygon_2_x.getValueAsDouble(),
-                                         leftFootPolygon_3_x.getValueAsDouble(),
-                                         leftFootPolygon_0_y.getValueAsDouble(),
-                                         leftFootPolygon_1_y.getValueAsDouble(),
-                                         leftFootPolygon_2_y.getValueAsDouble(),
-                                         leftFootPolygon_3_y.getValueAsDouble()});
-         newLeftStep = false;
-      }
-
-      if (newRightStep && currentTime - rightFullSupportTime > 0.1)
-      {
-         rightFootsteps.add(new double[] {rightFootPolygon_0_x.getValueAsDouble(),
-                                          rightFootPolygon_1_x.getValueAsDouble(),
-                                          rightFootPolygon_2_x.getValueAsDouble(),
-                                          rightFootPolygon_3_x.getValueAsDouble(),
-                                          rightFootPolygon_0_y.getValueAsDouble(),
-                                          rightFootPolygon_1_y.getValueAsDouble(),
-                                          rightFootPolygon_2_y.getValueAsDouble(),
-                                          rightFootPolygon_3_y.getValueAsDouble()});
-         newRightStep = false;
-      }
-
-      boolean recentLeftStep = !Double.isNaN(leftFullSupportTime) && currentTime - leftFullSupportTime < comPlotProximityToFootsteps;
-      boolean recentRightStep = !Double.isNaN(rightFullSupportTime) && currentTime - rightFullSupportTime < comPlotProximityToFootsteps;
-
-      if (recentLeftStep || recentRightStep)
-      {
-         if (Double.isNaN(lastCoMPlotTime) || currentTime - lastCoMPlotTime > comPlotResolution)
-         {
-            currentCenterOfMass.set(yoCenterOfMassX.getValueAsDouble(), yoCenterOfMassY.getValueAsDouble());
-
-            if (coms.isEmpty())
-            {
-               robotStartToDocumentCenter.add(-currentCenterOfMass.getX(), currentCenterOfMass.getY());
-            }
-
-            LogTools.info("(%d/%d) Extracting CoM at %s", currentLogPosition, numberOfEntries, currentCenterOfMass);
-            coms.add().set(currentCenterOfMass);
-
-            lastCenterOfMass.set(currentCenterOfMass);
-            lastCoMPlotTime = currentTime;
-         }
-      }
-
-      ++tick;
+      processLogAsync(this::processLog);
    }
 
+   public void gatherStatsAsync()
+   {
+      processLogAsync(logSession -> writeJSON(true));
+   }
+
+   public void processLogAsync(Consumer<LogSession> logSessionConsumer)
+   {
+      ThreadTools.startAsDaemon(() -> runLogSession(logSessionConsumer), "SCS2LogDataProcessorThread");
+   }
+
+   private void processLog(LogSession logSession)
+   {
+      locomotionData = new SCS2LogLocomotionData();
+      locomotionData.setup(logSession);
+
+      requestStopProcessing = false;
+      for (int i = 0; i < numberOfEntries && !requestStopProcessing; i++)
+      {
+         currentLogPosition = logSession.getLogDataReader().getCurrentLogPosition();
+         logSession.runTick();
+      }
+
+      locomotionData.requestStopProcessing();
+
+      writeJSON(false);
+      drawSVG();
+
+      locomotionData = null;
+   }
+
+   private void writeJSON(boolean statsOnly)
+   {
+      LogTools.info("Saving JSON to {}", jsonPath);
+      JSONFileTools.save(jsonPath, rootNode ->
+      {
+         rootNode.put("numberOfEntries", numberOfEntries);
+         if (!statsOnly)
+         {
+            numberOfFootstepsStat = locomotionData.getLeftFootsteps().size() + locomotionData.getRightFootsteps().size();
+            rootNode.put("numberOfFootsteps", numberOfFootstepsStat);
+            numberOfComsStat = locomotionData.getComs().size();
+            rootNode.put("numberOfComs", numberOfComsStat);
+         }
+      });
+   }
+
+   private void loadStats()
+   {
+      LogTools.info("Loading JSON stats from {}", jsonPath);
+      if (Files.exists(jsonPath))
+      {
+         JSONFileTools.load(jsonPath, rootNode ->
+         {
+            numberOfEntries = rootNode.get("numberOfEntries").intValue();
+            if (rootNode.has("numberOfFootsteps"))
+               numberOfFootstepsStat = rootNode.get("numberOfFootsteps").intValue();
+            if (rootNode.has("numberOfComs"))
+               numberOfComsStat = rootNode.get("numberOfComs").intValue();
+         });
+      }
+   }
+   
    private void drawSVG()
    {
       double documentSizeMillimeters = convertToMillimeters(DOCUMENT_SIZE);
@@ -248,8 +171,9 @@ public class SCS2LogDataProcessor
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setStroke(new BasicStroke(15));
 
-      for (double[] footstep : leftFootsteps)
+      for (double[] footstep : locomotionData.getLeftFootsteps())
       {
+         LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
          svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
                                               metersToMMX(footstep[1]),
                                               metersToMMX(footstep[2]),
@@ -260,8 +184,9 @@ public class SCS2LogDataProcessor
                                               metersToMMY(footstep[7])},
                                    4);
       }
-      for (double[] footstep : rightFootsteps)
+      for (double[] footstep : locomotionData.getRightFootsteps())
       {
+         LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
          svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
                                               metersToMMX(footstep[1]),
                                               metersToMMX(footstep[2]),
@@ -273,6 +198,7 @@ public class SCS2LogDataProcessor
                                    4);
       }
 
+      RecyclingArrayList<Point2D> coms = locomotionData.getComs();
       if (!coms.isEmpty())
       {
          int[] comXs = new int[coms.size()];
@@ -285,10 +211,9 @@ public class SCS2LogDataProcessor
          svgGraphics2D.drawPolyline(comXs, comYs, comXs.length);
       }
 
-      Path savePath = logPath.resolve(logPath.getFileName().toString() + "_OverheadPlot.svg");
-      LogTools.info("Saving to {}", savePath);
+      LogTools.info("Saving SVG to {}", svgPath);
 
-      try (FileWriter writer = new FileWriter(savePath.toFile()))
+      try (FileWriter writer = new FileWriter(svgPath.toFile()))
       {
          String svgDocument = svgGraphics2D.getSVGDocument();
          // Add viewBox attribute to the SVG element, to make it load correctly in Inkscape
@@ -303,17 +228,38 @@ public class SCS2LogDataProcessor
 
    private int metersToMMX(double x)
    {
-      return (int) convertToMillimeters(x + robotStartToDocumentCenter.getX());
+      double fromStart = x - locomotionData.getRobotStartLocation().getX();
+      int halfDocumentMM = (int) convertToMillimeters(DOCUMENT_SIZE / 2.0);
+      int mmFromStart = (int) convertToMillimeters(fromStart);
+      return mmFromStart + halfDocumentMM;
    }
 
    private int metersToMMY(double y)
    {
-      return (int) convertToMillimeters(y + robotStartToDocumentCenter.getY());
+      double fromStart = y - locomotionData.getRobotStartLocation().getY();
+      int halfDocumentMM = (int) convertToMillimeters(DOCUMENT_SIZE / 2.0);
+      int mmFromStart = (int) -convertToMillimeters(fromStart);
+      return mmFromStart + halfDocumentMM;
    }
 
    private long convertToMillimeters(double meters)
    {
       return (long) (meters * 1000.0);
+   }
+
+   public void stopProcessing()
+   {
+      requestStopProcessing = true;
+   }
+
+   public int getLogCurrentTick()
+   {
+      return currentLogPosition;
+   }
+
+   public int getNumberOfEntries()
+   {
+      return numberOfEntries;
    }
 
    public boolean isLogValid()
@@ -326,8 +272,20 @@ public class SCS2LogDataProcessor
       return processingLog;
    }
 
+   public int getNumberOfFootstepsStat()
+   {
+      return locomotionData == null ? numberOfFootstepsStat :
+            locomotionData.getLeftFootsteps().size() + locomotionData.getRightFootsteps().size();
+   }
+
+   public int getNumberOfComsStat()
+   {
+      return locomotionData == null ? numberOfComsStat : locomotionData.getComs().size();
+   }
+
    public static void main(String[] args)
    {
-      new SCS2LogDataProcessor().processLog();
+      SCS2LogDataProcessor logDataProcessor = new SCS2LogDataProcessor();
+      logDataProcessor.runLogSession(logDataProcessor::processLog);
    }
 }
