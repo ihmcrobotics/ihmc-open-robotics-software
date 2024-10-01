@@ -105,11 +105,6 @@ public class NativeQPInputTypeB
       return taskWeight;
    }
 
-   public double getTaskWeight()
-   {
-      return taskWeight;
-   }
-
    @Override
    public String toString()
    {

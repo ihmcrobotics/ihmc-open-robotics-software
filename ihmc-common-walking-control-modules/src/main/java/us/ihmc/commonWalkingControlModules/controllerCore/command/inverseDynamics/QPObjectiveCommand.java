@@ -37,14 +37,10 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
     */
    private final DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 1);
 
-   private final DMatrixRMaj gradientMatrix = new DMatrixRMaj(1, 1);
-
    /**
     * Boolean that indicates whether or not this command should be added in the nullspace of the other, primary commands.
     */
    private boolean doNullspaceProjection = false;
-
-   private boolean hasGradient = false;
 
    public QPObjectiveCommand()
    {
@@ -75,7 +71,6 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
       objective.reshape(numberOfRows, 1);
       jacobian.reshape(numberOfRows, numberOfDoFs);
       weightMatrix.reshape(numberOfRows, numberOfRows);
-      gradientMatrix.reshape(1, numberOfRows);
       selectionMatrix.reshape(numberOfRows, numberOfRows);
       CommonOps_DDRM.setIdentity(selectionMatrix);
    }
@@ -88,10 +83,8 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
       objective.set(other.objective);
       jacobian.set(other.jacobian);
       weightMatrix.set(other.weightMatrix);
-      gradientMatrix.set(other.gradientMatrix);
       selectionMatrix.set(other.selectionMatrix);
       doNullspaceProjection = other.doNullspaceProjection;
-      hasGradient = other.hasGradient;
    }
 
    @Override
@@ -153,21 +146,6 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
       return selectionMatrix;
    }
 
-   public DMatrixRMaj getGradientMatrix()
-   {
-      return gradientMatrix;
-   }
-
-   public void setHasGradient(boolean hasGradient)
-   {
-      this.hasGradient = hasGradient;
-   }
-
-   public boolean getHasGradient()
-   {
-      return hasGradient;
-   }
-
    @Override
    public boolean equals(Object object)
    {
@@ -188,10 +166,6 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
          if (!MatrixFeatures_DDRM.isEquals(objective, other.objective))
             return false;
          if (!MatrixFeatures_DDRM.isEquals(jacobian, other.jacobian))
-            return false;
-         if (!MatrixFeatures_DDRM.isEquals(gradientMatrix, other.gradientMatrix))
-            return false;
-         if (hasGradient != other.hasGradient)
             return false;
          if (doNullspaceProjection != other.doNullspaceProjection)
             return false;
