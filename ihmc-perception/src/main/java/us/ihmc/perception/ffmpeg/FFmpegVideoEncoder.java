@@ -3,15 +3,22 @@ package us.ihmc.perception.ffmpeg;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
+import org.bytedeco.ffmpeg.avutil.AVBufferRef;
+import org.bytedeco.ffmpeg.avutil.AVFrameSideData;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.perception.RawImage;
 
+import java.util.UUID;
+
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
-import static org.bytedeco.ffmpeg.global.avutil.av_make_q;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public abstract class FFmpegVideoEncoder extends FFmpegEncoder
 {
+   private final BytePointer uuid = new BytePointer(16);
+
    private int colorConversion = -1;
    private long firstFrameTime = -1L;
    private long nextFrameTime = -1L;
@@ -25,6 +32,11 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
                              int maxBFrames)
    {
       super(outputFormat, preferredEncoderName, bitRate);
+
+      UUID randomUUID = UUID.randomUUID();
+      uuid.putLong(randomUUID.getMostSignificantBits());
+      uuid.putLong(randomUUID.getLeastSignificantBits());
+      uuid.limit(16);
 
       // Use nanosecond precision for timebase
       timeBase = av_make_q(1, (int) Conversions.secondsToMilliseconds(1.0));
@@ -103,9 +115,28 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
       nextFrameTime = nextFrameAcquisitionTime;
    }
 
+   public void setNextFrameSideData(BytePointer data)
+   {
+      AVBufferRef seiBuffer = av_buffer_alloc(16 + data.limit());
+      Pointer.memcpy(seiBuffer.data().position(0), uuid.position(0), 16);
+      Pointer.memcpy(seiBuffer.data().position(16), data.position(0), data.limit());
+
+      av_frame_remove_side_data(frameToEncode, AV_FRAME_DATA_SEI_UNREGISTERED);
+      AVFrameSideData sideData = av_frame_new_side_data_from_buf(frameToEncode, AV_FRAME_DATA_SEI_UNREGISTERED, seiBuffer);
+      FFmpegTools.checkPointer(sideData, "Adding side data to AVFrame");
+   }
+
    public long getStartTime()
    {
       return firstFrameTime;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      uuid.close();
    }
 
    protected int getColorConversion()

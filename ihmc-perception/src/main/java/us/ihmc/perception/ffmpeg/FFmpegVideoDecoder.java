@@ -4,8 +4,10 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVFrameSideData;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
@@ -30,6 +32,7 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
    private int outputPixelFormat;
    private final AVFrame outputFrame;
    private Mat outputImage;
+   private BytePointer lastFrameSideData;
 
    private final AVRational millisecondTimebase;
    private long lastFrameTimestamp = -1L;
@@ -56,6 +59,8 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
 
       outputFrame = av_frame_alloc();
       FFmpegTools.checkPointer(outputFrame, "Allocating output frame");
+
+      lastFrameSideData = new BytePointer();
    }
 
    @Override
@@ -101,6 +106,7 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       boolean gotAFrame = decodeNextFrame(decodedFrame ->
       {
          lastFrameTimestamp = av_rescale_q(decodedFrame.best_effort_timestamp(), streamToDecode.time_base(), millisecondTimebase);
+         extractSideData(decodedFrame);
 
          if (swsContext != null)
          {
@@ -131,6 +137,11 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       return lastFrameTimestamp;
    }
 
+   public BytePointer getLastFrameSideData()
+   {
+      return lastFrameSideData;
+   }
+
    @Override
    public void destroy()
    {
@@ -146,6 +157,21 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       {
          sws_freeContext(swsContext);
          swsContext.close();
+      }
+   }
+
+   private void extractSideData(AVFrame decodedFrame)
+   {
+      lastFrameSideData.close();
+      AVFrameSideData sideData;
+      for (int i = 0; i < decodedFrame.nb_side_data(); ++i)
+      {
+         sideData = decodedFrame.side_data(i);
+         if (!sideData.isNull() && sideData.type() == AV_FRAME_DATA_SEI_UNREGISTERED)
+         {
+            lastFrameSideData = new BytePointer(sideData.data().position(16).limit(sideData.size()));
+            break;
+         }
       }
    }
 }

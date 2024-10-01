@@ -4,6 +4,7 @@ import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -87,7 +88,7 @@ public class SRTVideoStreamer
                           int imageHeight,
                           int inputAVPixelFormat)
    {
-      initialize(imageWidth, imageHeight, inputAVPixelFormat, -1, false, false);
+      initialize(imageWidth, imageHeight, inputAVPixelFormat, -1, false, false, false);
    }
 
    /**
@@ -105,12 +106,15 @@ public class SRTVideoStreamer
                           int inputAVPixelFormat,
                           int intermediateColorConversion,
                           boolean streamLosslessly,
+                          boolean includeExtraData,
                           boolean useHardwareAcceleration)
    {
       int bitRate = 10 * imageWidth * imageHeight;
 
       if (streamLosslessly)
          av_dict_set(encoderOptions, "tune", "lossless", 0);
+      if (includeExtraData)
+         av_dict_set_int(encoderOptions, "udu_sei", 1, 0);
 
       if (useHardwareAcceleration)
          encoder = new FFmpegHardwareVideoEncoder(outputFormat,
@@ -140,6 +144,14 @@ public class SRTVideoStreamer
    public void sendFrame(Pointer frame, Instant frameAcquisitionTime)
    {
       encoder.setNextFrameAcquisitionTime(frameAcquisitionTime.toEpochMilli());
+      encoder.setNextFrame(frame);
+      encoder.encodeNextFrame(this::writeToCallers);
+   }
+
+   public void sendFrame(Pointer frame, Instant frameAcquisitionTime, BytePointer extraData)
+   {
+      encoder.setNextFrameAcquisitionTime(frameAcquisitionTime.toEpochMilli());
+      encoder.setNextFrameSideData(extraData);
       encoder.setNextFrame(frame);
       encoder.encodeNextFrame(this::writeToCallers);
    }

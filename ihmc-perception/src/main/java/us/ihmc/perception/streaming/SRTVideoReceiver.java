@@ -3,6 +3,7 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -170,6 +171,11 @@ public class SRTVideoReceiver
    public long getLastFrameTimestamp()
    {
       return decoder.getLastFrameTimestamp();
+   }
+
+   public BytePointer getLastFrameSideData()
+   {
+      return decoder.getLastFrameSideData();
    }
 
    public boolean isConnected()

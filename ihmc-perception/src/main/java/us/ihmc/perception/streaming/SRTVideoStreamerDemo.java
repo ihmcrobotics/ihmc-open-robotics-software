@@ -38,7 +38,7 @@ public class SRTVideoStreamerDemo
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
 
       // Create and initialize the video streamer
-      InetSocketAddress streamerAddress = StreamingTools.getHostAddress();
+      InetSocketAddress streamerAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
       LogTools.info("Starting streamer on {}", streamerAddress);
       videoStreamer = new SRTVideoStreamer(streamerAddress);
       videoStreamer.initialize(imageWidth, imageHeight, AV_PIX_FMT_BGR24);

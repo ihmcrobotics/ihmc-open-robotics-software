@@ -81,6 +81,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -91,6 +93,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -1573,5 +1576,37 @@ public class MessageTools
          return Level.TRACE;
       else
          return Level.INFO;
+   }
+
+   public static <T extends Packet<T>> ByteBuffer serialize(T message)
+   {
+      SerializedPayload payload = new SerializedPayload(message.getPubSubTypePacket().get().getTypeSize());
+      try
+      {
+         TopicDataType<T> pubSubType = message.getPubSubTypePacket().get();
+         pubSubType.serialize(message, payload);
+         return payload.getData();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static <T extends Packet<T>> void deserialize(ByteBuffer serializedData, T messageToPack)
+   {
+      SerializedPayload payload = new SerializedPayload(serializedData.limit());
+      payload.getData().put(serializedData);
+      payload.getData().position(0);
+
+      try
+      {
+         TopicDataType<T> pubSubType = messageToPack.getPubSubTypePacket().get();
+         pubSubType.deserialize(payload, messageToPack);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }

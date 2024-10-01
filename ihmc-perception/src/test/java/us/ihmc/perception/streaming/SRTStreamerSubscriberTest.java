@@ -168,7 +168,7 @@ public class SRTStreamerSubscriberTest
    }
 
    @Test
-   public void testTimestampValues() throws InterruptedException
+   public void testSideData() throws InterruptedException
    {
       InetSocketAddress localAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
       Throttler throttler = new Throttler();
@@ -176,10 +176,10 @@ public class SRTStreamerSubscriberTest
 
       // Initialize the streamer
       SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
-      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24);
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24, -1, false, true, false);
       assertEquals(0, streamer.connectedCallerCount());
 
-      AtomicLong firstFrameTime = new AtomicLong(-1L);
+      String message = "Hello World!";
 
       // In a separate thread, wait for the receiver to connect
       Thread streamerConnectThread = ThreadTools.startAThread(() ->
@@ -188,25 +188,21 @@ public class SRTStreamerSubscriberTest
          for (int i = 0; i < 2 * FPS; ++i)
          {
             throttler.waitAndRun();
-            Instant frameInstant = Instant.now().minusSeconds(5L); // 5 seconds in the past.
-            firstFrameTime.compareAndSet(-1L, frameInstant.toEpochMilli());
-            streamer.sendFrame(sampleImage, frameInstant);
+            streamer.sendFrame(sampleImage, Instant.now(), new BytePointer(message));
          }
       }, "SRTStreamerTestConnection");
 
       // Initialize a receiver and connect to streamer
       SRTVideoReceiver receiver = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
-      assertFalse(receiver.isConnected());
       receiver.connect(localAddress, EXTRA_LONG_TIMEOUT);
 
       // Receive a frame
-
       Mat frame = receiver.getNextFrame(0.5);
       if (frame != null)
          frame.close();
-      long frameTimestamp = receiver.getLastFrameTimestamp();
+      BytePointer receivedMessage = receiver.getLastFrameSideData();
 
-      assertEquals(firstFrameTime.get(), frameTimestamp);
+      assertEquals(message, receivedMessage.getString());
 
       streamerConnectThread.join();
 

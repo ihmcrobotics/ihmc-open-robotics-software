@@ -72,7 +72,8 @@ public class ROS2SRTVideoStreamer
                           boolean streamLosslessly,
                           boolean useHardwareAcceleration)
    {
-      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, useHardwareAcceleration);
+      // TODO:
+      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, false, useHardwareAcceleration);
    }
 
    public synchronized void sendFrame(RawImage frame)
