@@ -14,6 +14,11 @@ public interface RobotVersion
       return hasArm(RobotSide.LEFT) && hasArm(RobotSide.RIGHT);
    }
 
+   default boolean hasHead()
+   {
+      return true;
+   }
+
    default boolean hasSakeGripperJoints(RobotSide side)
    {
       return false;
