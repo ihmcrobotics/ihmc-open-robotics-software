@@ -45,7 +45,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
 {
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
 
-   private final YoRegistry registry = new YoRegistry("WholeBodyControllerCore");
+   private final YoRegistry registry = new YoRegistry("WBCCThread");
    private final YoDouble wholeBodyControllerCoreTime = new YoDouble("WholeBodyControllerCoreTime", registry);
    private final FullHumanoidRobotModel controllerCoreFullRobotModel;
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
@@ -87,7 +87,6 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerCoreFullRobotModel, robotModel, sensorInformation);
-      //      wholeBodyControllerCoreCalculator = createWholeBodyControllerCoreCalculator();
       if (outputProcessor != null)
       {
          outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
@@ -114,7 +113,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       wholeBodyControllerCoreThreadTimer = new ExecutionTimer("WholeBodyControllerCoreTimer111", registry);
 
       firstTick.set(true);
-//      registry.addChild(wholeBodyControllerCoreCalculator.getYoRegistry());
+      registry.addChild(wholeBodyControllerCoreCalculator.getYoRegistry());
    }
 
    private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel controllerCoreModel,
@@ -213,7 +212,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
             firstTick.set(false);
          }
          wholeBodyControllerCoreCalculator.doControl();
-         humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
+         humanoidRobotContextData.setWholeBodyControllerCoreRan(true);
       }
       catch (Exception e)
       {
