@@ -158,7 +158,14 @@ public class SRTVideoStreamer
 
    public void sendFrame(RawImage frame)
    {
+      sendFrame(frame, null);
+   }
+
+   public void sendFrame(RawImage frame, BytePointer sideData)
+   {
       encoder.setNextFrame(frame);
+      if (sideData != null && !sideData.isNull())
+         encoder.setNextFrameSideData(sideData);
       encoder.encodeNextFrame(this::writeToCallers);
    }
 

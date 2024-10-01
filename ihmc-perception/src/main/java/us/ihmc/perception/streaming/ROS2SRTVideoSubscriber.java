@@ -1,14 +1,19 @@
 package us.ihmc.perception.streaming;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.msg.dds.StreamData;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -35,14 +40,24 @@ public class ROS2SRTVideoSubscriber
    private final AtomicBoolean subscriptionDesired = new AtomicBoolean(false);
    private volatile boolean shutdown = false;
 
+   private final StreamData frameDataMessage = new StreamData();
+   private final CameraIntrinsics cameraIntrinsics;
+   private float depthDiscretization;
+   private final MutableReferenceFrame sensorFrame;
+   private final FramePose3D sensorPose; // updated upon access
+
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, int outputAVPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
 
+      cameraIntrinsics = new CameraIntrinsics();
+      sensorFrame = new MutableReferenceFrame();
+      sensorPose = new FramePose3D();
+      
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
       videoReceiver = new SRTVideoReceiver(outputAVPixelFormat);
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
-
+      
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
    }
 
@@ -90,27 +105,32 @@ public class ROS2SRTVideoSubscriber
 
    public ReferenceFrame getSensorFrame()
    {
-      return streamStatusMonitor.getSensorFrame();
+      return sensorFrame.getReferenceFrame();
    }
 
    public RigidBodyTransformReadOnly getSensorTransformToWorld()
    {
-      return streamStatusMonitor.getSensorTransformToWorld();
+      return sensorFrame.getTransformToParent();
    }
 
    public FramePose3DReadOnly getSensorPose()
    {
-      return streamStatusMonitor.getSensorPose();
+      synchronized (sensorFrame)
+      {
+         sensorPose.setToZero(getSensorFrame());
+      }
+      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+      return sensorPose;
    }
 
    public CameraIntrinsics getCameraIntrinsics()
    {
-      return streamStatusMonitor.getCameraIntrinsics();
+      return cameraIntrinsics;
    }
 
    public float getDepthDiscretization()
    {
-      return streamStatusMonitor.getDepthDiscretization();
+      return depthDiscretization;
    }
 
    public long getFrameTimestamp()
@@ -158,6 +178,22 @@ public class ROS2SRTVideoSubscriber
             frameTimestamp = videoReceiver.getLastFrameTimestamp();
             if (nextFrame != null)
             {
+               BytePointer serializedFrameDataMessage = videoReceiver.getLastFrameSideData();
+               MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
+
+               cameraIntrinsics.setWidth(frameDataMessage.getImageWidth());
+               cameraIntrinsics.setHeight(frameDataMessage.getImageHeight());
+               cameraIntrinsics.setFx(frameDataMessage.getFx());
+               cameraIntrinsics.setFy(frameDataMessage.getFy());
+               cameraIntrinsics.setCx(frameDataMessage.getCx());
+               cameraIntrinsics.setCy(frameDataMessage.getCy());
+               depthDiscretization = frameDataMessage.getDepthDiscretization();
+
+               synchronized (sensorFrame)
+               {
+                  sensorFrame.update(transformToWorld -> transformToWorld.set(frameDataMessage.getOrientation(), frameDataMessage.getPosition()));
+               }
+
                newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
                nextFrame.close();
             }

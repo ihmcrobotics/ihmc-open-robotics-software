@@ -1,6 +1,9 @@
 package us.ihmc.perception.streaming;
 
+import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.msg.dds.StreamData;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
@@ -14,6 +17,7 @@ public class ROS2SRTVideoStreamer
 {
    private final SRTStreamStatus statusMessage;
    private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
+   private final StreamData frameDataMessage;
 
    private final SRTVideoStreamer videoStreamer;
 
@@ -33,6 +37,8 @@ public class ROS2SRTVideoStreamer
       statusMessage.setStreamerPort(streamOutputAddress.getPort());
 
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
+
+      frameDataMessage = new StreamData();
 
       videoStreamer = new SRTVideoStreamer(streamOutputAddress);
 
@@ -72,8 +78,7 @@ public class ROS2SRTVideoStreamer
                           boolean streamLosslessly,
                           boolean useHardwareAcceleration)
    {
-      // TODO:
-      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, false, useHardwareAcceleration);
+      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, true, useHardwareAcceleration);
    }
 
    public synchronized void sendFrame(RawImage frame)
@@ -81,7 +86,19 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      videoStreamer.sendFrame(frame);
+      frameDataMessage.setImageWidth(frame.getImageWidth());
+      frameDataMessage.setImageHeight(frame.getImageHeight());
+      frameDataMessage.setFx(frame.getFocalLengthX());
+      frameDataMessage.setFy(frame.getFocalLengthY());
+      frameDataMessage.setCx(frame.getPrincipalPointX());
+      frameDataMessage.setCy(frame.getPrincipalPointY());
+      frameDataMessage.setDepthDiscretization(frame.getDepthDiscretization());
+      frameDataMessage.getPosition().set(frame.getPosition());
+      frameDataMessage.getOrientation().set(frame.getOrientation());
+      try (BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameDataMessage)))
+      {
+         videoStreamer.sendFrame(frame, serializedMessage);
+      }
 
       sendFrequencyCalculator.ping();
       float frequency = (float) sendFrequencyCalculator.getFrequency();
