@@ -3,49 +3,25 @@ package us.ihmc.avatar.logProcessor;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
-
-import java.util.ArrayList;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class SCS2LogLocomotionData
 {
    private YoRegistry rootRegistry;
-   private YoVariable yoCurrentNumberOfFootsteps;
-   private YoVariable leftFootState;
-   private YoVariable rightFootState;
-   private ConstraintType leftLastFootState = ConstraintType.SWING;
-   private ConstraintType rightLastFootState = ConstraintType.SWING;
-   private Double leftFullSupportTime = Double.NaN;
-   private Double rightFullSupportTime = Double.NaN;
-   private boolean newLeftStep = false;
-   private boolean newRightStep = false;
-   private YoVariable leftFootPolygon_0_x ;
-   private YoVariable leftFootPolygon_0_y ;
-   private YoVariable leftFootPolygon_1_x ;
-   private YoVariable leftFootPolygon_1_y ;
-   private YoVariable leftFootPolygon_2_x ;
-   private YoVariable leftFootPolygon_2_y ;
-   private YoVariable leftFootPolygon_3_x ;
-   private YoVariable leftFootPolygon_3_y ;
-   private YoVariable rightFootPolygon_0_x;
-   private YoVariable rightFootPolygon_0_y;
-   private YoVariable rightFootPolygon_1_x;
-   private YoVariable rightFootPolygon_1_y;
-   private YoVariable rightFootPolygon_2_x;
-   private YoVariable rightFootPolygon_2_y;
-   private YoVariable rightFootPolygon_3_x;
-   private YoVariable rightFootPolygon_3_y;
-   private final ArrayList<double[]> leftFootsteps = new ArrayList<>();
-   private final ArrayList<double[]> rightFootsteps = new ArrayList<>();
+   private SCS2LogDataEnum<HighLevelControllerName> controllerState;
+   private final SideDependentList<SCS2LogDataFootstep> footStates = new SideDependentList<>();
 
    private final Point2D robotStartLocation = new Point2D();
-   private final Point2D currentCenterOfMass = new Point2D();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
-   private YoVariable yoCenterOfMassX;
-   private YoVariable yoCenterOfMassY;
+   private YoPoint3D yoCenterOfMass;
    private final double comPlotProximityToFootsteps = 5.0;
    private final double comPlotResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
@@ -58,32 +34,19 @@ public class SCS2LogLocomotionData
 
       String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
 
-      String momentumRateControl = highLevelController + "WalkingControllerState.LinearMomentumRateControlModule.";
-      yoCenterOfMassX = rootRegistry.findVariable(momentumRateControl + "centerOfMassX");
-      yoCenterOfMassY = rootRegistry.findVariable(momentumRateControl + "centerOfMassY");
+      if (rootRegistry.findVariable(highLevelController + "highLevelControllerNameCurrentState") instanceof YoEnum<?> yoEnum)
+         controllerState = new SCS2LogDataEnum<>(yoEnum, HighLevelControllerName.class);
 
-      String walkingMessageHandler = highLevelController + "HighLevelHumanoidControllerFactory.WalkingMessageHandler.";
-      yoCurrentNumberOfFootsteps = rootRegistry.findVariable(walkingMessageHandler + "currentNumberOfFootsteps");
+      String momentumRateControl = highLevelController + "WalkingControllerState.LinearMomentumRateControlModule.";
+      if (rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble xVariable
+       && rootRegistry.findVariable(momentumRateControl + "centerOfMassY") instanceof YoDouble yVariable
+       && rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble zVariable)
+         yoCenterOfMass = new YoPoint3D(xVariable, yVariable, zVariable);
+      
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
-      leftFootState = rootRegistry.findVariable(feetManager + "leftFootControlModule.leftFootCurrentState");
-      rightFootState = rootRegistry.findVariable(feetManager + "rightFootControlModule.rightFootCurrentState");
-      String footPolygonPrefix = highLevelController + "HighLevelHumanoidControllerToolbox.BipedSupportPolygons.";
-      leftFootPolygon_0_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_x");
-      leftFootPolygon_0_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_0_y");
-      leftFootPolygon_1_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_x");
-      leftFootPolygon_1_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_1_y");
-      leftFootPolygon_2_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_x");
-      leftFootPolygon_2_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_2_y");
-      leftFootPolygon_3_x  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_x");
-      leftFootPolygon_3_y  = rootRegistry.findVariable(footPolygonPrefix + "leftFootPolygon_3_y");
-      rightFootPolygon_0_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_x");
-      rightFootPolygon_0_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_0_y");
-      rightFootPolygon_1_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_x");
-      rightFootPolygon_1_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_1_y");
-      rightFootPolygon_2_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_x");
-      rightFootPolygon_2_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_2_y");
-      rightFootPolygon_3_x = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_x");
-      rightFootPolygon_3_y = rootRegistry.findVariable(footPolygonPrefix + "rightFootPolygon_3_y");
+      for (RobotSide side : RobotSide.values)
+         if (rootRegistry.findVariable(feetManager + "%1$sFootControlModule.%1$sFootCurrentState".formatted(side.getLowerCaseName())) instanceof YoEnum<?> yoEnum)
+            footStates.set(side, new SCS2LogDataFootstep(side, new SCS2LogDataEnum<>(yoEnum, ConstraintType.class), rootRegistry));
 
       logSession.addAfterReadCallback(this::afterRead);
    }
@@ -93,66 +56,25 @@ public class SCS2LogLocomotionData
       if (requestStopProcessing)
          return;
 
-      currentCenterOfMass.set(yoCenterOfMassX.getValueAsDouble(), yoCenterOfMassY.getValueAsDouble());
-
-      if (leftLastFootState != ConstraintType.FULL && leftFootState.getValueAsString().equals(ConstraintType.FULL.name()))
+      boolean recentSteps = false;
+      for (RobotSide side : RobotSide.values)
       {
-         newLeftStep = true;
-         leftFullSupportTime = currentTime;
-      }
-      leftLastFootState = leftFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(leftFootState.getValueAsString());
-
-      if (rightLastFootState != ConstraintType.FULL && rightFootState.getValueAsString().equals(ConstraintType.FULL.name()))
-      {
-         newRightStep = true;
-         rightFullSupportTime = currentTime;
-      }
-      rightLastFootState = rightFootState.getValueAsString().equals("null") ? null : ConstraintType.valueOf(rightFootState.getValueAsString());
-
-      if (newLeftStep && currentTime - leftFullSupportTime > 0.1)
-      {
-         LogTools.info("Left step at {}", new Point2D(leftFootPolygon_0_x.getValueAsDouble(), leftFootPolygon_0_y.getValueAsDouble()));
-         leftFootsteps.add(new double[] {leftFootPolygon_0_x.getValueAsDouble(),
-                                         leftFootPolygon_1_x.getValueAsDouble(),
-                                         leftFootPolygon_2_x.getValueAsDouble(),
-                                         leftFootPolygon_3_x.getValueAsDouble(),
-                                         leftFootPolygon_0_y.getValueAsDouble(),
-                                         leftFootPolygon_1_y.getValueAsDouble(),
-                                         leftFootPolygon_2_y.getValueAsDouble(),
-                                         leftFootPolygon_3_y.getValueAsDouble()});
-         newLeftStep = false;
+         recentSteps |= footStates.get(side).afterRead(currentTime);
       }
 
-      if (newRightStep && currentTime - rightFullSupportTime > 0.1)
-      {
-         LogTools.info("Right step at {}", new Point2D(rightFootPolygon_0_x.getValueAsDouble(), rightFootPolygon_0_y.getValueAsDouble()));
-         rightFootsteps.add(new double[] {rightFootPolygon_0_x.getValueAsDouble(),
-                                          rightFootPolygon_1_x.getValueAsDouble(),
-                                          rightFootPolygon_2_x.getValueAsDouble(),
-                                          rightFootPolygon_3_x.getValueAsDouble(),
-                                          rightFootPolygon_0_y.getValueAsDouble(),
-                                          rightFootPolygon_1_y.getValueAsDouble(),
-                                          rightFootPolygon_2_y.getValueAsDouble(),
-                                          rightFootPolygon_3_y.getValueAsDouble()});
-         newRightStep = false;
-      }
-
-      boolean recentLeftStep = !Double.isNaN(leftFullSupportTime) && currentTime - leftFullSupportTime < comPlotProximityToFootsteps;
-      boolean recentRightStep = !Double.isNaN(rightFullSupportTime) && currentTime - rightFullSupportTime < comPlotProximityToFootsteps;
-
-      if (recentLeftStep || recentRightStep)
+      if (recentSteps)
       {
          if (Double.isNaN(lastCoMPlotTime) || currentTime - lastCoMPlotTime > comPlotResolution)
          {
             if (coms.isEmpty())
             {
-               robotStartLocation.set(currentCenterOfMass.getX(), currentCenterOfMass.getY());
+               robotStartLocation.set(yoCenterOfMass.getX(), yoCenterOfMass.getY());
                LogTools.info("Robot start location: {}", robotStartLocation);
             }
 
-            coms.add().set(currentCenterOfMass);
+            coms.add().set(yoCenterOfMass);
 
-            lastCenterOfMass.set(currentCenterOfMass);
+            lastCenterOfMass.set(yoCenterOfMass);
             lastCoMPlotTime = currentTime;
          }
       }
@@ -174,14 +96,9 @@ public class SCS2LogLocomotionData
       return robotStartLocation;
    }
 
-   public ArrayList<double[]> getLeftFootsteps()
+   public SideDependentList<SCS2LogDataFootstep> getFootStates()
    {
-      return leftFootsteps;
-   }
-
-   public ArrayList<double[]> getRightFootsteps()
-   {
-      return rightFootsteps;
+      return footStates;
    }
 
    public RecyclingArrayList<Point2D> getComs()
