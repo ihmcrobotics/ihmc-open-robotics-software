@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -21,10 +22,10 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -38,6 +39,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -61,6 +63,7 @@ public class DynamicsMatrixCalculatorTest
 
    private InverseDynamicsCalculator inverseDynamicsCalculator;
    private DynamicsMatrixCalculator dynamicsMatrixCalculator;
+   private FloatingBaseRigidBodyDynamicsCalculator rbdCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
 
    private double gravityZ;
@@ -70,7 +73,7 @@ public class DynamicsMatrixCalculatorTest
    int bodyDoFs;
 
    @Test
-   public void testEquivalence() throws Exception
+   public void testEquivalence()
    {
       setupTest();
 
@@ -91,14 +94,14 @@ public class DynamicsMatrixCalculatorTest
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
-         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
    }
 
    @Test
-   public void testMassMatrixOnly() throws Exception
+   public void testMassMatrixOnly()
    {
       setupTest();
 
@@ -119,14 +122,18 @@ public class DynamicsMatrixCalculatorTest
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
-         dynamicsMatrixCalculator.computeQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         rbdCalculator.computeJointAccelerationGivenContactForcesForFloatingSubsystem(dynamicsMatrixCalculator.getFloatingBaseMassMatrix(),
+                                                                                      dynamicsMatrixCalculator.getFloatingBaseGravityCoriolisMatrix(),
+                                                                                      dynamicsMatrixCalculator.getFloatingBaseContactForceJacobian(),
+                                                                                      qddotSolution,
+                                                                                      rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
    }
 
    @Test
-   public void testNoLoad() throws Exception
+   public void testNoLoad()
    {
       setupTest();
 
@@ -149,7 +156,7 @@ public class DynamicsMatrixCalculatorTest
    }
 
    @Test
-   public void testGravityOnly() throws Exception
+   public void testGravityOnly()
    {
       setupTest();
 
@@ -172,7 +179,7 @@ public class DynamicsMatrixCalculatorTest
    }
 
    @Test
-   public void testGravityAndCoriolisOnly() throws Exception
+   public void testGravityAndCoriolisOnly()
    {
       setupTest();
 
@@ -196,7 +203,7 @@ public class DynamicsMatrixCalculatorTest
    }
 
    @Test
-   public void testMassMatrixAndGravityOnly() throws Exception
+   public void testMassMatrixAndGravityOnly()
    {
       setupTest();
 
@@ -215,14 +222,14 @@ public class DynamicsMatrixCalculatorTest
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
-         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
    }
 
    @Test
-   public void testMassMatrixAndCoriolisOnly() throws Exception
+   public void testMassMatrixAndCoriolisOnly()
    {
       setupTest();
 
@@ -242,14 +249,14 @@ public class DynamicsMatrixCalculatorTest
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
-         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
    }
 
    @Test
-   public void testMassMatrixGravityAndCoriolisOnly() throws Exception
+   public void testMassMatrixGravityAndCoriolisOnly()
    {
       setupTest();
 
@@ -269,14 +276,14 @@ public class DynamicsMatrixCalculatorTest
          DMatrixRMaj qddotSolution = new DMatrixRMaj(degreesOfFreedom, 1);
 
          update();
-         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
    }
 
    @Test
-   public void testForceAndGravityOnly() throws Exception
+   public void testForceAndGravityOnly()
    {
       setupTest();
 
@@ -299,7 +306,7 @@ public class DynamicsMatrixCalculatorTest
    }
 
    @Test
-   public void testForceGravityAndCoriolisOnly() throws Exception
+   public void testForceGravityAndCoriolisOnly()
    {
       setupTest();
 
@@ -321,12 +328,6 @@ public class DynamicsMatrixCalculatorTest
          solveAndCompare(qddotSolution, rhoSolution, false);
       }
    }
-
-   @Test
-   public void testOther() throws Exception
-   {
-   }
-
 
    private void setupTest()
    {
@@ -367,6 +368,7 @@ public class DynamicsMatrixCalculatorTest
       inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody());
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
+      rbdCalculator = new FloatingBaseRigidBodyDynamicsCalculator();
 
       centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(twistCalculator.getRootBody(), toolbox.getCenterOfMassFrame());
 
@@ -375,7 +377,7 @@ public class DynamicsMatrixCalculatorTest
       bodyDoFs = degreesOfFreedom - floatingBaseDoFs;
    }
 
-   private PlaneContactStateCommand nextPlaneContactStateCommand(Random random, ContactablePlaneBody contactablePlaneBody)
+   private static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, ContactablePlaneBody contactablePlaneBody)
    {
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
@@ -424,10 +426,10 @@ public class DynamicsMatrixCalculatorTest
       inverseDynamicsCalculator.compute();
       inverseDynamicsCalculator.writeComputedJointWrenches(SubtreeStreams.fromChildren(toolbox.getRootBody()).toArray(JointBasics[]::new));
 
-      dynamicsMatrixCalculator.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
+      extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
 
       if (checkRigidBodyDynamics)
-         assertTrue(dynamicsMatrixCalculator.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
+         assertTrue(dynamicsMatrixCalculator.checkRigidBodyDynamicsSatisfied(qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
 
       for(int i = 0; i < inverseDynamicsTauSolution.getNumRows(); i++)
       {
@@ -438,7 +440,26 @@ public class DynamicsMatrixCalculatorTest
       }
 
       checkTestQuality(qddotSolution, rhoSolution, inverseDynamicsTauSolution, dynamicsMatrixTauSolution);
-      MatrixTestTools.assertMatrixEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, tolerance);
+      EjmlUnitTests.assertEquals(inverseDynamicsTauSolution, dynamicsMatrixTauSolution, tolerance);
+   }
+
+   private static void extractTorqueMatrix(JointBasics[] joints, DMatrixRMaj torqueMatrixToPack)
+   {
+      OneDoFJointBasics[] filteredJoints = MultiBodySystemTools.filterJoints(joints, RevoluteJoint.class);
+      int bodyDoFs = MultiBodySystemTools.computeDegreesOfFreedom(filteredJoints);
+
+      int startIndex = 0;
+      for (int i = 0; i < bodyDoFs; i++)
+      {
+         JointBasics joint = filteredJoints[i];
+         int jointDoF = joint.getDegreesOfFreedom();
+         DMatrixRMaj torqueMatrix = new DMatrixRMaj(jointDoF, 1);
+         joint.getJointTau(0, torqueMatrix);
+
+         for (int dof = 0; dof < jointDoF; dof++)
+            torqueMatrixToPack.set(startIndex + dof, 0, torqueMatrix.get(dof, 0));
+         startIndex += jointDoF;
+      }
    }
 
    private void checkTestQuality(DMatrixRMaj qddotSolution, DMatrixRMaj rhoSolution, DMatrixRMaj inverseDynamicsSolution, DMatrixRMaj matrixSolution)

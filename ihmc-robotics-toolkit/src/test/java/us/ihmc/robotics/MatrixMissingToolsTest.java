@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -8,6 +9,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Random;
@@ -45,6 +47,33 @@ public class MatrixMissingToolsTest
                   assertEquals(originalMatrix.get(row, col), matrixToSet.get(row, col), EPSILON);
             }
          }
+      }
+   }
+
+   @Test
+   public void testNegate()
+   {
+      DMatrixRMaj matrixToNegate = new DMatrixRMaj(0, 0);
+      int iters = 100;
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         // reinitialize the matrix to random size and value
+         int initializeRows = RandomNumbers.nextInt(random, 100, 1000);
+         int initializeCols = RandomNumbers.nextInt(random, 100, 1000);
+         matrixToNegate.set(RandomMatrices_DDRM.rectangle(initializeRows, initializeCols, random));
+
+         // get the matrix to compare against
+         int rows = RandomNumbers.nextInt(random, 10, 500);
+         int cols = RandomNumbers.nextInt(random, 10, 500);
+         DMatrixRMaj randomMatrix = RandomMatrices_DDRM.rectangle(rows, cols, random);
+         matrixToNegate.set(randomMatrix);
+
+         // negate both ways and compare
+         MatrixMissingTools.negate(matrixToNegate);
+         CommonOps_DDRM.scale(-1.0, randomMatrix);
+
+         EjmlUnitTests.assertEquals(randomMatrix, matrixToNegate, EPSILON);
       }
    }
 
