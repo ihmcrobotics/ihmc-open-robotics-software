@@ -12,16 +12,19 @@ import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SCS2LogLocomotionData
 {
    private YoRegistry rootRegistry;
+   int initialWorkingCounterMismatch = -1;
+   private YoInteger workingCounterMismatch;
    private SCS2LogDataEnum<HighLevelControllerName> controllerState;
-   private final SideDependentList<SCS2LogDataFootstep> footStates = new SideDependentList<>();
-
+   private int walks = 0;
    private final Point2D robotStartLocation = new Point2D();
+   private final SideDependentList<SCS2LogDataFootstep> footStates = new SideDependentList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
-   private YoPoint3D yoCenterOfMass;
+   private YoPoint3D centerOfMass;
    private final double comPlotProximityToFootsteps = 5.0;
    private final double comPlotResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
@@ -32,6 +35,9 @@ public class SCS2LogLocomotionData
    {
       rootRegistry = logSession.getRootRegistry();
 
+      if (rootRegistry.findVariable("root.main.DRCEstimatorThread.NadiaEtherCATRealtimeThread.workingCounterMismatch") instanceof YoInteger yoInteger)
+         workingCounterMismatch = yoInteger;
+
       String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
 
       if (rootRegistry.findVariable(highLevelController + "highLevelControllerNameCurrentState") instanceof YoEnum<?> yoEnum)
@@ -41,7 +47,7 @@ public class SCS2LogLocomotionData
       if (rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble xVariable
        && rootRegistry.findVariable(momentumRateControl + "centerOfMassY") instanceof YoDouble yVariable
        && rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble zVariable)
-         yoCenterOfMass = new YoPoint3D(xVariable, yVariable, zVariable);
+         centerOfMass = new YoPoint3D(xVariable, yVariable, zVariable);
       
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
@@ -56,6 +62,12 @@ public class SCS2LogLocomotionData
       if (requestStopProcessing)
          return;
 
+      if (initialWorkingCounterMismatch < 0)
+         initialWorkingCounterMismatch = workingCounterMismatch.getIntegerValue();
+
+      if (controllerState.changedTo(HighLevelControllerName.WALKING))
+         ++walks;
+
       boolean recentSteps = false;
       for (RobotSide side : RobotSide.values)
       {
@@ -68,13 +80,13 @@ public class SCS2LogLocomotionData
          {
             if (coms.isEmpty())
             {
-               robotStartLocation.set(yoCenterOfMass.getX(), yoCenterOfMass.getY());
+               robotStartLocation.set(centerOfMass.getX(), centerOfMass.getY());
                LogTools.info("Robot start location: {}", robotStartLocation);
             }
 
-            coms.add().set(yoCenterOfMass);
+            coms.add().set(centerOfMass);
 
-            lastCenterOfMass.set(yoCenterOfMass);
+            lastCenterOfMass.set(centerOfMass);
             lastCoMPlotTime = currentTime;
          }
       }
@@ -104,5 +116,15 @@ public class SCS2LogLocomotionData
    public RecyclingArrayList<Point2D> getComs()
    {
       return coms;
+   }
+
+   public int getWalks()
+   {
+      return walks;
+   }
+
+   public int getWorkingCounterMismatch()
+   {
+      return workingCounterMismatch.getIntegerValue() - initialWorkingCounterMismatch;
    }
 }

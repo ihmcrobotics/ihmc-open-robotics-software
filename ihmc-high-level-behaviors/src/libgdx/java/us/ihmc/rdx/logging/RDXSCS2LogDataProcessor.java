@@ -7,7 +7,6 @@ import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImString;
 import us.ihmc.avatar.logProcessor.SCS2LogDataProcessor;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -76,14 +75,16 @@ public class RDXSCS2LogDataProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 5, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 7, tableFlags))
                {
                   float charWidth = ImGuiTools.calcTextSizeX("A");
                   ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Process"), ImGuiTableColumnFlags.WidthFixed, 15 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Size"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Walks"), ImGuiTableColumnFlags.WidthFixed, 5 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Footsteps"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Coms"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("workingCounterMismatch"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
 
                   ImGui.tableSetupScrollFreeze(0, 1);
                   ImGui.tableHeadersRow();
@@ -135,11 +136,15 @@ public class RDXSCS2LogDataProcessor
                      }
 
                      ImGui.tableNextColumn();
-                     ImGui.text("" + logProcessor.getNumberOfEntries());
+                     textIfPositive(logProcessor.getNumberOfEntries());
                      ImGui.tableNextColumn();
-                     ImGui.text("" + logProcessor.getNumberOfFootstepsStat());
+                     textIfPositive(logProcessor.getNumberOfWalksStat());
                      ImGui.tableNextColumn();
-                     ImGui.text("" + logProcessor.getNumberOfComsStat());
+                     textIfPositive(logProcessor.getNumberOfFootstepsStat());
+                     ImGui.tableNextColumn();
+                     textIfPositive(logProcessor.getNumberOfComsStat());
+                     ImGui.tableNextColumn();
+                     textIfPositive(logProcessor.getWorkingCounterMismatchStat());
                   }
 
                   ImGui.endTable();
@@ -161,6 +166,12 @@ public class RDXSCS2LogDataProcessor
             baseUI.dispose();
          }
       });
+   }
+
+   private void textIfPositive(int value)
+   {
+      if (value > -1)
+         ImGui.text("" + value);
    }
 
    private void refreshDirectoryListing()
