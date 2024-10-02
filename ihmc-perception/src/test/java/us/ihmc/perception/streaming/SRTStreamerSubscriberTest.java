@@ -38,7 +38,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 import static org.junit.jupiter.api.Assertions.*;
@@ -251,7 +250,18 @@ public class SRTStreamerSubscriberTest
       subscriber.addNewFrameConsumer(receivedImage ->
       {
          subscriberHasReceivedFrame.set(true);
-         assertTrue(OpenCVTools.dimensionsMatch(receivedImage, sampleImage));
+
+         // Ensure we received the correct frame
+         assertTrue(OpenCVTools.dimensionsMatch(receivedImage.getCpuImageMat(), sampleImage));
+
+         // Ensure we received other data
+         assertEquals(depthDescretization, receivedImage.getDepthDiscretization());
+         assertEquals(fx, receivedImage.getFocalLengthX());
+         assertEquals(fy, receivedImage.getFocalLengthY());
+         assertEquals(cx, receivedImage.getPrincipalPointX());
+         assertEquals(cy, receivedImage.getPrincipalPointY());
+         EuclidCoreTestTools.assertEquals(testPosition, receivedImage.getPosition(), 1E-5);
+         EuclidCoreTestTools.assertEquals(testOrientation, receivedImage.getOrientation(), 1E-5);
       });
 
       // No communication at this time
@@ -278,18 +288,6 @@ public class SRTStreamerSubscriberTest
 
       // Ensure we can receive an image
       assertTrue(subscriberHasReceivedFrame.get());
-
-      // Ensure we can receive other data
-      assertEquals(depthDescretization, subscriber.getDepthDiscretization());
-      assertEquals(fx, subscriber.getCameraIntrinsics().getFx());
-      assertEquals(fy, subscriber.getCameraIntrinsics().getFy());
-      assertEquals(cx, subscriber.getCameraIntrinsics().getCx());
-      assertEquals(cy, subscriber.getCameraIntrinsics().getCy());
-
-      FramePoint3D receivedPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), subscriber.getSensorTransformToWorld().getTranslation());
-      FrameQuaternion receivedOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), subscriber.getSensorTransformToWorld().getRotation());
-      EuclidCoreTestTools.assertEquals(testPosition, receivedPosition, 1E-5);
-      EuclidCoreTestTools.assertEquals(testOrientation, receivedOrientation, 1E-5);
 
       sendThread.join();
 

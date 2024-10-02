@@ -1,10 +1,9 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.ROS2Topic;
@@ -42,12 +41,11 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
       getOpenCVVideoVisualizer().update();
    }
 
-   private void updateImage(Mat newImage)
+   private void updateImage(RawImage newImage)
    {
       getFrequency().ping();
-      CameraIntrinsics imageIntrinsics = subscriber.getCameraIntrinsics();
-      getOpenCVVideoVisualizer().updateImageDimensions(imageIntrinsics.getWidth(), imageIntrinsics.getHeight());
-      newImage.copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+      getOpenCVVideoVisualizer().updateImageDimensions(newImage.getImageWidth(), newImage.getImageHeight());
+      newImage.getCpuImageMat().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
    }
 
    @Nullable

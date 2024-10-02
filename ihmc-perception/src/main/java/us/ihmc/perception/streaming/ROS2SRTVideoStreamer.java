@@ -2,8 +2,9 @@ package us.ihmc.perception.streaming;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
-import perception_msgs.msg.dds.StreamData;
+import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
@@ -17,7 +18,7 @@ public class ROS2SRTVideoStreamer
 {
    private final SRTStreamStatus statusMessage;
    private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
-   private final StreamData frameDataMessage;
+   private final VideoFrameExtraData frameDataMessage;
 
    private final SRTVideoStreamer videoStreamer;
 
@@ -38,7 +39,7 @@ public class ROS2SRTVideoStreamer
 
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
 
-      frameDataMessage = new StreamData();
+      frameDataMessage = new VideoFrameExtraData();
 
       videoStreamer = new SRTVideoStreamer(streamOutputAddress);
 
@@ -86,15 +87,9 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      frameDataMessage.setImageWidth(frame.getImageWidth());
-      frameDataMessage.setImageHeight(frame.getImageHeight());
-      frameDataMessage.setFx(frame.getFocalLengthX());
-      frameDataMessage.setFy(frame.getFocalLengthY());
-      frameDataMessage.setCx(frame.getPrincipalPointX());
-      frameDataMessage.setCy(frame.getPrincipalPointY());
-      frameDataMessage.setDepthDiscretization(frame.getDepthDiscretization());
-      frameDataMessage.getPosition().set(frame.getPosition());
-      frameDataMessage.getOrientation().set(frame.getOrientation());
+      frameDataMessage.setSequenceNumber(frame.getSequenceNumber());
+      MessageTools.toMessage(frame.getAcquisitionTime(), frameDataMessage.getAcquisitionTime());
+      frameDataMessage.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
       try (BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameDataMessage)))
       {
          videoStreamer.sendFrame(frame, serializedMessage);
@@ -111,8 +106,6 @@ public class ROS2SRTVideoStreamer
       statusMessage.setCx(frame.getPrincipalPointX());
       statusMessage.setCy(frame.getPrincipalPointY());
       statusMessage.setDepthDiscretization(frame.getDepthDiscretization());
-      statusMessage.getPosition().set(frame.getPosition());
-      statusMessage.getOrientation().set(frame.getOrientation());
       statusMessagePublisher.publish(statusMessage);
 
       frame.release();

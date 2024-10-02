@@ -25,17 +25,10 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
    public float cx_;
    public float cy_;
    public float depth_discretization_;
-   /**
-            * Sensor pose
-            */
-   public us.ihmc.euclid.tuple3D.Point3D position_;
-   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
 
    public SRTStreamStatus()
    {
       streamer_address_ = new java.lang.StringBuilder(255);
-      position_ = new us.ihmc.euclid.tuple3D.Point3D();
-      orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public SRTStreamStatus(SRTStreamStatus other)
@@ -69,8 +62,6 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       depth_discretization_ = other.depth_discretization_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
    }
 
    /**
@@ -194,21 +185,6 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
    }
 
 
-   /**
-            * Sensor pose
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getPosition()
-   {
-      return position_;
-   }
-
-
-   public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
-   {
-      return orientation_;
-   }
-
-
    public static Supplier<SRTStreamStatusPubSubType> getPubSubType()
    {
       return SRTStreamStatusPubSubType::new;
@@ -248,8 +224,6 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_discretization_, other.depth_discretization_, epsilon)) return false;
 
-      if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
-      if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
 
       return true;
    }
@@ -285,8 +259,6 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if(this.depth_discretization_ != otherMyClass.depth_discretization_) return false;
 
-      if (!this.position_.equals(otherMyClass.position_)) return false;
-      if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
 
       return true;
    }
@@ -318,11 +290,7 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       builder.append("cy=");
       builder.append(this.cy_);      builder.append(", ");
       builder.append("depth_discretization=");
-      builder.append(this.depth_discretization_);      builder.append(", ");
-      builder.append("position=");
-      builder.append(this.position_);      builder.append(", ");
-      builder.append("orientation=");
-      builder.append(this.orientation_);
+      builder.append(this.depth_discretization_);
       builder.append("}");
       return builder.toString();
    }

@@ -37,8 +37,6 @@ public class ROS2StreamStatusMonitor
 
    private final CameraIntrinsics cameraIntrinsics;
    private float depthDiscretization;
-   private final MutableReferenceFrame sensorFrame;
-   private final FramePose3D sensorPose; // updated upon access
 
    private boolean running = true;
 
@@ -46,8 +44,6 @@ public class ROS2StreamStatusMonitor
    {
       isStreaming = new AtomicBoolean(false);
       cameraIntrinsics = new CameraIntrinsics();
-      sensorFrame = new MutableReferenceFrame();
-      sensorPose = new FramePose3D();
 
       throttler = new Throttler();
       messageTimer = new Timer();
@@ -109,26 +105,6 @@ public class ROS2StreamStatusMonitor
       return depthDiscretization;
    }
 
-   public ReferenceFrame getSensorFrame()
-   {
-      return sensorFrame.getReferenceFrame();
-   }
-
-   public RigidBodyTransformReadOnly getSensorTransformToWorld()
-   {
-      return sensorFrame.getTransformToParent();
-   }
-
-   public FramePose3DReadOnly getSensorPose()
-   {
-      synchronized (sensorFrame)
-      {
-         sensorPose.setToZero(getSensorFrame());
-      }
-      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-      return sensorPose;
-   }
-
    public void destroy()
    {
       running = false;
@@ -150,11 +126,6 @@ public class ROS2StreamStatusMonitor
       cameraIntrinsics.setCx(statusMessage.getCx());
       cameraIntrinsics.setCy(statusMessage.getCy());
       depthDiscretization = statusMessage.getDepthDiscretization();
-
-      synchronized (sensorFrame)
-      {
-         sensorFrame.update(transformToWorld -> transformToWorld.set(statusMessage.getOrientation(), statusMessage.getPosition()));
-      }
 
       synchronized (isStreaming)
       {

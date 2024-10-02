@@ -15,7 +15,7 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f1c4661f39967ba831746964347dde0a6385011960bd8584a8ce88ca834e4afd";
+   		return "883cf507b601b16da2e4d9fc5c1bbfb9b44f37350452c31b488cacc4002a0cce";
    }
    
    @Override
@@ -73,10 +73,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -122,10 +118,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -156,8 +148,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       cdr.write_type_5(data.getDepthDiscretization());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.SRTStreamStatus data, us.ihmc.idl.CDR cdr)
@@ -183,8 +173,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       	
       data.setDepthDiscretization(cdr.read_type_5());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
 
    }
 
@@ -202,10 +190,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.write_type_5("cx", data.getCx());
       ser.write_type_5("cy", data.getCy());
       ser.write_type_5("depth_discretization", data.getDepthDiscretization());
-      ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
-
-      ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
-
    }
 
    @Override
@@ -222,10 +206,6 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       data.setCx(ser.read_type_5("cx"));
       data.setCy(ser.read_type_5("cy"));
       data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
-      ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
-
-      ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
-
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SRTStreamStatus src, perception_msgs.msg.dds.SRTStreamStatus dest)

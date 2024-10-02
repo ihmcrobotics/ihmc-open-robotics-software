@@ -5,9 +5,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -48,28 +47,27 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       publisher.remove();
    }
 
-   private void republishFrameAsImageMessage(Mat frame)
+   private void republishFrameAsImageMessage(RawImage frame)
    {
       // Set acquisition time as now... this isn't super accurate though
       MessageTools.toMessage(Instant.now(), imageMessage.getAcquisitionTime());
 
       // Pack the uncompressed data
-      PerceptionMessageTools.packImageMessageData(imageMessage, frame.data().limit(OpenCVTools.dataSize(frame)));
+      Mat frameMat = frame.getCpuImageMat();
+      PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
 
       // Set the camera intrinsics
-      CameraIntrinsics cameraIntrinsics = subscriber.getCameraIntrinsics();
-      imageMessage.setImageWidth(cameraIntrinsics.getWidth());
-      imageMessage.setImageHeight(cameraIntrinsics.getHeight());
-      imageMessage.setFocalLengthXPixels((float) cameraIntrinsics.getFx());
-      imageMessage.setFocalLengthYPixels((float) cameraIntrinsics.getFy());
-      imageMessage.setPrincipalPointXPixels((float) cameraIntrinsics.getCx());
-      imageMessage.setPrincipalPointYPixels((float) cameraIntrinsics.getCy());
-      imageMessage.setDepthDiscretization(subscriber.getDepthDiscretization());
+      imageMessage.setImageWidth(frame.getImageWidth());
+      imageMessage.setImageHeight(frame.getImageHeight());
+      imageMessage.setFocalLengthXPixels(frame.getFocalLengthX());
+      imageMessage.setFocalLengthYPixels(frame.getFocalLengthY());
+      imageMessage.setPrincipalPointXPixels(frame.getPrincipalPointX());
+      imageMessage.setPrincipalPointYPixels(frame.getPrincipalPointY());
+      imageMessage.setDepthDiscretization(frame.getDepthDiscretization());
 
       // Set the sensor pose
-      FramePose3DReadOnly sensorPose = subscriber.getSensorPose();
-      imageMessage.getPosition().set(sensorPose.getPosition());
-      imageMessage.getOrientation().set(sensorPose.getOrientation());
+      imageMessage.getPosition().set(frame.getPosition());
+      imageMessage.getOrientation().set(frame.getOrientation());
 
       // Set and increment the sequence number
       imageMessage.setSequenceNumber(frameSequenceNumber++);

@@ -3,17 +3,14 @@ package us.ihmc.perception.streaming;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SRTStreamStatus;
-import perception_msgs.msg.dds.StreamData;
+import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -33,26 +30,17 @@ public class ROS2SRTVideoSubscriber
    private final SRTVideoReceiver videoReceiver;
 
    private Mat nextFrame;
-   private long frameTimestamp = -1;
-   private final List<Consumer<Mat>> newFrameConsumers = new ArrayList<>();
+   private final List<Consumer<RawImage>> newFrameConsumers = new ArrayList<>();
 
    private final Thread subscriptionThread;
    private final AtomicBoolean subscriptionDesired = new AtomicBoolean(false);
    private volatile boolean shutdown = false;
 
-   private final StreamData frameDataMessage = new StreamData();
-   private final CameraIntrinsics cameraIntrinsics;
-   private float depthDiscretization;
-   private final MutableReferenceFrame sensorFrame;
-   private final FramePose3D sensorPose; // updated upon access
+   private final VideoFrameExtraData frameDataMessage = new VideoFrameExtraData();
 
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, int outputAVPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
-
-      cameraIntrinsics = new CameraIntrinsics();
-      sensorFrame = new MutableReferenceFrame();
-      sensorPose = new FramePose3D();
       
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
       videoReceiver = new SRTVideoReceiver(outputAVPixelFormat);
@@ -61,7 +49,7 @@ public class ROS2SRTVideoSubscriber
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
    }
 
-   public void addNewFrameConsumer(Consumer<Mat> newFrameConsumer)
+   public void addNewFrameConsumer(Consumer<RawImage> newFrameConsumer)
    {
       newFrameConsumers.add(newFrameConsumer);
    }
@@ -103,41 +91,6 @@ public class ROS2SRTVideoSubscriber
       return videoReceiver.isConnected();
    }
 
-   public ReferenceFrame getSensorFrame()
-   {
-      return sensorFrame.getReferenceFrame();
-   }
-
-   public RigidBodyTransformReadOnly getSensorTransformToWorld()
-   {
-      return sensorFrame.getTransformToParent();
-   }
-
-   public FramePose3DReadOnly getSensorPose()
-   {
-      synchronized (sensorFrame)
-      {
-         sensorPose.setToZero(getSensorFrame());
-      }
-      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-      return sensorPose;
-   }
-
-   public CameraIntrinsics getCameraIntrinsics()
-   {
-      return cameraIntrinsics;
-   }
-
-   public float getDepthDiscretization()
-   {
-      return depthDiscretization;
-   }
-
-   public long getFrameTimestamp()
-   {
-      return frameTimestamp;
-   }
-
    private void subscriptionUpdate()
    {
       while (!shutdown)
@@ -175,27 +128,30 @@ public class ROS2SRTVideoSubscriber
             // RECEIVER IS CONNECTED
             // Get the latest image and give it to consumers
             nextFrame = videoReceiver.getNextFrame(UPDATE_TIMEOUT);
-            frameTimestamp = videoReceiver.getLastFrameTimestamp();
             if (nextFrame != null)
             {
+               // Get frame data
                BytePointer serializedFrameDataMessage = videoReceiver.getLastFrameSideData();
                MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
+               CameraIntrinsics frameIntrinsics = streamStatusMonitor.getCameraIntrinsics();
+               FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
 
-               cameraIntrinsics.setWidth(frameDataMessage.getImageWidth());
-               cameraIntrinsics.setHeight(frameDataMessage.getImageHeight());
-               cameraIntrinsics.setFx(frameDataMessage.getFx());
-               cameraIntrinsics.setFy(frameDataMessage.getFy());
-               cameraIntrinsics.setCx(frameDataMessage.getCx());
-               cameraIntrinsics.setCy(frameDataMessage.getCy());
-               depthDiscretization = frameDataMessage.getDepthDiscretization();
+               // Create a RawImage
+               RawImage nextFrameRawImage = new RawImage(frameDataMessage.getSequenceNumber(),
+                                                         MessageTools.toInstant(frameDataMessage.getAcquisitionTime()),
+                                                         streamStatusMonitor.getDepthDiscretization(),
+                                                         nextFrame,
+                                                         null,
+                                                         (float) frameIntrinsics.getFx(),
+                                                         (float) frameIntrinsics.getFy(),
+                                                         (float) frameIntrinsics.getCx(),
+                                                         (float) frameIntrinsics.getCy(),
+                                                         frameSensorPose.getPosition(),
+                                                         frameSensorPose.getOrientation());
 
-               synchronized (sensorFrame)
-               {
-                  sensorFrame.update(transformToWorld -> transformToWorld.set(frameDataMessage.getOrientation(), frameDataMessage.getPosition()));
-               }
-
-               newFrameConsumers.forEach(consumer -> consumer.accept(nextFrame));
-               nextFrame.close();
+               // Hand it off to consumers
+               newFrameConsumers.forEach(consumer -> consumer.accept(nextFrameRawImage));
+               nextFrameRawImage.release();
             }
          }
          catch (InterruptedException ignored) {}

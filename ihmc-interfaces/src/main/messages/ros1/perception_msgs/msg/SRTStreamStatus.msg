@@ -23,9 +23,4 @@ float32 cy
 
 float32 depth_discretization
 
-# Sensor pose
-geometry_msgs/Point position
-
-geometry_msgs/Quaternion orientation
-
 
