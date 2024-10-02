@@ -28,15 +28,16 @@ public class SCS2LogDataProcessor
    private Path jsonPath;
    private Path svgPath;
    private SVGGraphics2D svgGraphics2D;
-   private long tick = 0;
-   private int numberOfEntries;
+   private int numberOfEntries = -1;
    private int currentLogPosition;
    private boolean processingLog = false;
    private boolean requestStopProcessing = false;
    private SCS2LogLocomotionData locomotionData;
 
+   private int numberOfWalksStat = -1;
    private int numberOfFootstepsStat = -1;
    private int numberOfComsStat = -1;
+   private int workingCounterMismatchStat = -1;
 
    public SCS2LogDataProcessor()
    {
@@ -140,6 +141,8 @@ public class SCS2LogDataProcessor
          rootNode.put("numberOfEntries", numberOfEntries);
          if (!statsOnly)
          {
+            numberOfWalksStat = locomotionData.getWalks();
+            rootNode.put("numberOfWalks", numberOfWalksStat);
             numberOfFootstepsStat = 0;
             for (RobotSide side : RobotSide.values)
             {
@@ -148,6 +151,8 @@ public class SCS2LogDataProcessor
             rootNode.put("numberOfFootsteps", numberOfFootstepsStat);
             numberOfComsStat = locomotionData.getComs().size();
             rootNode.put("numberOfComs", numberOfComsStat);
+            workingCounterMismatchStat = locomotionData.getWorkingCounterMismatch();
+            rootNode.put("workingCounterMismatch", workingCounterMismatchStat);
          }
       });
    }
@@ -160,10 +165,13 @@ public class SCS2LogDataProcessor
          JSONFileTools.load(jsonPath, rootNode ->
          {
             numberOfEntries = rootNode.get("numberOfEntries").intValue();
+            numberOfWalksStat = rootNode.get("numberOfWalks").intValue();
             if (rootNode.has("numberOfFootsteps"))
                numberOfFootstepsStat = rootNode.get("numberOfFootsteps").intValue();
             if (rootNode.has("numberOfComs"))
                numberOfComsStat = rootNode.get("numberOfComs").intValue();
+            if (rootNode.has("workingCounterMismatch"))
+               workingCounterMismatchStat = rootNode.get("workingCounterMismatch").intValue();
          });
       }
    }
@@ -267,6 +275,11 @@ public class SCS2LogDataProcessor
       return processingLog;
    }
 
+   public int getNumberOfWalksStat()
+   {
+      return numberOfWalksStat;
+   }
+
    public int getNumberOfFootstepsStat()
    {
       if (locomotionData == null || locomotionData.getFootStates().size() < 2)
@@ -285,6 +298,11 @@ public class SCS2LogDataProcessor
    public int getNumberOfComsStat()
    {
       return locomotionData == null ? numberOfComsStat : locomotionData.getComs().size();
+   }
+
+   public int getWorkingCounterMismatchStat()
+   {
+      return locomotionData == null ? workingCounterMismatchStat : locomotionData.getWorkingCounterMismatch();
    }
 
    public static void main(String[] args)
