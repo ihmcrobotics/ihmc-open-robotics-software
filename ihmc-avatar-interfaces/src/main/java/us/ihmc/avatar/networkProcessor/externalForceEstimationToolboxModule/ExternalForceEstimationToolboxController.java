@@ -250,7 +250,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       dynamicsMatrixCalculator.compute();
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
-      dynamicsMatrixCalculator.getCoriolisAndGravityMatrix(coriolisGravityMatrix);
+      dynamicsMatrixCalculator.getGravityAndCoriolisVector(coriolisGravityMatrix);
 
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
       CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);

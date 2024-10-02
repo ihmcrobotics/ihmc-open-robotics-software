@@ -34,21 +34,21 @@ public class DynamicsMatrixCalculator
    /** H(q) **/
    private final DMatrixRMaj massMatrix;
    /** C(q, qDdot) **/
-   private final DMatrixRMaj coriolisAndGravityMatrix;
+   private final DMatrixRMaj gravityAndCoriolisVector;
    /** J(q) **/
    private final DMatrixRMaj contactForceJacobian;
 
    /** H<sub>base</sub>(q) **/
    private final DMatrixRMaj floatingBaseMassMatrix;
    /** C<sub>base</sub>(q, qDdot) **/
-   private final DMatrixRMaj floatingBaseCoriolisAndGravityMatrix;
+   private final DMatrixRMaj floatingBaseGravityAndCoriolisVector;
    /** J<sub>base</sub>(q) **/
    private final DMatrixRMaj floatingBaseContactForceJacobian;
 
    /** H<sub>body</sub>(q) **/
    private final DMatrixRMaj bodyMassMatrix;
    /** C<sub>body</sub>(q, qDdot) **/
-   private final DMatrixRMaj bodyCoriolisAndGravityMatrix;
+   private final DMatrixRMaj bodyGravityAndCoriolisVector;
    /** J<sub>body</sub>(q) **/
    private final DMatrixRMaj bodyContactForceJacobian;
    /** J<sup>T</sup><sub>body</sub>(q) **/
@@ -111,15 +111,15 @@ public class DynamicsMatrixCalculator
       jointTorques = new DMatrixRMaj(bodyDoFs, 1);
 
       massMatrix = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
-      coriolisAndGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
+      gravityAndCoriolisVector = new DMatrixRMaj(degreesOfFreedom, 1);
       contactForceJacobian = new DMatrixRMaj(rhoSize, degreesOfFreedom);
 
       floatingBaseMassMatrix = new DMatrixRMaj(floatingBaseDoFs, degreesOfFreedom);
-      floatingBaseCoriolisAndGravityMatrix = new DMatrixRMaj(floatingBaseDoFs, 1);
+      floatingBaseGravityAndCoriolisVector = new DMatrixRMaj(floatingBaseDoFs, 1);
       floatingBaseContactForceJacobian = new DMatrixRMaj(rhoSize, floatingBaseDoFs);
 
       bodyMassMatrix = new DMatrixRMaj(bodyDoFs, degreesOfFreedom);
-      bodyCoriolisAndGravityMatrix = new DMatrixRMaj(bodyDoFs, 1);
+      bodyGravityAndCoriolisVector = new DMatrixRMaj(bodyDoFs, 1);
       bodyContactForceJacobian = new DMatrixRMaj(rhoSize, bodyDoFs);
       bodyContactForceJacobianTranspose = new DMatrixRMaj(bodyDoFs, rhoSize);
 
@@ -176,7 +176,7 @@ public class DynamicsMatrixCalculator
       massMatrix.set(massMatrixCalculator.getMassMatrix());
 
       // Gets the coriolis and gravity matrix
-      coriolisAndGravityMatrix.set(coriolisMatrixCalculator.getJointTauMatrix());
+      gravityAndCoriolisVector.set(coriolisMatrixCalculator.getJointTauMatrix());
 
       // Gets the contact force jacobian
       contactWrenchMatrixCalculator.computeContactForceJacobian(contactForceJacobian);
@@ -192,7 +192,7 @@ public class DynamicsMatrixCalculator
       assertRigidBodyDynamicsMatricesAreUpToDate();
 
       CommonOps_DDRM.extract(massMatrix, 0, floatingBaseDoFs, 0, degreesOfFreedom, floatingBaseMassMatrix, 0, 0);
-      CommonOps_DDRM.extract(coriolisAndGravityMatrix, 0, floatingBaseDoFs, 0, 1, floatingBaseCoriolisAndGravityMatrix, 0, 0);
+      CommonOps_DDRM.extract(gravityAndCoriolisVector, 0, floatingBaseDoFs, 0, 1, floatingBaseGravityAndCoriolisVector, 0, 0);
       CommonOps_DDRM.extract(contactForceJacobian, 0, rhoSize, 0, floatingBaseDoFs, floatingBaseContactForceJacobian, 0, 0);
       areFloatingBaseMatricesSegmented = true;
    }
@@ -205,7 +205,7 @@ public class DynamicsMatrixCalculator
       assertRigidBodyDynamicsMatricesAreUpToDate();
 
       CommonOps_DDRM.extract(massMatrix, floatingBaseDoFs, degreesOfFreedom, 0, degreesOfFreedom, bodyMassMatrix, 0, 0);
-      CommonOps_DDRM.extract(coriolisAndGravityMatrix, floatingBaseDoFs, degreesOfFreedom, 0, 1, bodyCoriolisAndGravityMatrix, 0, 0);
+      CommonOps_DDRM.extract(gravityAndCoriolisVector, floatingBaseDoFs, degreesOfFreedom, 0, 1, bodyGravityAndCoriolisVector, 0, 0);
       CommonOps_DDRM.extract(contactForceJacobian, 0, rhoSize, floatingBaseDoFs, degreesOfFreedom, bodyContactForceJacobian, 0, 0);
       areActuatedMatricesSegmented = true;
    }
@@ -214,10 +214,10 @@ public class DynamicsMatrixCalculator
    {
       assertRigidBodyDynamicsMatricesAreUpToDate();
 
-      DMatrixRMaj bodyCoriolisAndGravityMatrix = getBodyGravityCoriolisMatrix();
+      DMatrixRMaj bodyGravityAndCoriolisVector = getBodyGravityAndCoriolisVector();
 
-      torqueMinimizationObjective.reshape(bodyCoriolisAndGravityMatrix.getNumRows(), bodyCoriolisAndGravityMatrix.getNumCols());
-      MatrixMissingTools.negate_unsafe(bodyCoriolisAndGravityMatrix, torqueMinimizationObjective);
+      torqueMinimizationObjective.reshape(bodyGravityAndCoriolisVector.getNumRows(), bodyGravityAndCoriolisVector.getNumCols());
+      MatrixMissingTools.unsafe_changeSign(bodyGravityAndCoriolisVector, torqueMinimizationObjective);
       torqueMinimizationObjectiveIsUpToDate = true;
    }
 
@@ -260,7 +260,7 @@ public class DynamicsMatrixCalculator
    public void computeJointTorques(DMatrixRMaj jointTorquesToPack, DMatrixRMaj jointAccelerations, DMatrixRMaj contactForces)
    {
       FloatingBaseRigidBodyDynamicsCalculator.computeJointTorquesGivenContactForcesAndJointAccelerations(getBodyMassMatrix(),
-                                                                                                         getBodyGravityCoriolisMatrix(),
+                                                                                                         getBodyGravityAndCoriolisVector(),
                                                                                                          getBodyContactForceJacobian(),
                                                                                                          jointAccelerations,
                                                                                                          contactForces,
@@ -273,10 +273,10 @@ public class DynamicsMatrixCalculator
       massMatrixToPack.set(massMatrix);
    }
 
-   public void getCoriolisAndGravityMatrix(DMatrixRMaj coriolisAndGravityMatrixToPack)
+   public void getGravityAndCoriolisVector(DMatrixRMaj gravityAndCoriolisVectorToPack)
    {
       assertRigidBodyDynamicsMatricesAreUpToDate();
-      coriolisAndGravityMatrixToPack.set(coriolisAndGravityMatrix);
+      gravityAndCoriolisVectorToPack.set(gravityAndCoriolisVector);
    }
 
    public void getBodyMassMatrix(DMatrixRMaj bodyMassMatrixToPack)
@@ -284,9 +284,9 @@ public class DynamicsMatrixCalculator
       bodyMassMatrixToPack.set(getBodyMassMatrix());
    }
 
-   public void getBodyCoriolisMatrix(DMatrixRMaj bodyCoriolisMatrixToPack)
+   public void getBodyGravityAndCoriolisVector(DMatrixRMaj bodyGravityAndCoriolisVectorToPack)
    {
-      bodyCoriolisMatrixToPack.set(getBodyGravityCoriolisMatrix());
+      bodyGravityAndCoriolisVectorToPack.set(getBodyGravityAndCoriolisVector());
    }
 
    public DMatrixRMaj getFloatingBaseMassMatrix()
@@ -296,11 +296,11 @@ public class DynamicsMatrixCalculator
       return floatingBaseMassMatrix;
    }
 
-   public DMatrixRMaj getFloatingBaseGravityCoriolisMatrix()
+   public DMatrixRMaj getFloatingBaseGravityAndCoriolisVector()
    {
       if (!areFloatingBaseMatricesSegmented)
          segmentFloatingBaseMatrices();
-      return floatingBaseCoriolisAndGravityMatrix;
+      return floatingBaseGravityAndCoriolisVector;
    }
 
    public DMatrixRMaj getFloatingBaseContactForceJacobian()
@@ -317,11 +317,11 @@ public class DynamicsMatrixCalculator
       return bodyMassMatrix;
    }
 
-   public DMatrixRMaj getBodyGravityCoriolisMatrix()
+   public DMatrixRMaj getBodyGravityAndCoriolisVector()
    {
       if (!areActuatedMatricesSegmented)
          segmentActuatedMatrices();
-      return bodyCoriolisAndGravityMatrix;
+      return bodyGravityAndCoriolisVector;
    }
 
    public DMatrixRMaj getBodyContactForceJacobian()
@@ -370,7 +370,7 @@ public class DynamicsMatrixCalculator
    {
       // Compute the joint accelerations given the current contact force guess.
       rbdCalculator.computeJointAccelerationGivenContactForcesForFloatingSubsystem(getFloatingBaseMassMatrix(),
-                                                                                   getFloatingBaseGravityCoriolisMatrix(),
+                                                                                   getFloatingBaseGravityAndCoriolisVector(),
                                                                                    getFloatingBaseContactForceJacobian(),
                                                                                    jointAccelerationsToPack,
                                                                                    contactForcesToPack);
@@ -383,7 +383,7 @@ public class DynamicsMatrixCalculator
 
          // Solution isn't valid. Refine the contact force guess from the joint accelerations.
          rbdCalculator.computeContactForcesGivenJointAccelerationsForFloatingSubsystem(getFloatingBaseMassMatrix(),
-                                                                                       getFloatingBaseGravityCoriolisMatrix(),
+                                                                                       getFloatingBaseGravityAndCoriolisVector(),
                                                                                        getFloatingBaseContactForceJacobian(),
                                                                                        jointAccelerationsToPack,
                                                                                        contactForcesToPack);
@@ -408,7 +408,7 @@ public class DynamicsMatrixCalculator
    private boolean checkFloatingBaseDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj contactForces)
    {
       return rbdCalculator.areFloatingBaseDynamicsSatisfied(getFloatingBaseMassMatrix(),
-                                                            getFloatingBaseGravityCoriolisMatrix(),
+                                                            getFloatingBaseGravityAndCoriolisVector(),
                                                             getFloatingBaseContactForceJacobian(),
                                                             jointAccelerations,
                                                             contactForces);
@@ -430,10 +430,10 @@ public class DynamicsMatrixCalculator
    boolean checkRigidBodyDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj jointTorques, DMatrixRMaj contactForces)
    {
       return rbdCalculator.areFloatingBaseRigidBodyDynamicsSatisfied(getFloatingBaseMassMatrix(),
-                                                                     getFloatingBaseGravityCoriolisMatrix(),
+                                                                     getFloatingBaseGravityAndCoriolisVector(),
                                                                      getFloatingBaseContactForceJacobian(),
                                                                      getBodyMassMatrix(),
-                                                                     getBodyGravityCoriolisMatrix(),
+                                                                     getBodyGravityAndCoriolisVector(),
                                                                      getBodyContactForceJacobian(),
                                                                      jointAccelerations,
                                                                      jointTorques,

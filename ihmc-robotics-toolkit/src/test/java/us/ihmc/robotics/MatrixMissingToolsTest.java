@@ -9,7 +9,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
 import java.util.Random;
@@ -51,9 +50,10 @@ public class MatrixMissingToolsTest
    }
 
    @Test
-   public void testNegate()
+   public void testNegateUnsafe()
    {
       DMatrixRMaj matrixToNegate = new DMatrixRMaj(0, 0);
+      DMatrixRMaj negatedMatrix = new DMatrixRMaj(0, 0);
       int iters = 100;
       Random random = new Random(1738L);
       for (int i = 0; i < iters; i++)
@@ -62,18 +62,20 @@ public class MatrixMissingToolsTest
          int initializeRows = RandomNumbers.nextInt(random, 100, 1000);
          int initializeCols = RandomNumbers.nextInt(random, 100, 1000);
          matrixToNegate.set(RandomMatrices_DDRM.rectangle(initializeRows, initializeCols, random));
+         negatedMatrix.set(RandomMatrices_DDRM.rectangle(initializeRows, initializeCols, random));
 
          // get the matrix to compare against
          int rows = RandomNumbers.nextInt(random, 10, 500);
          int cols = RandomNumbers.nextInt(random, 10, 500);
          DMatrixRMaj randomMatrix = RandomMatrices_DDRM.rectangle(rows, cols, random);
          matrixToNegate.set(randomMatrix);
+         negatedMatrix.reshape(rows, cols);
 
          // negate both ways and compare
-         MatrixMissingTools.negate(matrixToNegate);
+         MatrixMissingTools.unsafe_changeSign(matrixToNegate, negatedMatrix);
          CommonOps_DDRM.scale(-1.0, randomMatrix);
 
-         EjmlUnitTests.assertEquals(randomMatrix, matrixToNegate, EPSILON);
+         EjmlUnitTests.assertEquals(randomMatrix, negatedMatrix, EPSILON);
       }
    }
 

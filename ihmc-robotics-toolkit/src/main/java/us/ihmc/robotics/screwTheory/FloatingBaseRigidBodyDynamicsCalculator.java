@@ -2,9 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
 public class FloatingBaseRigidBodyDynamicsCalculator
@@ -46,24 +46,24 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param floatingBaseMassMatrix                 top six rows of the H(q) matrix above, which is H<sub>base</sub>(q). Not modified.
-    * @param floatingBaseCoriolisMatrix             top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
+    * @param floatingBaseGravityAndCoriolisVector   top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
     * @param floatingBaseContactForceJacobianMatrix first six columns of the J matrix above, which is J<sub>base</sub>. Not modified.
     * @param jointAccelerationsToPack               resulting joint accelerations. &rho; in the above equations. Modified.
     * @param contactForces                          contact forces to use to compute the joint accelerations. qDdot in the above equations. Modified.
     */
    public void computeJointAccelerationGivenContactForcesForFloatingSubsystem(DMatrixRMaj floatingBaseMassMatrix,
-                                                                              DMatrixRMaj floatingBaseCoriolisMatrix,
+                                                                              DMatrixRMaj floatingBaseGravityAndCoriolisVector,
                                                                               DMatrixRMaj floatingBaseContactForceJacobianMatrix,
                                                                               DMatrixRMaj jointAccelerationsToPack,
                                                                               DMatrixRMaj contactForces)
    {
-      tempObjective.set(floatingBaseCoriolisMatrix);
+      tempObjective.set(floatingBaseGravityAndCoriolisVector);
       CommonOps_DDRM.multAddTransA(floatingBaseContactForceJacobianMatrix, contactForces, tempObjective);
 
       pseudoInverseSolver.setA(floatingBaseMassMatrix);
       pseudoInverseSolver.solve(tempObjective, jointAccelerationsToPack);
 
-      MatrixMissingTools.negate(jointAccelerationsToPack);
+      CommonOps_DDRM.changeSign(jointAccelerationsToPack);
    }
 
    /**
@@ -91,26 +91,26 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param floatingBaseMassMatrix                 top six rows of the H<sub>base</sub>(q) matrix above. Not modified.
-    * @param floatingBaseCoriolisMatrix             top six rows of the C<sub>base</sub>(q, qDot) matrix above. Not modified.
+    * @param floatingBaseGravityAndCoriolisVector   top six rows of the C<sub>base</sub>(q, qDot) matrix above. Not modified.
     * @param floatingBaseContactForceJacobianMatrix first six columns of the J<sub>base</sub> matrix above. Not modified.
     * @param jointAccelerations                     contact forces to compute the joint accelerations. &rho; in the above equations. Not modified.
     * @param contactForcesToPack                    resulting contact forces. qDdot in the above equations. Modified.
     */
    public void computeContactForcesGivenJointAccelerationsForFloatingSubsystem(DMatrixRMaj floatingBaseMassMatrix,
-                                                                               DMatrixRMaj floatingBaseCoriolisMatrix,
+                                                                               DMatrixRMaj floatingBaseGravityAndCoriolisVector,
                                                                                DMatrixRMaj floatingBaseContactForceJacobianMatrix,
                                                                                DMatrixRMaj jointAccelerations,
                                                                                DMatrixRMaj contactForcesToPack)
    {
       CommonOps_DDRM.transpose(floatingBaseContactForceJacobianMatrix, matrixTranspose);
 
-      tempObjective.set(floatingBaseCoriolisMatrix);
+      tempObjective.set(floatingBaseGravityAndCoriolisVector);
       CommonOps_DDRM.multAdd(floatingBaseMassMatrix, jointAccelerations, tempObjective);
 
       pseudoInverseSolver.setA(matrixTranspose);
       pseudoInverseSolver.solve(tempObjective, contactForcesToPack);
 
-      MatrixMissingTools.negate(contactForcesToPack);
+      CommonOps_DDRM.changeSign(contactForcesToPack);
    }
 
    /**
@@ -129,20 +129,20 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param bodyMassMatrix                 bottom N rows of the H(q) matrix above, which is H<sub>body</sub>(q). Not modified.
-    * @param bodyCoriolisMatrix             bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
+    * @param bodyGravityAndCoriolisVector   bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
     * @param bodyContactForceJacobianMatrix right N columns of the J matrix above, which is J<sub>body</sub>. Not modified.
     * @param jointAccelerations             joint accelerations. &rho; in the above equations. Not modified.
     * @param contactForces                  contact forces. qDdot in the above equations. Not modified.
     * @param jointTorquesToPack             joint torques. &tau; in the above equations. Modified.
     */
    public static void computeJointTorquesGivenContactForcesAndJointAccelerations(DMatrixRMaj bodyMassMatrix,
-                                                                                 DMatrixRMaj bodyCoriolisMatrix,
+                                                                                 DMatrixRMaj bodyGravityAndCoriolisVector,
                                                                                  DMatrixRMaj bodyContactForceJacobianMatrix,
                                                                                  DMatrixRMaj jointAccelerations,
                                                                                  DMatrixRMaj contactForces,
                                                                                  DMatrixRMaj jointTorquesToPack)
    {
-      jointTorquesToPack.set(bodyCoriolisMatrix);
+      jointTorquesToPack.set(bodyGravityAndCoriolisVector);
       CommonOps_DDRM.multAdd(bodyMassMatrix, jointAccelerations, jointTorquesToPack);
       CommonOps_DDRM.multAddTransA(bodyContactForceJacobianMatrix, contactForces, jointTorquesToPack);
    }
@@ -168,10 +168,10 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param floatingBaseMassMatrix                 top six rows of the H(q) matrix above, which is H<sub>base</sub>(q). Not modified.
-    * @param floatingBaseCoriolisMatrix             top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
+    * @param floatingBaseGravityAndCoriolisVector   top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
     * @param floatingBaseContactForceJacobianMatrix first six columns of the J matrix above, which is J<sub>base</sub>. Not modified.
     * @param bodyMassMatrix                         bottom N rows of the H(q) matrix above, which is H<sub>body</sub>(q). Not modified.
-    * @param bodyCoriolisMatrix                     bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
+    * @param bodyGravityAndCoriolisVector           bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
     * @param bodyContactForceJacobianMatrix         right N columns of the J matrix above, which is J<sub>body</sub>. Not modified.
     * @param jointAccelerations                     joint accelerations. &rho; in the above equations. Not modified.
     * @param jointTorques                           joint torques. &tau; in the above equations. Not modified.
@@ -179,23 +179,28 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * @return where the defined dynamics hold.
     */
    public boolean areFloatingBaseRigidBodyDynamicsSatisfied(DMatrixRMaj floatingBaseMassMatrix,
-                                                            DMatrixRMaj floatingBaseCoriolisMatrix,
+                                                            DMatrixRMaj floatingBaseGravityAndCoriolisVector,
                                                             DMatrixRMaj floatingBaseContactForceJacobianMatrix,
                                                             DMatrixRMaj bodyMassMatrix,
-                                                            DMatrixRMaj bodyCoriolisMatrix,
+                                                            DMatrixRMaj bodyGravityAndCoriolisVector,
                                                             DMatrixRMaj bodyContactForceJacobianMatrix,
                                                             DMatrixRMaj jointAccelerations,
                                                             DMatrixRMaj jointTorques,
                                                             DMatrixRMaj contactForces)
    {
       if (!areFloatingBaseDynamicsSatisfied(floatingBaseMassMatrix,
-                                            floatingBaseCoriolisMatrix,
+                                            floatingBaseGravityAndCoriolisVector,
                                             floatingBaseContactForceJacobianMatrix,
                                             jointAccelerations,
                                             contactForces))
          return false;
 
-      return areActuatedDynamicsSatisfied(bodyMassMatrix, bodyCoriolisMatrix, bodyContactForceJacobianMatrix, jointAccelerations, jointTorques, contactForces);
+      return areActuatedDynamicsSatisfied(bodyMassMatrix,
+                                          bodyGravityAndCoriolisVector,
+                                          bodyContactForceJacobianMatrix,
+                                          jointAccelerations,
+                                          jointTorques,
+                                          contactForces);
    }
 
    /**
@@ -214,23 +219,23 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param floatingBaseMassMatrix                 top six rows of the H(q) matrix above, which is H<sub>base</sub>(q). Not modified.
-    * @param floatingBaseCoriolisMatrix             top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
+    * @param floatingBaseGravityAndCoriolisVector   top six rows of the C(q, qDot) matrix above, which is C<sub>base</sub>(q, qDot). Not modified.
     * @param floatingBaseContactForceJacobianMatrix first six columns of the J matrix above, which is J<sub>base</sub>. Not modified.
     * @param jointAccelerations                     joint accelerations. &rho; in the above equations. Not modified.
     * @param contactForces                          contact forces. qDdot in the above equations. Not modified.
     * @return whether the defined dynamics hold.
     **/
    public boolean areFloatingBaseDynamicsSatisfied(DMatrixRMaj floatingBaseMassMatrix,
-                                                   DMatrixRMaj floatingBaseCoriolisMatrix,
+                                                   DMatrixRMaj floatingBaseGravityAndCoriolisVector,
                                                    DMatrixRMaj floatingBaseContactForceJacobianMatrix,
                                                    DMatrixRMaj jointAccelerations,
                                                    DMatrixRMaj contactForces)
    {
-      tempObjective.set(floatingBaseCoriolisMatrix);
+      tempObjective.set(floatingBaseGravityAndCoriolisVector);
       CommonOps_DDRM.multAdd(floatingBaseMassMatrix, jointAccelerations, tempObjective);
       CommonOps_DDRM.multAddTransA(floatingBaseContactForceJacobianMatrix, contactForces, tempObjective);
 
-      return equalsZero(tempObjective, tolerance);
+      return MatrixFeatures_DDRM.isZeros(tempObjective, tolerance);
    }
 
    /**
@@ -249,7 +254,7 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * </p>
     *
     * @param bodyMassMatrix                 bottom N rows of the H(q) matrix above, which is H<sub>body</sub>(q). Not modified.
-    * @param bodyCoriolisMatrix             bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
+    * @param bodyGravityAndCoriolisVector   bottom N rows of the C(q, qDot) matrix above, which is C<sub>body</sub>(q, qDot). Not modified.
     * @param bodyContactForceJacobianMatrix right N columns of the J matrix above, which is J<sub>body</sub>. Not modified.
     * @param jointAccelerations             joint accelerations. &rho; in the above equations. Not modified.
     * @param jointTorques                   joint torques. &tau; in the above equations. Not modified.
@@ -257,28 +262,16 @@ public class FloatingBaseRigidBodyDynamicsCalculator
     * @return where the defined dynamics hold.
     */
    public boolean areActuatedDynamicsSatisfied(DMatrixRMaj bodyMassMatrix,
-                                               DMatrixRMaj bodyCoriolisMatrix,
+                                               DMatrixRMaj bodyGravityAndCoriolisVector,
                                                DMatrixRMaj bodyContactForceJacobianMatrix,
                                                DMatrixRMaj jointAccelerations,
                                                DMatrixRMaj jointTorques,
                                                DMatrixRMaj contactForces)
    {
-      tempObjective.set(bodyCoriolisMatrix);
+      tempObjective.set(bodyGravityAndCoriolisVector);
       CommonOps_DDRM.multAdd(bodyMassMatrix, jointAccelerations, tempObjective);
       CommonOps_DDRM.multAddTransA(bodyContactForceJacobianMatrix, contactForces, tempObjective);
-      CommonOps_DDRM.subtractEquals(tempObjective, jointTorques);
 
-      return equalsZero(tempObjective, tolerance);
-   }
-
-   private static boolean equalsZero(DMatrixRMaj matrix, double tolerance)
-   {
-      for (int element = 0; element < matrix.getNumElements(); element++)
-      {
-         if (!MathTools.epsilonEquals(matrix.data[element], 0.0, tolerance))
-            return false;
-      }
-
-      return true;
+      return MatrixFeatures_DDRM.isEquals(tempObjective, jointTorques, tolerance);
    }
 }

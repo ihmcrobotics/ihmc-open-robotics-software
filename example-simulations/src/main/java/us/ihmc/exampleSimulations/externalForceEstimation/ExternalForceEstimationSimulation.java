@@ -79,7 +79,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       {
          dynamicsMatrixCalculator.compute();
          dynamicsMatrixCalculator.getBodyMassMatrix(m);
-         dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqg);
+         dynamicsMatrixCalculator.getBodyGravityAndCoriolisVector(cqg);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
    }

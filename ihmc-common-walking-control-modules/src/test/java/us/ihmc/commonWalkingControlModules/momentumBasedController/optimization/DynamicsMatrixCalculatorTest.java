@@ -123,7 +123,7 @@ public class DynamicsMatrixCalculatorTest
 
          update();
          rbdCalculator.computeJointAccelerationGivenContactForcesForFloatingSubsystem(dynamicsMatrixCalculator.getFloatingBaseMassMatrix(),
-                                                                                      dynamicsMatrixCalculator.getFloatingBaseGravityCoriolisMatrix(),
+                                                                                      dynamicsMatrixCalculator.getFloatingBaseGravityAndCoriolisVector(),
                                                                                       dynamicsMatrixCalculator.getFloatingBaseContactForceJacobian(),
                                                                                       qddotSolution,
                                                                                       rhoSolution);

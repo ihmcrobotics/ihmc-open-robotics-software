@@ -463,42 +463,16 @@ public class MatrixMissingTools
    }
 
    /**
-    * Negates the input matrix in-place.
-    *
-    * @param matrixToNegate the matrix to be negated. Modified.
-    */
-   public static void negate(DMatrixRMaj matrixToNegate)
-   {
-      negate_unsafe(matrixToNegate, matrixToNegate);
-   }
-
-   /**
-    * Negates the input matrix {@param matrixToNegate} and packs the result into {@param negatedMatrix}. Performs a size check to make sure the two matrices
-    * have a compatable size.
-    *
-    * @param matrixToNegate the matrix to be negated. Not modified.
-    * @param negatedMatrix the resulting negated matrix. Modified.
-    */
-   public static void negate(DMatrixRMaj matrixToNegate, DMatrixRMaj negatedMatrix)
-   {
-      if (matrixToNegate.numCols != negatedMatrix.numCols)
-         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
-      if (matrixToNegate.numRows != negatedMatrix.numRows)
-         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
-
-      negate_unsafe(matrixToNegate, negatedMatrix);
-   }
-
-   /**
     * Negates the input matrix {@param matrixToNegate} and packs the result into {@param negatedMatrix}. Skips the size check, so may throw an
     * {@link ArrayIndexOutOfBoundsException}
     *
     * @param matrixToNegate the matrix to be negated. Not modified.
     * @param negatedMatrix the resulting negated matrix. Modified.
     */
-   public static void negate_unsafe(DMatrixRMaj matrixToNegate, DMatrixRMaj negatedMatrix)
+   public static void unsafe_changeSign(DMatrixRMaj matrixToNegate, DMatrixRMaj negatedMatrix)
    {
-      for (int i = 0; i < matrixToNegate.getNumElements(); i++)
+      final double size = matrixToNegate.getNumElements();
+      for (int i = 0; i < size; i++)
          negatedMatrix.data[i] = -matrixToNegate.data[i];
    }
 
