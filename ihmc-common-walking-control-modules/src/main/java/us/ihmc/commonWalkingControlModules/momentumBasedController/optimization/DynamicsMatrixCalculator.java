@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
@@ -72,6 +71,7 @@ public class DynamicsMatrixCalculator
 
    private final FloatingBaseRigidBodyDynamicsCalculator rbdCalculator = new FloatingBaseRigidBodyDynamicsCalculator();
 
+   private boolean areRBDMatricesUpToDate = false;
    private boolean bodyContactForceJacobianTransposeIsUpToDate = false;
    private boolean torqueMinimizationObjectiveIsUpToDate = false;
    private boolean areFloatingBaseMatricesSegmented = false;
@@ -135,6 +135,7 @@ public class DynamicsMatrixCalculator
    {
       coriolisMatrixCalculator.setExternalWrenchesToZero();
 
+      areRBDMatricesUpToDate = false;
       bodyContactForceJacobianTransposeIsUpToDate = false;
       torqueMinimizationObjectiveIsUpToDate = false;
       areFloatingBaseMatricesSegmented = false;
@@ -154,8 +155,15 @@ public class DynamicsMatrixCalculator
       coriolisMatrixCalculator.setExternalWrench(rigidBody, externalWrench);
    }
 
+   /**
+    * This updates the rigid body matrices, and also sets the flags to perform efficient updates of the other matrices to false, indicating they must also be
+    * updated. This call performs no computation if {@link #reset()} has not been called.
+    */
    public void compute()
    {
+      if (areRBDMatricesUpToDate)
+         return;
+
       bodyContactForceJacobianTransposeIsUpToDate = false;
       torqueMinimizationObjectiveIsUpToDate = false;
       areFloatingBaseMatricesSegmented = false;
@@ -172,6 +180,8 @@ public class DynamicsMatrixCalculator
 
       // Gets the contact force jacobian
       contactWrenchMatrixCalculator.computeContactForceJacobian(contactForceJacobian);
+
+      areRBDMatricesUpToDate = true;
    }
 
    /**
@@ -179,6 +189,8 @@ public class DynamicsMatrixCalculator
     */
    private void segmentFloatingBaseMatrices()
    {
+      assertRigidBodyDynamicsMatricesAreUpToDate();
+
       CommonOps_DDRM.extract(massMatrix, 0, floatingBaseDoFs, 0, degreesOfFreedom, floatingBaseMassMatrix, 0, 0);
       CommonOps_DDRM.extract(coriolisAndGravityMatrix, 0, floatingBaseDoFs, 0, 1, floatingBaseCoriolisAndGravityMatrix, 0, 0);
       CommonOps_DDRM.extract(contactForceJacobian, 0, rhoSize, 0, floatingBaseDoFs, floatingBaseContactForceJacobian, 0, 0);
@@ -190,6 +202,8 @@ public class DynamicsMatrixCalculator
     */
    private void segmentActuatedMatrices()
    {
+      assertRigidBodyDynamicsMatricesAreUpToDate();
+
       CommonOps_DDRM.extract(massMatrix, floatingBaseDoFs, degreesOfFreedom, 0, degreesOfFreedom, bodyMassMatrix, 0, 0);
       CommonOps_DDRM.extract(coriolisAndGravityMatrix, floatingBaseDoFs, degreesOfFreedom, 0, 1, bodyCoriolisAndGravityMatrix, 0, 0);
       CommonOps_DDRM.extract(contactForceJacobian, 0, rhoSize, floatingBaseDoFs, degreesOfFreedom, bodyContactForceJacobian, 0, 0);
@@ -198,6 +212,8 @@ public class DynamicsMatrixCalculator
 
    private void computeTorqueMinimizationObjective()
    {
+      assertRigidBodyDynamicsMatricesAreUpToDate();
+
       DMatrixRMaj bodyCoriolisAndGravityMatrix = getBodyGravityCoriolisMatrix();
 
       torqueMinimizationObjective.reshape(bodyCoriolisAndGravityMatrix.getNumRows(), bodyCoriolisAndGravityMatrix.getNumCols());
@@ -207,6 +223,8 @@ public class DynamicsMatrixCalculator
 
    private void computeBodyContactForceJacobianTranspose()
    {
+      assertRigidBodyDynamicsMatricesAreUpToDate();
+
       DMatrixRMaj bodyContactForceJacobian = getBodyContactForceJacobian();
       CommonOps_DDRM.transpose(bodyContactForceJacobian, bodyContactForceJacobianTranspose);
       bodyContactForceJacobianTransposeIsUpToDate = true;
@@ -251,12 +269,14 @@ public class DynamicsMatrixCalculator
 
    public void getMassMatrix(DMatrixRMaj massMatrixToPack)
    {
+      assertRigidBodyDynamicsMatricesAreUpToDate();
       massMatrixToPack.set(massMatrix);
    }
 
-   public void getCoriolisMatrix(DMatrixRMaj coriolisMatrixToPack)
+   public void getCoriolisAndGravityMatrix(DMatrixRMaj coriolisAndGravityMatrixToPack)
    {
-      coriolisMatrixToPack.set(coriolisAndGravityMatrix);
+      assertRigidBodyDynamicsMatricesAreUpToDate();
+      coriolisAndGravityMatrixToPack.set(coriolisAndGravityMatrix);
    }
 
    public void getBodyMassMatrix(DMatrixRMaj bodyMassMatrixToPack)
@@ -325,22 +345,28 @@ public class DynamicsMatrixCalculator
       return torqueMinimizationObjective;
    }
 
+   private void assertRigidBodyDynamicsMatricesAreUpToDate()
+   {
+      if (!areRBDMatricesUpToDate)
+         throw new RuntimeException("Rigid body dynamics matrices must be updated by calling DynamicsMatrixCalculator.compute() before accessing this value.");
+   }
+
    /**
     * <p>
     * Computes the required contact forces given the joint accelerations using the rigid-body dynamics
     * for the floating body.  This is an interative method which seeks a consensus between the contact forces and the joint accelerations that satisfy the
-    * floating base dynamics of the system.
+    * floating base dynamics of the system. It should not be used for real time control, and is only used for testing.
     * </p>
     *
     * @param jointAccelerationsToPack resulting joint accelerations. Modified.
     * @param contactForcesToPack resulting contact forces. Should be initialized from somewhere. Modified.
     */
-   public void computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(DMatrixRMaj jointAccelerationsToPack, DMatrixRMaj contactForcesToPack)
+   void computeRequiredContactForcesAndJointAccelerationsFromInitialContactForcesGuess(DMatrixRMaj jointAccelerationsToPack, DMatrixRMaj contactForcesToPack)
    {
       computeRequiredRhoAndAchievableQddotGivenRhoImpl(jointAccelerationsToPack, contactForcesToPack, 0);
    }
 
-   private void computeRequiredRhoAndAchievableQddotGivenRhoImpl(DMatrixRMaj jointAccelerationsToPack, DMatrixRMaj contactForcesToPack, int iter)
+   void computeRequiredRhoAndAchievableQddotGivenRhoImpl(DMatrixRMaj jointAccelerationsToPack, DMatrixRMaj contactForcesToPack, int iter)
    {
       // Compute the joint accelerations given the current contact force guess.
       rbdCalculator.computeJointAccelerationGivenContactForcesForFloatingSubsystem(getFloatingBaseMassMatrix(),
@@ -367,11 +393,6 @@ public class DynamicsMatrixCalculator
       }
    }
 
-   public CompositeRigidBodyMassMatrixCalculator getMassMatrixCalculator()
-   {
-      return massMatrixCalculator;
-   }
-
    /**
     * <p>
     * Checks whether the floating base portion of the rigid body dynamics is satisfied by the given joint accelerations and contact forces.
@@ -384,7 +405,7 @@ public class DynamicsMatrixCalculator
     * @param contactForces current contact forces. &rho; in the above equations. Not modified.
     * @return whether dynamics are satisfied
     */
-   public boolean checkFloatingBaseDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj contactForces)
+   private boolean checkFloatingBaseDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj contactForces)
    {
       return rbdCalculator.areFloatingBaseDynamicsSatisfied(getFloatingBaseMassMatrix(),
                                                             getFloatingBaseGravityCoriolisMatrix(),
@@ -406,7 +427,7 @@ public class DynamicsMatrixCalculator
     * @param contactForces current contact forces. &rho; in the above equations. Not modified.
     * @return whether dynamics are satisfied
     */
-   public boolean checkRigidBodyDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj jointTorques, DMatrixRMaj contactForces)
+   boolean checkRigidBodyDynamicsSatisfied(DMatrixRMaj jointAccelerations, DMatrixRMaj jointTorques, DMatrixRMaj contactForces)
    {
       return rbdCalculator.areFloatingBaseRigidBodyDynamicsSatisfied(getFloatingBaseMassMatrix(),
                                                                      getFloatingBaseGravityCoriolisMatrix(),

@@ -161,7 +161,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       jointNameToMatrixIndexFunction = j ->
       {
          OneDoFJointBasics joint = jointNameMap.get(j);
-         return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
+         return controlCoreToolbox.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
 
       enableJointNoiseModel.set(false);
@@ -250,7 +250,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       dynamicsMatrixCalculator.compute();
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
-      dynamicsMatrixCalculator.getCoriolisMatrix(coriolisGravityMatrix);
+      dynamicsMatrixCalculator.getCoriolisAndGravityMatrix(coriolisGravityMatrix);
 
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
       CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);
