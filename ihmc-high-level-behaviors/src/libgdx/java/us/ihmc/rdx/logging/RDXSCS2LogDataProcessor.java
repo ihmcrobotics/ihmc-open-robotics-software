@@ -110,7 +110,7 @@ public class RDXSCS2LogDataProcessor
                            ImGui.sameLine();
                            if (ImGuiTools.textWithUnderlineOnHover("Stop") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
                            {
-                              logProcessor.gatherStatsAsync();
+                              logProcessor.stopProcessing();
                            }
                         }
                         else
