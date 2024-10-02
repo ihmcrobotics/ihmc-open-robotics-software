@@ -526,10 +526,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          inverseInertiaMatrix3D.transform(angularProportionalFeedback);
          inverseInertiaMatrix3D.transform(angularDerivativeFeedback);
       }
-      feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
-      feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
-      feedForwardLinearAction.changeFrame(controlFrame);
-      feedForwardAngularAction.changeFrame(controlFrame);
 
       desiredLinearAcceleration.setIncludingFrame(linearProportionalFeedback);
       desiredLinearAcceleration.add(linearDerivativeFeedback);
@@ -563,10 +559,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAcceleration.getAngularPart());
 
       desiredLinearAcceleration.changeFrame(controlFrame);
-      desiredLinearAcceleration.add(feedForwardLinearAction);
-
       desiredAngularAcceleration.changeFrame(controlFrame);
-      desiredAngularAcceleration.add(feedForwardAngularAction);
+
+      if (!isImpedanceEnabled())
+      {
+         feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
+         feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
+         feedForwardLinearAction.changeFrame(controlFrame);
+         feedForwardAngularAction.changeFrame(controlFrame);
+
+         desiredLinearAcceleration.add(feedForwardLinearAction);
+         desiredAngularAcceleration.add(feedForwardAngularAction);
+      }
 
       proccessInverseDynamicsDesiredAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
 
