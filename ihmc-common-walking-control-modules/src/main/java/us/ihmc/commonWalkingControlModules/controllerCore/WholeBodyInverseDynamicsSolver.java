@@ -279,7 +279,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       {
          // TODO Since switch to Mecano: need to update the inverse dynamics to update the rigid-body accelerations, kinda dumb.
          //         rigidBodyAccelerationProvider.compute();
-         inverseDynamicsCalculator.compute(jointAccelerations);
+         inverseDynamicsCalculator.compute(jointAccelerations); // todo i don't think this is necessary
 
          dynamicsMatrixCalculator.compute();
          DMatrixRMaj tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);

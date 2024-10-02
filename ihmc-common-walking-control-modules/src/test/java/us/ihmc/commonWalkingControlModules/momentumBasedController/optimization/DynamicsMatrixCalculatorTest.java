@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -358,6 +361,9 @@ public class DynamicsMatrixCalculatorTest
       wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       jointIndexHandler = toolbox.getJointIndexHandler();
 
+      for (ContactablePlaneBody contactablePlaneBody : toolbox.getContactablePlaneBodies())
+         wrenchMatrixCalculator.submitPlaneContactStateCommand(nextPlaneContactStateCommand(random, contactablePlaneBody));
+
       inverseDynamicsCalculator = new InverseDynamicsCalculator(toolbox.getRootBody());
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
@@ -368,6 +374,22 @@ public class DynamicsMatrixCalculatorTest
       floatingBaseDoFs = fullHumanoidRobotModel.getRootJoint().getDegreesOfFreedom();
       bodyDoFs = degreesOfFreedom - floatingBaseDoFs;
    }
+
+   private PlaneContactStateCommand nextPlaneContactStateCommand(Random random, ContactablePlaneBody contactablePlaneBody)
+   {
+      PlaneContactStateCommand next = new PlaneContactStateCommand();
+      next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
+      next.setCoefficientOfFriction(random.nextDouble());
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getSoleFrame(), 1.0));
+      next.setHasContactStateChanged(true);
+
+      for (FramePoint3D contactPoint : contactablePlaneBody.getContactPointsCopy())
+      {
+         next.addPointInContact(contactPoint);
+      }
+      return next;
+   }
+
 
    private void update()
    {
