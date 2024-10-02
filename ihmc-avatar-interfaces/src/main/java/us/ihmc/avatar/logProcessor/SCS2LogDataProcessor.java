@@ -6,6 +6,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -139,7 +140,11 @@ public class SCS2LogDataProcessor
          rootNode.put("numberOfEntries", numberOfEntries);
          if (!statsOnly)
          {
-            numberOfFootstepsStat = locomotionData.getLeftFootsteps().size() + locomotionData.getRightFootsteps().size();
+            numberOfFootstepsStat = 0;
+            for (RobotSide side : RobotSide.values)
+            {
+               numberOfFootstepsStat += locomotionData.getFootStates().get(side).getFootsteps().size();
+            }
             rootNode.put("numberOfFootsteps", numberOfFootstepsStat);
             numberOfComsStat = locomotionData.getComs().size();
             rootNode.put("numberOfComs", numberOfComsStat);
@@ -171,31 +176,21 @@ public class SCS2LogDataProcessor
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setStroke(new BasicStroke(15));
 
-      for (double[] footstep : locomotionData.getLeftFootsteps())
+      for (RobotSide side : RobotSide.values)
       {
-         LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
-         svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
-                                              metersToMMX(footstep[1]),
-                                              metersToMMX(footstep[2]),
-                                              metersToMMX(footstep[3])},
-                                   new int[] {metersToMMY(footstep[4]),
-                                              metersToMMY(footstep[5]),
-                                              metersToMMY(footstep[6]),
-                                              metersToMMY(footstep[7])},
-                                   4);
-      }
-      for (double[] footstep : locomotionData.getRightFootsteps())
-      {
-         LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
-         svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
-                                              metersToMMX(footstep[1]),
-                                              metersToMMX(footstep[2]),
-                                              metersToMMX(footstep[3])},
-                                   new int[] {metersToMMY(footstep[4]),
-                                              metersToMMY(footstep[5]),
-                                              metersToMMY(footstep[6]),
-                                              metersToMMY(footstep[7])},
-                                   4);
+         for (double[] footstep : locomotionData.getFootStates().get(side).getFootsteps())
+         {
+            LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
+            svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
+                                                 metersToMMX(footstep[1]),
+                                                 metersToMMX(footstep[2]),
+                                                 metersToMMX(footstep[3])},
+                                      new int[] {metersToMMY(footstep[4]),
+                                                 metersToMMY(footstep[5]),
+                                                 metersToMMY(footstep[6]),
+                                                 metersToMMY(footstep[7])},
+                                      4);
+         }
       }
 
       RecyclingArrayList<Point2D> coms = locomotionData.getComs();
@@ -274,8 +269,17 @@ public class SCS2LogDataProcessor
 
    public int getNumberOfFootstepsStat()
    {
-      return locomotionData == null ? numberOfFootstepsStat :
-            locomotionData.getLeftFootsteps().size() + locomotionData.getRightFootsteps().size();
+      if (locomotionData == null || locomotionData.getFootStates().size() < 2)
+         return numberOfFootstepsStat;
+      else
+      {
+         int steps = 0;
+         for (RobotSide side : RobotSide.values)
+         {
+            steps += locomotionData.getFootStates().get(side).getFootsteps().size();
+         }
+         return steps;
+      }
    }
 
    public int getNumberOfComsStat()
