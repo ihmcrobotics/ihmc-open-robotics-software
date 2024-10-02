@@ -30,6 +30,7 @@ public class RDXSCS2LogDataProcessor
    private final ImString imDirectoryOfLogs;
    private Path directoryOfLogsPath;
    private boolean directoryOfLogsExists;
+   private int autoProcessIndex = -1;
 
    public RDXSCS2LogDataProcessor()
    {
@@ -62,7 +63,37 @@ public class RDXSCS2LogDataProcessor
                ImGui.beginDisabled(!directoryOfLogsExists);
                if (ImGui.button(labels.get("Refresh")))
                   refreshDirectoryListing();
+               ImGui.sameLine();
+               if (!logProcessors.isEmpty())
+               {
+                  if (autoProcessIndex > -1)
+                  {
+                     if (ImGui.button(labels.get("Stop Processing")))
+                        autoProcessIndex = -1;
+                  }
+                  else
+                  {
+                     if (ImGui.button(labels.get("Process All")))
+                     {
+                        autoProcessIndex = 0;
+                     }
+                  }
+               }
                ImGui.endDisabled();
+
+               if (autoProcessIndex >= logDirectories.size())
+                  autoProcessIndex = -1;
+               if (autoProcessIndex > -1)
+               {
+                  SCS2LogDataProcessor logProcessor = logProcessors.get(logDirectories.get(autoProcessIndex));
+                  if (!logProcessor.isProcessingLog())
+                  {
+                     if (logProcessor.getLogCurrentTick() == 0)
+                        logProcessor.processLogAsync();
+                     else
+                        ++autoProcessIndex;
+                  }
+               }
 
                ImGuiTools.separatorText("Logs");
 
