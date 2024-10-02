@@ -129,6 +129,7 @@ public class SCS2LogDataProcessor
       locomotionData.requestStopProcessing();
 
       writeJSON(false);
+      loadStats();
       drawSVG();
 
       locomotionData = null;
