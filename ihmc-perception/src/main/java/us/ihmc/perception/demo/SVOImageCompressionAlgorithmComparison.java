@@ -70,41 +70,41 @@ public class SVOImageCompressionAlgorithmComparison
       LogTools.info("Initializing...");
 
       int bitRate = 10 * colorImage.getImageWidth() * colorImage.getImageHeight();
-      AVOutputFormat outputFormat = av_guess_format("mpegts", null, null);
+      AVOutputFormat colorOutputFormat = av_guess_format("mpegts", null, null);
+      AVOutputFormat depthOutputFormat = av_guess_format("matroska", null, null);
 
       // Initialize color encoder
-      colorEncoder = new FFmpegHardwareVideoEncoder(outputFormat,
-                                                    "h264_nvenc",
+      colorEncoder = new FFmpegHardwareVideoEncoder(colorOutputFormat,
+                                                    "hevc_nvenc",
                                                     bitRate,
                                                     colorImage.getImageWidth(),
                                                     colorImage.getImageHeight(),
                                                     10,
                                                     0,
                                                     AV_PIX_FMT_BGR0);
-      AVDictionary h264ColorOptions = new AVDictionary();
-      FFmpegTools.setAVDictionary(h264ColorOptions, StreamingTools.getH264NVENCStreamingOptions());
-      colorEncoder.initialize(h264ColorOptions);
+      AVDictionary hevcOptions = new AVDictionary();
+      FFmpegTools.setAVDictionary(hevcOptions, StreamingTools.getHEVCNVENCStreamingOptions());
+      colorEncoder.initialize(hevcOptions);
       colorEncoder.setIntermediateColorConversion(opencv_imgproc.COLOR_BGR2BGRA);
-      av_dict_free(h264ColorOptions);
-      h264ColorOptions.close();
+      av_dict_free(hevcOptions);
+      hevcOptions.close();
 
       // Initialize depth encoder
-      depthEncoder = new FFmpegSoftwareVideoEncoder(outputFormat,
-                                                    "h264_nvenc",
+      depthEncoder = new FFmpegSoftwareVideoEncoder(depthOutputFormat,
+                                                    "ffv1",
                                                     bitRate,
                                                     depthImage.getImageWidth(),
                                                     depthImage.getImageHeight(),
-                                                    AV_PIX_FMT_YUV444P,
+                                                    AV_PIX_FMT_GRAY16,
                                                     10,
                                                     0,
                                                     AV_PIX_FMT_GRAY16);
-      AVDictionary h264DepthOptions = new AVDictionary();
-      Map<String, String> options = StreamingTools.getH264NVENCStreamingOptions();
-      options.put("tune", "lossless");
-      FFmpegTools.setAVDictionary(h264DepthOptions, options);
-      depthEncoder.initialize(h264DepthOptions);
-      av_dict_free(h264DepthOptions);
-      h264DepthOptions.close();
+      AVDictionary ffv1Options = new AVDictionary();
+      Map<String, String> options = StreamingTools.getFFV1StreamingOptions();
+      FFmpegTools.setAVDictionary(ffv1Options, options);
+      depthEncoder.initialize(ffv1Options);
+      av_dict_free(ffv1Options);
+      ffv1Options.close();
    }
 
    private void run() throws IOException
@@ -117,6 +117,11 @@ public class SVOImageCompressionAlgorithmComparison
          zedDataRetriever.grabOneFrame();
          RawImage colorImage = zedDataRetriever.getLatestRawColorImage(RobotSide.LEFT);
          RawImage depthImage = zedDataRetriever.getLatestRawDepthImage();
+
+         colorImage.getCpuImageMat();
+         colorImage.getGpuImageMat();
+         depthImage.getCpuImageMat();
+         depthImage.getGpuImageMat();
 
          if (i == 0) // initialize on first run
             initialize(colorImage, depthImage);

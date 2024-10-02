@@ -35,16 +35,31 @@ public class StreamingTools
    }
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
-   private static final Map<String, String> H264_NVENC_STREAMING_OPTIONS
+   private static final Map<String, String> HEVC_NVENC_STREAMING_OPTIONS
          = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
                          entry("tune", "ull"),        // "Ultra low latency"
                          entry("rc", "vbr"),          // Rate control: variable bit rate mode
                          entry("delay", "0"),         // No delay to frame output
                          entry("zerolatency", "1"));  // Don't introduce reordering delay
 
-   public static Map<String, String> getH264NVENCStreamingOptions()
+   public static Map<String, String> getHEVCNVENCStreamingOptions()
    {
-      return new HashMap<>(H264_NVENC_STREAMING_OPTIONS);
+      return new HashMap<>(HEVC_NVENC_STREAMING_OPTIONS);
+   }
+
+   /** FFV1 options can be found using {@code ffmpeg -hide_banner -h encoder=ffv1}. */
+   private static final Map<String, String> FFV1_STREAMING_OPTIONS
+         = Map.ofEntries(entry("coder", "range_def"),
+                         entry("context", "0"),
+                         entry("level", "3"),
+                         entry("threads", "16"),
+                         entry("slices", "24"),
+                         entry("slicecrc", "0"),
+                         entry("pass", "1"));
+
+   public static Map<String, String> getFFV1StreamingOptions()
+   {
+      return new HashMap<>(FFV1_STREAMING_OPTIONS);
    }
 
    public static String toSRTAddress(InetSocketAddress address)

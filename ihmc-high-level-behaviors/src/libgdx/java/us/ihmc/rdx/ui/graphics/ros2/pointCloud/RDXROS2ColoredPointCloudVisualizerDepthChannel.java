@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLManager;
@@ -13,6 +14,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
+   private final Mat decodedDepthImage = new Mat();
    private SwapReference<BytedecoImage> depth16UC1ImageSwapReference;
 
    public RDXROS2ColoredPointCloudVisualizerDepthChannel(ROS2Topic<ImageMessage> topic)
@@ -37,7 +39,8 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    {
       synchronized (imageMessageSwapReference)
       {
-         imageMessageDecoder.decodeMessage(imageMessageSwapReference.getForThreadTwo(), depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
+         imageMessageDecoder.decodeMessage(imageMessageSwapReference.getForThreadTwo(), decodedDepthImage);
+         decodedDepthImage.copyTo(depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
       }
       depth16UC1ImageSwapReference.swap();
    }

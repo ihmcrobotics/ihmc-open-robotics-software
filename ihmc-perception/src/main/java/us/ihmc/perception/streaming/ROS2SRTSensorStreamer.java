@@ -32,32 +32,26 @@ public class ROS2SRTSensorStreamer
    public void addBGRStream(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage, boolean useHardwareAcceleration)
    {
       if (useHardwareAcceleration)
-         addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR0, COLOR_BGR2BGRA, false, true);
+         addColorStream(streamTopic, exampleImage, AV_PIX_FMT_BGR0, COLOR_BGR2BGRA, true);
       else
-         addStream(streamTopic, exampleImage, AV_PIX_FMT_BGR24);
+         addColorStream(streamTopic, exampleImage, AV_PIX_FMT_BGR24, -1, false);
+   }
+
+   public void addColorStream(ROS2Topic<SRTStreamStatus> streamTopic,
+                              RawImage exampleImage,
+                              int inputAVPixelFormat,
+                              int intermediateColorConversion,
+                              boolean useHardwareAcceleration)
+   {
+      ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, streamTopic);
+      videoStreamer.initializeForColor(exampleImage, inputAVPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+      videoStreamers.put(streamTopic, videoStreamer);
    }
 
    public void addDepthStream(ROS2Topic<SRTStreamStatus> streamTopic, RawImage exampleImage)
    {
-      addStream(streamTopic, exampleImage, AV_PIX_FMT_GRAY16, -1, true, false);
-   }
-
-   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
-                         RawImage exampleImage,
-                         int inputAVPixelFormat)
-   {
-      addStream(streamTopic, exampleImage, inputAVPixelFormat, -1, false, false);
-   }
-
-   public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,
-                         RawImage exampleImage,
-                         int inputAVPixelFormat,
-                         int intermediateColorConversion,
-                         boolean streamLosslessly,
-                         boolean useHardwareAcceleration)
-   {
       ROS2SRTVideoStreamer videoStreamer = new ROS2SRTVideoStreamer(ros2Node, streamTopic);
-      videoStreamer.initialize(exampleImage, inputAVPixelFormat, intermediateColorConversion, streamLosslessly, useHardwareAcceleration);
+      videoStreamer.initializeForDepth(exampleImage);
       videoStreamers.put(streamTopic, videoStreamer);
    }
 

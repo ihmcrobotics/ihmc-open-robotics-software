@@ -131,8 +131,14 @@ public class ROS2SRTVideoSubscriber
             if (nextFrame != null)
             {
                // Get frame data
-               BytePointer serializedFrameDataMessage = videoReceiver.getLastFrameSideData();
-               MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
+               if (streamStatusMonitor.extraDataInStatusMessage())
+                  frameDataMessage.set(streamStatusMonitor.getFrameExtraData());
+               else
+               {
+                  BytePointer serializedFrameDataMessage = videoReceiver.getLastFrameSideData();
+                  MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
+               }
+
                CameraIntrinsics frameIntrinsics = streamStatusMonitor.getCameraIntrinsics();
                FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
 

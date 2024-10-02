@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair.ImageType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -13,14 +14,26 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
+
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_GRAY16;
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
 
 public class ROS2SRTVideoStreamer
 {
+   private static final String PREFERRED_COLOR_CODEC = "hevc_nvenc";
+   private static final String COLOR_OUTPUT_FORMAT = "mpegts";
+   private static final String PREFERRED_DEPTH_CODEC = "ffv1";
+   private static final String DEPTH_OUTPUT_FORMAT = "matroska";
+   private static final int COLOR_OUTPUT_PIXEL_FORMAT = AV_PIX_FMT_YUV444P;
+
    private final SRTStreamStatus statusMessage;
    private final ROS2PublisherBasics<SRTStreamStatus> statusMessagePublisher;
-   private final VideoFrameExtraData frameDataMessage;
+   private final VideoFrameExtraData frameExtraData;
 
    private final SRTVideoStreamer videoStreamer;
+
+   private ImageType encodingImageType;
 
    private final FrequencyCalculator sendFrequencyCalculator;
 
@@ -39,47 +52,62 @@ public class ROS2SRTVideoStreamer
 
       statusMessagePublisher = ros2Node.createPublisher(streamTopic);
 
-      frameDataMessage = new VideoFrameExtraData();
+      frameExtraData = new VideoFrameExtraData();
 
       videoStreamer = new SRTVideoStreamer(streamOutputAddress);
 
       sendFrequencyCalculator = new FrequencyCalculator();
    }
 
-   public void initialize(RawImage exampleImage, int inputPixelFormat)
+   public void initializeForColor(RawImage exampleImage, int inputPixelFormat)
    {
-      initialize(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat);
+      initializeForColor(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat);
    }
 
-   public void initialize(int imageWidth,
-                          int imageHeight,
-                          int inputPixelFormat)
+   public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat)
    {
-      initialize(imageWidth, imageHeight, inputPixelFormat, -1, false, false);
+      initializeForColor(imageWidth, imageHeight, inputPixelFormat, -1, false);
    }
 
-   public void initialize(RawImage exampleImage,
-                          int inputPixelFormat,
-                          int intermediateColorConversion,
-                          boolean streamLosslessly,
-                          boolean useHardwareAcceleration)
+   public void initializeForColor(RawImage exampleImage, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      initialize(exampleImage.getImageWidth(),
-                 exampleImage.getImageHeight(),
-                 inputPixelFormat,
-                 intermediateColorConversion,
-                 streamLosslessly,
-                 useHardwareAcceleration);
+      initializeForColor(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
    }
 
-   public void initialize(int imageWidth,
-                          int imageHeight,
-                          int inputPixelFormat,
-                          int intermediateColorConversion,
-                          boolean streamLosslessly,
-                          boolean useHardwareAcceleration)
+   public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      videoStreamer.initialize(imageWidth, imageHeight, inputPixelFormat, intermediateColorConversion, streamLosslessly, true, useHardwareAcceleration);
+      Map<String, String> hevcOptions = StreamingTools.getHEVCNVENCStreamingOptions();
+      hevcOptions.put("udu_sei", "1");
+      videoStreamer.initialize(imageWidth,
+                               imageHeight,
+                               inputPixelFormat,
+                               COLOR_OUTPUT_PIXEL_FORMAT,
+                               intermediateColorConversion,
+                               COLOR_OUTPUT_FORMAT,
+                               PREFERRED_COLOR_CODEC,
+                               hevcOptions,
+                               useHardwareAcceleration);
+      encodingImageType = ImageType.COLOR;
+   }
+
+   public void initializeForDepth(RawImage exampleImage)
+   {
+      initializeForDepth(exampleImage.getImageWidth(), exampleImage.getImageHeight());
+   }
+
+   public void initializeForDepth(int imageWidth, int imageHeight)
+   {
+      Map<String, String> ffv1Options = StreamingTools.getFFV1StreamingOptions();
+      videoStreamer.initialize(imageWidth,
+                               imageHeight,
+                               AV_PIX_FMT_GRAY16,
+                               AV_PIX_FMT_GRAY16,
+                               -1,
+                               DEPTH_OUTPUT_FORMAT,
+                               PREFERRED_DEPTH_CODEC,
+                               ffv1Options,
+                               false);
+      encodingImageType = ImageType.DEPTH;
    }
 
    public synchronized void sendFrame(RawImage frame)
@@ -87,12 +115,22 @@ public class ROS2SRTVideoStreamer
       if (frame.get() == null)
          return;
 
-      frameDataMessage.setSequenceNumber(frame.getSequenceNumber());
-      MessageTools.toMessage(frame.getAcquisitionTime(), frameDataMessage.getAcquisitionTime());
-      frameDataMessage.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
-      try (BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameDataMessage)))
+      frameExtraData.setSequenceNumber(frame.getSequenceNumber());
+      MessageTools.toMessage(frame.getAcquisitionTime(), frameExtraData.getAcquisitionTime());
+      frameExtraData.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
+
+      if (encodingImageType == ImageType.COLOR)
       {
+         BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameExtraData));
          videoStreamer.sendFrame(frame, serializedMessage);
+         serializedMessage.close();
+         statusMessage.setContainsExtraData(false);
+      }
+      else
+      {
+         videoStreamer.sendFrame(frame);
+         statusMessage.getFrameExtraData().set(frameExtraData);
+         statusMessage.setContainsExtraData(true);
       }
 
       sendFrequencyCalculator.ping();

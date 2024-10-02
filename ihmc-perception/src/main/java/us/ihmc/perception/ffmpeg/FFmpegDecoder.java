@@ -77,10 +77,9 @@ public class FFmpegDecoder
             // Send a packet
             error = sendNextPacket();
 
-            // Handle the errors
-            if (error == AVERROR_EOF())
+            // return on error
+            if (error < 0)
                return false;
-            FFmpegTools.checkNegativeError(error, "Sending packet");
          }
 
          // Try to receive decoded frame

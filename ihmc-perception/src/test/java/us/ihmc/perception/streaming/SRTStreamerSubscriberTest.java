@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
+import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SRTStreamerSubscriberTest
@@ -175,7 +177,9 @@ public class SRTStreamerSubscriberTest
 
       // Initialize the streamer
       SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
-      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24, -1, false, true, false);
+      Map<String, String> encoderOptions = StreamingTools.getHEVCNVENCStreamingOptions();
+      encoderOptions.put("udu_sei", "1");
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24, AV_PIX_FMT_YUV444P, -1, "mpegts", "hevc_nvenc", encoderOptions, false);
       assertEquals(0, streamer.connectedCallerCount());
 
       String message = "Hello World!";
@@ -242,7 +246,7 @@ public class SRTStreamerSubscriberTest
 
       // Create and initialize the streamer
       ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(ROS2_NODE, requestTopic, localAddress);
-      streamer.initialize(rawImage, AV_PIX_FMT_BGR24);
+      streamer.initializeForColor(rawImage, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
       ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, AV_PIX_FMT_BGR24);

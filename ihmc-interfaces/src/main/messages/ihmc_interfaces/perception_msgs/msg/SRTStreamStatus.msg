@@ -12,3 +12,7 @@ float32 fy
 float32 cx
 float32 cy
 float32 depth_discretization
+
+# Some codecs cannot accept extra data, so it's sent through this message instead
+perception_msgs/VideoFrameExtraData frame_extra_data
+bool contains_extra_data

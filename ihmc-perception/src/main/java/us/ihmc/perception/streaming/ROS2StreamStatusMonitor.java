@@ -1,18 +1,14 @@
 package us.ihmc.perception.streaming;
 
 import perception_msgs.msg.dds.SRTStreamStatus;
+import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
@@ -37,6 +33,7 @@ public class ROS2StreamStatusMonitor
 
    private final CameraIntrinsics cameraIntrinsics;
    private float depthDiscretization;
+   private VideoFrameExtraData frameExtraData;
 
    private boolean running = true;
 
@@ -100,6 +97,16 @@ public class ROS2StreamStatusMonitor
       return cameraIntrinsics;
    }
 
+   public boolean extraDataInStatusMessage()
+   {
+      return frameExtraData != null;
+   }
+
+   public VideoFrameExtraData getFrameExtraData()
+   {
+      return frameExtraData;
+   }
+
    public float getDepthDiscretization()
    {
       return depthDiscretization;
@@ -126,6 +133,9 @@ public class ROS2StreamStatusMonitor
       cameraIntrinsics.setCx(statusMessage.getCx());
       cameraIntrinsics.setCy(statusMessage.getCy());
       depthDiscretization = statusMessage.getDepthDiscretization();
+
+      if (statusMessage.getContainsExtraData())
+         frameExtraData = statusMessage.getFrameExtraData();
 
       synchronized (isStreaming)
       {

@@ -38,7 +38,7 @@ public class FFmpegTools
       return switch (imageType)
       {
          case COLOR -> AV_PIX_FMT_BGR24;
-         case DEPTH -> AV_PIX_FMT_GRAY16();
+         case DEPTH -> AV_PIX_FMT_GRAY16;
       };
    }
 

@@ -25,10 +25,16 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
    public float cx_;
    public float cy_;
    public float depth_discretization_;
+   /**
+            * Some codecs cannot accept extra data, so it's sent through this message instead
+            */
+   public perception_msgs.msg.dds.VideoFrameExtraData frame_extra_data_;
+   public boolean contains_extra_data_;
 
    public SRTStreamStatus()
    {
       streamer_address_ = new java.lang.StringBuilder(255);
+      frame_extra_data_ = new perception_msgs.msg.dds.VideoFrameExtraData();
    }
 
    public SRTStreamStatus(SRTStreamStatus other)
@@ -61,6 +67,9 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       cy_ = other.cy_;
 
       depth_discretization_ = other.depth_discretization_;
+
+      perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.staticCopy(other.frame_extra_data_, frame_extra_data_);
+      contains_extra_data_ = other.contains_extra_data_;
 
    }
 
@@ -185,6 +194,24 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
    }
 
 
+   /**
+            * Some codecs cannot accept extra data, so it's sent through this message instead
+            */
+   public perception_msgs.msg.dds.VideoFrameExtraData getFrameExtraData()
+   {
+      return frame_extra_data_;
+   }
+
+   public void setContainsExtraData(boolean contains_extra_data)
+   {
+      contains_extra_data_ = contains_extra_data;
+   }
+   public boolean getContainsExtraData()
+   {
+      return contains_extra_data_;
+   }
+
+
    public static Supplier<SRTStreamStatusPubSubType> getPubSubType()
    {
       return SRTStreamStatusPubSubType::new;
@@ -224,6 +251,9 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_discretization_, other.depth_discretization_, epsilon)) return false;
 
+      if (!this.frame_extra_data_.epsilonEquals(other.frame_extra_data_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.contains_extra_data_, other.contains_extra_data_, epsilon)) return false;
+
 
       return true;
    }
@@ -259,6 +289,9 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if(this.depth_discretization_ != otherMyClass.depth_discretization_) return false;
 
+      if (!this.frame_extra_data_.equals(otherMyClass.frame_extra_data_)) return false;
+      if(this.contains_extra_data_ != otherMyClass.contains_extra_data_) return false;
+
 
       return true;
    }
@@ -290,7 +323,11 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       builder.append("cy=");
       builder.append(this.cy_);      builder.append(", ");
       builder.append("depth_discretization=");
-      builder.append(this.depth_discretization_);
+      builder.append(this.depth_discretization_);      builder.append(", ");
+      builder.append("frame_extra_data=");
+      builder.append(this.frame_extra_data_);      builder.append(", ");
+      builder.append("contains_extra_data=");
+      builder.append(this.contains_extra_data_);
       builder.append("}");
       return builder.toString();
    }
