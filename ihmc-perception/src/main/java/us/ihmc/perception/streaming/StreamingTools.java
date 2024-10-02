@@ -54,8 +54,7 @@ public class StreamingTools
                          entry("level", "3"),
                          entry("threads", "16"),
                          entry("slices", "24"),
-                         entry("slicecrc", "0"),
-                         entry("pass", "1"));
+                         entry("slicecrc", "0"));
 
    public static Map<String, String> getFFV1StreamingOptions()
    {
