@@ -35,6 +35,7 @@ public class SCS2LogDataProcessor
    private SCS2LogLocomotionData locomotionData;
 
    private int numberOfWalksStat = -1;
+   private int numberOfFallsStat = -1;
    private int numberOfFootstepsStat = -1;
    private int numberOfComsStat = -1;
    private int workingCounterMismatchStat = -1;
@@ -133,26 +134,15 @@ public class SCS2LogDataProcessor
       locomotionData = null;
    }
 
-   private void writeJSON(boolean statsOnly)
+   private void writeJSON(boolean numEntriesOnly)
    {
       LogTools.info("Saving JSON to {}", jsonPath);
       JSONFileTools.save(jsonPath, rootNode ->
       {
          rootNode.put("numberOfEntries", numberOfEntries);
-         if (!statsOnly)
+         if (!numEntriesOnly)
          {
-            numberOfWalksStat = locomotionData.getWalks();
-            rootNode.put("numberOfWalks", numberOfWalksStat);
-            numberOfFootstepsStat = 0;
-            for (RobotSide side : RobotSide.values)
-            {
-               numberOfFootstepsStat += locomotionData.getFootStates().get(side).getFootsteps().size();
-            }
-            rootNode.put("numberOfFootsteps", numberOfFootstepsStat);
-            numberOfComsStat = locomotionData.getComs().size();
-            rootNode.put("numberOfComs", numberOfComsStat);
-            workingCounterMismatchStat = locomotionData.getWorkingCounterMismatch();
-            rootNode.put("workingCounterMismatch", workingCounterMismatchStat);
+            locomotionData.writeJSON(rootNode);
          }
       });
    }
@@ -165,7 +155,10 @@ public class SCS2LogDataProcessor
          JSONFileTools.load(jsonPath, rootNode ->
          {
             numberOfEntries = rootNode.get("numberOfEntries").intValue();
-            numberOfWalksStat = rootNode.get("numberOfWalks").intValue();
+            if (rootNode.has("numberOfWalks"))
+               numberOfWalksStat = rootNode.get("numberOfWalks").intValue();
+            if (rootNode.has("numberOfFalls"))
+               numberOfFallsStat = rootNode.get("numberOfFalls").intValue();
             if (rootNode.has("numberOfFootsteps"))
                numberOfFootstepsStat = rootNode.get("numberOfFootsteps").intValue();
             if (rootNode.has("numberOfComs"))
@@ -186,18 +179,27 @@ public class SCS2LogDataProcessor
 
       for (RobotSide side : RobotSide.values)
       {
-         for (double[] footstep : locomotionData.getFootStates().get(side).getFootsteps())
+         int walk = 1;
+         for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
          {
-            LogTools.info("Drawing step at {} {}", new Point2D(footstep[0], footstep[4]), new Point2D(metersToMMX(footstep[0]), metersToMMY(footstep[4])));
-            svgGraphics2D.drawPolygon(new int[] {metersToMMX(footstep[0]),
-                                                 metersToMMX(footstep[1]),
-                                                 metersToMMX(footstep[2]),
-                                                 metersToMMX(footstep[3])},
-                                      new int[] {metersToMMY(footstep[4]),
-                                                 metersToMMY(footstep[5]),
-                                                 metersToMMY(footstep[6]),
-                                                 metersToMMY(footstep[7])},
-                                      4);
+//            svgGraphics2D.drawString("Walk %d".formatted(walk), );
+
+            for (SCS2LogDataFootstep footstep : logWalk.getFootsteps())
+            {
+               double[] polygon = footstep.getPolygon();
+               LogTools.info("Drawing step at {} {}", new Point2D(polygon[0], polygon[4]), new Point2D(metersToMMX(polygon[0]), metersToMMY(polygon[4])));
+               svgGraphics2D.drawPolygon(new int[] {metersToMMX(polygon[0]),
+                                                    metersToMMX(polygon[1]),
+                                                    metersToMMX(polygon[2]),
+                                                    metersToMMX(polygon[3])},
+                                         new int[] {metersToMMY(polygon[4]),
+                                                    metersToMMY(polygon[5]),
+                                                    metersToMMY(polygon[6]),
+                                                    metersToMMY(polygon[7])},
+                                         4);
+            }
+
+            ++walk;
          }
       }
 
@@ -277,22 +279,20 @@ public class SCS2LogDataProcessor
 
    public int getNumberOfWalksStat()
    {
-      return numberOfWalksStat;
+      return locomotionData == null ? numberOfWalksStat : locomotionData.getLogWalks().size();
+   }
+
+   public int getNumberOfFallsStat()
+   {
+      return locomotionData == null ? numberOfFallsStat : locomotionData.getFalls();
    }
 
    public int getNumberOfFootstepsStat()
    {
-      if (locomotionData == null || locomotionData.getFootStates().size() < 2)
+      if (locomotionData == null)
          return numberOfFootstepsStat;
       else
-      {
-         int steps = 0;
-         for (RobotSide side : RobotSide.values)
-         {
-            steps += locomotionData.getFootStates().get(side).getFootsteps().size();
-         }
-         return steps;
-      }
+         return locomotionData.getNumberOfFootsteps();
    }
 
    public int getNumberOfComsStat()

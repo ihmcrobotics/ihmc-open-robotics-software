@@ -29,17 +29,17 @@ public class SCS2LogDataEnum<E extends Enum<E>>
 
    public boolean changedFrom(E fromValue)
    {
-      E currentValue = getValue();
-      boolean changedFrom = lastValue == fromValue && currentValue != fromValue;
-      lastValue = currentValue;
-      return changedFrom;
+      return lastValue == fromValue && getValue() != fromValue;
    }
 
    public boolean changedTo(E toValue)
    {
+      return getValue() == toValue && lastValue != toValue;
+   }
+
+   public void postUpdate()
+   {
       E currentValue = getValue();
-      boolean changedTo = currentValue == toValue && lastValue != toValue;
       lastValue = currentValue;
-      return changedTo;
    }
 }

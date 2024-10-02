@@ -75,13 +75,14 @@ public class RDXSCS2LogDataProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 7, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 8, tableFlags))
                {
                   float charWidth = ImGuiTools.calcTextSizeX("A");
                   ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Process"), ImGuiTableColumnFlags.WidthFixed, 15 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Size"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Walks"), ImGuiTableColumnFlags.WidthFixed, 5 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Falls"), ImGuiTableColumnFlags.WidthFixed, 5 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Footsteps"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Coms"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("workingCounterMismatch"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
@@ -139,6 +140,8 @@ public class RDXSCS2LogDataProcessor
                      textIfPositive(logProcessor.getNumberOfEntries());
                      ImGui.tableNextColumn();
                      textIfPositive(logProcessor.getNumberOfWalksStat());
+                     ImGui.tableNextColumn();
+                     textIfPositive(logProcessor.getNumberOfFallsStat());
                      ImGui.tableNextColumn();
                      textIfPositive(logProcessor.getNumberOfFootstepsStat());
                      ImGui.tableNextColumn();

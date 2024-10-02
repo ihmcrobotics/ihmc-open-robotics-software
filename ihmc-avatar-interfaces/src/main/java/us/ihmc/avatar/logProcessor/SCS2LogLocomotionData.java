@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,22 +11,26 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
+
 public class SCS2LogLocomotionData
 {
+   private double dt;
    private YoRegistry rootRegistry;
-   int initialWorkingCounterMismatch = -1;
+   private int initialWorkingCounterMismatch = -1;
    private YoInteger workingCounterMismatch;
+   private YoBoolean isRobotFalling;
    private SCS2LogDataEnum<HighLevelControllerName> controllerState;
-   private int walks = 0;
    private final Point2D robotStartLocation = new Point2D();
-   private final SideDependentList<SCS2LogDataFootstep> footStates = new SideDependentList<>();
+   private final SideDependentList<SCS2LogDataFootState> footStates = new SideDependentList<>();
+   private final ArrayList<SCS2LogWalk> logWalks = new ArrayList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
    private YoPoint3D centerOfMass;
-   private final double comPlotProximityToFootsteps = 5.0;
    private final double comPlotResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
    private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
@@ -35,6 +40,8 @@ public class SCS2LogLocomotionData
    {
       rootRegistry = logSession.getRootRegistry();
 
+      dt = logSession.getLogDataReader().getParser().getDt();
+
       if (rootRegistry.findVariable("root.main.DRCEstimatorThread.NadiaEtherCATRealtimeThread.workingCounterMismatch") instanceof YoInteger yoInteger)
          workingCounterMismatch = yoInteger;
 
@@ -42,6 +49,9 @@ public class SCS2LogLocomotionData
 
       if (rootRegistry.findVariable(highLevelController + "highLevelControllerNameCurrentState") instanceof YoEnum<?> yoEnum)
          controllerState = new SCS2LogDataEnum<>(yoEnum, HighLevelControllerName.class);
+
+      if (rootRegistry.findVariable(highLevelController + "HighLevelHumanoidControllerToolbox.WalkingFailureDetectionControlModule.isRobotFalling") instanceof YoBoolean yoBoolean)
+         isRobotFalling = yoBoolean;
 
       String momentumRateControl = highLevelController + "WalkingControllerState.LinearMomentumRateControlModule.";
       if (rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble xVariable
@@ -52,7 +62,7 @@ public class SCS2LogLocomotionData
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
          if (rootRegistry.findVariable(feetManager + "%1$sFootControlModule.%1$sFootCurrentState".formatted(side.getLowerCaseName())) instanceof YoEnum<?> yoEnum)
-            footStates.set(side, new SCS2LogDataFootstep(side, new SCS2LogDataEnum<>(yoEnum, ConstraintType.class), rootRegistry));
+            footStates.set(side, new SCS2LogDataFootState(side, new SCS2LogDataEnum<>(yoEnum, ConstraintType.class), rootRegistry));
 
       logSession.addAfterReadCallback(this::afterRead);
    }
@@ -62,40 +72,84 @@ public class SCS2LogLocomotionData
       if (requestStopProcessing)
          return;
 
+      long tick = (long) (currentTime / dt);
+
       if (initialWorkingCounterMismatch < 0)
          initialWorkingCounterMismatch = workingCounterMismatch.getIntegerValue();
 
       if (controllerState.changedTo(HighLevelControllerName.WALKING))
-         ++walks;
-
-      boolean recentSteps = false;
-      for (RobotSide side : RobotSide.values)
       {
-         recentSteps |= footStates.get(side).afterRead(currentTime);
+         SCS2LogWalk logWalk = new SCS2LogWalk();
+         logWalks.add(logWalk);
+         logWalk.getWalkStart().set(centerOfMass);
+         logWalk.setWalkStartTick(tick);
       }
-
-      if (recentSteps)
+      if (controllerState.changedFrom(HighLevelControllerName.WALKING) && controllerState.changedTo(HighLevelControllerName.FREEZE_STATE))
       {
-         if (Double.isNaN(lastCoMPlotTime) || currentTime - lastCoMPlotTime > comPlotResolution)
+         if (isRobotFalling.getBooleanValue())
          {
-            if (coms.isEmpty())
-            {
-               robotStartLocation.set(centerOfMass.getX(), centerOfMass.getY());
-               LogTools.info("Robot start location: {}", robotStartLocation);
-            }
-
-            coms.add().set(centerOfMass);
-
-            lastCenterOfMass.set(centerOfMass);
-            lastCoMPlotTime = currentTime;
+            getCurrentLogWalk().setEndedWithFall(true);
          }
       }
+      controllerState.postUpdate();
+
+      if (!logWalks.isEmpty() && controllerState.getValue() == HighLevelControllerName.WALKING)
+      {
+         SCS2LogWalk logWalk = getCurrentLogWalk();
+         logWalk.update(currentTime, tick, workingCounterMismatch);
+
+         boolean recentSteps = false;
+         for (RobotSide side : RobotSide.values)
+         {
+            recentSteps |= footStates.get(side).afterRead(currentTime);
+            logWalk.getFootsteps().addAll(footStates.get(side).getFootsteps());
+            footStates.get(side).getFootsteps().clear();
+         }
+
+         if (recentSteps)
+         {
+            if (Double.isNaN(lastCoMPlotTime) || currentTime - lastCoMPlotTime > comPlotResolution)
+            {
+               if (coms.isEmpty())
+               {
+                  robotStartLocation.set(centerOfMass.getX(), centerOfMass.getY());
+                  LogTools.info("Robot start location: {}", robotStartLocation);
+               }
+
+               coms.add().set(centerOfMass);
+
+               lastCenterOfMass.set(centerOfMass);
+               lastCoMPlotTime = currentTime;
+            }
+         }
+
+
+      }
+
 
       // TODO:
       // # Falls
       // # Runs of action (split by 30 seconds of inactivity)
       // Timestamps where runs start
       // Arm motions
+
+
+
+
+   }
+
+   public void writeJSON(ObjectNode rootNode)
+   {
+      rootNode.put("numberOfWalks", logWalks.size());
+      rootNode.put("numberOfFalls", getFalls());
+      rootNode.put("numberOfFootsteps", getNumberOfFootsteps());
+      rootNode.put("numberOfComs", coms.size());
+      rootNode.put("workingCounterMismatch", getWorkingCounterMismatch());
+   }
+
+   private SCS2LogWalk getCurrentLogWalk()
+   {
+      return logWalks.get(logWalks.size() - 1);
    }
 
    public void requestStopProcessing()
@@ -108,9 +162,14 @@ public class SCS2LogLocomotionData
       return robotStartLocation;
    }
 
-   public SideDependentList<SCS2LogDataFootstep> getFootStates()
+   public int getNumberOfFootsteps()
    {
-      return footStates;
+      int numberOfFootsteps = 0;
+      for (SCS2LogWalk logWalk : logWalks)
+      {
+         numberOfFootsteps += logWalk.getFootsteps().size();
+      }
+      return numberOfFootsteps;
    }
 
    public RecyclingArrayList<Point2D> getComs()
@@ -118,13 +177,27 @@ public class SCS2LogLocomotionData
       return coms;
    }
 
-   public int getWalks()
+   public ArrayList<SCS2LogWalk> getLogWalks()
    {
-      return walks;
+      return logWalks;
+   }
+
+   public int getFalls()
+   {
+      int falls = 0;
+      for (SCS2LogWalk logWalk : logWalks)
+      {
+         if (logWalk.isEndedWithFall())
+            ++falls;
+      }
+      return falls;
    }
 
    public int getWorkingCounterMismatch()
    {
-      return workingCounterMismatch.getIntegerValue() - initialWorkingCounterMismatch;
+      if (workingCounterMismatch == null)
+         return -1;
+      else
+         return workingCounterMismatch.getIntegerValue() - initialWorkingCounterMismatch;
    }
 }
