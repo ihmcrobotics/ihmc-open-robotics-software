@@ -87,8 +87,8 @@ public class SRTVideoStreamer
                  inputAVPixelFormat,
                  OUTPUT_PIXEL_FORMAT,
                  -1,
-                 DEFAULT_CODEC,
                  DEFAULT_OUTPUT_FORMAT,
+                 DEFAULT_CODEC,
                  StreamingTools.getHEVCNVENCStreamingOptions(),
                  false);
    }
