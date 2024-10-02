@@ -1,14 +1,14 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ControllerTask extends HumanoidRobotControlTask
 {
@@ -70,6 +70,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(masterContext, controllerThread.getHumanoidRobotContextData());
    }
 
    @Override

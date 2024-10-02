@@ -46,6 +46,10 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 
       OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoint, OneDoFJointBasics.class);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
+
+      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(wholeBodyControllerCoreOutput);
+
+
    }
 
    private final YoGraphicListDefinition scs2AdditionalYoGraphics = new YoGraphicListDefinition();
@@ -83,7 +87,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    @Override
    public YoRegistry getYoRegistry()
    {
-      return null;
+      return registry;
    }
 
    private void copyJointDesiredsToJoints()
@@ -101,7 +105,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 //            throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
 //      }
 
-      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+//      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
       // TODO This will be running on the ControllerThread.

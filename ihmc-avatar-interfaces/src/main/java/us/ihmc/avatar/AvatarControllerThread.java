@@ -230,7 +230,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
-                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
@@ -262,7 +262,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                                                            forceSensorDataHolderForController,
                                                                                            centerOfMassDataHolderForController,
                                                                                            centerOfPressureDataHolderForEstimator,
-                                                                                           lowLevelControllerOutput,
+                                                                                           wholeBodyControllerCoreOutput,
                                                                                            jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
@@ -307,16 +307,18 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+      humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
 
       //TODO this should be removed.
       // New Thread (WBCCThread) will replace this action
       // in the EsitmatorThread, the initialize method clear the jointDesiredOutputList. So, let it be here.
 
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+//      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreOutPutList = humanoidRobotContextData.getWholeBodyControllerCoreDesiredOutPutList();
 
-      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      for (int i = 0; i < wholeBodyControllerCoreOutPutList.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+         wholeBodyControllerCoreOutPutList.getJointDesiredOutput(i).clear();
       }
 
    }

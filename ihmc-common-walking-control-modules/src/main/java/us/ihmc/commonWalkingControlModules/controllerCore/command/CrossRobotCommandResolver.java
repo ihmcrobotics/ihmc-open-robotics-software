@@ -226,8 +226,18 @@ public class CrossRobotCommandResolver
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+//      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
       out.setControllerRan(in.getControllerRan());
+   }
+
+   /**
+    * Resolves only the part of the context data that is updated by the wholeBodyControllerCore thread
+    */
+   public void resolveHumanoidRobotContextDataWholeBodyControllerCore(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(),out.getJointDesiredOutputList());
+      out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
 
    /**
@@ -237,6 +247,7 @@ public class CrossRobotCommandResolver
    {
       out.setPerceptionRan(in.getPerceptionRan());
    }
+
 
    /**
     * Resolves only the part of the context data that is updated by the estimator thread.

@@ -45,7 +45,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
 {
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
 
-   private final YoRegistry registry = new YoRegistry("WBCCThread");
+   private final YoRegistry registry = new YoRegistry("WholeBodyControllerCoreThread");
    private final YoDouble wholeBodyControllerCoreTime = new YoDouble("WholeBodyControllerCoreTime", registry);
    private final FullHumanoidRobotModel controllerCoreFullRobotModel;
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);

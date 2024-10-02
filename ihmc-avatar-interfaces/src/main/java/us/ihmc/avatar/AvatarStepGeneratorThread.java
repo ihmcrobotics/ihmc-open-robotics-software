@@ -128,6 +128,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+      humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
    }
 
    private void runOnFirstTick()
