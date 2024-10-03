@@ -393,7 +393,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, updatePeriodMilliseconds, TimeUnit.MILLISECONDS);
    }
 
-   private void reinitialize()
+   public void reinitialize()
    {
       if (getToolboxController() != null)
       {

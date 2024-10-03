@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.referenceSpreading;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -10,8 +11,10 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
@@ -44,6 +47,47 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    }
 
    @Override
+   public void receivedPacket(ToolboxStateMessage message)
+   {
+      super.receivedPacket(message);
+
+      ToolboxState requestedState = ToolboxState.fromByte(message.getRequestedToolboxState());
+      if (requestedState == null)
+      {
+         return;
+      }
+
+      if (requestedState == ToolboxState.WAKE_UP && toolboxRunnable != null)
+      {
+         referenceSpreadingToolboxController.hybridReplayer.start();
+      }
+   }
+
+//   REINITIALIZE IS HIGHJACKED TO BECOME PAUSE/UNPAUSE
+   @Override
+   public void reinitialize(){
+      if (super.toolboxRunnable != null)
+      {
+         if (referenceSpreadingToolboxController.hybridReplayer.isPaused())
+         {
+            LogTools.info("Unpausing Playback");
+            referenceSpreadingToolboxController.hybridReplayer.start(false);
+         }
+         else {
+            LogTools.info("Unpausing Playback");
+            referenceSpreadingToolboxController.hybridReplayer.pause();
+         }
+      }
+   }
+
+   @Override
+   public void sleep()
+   {
+      super.sleep();
+      referenceSpreadingToolboxController.hybridReplayer.stop();
+   }
+
+   @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
@@ -52,12 +96,6 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       {
          if(referenceSpreadingToolboxController != null)
             referenceSpreadingToolboxController.updateRobotConfigurationData(s.takeNextData());
-      });
-
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class), s ->
-      {
-         if(referenceSpreadingToolboxController != null)
-            referenceSpreadingToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());
       });
    }
 

@@ -37,6 +37,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,17 +46,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToIntFunction;
 
 public class ReferenceSpreadingToolboxController extends ToolboxController
 {
    private final YoBoolean waitingForRobotConfigurationData = new YoBoolean("waitingForRobotConfigurationData", registry);
-   private final YoBoolean waitingForRobotControllerData = new YoBoolean("waitingForRobotControllerData", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
-   private final AtomicReference<RobotDesiredConfigurationData> robotDesiredConfigurationData = new AtomicReference<>();
+
+   public final ReplayHandHybridTrajectoryRS hybridReplayer;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -63,13 +65,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
 
+
    private final CommandInputManager commandInputManager;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
-
-   // Particle filter parameters
-   private final YoBoolean enableJointNoiseModel = new YoBoolean("enableJointNoiseModel", registry);
-   private final YoDouble rootJointNoise = new YoDouble("rootJointNoise", registry);
-   private final YoDouble jointNoiseMultiplier = new YoDouble("jointNoiseMultiplier", registry);
 
    public ReferenceSpreadingToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -91,8 +89,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                           .subtreeIterable()
                           .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
-      double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
       JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
+
+      double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
                                                                                        9.81,
                                                                                        fullRobotModel.getRootJoint(),
@@ -110,13 +109,22 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
          contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
       }
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
+
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
+
+      String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
+                                                                           "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
+      String filePath = demoDirectory + "/simplePlayback.csv";
+
+      hybridReplayer = new ReplayHandHybridTrajectoryRS(filePath, 1);
    }
 
    @Override
    public boolean initialize()
    {
       waitingForRobotConfigurationData.set(true);
-      waitingForRobotControllerData.set(true);
+      hybridReplayer.start();
       isDone.set(false);
 
       return true;
@@ -128,28 +136,14 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       RobotConfigurationData robotConfigurationData = this.robotConfigurationData.getAndSet(null);
       if (robotConfigurationData != null)
       {
-         updateRobotState(robotConfigurationData, rootJoint, oneDoFJoints);
          referenceFrames.updateFrames();
          waitingForRobotConfigurationData.set(false);
       }
 
-      RobotDesiredConfigurationData desiredConfigurationData = this.robotDesiredConfigurationData.getAndSet(null);
-      if (desiredConfigurationData != null)
-      {
-//         updateRobotDesiredState(desiredConfigurationData, controllerDesiredQdd, jointNameToMatrixIndexFunction);
-         waitingForRobotControllerData.set(false);
-      }
-
-      if (waitingForRobotControllerData.getBooleanValue() || waitingForRobotConfigurationData.getBooleanValue())
-      {
-         if (DEBUG)
-         {
-            LogTools.info("Waiting for controller messages before starting estimation...");
-         }
-
+      if (waitingForRobotConfigurationData.getBooleanValue())
          return;
-      }
 
+      hybridReplayer.doAction(robotConfigurationData.getMonotonicTime());
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -157,63 +151,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       this.robotConfigurationData.set(robotConfigurationData);
    }
 
-   public void updateRobotDesiredConfigurationData(RobotDesiredConfigurationData robotDesiredConfigurationData)
-   {
-      this.robotDesiredConfigurationData.set(robotDesiredConfigurationData);
-   }
-
    @Override
    public boolean isDone()
    {
       return isDone.getValue();
-   }
-
-   public FloatingJointBasics getRootJoint()
-   {
-      return rootJoint;
-   }
-
-   public OneDoFJointBasics[] getOneDoFJoints()
-   {
-      return oneDoFJoints;
-   }
-
-   private static void updateRobotState(RobotConfigurationData robotConfigurationData, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
-   {
-      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
-      TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
-
-      if(newJointAngles.size() != oneDoFJoints.length)
-      {
-         throw new RuntimeException("Received RobotConfigurationData packet with " + newJointAngles.size() + "joints, expected " + oneDoFJoints.length);
-      }
-
-      for (int i = 0; i < newJointAngles.size(); i++)
-      {
-         oneDoFJoints[i].setQ(newJointAngles.get(i));
-         oneDoFJoints[i].setQd(newJointVelocities.get(i));
-      }
-
-      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
-      rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
-      rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
-
-      rootJoint.getPredecessor().updateFramesRecursively();
-   }
-
-   private static void updateRobotDesiredState(RobotDesiredConfigurationData desiredConfigurationData, DMatrixRMaj controllerDesiredQdd, ToIntFunction<String> jointNameToMatrixIndex)
-   {
-      CommonOps_DDRM.fill(controllerDesiredQdd, 0.0);
-      desiredConfigurationData.getDesiredRootJointAngularAcceleration().get(0, controllerDesiredQdd);
-      desiredConfigurationData.getDesiredRootJointLinearAcceleration().get(3, controllerDesiredQdd);
-
-      RecyclingArrayList<JointDesiredOutputMessage> jointDesiredOutputList = desiredConfigurationData.getJointDesiredOutputList();
-      for (int i = 0; i < jointDesiredOutputList.size(); i++)
-      {
-         String jointName = jointDesiredOutputList.get(i).getJointName().toString();
-         int matrixIndex = jointNameToMatrixIndex.applyAsInt(jointName);
-
-         controllerDesiredQdd.set(matrixIndex, 0, jointDesiredOutputList.get(i).getDesiredAcceleration());
-      }
    }
 }
