@@ -36,7 +36,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       publisher = publisherNode.createPublisher(streamTopicPair.imageMessageTopic());
       subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode),
                                               streamTopicPair.streamStatusTopic(),
-                                              FFmpegTools.imageTypeToAVPixelFormat(streamTopicPair.imageType()));
+                                              PixelFormat.fromImageType(streamTopicPair.imageType()));
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
    }

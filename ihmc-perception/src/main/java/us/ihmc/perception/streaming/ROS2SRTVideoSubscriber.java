@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -38,12 +39,12 @@ public class ROS2SRTVideoSubscriber
 
    private final VideoFrameExtraData frameDataMessage = new VideoFrameExtraData();
 
-   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, int outputAVPixelFormat)
+   public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputAVPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
       
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
-      videoReceiver = new SRTVideoReceiver(outputAVPixelFormat);
+      videoReceiver = new SRTVideoReceiver(outputAVPixelFormat.toFFmpegPixelFormat());
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
       
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));

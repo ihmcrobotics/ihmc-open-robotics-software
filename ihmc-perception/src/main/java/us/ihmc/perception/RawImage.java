@@ -157,8 +157,6 @@ public class RawImage
    {
       if (getImageWidth() != newGpuImageMat.cols() || getImageHeight() != newGpuImageMat.rows())
          throw new IllegalArgumentException("New image must have the same dimensions as the current image");
-      if (getOpenCVType() != newGpuImageMat.type())
-         throw new IllegalArgumentException("New image must be the same OpenCV type as the current image");
 
       RawImage newRawImage = new RawImage(this);
       newGpuImageMat.copyTo(newRawImage.getGpuImageMat());

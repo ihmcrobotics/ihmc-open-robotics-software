@@ -1,6 +1,5 @@
 package us.ihmc.perception.ffmpeg;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVDictionaryEntry;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
@@ -14,10 +13,9 @@ import org.bytedeco.ffmpeg.global.swresample;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair.ImageType;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.HashMap;
@@ -33,30 +31,9 @@ public class FFmpegTools
       return rational.num() / (double) rational.den();
    }
 
-   public static int imageTypeToAVPixelFormat(ImageType imageType)
-   {
-      return switch (imageType)
-      {
-         case COLOR -> AV_PIX_FMT_BGR24;
-         case DEPTH -> AV_PIX_FMT_GRAY16;
-      };
-   }
-
-   public static int avPixelFormatToOpenCVType(int pixelFormat)
-   {
-      return switch (pixelFormat)
-      {
-         case AV_PIX_FMT_GRAY8 -> opencv_core.CV_8UC1;
-         case AV_PIX_FMT_BGR24, AV_PIX_FMT_RGB24 -> opencv_core.CV_8UC3;
-         case AV_PIX_FMT_RGBA, AV_PIX_FMT_BGRA -> opencv_core.CV_8UC4;
-         case AV_PIX_FMT_GRAY16BE, AV_PIX_FMT_GRAY16LE -> opencv_core.CV_16UC1;
-         default -> throw new NotImplementedException("Either the pixel format cannot be matched to an OpenCV type, or the match has not been implemented.");
-      };
-   }
-
    public static Mat avFrameToMat(AVFrame frame)
    {
-      int openCVType = avPixelFormatToOpenCVType(frame.format());
+      int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType();
       return new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
    }
 

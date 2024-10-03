@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
@@ -249,7 +250,7 @@ public class SRTStreamerSubscriberTest
       streamer.initializeForColor(rawImage, AV_PIX_FMT_BGR24);
 
       // Create the subscriber
-      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, AV_PIX_FMT_BGR24);
+      ROS2SRTVideoSubscriber subscriber = new ROS2SRTVideoSubscriber(ROS2_HELPER, requestTopic, PixelFormat.BGR8);
       AtomicBoolean subscriberHasReceivedFrame = new AtomicBoolean(false);
       subscriber.addNewFrameConsumer(receivedImage ->
       {

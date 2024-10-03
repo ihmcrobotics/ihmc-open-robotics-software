@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import org.bytedeco.ffmpeg.global.avutil;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.ROS2Topic;
@@ -21,7 +21,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
 
       this.streamTopic = streamTopic;
 
-      subscriber = new ROS2SRTVideoSubscriber(ros2, streamTopic, avutil.AV_PIX_FMT_RGBA);
+      subscriber = new ROS2SRTVideoSubscriber(ros2, streamTopic, PixelFormat.RGBA8);
       subscriber.addNewFrameConsumer(this::updateImage);
 
       setActivenessChangeCallback(isActive ->
