@@ -114,10 +114,11 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
 
       // If the input and output dimensions don't match
       if (outputSize.width() != imagePlanes.get(0).cols() || outputSize.height() != imagePlanes.get(0).rows())
-      {
+      {  // Find the scale factor
          double widthScaleFactor = (double) outputSize.width() / imagePlanes.get(0).cols();
          double heightScaleFactor = (double) outputSize.height() / imagePlanes.get(0).rows();
 
+         // Rescale all planes by that factor
          for (int i = 0; i < imagePlanes.size(); ++i)
          {
             // Resize and put data in the frame to encode
@@ -125,7 +126,6 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
             resizeTarget.height((int) (outputSize.height() * heightScaleFactor));
             opencv_cudawarping.resize(imagePlanes.get(i), tempGpuMat, resizeTarget);
             imagePlanes.put(i, tempGpuMat);
-            frameToEncode.data(0, tempGpuMat.data());
          }
       }
 

@@ -19,14 +19,18 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.imageMessage.PixelFormat.*;
 
 public class ImageMessageDecoderTest
 {
    private static final double LOSSY_COMPRESSION_EPSILON = 3.0;
    private static final double LOSSLESS_COMPRESSION_EPSILON = 1E-6;
+
+   private static final Set<PixelFormat> TESTABLE_COLOR_FORMATS = Set.of(BGR8, BGRA8, RGB8, RGBA8, YUV_I420, GRAY8);
 
    private static Mat zedColorBGR;
    private static Mat zedDepth16U;
@@ -49,7 +53,7 @@ public class ImageMessageDecoderTest
    {
       for (PixelFormat pixelFormat : PixelFormat.values())
       {  // Test the color formats
-         if (pixelFormat != PixelFormat.GRAY16)
+         if (TESTABLE_COLOR_FORMATS.contains(pixelFormat))
          {
             LogTools.info("Testing Color PNG Compression: {}", pixelFormat.name());
             testDecompression(this::opencvPNGCompression, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
@@ -68,7 +72,7 @@ public class ImageMessageDecoderTest
    {
       for (PixelFormat pixelFormat : PixelFormat.values())
       {  // Test the color formats
-         if (pixelFormat != PixelFormat.GRAY16)
+         if (TESTABLE_COLOR_FORMATS.contains(pixelFormat))
          {
             LogTools.info("Testing Color Uncompressed: {}", pixelFormat.name());
             testDecompression(this::packUncompressed, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
@@ -87,7 +91,7 @@ public class ImageMessageDecoderTest
    {
       for (PixelFormat pixelFormat : PixelFormat.values())
       {  // Only test the color formats for jpeg
-         if (pixelFormat != PixelFormat.GRAY16)
+         if (TESTABLE_COLOR_FORMATS.contains(pixelFormat))
          {
             LogTools.info("Testing Color JPEG Compression: {}", pixelFormat.name());
             testDecompression(this::opencvJpegCompression, zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
@@ -99,7 +103,7 @@ public class ImageMessageDecoderTest
    @Test
    public void testNVJPEG()
    {  // Only these formats have been tested to work with NVJPEG. A few other formats (like YUV_I420) might also work, but have not been verified.
-      PixelFormat[] nvjpegSupportedFormats = {PixelFormat.BGR8, PixelFormat.RGB8, PixelFormat.GRAY8};
+      PixelFormat[] nvjpegSupportedFormats = {BGR8, RGB8, PixelFormat.GRAY8};
 
       for (PixelFormat pixelFormat : nvjpegSupportedFormats)
       {
@@ -114,7 +118,7 @@ public class ImageMessageDecoderTest
    {
       for (PixelFormat pixelFormat : PixelFormat.values())
       {  // Test the color formats
-         if (pixelFormat != PixelFormat.GRAY16)
+         if (TESTABLE_COLOR_FORMATS.contains(pixelFormat))
          {
             LogTools.info("Testing Color NVCOMP Compression: {}", pixelFormat.name());
             testDecompression(this::nvcompCompression, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
@@ -155,7 +159,7 @@ public class ImageMessageDecoderTest
       if (image.type() == opencv_core.CV_16UC1)
          image.copyTo(encoderInputImage);
       else
-         PixelFormat.BGR8.convertToPixelFormat(image, encoderInputImage, encodingInputPixelFormat);
+         BGR8.convertToPixelFormat(image, encoderInputImage, encodingInputPixelFormat);
       Mat expectedImage = new Mat();
 
       // Create and pack parts of the image message
@@ -206,7 +210,7 @@ public class ImageMessageDecoderTest
                                         double decompressionEpsilon)
    {  // Ensure encoder input is in desired pixel format
       Mat encoderInputImage = new Mat();
-      PixelFormat.BGR8.convertToPixelFormat(image, encoderInputImage, encodedPixelFormat);
+      BGR8.convertToPixelFormat(image, encoderInputImage, encodedPixelFormat);
       Mat expectedImage = new Mat();
 
       ImageMessage message = new ImageMessage();

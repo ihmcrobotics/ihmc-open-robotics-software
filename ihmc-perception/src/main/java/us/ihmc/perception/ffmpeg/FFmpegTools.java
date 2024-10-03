@@ -13,7 +13,9 @@ import org.bytedeco.ffmpeg.global.swresample;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.tools.string.StringTools;
@@ -33,8 +35,16 @@ public class FFmpegTools
 
    public static Mat avFrameToMat(AVFrame frame)
    {
-      int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType();
-      return new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
+      try (MatVector planes = new MatVector())
+      {
+         int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType(1);
+         for (int i = 0; frame.data(i) != null && !frame.data(i).isNull(); ++i)
+            planes.push_back(new Mat(frame.height(), frame.width(), openCVType, frame.data(i), frame.linesize(i)));
+
+         Mat resultMat = new Mat();
+         opencv_core.merge(planes, resultMat);
+         return resultMat;
+      }
    }
 
    public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)
