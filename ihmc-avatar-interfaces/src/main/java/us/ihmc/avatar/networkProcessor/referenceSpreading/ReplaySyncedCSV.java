@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class ReplayHandHybridTrajectoryRS
+public class ReplaySyncedCSV
 {
    private TrajectoryRecordReplay trajectoryPlayer;
 
@@ -22,10 +22,10 @@ public class ReplayHandHybridTrajectoryRS
    private boolean paused = false;
    private boolean finished = false;
 
-   private HashMap<String, Double> thisFrame = new HashMap<>();
+   private HashMap<String, Double> currentFrame = new HashMap<>();
    private HashMap<String, Double> nextFrame = new HashMap<>();
 
-   public ReplayHandHybridTrajectoryRS(String filePath, int numberOfParts)
+   public ReplaySyncedCSV(String filePath, int numberOfParts)
    {
       trajectoryPlayer = new TrajectoryRecordReplay(filePath, numberOfParts, true);
       trajectoryPlayer.importData(true);
@@ -39,10 +39,11 @@ public class ReplayHandHybridTrajectoryRS
       if (!paused || restart)
       {
          reset();
-         makeMap(trajectoryPlayer.play(true), thisFrame);
+         makeMap(trajectoryPlayer.play(true), currentFrame);
          makeMap(trajectoryPlayer.play(true), nextFrame);
-         startCSVTime = thisFrame.get("root.time[sec]");
+         startCSVTime = currentFrame.get("time[sec]");
          finished = false;
+         LogTools.info("all keys: " + trajectoryPlayer.getKeyMatrix());
       }
       paused = false;
       trajectoryPlayer.setDoneReplay(false);
@@ -57,29 +58,27 @@ public class ReplayHandHybridTrajectoryRS
    }
 
    public void pause(){
-      LogTools.info("Pausing replay");
       paused = true;
    }
 
    public void stop()
    {
-      LogTools.info("Stopping replay");
       reset();
       finished = true;
    }
 
-   public void doAction(Long currentTime)
+   public boolean checkNewFrame(Long currentTime)
    {
       if (paused || finished)
       {
-         return;
+         return false;
       }
 
       if (startTime == null)
       {
-         if (!Objects.equals(startCSVTime, thisFrame.get("root.time[sec]")))
+         if (!Objects.equals(startCSVTime, currentFrame.get("time[sec]")))
          {
-            startTime = (long) (currentTime - thisFrame.get("root.time[sec]") * 1_000_000_000);
+            startTime = (long) (currentTime - currentFrame.get("time[sec]") * 1_000_000_000);
          }
          else
          {
@@ -87,25 +86,33 @@ public class ReplayHandHybridTrajectoryRS
          }
       }
       if (trajectoryPlayer.hasDoneReplay()){
+         LogTools.info("Finished replay111");
          stop();
       }
-      nextFrame(currentTime);
-   }
-
-   private void nextFrame(Long currentTime)
-   {
-      while ((currentTime - startTime) / 1_000_000_000.0 >= nextFrame.get("root.time[sec]") - startCSVTime)
+      if ((currentTime - startTime) / 1_000_000_000.0 < nextFrame.get("time[sec]") - startCSVTime)
       {
-         thisFrame.putAll(nextFrame);
+         LogTools.info("No new frame");
+         return false;
+      }
+
+      while ((currentTime - startTime) / 1_000_000_000.0 >= nextFrame.get("time[sec]") - startCSVTime)
+      {
+         currentFrame.putAll(nextFrame);
          makeMap(trajectoryPlayer.play(true), nextFrame);
       }
-      LogTools.info("NextFrame Time: " + nextFrame.get("root.time[sec]") + " Current Time: " + (currentTime - startTime) / 1_000_000_000.0);
+      LogTools.info("NextFrame Time: " + nextFrame.get("time[sec]") + " Current Time: " + (currentTime - startTime) / 1_000_000_000.0);
+
+      return true;
+   }
+   public HashMap<String, Double> getCurrentFrame()
+   {
+      return currentFrame;
    }
 
    private void reset()
    {
       trajectoryPlayer.reset();
-      thisFrame.clear();
+      currentFrame.clear();
       nextFrame.clear();
    }
 

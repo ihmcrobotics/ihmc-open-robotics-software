@@ -163,6 +163,7 @@ public class TrajectoryRecordReplay
             if (createKeyMapTemp){
                String[] keys = line.split(",");
                keyMatrix.addAll(Arrays.asList(keys));
+               parseKeyMatrix(keyMatrix);
                createKeyMapTemp = false;
                continue;
             }
@@ -303,5 +304,19 @@ public class TrajectoryRecordReplay
    public List<String> getKeyMatrix()
    {
       return keyMatrix;
+   }
+
+   private void parseKeyMatrix(List<String> keyMatrixToParse)
+   {
+      for (int i = 0; i < keyMatrixToParse.size(); i++)
+      {
+         String key = keyMatrixToParse.get(i);
+         int lastDotIndex = key.lastIndexOf('.');
+         if (lastDotIndex != -1)
+         {
+            key = key.substring(lastDotIndex + 1);
+         }
+         keyMatrixToParse.set(i, key);
+      }
    }
 }

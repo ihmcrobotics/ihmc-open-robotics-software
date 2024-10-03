@@ -57,7 +57,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 
-   public final ReplayHandHybridTrajectoryRS hybridReplayer;
+   public final ReplaySyncedCSV csvReplayer;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -65,9 +65,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
 
-
    private final CommandInputManager commandInputManager;
-   private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
+   private Boolean csvUpdated = false;
+   private HashMap<String, Double> currentFrame = new HashMap<>();
 
    public ReferenceSpreadingToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -117,14 +117,14 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
       String filePath = demoDirectory + "/simplePlayback.csv";
 
-      hybridReplayer = new ReplayHandHybridTrajectoryRS(filePath, 1);
+      csvReplayer = new ReplaySyncedCSV(filePath, 1);
    }
 
    @Override
    public boolean initialize()
    {
       waitingForRobotConfigurationData.set(true);
-      hybridReplayer.start();
+      csvReplayer.start();
       isDone.set(false);
 
       return true;
@@ -143,7 +143,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       if (waitingForRobotConfigurationData.getBooleanValue())
          return;
 
-      hybridReplayer.doAction(robotConfigurationData.getMonotonicTime());
+      csvUpdated = csvReplayer.checkNewFrame(robotConfigurationData.getMonotonicTime());
+
+      if (csvUpdated)
+      {
+         currentFrame = csvReplayer.getCurrentFrame();
+         LogTools.info("Current Frame: " + currentFrame);
+      }
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)

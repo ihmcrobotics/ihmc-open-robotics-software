@@ -1,7 +1,9 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -17,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -29,6 +32,8 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    private static final double defaultTimeWithoutInputsBeforeSleep = 60.0;
 
    private final ReferenceSpreadingToolboxController referenceSpreadingToolboxController;
+
+   private ROS2PublisherBasics<HandTrajectoryMessage> messagePublisher;
 
    public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
    {
@@ -59,23 +64,23 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
 
       if (requestedState == ToolboxState.WAKE_UP && toolboxRunnable != null)
       {
-         referenceSpreadingToolboxController.hybridReplayer.start();
+         referenceSpreadingToolboxController.csvReplayer.start();
       }
    }
 
-//   REINITIALIZE IS HIGHJACKED TO BECOME PAUSE/UNPAUSE
+//   REINITIALIZE is highjacked to pause and unpause the playback
    @Override
    public void reinitialize(){
       if (super.toolboxRunnable != null)
       {
-         if (referenceSpreadingToolboxController.hybridReplayer.isPaused())
+         if (referenceSpreadingToolboxController.csvReplayer.isPaused())
          {
             LogTools.info("Unpausing Playback");
-            referenceSpreadingToolboxController.hybridReplayer.start(false);
+            referenceSpreadingToolboxController.csvReplayer.start(false);
          }
          else {
-            LogTools.info("Unpausing Playback");
-            referenceSpreadingToolboxController.hybridReplayer.pause();
+            LogTools.info("Pausing Playback");
+            referenceSpreadingToolboxController.csvReplayer.pause();
          }
       }
    }
@@ -84,12 +89,14 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    public void sleep()
    {
       super.sleep();
-      referenceSpreadingToolboxController.hybridReplayer.stop();
+      referenceSpreadingToolboxController.csvReplayer.stop();
    }
 
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
+      messagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName));
+
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
@@ -111,6 +118,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       return getSupportedCommands();
    }
 
+//todo: change to ReferenceSpreadingConfigurationCommand
    public static List<Class<? extends Command<?, ?>>> getSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
@@ -124,6 +132,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       return getSupportedStatuses();
    }
 
+//   todo: change to ReferenceSpreadingOutputStatus
    public static List<Class<? extends Settable<?>>> getSupportedStatuses()
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
