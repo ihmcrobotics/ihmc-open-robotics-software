@@ -7,6 +7,7 @@ import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.perception.RawImage;
 
@@ -58,31 +59,49 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
    }
 
    @Override
-   protected void prepareFrameForEncoding(Pointer imageMatToEncode)
+   protected void prepareFrameForEncoding(Pointer imageToEncode)
    {
-      Mat image = new Mat(imageMatToEncode);
+      if (imageToEncode instanceof Mat mat)
+      {
+         MatVector matVector = new MatVector(mat);
+         prepareFrameForEncoding(matVector);
+         matVector.close();
+      }
+      else if (imageToEncode instanceof  MatVector matVector)
+         prepareFrameForEncoding(matVector);
+   }
 
+   protected void prepareFrameForEncoding(MatVector imagePlanes)
+   {
       int requestedColorConversion = getColorConversion();
       if (requestedColorConversion >= 0) // if a color conversion is requested
       {
-         // Convert color and assign to another mat to avoid changing the input data
-         opencv_imgproc.cvtColor(image, tempMat, requestedColorConversion);
-         image = tempMat;
+         // Convert color an assign to another gpu mat to avoid changing the input data
+         for (int i = 0; i < imagePlanes.size(); ++i)
+         {
+            opencv_imgproc.cvtColor(imagePlanes.get(i), tempMat, requestedColorConversion);
+            imagePlanes.put(i, tempMat);
+         }
       }
 
       // If the input and output dimensions or pixel formats don't match
-      if (frameToEncode.width() != image.cols() || frameToEncode.height() != image.rows() || frameToScale.format() != frameToEncode.format())
+      if (frameToEncode.width() != imagePlanes.get(0).cols() || frameToEncode.height() != imagePlanes.get(0).rows()
+          || frameToScale.format() != frameToEncode.format())
       {
          if (swsContext == null) // Initialize frame scaling for first time
-            initializeScaling(image.size());
+            initializeScaling(imagePlanes.get(0).size());
 
          // Scale the frame and put data in the frame to encode
-         frameToScale.data(0, image.data());
+         for (int i = 0; i < imagePlanes.size(); ++i)
+            frameToScale.data(i, imagePlanes.get(i).data());
          error = sws_scale_frame(swsContext, frameToEncode, frameToScale);
          FFmpegTools.checkNegativeError(error, "Scaling frame");
       }
       else // No scaling needed; put data directly into frame to encode
-         frameToEncode.data(0, image.data());
+      {
+         for (int i = 0; i < imagePlanes.size(); ++i)
+            frameToEncode.data(i, imagePlanes.get(i).data());
+      }
    }
 
    private void initializeScaling(Size inputImageSize)

@@ -9,6 +9,7 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.perception.RawImage;
 
@@ -26,6 +27,7 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
    private final AVHWFramesContext hardwareFramesContext;
 
    private final Size outputSize;
+   private final Size resizeTarget;
    private final GpuMat tempGpuMat;
 
    public FFmpegHardwareVideoEncoder(AVOutputFormat outputFormat,
@@ -40,6 +42,7 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       super(outputFormat, preferredCodecName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
 
       outputSize = new Size(outputWidth, outputHeight);
+      resizeTarget = new Size();
       tempGpuMat = new GpuMat();
 
       // Find the hardware configuration for the encoder
@@ -84,27 +87,51 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
    }
 
    @Override
-   protected void prepareFrameForEncoding(Pointer imageGpuMatToEncode)
+   protected void prepareFrameForEncoding(Pointer gpuImageToEncode)
    {
-      GpuMat image = new GpuMat(imageGpuMatToEncode);
+      if (gpuImageToEncode instanceof GpuMat mat)
+      {
+         GpuMatVector matVector = new GpuMatVector(mat);
+         prepareFrameForEncoding(matVector);
+         matVector.close();
+      }
+      else if (gpuImageToEncode instanceof  GpuMatVector matVector)
+         prepareFrameForEncoding(matVector);
+   }
 
+   private void prepareFrameForEncoding(GpuMatVector imagePlanes)
+   {
       int requestedColorConversion = getColorConversion();
       if (requestedColorConversion >= 0) // if a color conversion is requested
       {
          // Convert color an assign to another gpu mat to avoid changing the input data
-         opencv_cudaimgproc.cvtColor(image, tempGpuMat, requestedColorConversion);
-         image = tempGpuMat;
+         for (int i = 0; i < imagePlanes.size(); ++i)
+         {
+            opencv_cudaimgproc.cvtColor(imagePlanes.get(i), tempGpuMat, requestedColorConversion);
+            imagePlanes.put(i, tempGpuMat);
+         }
       }
 
       // If the input and output dimensions don't match
-      if (outputSize.width() != image.cols() || outputSize.height() != image.rows())
+      if (outputSize.width() != imagePlanes.get(0).cols() || outputSize.height() != imagePlanes.get(0).rows())
       {
-         // Resize and put data in the frame to encode
-         opencv_cudawarping.resize(image, tempGpuMat, outputSize);
-         frameToEncode.data(0, tempGpuMat.data());
+         double widthScaleFactor = (double) outputSize.width() / imagePlanes.get(0).cols();
+         double heightScaleFactor = (double) outputSize.height() / imagePlanes.get(0).rows();
+
+         for (int i = 0; i < imagePlanes.size(); ++i)
+         {
+            // Resize and put data in the frame to encode
+            resizeTarget.width((int) (outputSize.width() * widthScaleFactor));
+            resizeTarget.height((int) (outputSize.height() * heightScaleFactor));
+            opencv_cudawarping.resize(imagePlanes.get(i), tempGpuMat, resizeTarget);
+            imagePlanes.put(i, tempGpuMat);
+            frameToEncode.data(0, tempGpuMat.data());
+         }
       }
-      else // No resizing needed; put data directly into frame to encode
-         frameToEncode.data(0, image.data());
+
+      // Put data into AVFrame
+      for (int i = 0; i < imagePlanes.size(); ++i)
+         frameToEncode.data(i, imagePlanes.get(i).data());
    }
 
    private AVCodecHWConfig getCodecHardwareConfiguration(AVCodec encoder)
@@ -135,6 +162,7 @@ public class FFmpegHardwareVideoEncoder extends FFmpegVideoEncoder
       hardwareConfiguration.close();
 
       outputSize.close();
+      resizeTarget.close();
       tempGpuMat.close();
    }
 }
