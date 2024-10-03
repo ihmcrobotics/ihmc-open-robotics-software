@@ -10,6 +10,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,6 +21,11 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RDXVRManager
 {
@@ -53,10 +59,14 @@ public class RDXVRManager
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
    private final RDXVRTeleporter teleporter = new RDXVRTeleporter();
+   private final List<RDXVRTrackerRoleManager> trackerRoleManagers = new ArrayList<>();
 
    public void create()
    {
       teleporter.create(context);
+
+      for (RDXVRTracker tracker : context.getTrackers().values())
+         trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, tracker));
    }
 
    /**
@@ -137,10 +147,64 @@ public class RDXVRManager
                waitingOnPoses = false;
             }
 
-//            if (posesReadyThisFrame)
+            if (posesReadyThisFrame)
             {
-//               pollEventsFrequencyCalculator.ping();
-                  context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+               // pollEventsFrequencyCalculator.ping();
+               context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+
+               // A tracker has disconnected
+               List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
+               for (String removedSerialNumber : removedTrackersSerialNumbers)
+               {
+                  for (int i = 0; i < trackerRoleManagers.size(); i++)
+                  {
+                     if (trackerRoleManagers.get(i).getTrackerSerialNumber().equals(removedSerialNumber))
+                     {
+                        String assignedRole = trackerRoleManagers.get(i).getAssignedRole();
+                        if (assignedRole != null)
+                        {
+                           context.setTrackerRoleAsAvailable(assignedRole);
+                        }
+                        trackerRoleManagers.remove(i);
+                     }
+                  }
+                  context.getTrackers().remove(removedSerialNumber);
+                  LogTools.warn("Tracker {} removed", removedSerialNumber);
+               }
+
+               // A new tracker has been detected
+               List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
+               for (String newSerialNumber : newTrackersSerialNumbers)
+               {
+                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
+               }
+
+               // A reset of roles has been triggered from the UI
+               if (context.getRolesResetNotification().poll())
+               {
+                  for (var trackerRoleManager : trackerRoleManagers)
+                  {
+                     trackerRoleManager.reset();
+                  }
+               }
+
+               // A loading of preset roles has been triggered from the UI
+               if (context.getLoadingRolesNotification().poll())
+               {
+                  var trackerRoleMap = context.getTrackersRoleMap();
+                  for (var trackerRole : trackerRoleMap.entrySet())
+                  {
+                     for (var trackerRoleManager : trackerRoleManagers)
+                     {
+                        // if serial numbers match
+                        if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
+                        {
+                           trackerRoleManager.setActive(trackerRole.getKey());
+                        }
+                     }
+                  }
+                  LogTools.info("Loaded roles");
+               }
             }
          }
       }
@@ -183,8 +247,24 @@ public class RDXVRManager
          renderEnableCheckbox();
 
          ImGuiTools.separatorText("Status");
-         ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
-         ImGui.text("Connected controllers: " + (isVRReady() ? StringUtils.join(context.getControllers(), ", ") : "None"));
+         if (isVRReady())
+         {
+            ImGui.text("Connected headset: " + context.getHeadset().getModelName());
+            ImGui.text("Connected controllers: " + StringUtils.join(context.getControllers()
+                                                                           .values()
+                                                                           .stream()
+                                                                           .filter(RDXVRTrackedDevice::isConnected)
+                                                                           .collect(Collectors.toList()), ", "));
+            ImGui.text("Connected trackers: " + StringUtils.join(context.getTrackers()
+                                                                        .values()
+                                                                        .stream()
+                                                                        .filter(RDXVRTrackedDevice::isConnected)
+                                                                        .collect(Collectors.toList()), ", "));
+         }
+         else
+         {
+            ImGui.text("VR not enabled");
+         }
 
          if (ImGui.collapsingHeader(labels.get("Debug")))
             renderDebugPlots();
@@ -297,7 +377,13 @@ public class RDXVRManager
             context.getHeadsetRenderable(renderables, pool);
          }
          context.getControllerRenderables(renderables, pool);
-         context.getTrackerRenderables(renderables, pool);
+         for (var trackerRoleManager : trackerRoleManagers)
+         {
+            if (!trackerRoleManager.isRoleAssigned())
+               trackerRoleManager.getRedModelInstance().getRenderables(renderables, pool);
+            else
+               context.getTrackerRenderables(trackerRoleManager.getTrackerSerialNumber(), renderables, pool);
+         }
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
       }
@@ -311,5 +397,10 @@ public class RDXVRManager
    public RDXVRTeleporter getTeleporter()
    {
       return teleporter;
+   }
+
+   public List<RDXVRTrackerRoleManager> getTrackerRoleManagers()
+   {
+      return trackerRoleManagers;
    }
 }

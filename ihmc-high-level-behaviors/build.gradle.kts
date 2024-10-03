@@ -19,7 +19,7 @@ mainDependencies {
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
-   api("us.ihmc:promp:source")
+   api("us.ihmc:promp-java:1.0.0")
 }
 
 missionControlDependencies {
@@ -40,7 +40,6 @@ testDependencies {
    api(ihmc.sourceSetProject("libgdx"))
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
-   api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("us.ihmc:scs2-examples:17-0.27.3")
    api("us.ihmc:scs2-bullet-simulation-test:17-0.27.3")
    api("us.ihmc:example-simulations:source")

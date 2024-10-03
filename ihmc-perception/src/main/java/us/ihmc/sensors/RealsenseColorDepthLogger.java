@@ -52,7 +52,6 @@ public class RealsenseColorDepthLogger
    private volatile boolean running = true;
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0);
 
-   private final String serialNumber;
    private int depthHeight;
    private int depthWidth;
    private final int colorHeight;
@@ -62,9 +61,8 @@ public class RealsenseColorDepthLogger
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public RealsenseColorDepthLogger(String serialNumber, RealsenseConfiguration realsenseConfiguration, String depthChannelName, String colorChannelName)
+   public RealsenseColorDepthLogger(RealsenseConfiguration realsenseConfiguration, String depthChannelName, String colorChannelName)
    {
-      this.serialNumber = serialNumber;
       this.depthWidth = realsenseConfiguration.getDepthWidth();
       this.depthHeight = realsenseConfiguration.getDepthHeight();
       this.colorWidth = realsenseConfiguration.getColorWidth();
@@ -83,7 +81,7 @@ public class RealsenseColorDepthLogger
       perceptionDataLogger.setChannelEnabled(depthChannelName, true);
 
       realsenseDeviceManager = new RealsenseDeviceManager();
-      sensor = realsenseDeviceManager.createBytedecoRealsenseDevice(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
+      sensor = realsenseDeviceManager.createBytedecoRealsenseDevice(this.depthWidth, this.depthHeight, this.depthFPS);
 
       if (sensor.getDevice() == null)
       {
@@ -155,10 +153,7 @@ public class RealsenseColorDepthLogger
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      // L515: [F1121365, F0245563], D455: [215122254074]
-      String serialNumber = System.getProperty("l515.serial.number", "F1121365");
-      new RealsenseColorDepthLogger(serialNumber,
-                                    RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
+      new RealsenseColorDepthLogger(RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
                                     PerceptionLoggerConstants.L515_DEPTH_NAME,
                                     PerceptionLoggerConstants.L515_DEPTH_NAME);
    }

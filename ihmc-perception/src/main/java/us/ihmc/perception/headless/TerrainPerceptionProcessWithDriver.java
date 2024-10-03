@@ -103,8 +103,7 @@ public class TerrainPerceptionProcessWithDriver
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public TerrainPerceptionProcessWithDriver(String serialNumber,
-                                             String robotName,
+   public TerrainPerceptionProcessWithDriver(String robotName,
                                              CollisionBoxProvider collisionBoxProvider,
                                              FullHumanoidRobotModel fullRobotModel,
                                              RealsenseConfiguration realsenseConfiguration,
@@ -131,12 +130,12 @@ public class TerrainPerceptionProcessWithDriver
       realtimeROS2Node.spin();
       realsenseDeviceManager = new RealsenseDeviceManager();
 
-      LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
-      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+      LogTools.info("Creating Bytedeco Realsense");
+      realsense = realsenseDeviceManager.createBytedecoRealsenseDevice(realsenseConfiguration);
       if (realsense.getDevice() == null)
       {
          destroy();
-         throw new RuntimeException("Realsense device not found. Set -D<model>.serial.number=00000000000");
+         throw new RuntimeException("Realsense device not found.");
       }
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();

@@ -118,7 +118,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.CUSTOM1;
+      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {

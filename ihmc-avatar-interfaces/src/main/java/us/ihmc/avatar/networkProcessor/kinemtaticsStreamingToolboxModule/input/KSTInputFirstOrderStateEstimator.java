@@ -153,6 +153,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
          {
             singleEndEffectorEstimator.resetVelocity();
          }
+         centerOfMassEstimator.resetVelocity();
       }
       else if (isNewInput)
       { // New input, let's update the velocities
