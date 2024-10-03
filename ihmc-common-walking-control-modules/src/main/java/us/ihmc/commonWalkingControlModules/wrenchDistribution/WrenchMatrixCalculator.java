@@ -31,6 +31,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -111,21 +112,27 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
 
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
-      this(toolbox, toolbox.getCenterOfMassFrame(), parentRegistry);
+      this(toolbox.getCenterOfMassFrame(),
+           toolbox.getContactablePlaneBodies(),
+           toolbox.getOptimizationSettings(),
+           toolbox.getControlDT(),
+           parentRegistry,
+           toolbox.getYoGraphicsListRegistry());
    }
 
-   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame centerOfMassFrame, YoRegistry parentRegistry)
+   public WrenchMatrixCalculator(ReferenceFrame centerOfMassFrame,
+                                 List<? extends ContactablePlaneBody> contactablePlaneBodies,
+                                 ControllerCoreOptimizationSettings optimizationSettings,
+                                 double dt,
+                                 YoRegistry parentRegistry,
+                                 YoGraphicsListRegistry graphicsListRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-
-      double dt = toolbox.getControlDT();
       this.dtSquaredInv = 1.0 / (dt * dt);
-
-      nContactableBodies = toolbox.getNumberOfContactableBodies();
-      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();
-      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint();
-      rhoSize = toolbox.getRhoSize();
+      this.nContactableBodies = optimizationSettings.getNumberOfContactableBodies();
+      this.maxNumberOfContactPoints = optimizationSettings.getNumberOfContactPointsPerContactableBody();
+      this.numberOfBasisVectorsPerContactPoint = optimizationSettings.getNumberOfBasisVectorsPerContactPoint();
+      this.rhoSize = optimizationSettings.getRhoSize();
       copTaskSize = 2 * nContactableBodies;
 
       rhoJacobianMatrix = new DMatrixRMaj(SpatialForce.SIZE, rhoSize);
@@ -161,14 +168,14 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
 
          rigidBodies.add(rigidBody);
 
-         FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
+         FrictionConeRotationCalculator frictionConeRotation = optimizationSettings.getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody,
                                                                                                   centerOfMassFrame,
                                                                                                   maxNumberOfContactPoints,
                                                                                                   numberOfBasisVectorsPerContactPoint,
                                                                                                   frictionConeRotation,
                                                                                                   registry);
-         helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
+         helper.setDeactivateRhoWhenNotInContact(optimizationSettings.getDeactivateRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
          bodyRhoOffsets.put(rigidBody, rhoOffset);
          rhoOffset += helper.getRhoSize();
@@ -184,14 +191,13 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
          Wrench wrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
          wrenchesFromRho.put(rigidBody, wrench);
 
-         if (toolbox.getYoGraphicsListRegistry() != null)
+         if (graphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
             copViz.setVisible(PlaneContactWrenchProcessor.VISUALIZE);
          }
       }
 
-      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       rhoWeight.set(optimizationSettings.getRhoWeight());
       rhoRateDefaultWeight.set(optimizationSettings.getRhoRateDefaultWeight());
       rhoRateHighWeight.set(optimizationSettings.getRhoRateHighWeight());
