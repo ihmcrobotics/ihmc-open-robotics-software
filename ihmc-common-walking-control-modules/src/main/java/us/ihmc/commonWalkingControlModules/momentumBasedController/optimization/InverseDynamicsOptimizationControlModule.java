@@ -606,7 +606,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                                                                           motionAndRhoQPInput,
                                                                           dynamicsMatrixCalculator.getBodyMassMatrix(),
                                                                           dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
-                                                                          dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
+                                                                          dynamicsMatrixCalculator.getBodyGravityAndCoriolisVector());
       if (success)
          qpSolver.addQPInput(motionAndRhoQPInput, MOTION_AND_RHO);
    }
@@ -660,6 +660,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       RigidBodyBasics rigidBody = command.getRigidBody();
       WrenchReadOnly wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+      dynamicsMatrixCalculator.setExternalWrench(rigidBody, wrench);
    }
 
    public void submitContactWrenchCommand(ContactWrenchCommand command)

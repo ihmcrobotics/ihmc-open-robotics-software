@@ -220,7 +220,7 @@ public class DoglegSolver
    private void updateSteepestDescentStep()
    {
       steepestDescentStep.set(gradient);
-      MatrixMissingTools.negate(steepestDescentStep);
+      CommonOps_DDRM.changeSign(steepestDescentStep);
    }
 
    private void updateGaussNewtonStep()
@@ -229,7 +229,7 @@ public class DoglegSolver
       gaussNewtonStepSolver.setA(jacobian);
       // Check "quality" of system to solve -- results close to or equal to zero indicate a near-singular or singular system
       gaussNewtonStepSystemQuality = gaussNewtonStepSolver.quality();
-      MatrixMissingTools.negate(residualCopy);
+      CommonOps_DDRM.changeSign(residualCopy);
       gaussNewtonStepSolver.solve(residualCopy, gaussNewtonStep);
    }
 
