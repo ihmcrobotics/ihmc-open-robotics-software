@@ -225,7 +225,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    public void compute()
    {
       controllerCoreComputeTimer.startMeasurement();
-
+   // TODO This will be moved to the WholeBodyControllCoreThread
       computeFeedbackControllers();
 
       switch (currentMode.getEnumValue())
@@ -251,6 +251,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    }
 
    // TODO Clean me up once compute() and submitControllerCoreCommand(ControllerCoreCommandInterface) have been removed.
+   // TODO This should be called from the wholeBodyControllerCoreThread.
    public void compute(ControllerCoreCommandInterface controllerCoreCommand)
    {
       submitControllerCoreCommand(controllerCoreCommand);

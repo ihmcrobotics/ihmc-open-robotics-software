@@ -80,6 +80,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     */
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
+//   private final ControllerCoreOutput controllerCoreOutput;
    /**
     * The desired joint data to be set on the robot. Set by the controller.
     */
