@@ -1,43 +1,44 @@
-package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
+package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
-import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExternalForceEstimationToolboxModule extends ToolboxModule
+public class ReferenceSpreadingToolboxModule extends ToolboxModule
 {
    public static final int UPDATE_PERIOD_MILLIS = 60;
    private static final double defaultTimeWithoutInputsBeforeSleep = 60.0;
 
-   private final ExternalForceEstimationToolboxController forceEstimationToolboxController;
+   private final ReferenceSpreadingToolboxController referenceSpreadingToolboxController;
 
-   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
+   public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, ros2Node);
-      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
+      this.referenceSpreadingToolboxController = new ReferenceSpreadingToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
       timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
       startYoVariableServer();
    }
 
-   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, pubSubImplementation);
-      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
+      this.referenceSpreadingToolboxController = new ReferenceSpreadingToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
       timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
       startYoVariableServer();
    }
@@ -49,22 +50,21 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
       {
-         if(forceEstimationToolboxController != null)
-
-            forceEstimationToolboxController.updateRobotConfigurationData(s.takeNextData());
+         if(referenceSpreadingToolboxController != null)
+            referenceSpreadingToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
 
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class), s ->
       {
-         if(forceEstimationToolboxController != null)
-            forceEstimationToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());
+         if(referenceSpreadingToolboxController != null)
+            referenceSpreadingToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());
       });
    }
 
    @Override
    public ToolboxController getToolboxController()
    {
-      return forceEstimationToolboxController;
+      return referenceSpreadingToolboxController;
    }
 
    @Override
@@ -101,7 +101,7 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.REFERENCE_SPREADING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -112,6 +112,6 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.REFERENCE_SPREADING_TOOLBOX.withRobot(robotName).withInput();
    }
 }

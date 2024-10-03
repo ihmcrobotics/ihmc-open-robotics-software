@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class TrajectoryRecordReplay
    private String filePath;
    private int numberOfParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
    private final List<double[]> dataMatrix = new ArrayList<>();
+   private final List<String> keyMatrix = new ArrayList<>();
    private final List<double[]> concatenatedDataMatrix = new ArrayList<>();
    private final List<double[]> splitDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
@@ -26,11 +28,20 @@ public class TrajectoryRecordReplay
    private boolean doneReplaying = false;
    private boolean concatenated = false;
    private String recordFileName = "";
+   private boolean createKeyMap = false;
+
 
    public TrajectoryRecordReplay(String filePath, int numberParts)
    {
       this.filePath = filePath;
       this.numberOfParts = numberParts;
+   }
+
+   public TrajectoryRecordReplay(String filePath, int numberParts, boolean createKeyMap)
+   {
+      this.filePath = filePath;
+      this.numberOfParts = numberParts;
+      this.createKeyMap = createKeyMap;
    }
 
    public double[] play()
@@ -40,7 +51,7 @@ public class TrajectoryRecordReplay
 
    public double[] play(boolean split)
    {
-      if (timeStepReplay < 1)
+      if (timeStepReplay < 1 && dataMatrix.isEmpty())
       {
          this.readCSV();
          if (split)
@@ -100,6 +111,13 @@ public class TrajectoryRecordReplay
       concatenated = true;
    }
 
+   public void importData(boolean split)
+   {
+      this.readCSV();
+      if (split)
+         this.splitData();
+   }
+
    /**
     * Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
     * and we want the info of each part in a separate row.
@@ -139,8 +157,16 @@ public class TrajectoryRecordReplay
       {
          BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
          String line;
+         boolean createKeyMapTemp = this.createKeyMap;
          while ((line = fileReader.readLine()) != null)
          {
+            if (createKeyMapTemp){
+               String[] keys = line.split(",");
+               keyMatrix.addAll(Arrays.asList(keys));
+               createKeyMapTemp = false;
+               continue;
+            }
+
             String[] values = line.split(",");
             double[] dataValues = new double[values.length];
             for (int i = 0; i < values.length; i++)
@@ -192,7 +218,7 @@ public class TrajectoryRecordReplay
       }
    }
 
-   private void reset()
+   public void reset()
    {
       timeStepReplay = 0;
       dataMatrix.clear();
@@ -272,5 +298,10 @@ public class TrajectoryRecordReplay
    public void setRecordFileName(String recordFileName)
    {
       this.recordFileName = recordFileName;
+   }
+
+   public List<String> getKeyMatrix()
+   {
+      return keyMatrix;
    }
 }
