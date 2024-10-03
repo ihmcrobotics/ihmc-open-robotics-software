@@ -21,21 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -790,6 +776,22 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static QPCostCommand nextQPCostCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      QPCostCommand next = new QPCostCommand();
+
+      int numberOfRows = RandomNumbers.nextInt(random, 1, 10);
+      int numberOfDoFs = RandomNumbers.nextInt(random, 1, 50);
+      next.setCommandId(random.nextInt());
+      next.getStateJacobian().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfDoFs, random));
+      next.getStateObjective().set(RandomMatrices_DDRM.rectangle(numberOfRows, 1, random));
+      next.getCostHessian().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfRows, random));
+      next.getCostGradient().set(RandomMatrices_DDRM.rectangle(numberOfRows, 1, random));
+      next.setWeight(RandomNumbers.nextDouble(random, 10.0));
+
+      return next;
+   }
+
    public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       return nextPlaneContactStateCommand(random, false, rootBody, possibleFrames);
@@ -1279,7 +1281,7 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setLinearMomentumRateHessian(nextDMatrixRMaj(random, 3, 3));
       next.setLinearMomentumRateGradient(nextDMatrixRMaj(random, 1, 3));
-      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setWeight(random.nextDouble());
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
 
       return next;
