@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationPara
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -432,6 +433,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                            JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                           ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
                                                            JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);

@@ -1,17 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataBasics;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -45,6 +36,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    private final ControllerCoreOutput controllerCoreOutput;
    private final RootJointDesiredConfigurationDataBasics rootJointDesiredConfigurationData;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
+   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
 
    private OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);

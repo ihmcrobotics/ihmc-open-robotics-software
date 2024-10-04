@@ -158,6 +158,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
                                                   wholeBodyControllerCoreDesiredJointDataHolder,
+                                                  controllerCoreOutPutDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
                                                   kinematicsSimulation,
@@ -234,6 +235,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                            ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
@@ -266,6 +268,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                                                            centerOfMassDataHolderForController,
                                                                                            centerOfPressureDataHolderForEstimator,
                                                                                            wholeBodyControllerCoreOutput,
+                                                                                           controllerCoreOutPutDataHolder,
                                                                                            jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
