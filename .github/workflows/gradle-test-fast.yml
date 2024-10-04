@@ -42,6 +42,7 @@ jobs:
     with:
       subproject: 'ihmc-footstep-planning'
       test-category: 'fast'
+      requires-self-hosted: true
   ihmc-graphics:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
