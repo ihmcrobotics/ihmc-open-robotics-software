@@ -12,8 +12,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,6 +34,7 @@ public class ROS2SRTVideoSubscriber
 
    private Mat nextFrame;
    private final List<Consumer<RawImage>> newFrameConsumers = new ArrayList<>();
+   private double lastFrameDelay;
 
    private final Thread subscriptionThread;
    private final AtomicBoolean subscriptionDesired = new AtomicBoolean(false);
@@ -92,6 +95,11 @@ public class ROS2SRTVideoSubscriber
       return videoReceiver.isConnected();
    }
 
+   public double getLastFrameDelay()
+   {
+      return lastFrameDelay;
+   }
+
    private void subscriptionUpdate()
    {
       while (!shutdown)
@@ -142,10 +150,12 @@ public class ROS2SRTVideoSubscriber
 
                CameraIntrinsics frameIntrinsics = streamStatusMonitor.getCameraIntrinsics();
                FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
+               Instant frameAcquisitionTime = MessageTools.toInstant(frameDataMessage.getAcquisitionTime());
+               lastFrameDelay = TimeTools.calculateDelay(frameAcquisitionTime);
 
                // Create a RawImage
                RawImage nextFrameRawImage = new RawImage(frameDataMessage.getSequenceNumber(),
-                                                         MessageTools.toInstant(frameDataMessage.getAcquisitionTime()),
+                                                         frameAcquisitionTime,
                                                          streamStatusMonitor.getDepthDiscretization(),
                                                          nextFrame,
                                                          null,

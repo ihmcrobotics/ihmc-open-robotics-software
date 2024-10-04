@@ -1,10 +1,15 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
+import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
+import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -12,8 +17,13 @@ import javax.annotation.Nullable;
 
 public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualizer<SRTStreamStatus>
 {
+   private static final String DELAY_PLOT_TEXT = "Delay (ms)";
+
    private final ROS2Topic<SRTStreamStatus> streamTopic;
    private final ROS2SRTVideoSubscriber subscriber;
+
+   private float alphaFilteredDelayMS = 0.0f;
+   private final ImGuiPlot delayPlot = new ImGuiPlot(DELAY_PLOT_TEXT, 1000, -1, 20);
 
    public RDXROS2SRTVideoStreamVisualizer(ROS2PublishSubscribeAPI ros2, String title, ROS2Topic<SRTStreamStatus> streamTopic)
    {
@@ -46,6 +56,8 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
       getFrequency().ping();
       getOpenCVVideoVisualizer().updateImageDimensions(newImage.getImageWidth(), newImage.getImageHeight());
       newImage.getCpuImageMat().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+      float delayMS = (float) Conversions.secondsToMilliseconds(subscriber.getLastFrameDelay());
+      alphaFilteredDelayMS = 0.1f * delayMS + 0.9f * alphaFilteredDelayMS;
    }
 
    @Nullable
@@ -58,6 +70,11 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    @Override
    public void renderImGuiWidgets()
    {
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(alphaFilteredDelayMS, 20.0f, 200.0f));
+      delayPlot.setWidth((int) (ImGui.getColumnWidth() - ImGuiTools.calcTextSizeX(DELAY_PLOT_TEXT)));
+      delayPlot.render(alphaFilteredDelayMS);
+      ImGui.popStyleColor();
+
       getOpenCVVideoVisualizer().renderImGuiWidgets();
    }
 
