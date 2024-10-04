@@ -8,6 +8,7 @@ import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxController;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -33,22 +34,23 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
 
    private final ReferenceSpreadingToolboxController referenceSpreadingToolboxController;
 
-   private ROS2PublisherBasics<HandTrajectoryMessage> messagePublisher;
-
-   public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
-   {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, ros2Node);
-      this.referenceSpreadingToolboxController = new ReferenceSpreadingToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
-      timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
-      startYoVariableServer();
-   }
+   private ROS2PublisherBasics<HandTrajectoryMessage> trajectoryMessagePublisher;
 
    public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
+      this(robotModel, KinematicsStreamingToolboxParameters.defaultParameters(), startYoVariableServer, pubSubImplementation);
+   }
+
+   public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel,
+                                           KinematicsStreamingToolboxParameters parameters,
+                                           boolean startYoVariableServer,
+                                           PubSubImplementation pubSubImplementation){
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, pubSubImplementation);
       this.referenceSpreadingToolboxController = new ReferenceSpreadingToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
       timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
       startYoVariableServer();
+
+      referenceSpreadingToolboxController.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
    }
 
    @Override
@@ -62,40 +64,13 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
          return;
       }
 
-      if (requestedState == ToolboxState.WAKE_UP && toolboxRunnable != null)
-      {
-         referenceSpreadingToolboxController.csvReplayer.start();
-      }
-   }
-
-//   REINITIALIZE is highjacked to pause and unpause the playback
-   @Override
-   public void reinitialize(){
-      if (super.toolboxRunnable != null)
-      {
-         if (referenceSpreadingToolboxController.csvReplayer.isPaused())
-         {
-            LogTools.info("Unpausing Playback");
-            referenceSpreadingToolboxController.csvReplayer.start(false);
-         }
-         else {
-            LogTools.info("Pausing Playback");
-            referenceSpreadingToolboxController.csvReplayer.pause();
-         }
-      }
-   }
-
-   @Override
-   public void sleep()
-   {
-      super.sleep();
-      referenceSpreadingToolboxController.csvReplayer.stop();
+      LogTools.info("Received message to change state to: " + requestedState);
    }
 
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      messagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName));
+      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName));
 
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 

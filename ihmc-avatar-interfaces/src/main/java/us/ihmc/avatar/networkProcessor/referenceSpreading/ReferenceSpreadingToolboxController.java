@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
@@ -37,6 +38,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -57,17 +59,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 
-   public final ReplaySyncedCSV csvReplayer;
-
    private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
 
-   private final CommandInputManager commandInputManager;
-   private Boolean csvUpdated = false;
-   private HashMap<String, Double> currentFrame = new HashMap<>();
+   private HandTrajectoryMessagePublisher trajectoryMessagePublisher;
 
    public ReferenceSpreadingToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -79,7 +77,6 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    {
       super(statusOutputManager, parentRegistry);
 
-      this.commandInputManager = commandInputManager;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
@@ -117,14 +114,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
       String filePath = demoDirectory + "/simplePlayback.csv";
 
-      csvReplayer = new ReplaySyncedCSV(filePath, 1);
+
    }
 
    @Override
    public boolean initialize()
    {
       waitingForRobotConfigurationData.set(true);
-      csvReplayer.start();
       isDone.set(false);
 
       return true;
@@ -142,14 +138,11 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       if (waitingForRobotConfigurationData.getBooleanValue())
          return;
+   }
 
-      csvUpdated = csvReplayer.checkNewFrame(robotConfigurationData.getMonotonicTime());
-
-      if (csvUpdated)
-      {
-         currentFrame = csvReplayer.getCurrentFrame();
-         LogTools.info("Current Frame: " + currentFrame);
-      }
+   public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
+   {
+      this.trajectoryMessagePublisher = trajectoryMessagePublisher;
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -161,5 +154,21 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    public boolean isDone()
    {
       return isDone.getValue();
+   }
+
+   public HandTrajectoryMessage createHandTrajectoryMessage(HashMap<String, Double> thisFrame, RobotSide robotSide)
+   {
+      SE3TrajectoryPointMessage se3TrajectoryPointMessage = new SE3TrajectoryPointMessage();
+
+
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+      handTrajectoryMessage.setRobotSide(robotSide.toByte());
+      handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add(se3TrajectoryPointMessage);
+      return handTrajectoryMessage;
+   }
+
+   public interface HandTrajectoryMessagePublisher
+   {
+      void publish(HandTrajectoryMessage messageToPublish);
    }
 }
