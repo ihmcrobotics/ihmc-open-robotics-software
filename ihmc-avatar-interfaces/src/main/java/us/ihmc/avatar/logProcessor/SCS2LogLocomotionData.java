@@ -2,13 +2,13 @@ package us.ihmc.avatar.logProcessor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -26,14 +26,14 @@ public class SCS2LogLocomotionData
    private YoInteger workingCounterMismatch;
    private YoBoolean isRobotFalling;
    private SCS2LogDataEnum<HighLevelControllerName> controllerState;
-   private final Point2D robotStartLocation = new Point2D();
+   private final Point2D robotStartLocation = new Point2D(Double.NaN, Double.NaN);
    private final SideDependentList<SCS2LogDataFootState> footStates = new SideDependentList<>();
    private final ArrayList<SCS2LogWalk> logWalks = new ArrayList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
    private YoPoint3D centerOfMass;
-   private final double comPlotResolution = 0.1;
+   private YoPoint2D capturePoint;
+   private final double plotTimeResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
-   private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
    private boolean requestStopProcessing = false;
 
    public void setup(LogSession logSession)
@@ -58,6 +58,10 @@ public class SCS2LogLocomotionData
        && rootRegistry.findVariable(momentumRateControl + "centerOfMassY") instanceof YoDouble yVariable
        && rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble zVariable)
          centerOfMass = new YoPoint3D(xVariable, yVariable, zVariable);
+
+      if (rootRegistry.findVariable(momentumRateControl + "capturePointX") instanceof YoDouble xVariable
+       && rootRegistry.findVariable(momentumRateControl + "capturePointY") instanceof YoDouble yVariable)
+         capturePoint = new YoPoint2D(xVariable, yVariable);
       
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
@@ -106,36 +110,31 @@ public class SCS2LogLocomotionData
             footStates.get(side).getFootsteps().clear();
          }
 
-         if (recentSteps)
+         if (robotStartLocation.containsNaN())
          {
-            if (Double.isNaN(lastCoMPlotTime) || currentTime - lastCoMPlotTime > comPlotResolution)
-            {
-               if (coms.isEmpty())
-               {
-                  robotStartLocation.set(centerOfMass.getX(), centerOfMass.getY());
-                  LogTools.info("Robot start location: {}", robotStartLocation);
-               }
-
-               coms.add().set(centerOfMass);
-
-               lastCenterOfMass.set(centerOfMass);
-               lastCoMPlotTime = currentTime;
-            }
+            robotStartLocation.set(centerOfMass.getX(), centerOfMass.getY());
+            LogTools.info("Robot start location: {}", robotStartLocation);
          }
 
-
+         if (lastCenterOfMass.containsNaN())
+         {
+            logWalk.getComs().add().set(centerOfMass);
+            lastCenterOfMass.set(centerOfMass);
+            lastCoMPlotTime = currentTime;
+         }
+         else if (centerOfMass.distanceXY(lastCenterOfMass) > 0.001 && currentTime - lastCoMPlotTime > plotTimeResolution)
+         {
+            logWalk.getComs().add().set(centerOfMass);
+            logWalk.getIcps().add().set(capturePoint);
+            lastCenterOfMass.set(centerOfMass);
+            lastCoMPlotTime = currentTime;
+         }
       }
 
-
       // TODO:
-      // # Falls
       // # Runs of action (split by 30 seconds of inactivity)
       // Timestamps where runs start
       // Arm motions
-
-
-
-
    }
 
    public void writeJSON(ObjectNode rootNode)
@@ -143,7 +142,7 @@ public class SCS2LogLocomotionData
       rootNode.put("numberOfWalks", logWalks.size());
       rootNode.put("numberOfFalls", getFalls());
       rootNode.put("numberOfFootsteps", getNumberOfFootsteps());
-      rootNode.put("numberOfComs", coms.size());
+      rootNode.put("numberOfComs", getNumberOfComs());
       rootNode.put("workingCounterMismatch", getWorkingCounterMismatch());
    }
 
@@ -172,9 +171,14 @@ public class SCS2LogLocomotionData
       return numberOfFootsteps;
    }
 
-   public RecyclingArrayList<Point2D> getComs()
+   public int getNumberOfComs()
    {
-      return coms;
+      int numberOfComs = 0;
+      for (SCS2LogWalk logWalk : logWalks)
+      {
+         numberOfComs += logWalk.getComs().size();
+      }
+      return numberOfComs;
    }
 
    public ArrayList<SCS2LogWalk> getLogWalks()

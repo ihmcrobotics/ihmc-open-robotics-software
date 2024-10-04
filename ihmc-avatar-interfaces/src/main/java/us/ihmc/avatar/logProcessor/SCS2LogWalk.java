@@ -12,6 +12,7 @@ public class SCS2LogWalk
    private final Point2D walkStart = new Point2D();
    private final ArrayList<SCS2LogDataFootstep> footsteps = new ArrayList<>();
    private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
+   private final RecyclingArrayList<Point2D> icps = new RecyclingArrayList<>(Point2D::new);
 
    private boolean endedWithFall = false;
    private int initialWorkingCounterMismatch = -1;
@@ -58,6 +59,11 @@ public class SCS2LogWalk
    public RecyclingArrayList<Point2D> getComs()
    {
       return coms;
+   }
+
+   public RecyclingArrayList<Point2D> getIcps()
+   {
+      return icps;
    }
 
    public int getInitialWorkingCounterMismatch()
