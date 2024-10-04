@@ -73,9 +73,19 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       this.centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
    }
 
+   public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
+   {
+      return this.centerOfPressureDataHolder;
+   }
+
    public void setDesiredExternalWrench(WrenchReadOnly desiredExternalWrench, RigidBodyBasics rigidBody)
    {
       this.desiredExternalWrenchHolder.setDesiredExternalWrench(desiredExternalWrench, rigidBody);
+   }
+
+   public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
+   {
+      return this.desiredExternalWrenchHolder;
    }
 
    @Override
@@ -90,7 +100,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearMomentum()
+   public FrameVector3D getLinearMomentum()
    {
       return linearMomentum;
    }
@@ -101,7 +111,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    }
 
    @Override
-   public FrameVector3DReadOnly getAngularMomentum()
+   public FrameVector3D getAngularMomentum()
    {
       return angularMomentum;
    }
@@ -112,7 +122,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearMomentumRate()
+   public FrameVector3D getLinearMomentumRate()
    {
       return linearMomentumRate;
    }
@@ -123,7 +133,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    }
 
    @Override
-   public FrameVector3DReadOnly getAngularMomentumRate()
+   public FrameVector3D getAngularMomentumRate()
    {
       return angularMomentumRate;
    }
@@ -139,6 +149,12 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       return rootJointDesiredConfigurationData;
    }
 
+   @Override
+   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+   {
+      return null;
+   }
+
    public void setLowLevelOneDoFJointControllerCoreOutputDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointControllerCoreOutputDataHolder)
    {
       this.lowLevelOneDoFJointControllerCoreOutputDataHolder.overwriteWith(lowLevelOneDoFJointControllerCoreOutputDataHolder);
@@ -150,10 +166,10 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    {
       return lowLevelOneDoFJointControllerCoreOutputDataHolder;
    }
-   @Override
-   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+
+   public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder()
    {
-      return null;
+      return lowLevelOneDoFJointControllerCoreOutputDataHolder;
    }
 
    public void set(ControllerCoreOutPutDataHolder other)

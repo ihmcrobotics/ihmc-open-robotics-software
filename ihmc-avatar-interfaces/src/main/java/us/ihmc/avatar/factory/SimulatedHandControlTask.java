@@ -1,12 +1,12 @@
 package us.ihmc.avatar.factory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimulatedHandControlTask extends HumanoidRobotControlTask
 {
@@ -69,6 +69,7 @@ public class SimulatedHandControlTask extends HumanoidRobotControlTask
       handSensorReader.read(handControlThread.getHumanoidRobotContextData().getSensorDataContext());
       handControlThread.getHumanoidRobotContextData().setEstimatorRan(masterContext.getEstimatorRan());
       handControlThread.getHumanoidRobotContextData().setControllerRan(masterContext.getControllerRan());
+      handControlThread.getHumanoidRobotContextData().setWholeBodyControllerCoreRan(masterContext.getWholeBodyControllerCoreRan());
    }
 
    @Override

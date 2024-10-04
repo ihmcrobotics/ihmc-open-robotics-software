@@ -79,9 +79,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       estimatorResolver.resolveHumanoidRobotContextDataScheduler(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());
+      //TODO This should be removed after checking resolveHumanoidRobotContextDataWholeBodyControllerCoreFull works well
       estimatorResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(masterContext, estimatorThread.getHumanoidRobotContextData());
-
-
+      estimatorResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(masterContext, estimatorThread.getHumanoidRobotContextData());
    }
 
    @Override
@@ -101,5 +101,4 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       schedulerThreadRunnables.add(runnable);
    }
-
 }

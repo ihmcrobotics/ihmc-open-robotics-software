@@ -1689,12 +1689,14 @@ public class CrossRobotCommandRandomTools
                                                                    robotMotionStatusHolder,
                                                                    jointDesiredOutputList,
                                                                    sensorDataContext,
+                                                                   null,
                                                                    null);
       next.setTimestamp(random.nextLong());
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
       next.setPerceptionRan(random.nextBoolean());
+      next.setWholeBodyControllerCoreRan(random.nextBoolean());
       return next;
    }
 

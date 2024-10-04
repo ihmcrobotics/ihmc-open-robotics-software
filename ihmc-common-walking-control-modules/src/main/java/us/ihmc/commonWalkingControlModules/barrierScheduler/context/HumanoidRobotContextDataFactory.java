@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -21,8 +22,9 @@ public class HumanoidRobotContextDataFactory
    protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
    protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    protected final RequiredFactoryField<SensorDataContext> sensorDataContext = new RequiredFactoryField<>("sensorDataContext");
-   protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccJointDesiredOutputList = new RequiredFactoryField<>("wholeBodyControllerCoreJointDesiredOutputList");
-
+   protected final RequiredFactoryField<ControllerCoreOutPutDataHolder> controllerCoreOutputDataHolder = new RequiredFactoryField<>("controllerCoreDataHolder");
+   protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccJointDesiredOutputList = new RequiredFactoryField<>(
+         "wholeBodyControllerCoreJointDesiredOutputList");
 
    public HumanoidRobotContextData createHumanoidRobotContextData()
    {
@@ -35,7 +37,8 @@ public class HumanoidRobotContextDataFactory
                                           robotMotionStatusHolder.get(),
                                           jointDesiredOutputList.get(),
                                           sensorDataContext.get(),
-                                          wbccJointDesiredOutputList.get());
+                                          wbccJointDesiredOutputList.get(),
+                                          controllerCoreOutputDataHolder.get());
    }
 
    public void setProcessedJointData(HumanoidRobotContextJointData value)
@@ -72,8 +75,14 @@ public class HumanoidRobotContextDataFactory
    {
       wbccJointDesiredOutputList.set(value);
    }
+
    public void setSensorDataContext(SensorDataContext value)
    {
       sensorDataContext.set(value);
+   }
+
+   public void setControllerCoreOutputDataHolder(ControllerCoreOutPutDataHolder value)
+   {
+      controllerCoreOutputDataHolder.set(value);
    }
 }
