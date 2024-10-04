@@ -11,6 +11,7 @@ import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -93,22 +94,11 @@ public class RealsenseColorDepthImagePublisher
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-         imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-         MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
-         depthImageMessage.setFocalLengthXPixels(depthImageToPublish.getFocalLengthX());
-         depthImageMessage.setFocalLengthYPixels(depthImageToPublish.getFocalLengthY());
-         depthImageMessage.setPrincipalPointXPixels(depthImageToPublish.getPrincipalPointX());
-         depthImageMessage.setPrincipalPointYPixels(depthImageToPublish.getPrincipalPointY());
-         depthImageMessage.setImageWidth(depthImageToPublish.getImageWidth());
-         depthImageMessage.setImageHeight(depthImageToPublish.getImageHeight());
-         depthImageMessage.getPosition().set(depthImageToPublish.getPosition());
-         depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
-         depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
-         depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         depthImageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
-         depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
-         depthImageMessage.setCompressionType(CompressionType.ZSTD_NVJPEG_HYBRID.toByte());
+         PerceptionMessageTools.packImageMessage(depthImageToPublish,
+                                                 depthPNGPointer,
+                                                 CompressionType.ZSTD_NVJPEG_HYBRID,
+                                                 CameraModel.PINHOLE,
+                                                 depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
          lastDepthSequenceNumber = depthImageToPublish.getSequenceNumber();
@@ -151,27 +141,12 @@ public class RealsenseColorDepthImagePublisher
             imageEncoder = new CUDAJPEGProcessor();
 
          // Compress image
-         BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
+         BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getHeight() * colorImageToPublish.getWidth());
          imageEncoder.encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
-         imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
-         MessageTools.toMessage(colorImageToPublish.getAcquisitionTime(), colorImageMessage.getAcquisitionTime());
-         colorImageMessage.setFocalLengthXPixels(colorImageToPublish.getFocalLengthX());
-         colorImageMessage.setFocalLengthYPixels(colorImageToPublish.getFocalLengthY());
-         colorImageMessage.setPrincipalPointXPixels(colorImageToPublish.getPrincipalPointX());
-         colorImageMessage.setPrincipalPointYPixels(colorImageToPublish.getPrincipalPointY());
-         colorImageMessage.setImageWidth(colorImageToPublish.getImageWidth());
-         colorImageMessage.setImageHeight(colorImageToPublish.getImageHeight());
-         colorImageMessage.getPosition().set(colorImageToPublish.getPosition());
-         colorImageMessage.getOrientation().set(colorImageToPublish.getOrientation());
-         colorImageMessage.setSequenceNumber(colorImageToPublish.getSequenceNumber());
-         colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
-         colorImageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
-         colorImageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
-         colorImageMessage.setCompressionType(CompressionType.NVJPEG.toByte());
+         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, CameraModel.PINHOLE, colorImageMessage);
 
          ros2ColorImagePublisher.publish(colorImageMessage);
          lastColorSequenceNumber = colorImageToPublish.getSequenceNumber();

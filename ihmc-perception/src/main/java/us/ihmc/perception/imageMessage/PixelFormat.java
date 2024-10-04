@@ -18,7 +18,8 @@ public enum PixelFormat
    RGBA8(1, 4, -1, -1),                                        // 32 bits per pixel, in RGBA order
    YUV_I420(1, 1, COLOR_YUV2RGBA_I420, COLOR_RGBA2YUV_I420),   // YUV420 format
    GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY),              // monochrome
-   GRAY16(2, 1, -1, -1);                                       // aka depth
+   GRAY16(2, 1, -1, -1),                                       // aka depth
+   UNKNOWN(-1, -1, -1, -1);
 
    /** Equivalent to {@code elemsize} of the corresponding OpenCV type */
    public final long bytesPerElement;
