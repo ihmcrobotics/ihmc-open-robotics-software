@@ -11,6 +11,10 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTTimeProvider;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.referenceSpreadingStateHelper.RSTimeProvider;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.referenceSpreadingStateHelper.States;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactParticleFilter;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
@@ -38,6 +42,8 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -51,6 +57,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToIntFunction;
+import java.util.logging.Logger;
 
 public class ReferenceSpreadingToolboxController extends ToolboxController
 {
@@ -58,6 +65,10 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
+
+   private final RSTimeProvider timeProvider;
+   private final YoDouble time = new YoDouble("time", registry);
+   StateMachine<States, State> stateMachine;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -76,6 +87,8 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                                                    YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      timeProvider = RSTimeProvider.createTimeProfider();
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -114,7 +127,8 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
       String filePath = demoDirectory + "/simplePlayback.csv";
 
-
+      referenceSpreadingStateHelper stateMachineHelper = new referenceSpreadingStateHelper(registry);
+      stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
    @Override
@@ -122,6 +136,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    {
       waitingForRobotConfigurationData.set(true);
       isDone.set(false);
+
+      timeProvider.initialize();
+      time.set(timeProvider.getTime());
 
       return true;
    }
@@ -138,6 +155,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       if (waitingForRobotConfigurationData.getBooleanValue())
          return;
+
+
+
+      timeProvider.update(robotConfigurationData.getMonotonicTime());
+      time.set(timeProvider.getTime());
+
+      stateMachine.doActionAndTransition();
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
