@@ -129,8 +129,8 @@ import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 public class KinematicsToolboxController extends ToolboxController
 {
    private static final double GRAVITY = 9.81;
-
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
+   public static final boolean ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -863,7 +863,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected void initializePrivilegedConfiguration()
    {
-      if (initialRobotConfigurationMap != null)
+      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
       {
          initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
                                                    {
@@ -872,7 +872,7 @@ public class KinematicsToolboxController extends ToolboxController
                                                    });
       }
 
-      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+//       Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
    }
 

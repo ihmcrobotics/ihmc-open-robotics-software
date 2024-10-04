@@ -324,28 +324,28 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       externalWrenchManager.doAction(Double.NaN);
 
-      if (alphaLoadedCarriedObject != null)
-      {
-         alphaLoadedCarriedObject.update(isCarryingObject ? 1.0 : 0.0);
-
-         if (alphaLoadedCarriedObject.getValue() > 1.0e-4)
-         {
-            double additionalPayloadMass = alphaLoadedCarriedObject.getValue() * objectCarryMass;
-
-            objectCarryCombinedInertia.setIncludingFrame(baselineInertia);
-            objectCarryCombinedInertia.setMass(additionalPayloadMass);
-            double objectRadius = 0.3;
-            double sphereMOI = 0.4 * additionalPayloadMass * objectRadius * objectRadius;
-            objectCarryCombinedInertia.getMomentOfInertia().setToDiagonal(sphereMOI, sphereMOI, sphereMOI);
-
-            objectCarryCombinedInertia.add(baselineInertia);
-            bodyToControl.getInertia().setIncludingFrame(objectCarryCombinedInertia);
-         }
-         else
-         {
-            bodyToControl.getInertia().setIncludingFrame(baselineInertia);
-         }
-      }
+//      if (alphaLoadedCarriedObject != null)
+//      {
+//         alphaLoadedCarriedObject.update(isCarryingObject ? 1.0 : 0.0);
+//
+//         if (alphaLoadedCarriedObject.getValue() > 1.0e-4)
+//         {
+//            double additionalPayloadMass = alphaLoadedCarriedObject.getValue() * objectCarryMass;
+//
+//            objectCarryCombinedInertia.setIncludingFrame(baselineInertia);
+//            objectCarryCombinedInertia.setMass(additionalPayloadMass);
+//            double objectRadius = 0.3;
+//            double sphereMOI = 0.4 * additionalPayloadMass * objectRadius * objectRadius;
+//            objectCarryCombinedInertia.getMomentOfInertia().setToDiagonal(sphereMOI, sphereMOI, sphereMOI);
+//
+//            objectCarryCombinedInertia.add(baselineInertia);
+//            bodyToControl.getInertia().setIncludingFrame(objectCarryCombinedInertia);
+//         }
+//         else
+//         {
+//            bodyToControl.getInertia().setIncludingFrame(baselineInertia);
+//         }
+//      }
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -467,12 +467,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       if (alphaLoadedCarriedObject == null)
          return;
 
-      LogTools.info("Received object carry command!");
-
-      isCarryingObject = objectCarryCommand.isPickingUp();
-
-      if (isCarryingObject)
-         objectCarryMass = objectCarryCommand.getObjectMass();
+//      LogTools.info("Received object carry command!");
+//
+//      isCarryingObject = objectCarryCommand.isPickingUp();
+//
+//      if (isCarryingObject)
+//         objectCarryMass = objectCarryCommand.getObjectMass();
    }
 
    /**
