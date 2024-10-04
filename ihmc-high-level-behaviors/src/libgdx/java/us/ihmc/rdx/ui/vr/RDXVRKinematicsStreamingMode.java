@@ -78,9 +78,9 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 public class RDXVRKinematicsStreamingMode
 {
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
-   final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.9;
+   final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.7;
    final double COM_JOYSTICK_INCREMENT = 0.001;
-   private static final double OBJECT_MASS = 30.0;
+   private static final double OBJECT_MASS = 0.4;
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -425,6 +425,8 @@ public class RDXVRKinematicsStreamingMode
          double forwardJoystickValue = controller.getJoystickActionData().y();
          double lateralJoystickValue = -controller.getJoystickActionData().x();
 
+//         LogTools.info(forwardJoystickValue + ", " + lateralJoystickValue);
+
          if (kinematicsRecorder.isReplaying())
          { // overwrite with recorded values
             rightAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.RIGHT);
@@ -476,7 +478,7 @@ public class RDXVRKinematicsStreamingMode
             if (Math.abs(lateralJoystickValue) > COM_CONTROL_JOYSTICK_THRESHOLD)
                comJoystickXYInput.setY(comJoystickXYInput.getY() + Math.signum(lateralJoystickValue) * COM_JOYSTICK_INCREMENT);
 
-            LogTools.info(comJoystickXYInput.getX());
+//            LogTools.info(comJoystickXYInput.getX());
             comJoystickXYInput.changeFrame(ReferenceFrame.getWorldFrame());
          }
 
@@ -946,7 +948,7 @@ public class RDXVRKinematicsStreamingMode
                      ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                   }
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
-                  polygonGraphic.update(latestStatus);
+                  polygonGraphic.update(latestStatus, comJoystickXYInput.getX(), comJoystickXYInput.getY(), comJoystickZInput.getZ());
                }
             }
             if (capturabilityBasedStatus.getMessageNotification().poll())

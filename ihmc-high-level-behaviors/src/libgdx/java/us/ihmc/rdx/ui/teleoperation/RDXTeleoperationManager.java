@@ -90,9 +90,9 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
 
-   private final RDXPelvisHeightSlider pelvisHeightSlider;
-   private final RDXChestOrientationSlider chestPitchSlider;
-   private final RDXChestOrientationSlider chestYawSlider;
+//   private final RDXPelvisHeightSlider pelvisHeightSlider;
+//   private final RDXChestOrientationSlider chestPitchSlider;
+//   private final RDXChestOrientationSlider chestYawSlider;
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
    private RDXRobotCollisionModel contactCollisionModel;
@@ -158,11 +158,11 @@ public class RDXTeleoperationManager extends RDXPanel
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
-      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
+//      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       // TODO this should update the GDX desired Robot
-      chestPitchSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, ros2Helper, teleoperationParameters);
+//      chestPitchSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.PITCH, ros2Helper, teleoperationParameters);
       // TODO this should update the GDX desired robot.
-      chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, ros2Helper, teleoperationParameters);
+//      chestYawSlider = new RDXChestOrientationSlider(syncedRobot, YawPitchRollAxis.YAW, ros2Helper, teleoperationParameters);
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
@@ -526,9 +526,9 @@ public class RDXTeleoperationManager extends RDXPanel
 
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      pelvisHeightSlider.renderImGuiWidgets();
-      chestPitchSlider.renderImGuiWidgets();
-      chestYawSlider.renderImGuiWidgets();
+//      pelvisHeightSlider.renderImGuiWidgets();
+//      chestPitchSlider.renderImGuiWidgets();
+//      chestYawSlider.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
 
