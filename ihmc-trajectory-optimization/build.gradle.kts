@@ -13,10 +13,24 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("net.sf.trove4j:trove4j:3.0.3")
+   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-matrix-library:0.19.0")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("org.ejml:ejml-ddense:0.39")
+}
+
+examplesDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:ihmc-yovariables:0.12.2")
+   api("us.ihmc:simulation-construction-set:0.25.1")
+}
+
+examplesTestDependencies{
+   api(ihmc.sourceSetProject("examples"))
 }
 

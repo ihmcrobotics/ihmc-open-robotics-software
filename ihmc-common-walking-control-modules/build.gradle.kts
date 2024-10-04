@@ -14,16 +14,15 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
+   api("us.ihmc:ihmc-trajectory-optimization:source")
 }
 
 testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-convex-optimization-test:0.17.21")
 }
