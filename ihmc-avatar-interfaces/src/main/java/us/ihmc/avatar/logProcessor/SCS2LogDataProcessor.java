@@ -186,7 +186,7 @@ public class SCS2LogDataProcessor
          int walk = 1;
          for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
          {
-//            svgGraphics2D.drawString("Walk %d".formatted(walk), );
+            svgGraphics2D.drawString("Walk %d".formatted(walk), metersToMMX(logWalk.getWalkStart().getX()), metersToMMY(logWalk.getWalkStart().getY() + 0.5));
 
             for (SCS2LogDataFootstep footstep : logWalk.getFootsteps())
             {
