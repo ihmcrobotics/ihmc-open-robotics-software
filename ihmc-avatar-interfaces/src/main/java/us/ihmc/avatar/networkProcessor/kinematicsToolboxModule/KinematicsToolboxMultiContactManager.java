@@ -199,7 +199,7 @@ public class KinematicsToolboxMultiContactManager
 
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
 
-      double defaultPostureSensitivityThreshold = 0.065;
+      double defaultPostureSensitivityThreshold = 0.045;
       double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
       double defaultStabilityMarginThresholdHigh = 0.16; // 0.12;
 
