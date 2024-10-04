@@ -1,7 +1,10 @@
 package us.ihmc.avatar.logProcessor;
 
 import org.jfree.svg.SVGGraphics2D;
+import org.jfree.svg.SVGHints;
+import org.jfree.svg.SVGHints.Key;
 import org.jfree.svg.SVGUnits;
+import org.jfree.svg.SVGUtils;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SCS2LogDataProcessor
@@ -179,32 +183,61 @@ public class SCS2LogDataProcessor
       svgGraphics2D = new SVGGraphics2D(documentSizeMillimeters, documentSizeMillimeters, SVGUnits.MM);
 
       svgGraphics2D.setColor(Color.BLACK);
-      svgGraphics2D.setStroke(new BasicStroke(15));
+      svgGraphics2D.setStroke(new BasicStroke(7));
+      svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 20));
+      svgGraphics2D.setFontSizeUnits(SVGUnits.MM);
 
-      for (RobotSide side : RobotSide.values)
+      int walk = 1;
+      for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
       {
-         int walk = 1;
-         for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
-         {
-            svgGraphics2D.drawString("Walk %d".formatted(walk), metersToMMX(logWalk.getWalkStart().getX()), metersToMMY(logWalk.getWalkStart().getY() + 0.5));
+         String walkName = "Walk %d".formatted(walk);
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, walkName);
+         svgGraphics2D.drawString(walkName, metersToMMX(logWalk.getWalkStart().getX()), metersToMMY(logWalk.getWalkStart().getY() + 0.3));
 
-            for (SCS2LogDataFootstep footstep : logWalk.getFootsteps())
+         String groupName = "Footsteps %d".formatted(walk);
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, groupName);
+
+         for (SCS2LogDataFootstep footstep : logWalk.getFootsteps())
+         {
+            svgGraphics2D.setColor(footstep.getSide() == RobotSide.LEFT ? Color.RED : Color.GREEN);
+
+            double[] polygon = footstep.getPolygon();
+            LogTools.info("Drawing step at {} {}", new Point2D(polygon[0], polygon[4]), new Point2D(metersToMMX(polygon[0]), metersToMMY(polygon[4])));
+            svgGraphics2D.drawPolygon(new int[] {metersToMMX(polygon[0]),
+                                                 metersToMMX(polygon[1]),
+                                                 metersToMMX(polygon[2]),
+                                                 metersToMMX(polygon[3])},
+                                      new int[] {metersToMMY(polygon[4]),
+                                                 metersToMMY(polygon[5]),
+                                                 metersToMMY(polygon[6]),
+                                                 metersToMMY(polygon[7])},
+                                      4);
+         }
+
+         svgGraphics2D.setColor(Color.BLACK);
+
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, groupName);
+
+         if (logWalk.isEndedWithFall())
+         {
+            Point2D fallLocation;
+            if (logWalk.getFootsteps().isEmpty())
             {
-               double[] polygon = footstep.getPolygon();
-               LogTools.info("Drawing step at {} {}", new Point2D(polygon[0], polygon[4]), new Point2D(metersToMMX(polygon[0]), metersToMMY(polygon[4])));
-               svgGraphics2D.drawPolygon(new int[] {metersToMMX(polygon[0]),
-                                                    metersToMMX(polygon[1]),
-                                                    metersToMMX(polygon[2]),
-                                                    metersToMMX(polygon[3])},
-                                         new int[] {metersToMMY(polygon[4]),
-                                                    metersToMMY(polygon[5]),
-                                                    metersToMMY(polygon[6]),
-                                                    metersToMMY(polygon[7])},
-                                         4);
+               fallLocation = logWalk.getWalkStart();
+            }
+            else
+            {
+               double[] lastStepPolygon = logWalk.getFootsteps().get(logWalk.getFootsteps().size() - 1).getPolygon();
+               fallLocation = new Point2D(lastStepPolygon[0], lastStepPolygon[4]);
             }
 
-            ++walk;
+            svgGraphics2D.drawString("Fall %d".formatted(walk), metersToMMX(fallLocation.getX()), metersToMMY(fallLocation.getY() + 0.3));
          }
+
+
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, walkName);
+
+         ++walk;
       }
 
       RecyclingArrayList<Point2D> coms = locomotionData.getComs();
@@ -217,7 +250,10 @@ public class SCS2LogDataProcessor
             comXs[i] = metersToMMX(coms.get(i).getX());
             comYs[i] = metersToMMY(coms.get(i).getY());
          }
+         svgGraphics2D.setColor(Color.BLUE);
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, "Coms");
          svgGraphics2D.drawPolyline(comXs, comYs, comXs.length);
+         svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, "Coms");
       }
 
       LogTools.info("Saving SVG to {}", svgPath);
