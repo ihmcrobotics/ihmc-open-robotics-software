@@ -1,8 +1,12 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
+import com.esotericsoftware.minlog.Log;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -10,7 +14,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class referenceSpreadingStateHelper
+public class ReferenceSpreadingStateHelper
 {
    public enum States
    {
@@ -19,11 +23,16 @@ public class referenceSpreadingStateHelper
       DONE
    }
 
+   HandTrajectoryMessagePublisher trajectoryMessagePublisher;
    YoRegistry registry;
 
-   public referenceSpreadingStateHelper(YoRegistry registry)
+   ReferenceSpreadingTrajectory preImpactReference;
+
+   public ReferenceSpreadingStateHelper(String filePath, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
+      this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
+      preImpactReference = new ReferenceSpreadingTrajectory(filePath);
    }
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
@@ -35,9 +44,7 @@ public class referenceSpreadingStateHelper
       factory.addState(States.AFTER, new AfterState());
       factory.addState(States.DONE, new DoneState());
 
-      StateTransitionCondition beforeToAfterTransitionCondition = t -> {
-         LogTools.info("Time: " + t);
-         return t > 1.5;};
+      StateTransitionCondition beforeToAfterTransitionCondition = t -> t>1;
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
       factory.addDoneTransition(States.AFTER, States.DONE);
@@ -53,15 +60,17 @@ public class referenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
+         LogTools.info("BeforeState: " + timeInState);
       }
 
       public void onEntry()
       {
+         LogTools.info("Entering BeforeState");
       }
 
       public void onExit(double timeInState)
       {
-
+         LogTools.info("Exiting BeforeState");
       }
    }
 
@@ -73,16 +82,20 @@ public class referenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         LogTools.info("TimeInState: " + timeInState);
+         LogTools.info("AfterState: " + timeInState);
       }
 
       public void onEntry()
       {
+         LogTools.info("Entering AfterState");
+         HandTrajectoryMessage handTrajectoryMessage = preImpactReference.getHandTrajectoryMessage(RobotSide.LEFT);
+         //         LogTools.info("HandTrajectoryMessage: " + handTrajectoryMessage);
+         trajectoryMessagePublisher.publish(handTrajectoryMessage);
       }
 
       public void onExit(double timeInState)
       {
-
+         LogTools.info("Exiting AfterState");
       }
    }
 
@@ -98,11 +111,12 @@ public class referenceSpreadingStateHelper
 
       public void onEntry()
       {
+         LogTools.info("Entering DoneState");
       }
 
       public void onExit(double timeInState)
       {
-
+         LogTools.info("Exiting DoneState: " + timeInState);
       }
    }
 

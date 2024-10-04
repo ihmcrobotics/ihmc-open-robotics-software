@@ -3,40 +3,25 @@ package us.ihmc.avatar.networkProcessor.referenceSpreading;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 import controller_msgs.msg.dds.*;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTTimeProvider;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
-import us.ihmc.avatar.networkProcessor.referenceSpreading.referenceSpreadingStateHelper.RSTimeProvider;
-import us.ihmc.avatar.networkProcessor.referenceSpreading.referenceSpreadingStateHelper.States;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactParticleFilter;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingStateHelper.RSTimeProvider;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingStateHelper.States;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.ForceEstimatorDynamicMatrixUpdater;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.PredefinedContactExternalForceSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.physics.Collidable;
@@ -44,20 +29,16 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToIntFunction;
-import java.util.logging.Logger;
 
 public class ReferenceSpreadingToolboxController extends ToolboxController
 {
@@ -125,9 +106,9 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
-      String filePath = demoDirectory + "/simplePlayback.csv";
+      String filePath = demoDirectory + "/pickUpBox.csv";
 
-      referenceSpreadingStateHelper stateMachineHelper = new referenceSpreadingStateHelper(registry);
+      ReferenceSpreadingStateHelper stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
