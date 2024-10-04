@@ -3,6 +3,7 @@ package us.ihmc.perception.ffmpeg;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVDictionaryEntry;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
+import org.bytedeco.ffmpeg.avutil.AVPixFmtDescriptor;
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avdevice;
@@ -35,16 +36,27 @@ public class FFmpegTools
 
    public static Mat avFrameToMat(AVFrame frame)
    {
-      try (MatVector planes = new MatVector())
-      {
+      Mat resultMat;
+      AVPixFmtDescriptor pixelFormatDescriptor = av_pix_fmt_desc_get(frame.format());
+      if ((pixelFormatDescriptor.flags() & AV_PIX_FMT_FLAG_PLANAR) == 0)
+      {  // Non-planar data; create Mat directly using 1st plane
+         int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType();
+         resultMat = new Mat(frame.height(), frame.width(), openCVType, frame.data(0), frame.linesize(0));
+      }
+      else
+      {  // Planar data; must extract planes individually then merge into 1 Mat
+         MatVector planes = new MatVector();
          int openCVType = PixelFormat.fromFFmpegPixelFormat(frame.format()).toOpenCVType(1);
          for (int i = 0; frame.data(i) != null && !frame.data(i).isNull(); ++i)
             planes.push_back(new Mat(frame.height(), frame.width(), openCVType, frame.data(i), frame.linesize(i)));
 
-         Mat resultMat = new Mat();
+         resultMat = new Mat();
          opencv_core.merge(planes, resultMat);
-         return resultMat;
+         planes.close();
       }
+      pixelFormatDescriptor.close();
+
+      return resultMat;
    }
 
    public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)

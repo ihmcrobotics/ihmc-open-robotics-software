@@ -33,7 +33,6 @@ public class SRTVideoStreamer
    private static final int GOP_SIZE = 5; // send 5 P frames between key frames
    private static final int MAX_B_FRAMES = 0; // don't use B frames
 
-   private final AVDictionary encoderOptions;
    private FFmpegVideoEncoder encoder;
 
    private AVOutputFormat outputFormat;
@@ -63,9 +62,6 @@ public class SRTVideoStreamer
 
       liveSRTOptions = StreamingTools.getLiveSRTOptions();
       liveSRTOptions.put("mode", "listener");
-
-      encoderOptions = new AVDictionary();
-      FFmpegTools.setAVDictionary(encoderOptions, StreamingTools.getHEVCNVENCStreamingOptions());
 
       callerConnector = new Thread(this::connectToCallers, getClass().getSimpleName() + "CallerConnector");
       callerConnector.setDaemon(true);
@@ -227,9 +223,6 @@ public class SRTVideoStreamer
          callerIterator.next().destroy();
          callerIterator.remove();
       }
-
-      av_dict_free(encoderOptions);
-      encoderOptions.close();
 
       if (encoder != null)
          encoder.destroy();

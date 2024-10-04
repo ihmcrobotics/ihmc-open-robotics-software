@@ -89,7 +89,7 @@ public enum PixelFormat
    public int toOpenCVType(int numberOfChannels)
    {
       return switch ((int) bytesPerElement)
-      {  // TODO: What about floating point types?
+      {
          case 1 -> opencv_core.CV_8UC(numberOfChannels);
          case 2 -> opencv_core.CV_16UC(numberOfChannels);
          default -> throw new NotImplementedException("Tomasz has been too busy (or lazy) to implement this. Feel free to do it yourself!");

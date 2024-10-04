@@ -36,25 +36,26 @@ public class StreamingTools
 
    /** hevc_nvenc options can be found using {@code ffmpeg -hide_banner -h encoder=hevc_nvenc}. */
    private static final Map<String, String> HEVC_NVENC_STREAMING_OPTIONS
-         = Map.ofEntries(entry("preset", "p1"),       // p1 = fastest, p2 = fast, p3 = medium ... p7 = slowest
-                         entry("tune", "ull"),        // "Ultra low latency"
-                         entry("rc", "vbr"),          // Rate control: variable bit rate mode
-                         entry("delay", "0"),         // No delay to frame output
-                         entry("zerolatency", "1"));  // Don't introduce reordering delay
+         = Map.ofEntries(entry("rc", "vbr"),          // Rate control: variable bit rate mode
+                         entry("2pass", "0"),         // Disable 2pass encoding mode
+                         entry("delay", "0"),         // 0 delay to frame output (can't do lookahead)
+                         entry("spatial-aq", "1"),    // Enable spatial AQ
+                         entry("zerolatency", "1"),   // Don't introduce reordering delay
+                         entry("cq", "30"));          // Quality level: from 1 (visually lossless) to 51 (bad quality), 0 = auto
 
    public static Map<String, String> getHEVCNVENCStreamingOptions()
    {
       return new HashMap<>(HEVC_NVENC_STREAMING_OPTIONS);
    }
 
-   /** FFV1 options can be found using {@code ffmpeg -hide_banner -h encoder=ffv1}. */
+   /** FFV1 options can be found <a href="https://trac.ffmpeg.org/wiki/Encode/FFV1">here</a>. */
    private static final Map<String, String> FFV1_STREAMING_OPTIONS
-         = Map.ofEntries(entry("coder", "range_def"),
-                         entry("context", "0"),
-                         entry("level", "3"),
-                         entry("threads", "16"),
-                         entry("slices", "24"),
-                         entry("slicecrc", "0"));
+         = Map.ofEntries(entry("coder", "range_def"), // Coder that allows GRAY16 images
+                         entry("context", "0"),       // Small context
+                         entry("level", "3"),         // Use FFV1 version 3
+                         entry("threads", "16"),      // Use 16 threads
+                         entry("slices", "24"),       // More slices = better multithreading but less compression
+                         entry("slicecrc", "0"));     // Disable CRC in slices
 
    public static Map<String, String> getFFV1StreamingOptions()
    {

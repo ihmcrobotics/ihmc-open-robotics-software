@@ -9,19 +9,31 @@ import java.net.InetSocketAddress;
 
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
+/**
+ * <p>
+ * Demo for the {@link SRTVideoReceiver}. Connects to a streamer
+ * on the {@link #STREAMER_ADDRESS}, and shows the video using
+ * OpenCV HighGUI
+ * </p>
+ * <p>
+ * To stream a video for this demo, use the following command:
+ * {@code ffmpeg -re -i [video-file] -c:v h264_nvenc -f mpegts -mode listener srt://127.0.0.1:60001}.
+ * Alternatively, you can run the {@link SRTVideoStreamerDemo},
+ * but be sure the set the {@link #STREAMER_ADDRESS} to the one printed by the streamer demo.
+ * </p>
+ */
 public class SRTVideoReceiverDemo
 {
-   private static final InetSocketAddress STREAMER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+   /* package-private */ static final InetSocketAddress STREAMER_ADDRESS = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
 
    private final SRTVideoReceiver videoSubscriber;
-   private boolean shutdown = false;
+   private volatile boolean shutdown = false;
    private final Notification shutdownReady = new Notification();
 
    private SRTVideoReceiverDemo()
    {
       videoSubscriber = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "SRTSubscriberDemoDestruction"));
-      run();
    }
 
    private void run()
@@ -53,6 +65,9 @@ public class SRTVideoReceiverDemo
 
    private void destroy()
    {
+      if (shutdown)
+         return;
+
       shutdown = true;
 
       shutdownReady.blockingPoll();
@@ -62,6 +77,8 @@ public class SRTVideoReceiverDemo
 
    public static void main(String[] args)
    {
-      new SRTVideoReceiverDemo();
+      SRTVideoReceiverDemo demo = new SRTVideoReceiverDemo();
+      demo.run();
+      demo.destroy();
    }
 }

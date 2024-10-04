@@ -12,10 +12,16 @@ import java.time.Instant;
 import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_BGR24;
 
 /**
- * Demo for the SRTVideoStreamer. Grabs images from a webcam
- * and give them to the streamer to be streamed over SRT.
+ * <p>
+ * Demo for the {@link SRTVideoStreamer}. Grabs images from a webcam
+ * and gives them to the streamer to be streamed over SRT.
+ * </p>
+ * <p>
  * To view the stream, use the following command:
- * {@code ffplay srt://streamer-address:streamer-port -fflags nobuffer}
+ * {@code ffplay srt://[streamer-address:streamer-port] -fflags nobuffer}.
+ * Alternatively, you can run the {@link SRTVideoReceiverDemo},
+ * but be sure to set the {@link SRTVideoReceiverDemo#STREAMER_ADDRESS} correctly.
+ * </p>
  */
 public class SRTVideoStreamerDemo
 {
@@ -38,7 +44,7 @@ public class SRTVideoStreamerDemo
       int imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
 
       // Create and initialize the video streamer
-      InetSocketAddress streamerAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+      InetSocketAddress streamerAddress = StreamingTools.getHostAddress();
       LogTools.info("Starting streamer on {}", streamerAddress);
       videoStreamer = new SRTVideoStreamer(streamerAddress);
       videoStreamer.initialize(imageWidth, imageHeight, AV_PIX_FMT_BGR24);
