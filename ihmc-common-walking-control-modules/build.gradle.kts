@@ -17,6 +17,7 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
+   api("us.ihmc:ihmc-trajectory-optimization:source")
 }
 
 testDependencies {

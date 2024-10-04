@@ -22,3 +22,15 @@ testDependencies {
    api("org.ejml:ejml-ddense:0.39")
 }
 
+examplesDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:ihmc-yovariables:0.12.2")
+   api("us.ihmc:simulation-construction-set:0.25.1")
+}
+
+examplesTestDependencies{
+   api(ihmc.sourceSetProject("examples"))
+}
+
