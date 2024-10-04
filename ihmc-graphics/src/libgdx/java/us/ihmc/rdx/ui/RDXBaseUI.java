@@ -30,18 +30,22 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
+import us.ihmc.rdx.sceneManager.RDX2DSceneManager;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.remoteCaptury.RDXCapturyManager;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridResourceDirectory;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Method call order:
@@ -102,6 +106,7 @@ public class RDXBaseUI
    private final RDX3DPanel primary3DPanel;
    private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
    private final RDXVRManager vrManager = new RDXVRManager();
+   private final ArrayList<Runnable> runnableMenuItem = new ArrayList<>();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -549,6 +554,10 @@ public class RDXBaseUI
       }
 
       vrManager.renderMenuBar();
+      for(Runnable runnable : runnableMenuItem)
+      {
+         runnable.run();
+      }
 
       frameRateDisplay.ping();
 
@@ -579,6 +588,11 @@ public class RDXBaseUI
       primaryScene.dispose();
 
       instance = null;
+   }
+
+   public void addToMenuBar(Runnable renderImGuiMenu)
+   {
+      runnableMenuItem.add(renderImGuiMenu);
    }
 
    public void add3DPanel(RDX3DPanel panel3D)
