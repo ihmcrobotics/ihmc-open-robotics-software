@@ -3,8 +3,8 @@ package us.ihmc.parameterTuner.remote;
 import java.io.IOException;
 
 import javafx.stage.Stage;
-import us.ihmc.javafx.JavaFXMissingTools;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.JavaFXTools;
+import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
@@ -60,7 +60,7 @@ public class ParameterTuner extends ParameterTuningApplication
       {
          try
          {
-            JavaFXMissingTools.runApplication(new ParameterTuner(connection));
+            JavaFXTools.runApplication(new ParameterTuner(connection));
          }
          catch (IOException e)
          {

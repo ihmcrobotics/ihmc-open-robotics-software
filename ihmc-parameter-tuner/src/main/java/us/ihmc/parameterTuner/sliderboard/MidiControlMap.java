@@ -1,4 +1,4 @@
-package us.ihmc.robotics.sliderboard;
+package us.ihmc.parameterTuner.sliderboard;
 
 /**
  * A MIDI connection can be used to send or receive control commands. 127 controllers can

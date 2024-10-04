@@ -9,7 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.robotics.sliderboard.Sliderboard;
+import us.ihmc.parameterTuner.sliderboard.Sliderboard;
 
 public class SliderButton extends Button
 {

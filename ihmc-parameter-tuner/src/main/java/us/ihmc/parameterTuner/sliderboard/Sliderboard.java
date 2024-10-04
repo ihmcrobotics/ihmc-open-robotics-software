@@ -1,4 +1,4 @@
-package us.ihmc.robotics.sliderboard;
+package us.ihmc.parameterTuner.sliderboard;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
@@ -8,8 +8,8 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.sliderboard.boards.SliderboardType;
+import us.ihmc.log.LogTools;
+import us.ihmc.parameterTuner.sliderboard.boards.SliderboardType;
 
 /**
  * A lightweight sliderboard.
@@ -20,7 +20,7 @@ import us.ihmc.robotics.sliderboard.boards.SliderboardType;
  * </p>
  * <p>
  * To interact with the sliderboard listeners for sliders can be added and the value of a slider can be set through
- * {@link setSliderValue(double, int)}.
+ * {@link #setSliderValue(double, int)}.
  * </p>
  *
  * @author Georg
@@ -165,7 +165,7 @@ public class Sliderboard
       int channel = channelMapper.getSliderChannel(sliderIndex);
       if (channel == -1)
       {
-         PrintTools.info("Unknown slider index: " + sliderIndex);
+         LogTools.info("Unknown slider index: " + sliderIndex);
          return;
       }
 
@@ -180,7 +180,7 @@ public class Sliderboard
       }
       catch (InvalidMidiDataException e)
       {
-         PrintTools.info("Was unable to create slider board message.");
+         LogTools.info("Was unable to create slider board message.");
       }
    }
 
@@ -194,7 +194,7 @@ public class Sliderboard
       int channel = channelMapper.getButtonChannel(buttonIndex);
       if (channel == -1)
       {
-         PrintTools.info("Unknown button index: " + buttonIndex);
+         LogTools.info("Unknown button index: " + buttonIndex);
          return;
       }
 
@@ -209,7 +209,7 @@ public class Sliderboard
       }
       catch (InvalidMidiDataException e)
       {
-         PrintTools.info("Was unable to create slider board message.");
+         LogTools.info("Was unable to create slider board message.");
       }
    }
 
