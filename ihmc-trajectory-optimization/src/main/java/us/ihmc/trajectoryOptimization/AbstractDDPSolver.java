@@ -9,8 +9,8 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.DiagonalMatrixTools;
 import us.ihmc.matrixlib.MatrixTools;
 
@@ -260,7 +260,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       {
          if (W.get(i, i) <= 0.0)
          {
-            if (debug) PrintTools.info("Hessian is not positive definite, aborting backward pass.");
+            if (debug) LogTools.info("Hessian is not positive definite, aborting backward pass.");
             return false;
          }
       }
@@ -507,7 +507,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
                if (lastIteration)
                   break;
 
-               if (debug) PrintTools.info("Dynamics are not positive definite");
+               if (debug) LogTools.info("Dynamics are not positive definite");
                applyLevenbergMarquardtHeuristicForHessianRegularization(false);
             }
 
@@ -562,7 +562,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
             if (lastIteration)
                break;
 
-            if (debug) PrintTools.info("Dynamics are not positive definite");
+            if (debug) LogTools.info("Dynamics are not positive definite");
             applyLevenbergMarquardtHeuristicForHessianRegularization(false);
          }
 

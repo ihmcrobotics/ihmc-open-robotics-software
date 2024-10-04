@@ -13,10 +13,12 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("net.sf.trove4j:trove4j:3.0.3")
+   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-matrix-library:0.19.0")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("org.ejml:ejml-ddense:0.39")
 }
 
