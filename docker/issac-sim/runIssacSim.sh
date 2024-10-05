@@ -31,8 +31,3 @@ docker run \
     --volume ~/docker/isaac-sim/documents:/root/Documents:rw \
     --entrypoint bash \
     nvcr.io/nvidia/isaac-sim:4.2.0
-     
-      
-    #-v /usr/share/vulkan/icd.d/nvidia_icd.json:/etc/vulkan/icd.d/nvidia_icd.json \
-    #-v /usr/share/vulkan/implicit_layer.d/nvidia_layers.json:/etc/vulkan/implicit_layer.d/nvidia_layers.json \
-    #-v /usr/share/glvnd/egl_vendor.d/10_nvidia.json:/usr/share/glvnd/egl_vendor.d/10_nvidia.json \
