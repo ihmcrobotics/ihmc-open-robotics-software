@@ -175,6 +175,12 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
+   public WholeBodyControllerCore getControllerCoreOutput()
+   {
+      return controllerCore;
+   }
+
+   @Override
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
       return controllerCore.getOutputForRootJoint();

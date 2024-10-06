@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -67,6 +69,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
+   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
@@ -99,7 +102,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                             JointDesiredOutputListBasics lowLevelControllerOutput)
+                                             JointDesiredOutputListBasics lowLevelControllerOutput,
+                                             ControllerCoreOutPutDataHolder controllercoreOutputDataHolder)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -107,6 +111,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
+      this.controllerCoreOutPutDataHolder = controllercoreOutputDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -148,7 +153,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param pluginFactory the factory used to create the new plugin to be registered.
     */
    public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
@@ -163,7 +168,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param plugin the plugin to be registered.
     */
    public void addControllerPlugin(HighLevelHumanoidControllerPlugin plugin)
@@ -326,6 +331,18 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       {
          controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
+      }
+   }
+
+   private void reportControllerCoreOutputDataForWholeBodyControllerCore()
+   {
+//      ControllerCoreOutput controllerCoreOutputDataHolder =
+
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerCoreOutPutDataHolder.getDesiredCenterOfPressureDataHolder().setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
       }
    }
 

@@ -136,7 +136,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       feedbackController.registerControllers(template);
    }
 
-   public void initialize()
+   public void     initialize()
    {
       feedbackController.initialize();
       if (inverseDynamicsSolver != null)
