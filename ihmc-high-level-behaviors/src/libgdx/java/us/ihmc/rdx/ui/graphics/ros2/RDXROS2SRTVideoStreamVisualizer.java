@@ -54,7 +54,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    private void updateImage(RawImage newImage)
    {
       getFrequency().ping();
-      getOpenCVVideoVisualizer().updateImageDimensions(newImage.getImageWidth(), newImage.getImageHeight());
+      getOpenCVVideoVisualizer().updateImageDimensions(newImage.getWidth(), newImage.getHeight());
       newImage.getCpuImageMat().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
       float delayMS = (float) Conversions.secondsToMilliseconds(subscriber.getLastFrameDelay());
       alphaFilteredDelayMS = 0.1f * delayMS + 0.9f * alphaFilteredDelayMS;

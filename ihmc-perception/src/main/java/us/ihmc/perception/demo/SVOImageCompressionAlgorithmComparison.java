@@ -74,7 +74,7 @@ public class SVOImageCompressionAlgorithmComparison
    {
       LogTools.info("Initializing...");
 
-      int bitRate = 10 * colorImage.getImageWidth() * colorImage.getImageHeight();
+      int bitRate = 10 * colorImage.getWidth() * colorImage.getHeight();
       AVOutputFormat colorOutputFormat = av_guess_format("mpegts", null, null);
       AVOutputFormat depthOutputFormat = av_guess_format("matroska", null, null);
 
@@ -82,8 +82,8 @@ public class SVOImageCompressionAlgorithmComparison
       colorEncoder = new FFmpegHardwareVideoEncoder(colorOutputFormat,
                                                     "hevc_nvenc",
                                                     bitRate,
-                                                    colorImage.getImageWidth(),
-                                                    colorImage.getImageHeight(),
+                                                    colorImage.getWidth(),
+                                                    colorImage.getHeight(),
                                                     10,
                                                     0,
                                                     AV_PIX_FMT_BGR0);
@@ -98,8 +98,8 @@ public class SVOImageCompressionAlgorithmComparison
       depthEncoder = new FFmpegSoftwareVideoEncoder(depthOutputFormat,
                                                     "ffv1",
                                                     bitRate,
-                                                    depthImage.getImageWidth(),
-                                                    depthImage.getImageHeight(),
+                                                    depthImage.getWidth(),
+                                                    depthImage.getHeight(),
                                                     AV_PIX_FMT_GRAY16,
                                                     10,
                                                     0,

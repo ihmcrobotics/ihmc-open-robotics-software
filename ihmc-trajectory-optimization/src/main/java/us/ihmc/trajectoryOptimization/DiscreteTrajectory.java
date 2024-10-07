@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class DiscreteTrajectory extends DiscreteSequence
 {
@@ -51,7 +51,7 @@ public class DiscreteTrajectory extends DiscreteSequence
    {
       if (!MathTools.intervalContains(time, startTime, endTime))
       {
-         PrintTools.warn("Requested computation time is outside the bounds of the trajectory. We do not extrapolate.");
+         LogTools.warn("Requested computation time is outside the bounds of the trajectory. We do not extrapolate.");
          time = MathTools.clamp(time, startTime, endTime);
       }
 

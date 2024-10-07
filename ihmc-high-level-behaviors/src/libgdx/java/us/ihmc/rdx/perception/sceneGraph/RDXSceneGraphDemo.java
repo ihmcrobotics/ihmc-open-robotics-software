@@ -173,8 +173,8 @@ public class RDXSceneGraphDemo
                {
                   if (planarRegionsExtractor == null)
                   {
-                     int imageHeight = zedDepthImage.getImageHeight();
-                     int imageWidth = zedDepthImage.getImageWidth();
+                     int imageHeight = zedDepthImage.getHeight();
+                     int imageWidth = zedDepthImage.getWidth();
                      double fx = zedDepthImage.getFocalLengthX();
                      double fy = zedDepthImage.getFocalLengthY();
                      double cx = zedDepthImage.getPrincipalPointX();

@@ -12,12 +12,15 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImageTest;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -225,25 +228,16 @@ public class SRTStreamerSubscriberTest
       ROS2Topic<SRTStreamStatus> requestTopic = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("ros2_srt_test");
 
       float depthDescretization = -1.0f;
-      float fx = 500.0f;
-      float fy = 400.0f;
-      float cx = sampleImage.cols() / 2.0f;
-      float cy = sampleImage.rows() / 2.0f;
-      FramePoint3D testPosition = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.3, 0.4, 0.5);
-      FrameQuaternion testOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), 0.5, 0.4, 0.3);
+      CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(sampleImage.rows(),
+                                                               sampleImage.cols(),
+                                                               500.0,
+                                                               400.0,
+                                                               sampleImage.cols() / 2.0,
+                                                               sampleImage.rows() / 2.0);
+      FramePose3D testPose = new FramePose3D(ReferenceFrame.getWorldFrame(), new Pose3D(0.3, 0.4, 0.5, 0.5, 0.4, 0.3));
 
       // Create an example raw image
-      RawImage rawImage = new RawImage(0L,
-                                       Instant.now(),
-                                       depthDescretization,
-                                       sampleImage,
-                                       null,
-                                       fx,
-                                       fy,
-                                       cx,
-                                       cy,
-                                       testPosition,
-                                       testOrientation);
+      RawImage rawImage = RawImage.createWithBGRImage(sampleImage, cameraIntrinsics, testPose, Instant.now(), 0L);
 
       // Create and initialize the streamer
       ROS2SRTVideoStreamer streamer = new ROS2SRTVideoStreamer(ROS2_NODE, requestTopic, localAddress);
@@ -261,12 +255,11 @@ public class SRTStreamerSubscriberTest
 
          // Ensure we received other data
          assertEquals(depthDescretization, receivedImage.getDepthDiscretization());
-         assertEquals(fx, receivedImage.getFocalLengthX());
-         assertEquals(fy, receivedImage.getFocalLengthY());
-         assertEquals(cx, receivedImage.getPrincipalPointX());
-         assertEquals(cy, receivedImage.getPrincipalPointY());
-         EuclidCoreTestTools.assertEquals(testPosition, receivedImage.getPosition(), 1E-5);
-         EuclidCoreTestTools.assertEquals(testOrientation, receivedImage.getOrientation(), 1E-5);
+         assertEquals(cameraIntrinsics.getFx(), receivedImage.getFocalLengthX());
+         assertEquals(cameraIntrinsics.getFy(), receivedImage.getFocalLengthY());
+         assertEquals(cameraIntrinsics.getCx(), receivedImage.getPrincipalPointX());
+         assertEquals(cameraIntrinsics.getCy(), receivedImage.getPrincipalPointY());
+         EuclidCoreTestTools.assertEquals(testPose, receivedImage.getPose(), 1E-5);
       });
 
       // No communication at this time

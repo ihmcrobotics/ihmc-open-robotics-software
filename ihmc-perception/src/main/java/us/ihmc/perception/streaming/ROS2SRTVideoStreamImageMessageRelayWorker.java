@@ -56,8 +56,8 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
 
       // Set the camera intrinsics
-      imageMessage.setImageWidth(frame.getImageWidth());
-      imageMessage.setImageHeight(frame.getImageHeight());
+      imageMessage.setImageWidth(frame.getWidth());
+      imageMessage.setImageHeight(frame.getHeight());
       imageMessage.setFocalLengthXPixels(frame.getFocalLengthX());
       imageMessage.setFocalLengthYPixels(frame.getFocalLengthY());
       imageMessage.setPrincipalPointXPixels(frame.getPrincipalPointX());

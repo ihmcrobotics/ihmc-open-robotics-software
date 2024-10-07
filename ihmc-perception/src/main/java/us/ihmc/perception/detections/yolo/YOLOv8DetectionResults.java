@@ -9,6 +9,8 @@ import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,14 +26,10 @@ public class YOLOv8DetectionResults
 
    private final float maskThreshold;
 
-   private final int maskOpenCVType;
    private final int numberOfMasks;
    private final int maskWidth;
    private final int maskHeight;
-   private final float maskFocalLengthX;
-   private final float maskFocalLengthY;
-   private final float maskPrincipalPointX;
-   private final float maskPrincipalPointY;
+   private final CameraIntrinsics maskIntrinsics;
 
    private final Mat zeroMat;
 
@@ -43,17 +41,18 @@ public class YOLOv8DetectionResults
       this.outputMasksIndexer = outputBlobs.get(1).createIndexer();
       this.maskThreshold = maskThreshold;
 
-      maskOpenCVType = outputBlobs.get(1).col(0).type();
+      int maskOpenCVType = outputBlobs.get(1).col(0).type();
       numberOfMasks = (int) outputMasksIndexer.size(1);
       maskHeight = (int) outputMasksIndexer.size(2);
       maskWidth = (int) outputMasksIndexer.size(3);
 
-      float xScaleFactor = (float) maskWidth / detectionImage.getImageWidth();
-      float yScaleFactor = (float) maskHeight / detectionImage.getImageHeight();
-      maskFocalLengthX = xScaleFactor * detectionImage.getFocalLengthX();
-      maskFocalLengthY = yScaleFactor * detectionImage.getFocalLengthY();
-      maskPrincipalPointX = xScaleFactor * detectionImage.getPrincipalPointX();
-      maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
+      float xScaleFactor = (float) maskWidth / detectionImage.getWidth();
+      float yScaleFactor = (float) maskHeight / detectionImage.getHeight();
+      float maskFocalLengthX = xScaleFactor * detectionImage.getFocalLengthX();
+      float maskFocalLengthY = yScaleFactor * detectionImage.getFocalLengthY();
+      float maskPrincipalPointX = xScaleFactor * detectionImage.getPrincipalPointX();
+      float maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
+      maskIntrinsics = new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
 
       zeroMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
    }
@@ -62,12 +61,15 @@ public class YOLOv8DetectionResults
    {
       Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
 
-      for (YOLOv8DetectionOutput detection : detections)
+      synchronized (this)
       {
-         Mat detectionMask = getDetectionMask(detection);
-         
-         if (detectionMask != null) // FIXME: This can be NULL
-            segmentationImages.put(detection, createRawImageWithMat(detectionMask));
+         for (YOLOv8DetectionOutput detection : detections)
+         {
+            Mat detectionMask = getDetectionMask(detection);
+
+            if (detectionMask != null && !detectionMask.isNull()) // FIXME: This can be NULL
+               segmentationImages.put(detection, createMaskRawImage(detectionMask));
+         }
       }
 
       return segmentationImages;
@@ -77,12 +79,16 @@ public class YOLOv8DetectionResults
    {
       Map<YOLOv8DetectionOutput, RawImage> segmentationImages = new HashMap<>();
 
-      for (YOLOv8DetectionOutput detection : detections)
+      synchronized (this)
       {
-         if (targetClasses.contains(detection.objectClass()))
+         for (YOLOv8DetectionOutput detection : detections)
          {
-            Mat detectionMask = getDetectionMask(detection);
-            segmentationImages.put(detection, createRawImageWithMat(detectionMask));
+            if (targetClasses.contains(detection.objectClass()))
+            {
+               Mat detectionMask = getDetectionMask(detection);
+               if (detectionMask != null && !detectionMask.isNull()) // FIXME: This can be NULL
+                  segmentationImages.put(detection, createMaskRawImage(detectionMask));
+            }
          }
       }
 
@@ -94,7 +100,7 @@ public class YOLOv8DetectionResults
       for (YOLOv8DetectionOutput detection : detections)
       {
          if (detection.objectClass().equals(objectClass))
-            return createRawImageWithMat(getDetectionMask(detection));
+            return createMaskRawImage(getDetectionMask(detection));
       }
 
       return null;
@@ -150,22 +156,19 @@ public class YOLOv8DetectionResults
       return booleanMask;
    }
 
-   private RawImage createRawImageWithMat(Mat mat)
+   private RawImage createMaskRawImage(Mat mask)
    {
-      return new RawImage(detectionImage.getSequenceNumber(),
-                          detectionImage.getAcquisitionTime(),
-                          -1.0f,
-                          mat.clone(),
+      return new RawImage(mask,
                           null,
-                          maskFocalLengthX,
-                          maskFocalLengthY,
-                          maskPrincipalPointX,
-                          maskPrincipalPointY,
-                          detectionImage.getPosition(),
-                          detectionImage.getOrientation());
+                          PixelFormat.UNKNOWN,
+                          maskIntrinsics,
+                          detectionImage.getPose(),
+                          detectionImage.getAcquisitionTime(),
+                          detectionImage.getSequenceNumber(),
+                          -1.0f);
    }
 
-   public void destroy()
+   public synchronized void destroy()
    {
       for (Mat mat : objectMasks.values())
          if (mat != null && !mat.isNull())

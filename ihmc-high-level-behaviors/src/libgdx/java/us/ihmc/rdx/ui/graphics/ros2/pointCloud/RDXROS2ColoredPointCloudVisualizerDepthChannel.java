@@ -14,7 +14,7 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
-   private final Mat decodedDepthImage = new Mat();
+   private final Mat decompressedDepthImage = new Mat();
    private SwapReference<BytedecoImage> depth16UC1ImageSwapReference;
 
    public RDXROS2ColoredPointCloudVisualizerDepthChannel(ROS2Topic<ImageMessage> topic)
@@ -39,8 +39,8 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    {
       synchronized (imageMessageSwapReference)
       {
-         imageMessageDecoder.decodeMessage(imageMessageSwapReference.getForThreadTwo(), decodedDepthImage);
-         decodedDepthImage.copyTo(depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
+         imageMessageDecoder.decodeMessage(imageMessageSwapReference.getForThreadTwo(), decompressedDepthImage);
+         decompressedDepthImage.copyTo(depth16UC1ImageSwapReference.getForThreadOne().getBytedecoOpenCVMat());
       }
       depth16UC1ImageSwapReference.swap();
    }
@@ -55,6 +55,7 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    public void destroy()
    {
       super.destroy();
+      decompressedDepthImage.close();
    }
 
    public BytedecoImage getDepth16UC1Image()

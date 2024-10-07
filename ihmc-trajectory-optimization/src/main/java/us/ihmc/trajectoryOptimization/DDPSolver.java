@@ -3,7 +3,7 @@ package us.ihmc.trajectoryOptimization;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
@@ -120,7 +120,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
                break;
 
             lineSearchGain = Math.max(lineSearchGain - lineSearchScaling, lineSearchGainMinimum);
-            PrintTools.info("Solution diverged, decrease line search gain to " + lineSearchGain + " and trying again.");
+            LogTools.info("Solution diverged, decrease line search gain to " + lineSearchGain + " and trying again.");
          }
          else
          {

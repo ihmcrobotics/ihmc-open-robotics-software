@@ -10,7 +10,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
@@ -33,6 +32,7 @@ public class ROS2SRTVideoSubscriber
    private final SRTVideoReceiver videoReceiver;
 
    private Mat nextFrame;
+   private final PixelFormat nextFramePixelFormat;
    private final List<Consumer<RawImage>> newFrameConsumers = new ArrayList<>();
    private double lastFrameDelay;
 
@@ -45,7 +45,9 @@ public class ROS2SRTVideoSubscriber
    public ROS2SRTVideoSubscriber(ROS2PublishSubscribeAPI ros2, ROS2Topic<SRTStreamStatus> streamTopic, PixelFormat outputAVPixelFormat)
    {
       av_log_set_level(AV_LOG_FATAL); // silences no key frame errors which are 99% safe to ignore
-      
+
+      nextFramePixelFormat = outputAVPixelFormat;
+
       streamStatusMonitor = new ROS2StreamStatusMonitor(ros2, streamTopic);
       videoReceiver = new SRTVideoReceiver(outputAVPixelFormat.toFFmpegPixelFormat());
       subscriptionThread = ThreadTools.startAThread(this::subscriptionUpdate, "ROS2SRTVideoSubscription");
@@ -148,23 +150,19 @@ public class ROS2SRTVideoSubscriber
                   MessageTools.deserialize(serializedFrameDataMessage.asByteBuffer(), frameDataMessage);
                }
 
-               CameraIntrinsics frameIntrinsics = streamStatusMonitor.getCameraIntrinsics();
                FramePose3D frameSensorPose = new FramePose3D(frameDataMessage.getSensorPose());
                Instant frameAcquisitionTime = MessageTools.toInstant(frameDataMessage.getAcquisitionTime());
                lastFrameDelay = TimeTools.calculateDelay(frameAcquisitionTime);
 
                // Create a RawImage
-               RawImage nextFrameRawImage = new RawImage(frameDataMessage.getSequenceNumber(),
-                                                         frameAcquisitionTime,
-                                                         streamStatusMonitor.getDepthDiscretization(),
-                                                         nextFrame,
+               RawImage nextFrameRawImage = new RawImage(nextFrame,
                                                          null,
-                                                         (float) frameIntrinsics.getFx(),
-                                                         (float) frameIntrinsics.getFy(),
-                                                         (float) frameIntrinsics.getCx(),
-                                                         (float) frameIntrinsics.getCy(),
-                                                         frameSensorPose.getPosition(),
-                                                         frameSensorPose.getOrientation());
+                                                         nextFramePixelFormat,
+                                                         streamStatusMonitor.getCameraIntrinsics(),
+                                                         frameSensorPose,
+                                                         frameAcquisitionTime,
+                                                         frameDataMessage.getSequenceNumber(),
+                                                         streamStatusMonitor.getDepthDiscretization());
 
                // Hand it off to consumers
                newFrameConsumers.forEach(consumer -> consumer.accept(nextFrameRawImage));

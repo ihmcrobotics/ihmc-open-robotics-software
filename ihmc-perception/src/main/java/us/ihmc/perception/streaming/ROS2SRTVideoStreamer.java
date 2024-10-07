@@ -60,7 +60,7 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForColor(RawImage exampleImage, int inputPixelFormat)
    {
-      initializeForColor(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat);
+      initializeForColor(exampleImage.getWidth(), exampleImage.getHeight(), inputPixelFormat);
    }
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat)
@@ -70,7 +70,7 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForColor(RawImage exampleImage, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
    {
-      initializeForColor(exampleImage.getImageWidth(), exampleImage.getImageHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
+      initializeForColor(exampleImage.getWidth(), exampleImage.getHeight(), inputPixelFormat, intermediateColorConversion, useHardwareAcceleration);
    }
 
    public void initializeForColor(int imageWidth, int imageHeight, int inputPixelFormat, int intermediateColorConversion, boolean useHardwareAcceleration)
@@ -91,7 +91,7 @@ public class ROS2SRTVideoStreamer
 
    public void initializeForDepth(RawImage exampleImage)
    {
-      initializeForDepth(exampleImage.getImageWidth(), exampleImage.getImageHeight());
+      initializeForDepth(exampleImage.getWidth(), exampleImage.getHeight());
    }
 
    public void initializeForDepth(int imageWidth, int imageHeight)
@@ -136,8 +136,8 @@ public class ROS2SRTVideoStreamer
       float frequency = (float) sendFrequencyCalculator.getFrequency();
       statusMessage.setExpectedPublishFrequency(Math.max(1.0f, frequency));
       statusMessage.setIsStreaming(true);
-      statusMessage.setImageWidth(frame.getImageWidth());
-      statusMessage.setImageHeight(frame.getImageHeight());
+      statusMessage.setImageWidth(frame.getWidth());
+      statusMessage.setImageHeight(frame.getHeight());
       statusMessage.setFx(frame.getFocalLengthX());
       statusMessage.setFy(frame.getFocalLengthY());
       statusMessage.setCx(frame.getPrincipalPointX());

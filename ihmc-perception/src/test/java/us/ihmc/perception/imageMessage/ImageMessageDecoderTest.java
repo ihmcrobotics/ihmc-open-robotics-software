@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -38,8 +39,8 @@ public class ImageMessageDecoderTest
    @BeforeAll
    public static void loadImages() throws URISyntaxException, IOException
    {
-      Path zedColorBGRPath = Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI());
-      Path zedDepth16UPath = Path.of(RawImageTest.class.getResource("zedDepth16U.raw").toURI());
+      Path zedColorBGRPath = Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedColorBGR.raw")).toURI());
+      Path zedDepth16UPath = Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedDepth16U.raw")).toURI());
 
       byte[] colorBytes = Files.readAllBytes(zedColorBGRPath);
       byte[] depthBytes = Files.readAllBytes(zedDepth16UPath);
@@ -135,7 +136,7 @@ public class ImageMessageDecoderTest
    @Test
    public void testHybridDepthCompression()
    {
-      LogTools.info("Testing Hybri Depth Compression");
+      LogTools.info("Testing Hybrid Depth Compression");
       testGeneralDecompression(this::hybridDepthCompression, zedDepth16U, PixelFormat.GRAY16, LOSSY_COMPRESSION_EPSILON);
       System.out.println();
    }

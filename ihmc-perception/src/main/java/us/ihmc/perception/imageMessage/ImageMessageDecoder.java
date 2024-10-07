@@ -23,10 +23,11 @@ public class ImageMessageDecoder
 
    public ImageMessageDecoder()
    {
-      if (CUDATools.hasCUDADevice())
+      if (CUDATools.hasCUDADevice() && CUDATools.hasNVJPEG())
       {
-         cudaCompressionTools = new CUDACompressionTools();
          cudaJpegDecoder = new CUDAJPEGProcessor();
+         if (CUDATools.hasNVCOMP())
+            cudaCompressionTools = new CUDACompressionTools();
       }
    }
 

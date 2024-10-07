@@ -2,15 +2,13 @@ package us.ihmc.trajectoryOptimization;
 
 import java.util.Random;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
-
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.matrixlib.MatrixTestTools;
 
 public class DDPSolverTest
 {
@@ -105,8 +103,8 @@ public class DDPSolverTest
       CommonOps_DDRM.add(currentControl, feedforwardTerm, updatedControlAlternative);
       CommonOps_DDRM.multAdd(gainMatrix, stateError, updatedControlAlternative);
 
-      MatrixTestTools.assertMatrixEquals(updatedControlAlternative, updatedControl, 1e-12);
-      MatrixTestTools.assertMatrixEquals(updatedControlExpected, updatedControl, 1e-12);
+      EjmlUnitTests.assertEquals(updatedControlAlternative, updatedControl, 1e-12);
+      EjmlUnitTests.assertEquals(updatedControlExpected, updatedControl, 1e-12);
    }
 
    @Test
@@ -168,12 +166,12 @@ public class DDPSolverTest
       QxuExpected.set(L_XU);
       CommonOps_DDRM.multAdd(aV, f_U, QxuExpected);
 
-      MatrixTestTools.assertMatrixEquals(QxExpected, Qx, 1e-12);
-      MatrixTestTools.assertMatrixEquals(QuExpected, Qu, 1e-12);
-      MatrixTestTools.assertMatrixEquals(QxxExpected, Qxx, 1e-12);
-      MatrixTestTools.assertMatrixEquals(QuuExpected, Quu, 1e-12);
-      MatrixTestTools.assertMatrixEquals(QxuExpected, Qxu, 1e-12);
-      MatrixTestTools.assertMatrixEquals(QuxExpected, Qux, 1e-12);
+      EjmlUnitTests.assertEquals(QxExpected, Qx, 1e-12);
+      EjmlUnitTests.assertEquals(QuExpected, Qu, 1e-12);
+      EjmlUnitTests.assertEquals(QxxExpected, Qxx, 1e-12);
+      EjmlUnitTests.assertEquals(QuuExpected, Quu, 1e-12);
+      EjmlUnitTests.assertEquals(QxuExpected, Qxu, 1e-12);
+      EjmlUnitTests.assertEquals(QuxExpected, Qux, 1e-12);
    }
 
 
@@ -303,8 +301,8 @@ public class DDPSolverTest
       CommonOps_DDRM.multAddTransA(gainMatrix, Q_U, V_X_expected);
       CommonOps_DDRM.multAdd(Q_XU, gainMatrix, V_XX_expected);
 
-      MatrixTestTools.assertMatrixEquals(V_X_expected, V_X, 1e-12);
-      MatrixTestTools.assertMatrixEquals(V_XX_expected, V_XX, 1e-12);
+      EjmlUnitTests.assertEquals(V_X_expected, V_X, 1e-12);
+      EjmlUnitTests.assertEquals(V_XX_expected, V_XX, 1e-12);
    }
 
    @Test
@@ -422,8 +420,8 @@ public class DDPSolverTest
       CommonOps_DDRM.mult(-1.0, Q_UU_inv, Q_UX, gainExpected);
       CommonOps_DDRM.mult(-1.0, Q_UU_inv, Q_U, feedforwardExpected);
 
-      MatrixTestTools.assertMatrixEquals(gainExpected, gainMatrix, 1e-6);
-      MatrixTestTools.assertMatrixEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
+      EjmlUnitTests.assertEquals(gainExpected, gainMatrix, 1e-6);
+      EjmlUnitTests.assertEquals(feedforwardExpected, feedforwardMatrix, 1e-6);
    }
 
    @Test
@@ -458,21 +456,21 @@ public class DDPSolverTest
 
       CommonOps_DDRM.add(d_original, abc, d_expected);
 
-      MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
-      MatrixTestTools.assertMatrixEquals(b_expected, b, 1e-12);
-      MatrixTestTools.assertMatrixEquals(c_expected, c, 1e-12);
-      MatrixTestTools.assertMatrixEquals(d_expected, d, 1e-12);
+      EjmlUnitTests.assertEquals(a_expected, a, 1e-12);
+      EjmlUnitTests.assertEquals(b_expected, b, 1e-12);
+      EjmlUnitTests.assertEquals(c_expected, c, 1e-12);
+      EjmlUnitTests.assertEquals(d_expected, d, 1e-12);
 
-      double alpha = RandomNumbers.nextDouble(random, 1000);
+      double alpha = random.nextDouble(1000.0);
 
       d.set(d_original);
       CommonOps_DDRM.add(d_original, alpha, abc, d_expected);
       calculator.addMultQuad(alpha, a, b, c, d);
 
-      MatrixTestTools.assertMatrixEquals(a_expected, a, 1e-12);
-      MatrixTestTools.assertMatrixEquals(b_expected, b, 1e-12);
-      MatrixTestTools.assertMatrixEquals(c_expected, c, 1e-12);
-      MatrixTestTools.assertMatrixEquals(d_expected, d, 1e-12);
+      EjmlUnitTests.assertEquals(a_expected, a, 1e-12);
+      EjmlUnitTests.assertEquals(b_expected, b, 1e-12);
+      EjmlUnitTests.assertEquals(c_expected, c, 1e-12);
+      EjmlUnitTests.assertEquals(d_expected, d, 1e-12);
    }
 
    private class TestDynamics implements DiscreteHybridDynamics<DefaultDiscreteState>
