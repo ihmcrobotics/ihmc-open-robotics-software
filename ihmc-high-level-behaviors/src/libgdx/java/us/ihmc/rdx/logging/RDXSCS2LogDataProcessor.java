@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class RDXSCS2LogDataProcessor
@@ -231,6 +232,7 @@ public class RDXSCS2LogDataProcessor
       {
          throw new RuntimeException(e);
       }
+      logDirectories.sort(Comparator.comparing(Path::toString));
    }
 
    public static void main(String[] args)
