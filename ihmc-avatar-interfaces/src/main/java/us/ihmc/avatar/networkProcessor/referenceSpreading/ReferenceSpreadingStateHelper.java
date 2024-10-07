@@ -1,11 +1,9 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
-import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -27,6 +25,7 @@ public class ReferenceSpreadingStateHelper
    YoRegistry registry;
 
    ReferenceSpreadingTrajectory preImpactReference;
+   DoubleProvider time;
 
    public ReferenceSpreadingStateHelper(String filePath, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
@@ -37,6 +36,8 @@ public class ReferenceSpreadingStateHelper
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
    {
+      this.time = time;
+
       StateMachineFactory<States, State> factory = new StateMachineFactory<>(States.class);
       factory.setNamePrefix("stateMachine").setRegistry(registry).buildYoClock(time);
 
@@ -52,20 +53,31 @@ public class ReferenceSpreadingStateHelper
       return factory.build(States.BEFORE);
    }
 
+   public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
+   {
+      this.trajectoryMessagePublisher = trajectoryMessagePublisher;
+   }
+
    private class BeforeState implements State
    {
+
       public BeforeState()
       {
       }
 
       public void doAction(double timeInState)
       {
-         LogTools.info("BeforeState: " + timeInState);
+//         LogTools.info("BeforeState: " + timeInState);
       }
 
       public void onEntry()
       {
          LogTools.info("Entering BeforeState");
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            HandTrajectoryMessage handTrajectoryMessage = preImpactReference.getHandTrajectoryMessage(robotSide, time.getValue());
+            trajectoryMessagePublisher.publish(handTrajectoryMessage);
+         }
       }
 
       public void onExit(double timeInState)
@@ -82,15 +94,12 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         LogTools.info("AfterState: " + timeInState);
+//         LogTools.info("AfterState: " + timeInState);
       }
 
       public void onEntry()
       {
          LogTools.info("Entering AfterState");
-         HandTrajectoryMessage handTrajectoryMessage = preImpactReference.getHandTrajectoryMessage(RobotSide.LEFT);
-         //         LogTools.info("HandTrajectoryMessage: " + handTrajectoryMessage);
-         trajectoryMessagePublisher.publish(handTrajectoryMessage);
       }
 
       public void onExit(double timeInState)
@@ -128,28 +137,22 @@ public class ReferenceSpreadingStateHelper
 
       double getTime();
 
-      static RSTimeProvider createTimeProfider()
+      static RSTimeProvider createTimeProvider()
       {
          return new RSTimeProvider()
          {
             private double time = 0.0;
-            private long initialTime = -1L;
 
             @Override
             public void initialize()
             {
                time = 0.0;
-               initialTime = -1L;
             }
 
             @Override
             public void update(long currentTime)
             {
-               if (initialTime == -1L)
-               {
-                  initialTime = currentTime;
-               }
-               time = Conversions.nanosecondsToSeconds(currentTime-initialTime);
+               time = Conversions.nanosecondsToSeconds(currentTime);
 
             }
 

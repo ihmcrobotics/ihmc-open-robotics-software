@@ -19,6 +19,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -55,6 +56,11 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       referenceSpreadingToolboxController.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
 
       startYoVariableServer();
+      if (yoVariableServer != null)
+      {
+         JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
+         jvmStatisticsGenerator.start();
+      }
    }
 
    @Override

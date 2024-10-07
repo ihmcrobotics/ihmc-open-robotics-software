@@ -7,7 +7,7 @@
 uint32 sequence_id
 
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
-ihmc_common_msgs/SE3TrajectoryPointMessage[<=50] taskspace_trajectory_points
+ihmc_common_msgs/SE3TrajectoryPointMessage[<=200] taskspace_trajectory_points
 # The selection matrix for each axis of the angular part of this trajectory.
 ihmc_common_msgs/SelectionMatrix3DMessage angular_selection_matrix
 # The selection matrix for each axis of the linear part of this trajectory.

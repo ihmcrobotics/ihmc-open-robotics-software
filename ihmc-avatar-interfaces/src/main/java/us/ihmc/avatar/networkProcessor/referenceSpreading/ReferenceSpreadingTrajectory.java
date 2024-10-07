@@ -26,6 +26,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 public class ReferenceSpreadingTrajectory
 {
    private static final double INITIAL_TIME_DURATION = 0.0;
+   private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
 
    private final TrajectoryRecordReplay trajectoryPlayer;
    private String filePath;
@@ -42,7 +43,7 @@ public class ReferenceSpreadingTrajectory
    }
 
    // Warning: Assumption is taken that all data is in the same frame.
-   public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)
+   public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide, Double startTime)
    {
       trajectoryPlayer.reset();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
@@ -54,32 +55,40 @@ public class ReferenceSpreadingTrajectory
 
       HashMap<String, Double> currentFrame = new HashMap<>();
       makeMap(trajectoryPlayer.play(true), currentFrame);
-      Double previousTime = currentFrame.get("time[sec]")-INITIAL_TIME_DURATION;
+      Double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
-      String name = robotSide.getUpperCaseName()+"_GRIPPER_YAW_LINKCurrent";
+      LogTools.info("Start time: " + startTime);
+
+      String name = robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent";
+      int totalFrames = trajectoryPlayer.getNumberOfLines();
+      int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
+      int currentFrameIndex = 0;
+
       while (!trajectoryPlayer.hasDoneReplay())
       {
          makeMap(trajectoryPlayer.play(true), currentFrame);
+         if (currentFrameIndex % frameInterval == 0)
+         {
+            double currentTime = currentFrame.get("time[sec]");
+            desiredPosition.set(currentFrame.get(name + "PositionX"),
+                                currentFrame.get(name + "PositionY"),
+                                currentFrame.get(name + "PositionZ"));
+            desiredOrientation.setQuaternion(currentFrame.get(name + "OrientationQx"),
+                                             currentFrame.get(name + "OrientationQy"),
+                                             currentFrame.get(name + "OrientationQz"),
+                                             currentFrame.get(name + "OrientationQs"));
 
-         desiredPosition.set(currentFrame.get(name+"PositionX"),
-                             currentFrame.get(name+"PositionY"),
-                             currentFrame.get(name+"PositionZ"));
-         desiredOrientation.setQuaternion(currentFrame.get(name+"OrientationQx"),
-                                           currentFrame.get(name+"OrientationQy"),
-                                           currentFrame.get(name+"OrientationQz"),
-                                           currentFrame.get(name+"OrientationQs"));
-
-         se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentFrame.get("time[sec]")-previousTime,
-                                    desiredPosition,
-                                    desiredOrientation,
-                                     zeroVector3D,
-                                     zeroVector3D);
-         se3TrajectoryPointMessage.setSequenceId(frameId++);
-         se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
-
-         previousTime = currentFrame.get("time[sec]");
+            se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentTime - startTimeCSV + startTime,
+                                                                        desiredPosition,
+                                                                        desiredOrientation,
+                                                                        zeroVector3D,
+                                                                        zeroVector3D);
+            se3TrajectoryPointMessage.setSequenceId(frameId++);
+            se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
+         }
+         currentFrameIndex++;
       }
-//      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(currentFrame.get(name+"PositionFrame").longValue());
+
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
       handTrajectoryMessage.setRobotSide(robotSide.toByte());

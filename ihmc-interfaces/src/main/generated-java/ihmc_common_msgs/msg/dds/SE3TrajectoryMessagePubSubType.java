@@ -15,7 +15,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9dd6ee74575933edd4c126b08f0bd65e0d3f2d7fe8823c1abf44de187a36dd2e";
+   		return "24ec1c137e3989441f2f0868c0abc5c02436e5bc4be5b49d71162fda3fed37b1";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -119,7 +119,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getTaskspaceTrajectoryPoints().size() <= 50)
+      if(data.getTaskspaceTrajectoryPoints().size() <= 200)
       cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
           throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
 

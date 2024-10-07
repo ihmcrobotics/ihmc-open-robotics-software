@@ -291,6 +291,8 @@ public class TrajectoryRecordReplay
       return timeStepReplay;
    }
 
+   public int getNumberOfLines() { return dataMatrix.size(); }
+
    public String getRecordFileName()
    {
       return recordFileName;

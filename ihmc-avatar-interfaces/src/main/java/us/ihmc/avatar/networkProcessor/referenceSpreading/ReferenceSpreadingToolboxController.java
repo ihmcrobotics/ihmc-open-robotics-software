@@ -50,6 +50,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final RSTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
    StateMachine<States, State> stateMachine;
+   ReferenceSpreadingStateHelper stateMachineHelper;
 
    private final HumanoidReferenceFrames referenceFrames;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -57,7 +58,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
 
-   private HandTrajectoryMessagePublisher trajectoryMessagePublisher;
+   private HandTrajectoryMessagePublisher trajectoryMessagePublisher = m-> {LogTools.error("No publisher set");};
 
    public ReferenceSpreadingToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
@@ -69,7 +70,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    {
       super(statusOutputManager, parentRegistry);
 
-      timeProvider = RSTimeProvider.createTimeProfider();
+      timeProvider = RSTimeProvider.createTimeProvider();
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -82,7 +83,6 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
 
-      double updateDT = Conversions.millisecondsToSeconds(updateRateMillis);
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
                                                                                        9.81,
                                                                                        fullRobotModel.getRootJoint(),
@@ -108,7 +108,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
       String filePath = demoDirectory + "/pickUpBox.csv";
 
-      ReferenceSpreadingStateHelper stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
+      stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
@@ -137,8 +137,6 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       if (waitingForRobotConfigurationData.getBooleanValue())
          return;
 
-
-
       timeProvider.update(robotConfigurationData.getMonotonicTime());
       time.set(timeProvider.getTime());
 
@@ -148,6 +146,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
+      stateMachineHelper.setTrajectoryMessagePublisher(trajectoryMessagePublisher);
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
