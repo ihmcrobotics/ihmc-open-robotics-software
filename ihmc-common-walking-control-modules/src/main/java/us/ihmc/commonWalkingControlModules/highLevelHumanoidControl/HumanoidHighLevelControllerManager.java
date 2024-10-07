@@ -238,6 +238,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
+      reportControllerCoreOutputDataForWholeBodyControllerCore();
 
       if (inertialParameterManager != null)
          inertialParameterManager.update();
