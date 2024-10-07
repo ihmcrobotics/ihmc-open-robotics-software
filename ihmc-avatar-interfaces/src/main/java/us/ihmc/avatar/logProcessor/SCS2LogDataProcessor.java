@@ -4,7 +4,6 @@ import org.jfree.svg.SVGGraphics2D;
 import org.jfree.svg.SVGHints;
 import org.jfree.svg.SVGUnits;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
@@ -181,18 +180,38 @@ public class SCS2LogDataProcessor
    {
       double documentSizeMillimeters = convertToMillimeters(DOCUMENT_SIZE);
       svgGraphics2D = new SVGGraphics2D(documentSizeMillimeters, documentSizeMillimeters, SVGUnits.MM);
-
-      svgGraphics2D.setColor(Color.BLACK);
-      svgGraphics2D.setStroke(new BasicStroke(5));
-      svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 20));
       svgGraphics2D.setFontSizeUnits(SVGUnits.MM);
+
+      svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, "Legend");
+      Point2D legendOrigin = new Point2D(locomotionData.getRobotStartLocation());
+      legendOrigin.add(2.0, -2.0);
+      drawText("Legend", legendOrigin.getX(), legendOrigin.getY());
+      double verticalCaret = 0.1;
+      double lineIndent = 0.7;
+      double lineLength = 0.2;
+      drawText("Center of Mass", legendOrigin.getX(), legendOrigin.getY() - verticalCaret);
+      comStroke();
+      drawLine(new Point2D[] {new Point2D(legendOrigin.getX() + lineIndent,
+                                          legendOrigin.getY() - verticalCaret),
+                              new Point2D(legendOrigin.getX() + lineIndent + lineLength,
+                                          legendOrigin.getY() - verticalCaret)
+      });
+      verticalCaret += 0.1;
+      drawText("Capture Point", legendOrigin.getX(), legendOrigin.getY() - verticalCaret);
+      icpStroke();
+      drawLine(new Point2D[] {new Point2D(legendOrigin.getX() + lineIndent,
+                                          legendOrigin.getY() - verticalCaret),
+                              new Point2D(legendOrigin.getX() + lineIndent + lineLength,
+                                          legendOrigin.getY() - verticalCaret)
+      });
+      svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, "Legend");
 
       int walk = 1;
       for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
       {
          String walkName = "Walk %d".formatted(walk);
          svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, walkName);
-         svgGraphics2D.drawString(walkName, metersToMMX(logWalk.getWalkStart().getX()), metersToMMY(logWalk.getWalkStart().getY() + 0.3));
+         drawText(walkName, logWalk.getWalkStart().getX(), logWalk.getWalkStart().getY() + 0.3);
 
          String groupName = "Footsteps %d".formatted(walk);
          svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, groupName);
@@ -217,15 +236,12 @@ public class SCS2LogDataProcessor
 
          svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, groupName);
 
-         svgGraphics2D.setStroke(new BasicStroke(2.5f));
-         svgGraphics2D.setColor(Color.BLACK);
+         comStroke();
          plot(logWalk.getComs(), "Coms");
-         svgGraphics2D.setColor(Color.BLUE);
-         
-         svgGraphics2D.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {10.0f}, 0.0f));
+
+         icpStroke();
          plot(logWalk.getIcps(), "ICPs");
 
-         svgGraphics2D.setColor(Color.BLACK);
          if (logWalk.isEndedWithFall())
          {
             Point2D fallLocation;
@@ -239,7 +255,7 @@ public class SCS2LogDataProcessor
                fallLocation = new Point2D(lastStepPolygon[0], lastStepPolygon[4]);
             }
 
-            svgGraphics2D.drawString("Fall %d".formatted(walk), metersToMMX(fallLocation.getX()), metersToMMY(fallLocation.getY() + 0.3));
+            drawText("Fall %d".formatted(walk), fallLocation.getX(), fallLocation.getY() + 0.3);
          }
 
          svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, walkName);
@@ -261,6 +277,39 @@ public class SCS2LogDataProcessor
       {
          throw new RuntimeException(e);
       }
+   }
+
+   private void drawText(String Legend, double x, double y)
+   {
+      textStroke();
+      svgGraphics2D.drawString(Legend, metersToMMX(x), metersToMMY(y));
+   }
+
+   private void textStroke()
+   {
+      svgGraphics2D.setColor(Color.BLACK);
+      svgGraphics2D.setStroke(new BasicStroke(5));
+      svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 20));
+   }
+
+   private void icpStroke()
+   {
+      svgGraphics2D.setColor(Color.BLUE);
+      svgGraphics2D.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] {10.0f}, 0.0f));
+   }
+
+   private void comStroke()
+   {
+      svgGraphics2D.setColor(Color.BLACK);
+      svgGraphics2D.setStroke(new BasicStroke(2.5f));
+   }
+
+   private void drawLine(Point2D[] line)
+   {
+      svgGraphics2D.drawLine(metersToMMX(line[0].getX()),
+                             metersToMMY(line[0].getY()),
+                             metersToMMX(line[1].getX()),
+                             metersToMMY(line[1].getY()));
    }
 
    private void plot(List<Point2D> points, String name)
