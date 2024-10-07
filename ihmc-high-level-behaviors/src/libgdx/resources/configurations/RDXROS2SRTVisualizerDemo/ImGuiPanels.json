@@ -3,6 +3,8 @@
   "windows" : {
     "3D View" : false,
     "Perception Visualizers" : true,
-    "Stream Visualizer###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:Stream Visualizer" : false
+    "ZED Color Left###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:ZED Color Left" : true,
+    "ZED Color Right###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:ZED Color Right" : true,
+    "ZED Depth###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:ZED Depth" : true
   }
 }
