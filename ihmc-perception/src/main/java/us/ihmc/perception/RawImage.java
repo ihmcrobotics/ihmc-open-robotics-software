@@ -14,7 +14,6 @@ import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 
 import javax.annotation.Nullable;
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
