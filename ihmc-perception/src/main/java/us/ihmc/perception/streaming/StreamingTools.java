@@ -24,6 +24,8 @@ public class StreamingTools
    private static final Map<String, String> LIVE_SRT_OPTIONS
          = Map.ofEntries(entry("transtype", "live"),
                          entry("smoother", "live"),
+                         entry("maxbw", "-1"),           // Set no maximum to sending bandwidth
+                         entry("tlpktdrop", "1"),        // "Too late packet drop" - drop packets that arrive/are sent too late
                          entry("rcvlatency", "50"),
                          entry("peerlatency", "50"),     // 50ms of buffer delay for packet loss correction
                          entry("mss", "1360"),           // Max packet size of MPEG-TS

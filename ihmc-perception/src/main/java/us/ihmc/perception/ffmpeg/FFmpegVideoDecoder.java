@@ -1,5 +1,6 @@
 package us.ihmc.perception.ffmpeg;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
@@ -103,8 +104,15 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
       if (outputImage != null)
          outputImage.close();
 
-      boolean gotAFrame = decodeNextFrame(decodedFrame ->
-      {
+      MutableBoolean gotAFrame = new MutableBoolean();
+      gotAFrame.setValue(decodeNextFrame(decodedFrame ->
+      {  // Ensure the pixel format was identified
+         if (decodedFrame.format() < 0 || decodedFrame.format() > AV_PIX_FMT_NB)
+         {
+            gotAFrame.setFalse();
+            return;
+         }
+
          lastFrameTimestamp = av_rescale_q(decodedFrame.best_effort_timestamp(), streamToDecode.time_base(), millisecondTimebase);
          extractSideData(decodedFrame);
 
@@ -121,9 +129,9 @@ public class FFmpegVideoDecoder extends FFmpegDecoder
             outputImage = FFmpegTools.avFrameToMat(outputFrame);
             av_frame_unref(outputFrame);
          }
-      });
+      }));
 
-      if (!gotAFrame)
+      if (!gotAFrame.getValue())
          return null;
 
       return outputImage;

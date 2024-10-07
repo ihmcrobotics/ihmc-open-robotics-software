@@ -10,6 +10,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.ffmpeg.FFmpegVideoEncoder;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avutil.av_dict_copy;
@@ -17,6 +20,8 @@ import static org.bytedeco.ffmpeg.global.avutil.av_dict_free;
 
 public class SRTStreamWriter
 {
+   private static final long CONNECTION_TIMEOUT_MS = 2000L;
+
    private final FFmpegVideoEncoder encoder;
 
    private final AVIOContext srtContext;
@@ -27,6 +32,8 @@ public class SRTStreamWriter
    private final AVPacket packetCopy;
    private AVStream outputStream;
 
+   private final Timer connectionTimeoutTimer;
+   private TimerTask endConnectionOnTimeout;
    private boolean connected = false;
 
    private int error;
@@ -46,6 +53,8 @@ public class SRTStreamWriter
 
       packetCopy = av_packet_alloc();
       FFmpegTools.checkPointer(packetCopy, "Allocating a packet");
+
+      connectionTimeoutTimer = new Timer(getClass().getSimpleName() + "ConnectionTimeout", true);
    }
 
    private boolean startOutput()
@@ -73,10 +82,13 @@ public class SRTStreamWriter
       return true;
    }
 
-   public boolean write(AVPacket packetToWrite)
+   public synchronized boolean write(AVPacket packetToWrite)
    {
       if (outputStream == null)
          connected = startOutput();
+
+      if (endConnectionOnTimeout != null)
+         connected &= endConnectionOnTimeout.cancel();
 
       if (connected)
       {
@@ -91,13 +103,15 @@ public class SRTStreamWriter
             LogTools.debug("Connection failed with caller while writing packet");
          }
 
+         endConnectionOnTimeout = new ConnectionTimeoutTask();
+         connectionTimeoutTimer.schedule(endConnectionOnTimeout, CONNECTION_TIMEOUT_MS);
          av_packet_unref(packetCopy);
       }
 
       return connected;
    }
 
-   public void endOutput()
+   public synchronized void endOutput()
    {
       if (!connected)
          return;
@@ -130,8 +144,17 @@ public class SRTStreamWriter
          outputStream.close();
    }
 
-   public boolean isConnected()
+   public synchronized boolean isConnected()
    {
       return connected;
+   }
+
+   private class ConnectionTimeoutTask extends TimerTask
+   {
+      @Override
+      public void run()
+      {
+         endOutput();
+      }
    }
 }

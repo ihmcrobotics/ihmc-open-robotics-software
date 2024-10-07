@@ -15,8 +15,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_GRAY16;
-import static org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_YUV444P;
+import static org.bytedeco.ffmpeg.global.avutil.*;
 
 public class ROS2SRTVideoStreamer
 {
@@ -43,6 +42,8 @@ public class ROS2SRTVideoStreamer
 
    public ROS2SRTVideoStreamer(ROS2Node ros2Node, ROS2Topic<SRTStreamStatus> streamTopic, InetSocketAddress streamOutputAddress)
    {
+      av_log_set_level(AV_LOG_FATAL); // silences non monotonically increasing dts warning, which are 99% safe to ignore
+
       LogTools.info("Streaming {} on {}", streamTopic.getName(), streamOutputAddress);
 
       statusMessage = new SRTStreamStatus();

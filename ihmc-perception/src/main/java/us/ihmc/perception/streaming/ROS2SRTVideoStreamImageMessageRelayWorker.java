@@ -55,21 +55,11 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       Mat frameMat = frame.getCpuImageMat();
       PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
 
-      // Set the camera intrinsics
-      imageMessage.setImageWidth(frame.getWidth());
-      imageMessage.setImageHeight(frame.getHeight());
-      imageMessage.setFocalLengthXPixels(frame.getFocalLengthX());
-      imageMessage.setFocalLengthYPixels(frame.getFocalLengthY());
-      imageMessage.setPrincipalPointXPixels(frame.getPrincipalPointX());
-      imageMessage.setPrincipalPointYPixels(frame.getPrincipalPointY());
-      imageMessage.setDepthDiscretization(frame.getDepthDiscretization());
+      // Pack the image message meta data
+      frame.packImageMessageMetaData(imageMessage);
 
-      // Set the sensor pose
-      imageMessage.getPosition().set(frame.getPosition());
-      imageMessage.getOrientation().set(frame.getOrientation());
-
-      // Set and increment the sequence number
-      imageMessage.setSequenceNumber(frameSequenceNumber++);
+      if (frame.getPixelFormat() == PixelFormat.GRAY16)
+         System.out.println("Publishing depth????");
 
       // Send the message
       publisher.publish(imageMessage);

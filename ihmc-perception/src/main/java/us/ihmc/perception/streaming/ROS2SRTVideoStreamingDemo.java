@@ -41,13 +41,6 @@ public class ROS2SRTVideoStreamingDemo
          RawImage rightColorImage = imageRetriever.getLatestRawColorImage(RobotSide.RIGHT);
          RawImage depthImage = imageRetriever.getLatestRawDepthImage();
 
-         if (!streamer.hasStream(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS))
-         {
-            streamer.addBGRStream(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, leftColorImage, true);
-            streamer.addBGRStream(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, rightColorImage, true);
-            streamer.addDepthStream(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, depthImage);
-         }
-
          streamer.sendFrame(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, leftColorImage);
          streamer.sendFrame(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, rightColorImage);
          streamer.sendFrame(PerceptionAPI.SRT_ZED_DEPTH_STREAM_STATUS, depthImage);
