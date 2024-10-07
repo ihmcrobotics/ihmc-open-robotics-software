@@ -10,7 +10,7 @@ public class SCS2LogWalk
 {
    private long walkStartTick = -1;
    private final Point2D walkStart = new Point2D();
-   private final ArrayList<SCS2LogDataFootstep> footsteps = new ArrayList<>();
+   private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point2D> icps = new RecyclingArrayList<>(Point2D::new);
 
@@ -41,7 +41,7 @@ public class SCS2LogWalk
       return walkStart;
    }
 
-   public ArrayList<SCS2LogDataFootstep> getFootsteps()
+   public ArrayList<SCS2LogFootstep> getFootsteps()
    {
       return footsteps;
    }

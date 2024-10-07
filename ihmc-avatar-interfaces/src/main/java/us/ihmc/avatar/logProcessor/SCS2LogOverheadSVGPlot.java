@@ -69,7 +69,7 @@ public class SCS2LogOverheadSVGPlot
          String groupName = "Footsteps %d".formatted(walk);
          svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, groupName);
 
-         for (SCS2LogDataFootstep footstep : logWalk.getFootsteps())
+         for (SCS2LogFootstep footstep : logWalk.getFootsteps())
          {
             Color color = FootstepListVisualizer.defaultFeetColors.get(footstep.getSide());
             svgGraphics2D.setColor(color);

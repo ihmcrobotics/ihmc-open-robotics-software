@@ -2,13 +2,13 @@ package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class SCS2LogDataEnum<E extends Enum<E>>
+public class SCS2LogEnum<E extends Enum<E>>
 {
    private final YoEnum<?> yoEnum;
    private final Class<E> enumType;
    private E lastValue = null;
 
-   public SCS2LogDataEnum(YoEnum<?> yoEnum, Class<E> enumType)
+   public SCS2LogEnum(YoEnum<?> yoEnum, Class<E> enumType)
    {
       this.yoEnum = yoEnum;
       this.enumType = enumType;

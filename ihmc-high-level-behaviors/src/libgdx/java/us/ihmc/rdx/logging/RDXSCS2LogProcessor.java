@@ -6,7 +6,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImString;
-import us.ihmc.avatar.logProcessor.SCS2LogDataProcessor;
+import us.ihmc.avatar.logProcessor.SCS2LogProcessor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -22,18 +22,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class RDXSCS2LogDataProcessor
+public class RDXSCS2LogProcessor
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("RDX Log Data Processor");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<Path> logDirectories = new ArrayList<>();
-   private final HashMap<Path, SCS2LogDataProcessor> logProcessors = new HashMap<>();
+   private final HashMap<Path, SCS2LogProcessor> logProcessors = new HashMap<>();
    private final ImString imDirectoryOfLogs;
    private Path directoryOfLogsPath;
    private boolean directoryOfLogsExists;
    private int autoProcessIndex = -1;
 
-   public RDXSCS2LogDataProcessor()
+   public RDXSCS2LogProcessor()
    {
       String property = System.getProperty("directory.of.logs");
       imDirectoryOfLogs = new ImString(property == null ? IHMCCommonPaths.LOGS_DIRECTORY.toString() : property, 1000);
@@ -86,7 +86,7 @@ public class RDXSCS2LogDataProcessor
                   autoProcessIndex = -1;
                if (autoProcessIndex > -1)
                {
-                  SCS2LogDataProcessor logProcessor = logProcessors.get(logDirectories.get(autoProcessIndex));
+                  SCS2LogProcessor logProcessor = logProcessors.get(logDirectories.get(autoProcessIndex));
                   if (!logProcessor.isProcessingLog())
                   {
                      if (logProcessor.getLogCurrentTick() == 0)
@@ -126,7 +126,7 @@ public class RDXSCS2LogDataProcessor
 
                   for (Path logDirectory : logDirectories)
                   {
-                     SCS2LogDataProcessor logProcessor = logProcessors.get(logDirectory);
+                     SCS2LogProcessor logProcessor = logProcessors.get(logDirectory);
 
                      ImGui.tableNextColumn();
                      ImGui.text(logDirectory.getFileName().toString());
@@ -218,10 +218,10 @@ public class RDXSCS2LogDataProcessor
          {
             if (Files.exists(path.resolve("robotData.log")))
             {
-               SCS2LogDataProcessor logProcessor = logProcessors.get(path);
+               SCS2LogProcessor logProcessor = logProcessors.get(path);
                if (logProcessor == null)
                {
-                  logProcessor = new SCS2LogDataProcessor(path);
+                  logProcessor = new SCS2LogProcessor(path);
                   logProcessors.put(path, logProcessor);
                }
                logDirectories.add(path);
@@ -237,6 +237,6 @@ public class RDXSCS2LogDataProcessor
 
    public static void main(String[] args)
    {
-      new RDXSCS2LogDataProcessor();
+      new RDXSCS2LogProcessor();
    }
 }
