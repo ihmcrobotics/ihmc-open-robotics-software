@@ -35,6 +35,11 @@ import java.util.Map;
 import static org.bytedeco.ffmpeg.global.avformat.av_guess_format;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
+/**
+ * Runs various compression algorithms on images grabbed from an SVO file.
+ * Calculates the average compressed size, compression ratio, amd compression duration.
+ * Outputs results to a .csv file in the Documents folder.
+ */
 public class SVOImageCompressionAlgorithmComparison
 {
    private static final int DATA_POINTS = 500;
@@ -114,10 +119,12 @@ public class SVOImageCompressionAlgorithmComparison
          if (i % 10 == 0)
             LogTools.info("Grabbing frame {}", i);
 
+         // Grab a frame and get the images
          zedDataRetriever.grabOneFrame();
          RawImage colorImage = zedDataRetriever.getLatestRawColorImage(RobotSide.LEFT);
          RawImage depthImage = zedDataRetriever.getLatestRawDepthImage();
 
+         // Ensure all images are present both in host and device memory
          colorImage.getCpuImageMat();
          colorImage.getGpuImageMat();
          depthImage.getCpuImageMat();
@@ -126,6 +133,7 @@ public class SVOImageCompressionAlgorithmComparison
          if (i == 0) // initialize on first run
             initialize(colorImage, depthImage);
 
+         // Test the algorithms with color and depth
          algorithmComparison.test(colorImage);
          algorithmComparison.test(depthImage);
 

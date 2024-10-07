@@ -34,6 +34,11 @@ public class FFmpegTools
       return rational.num() / (double) rational.den();
    }
 
+   /**
+    * Converts the given {@code AVFrame} to a {@code Mat}.
+    * @param frame {@code AVFrame} to convert into a {@code Mat}.
+    * @return The {@code Mat} version of the given frame. Must be closed.
+    */
    public static Mat avFrameToMat(AVFrame frame)
    {
       Mat resultMat;
@@ -59,17 +64,27 @@ public class FFmpegTools
       return resultMat;
    }
 
+   /**
+    * Set an {@code AVDictionary} with values stored in a {@code Map}.
+    * @param dictionaryToSet The dictionary to set.
+    * @param options A {@code Map} of the dictionary options.
+    */
    public static void setAVDictionary(AVDictionary dictionaryToSet, Map<String, String> options)
    {
       for (Map.Entry<String, String> option : options.entrySet())
          av_dict_set(dictionaryToSet, option.getKey(), option.getValue(), 0);
    }
 
+   /**
+    * Call this after passing the dictionary to a LibAV function that leaves unrecognized options in the dictionary.
+    * @param dictionary Dictionary that has been used by a LibAV function.
+    */
    public static void checkDictionaryAfterUse(AVDictionary dictionary)
-   {
+   {  // If the dictionary is empty, we're good.
       if (av_dict_count(dictionary) == 0)
          return;
 
+      // Go through the options that were not recognized by LibAV and print them.
       StringBuilder notFoundEntriesString = new StringBuilder("The following entries did not match available options:\n");
       AVDictionaryEntry entry = null;
       while ((entry = av_dict_iterate(dictionary, entry)) != null)

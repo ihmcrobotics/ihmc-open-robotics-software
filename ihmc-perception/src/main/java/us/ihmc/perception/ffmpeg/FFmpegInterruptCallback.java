@@ -5,6 +5,9 @@ import org.bytedeco.javacpp.Pointer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Callback for interrupting LibAV functions.
+ */
 public class FFmpegInterruptCallback extends AVIOInterruptCB
 {
    private final Callback_Pointer callbackPointer;

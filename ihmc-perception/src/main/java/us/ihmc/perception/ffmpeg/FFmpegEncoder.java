@@ -17,11 +17,13 @@ import us.ihmc.log.LogTools;
 import java.util.function.Consumer;
 
 import static org.bytedeco.ffmpeg.global.avcodec.*;
-import static org.bytedeco.ffmpeg.global.avformat.av_interleaved_write_frame;
 import static org.bytedeco.ffmpeg.global.avformat.avformat_new_stream;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 
+/**
+ * A general encoder that uses LibAV to perform the encoding.
+ */
 // TODO: Add a FFMPEGAudioEncoder
 public abstract class FFmpegEncoder
 {
@@ -96,18 +98,6 @@ public abstract class FFmpegEncoder
     * @param data Pointer to an object containing information about the frame to encode.
     */
    public abstract void setNextFrame(Pointer data);
-
-   public boolean encodeAndWriteNextFrame(AVFormatContext outputContext, AVStream stream)
-   {
-      return encodeNextFrame(packet ->
-      {
-         av_packet_rescale_ts(encodedPacket, encoderContext.time_base(), stream.time_base());
-         encodedPacket.stream_index(stream.index());
-
-         error = av_interleaved_write_frame(outputContext, packet);
-         FFmpegTools.checkNegativeError(error, "Writing packet");
-      });
-   }
 
    /**
     * Encode the frame assigned using {@link #setNextFrame(Pointer)}.

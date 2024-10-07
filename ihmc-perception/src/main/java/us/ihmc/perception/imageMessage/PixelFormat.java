@@ -7,7 +7,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair.ImageType;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
@@ -59,15 +58,6 @@ public enum PixelFormat
    public static PixelFormat fromImageMessage(ImageMessage imageMessage)
    {
       return fromByte(imageMessage.getPixelFormat());
-   }
-
-   public static PixelFormat fromImageType(ImageType imageType)
-   {
-      return switch (imageType)
-      {
-         case COLOR -> BGR8;
-         case DEPTH -> GRAY16;
-      };
    }
 
    public static PixelFormat fromFFmpegPixelFormat(int avPixelFormat)

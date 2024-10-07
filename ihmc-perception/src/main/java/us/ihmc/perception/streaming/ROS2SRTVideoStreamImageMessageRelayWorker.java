@@ -7,7 +7,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -27,16 +26,16 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
    public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
+      PixelFormat outputPixelFormat = streamTopicPair.isDepth() ? PixelFormat.GRAY16 : PixelFormat.BGR8;
+
       imageMessage = new ImageMessage();
-      imageMessage.setPixelFormat(PixelFormat.fromImageType(streamTopicPair.imageType()).toByte());
+      imageMessage.setPixelFormat(outputPixelFormat.toByte());
       imageMessage.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
       imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
       publisher = publisherNode.createPublisher(streamTopicPair.imageMessageTopic());
-      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode),
-                                              streamTopicPair.streamStatusTopic(),
-                                              PixelFormat.fromImageType(streamTopicPair.imageType()));
+      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
    }

@@ -10,6 +10,10 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SRTVideoStreamVisualizer;
 import us.ihmc.ros2.ROS2Node;
 
+/**
+ * Demo for the SRT visualizer. Connects to a ZED stream and visualizes it.
+ * To stream video from a ZED camera or SVO file, use the {@link us.ihmc.perception.streaming.ROS2SRTVideoStreamingDemo}.
+ */
 public class RDXROS2SRTVisualizerDemo
 {
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_visualize_demo");

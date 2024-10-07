@@ -1578,11 +1578,18 @@ public class MessageTools
          return Level.INFO;
    }
 
+   /**
+    * Serializes the given ROS2 message/
+    * @param message The ROS2 message to be serialized
+    * @return A ByteBuffer containing the serialized message
+    * @param <T> The type of the ROS2 message
+    */
    public static <T extends Packet<T>> ByteBuffer serialize(T message)
    {
       SerializedPayload payload = new SerializedPayload(message.getPubSubTypePacket().get().getTypeSize());
       try
       {
+         @SuppressWarnings("unchecked")
          TopicDataType<T> pubSubType = message.getPubSubTypePacket().get();
          pubSubType.serialize(message, payload);
          return payload.getData();
@@ -1593,6 +1600,12 @@ public class MessageTools
       }
    }
 
+   /**
+    * Deserializes the given serialized message, and packs it into the {@code messageToPack}.
+    * @param serializedData The serialized data of a ROS2 message
+    * @param messageToPack ROS2 message into which the deserialized message will be packed. Must be of the same type as the serialized message.
+    * @param <T> The type of the ROS2 message
+    */
    public static <T extends Packet<T>> void deserialize(ByteBuffer serializedData, T messageToPack)
    {
       SerializedPayload payload = new SerializedPayload(serializedData.limit());
@@ -1601,6 +1614,7 @@ public class MessageTools
 
       try
       {
+         @SuppressWarnings("unchecked")
          TopicDataType<T> pubSubType = messageToPack.getPubSubTypePacket().get();
          pubSubType.deserialize(payload, messageToPack);
       }

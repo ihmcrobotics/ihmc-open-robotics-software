@@ -15,6 +15,9 @@ import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avformat.av_find_best_stream;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
+/**
+ * A general decoder that uses LibAV to perform the decoding.
+ */
 public class FFmpegDecoder
 {
    protected final AVFormatContext inputContext;
@@ -56,6 +59,11 @@ public class FFmpegDecoder
       FFmpegTools.checkPointer(decodedFrame, "Allocating decoded frame");
    }
 
+   /**
+    * Initialize the decoder
+    * @param codecOptions Decoder options.
+    * @param packetProvider Function that packs data into the AVPacket to be decoded and returns an error code.
+    */
    public void initialize(AVDictionary codecOptions, Function<AVPacket, Integer> packetProvider)
    {
       this.packetProvider = packetProvider;
@@ -68,6 +76,11 @@ public class FFmpegDecoder
       av_dict_free(optionsCopy);
    }
 
+   /**
+    * Attempts to take packets and send them to the decoder until a frame is received.
+    * @param frameConsumer Consumer called upon reception of a frame.
+    * @return {@code true} if a frame was received, {@code false} if the method failed to get a frame.
+    */
    protected boolean decodeNextFrame(Consumer<AVFrame> frameConsumer)
    {
       do

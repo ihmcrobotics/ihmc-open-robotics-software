@@ -4,7 +4,6 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import perception_msgs.msg.dds.VideoFrameExtraData;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair.ImageType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
@@ -33,7 +32,7 @@ public class ROS2SRTVideoStreamer
 
    private final SRTVideoStreamer videoStreamer;
 
-   private ImageType encodingImageType;
+   private boolean isStreamingDepth;
 
    private final FrequencyCalculator sendFrequencyCalculator;
 
@@ -87,7 +86,7 @@ public class ROS2SRTVideoStreamer
                                PREFERRED_COLOR_CODEC,
                                hevcOptions,
                                useHardwareAcceleration);
-      encodingImageType = ImageType.COLOR;
+      isStreamingDepth = false;
    }
 
    public void initializeForDepth(RawImage exampleImage)
@@ -107,7 +106,7 @@ public class ROS2SRTVideoStreamer
                                PREFERRED_DEPTH_CODEC,
                                ffv1Options,
                                false);
-      encodingImageType = ImageType.DEPTH;
+      isStreamingDepth = true;
    }
 
    public synchronized void sendFrame(RawImage frame)
@@ -119,18 +118,18 @@ public class ROS2SRTVideoStreamer
       MessageTools.toMessage(frame.getAcquisitionTime(), frameExtraData.getAcquisitionTime());
       frameExtraData.getSensorPose().set(new Pose3D(frame.getPosition(), frame.getOrientation()));
 
-      if (encodingImageType == ImageType.COLOR)
+      if (isStreamingDepth)
+      {
+         videoStreamer.sendFrame(frame);
+         statusMessage.getFrameExtraData().set(frameExtraData);
+         statusMessage.setContainsExtraData(true);
+      }
+      else
       {
          BytePointer serializedMessage = new BytePointer(MessageTools.serialize(frameExtraData));
          videoStreamer.sendFrame(frame, serializedMessage);
          serializedMessage.close();
          statusMessage.setContainsExtraData(false);
-      }
-      else
-      {
-         videoStreamer.sendFrame(frame);
-         statusMessage.getFrameExtraData().set(frameExtraData);
-         statusMessage.setContainsExtraData(true);
       }
 
       sendFrequencyCalculator.ping();

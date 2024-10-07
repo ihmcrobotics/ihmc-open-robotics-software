@@ -8,6 +8,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Callback for interrupting LibAV functions some time after calling {@link #start(double)}.
+ */
 public class FFmpegTimeoutCallback extends FFmpegInterruptCallback
 {
    private long timeout;

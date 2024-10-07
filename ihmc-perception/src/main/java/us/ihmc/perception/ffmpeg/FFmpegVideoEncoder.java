@@ -4,6 +4,7 @@ import org.bytedeco.ffmpeg.avformat.AVFormatContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVBufferRef;
+import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrameSideData;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
@@ -15,6 +16,9 @@ import java.util.UUID;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_parameters_from_context;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 
+/**
+ * A video encoder that uses LibAV.
+ */
 public abstract class FFmpegVideoEncoder extends FFmpegEncoder
 {
    private final BytePointer uuid = new BytePointer(16);
@@ -23,6 +27,19 @@ public abstract class FFmpegVideoEncoder extends FFmpegEncoder
    private long firstFrameTime = -1L;
    private long nextFrameTime = -1L;
 
+   /**
+    * Creates a new video encoder. Must call {@link FFmpegEncoder#initialize(AVDictionary)} after this.
+    * @param outputFormat The format of encoded output
+    *                     (see: <a href="https://ffmpeg.org/ffmpeg-formats.html">FFmpeg Formats Documentation</a>,
+    *                     or run {@code ffmpeg -hide_banner -formats} to see a list of formats).
+    * @param preferredEncoderName Name of the encoder to use
+    *                             (run {@code ffmpeg -hide_banner -encoders} to see a list of encoders, though not all encoders may be available).
+    * @param bitRate Target output bit rate.
+    * @param outputWidth Width of the output video. If the output dimensions don't match that of the input, the input will be rescaled before encoding.
+    * @param outputHeight Height of the output video. If the output dimensions don't match that of the input, the input will be rescaled before encoding.
+    * @param groupOfPicturesSize Number of frames between key frames.
+    * @param maxBFrames Maximum number of B frames in every GOP.
+    */
    public FFmpegVideoEncoder(AVOutputFormat outputFormat,
                              String preferredEncoderName,
                              int bitRate,

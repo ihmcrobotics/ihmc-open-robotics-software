@@ -1,6 +1,7 @@
 package us.ihmc.perception.ffmpeg;
 
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
+import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.avutil.AVFrame;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
 import org.bytedeco.javacpp.DoublePointer;
@@ -14,6 +15,9 @@ import us.ihmc.perception.RawImage;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import static org.bytedeco.ffmpeg.global.swscale.*;
 
+/**
+ * Software implementation of a video encoder that uses LibAV.
+ */
 public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
 {
    private static final int SCALE_METHOD = SWS_BICUBIC;
@@ -22,8 +26,23 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
    private final AVFrame frameToScale;
    private final Mat tempMat;
 
+   /**
+    * Creates a new video encoder. Must call {@link FFmpegEncoder#initialize(AVDictionary)} after this.
+    * @param outputFormat The format of encoded output
+    *                     (see: <a href="https://ffmpeg.org/ffmpeg-formats.html">FFmpeg Formats Documentation</a>,
+    *                     or run {@code ffmpeg -hide_banner -formats} to see a list of formats).
+    * @param preferredEncoderName Name of the encoder to use
+    *                             (run {@code ffmpeg -hide_banner -encoders} to see a list of encoders, though not all encoders may be available).
+    * @param bitRate Target output bit rate.
+    * @param outputWidth Width of the output video. If the output dimensions don't match that of the input, the input will be rescaled before encoding.
+    * @param outputHeight Height of the output video. If the output dimensions don't match that of the input, the input will be rescaled before encoding.
+    * @param outputPixelFormat Pixel format of the output video (Must be one of avutil.AV_PIX_FMT_*).
+    * @param groupOfPicturesSize Number of frames between key frames.
+    * @param maxBFrames Maximum number of B frames in every GOP.
+    * @param inputPixelFormat Pixel format of input images (one of avutil.AV_PIX_FMT_*).
+    */
    public FFmpegSoftwareVideoEncoder(AVOutputFormat outputFormat,
-                                     String preferredCodecName,
+                                     String preferredEncoderName,
                                      int bitRate,
                                      int outputWidth,
                                      int outputHeight,
@@ -32,7 +51,7 @@ public class FFmpegSoftwareVideoEncoder extends FFmpegVideoEncoder
                                      int maxBFrames,
                                      int inputPixelFormat)
    {
-      super(outputFormat, preferredCodecName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
+      super(outputFormat, preferredEncoderName, bitRate, outputWidth, outputHeight, groupOfPicturesSize, maxBFrames);
 
       tempMat = new Mat();
 
