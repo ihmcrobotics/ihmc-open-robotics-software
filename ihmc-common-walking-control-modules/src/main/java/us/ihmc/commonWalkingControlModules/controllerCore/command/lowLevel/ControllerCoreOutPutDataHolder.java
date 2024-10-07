@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -17,7 +18,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    private final CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder();
 
    private boolean hasDesiredExternalWrench = false;
-   private final DesiredExternalWrenchHolder desiredExternalWrenchHolder = new DesiredExternalWrenchHolder();
+   private DesiredExternalWrenchHolder desiredExternalWrenchHolder = new DesiredExternalWrenchHolder();
 
    private boolean hasLinearMomentum = false;
    private final FrameVector3D linearMomentum = new FrameVector3D();
@@ -60,6 +61,19 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       desiredExternalWrenchHolder.clear();
       rootJointDesiredConfigurationData.clear();
       lowLevelOneDoFJointControllerCoreOutputDataHolder.clear();
+   }
+   public void setControllerCoreOutputDataHolder(ControllerCoreOutput controllerCoreOutput)
+   {
+      setDesiredCenterOfPressureDataHolder(controllerCoreOutput.getCenterOfPressureData());
+      desiredExternalWrenchHolder = controllerCoreOutput.getDesiredExternalWrenchData();
+
+      setAngularMomentum(controllerCoreOutput.getAngularMomentum());
+      setAngularMomentumRate(controllerCoreOutput.getAngularMomentumRate());
+
+      setLinearMomentum(controllerCoreOutput.getLinearMomentum());
+      setLinearMomentumRate(controllerCoreOutput.getLinearMomentumRate());
+      setRootJointDesiredConfigurationData(controllerCoreOutput.getRootJointDesiredConfigurationData());
+      setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolderPreferred());
    }
 
    public void setDesiredCenterOfPressureDataHolder(CenterOfPressureDataHolder centerOfPressureDataHolder)

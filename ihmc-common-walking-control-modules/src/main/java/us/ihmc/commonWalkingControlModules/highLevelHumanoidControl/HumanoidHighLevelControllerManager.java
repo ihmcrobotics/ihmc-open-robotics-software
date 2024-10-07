@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -336,14 +335,15 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private void reportControllerCoreOutputDataForWholeBodyControllerCore()
    {
-//      ControllerCoreOutput controllerCoreOutputDataHolder =
-
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
-      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         controllerCoreOutPutDataHolder.getDesiredCenterOfPressureDataHolder().setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
-      }
+//      ControllerCoreOutput controllerCoreOutputDataHolder = stateMachine.getCurrentState().getControllerCoreOutput();
+//
+//      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+//      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         controllerCoreOutPutDataHolder.getDesiredCenterOfPressureDataHolder().setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
+//      }
+      controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
    }
 
    private void copyJointDesiredsToJoints()

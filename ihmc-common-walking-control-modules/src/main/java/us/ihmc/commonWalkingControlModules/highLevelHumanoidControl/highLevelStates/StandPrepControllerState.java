@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import com.google.common.base.CaseFormat;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -184,7 +183,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    }
 
    @Override
-   public WholeBodyControllerCore getControllerCoreOutput()
+   public ControllerCoreOutput getControllerCoreOutput()
    {
       return null;
    }

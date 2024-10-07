@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -143,7 +144,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public WholeBodyControllerCore getControllerCoreOutput()
+   public ControllerCoreOutput getControllerCoreOutput()
    {
       return null;
    }
