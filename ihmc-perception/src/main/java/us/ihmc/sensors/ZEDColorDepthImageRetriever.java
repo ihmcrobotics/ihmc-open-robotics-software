@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
@@ -54,10 +55,7 @@ public class ZEDColorDepthImageRetriever
 
    private int imageWidth; // Width of rectified image in pixels (color image width == depth image width)
    private int imageHeight; // Height of rectified image in pixels (color image height ==  depth image height)
-   private final SideDependentList<Float> cameraFocalLengthX = new SideDependentList<>();
-   private final SideDependentList<Float> cameraFocalLengthY = new SideDependentList<>();
-   private final SideDependentList<Float> cameraPrincipalPointX = new SideDependentList<>();
-   private final SideDependentList<Float> cameraPrincipalPointY = new SideDependentList<>();
+   private final SideDependentList<CameraIntrinsics> cameraIntrinsics = new SideDependentList<>();
    private float sensorCenterToCameraDistanceY = 0.0f;
 
    private Pointer colorImagePointer;
@@ -203,17 +201,15 @@ public class ZEDColorDepthImageRetriever
          if (colorImages.get(side) != null)
             colorImages.get(side).release();
          colorImages.put(side,
-                         new RawImage(grabSequenceNumber,
-                                      colorImageAcquisitionTime.get(),
-                                      MILLIMETER_TO_METERS,
-                                      null,
+                         new RawImage(null,
                                       colorGpuMats.get(side).clone(),
-                                      cameraFocalLengthX.get(side),
-                                      cameraFocalLengthY.get(side),
-                                      cameraPrincipalPointX.get(side),
-                                      cameraPrincipalPointY.get(side),
-                                      cameraFramePoses.get(side).getPosition(),
-                                      cameraFramePoses.get(side).getOrientation()));
+                                      PixelFormat.BGR8,
+                                      cameraIntrinsics.get(side),
+                                      cameraFramePoses.get(side),
+                                      colorImageAcquisitionTime.get(),
+                                      grabSequenceNumber,
+                                      MILLIMETER_TO_METERS));
+
 
          newColorImagesAvailable.get(side).signal();
       }
@@ -247,17 +243,14 @@ public class ZEDColorDepthImageRetriever
       {
          if (depthImage != null)
             depthImage.release();
-         depthImage = new RawImage(grabSequenceNumber,
-                                   depthImageAcquisitionTime.get(),
-                                   MILLIMETER_TO_METERS,
-                                   null,
+         depthImage = new RawImage(null,
                                    depthGpuMat.clone(),
-                                   cameraFocalLengthX.get(RobotSide.LEFT),
-                                   cameraFocalLengthY.get(RobotSide.LEFT),
-                                   cameraPrincipalPointX.get(RobotSide.LEFT),
-                                   cameraPrincipalPointY.get(RobotSide.LEFT),
-                                   cameraFramePoses.get(RobotSide.LEFT).getPosition(),
-                                   cameraFramePoses.get(RobotSide.LEFT).getOrientation());
+                                   PixelFormat.GRAY16,
+                                   cameraIntrinsics.get(RobotSide.LEFT),
+                                   cameraFramePoses.get(RobotSide.LEFT),
+                                   depthImageAcquisitionTime.get(),
+                                   grabSequenceNumber,
+                                   MILLIMETER_TO_METERS);
 
          newDepthImageAvailable.signal();
       }
@@ -333,12 +326,7 @@ public class ZEDColorDepthImageRetriever
 
    public CameraIntrinsics getCameraIntrinsics(RobotSide cameraSide)
    {
-      return new CameraIntrinsics(imageHeight,
-                                  imageWidth,
-                                  cameraFocalLengthX.get(cameraSide),
-                                  cameraFocalLengthY.get(cameraSide),
-                                  cameraPrincipalPointX.get(cameraSide),
-                                  cameraPrincipalPointY.get(cameraSide));
+      return cameraIntrinsics.get(cameraSide);
    }
 
    public FramePose3D getLatestSensorPose()
@@ -463,17 +451,23 @@ public class ZEDColorDepthImageRetriever
 
       // Get camera's parameters
       SL_CalibrationParameters zedCalibrationParameters = sl_get_calibration_parameters(cameraID, false);
-      cameraFocalLengthX.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().fx());
-      cameraFocalLengthX.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().fx());
-      cameraFocalLengthY.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().fy());
-      cameraFocalLengthY.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().fy());
-      cameraPrincipalPointX.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().cx());
-      cameraPrincipalPointX.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().cx());
-      cameraPrincipalPointY.put(RobotSide.LEFT, zedCalibrationParameters.left_cam().cy());
-      cameraPrincipalPointY.put(RobotSide.RIGHT, zedCalibrationParameters.right_cam().cy());
-
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
+
+      cameraIntrinsics.put(RobotSide.LEFT,
+                           new CameraIntrinsics(imageHeight,
+                                                imageWidth,
+                                                zedCalibrationParameters.left_cam().fx(),
+                                                zedCalibrationParameters.left_cam().fy(),
+                                                zedCalibrationParameters.left_cam().cx(),
+                                                zedCalibrationParameters.left_cam().cy()));
+      cameraIntrinsics.put(RobotSide.RIGHT,
+                           new CameraIntrinsics(imageHeight,
+                                                imageWidth,
+                                                zedCalibrationParameters.right_cam().fx(),
+                                                zedCalibrationParameters.right_cam().fy(),
+                                                zedCalibrationParameters.right_cam().cx(),
+                                                zedCalibrationParameters.right_cam().cy()));
 
       SL_CameraInformation cameraInformation = sl_get_camera_information(cameraID, 0, 0);
       sensorCenterToCameraDistanceY = cameraInformation.camera_configuration().calibration_parameters().translation().y() * -0.5f;
