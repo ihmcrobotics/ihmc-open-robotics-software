@@ -106,7 +106,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
-      String filePath = demoDirectory + "/pickUpBox.csv";
+      String filePath = demoDirectory + "/testCSV.csv";
 
       stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
@@ -160,19 +160,8 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
-   public HandTrajectoryMessage createHandTrajectoryMessage(HashMap<String, Double> thisFrame, RobotSide robotSide)
-   {
-      SE3TrajectoryPointMessage se3TrajectoryPointMessage = new SE3TrajectoryPointMessage();
-
-
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-      handTrajectoryMessage.setRobotSide(robotSide.toByte());
-      handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add(se3TrajectoryPointMessage);
-      return handTrajectoryMessage;
-   }
-
    public interface HandTrajectoryMessagePublisher
    {
-      void publish(HandTrajectoryMessage messageToPublish);
+      void publish(HandHybridJointspaceTaskspaceTrajectoryMessage messageToPublish);
    }
 }

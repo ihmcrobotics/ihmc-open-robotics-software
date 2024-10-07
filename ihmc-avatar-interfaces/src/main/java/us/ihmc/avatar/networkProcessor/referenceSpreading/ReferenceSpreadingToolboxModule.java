@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
@@ -19,14 +20,9 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +34,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
 
    private final ReferenceSpreadingToolboxController referenceSpreadingToolboxController;
 
-   private ROS2PublisherBasics<HandTrajectoryMessage> trajectoryMessagePublisher;
+   private ROS2PublisherBasics<HandHybridJointspaceTaskspaceTrajectoryMessage> trajectoryMessagePublisher;
 
    public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -56,11 +52,6 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       referenceSpreadingToolboxController.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
 
       startYoVariableServer();
-      if (yoVariableServer != null)
-      {
-         JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
-         jvmStatisticsGenerator.start();
-      }
    }
 
    @Override
@@ -80,7 +71,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HandTrajectoryMessage.class, robotName));
+      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HandHybridJointspaceTaskspaceTrajectoryMessage.class, robotName));
 
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 

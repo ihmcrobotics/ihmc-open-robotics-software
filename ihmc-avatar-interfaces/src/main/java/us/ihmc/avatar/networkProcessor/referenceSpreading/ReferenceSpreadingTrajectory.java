@@ -1,14 +1,21 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
 import boofcv.gui.d3.Orientation3D;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
@@ -16,6 +23,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,6 +35,7 @@ public class ReferenceSpreadingTrajectory
 {
    private static final double INITIAL_TIME_DURATION = 0.0;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
+   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
    private final TrajectoryRecordReplay trajectoryPlayer;
    private String filePath;
@@ -42,57 +51,86 @@ public class ReferenceSpreadingTrajectory
       keyMatrix = trajectoryPlayer.getKeyMatrix();
    }
 
-   // Warning: Assumption is taken that all data is in the same frame.
-   public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide, Double startTime)
+   public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide, Double startTime)
    {
       trajectoryPlayer.reset();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
       SE3TrajectoryPointMessage se3TrajectoryPointMessage;
-      long frameId = 0;
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      TrajectoryPoint1DMessage jointTrajectoryPointMessage = new TrajectoryPoint1DMessage();
+
+      for (String jointName : JOINT_NAMES)
+      {
+         jointspaceTrajectoryMessage.getJointTrajectoryMessages().add().set(new OneDoFJointTrajectoryMessage());
+      }
 
       Point3D desiredPosition = new Point3D();
       YawPitchRoll desiredOrientation = new YawPitchRoll();
+      Vector3D desiredLinearVelocity = new Vector3D();
+      Vector3D desiredAngularVelocity = new Vector3D();
 
       HashMap<String, Double> currentFrame = new HashMap<>();
       makeMap(trajectoryPlayer.play(true), currentFrame);
       Double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
-      LogTools.info("Start time: " + startTime);
+      String nameSpatial = robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent";
 
-      String name = robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent";
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
-      int currentFrameIndex = 0;
+      int frameIndex = 0;
+      int jointIndex;
 
       while (!trajectoryPlayer.hasDoneReplay())
       {
          makeMap(trajectoryPlayer.play(true), currentFrame);
-         if (currentFrameIndex % frameInterval == 0)
+         if (frameIndex % frameInterval == 0)
          {
             double currentTime = currentFrame.get("time[sec]");
-            desiredPosition.set(currentFrame.get(name + "PositionX"),
-                                currentFrame.get(name + "PositionY"),
-                                currentFrame.get(name + "PositionZ"));
-            desiredOrientation.setQuaternion(currentFrame.get(name + "OrientationQx"),
-                                             currentFrame.get(name + "OrientationQy"),
-                                             currentFrame.get(name + "OrientationQz"),
-                                             currentFrame.get(name + "OrientationQs"));
+            desiredPosition.set(currentFrame.get(nameSpatial + "PositionX"),
+                                currentFrame.get(nameSpatial + "PositionY"),
+                                currentFrame.get(nameSpatial + "PositionZ"));
+            desiredOrientation.setQuaternion(currentFrame.get(nameSpatial + "OrientationQx"),
+                                             currentFrame.get(nameSpatial + "OrientationQy"),
+                                             currentFrame.get(nameSpatial + "OrientationQz"),
+                                             currentFrame.get(nameSpatial + "OrientationQs"));
+
+            desiredLinearVelocity.set(currentFrame.get(nameSpatial + "LinearVelocityX"),
+                                      currentFrame.get(nameSpatial + "LinearVelocityY"),
+                                      currentFrame.get(nameSpatial + "LinearVelocityZ"));
+            desiredAngularVelocity.set(currentFrame.get(nameSpatial + "AngularVelocityX"),
+                                       currentFrame.get(nameSpatial + "AngularVelocityY"),
+                                       currentFrame.get(nameSpatial + "AngularVelocityZ"));
+
+            for (String jointName : JOINT_NAMES)
+            {
+               jointIndex = JOINT_NAMES.indexOf(jointName);
+               jointTrajectoryPointMessage.setTime(currentTime - startTimeCSV + startTime);
+               jointTrajectoryPointMessage.setPosition(currentFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName));
+               jointTrajectoryPointMessage.setVelocity(currentFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName));
+               jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(jointIndex).getTrajectoryPoints().add().set(jointTrajectoryPointMessage);
+            }
 
             se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentTime - startTimeCSV + startTime,
                                                                         desiredPosition,
                                                                         desiredOrientation,
-                                                                        zeroVector3D,
-                                                                        zeroVector3D);
-            se3TrajectoryPointMessage.setSequenceId(frameId++);
+                                                                        desiredLinearVelocity,
+                                                                        desiredAngularVelocity);
+            se3TrajectoryPointMessage.setSequenceId(frameIndex);
             se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
          }
-         currentFrameIndex++;
+         frameIndex++;
       }
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-      handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
-      handTrajectoryMessage.setRobotSide(robotSide.toByte());
-      return handTrajectoryMessage;
+      HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+      handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+      handHybridTrajectoryMessage.setRobotSide(robotSide.toByte());
+      handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+
+      handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+      return handHybridTrajectoryMessage;
    }
 
    private void makeMap(double[] values, HashMap<String, Double> mapToPack)

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
-import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
@@ -75,9 +75,10 @@ public class ReferenceSpreadingStateHelper
          LogTools.info("Entering BeforeState");
          for (RobotSide robotSide : RobotSide.values())
          {
-            HandTrajectoryMessage handTrajectoryMessage = preImpactReference.getHandTrajectoryMessage(robotSide, time.getValue());
-            trajectoryMessagePublisher.publish(handTrajectoryMessage);
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide, time.getValue());
+            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
+         LogTools.info("Published all messages");
       }
 
       public void onExit(double timeInState)

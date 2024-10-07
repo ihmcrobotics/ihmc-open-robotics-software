@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dbb8df4131337e6a9528f0669c662d991a977054cdf88786d3b51f3eae564f80";
+   		return "02bdffe83518d11224d3740c88d5660c4ff7eb3f46fa3f1248657e354decc481";
    }
    
    @Override
