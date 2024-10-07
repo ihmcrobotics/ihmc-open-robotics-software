@@ -34,6 +34,7 @@ public class SCS2LogLocomotionData
    private YoPoint2D capturePoint;
    private final double plotTimeResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
+   private SideDependentList<ArrayList<YoDouble>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private boolean requestStopProcessing = false;
 
    public void setup(LogSession logSession)
@@ -67,6 +68,20 @@ public class SCS2LogLocomotionData
       for (RobotSide side : RobotSide.values)
          if (rootRegistry.findVariable(feetManager + "%1$sFootControlModule.%1$sFootCurrentState".formatted(side.getLowerCaseName())) instanceof YoEnum<?> yoEnum)
             footStates.set(side, new SCS2LogDataFootState(side, new SCS2LogDataEnum<>(yoEnum, ConstraintType.class), rootRegistry));
+
+      String sensorProcessing = "root.main.DRCEstimatorThread.NadiaSensorReader.SensorProcessing.";
+      // TODO: These are specific to the robot version. How would you know these generally?
+      String[] armJointNames = new String[] { "SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z" };
+      for (RobotSide side : RobotSide.values)
+      {
+         for (String armJoint : armJointNames)
+         {
+            if (rootRegistry.findVariable(sensorProcessing + "raw_q_%s_%s".formatted(side.getSideNameInAllCaps(), armJoint)) instanceof YoDouble yoDouble)
+            {
+               armJointPositions.get(side).add(yoDouble);
+            }
+         }
+      }
 
       logSession.addAfterReadCallback(this::afterRead);
    }
