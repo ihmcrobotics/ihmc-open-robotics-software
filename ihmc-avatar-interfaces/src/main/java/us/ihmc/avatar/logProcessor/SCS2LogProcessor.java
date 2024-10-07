@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-public class SCS2LogDataProcessor
+public class SCS2LogProcessor
 {
    private Path logPath;
    private Path jsonPath;
@@ -28,7 +28,7 @@ public class SCS2LogDataProcessor
    private int numberOfComsStat = -1;
    private int workingCounterMismatchStat = -1;
 
-   public SCS2LogDataProcessor()
+   public SCS2LogProcessor()
    {
       this(System.getProperty("log.path") == null ? null : Paths.get(System.getProperty("log.path")));
 
@@ -39,7 +39,7 @@ public class SCS2LogDataProcessor
    }
 
    /** @param logPath Path to the log folder containing robotData.log */
-   public SCS2LogDataProcessor(Path logPath)
+   public SCS2LogProcessor(Path logPath)
    {
       this.logPath = logPath;
 
@@ -215,7 +215,7 @@ public class SCS2LogDataProcessor
 
    public static void main(String[] args)
    {
-      SCS2LogDataProcessor logDataProcessor = new SCS2LogDataProcessor();
+      SCS2LogProcessor logDataProcessor = new SCS2LogProcessor();
       logDataProcessor.runLogSession(logDataProcessor::processLog);
    }
 }

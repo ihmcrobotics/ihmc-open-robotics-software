@@ -9,10 +9,10 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 
-public class SCS2LogDataFootState
+public class SCS2LogFootState
 {
    private final RobotSide side;
-   private final SCS2LogDataEnum<ConstraintType> yoFootState;
+   private final SCS2LogEnum<ConstraintType> yoFootState;
    private boolean newStep = false;
    private double fullSupportTime = Double.NaN;
    private YoVariable footPolygon_0_x ;
@@ -23,10 +23,10 @@ public class SCS2LogDataFootState
    private YoVariable footPolygon_2_y ;
    private YoVariable footPolygon_3_x ;
    private YoVariable footPolygon_3_y ;
-   private final ArrayList<SCS2LogDataFootstep> footsteps = new ArrayList<>();
+   private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    private final double comPlotProximityToFootsteps = 5.0;
 
-   public SCS2LogDataFootState(RobotSide side, SCS2LogDataEnum<ConstraintType> yoFootState, YoRegistry rootRegistry)
+   public SCS2LogFootState(RobotSide side, SCS2LogEnum<ConstraintType> yoFootState, YoRegistry rootRegistry)
    {
       this.side = side;
       this.yoFootState = yoFootState;
@@ -55,14 +55,14 @@ public class SCS2LogDataFootState
       if (newStep && currentTime - fullSupportTime > 0.1)
       {
          LogTools.info("%s step at %s".formatted(side.getPascalCaseName(), new Point2D(footPolygon_0_x.getValueAsDouble(), footPolygon_0_y.getValueAsDouble())));
-         footsteps.add(new SCS2LogDataFootstep(side, new double[] {footPolygon_0_x.getValueAsDouble(),
-                                                                   footPolygon_1_x.getValueAsDouble(),
-                                                                   footPolygon_2_x.getValueAsDouble(),
-                                                                   footPolygon_3_x.getValueAsDouble(),
-                                                                   footPolygon_0_y.getValueAsDouble(),
-                                                                   footPolygon_1_y.getValueAsDouble(),
-                                                                   footPolygon_2_y.getValueAsDouble(),
-                                                                   footPolygon_3_y.getValueAsDouble()}));
+         footsteps.add(new SCS2LogFootstep(side, new double[] {footPolygon_0_x.getValueAsDouble(),
+                                                               footPolygon_1_x.getValueAsDouble(),
+                                                               footPolygon_2_x.getValueAsDouble(),
+                                                               footPolygon_3_x.getValueAsDouble(),
+                                                               footPolygon_0_y.getValueAsDouble(),
+                                                               footPolygon_1_y.getValueAsDouble(),
+                                                               footPolygon_2_y.getValueAsDouble(),
+                                                               footPolygon_3_y.getValueAsDouble()}));
          newStep = false;
       }
 
@@ -70,7 +70,7 @@ public class SCS2LogDataFootState
       return !Double.isNaN(fullSupportTime) && currentTime - fullSupportTime < comPlotProximityToFootsteps;
    }
 
-   public ArrayList<SCS2LogDataFootstep> getFootsteps()
+   public ArrayList<SCS2LogFootstep> getFootsteps()
    {
       return footsteps;
    }

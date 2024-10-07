@@ -25,9 +25,9 @@ public class SCS2LogLocomotionData
    private int initialWorkingCounterMismatch = -1;
    private YoInteger workingCounterMismatch;
    private YoBoolean isRobotFalling;
-   private SCS2LogDataEnum<HighLevelControllerName> controllerState;
+   private SCS2LogEnum<HighLevelControllerName> controllerState;
    private final Point2D robotStartLocation = new Point2D(Double.NaN, Double.NaN);
-   private final SideDependentList<SCS2LogDataFootState> footStates = new SideDependentList<>();
+   private final SideDependentList<SCS2LogFootState> footStates = new SideDependentList<>();
    private final ArrayList<SCS2LogWalk> logWalks = new ArrayList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
    private YoPoint3D centerOfMass;
@@ -49,7 +49,7 @@ public class SCS2LogLocomotionData
       String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
 
       if (rootRegistry.findVariable(highLevelController + "highLevelControllerNameCurrentState") instanceof YoEnum<?> yoEnum)
-         controllerState = new SCS2LogDataEnum<>(yoEnum, HighLevelControllerName.class);
+         controllerState = new SCS2LogEnum<>(yoEnum, HighLevelControllerName.class);
 
       if (rootRegistry.findVariable(highLevelController + "HighLevelHumanoidControllerToolbox.WalkingFailureDetectionControlModule.isRobotFalling") instanceof YoBoolean yoBoolean)
          isRobotFalling = yoBoolean;
@@ -67,7 +67,7 @@ public class SCS2LogLocomotionData
       String feetManager = highLevelController + "HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.";
       for (RobotSide side : RobotSide.values)
          if (rootRegistry.findVariable(feetManager + "%1$sFootControlModule.%1$sFootCurrentState".formatted(side.getLowerCaseName())) instanceof YoEnum<?> yoEnum)
-            footStates.set(side, new SCS2LogDataFootState(side, new SCS2LogDataEnum<>(yoEnum, ConstraintType.class), rootRegistry));
+            footStates.set(side, new SCS2LogFootState(side, new SCS2LogEnum<>(yoEnum, ConstraintType.class), rootRegistry));
 
       String sensorProcessing = "root.main.DRCEstimatorThread.NadiaSensorReader.SensorProcessing.";
       // TODO: These are specific to the robot version. How would you know these generally?
