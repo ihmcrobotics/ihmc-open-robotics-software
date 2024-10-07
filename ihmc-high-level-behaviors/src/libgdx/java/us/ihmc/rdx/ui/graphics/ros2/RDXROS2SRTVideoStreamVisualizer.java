@@ -70,7 +70,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    @Override
    public void renderImGuiWidgets()
    {
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(alphaFilteredDelayMS, 20.0f, 200.0f));
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor(alphaFilteredDelayMS, 50.0f, 200.0f));
       delayPlot.setWidth((int) (ImGui.getColumnWidth() - ImGuiTools.calcTextSizeX(DELAY_PLOT_TEXT)));
       delayPlot.render(alphaFilteredDelayMS);
       ImGui.popStyleColor();

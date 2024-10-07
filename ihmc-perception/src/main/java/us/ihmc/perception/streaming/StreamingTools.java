@@ -24,8 +24,8 @@ public class StreamingTools
    private static final Map<String, String> LIVE_SRT_OPTIONS
          = Map.ofEntries(entry("transtype", "live"),
                          entry("smoother", "live"),
-                         entry("rcvlatency", "20"),
-                         entry("peerlatency", "20"),     // 20ms of buffer delay for packet loss correction
+                         entry("rcvlatency", "50"),
+                         entry("peerlatency", "50"),     // 50ms of buffer delay for packet loss correction
                          entry("mss", "1360"),           // Max packet size of MPEG-TS
                          entry("payload_size", "1316")); // Payload size of MPEG-TS
 
