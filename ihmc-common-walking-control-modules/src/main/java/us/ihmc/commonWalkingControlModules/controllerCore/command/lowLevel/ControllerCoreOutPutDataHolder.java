@@ -1,15 +1,18 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadOnly
@@ -36,8 +39,12 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    private boolean hasLowLevelOneDoFJointControllerCoreOutputDataHolder = false;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointControllerCoreOutputDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   public ControllerCoreOutPutDataHolder()
+   private boolean hasJointDesiredOutputList = false;
+   private final JointDesiredOutputListBasics jointDesiredOutputList;
+
+   public ControllerCoreOutPutDataHolder(OneDoFJointBasics[] controlledOneDoFJoints)
    {
+      jointDesiredOutputList = new JointDesiredOutputList(controlledOneDoFJoints);
       clear();
    }
 
@@ -51,6 +58,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       hasCenterOfPressure = false;
       hasDesiredExternalWrench = false;
       hasRootJointDesiredConfiguration = false;
+      hasJointDesiredOutputList = false;
 
       angularMomentum.setToNaN();
       angularMomentumRate.setToNaN();
@@ -61,7 +69,9 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       desiredExternalWrenchHolder.clear();
       rootJointDesiredConfigurationData.clear();
       lowLevelOneDoFJointControllerCoreOutputDataHolder.clear();
+      jointDesiredOutputList.clear();
    }
+
    public void setControllerCoreOutputDataHolder(ControllerCoreOutput controllerCoreOutput)
    {
       setDesiredCenterOfPressureDataHolder(controllerCoreOutput.getCenterOfPressureData());
@@ -73,7 +83,8 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       setLinearMomentum(controllerCoreOutput.getLinearMomentum());
       setLinearMomentumRate(controllerCoreOutput.getLinearMomentumRate());
       setRootJointDesiredConfigurationData(controllerCoreOutput.getRootJointDesiredConfigurationData());
-      setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolderPreferred());
+      setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+      setJointDesiredOutputList(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
    public void setDesiredCenterOfPressureDataHolder(CenterOfPressureDataHolder centerOfPressureDataHolder)
@@ -163,15 +174,21 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       return rootJointDesiredConfigurationData;
    }
 
-   @Override
-   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
-   {
-      return null;
-   }
+
 
    public void setLowLevelOneDoFJointControllerCoreOutputDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointControllerCoreOutputDataHolder)
    {
       this.lowLevelOneDoFJointControllerCoreOutputDataHolder.overwriteWith(lowLevelOneDoFJointControllerCoreOutputDataHolder);
+   }
+
+   public void setJointDesiredOutputList(JointDesiredOutputListReadOnly jointDesiredOutputList)
+   {
+      this.jointDesiredOutputList.overwriteWith(jointDesiredOutputList);
+   }
+   @Override
+   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+   {
+      return jointDesiredOutputList;
    }
 
    //TODO this will be replace the getLowLevelOneDoFJointDesiredDataHolderPreferered. This one returns lowLevelOneDoFJointDesiredDataHolder
@@ -199,6 +216,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       this.angularMomentumRate.setIncludingFrame(other.angularMomentumRate);
       this.rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
       this.lowLevelOneDoFJointControllerCoreOutputDataHolder.set(other.lowLevelOneDoFJointControllerCoreOutputDataHolder);
+      this.jointDesiredOutputList.overwriteWith(other.jointDesiredOutputList);
    }
 
    @Override
@@ -211,7 +229,6 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       {
          return true;
       }
-
       else if (obj instanceof ControllerCoreOutPutDataHolder other)
       {
          if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
@@ -228,7 +245,11 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
             return false;
          if (!rootJointDesiredConfigurationData.equals(other.rootJointDesiredConfigurationData))
             return false;
-         return lowLevelOneDoFJointControllerCoreOutputDataHolder.equals(other.lowLevelOneDoFJointControllerCoreOutputDataHolder);
+         if( !lowLevelOneDoFJointControllerCoreOutputDataHolder.equals(other.lowLevelOneDoFJointControllerCoreOutputDataHolder))
+            return false;
+         if(!jointDesiredOutputList.equals(other.jointDesiredOutputList))
+            return false;
+         return true;
       }
       else
       {

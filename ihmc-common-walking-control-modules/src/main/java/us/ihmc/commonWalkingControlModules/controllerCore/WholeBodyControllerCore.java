@@ -36,9 +36,8 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    private final ControllerCoreOutput controllerCoreOutput;
    private final RootJointDesiredConfigurationDataBasics rootJointDesiredConfigurationData;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
-   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
 
-   private OneDoFJointBasics[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreFeedbackControlTimer = new ExecutionTimer("controllerCoreFeedbackControlTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmissionTimer = new ExecutionTimer("controllerCoreSubmissionTimer", 1.0, registry);
@@ -136,7 +135,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       feedbackController.registerControllers(template);
    }
 
-   public void     initialize()
+   public void initialize()
    {
       feedbackController.initialize();
       if (inverseDynamicsSolver != null)
@@ -217,7 +216,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    public void compute()
    {
       controllerCoreComputeTimer.startMeasurement();
-   // TODO This will be moved to the WholeBodyControllCoreThread
+      // TODO This will be moved to the WholeBodyControllCoreThread
       computeFeedbackControllers();
 
       switch (currentMode.getEnumValue())

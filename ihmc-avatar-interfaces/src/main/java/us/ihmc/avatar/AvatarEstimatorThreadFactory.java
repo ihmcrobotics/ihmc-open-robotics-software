@@ -609,7 +609,7 @@ public class AvatarEstimatorThreadFactory
    public ControllerCoreOutPutDataHolder getControllerCoreOutPutDataHolder()
    {
       if(!controllerCoreOutputDataHolderField.hasValue())
-         controllerCoreOutputDataHolderField.set(new ControllerCoreOutPutDataHolder());
+         controllerCoreOutputDataHolderField.set(new ControllerCoreOutPutDataHolder(getControllableOneDoFJoints()));
       return controllerCoreOutputDataHolderField.get();
    }
 

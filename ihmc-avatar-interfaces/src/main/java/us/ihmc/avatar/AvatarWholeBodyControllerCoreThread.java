@@ -77,7 +77,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
-      ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
+      ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForWholeBodyControllerCore);
@@ -108,6 +108,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                   sensorInformation,
                                                                                   wholeBodyControllerCoreDesiredJointDataHolder,
                                                                                   desiredJointDataHolder,
+                                                                                  controllerCoreOutPutDataHolder,
                                                                                   registry,
                                                                                   kinematicSimulation,
                                                                                   arrayOfJointsToIgnore);
@@ -130,6 +131,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                           HumanoidRobotSensorInformation sensorInformation,
                                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                                          ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
                                                                           YoRegistry registry,
                                                                           boolean kinematicsSimulation,
                                                                           JointBasics... jointToIgnore)
@@ -153,6 +155,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
                                                                                                                 wholeBodyControllerCoreOutput,
                                                                                                                 lowLevelControllerOutput,
+                                                                                                                controllerCoreOutPutDataHolder,
                                                                                                                 jointToIgnore);
 
       scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -25,11 +26,13 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 //   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final JointBasics[] controlledJoint;
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
+   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
 
    public HumanoidWholeBodyControllerCoreManager(FullHumanoidRobotModel fullRobotModel,
                                                  JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                 ControllerCoreOutPutDataHolder controllerCoreOutputDataHolder,
                                                  JointBasics... jointsToIgnore)
    {
 
@@ -37,6 +40,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       this.lowLevelControllerOutput = lowLevelControllerOutput;
 //      this.controllerToolbox = controllerToolbox;
       this.wholeBodyControllerCoreOutput = wholeBodyControllerCoreOutput;
+      this.controllerCoreOutPutDataHolder = controllerCoreOutputDataHolder;
 
       controllerFactoryHelper = new HighLevelControllerFactoryHelper();
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
@@ -94,7 +98,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    {
       // TODO should replace the output of the WholeBodyControllerCore Outputs from the ControllerThread.
       // JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
-      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = wholeBodyControllerCoreOutput;
+//      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = wholeBodyControllerCoreOutput;
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutPutDataHolder.getLowLevelOneDoFJointDesiredDataHolder();
 //
 //      for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
 //      {

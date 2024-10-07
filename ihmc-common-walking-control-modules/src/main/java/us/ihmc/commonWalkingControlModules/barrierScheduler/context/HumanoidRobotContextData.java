@@ -103,7 +103,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
       sensorDataContext = new SensorDataContext();
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder();
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
+      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(null);
    }
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
@@ -137,7 +137,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
+      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(fullRobotModel.getControllableOneDoFJoints());
    }
 
    public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
@@ -150,7 +150,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       sensorDataContext = new SensorDataContext(joints);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder();
+      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(joints.toArray(new OneDoFJointBasics[0]));
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
