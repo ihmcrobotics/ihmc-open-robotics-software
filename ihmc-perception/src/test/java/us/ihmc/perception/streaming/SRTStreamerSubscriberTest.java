@@ -171,6 +171,48 @@ public class SRTStreamerSubscriberTest
    }
 
    @Test
+   public void testStreamerConnectionTimeout() throws InterruptedException
+   {
+      InetSocketAddress localAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);
+      Throttler throttler = new Throttler();
+      throttler.setFrequency(FPS);
+
+      // Initialize the streamer
+      SRTVideoStreamer streamer = new SRTVideoStreamer(localAddress);
+      streamer.initialize(sampleImage.cols(), sampleImage.rows(), AV_PIX_FMT_BGR24);
+
+      // In a separate thread, wait for the receiver to connect
+      Thread streamerConnectThread = ThreadTools.startAThread(() ->
+      {
+         // Send 1 second of video
+         for (int i = 0; i < 1 * FPS; ++i)
+         {
+            throttler.waitAndRun();
+            streamer.sendFrame(sampleImage, Instant.now());
+         }
+      }, "SRTStreamerTestConnection");
+
+      // Initialize a receiver and connect to streamer
+      SRTVideoReceiver receiver = new SRTVideoReceiver(AV_PIX_FMT_BGR24);
+      receiver.connect(localAddress, EXTRA_LONG_TIMEOUT);
+
+      // Should be communicating now
+      assertEquals(1, streamer.connectedCallerCount());
+
+      // Wait until we stop sending a video
+      streamerConnectThread.join();
+
+      // Wait until timeout occurs
+      MissingThreadTools.sleep(3.0);
+
+      // We should not be connected anymore
+      assertEquals(0, streamer.connectedCallerCount());
+
+      streamer.destroy();
+      receiver.destroy();
+   }
+
+   @Test
    public void testSideData() throws InterruptedException
    {
       InetSocketAddress localAddress = InetSocketAddress.createUnresolved("127.0.0.1", 60001);

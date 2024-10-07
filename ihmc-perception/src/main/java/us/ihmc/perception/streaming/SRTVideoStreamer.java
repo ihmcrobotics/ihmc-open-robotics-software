@@ -194,7 +194,7 @@ public class SRTVideoStreamer
 
    public int connectedCallerCount()
    {
-      return callers.size();
+      return (int) callers.stream().filter(SRTStreamWriter::isConnected).count();
    }
 
    public boolean isInitialized()
