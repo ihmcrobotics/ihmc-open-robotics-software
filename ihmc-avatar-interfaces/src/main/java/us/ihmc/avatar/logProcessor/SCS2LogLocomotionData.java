@@ -34,7 +34,7 @@ public class SCS2LogLocomotionData
    private YoPoint2D capturePoint;
    private final double plotTimeResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
-   private SideDependentList<ArrayList<YoDouble>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private SideDependentList<ArrayList<SCS2LogJointTracker>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private boolean requestStopProcessing = false;
 
    public void setup(LogSession logSession)
@@ -78,7 +78,7 @@ public class SCS2LogLocomotionData
          {
             if (rootRegistry.findVariable(sensorProcessing + "raw_q_%s_%s".formatted(side.getSideNameInAllCaps(), armJoint)) instanceof YoDouble yoDouble)
             {
-               armJointPositions.get(side).add(yoDouble);
+               armJointPositions.get(side).add(new SCS2LogJointTracker(yoDouble));
             }
          }
       }
@@ -144,6 +144,8 @@ public class SCS2LogLocomotionData
             lastCenterOfMass.set(centerOfMass);
             lastCoMPlotTime = currentTime;
          }
+
+
       }
 
       // TODO:
