@@ -315,7 +315,7 @@ public class RawImage
    }
 
    /**
-    * Packs the {@link ImageMessage} with the {@link RawImage} mete data,
+    * Packs the {@link ImageMessage} with the {@link RawImage} meta data,
     * EXCEPT:
     * <ul>
     * <li> the CameraModel, </li>
