@@ -213,6 +213,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       return controllerCoreCommand;
    }
 
+
    @Override
    public void set(HumanoidRobotContextData other)
    {
@@ -237,6 +238,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       wholeBodyControllerCoreDesiredOutPutList.set(src.wholeBodyControllerCoreDesiredOutPutList);
       sensorDataContext.set(src.sensorDataContext);
       controllerCoreOutPutDataHolder.set(src.controllerCoreOutPutDataHolder);
+      controllerCoreCommand.setControllerCoreMode(src.controllerCoreCommand.getControllerCoreMode());
       controllerCoreCommand.set(src.controllerCoreCommand);
    }
 

@@ -94,6 +94,13 @@ public class CrossRobotCommandResolver
       resolveFeedbackControlCommandList(in.getFeedbackControlCommandList(), out.getFeedbackControlCommandList());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolder(), out.getLowLevelOneDoFJointDesiredDataHolder());
    }
+   public void resolveControllerCoreCommand(ControllerCoreCommand in, ControllerCoreCommand out)
+   {
+      out.clear();
+      out.setControllerCoreMode(in.getControllerCoreMode());
+      if(in.isReinitializationRequested())
+         out.requestReinitialization();
+   }
 
    public void resolveControllerCoreOutputDataHolder(ControllerCoreOutPutDataHolder in, ControllerCoreOutPutDataHolder out)
    {
@@ -214,6 +221,7 @@ public class CrossRobotCommandResolver
    public void resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
+      resolveControllerCoreCommand(in.getControllerCoreCommand(), out.getControllerCoreCommand());
       out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
 
@@ -279,6 +287,12 @@ public class CrossRobotCommandResolver
       out.clear();
       resolveInverseDynamicsCommandListInternal(in, out);
    }
+   public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandList out)
+   {
+      out.clear();
+      resolveInverseDynamicsCommandListInternal(in, out);
+   }
+
 
    public void resolveInverseKinematicsCommandList(InverseKinematicsCommandList in, InverseKinematicsCommandBuffer out)
    {
@@ -298,6 +312,77 @@ public class CrossRobotCommandResolver
       resolveFeedbackControlCommandListInternal(in, out);
    }
 
+   private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
+   {
+      out.setCommandId(in.getCommandId());
+
+      for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
+      {
+         InverseDynamicsCommand<?> commandToResolve = in.getCommand(commandIndex);
+         switch (commandToResolve.getCommandType())
+         {
+            case CENTER_OF_PRESSURE:
+               resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
+               break;
+            case CONTACT_WRENCH:
+               resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
+               break;
+            case EXTERNAL_WRENCH:
+               resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
+               break;
+            case OPTIMIZATION_SETTINGS:
+               resolveInverseDynamicsOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) commandToResolve,
+                                                                 out.addInverseDynamicsOptimizationSettingsCommand());
+               break;
+            case JOINT_ACCELERATION_INTEGRATION:
+               resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
+               break;
+            case JOINTSPACE:
+               if (commandToResolve instanceof JointspaceAccelerationCommand jointspaceAccelerationCommand)
+                  resolveJointspaceAccelerationCommand(jointspaceAccelerationCommand, out.addJointspaceAccelerationCommand());
+               else if (commandToResolve instanceof JointTorqueCommand jointTorqueCommand)
+                  resolveJointTorqueCommand(jointTorqueCommand, out.addJointTorqueCommand());
+               else
+                  throw new RuntimeException("Unknown " + JOINTSPACE + " command " + commandToResolve.getClass().getSimpleName());
+               break;
+            case MOMENTUM:
+               resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
+               break;
+            case MOMENTUM_COST:
+               resolveLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) commandToResolve, out.addLinearMomentumRateCostCommand());
+               break;
+            case PLANE_CONTACT_STATE:
+               resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
+               break;
+            case TASKSPACE:
+               resolveSpatialAccelerationCommand((SpatialAccelerationCommand) commandToResolve, out.addSpatialAccelerationCommand());
+               break;
+            case COMMAND_LIST:
+               resolveInverseDynamicsCommandListInternal((InverseDynamicsCommandList) commandToResolve, out);
+               break;
+            case PRIVILEGED_CONFIGURATION:
+               resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
+               break;
+            case PRIVILEGED_JOINTSPACE_COMMAND:
+               resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
+               break;
+            case LIMIT_REDUCTION:
+               resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+               break;
+            case QP_INPUT:
+               resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
+               break;
+            case QP_COST:
+               resolveQPCostCommand((QPCostCommand) commandToResolve, out.addQPCostCommand());
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+         }
+      }
+   }
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
       out.setCommandId(in.getCommandId());
