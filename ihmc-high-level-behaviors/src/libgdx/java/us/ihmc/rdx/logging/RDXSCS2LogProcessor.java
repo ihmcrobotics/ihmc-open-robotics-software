@@ -76,8 +76,14 @@ public class RDXSCS2LogProcessor
                   {
                      if (ImGui.button(labels.get("Process All")))
                      {
+                        refreshDirectoryListing();
                         autoProcessIndex = 0;
                      }
+                  }
+
+                  if (ImGui.button(labels.get("Plot Linear Traversals")))
+                  {
+                     
                   }
                }
                ImGui.endDisabled();
@@ -212,6 +218,7 @@ public class RDXSCS2LogProcessor
    private void refreshDirectoryListing()
    {
       logDirectories.clear();
+      logProcessors.clear();
       try (DirectoryStream<Path> stream = Files.newDirectoryStream(directoryOfLogsPath))
       {
          for (Path path : stream)

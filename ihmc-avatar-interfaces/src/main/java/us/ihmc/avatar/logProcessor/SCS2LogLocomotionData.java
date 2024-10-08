@@ -10,6 +10,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
+import us.ihmc.yoVariables.euclid.YoPose3D;
+import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,6 +32,7 @@ public class SCS2LogLocomotionData
    private final SideDependentList<SCS2LogFootState> footStates = new SideDependentList<>();
    private final ArrayList<SCS2LogWalk> logWalks = new ArrayList<>();
    private final Point2D lastCenterOfMass = new Point2D(Double.NaN, Double.NaN);
+   private YoPose3D pelvisPose;
    private YoPoint3D centerOfMass;
    private YoPoint2D capturePoint;
    private final double plotTimeResolution = 0.1;
@@ -53,6 +56,17 @@ public class SCS2LogLocomotionData
 
       if (rootRegistry.findVariable(highLevelController + "HighLevelHumanoidControllerToolbox.WalkingFailureDetectionControlModule.isRobotFalling") instanceof YoBoolean yoBoolean)
          isRobotFalling = yoBoolean;
+
+      // TODO: These are specific to nadia, how to make general?
+      if (rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_x") instanceof YoDouble xVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_y") instanceof YoDouble yVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_z") instanceof YoDouble zVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_qx") instanceof YoDouble qxVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_qy") instanceof YoDouble qyVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_qz") instanceof YoDouble qzVariable
+       && rootRegistry.findVariable("root.nadia.q_PELVIS_LINK_qs") instanceof YoDouble qsVariable)
+         pelvisPose = new YoPose3D(new YoPoint3D(xVariable, yVariable, zVariable),
+                                   new YoQuaternion(qxVariable, qyVariable, qzVariable, qsVariable));
 
       String momentumRateControl = highLevelController + "WalkingControllerState.LinearMomentumRateControlModule.";
       if (rootRegistry.findVariable(momentumRateControl + "centerOfMassX") instanceof YoDouble xVariable
@@ -133,25 +147,23 @@ public class SCS2LogLocomotionData
 
          if (lastCenterOfMass.containsNaN())
          {
-            logWalk.getComs().add().set(centerOfMass);
-            lastCenterOfMass.set(centerOfMass);
-            lastCoMPlotTime = currentTime;
+            recordEntry(currentTime, logWalk);
          }
          else if (centerOfMass.distanceXY(lastCenterOfMass) > 0.001 && currentTime - lastCoMPlotTime > plotTimeResolution)
          {
-            logWalk.getComs().add().set(centerOfMass);
-            logWalk.getIcps().add().set(capturePoint);
-            lastCenterOfMass.set(centerOfMass);
-            lastCoMPlotTime = currentTime;
+            recordEntry(currentTime, logWalk);
          }
-
-
       }
+   }
 
-      // TODO:
-      // # Runs of action (split by 30 seconds of inactivity)
-      // Timestamps where runs start
-      // Arm motions
+   private void recordEntry(double currentTime, SCS2LogWalk logWalk)
+   {
+      logWalk.getTimes().add(currentTime);
+      logWalk.getPelvisPoses().add().set(pelvisPose);
+      logWalk.getComs().add().set(centerOfMass);
+      logWalk.getIcps().add().set(capturePoint);
+      lastCenterOfMass.set(centerOfMass);
+      lastCoMPlotTime = currentTime;
    }
 
    public void writeJSON(ObjectNode rootNode)
