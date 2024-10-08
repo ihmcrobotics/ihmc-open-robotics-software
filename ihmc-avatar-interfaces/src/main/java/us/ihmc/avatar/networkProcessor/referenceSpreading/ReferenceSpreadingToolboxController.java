@@ -104,9 +104,11 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
       List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
 
+//      todo: Add proper way of importing the CSV file.
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
-      String filePath = demoDirectory + "/testCSV.csv";
+//      String filePath = demoDirectory + "/testCSV.csv";
+      String filePath = demoDirectory + "/boxPickup.csv";
 
       stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
