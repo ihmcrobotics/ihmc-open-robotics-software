@@ -260,6 +260,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
    private void unsubscribe()
    {
+      colorChannel.unsubscribe();
+      depthChannel.unsubscribe();
       subscribed = false;
    }
 
