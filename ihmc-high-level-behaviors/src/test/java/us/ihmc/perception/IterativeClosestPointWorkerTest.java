@@ -41,12 +41,6 @@ public class IterativeClosestPointWorkerTest
 
       // test slightly undersized box with just translation error
       testWithDifferentBoxes(icp, 0.9f, actualBoxDimensions.getX32(), actualBoxDimensions.getY32(), actualBoxDimensions.getZ32(), new Pose3D(), translationError, new Quaternion(), random);
-
-      // test medium undersized box with just translation error
-//      testWithDifferentBoxes(icp, 0.75f, actualBoxDimensions.getX32(), actualBoxDimensions.getY32(), actualBoxDimensions.getZ32(), new Pose3D(), translationError, new Quaternion(), random);
-
-      // test very undersized box with just translation error
-//      testWithDifferentBoxes(icp, 0.5f, actualBoxDimensions.getX32(), actualBoxDimensions.getY32(), actualBoxDimensions.getZ32(), new Pose3D(), translationError, new Quaternion(), random);
    }
 
    @Test
@@ -68,9 +62,6 @@ public class IterativeClosestPointWorkerTest
 
       // test slightly undersized point cloud
       testWithDifferentBoxesAndRandomError(icp, 0.95f, actualBoxDepth, actualBoxWidth, actualBoxHeight, random);
-
-      // test with too small point cloud
-//      testWithDifferentBoxesAndRandomError(icp, 0.5f, actualBoxDepth, actualBoxWidth, actualBoxHeight, random);
    }
 
    private void testWithDifferentBoxesAndRandomError(IterativeClosestPointWorker icp,
