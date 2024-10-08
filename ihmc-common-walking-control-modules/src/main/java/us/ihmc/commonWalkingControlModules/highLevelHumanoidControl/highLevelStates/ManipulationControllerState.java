@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -505,9 +506,19 @@ public class ManipulationControllerState extends HighLevelControllerState
          {
             SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
+            WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
+            {
+               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            }
+            else
+            {
+               LogTools.info("Hybrid message with FeedForward activated");
+               feedForwardCommand.setSequenceId(command.getSequenceId());
+               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
+            }
          }
       }
 

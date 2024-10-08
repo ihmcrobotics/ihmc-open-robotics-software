@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -378,6 +379,26 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
       }
       else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      { // Otherwise execute in TASKSPACE mode
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+         hold();
+      }
+   }
+
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand, WrenchTrajectoryControllerCommand feedForwardCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+      }
+      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, initialJointPositions))
       { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
       }

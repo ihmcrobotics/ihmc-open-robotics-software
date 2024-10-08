@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,6 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
@@ -93,6 +96,10 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
+
+   TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
+   RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
+   SpatialVector desiredFeedForwardSpatialVector;
 
    private final BooleanProvider useBaseFrameForControl;
 
@@ -325,6 +332,11 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
       updateFunctionGenerators();
+
+      if (!feedForwardTrajectoryList.isEmpty())
+      {
+         feedForwardAcceleration.set(feedForwardTrajectoryList.get(trajectoryGenerator.getCurrentWaypointIndex()).getLinearPart());
+      }
 
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -659,6 +671,16 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       {
          return pointQueue.peekLast().getTime();
       }
+   }
+
+   public TDoubleArrayList getFeedForwardTrajectoryTimes()
+   {
+      return feedForwardTrajectoryTimes;
+   }
+
+   public RecyclingArrayList<SpatialVector> getFeedForwardTrajectoryList()
+   {
+      return feedForwardTrajectoryList;
    }
 
    public void clear()

@@ -27,6 +27,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
@@ -229,10 +231,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerImpedanceEnabled", fbToolbox.getRegistry());
       isImpedanceEnabled.set(false);
 
-      yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", controlFrame, parentRegistry);
-      yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", controlFrame, parentRegistry);
-      yoLinearAcceleration = new YoFrameVector3D(endEffector.getName() + "positionAcceleration", controlFrame, parentRegistry);
-      yoAngularAcceleration = new YoFrameVector3D(endEffector.getName() + "orientationAcceleration", controlFrame, parentRegistry);
+      yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", worldFrame, parentRegistry);
+      yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", worldFrame, parentRegistry);
+      yoLinearAcceleration = new YoFrameVector3D(endEffector.getName() + "positionAcceleration", worldFrame, parentRegistry);
+      yoAngularAcceleration = new YoFrameVector3D(endEffector.getName() + "orientationAcceleration", worldFrame, parentRegistry);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled, true);
@@ -507,10 +509,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (computeIntegralTerm)
          computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
 
-      yoPositionFeedback.set(linearProportionalFeedback);
-      yoPositionFeedback.add(linearDerivativeFeedback);
-      yoOrientationFeedback.set(angularProportionalFeedback);
-      yoOrientationFeedback.add(angularDerivativeFeedback);
+      updateFeedForward();
 
       if (isImpedanceEnabled())
       {
@@ -580,8 +579,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       addCoriolisAcceleration(desiredLinearAcceleration);
 
+      desiredLinearAcceleration.changeFrame(worldFrame);
+      desiredAngularAcceleration.changeFrame(worldFrame);
       yoLinearAcceleration.set(desiredLinearAcceleration);
       yoAngularAcceleration.set(desiredAngularAcceleration);
+      desiredLinearAcceleration.changeFrame(controlFrame);
+      desiredAngularAcceleration.changeFrame(controlFrame);
 
       inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
    }
@@ -1122,6 +1125,22 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
       CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, inverseInertiaMatrix);
+   }
+
+   private void updateFeedForward()
+   {
+      linearProportionalFeedback.changeFrame(worldFrame);
+      angularProportionalFeedback.changeFrame(worldFrame);
+      linearDerivativeFeedback.changeFrame(worldFrame);
+      angularDerivativeFeedback.changeFrame(worldFrame);
+      yoPositionFeedback.set(linearProportionalFeedback);
+      yoPositionFeedback.add(linearDerivativeFeedback);
+      yoOrientationFeedback.set(angularProportionalFeedback);
+      yoOrientationFeedback.add(angularDerivativeFeedback);
+      linearProportionalFeedback.changeFrame(controlFrame);
+      angularProportionalFeedback.changeFrame(controlFrame);
+      linearDerivativeFeedback.changeFrame(controlFrame);
+      angularDerivativeFeedback.changeFrame(controlFrame);
    }
 
    @Override

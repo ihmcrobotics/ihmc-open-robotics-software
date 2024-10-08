@@ -37,11 +37,16 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
             * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
             */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_message_;
+   /**
+            * The feedforward taskspace trajectory information.
+            */
+   public controller_msgs.msg.dds.WrenchTrajectoryMessage feedforward_taskspace_trajectory_message_;
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       taskspace_trajectory_message_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
+      feedforward_taskspace_trajectory_message_ = new controller_msgs.msg.dds.WrenchTrajectoryMessage();
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage other)
@@ -60,6 +65,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
+      controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.staticCopy(other.feedforward_taskspace_trajectory_message_, feedforward_taskspace_trajectory_message_);
    }
 
    /**
@@ -129,6 +135,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    }
 
 
+   /**
+            * The feedforward taskspace trajectory information.
+            */
+   public controller_msgs.msg.dds.WrenchTrajectoryMessage getFeedforwardTaskspaceTrajectoryMessage()
+   {
+      return feedforward_taskspace_trajectory_message_;
+   }
+
+
    public static Supplier<HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType> getPubSubType()
    {
       return HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType::new;
@@ -154,6 +169,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       if (!this.taskspace_trajectory_message_.epsilonEquals(other.taskspace_trajectory_message_, epsilon)) return false;
       if (!this.jointspace_trajectory_message_.epsilonEquals(other.jointspace_trajectory_message_, epsilon)) return false;
+      if (!this.feedforward_taskspace_trajectory_message_.epsilonEquals(other.feedforward_taskspace_trajectory_message_, epsilon)) return false;
 
       return true;
    }
@@ -175,6 +191,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       if (!this.taskspace_trajectory_message_.equals(otherMyClass.taskspace_trajectory_message_)) return false;
       if (!this.jointspace_trajectory_message_.equals(otherMyClass.jointspace_trajectory_message_)) return false;
+      if (!this.feedforward_taskspace_trajectory_message_.equals(otherMyClass.feedforward_taskspace_trajectory_message_)) return false;
 
       return true;
    }
@@ -194,7 +211,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       builder.append("taskspace_trajectory_message=");
       builder.append(this.taskspace_trajectory_message_);      builder.append(", ");
       builder.append("jointspace_trajectory_message=");
-      builder.append(this.jointspace_trajectory_message_);
+      builder.append(this.jointspace_trajectory_message_);      builder.append(", ");
+      builder.append("feedforward_taskspace_trajectory_message=");
+      builder.append(this.feedforward_taskspace_trajectory_message_);
       builder.append("}");
       return builder.toString();
    }

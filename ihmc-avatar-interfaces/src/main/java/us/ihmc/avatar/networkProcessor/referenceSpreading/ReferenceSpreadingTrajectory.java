@@ -5,6 +5,8 @@ import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
@@ -12,6 +14,7 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -19,6 +22,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import geometry_msgs.msg.dds.Wrench;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -40,9 +46,11 @@ public class ReferenceSpreadingTrajectory
    private final TrajectoryRecordReplay trajectoryPlayer;
    private String filePath;
    private List<String> keyMatrix = new ArrayList<>();
+   FullHumanoidRobotModel fullRobotModel;
 
-   ReferenceSpreadingTrajectory(String filePath)
+   ReferenceSpreadingTrajectory(String filePath, FullHumanoidRobotModel fullRobotModel)
    {
+      this.fullRobotModel = fullRobotModel;
       this.filePath = filePath;
 
       trajectoryPlayer = new TrajectoryRecordReplay(filePath, 1, true);
@@ -71,6 +79,10 @@ public class ReferenceSpreadingTrajectory
       YawPitchRoll desiredOrientation = new YawPitchRoll();
       Vector3D desiredLinearVelocity = new Vector3D();
       Vector3D desiredAngularVelocity = new Vector3D();
+
+      WrenchTrajectoryMessage wrenchTrajectoryMessage = new WrenchTrajectoryMessage();
+      WrenchTrajectoryPointMessage wrenchTrajectoryPointMessage = new WrenchTrajectoryPointMessage();
+      Wrench desiredFeedForwardWrench = new Wrench();
 
       HashMap<String, Double> currentFrame = new HashMap<>();
       makeMap(trajectoryPlayer.play(true), currentFrame);
@@ -120,6 +132,18 @@ public class ReferenceSpreadingTrajectory
                                                                         desiredAngularVelocity);
             se3TrajectoryPointMessage.setSequenceId(frameIndex);
             se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
+
+            desiredFeedForwardWrench.getForce().set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackX"),
+                                                    currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackY"),
+                                                    currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackZ"));
+
+            desiredFeedForwardWrench.getTorque().set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackX"),
+                                                     currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackY"),
+                                                     currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackZ"));
+
+            wrenchTrajectoryPointMessage.setTime(currentTime - startTimeCSV + startTime);
+            wrenchTrajectoryPointMessage.getWrench().set(desiredFeedForwardWrench);
+            wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(wrenchTrajectoryPointMessage);
          }
          frameIndex++;
       }
@@ -130,6 +154,7 @@ public class ReferenceSpreadingTrajectory
       handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
       handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+      handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
       return handHybridTrajectoryMessage;
    }
 

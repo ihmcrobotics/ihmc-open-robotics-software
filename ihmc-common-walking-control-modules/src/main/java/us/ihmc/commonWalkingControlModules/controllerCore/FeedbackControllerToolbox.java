@@ -1130,7 +1130,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionGains;
       }
 
-      public YoSE3OffsetFrame getOrCreateSpatialFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      public YoSE3OffsetFrame  getOrCreateSpatialFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (spatialFeedbackControlFrame == null)
             spatialFeedbackControlFrame = new YoSE3OffsetFrame(namePrefix + "Spatial" + controlFrameNameSuffix,

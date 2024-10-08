@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -27,11 +28,11 @@ public class ReferenceSpreadingStateHelper
    ReferenceSpreadingTrajectory preImpactReference;
    DoubleProvider time;
 
-   public ReferenceSpreadingStateHelper(String filePath, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
+   public ReferenceSpreadingStateHelper(String filePath, FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
-      preImpactReference = new ReferenceSpreadingTrajectory(filePath);
+      preImpactReference = new ReferenceSpreadingTrajectory(filePath, fullRobotModel);
    }
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)

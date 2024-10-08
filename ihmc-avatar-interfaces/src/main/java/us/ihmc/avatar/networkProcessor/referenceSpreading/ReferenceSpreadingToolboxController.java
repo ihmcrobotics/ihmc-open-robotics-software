@@ -110,7 +110,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 //      String filePath = demoDirectory + "/testCSV.csv";
       String filePath = demoDirectory + "/boxPickup.csv";
 
-      stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, trajectoryMessagePublisher, registry);
+      stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, fullRobotModel, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
