@@ -75,7 +75,7 @@ public class RTPSCommunicationFactory
          String[] restrictionHostList = restrictionHostString.split("\\s*,\\s*");
          for (String restrictionHost : restrictionHostList)
          {
-            SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost).getInfo();
+            SubnetInfo restrictionSubnetInfo = new SubnetUtils(restrictionHost.trim()).getInfo();
             LogTools.debug("Restriction subnet info:\n{}", restrictionSubnetInfo);
             LogTools.info("Restriction address: {}", restrictionSubnetInfo.getAddress());
             LogTools.info("Restriction netmask: {}", restrictionSubnetInfo.getNetmask());
