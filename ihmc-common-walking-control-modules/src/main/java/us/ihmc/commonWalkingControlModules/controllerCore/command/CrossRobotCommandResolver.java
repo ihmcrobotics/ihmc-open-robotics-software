@@ -106,7 +106,7 @@ public class CrossRobotCommandResolver
       out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder(),
                                                   out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolder(), out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreDesiredDataHolder(), out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
 
    }
 

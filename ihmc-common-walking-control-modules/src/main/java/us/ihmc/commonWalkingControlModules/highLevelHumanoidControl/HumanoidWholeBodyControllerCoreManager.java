@@ -23,7 +23,6 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
    private final JointDesiredOutputListBasics wholeBodyControllerCoreOutput;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
-//   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final JointBasics[] controlledJoint;
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
    private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
@@ -97,18 +96,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private void copyJointDesiredsToJoints()
    {
       // TODO should replace the output of the WholeBodyControllerCore Outputs from the ControllerThread.
-      // JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
-//      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = wholeBodyControllerCoreOutput;
-      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutPutDataHolder.getLowLevelOneDoFJointDesiredDataHolder();
-//
-//      for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
-//      {
-//         OneDoFJointReadOnly controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
-//         JointDesiredOutputReadOnly lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
-//
-//         if (!lowLevelJointData.hasControlMode())
-//            throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
-//      }
+
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutPutDataHolder.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder();
 
 //      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);

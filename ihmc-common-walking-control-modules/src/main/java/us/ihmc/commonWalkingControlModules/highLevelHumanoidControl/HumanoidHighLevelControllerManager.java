@@ -336,14 +336,6 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
    private void reportControllerCoreOutputDataForWholeBodyControllerCore()
    {
-//      ControllerCoreOutput controllerCoreOutputDataHolder = stateMachine.getCurrentState().getControllerCoreOutput();
-//
-//      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
-//      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         controllerCoreOutPutDataHolder.getDesiredCenterOfPressureDataHolder().setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
-//      }
       controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
    }
 
