@@ -15,8 +15,8 @@ import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
@@ -34,6 +34,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    protected final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private ROS2Topic<ImageMessage> topic;
+   private ROS2Subscription<ImageMessage> imageMessageSubscription;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    protected final SwapReference<ImageMessage> imageMessageSwapReference = new SwapReference<>(ImageMessage::new);
@@ -72,7 +73,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
    public void subscribe(ROS2Node ros2Node, Object imageMessagesSyncObject)
    {
-      ros2Node.createSubscription(topic, subscriber -> {
+      if (imageMessageSubscription != null)
+         unsubscribe();
+
+      imageMessageSubscription = ros2Node.createSubscription(topic, subscriber -> {
          synchronized (imageMessagesSyncObject)
          {
             imageMessage.getData().resetQuick();
@@ -82,6 +86,15 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
             frequencyText.ping();
          }
       });
+   }
+
+   public void unsubscribe()
+   {
+      if (imageMessageSubscription != null)
+      {
+         imageMessageSubscription.remove();
+         imageMessageSubscription = null;
+      }
    }
 
    /**
