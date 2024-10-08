@@ -331,7 +331,7 @@ public class CrossRobotCommandResolver
                else if (commandToResolve instanceof JointTorqueCommand jointTorqueCommand)
                   resolveJointTorqueCommand(jointTorqueCommand, out.addJointTorqueCommand());
                else
-                  throw new RuntimeException("Unknown " + JOINTSPACE +  " command " + commandToResolve.getClass().getSimpleName());
+                  throw new RuntimeException("Unknown " + JOINTSPACE + " command " + commandToResolve.getClass().getSimpleName());
                break;
             case MOMENTUM:
                resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
@@ -359,6 +359,9 @@ public class CrossRobotCommandResolver
                break;
             case QP_INPUT:
                resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
+               break;
+            case QP_COST:
+               resolveQPCostCommand((QPCostCommand) commandToResolve, out.addQPCostCommand());
                break;
             default:
                throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
@@ -618,7 +621,7 @@ public class CrossRobotCommandResolver
       out.setCommandId(in.getCommandId());
       out.setMomentumRateHessian(in.getMomentumRateHessian());
       out.setMomentumRateGradient(in.getMomentumRateGradient());
-      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      out.setWeight(in.getWeight());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
@@ -630,6 +633,16 @@ public class CrossRobotCommandResolver
       out.getObjective().set(in.getObjective());
       out.getJacobian().set(in.getJacobian());
       out.setDoNullSpaceProjection(in.isNullspaceProjected());
+   }
+
+   public void resolveQPCostCommand(QPCostCommand in, QPCostCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.setWeight(in.getWeight());
+      out.setCostHessian(in.getCostHessian());
+      out.setCostGradient(in.getCostGradient());
+      out.setStateJacobian(in.getStateJacobian());
+      out.setStateObjective(in.getStateObjective());
    }
 
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
@@ -731,6 +744,8 @@ public class CrossRobotCommandResolver
          out.enable();
       else
          out.disable();
+
+      out.setNullspaceAlpha(in.getNullspaceAlpha());
    }
 
    public void resolvePrivilegedJointSpaceCommand(PrivilegedJointSpaceCommand in, PrivilegedJointSpaceCommand out)

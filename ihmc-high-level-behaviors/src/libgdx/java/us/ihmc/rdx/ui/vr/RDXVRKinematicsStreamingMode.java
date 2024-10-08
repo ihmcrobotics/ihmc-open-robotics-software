@@ -6,17 +6,14 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -24,7 +21,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -38,6 +37,7 @@ import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
@@ -46,29 +46,29 @@ import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static us.ihmc.communication.packets.MessageTools.toFrameId;
+import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRKinematicsStreamingMode
 {
-   private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
+   public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RetargetingParameters retargetingParameters;
@@ -87,41 +87,63 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
+   public long controllerLastPollTimeNanos;
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
-   private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
+   private Set<String> additionalTrackedSegments = new HashSet<>();
+   private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
+   private MutableReferenceFrame headsetReferenceFrame;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final Notification streamingDisabled = new Notification();
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
+   private final RDXVRContext vrContext;
+   private final ControllerStatusTracker controllerStatusTracker;
+   private final RDXManualFootstepPlacement footstepPlacer;
+   private boolean pausedForWalking = false;
+   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
+   private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
-   private ReferenceFrame pelvisFrame;
-   private final RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
-   private ReferenceFrame chestFrame;
-   private final RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
+   private final ImBoolean armScaling = new ImBoolean(false);
+   private final ImBoolean comTracking = new ImBoolean(false);
+   private ReferenceFrame initialPelvisFrame;
+   private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame initialChestFrame;
+   private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private RDXVRMotionRetargeting motionRetargeting;
+   private RDXVRPrescientFootstepStreaming prescientFootstepStreaming;
+   private long lastStepCompletionTime;
+   private boolean reintializingToolbox = false;
+   private long pausedStreamingTime;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       RDXVRContext vrContext,
                                        RetargetingParameters retargetingParameters,
-                                       SceneGraph sceneGraph)
+                                       SceneGraph sceneGraph,
+                                       ControllerStatusTracker controllerStatusTracker,
+                                       RDXManualFootstepPlacement footstepPlacer)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.retargetingParameters = retargetingParameters;
       this.sceneGraph = sceneGraph;
+      this.vrContext = vrContext;
+      this.controllerStatusTracker = controllerStatusTracker;
+      this.footstepPlacer = footstepPlacer;
    }
 
-   public void create(RDXVRContext vrContext, boolean createToolbox)
+   public void create(boolean createToolbox)
    {
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
@@ -153,89 +175,112 @@ public class RDXVRKinematicsStreamingMode
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
+      headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
+      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
+      prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
-      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-      parameters.setDefault();
-      parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
-      parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
-      parameters.setDefaultLinearRateLimit(10.0);
-      parameters.setDefaultAngularRateLimit(100.0);
-      parameters.setDefaultLinearWeight(10.0);
-      parameters.setDefaultAngularWeight(0.1);
-      parameters.setInputPoseLPFBreakFrequency(15.0);
-      parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
-      parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-
-      parameters.setMinimizeAngularMomentum(true);
-      parameters.setMinimizeLinearMomentum(true);
-      parameters.setAngularMomentumWeight(0.25);
-      parameters.setLinearMomentumWeight(0.25);
-
-      parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-      parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
-      parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
-      parameters.setUseStreamingPublisher(true);
-
+      // TODO Luigi. remove when Nadia chest link has been replaced and we can remove the fake joints from the urdf
+      // Message for deactivating the spine pitch and roll joints
+      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
+      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
       if (createToolbox)
       {
+         KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
+         parameters.setDefault();
+         parameters.setToolboxUpdatePeriod(0.003);
+         parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
+         boolean usingRealtimePlugin = false;
+         parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
+         parameters.setHoldChestAngularWeight(1.0, 1.0, 0.5);
+         parameters.setHoldPelvisLinearWeight(10.0, 10.0, 20.0);
+         parameters.setDefaultLinearRateLimit(10.0);
+         parameters.setDefaultAngularRateLimit(100.0);
+         parameters.setDefaultLinearWeight(10.0);
+         parameters.setDefaultAngularWeight(0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
+         parameters.setInputPoseLPFBreakFrequency(15.0);
+         parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+         parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
+         parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+         parameters.setUseBBXInputFilter(true);
+         parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
+         parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
+         parameters.setOutputLPFBreakFrequency(10.0);
+         parameters.setOutputJointVelocityScale(0.65);
+
+         parameters.setMinimizeAngularMomentum(true);
+         parameters.setMinimizeLinearMomentum(true);
+         parameters.setAngularMomentumWeight(0.20);
+         // TODO should prob be something like 0.01, 0.25 makes it feels like it's moving through mud, the pelvis height mainly won't move fast up/down cuz it generates too much momentum.
+         parameters.setLinearMomentumWeight(0.01);
+
+         parameters.setMinimizeAngularMomentumRate(true);
+         parameters.setMinimizeLinearMomentumRate(true);
+         parameters.setAngularMomentumRateWeight(1.0);
+         parameters.setLinearMomentumRateWeight(1.0);
+
+         parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
+         parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
+         parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+         parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+         parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
+
+         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
+
+         if (robotModel != null)
+         {
+            Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
+            for (RobotSide robotSide : RobotSide.values)
+               jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -0.10);
+            parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
+            parameters.setInitialConfigurationMap(createInitialConfiguration(robotModel));
+         }
+
+         parameters.setUseStreamingPublisher(Boolean.parseBoolean(System.getProperty("use.streaming.publisher", "true")));
+
          boolean startYoVariableServer = true;
          toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
-         ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
       }
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
-      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+      if (vrContext.getControllerModel() == RDXVRControllerModel.FOCUS3)
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
+      }
+      else
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+      }
    }
 
    private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
    {
       Map<String, Double> initialConfigurationMap = new HashMap<>();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
-      HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      defaultRobotInitialSetup.initializeFullRobotModel(robot);
-
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
          String jointName = joint.getName();
-         double q_priv = robot.getOneDoFJointByName(jointName).getQ();
-         initialConfigurationMap.put(jointName, q_priv);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         // TODO: Extract preset configuration to robot model
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.5);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.13));
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.13);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -1.0);
-
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.58);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.55 + 0.672);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.64);
+         double q = syncedRobot.getFullRobotModel().getOneDoFJointByName(jointName).getQ();
+         initialConfigurationMap.put(jointName, q);
       }
 
       return initialConfigurationMap;
    }
 
-   public void processVRInput(RDXVRContext vrContext)
+   public void processVRInput()
    {
-      if (controllerModel == RDXVRControllerModel.UNKNOWN)
-         controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
             streamToController.set(!streamToController.get());
+            if (!streamToController.get())
+               streamingDisabled.set();
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -244,168 +289,353 @@ public class RDXVRKinematicsStreamingMode
          {
             HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
             sendHandCommand(RobotSide.LEFT, handConfiguration);
+            vrContext.loadTrackerRolesFromFile();
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
-         InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-         kinematicsRecorder.processRecordReplayInput(joystickButton);
+         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+         gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
+
+         kinematicsRecorder.processRecordReplayInput(leftJoystickButton);
          if (kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
+
+         if (leftJoystickButton.bChanged() && !leftJoystickButton.bState() &&
+             !kinematicsRecorder.isReplayingEnabled().get() && !kinematicsRecorder.isRecordingEnabled().get())
+         { // reinitialize toolbox
+            LogTools.warn("Reinitializing toolbox. Forcing initial lower-body IK configuration to current robot configuration");
+            if (enabled.get())
+            {
+               sleepToolbox();
+               // Update initial configuration of KST
+               KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
+                       syncedRobot.getFullRobotModel());
+               List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
+                  int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
+                  int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
+                  int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
+
+                  // TODO extract this initial configuration in robot specific class
+                  initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
+                  initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
+                  initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
+                  initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
+                  // TODO add also default for wrist joints if they exist
+               }
+               ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                       .getSimpleRobotName()), initialConfigMessage);
+               wakeUpToolbox();
+               reinitializeToolbox();
+               wakeUpToolbox();
+            }
+         }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+        InputDigitalActionData aButton = controller.getAButtonActionData();
+        if (aButton.bChanged() && !aButton.bState())
         {
-           InputDigitalActionData aButton = controller.getAButtonActionData();
-           if (aButton.bChanged() && !aButton.bState())
-           {
-              setEnabled(!enabled.get());
-           }
+           setEnabled(!enabled.get());
+        }
 
-           // NOTE: Implement hand open close for controller trigger button.
-           InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
-           if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-           { // do not want to close grippers while interacting with the panel
-              HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
-              sendHandCommand(RobotSide.RIGHT, handConfiguration);
-           }
-        });
+        // NOTE: Implement hand open close for controller trigger button.
+        InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+        if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+        { // do not want to close grippers while interacting with the panel
+           HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+           sendHandCommand(RobotSide.RIGHT, handConfiguration);
+
+           // TODO discuss and possibly remap to different button...
+
+           //           double trajectoryTime = 1.5;
+           //           GoHomeMessage homePelvis = new GoHomeMessage();
+           //           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+           //           homePelvis.setTrajectoryTime(trajectoryTime);
+           //           ros2ControllerHelper.publishToController(homePelvis);
+           //
+           //           GoHomeMessage homeChest = new GoHomeMessage();
+           //           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+           //           homeChest.setTrajectoryTime(trajectoryTime);
+           //
+           //           RDXBaseUI.pushNotification("Commanding home pose...");
+           //           ros2ControllerHelper.publishToController(homeChest);
+           //
+           //           prescientFootstepStreaming.reset();
+           //           pausedForWalking = false;
+           //           reintializingToolbox = false;
+        }
+
+         gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
+      });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
-         Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
-         for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
-            handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
+
+         // ----------  VR Trackers ------------
+         additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
+         for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.getTrackerTypes())
+         {
+            if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+            {
+               vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
+               {
+                  if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
+                  {
+                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getReferenceFrame().update();
+                     trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
+                  }
+                  if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
+                  {
+                     trackerFrameGraphics.put(segmentType.getSegmentName(),
+                                              new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+                  }
+                  trackerFrameGraphics.get(segmentType.getSegmentName())
+                                      .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+                  if (motionRetargeting.isRetargetingNotNeeded(segmentType))
+                  {
+                     RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
+                     if (controlledSegment != null)
+                     {
+                        KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                                           trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
+                                                                                           segmentType.getSegmentName(),
+                                                                                           segmentType.getPositionWeight(),
+                                                                                           segmentType.getOrientationWeight(),
+                                                                                           segmentType.getLinearRateLimitation(),
+                                                                                           segmentType.getAngularRateLimitation());
+                        message.setHasDesiredLinearVelocity(true);
+                        message.getDesiredLinearVelocityInWorld().set(tracker.getLinearVelocity());
+                        message.setHasDesiredAngularVelocity(true);
+                        message.getDesiredAngularVelocityInWorld().set(tracker.getAngularVelocity());
+                        toolboxInputMessage.getInputs().add().set(message);
+                        // TODO. figure out how we can set this correctly after retargeting computation, or if we even need it
+                        //toolboxInputMessage.setTimestamp(tracker.getLastPollTimeNanos());
+                     }
+                  }
+               });
+               if (segmentType.isFootRelated())
+               {
+                  prescientFootstepStreaming.setTrackerReference(segmentType.getSegmentSide(), trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+               }
+            }
+         }
+         // ---------- end VR Trackers ------------
+
+         // ----------  VR Controllers ------------
+         for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.getControllerTypes())
+         {
+            vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
+            {
+               MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM);
+               if (endEffectorFrame == null)
+                  return;
+               controller.getXForwardZUpControllerFrame().update();
+               controllerFrameGraphics.get(segmentType.getSegmentSide())
+                                      .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+               handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(endEffectorFrame);
+               if (!armScaling.get())
+               {
+                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
+                                                                                           segmentType.getSegmentSide()),
+                                                                                     handDesiredControlFrames.get(
+                                                                                           segmentType.getSegmentSide()).getReferenceFrame(),
+                                                                                     segmentType.getSegmentName(),
+                                                                                     segmentType.getPositionWeight(),
+                                                                                     segmentType.getOrientationWeight(),
+                                                                                     segmentType.getLinearRateLimitation(),
+                                                                                     segmentType.getAngularRateLimitation());
+                  message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
+                  message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
+
+                  message.setHasDesiredLinearVelocity(true);
+                  message.getDesiredLinearVelocityInWorld().set(controller.getLinearVelocity());
+                  message.setHasDesiredAngularVelocity(true);
+                  message.getDesiredAngularVelocityInWorld().set(controller.getAngularVelocity());
+
+                  toolboxInputMessage.getInputs().add().set(message);
+                  toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
+               }
+               else
+                  controllerLastPollTimeNanos = controller.getLastPollTimeNanos();
+            });
+         }
+         // ---------- end VR Controllers ------------
+
+         if (armScaling.get())
+         { // Update headset pose, used for retargeting to estimate shoulder position
+            vrContext.getHeadset().runIfConnected(headset -> headset.getXForwardZUpHeadsetFrame().update());
+         }
+         // Correct values from trackers/controllers using retargeting techniques
+         motionRetargeting.computeDesiredValues();
+         for (VRTrackedSegmentType segmentType : motionRetargeting.getRetargetedSegments())
+         {
+            RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
+            if (controlledSegment != null)
+            {
+               KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                                  motionRetargeting.getDesiredFrame(segmentType),
+                                                                                  segmentType.getSegmentName(),
+                                                                                  segmentType.getPositionWeight(),
+                                                                                  segmentType.getOrientationWeight(),
+                                                                                  segmentType.getLinearRateLimitation(),
+                                                                                  segmentType.getAngularRateLimitation());
+               // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
+               if (segmentType.isHandRelated())
+               {
+                  // Check arm scaling state not changed -> disabled
+                  if (!enabled.get()) return;
+                  message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
+                  message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
+                  toolboxInputMessage.setTimestamp(controllerLastPollTimeNanos);
+               }
+               toolboxInputMessage.getInputs().add().set(message);
+            }
+         }
+         if (motionRetargeting.isCenterOfMassAvailable())
+         {   // If using ankles and waist tracker, create a CoM message for the toolbox
+            KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
+            comMessage.setHasDesiredLinearVelocity(false);
+            comMessage.getDesiredPositionInWorld().set(motionRetargeting.getDesiredCenterOfMassXYInWorld());
+            comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
+            comMessage.getSelectionMatrix().setXSelected(true);
+            comMessage.getSelectionMatrix().setYSelected(true);
+            comMessage.getSelectionMatrix().setZSelected(false);
+            comMessage.getWeights().setXWeight(1.0);
+            comMessage.getWeights().setYWeight(1.0);
+
+            toolboxInputMessage.setUseCenterOfMassInput(true);
+            toolboxInputMessage.getCenterOfMassInput().set(comMessage);
+         }
+
 
          if (controlArmsOnly.get())
+         { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
+            lockChest(toolboxInputMessage);
+            lockPelvis(toolboxInputMessage);
+         }
+         else if (!additionalTrackedSegments.contains(WAIST.getSegmentName()) && additionalTrackedSegments.contains(CHEST.getSegmentName()))
+         { // If using only the chest tracker, lock the pelvis pose to avoid weird poses
+            lockPelvis(toolboxInputMessage);
+         }
+
+         // Stepping with ankle trackers
+         if (gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f)
          {
-            if (pelvisFrame == null)
+            prescientFootstepStreaming.streamFootsteps();
+
+            // Stepping with ankle trackers pauses Streaming until walking is done
+            if (!controllerStatusTracker.isWalking())
             {
-               pelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-               pelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), pelvisTransformToWorld);
+               if (pausedForWalking)
+               {
+                  if (System.currentTimeMillis() - pausedStreamingTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_BEFORE_STEP)
+                  {
+                     LogTools.info("Stepping");
+                     prescientFootstepStreaming.step();
+                  }
+               }
+               if (prescientFootstepStreaming.getReadyToStepNotification().poll())
+               {
+                  streamToController.set(false);
+                  pausedStreamingTime = System.currentTimeMillis();
+                  pausedForWalking = true;
+                  LogTools.info("Starting to walk. Paused streaming");
+                  visualizeIKPreviewGraphic(false);
+               }
             }
-
-            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
-            tempFramePose.setToZero(pelvisFrame);
-            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-
-            toolboxInputMessage.getInputs().add().set(message);
-
-            if (chestFrame == null)
+            else
             {
-               chestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
-               chestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), chestTransformToWorld);
+               sleepToolbox();
+               if (prescientFootstepStreaming.getReadyToStepNotification().poll())
+               {
+                  LogTools.info("Stepping");
+                  prescientFootstepStreaming.step();
+               }
             }
-
-            message = new KinematicsToolboxRigidBodyMessage();
-            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
-            tempFramePose.setToZero(chestFrame);
-            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
-
-            toolboxInputMessage.getInputs().add().set(message);
+         }
+         else
+         {
+            prescientFootstepStreaming.reset();
          }
 
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-//         toolboxInputMessage.setTimestamp();
-
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
    }
 
-   private void handleTrackedSegment(RDXVRContext vrContext,
-                                     KinematicsStreamingToolboxInputMessage toolboxInputMessage,
-                                     VRTrackedSegmentType segmentType,
-                                     Set<String> additionalTrackedSegments)
+   // TODO. There is a KTConfigurationMessage to lock chest/pelvis. Use that message, and probably tune the weight of that message. This is equivalent
+   private void lockChest(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
    {
-      if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+      if (initialChestFrame == null)
       {
-         vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
-         {
-            if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
-            {
-               trackerFrameGraphics.put(segmentType.getSegmentName(),
-                                        new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-            }
-            if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
-            {
-               MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-               trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
-               trackerDesiredControlFrame.getReferenceFrame().update();
-               trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
-            }
-            trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
-            RigidBodyBasics controlledSegment = switch (segmentType)
-                  {
-                     case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
-                     case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
-                     case CHEST -> ghostFullRobotModel.getChest();
-                     default -> throw new IllegalStateException(
-                           "Unexpected VR-tracked segment: " + segmentType);
-                  };
-            if (controlledSegment != null)
-            {
-               KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                  trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
-                                                                                                            .getReferenceFrame(),
-                                                                                  segmentType.getSegmentName(),
-                                                                                  segmentType.getPositionWeight(),
-                                                                                  segmentType.getOrientationWeight());
-               toolboxInputMessage.getInputs().add().set(message);
-            }
-         });
+         initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
+         initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                      initialChestTransformToWorld);
       }
-      else if (segmentType.getSegmentName().contains("Hand"))
+
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+      tempFramePose.setToZero(initialChestFrame);
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+
+      toolboxInputMessage.getInputs().add().set(message);
+   }
+
+   private void lockPelvis(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
+   {
+      if (initialPelvisFrame == null)
       {
-         vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
-         {
-            MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM);
-            if (endEffectorFrame == null)
-               return;
-
-            controller.getXForwardZUpControllerFrame().update();
-            controllerFrameGraphics.get(segmentType.getSegmentSide())
-                                   .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-            handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(endEffectorFrame);
-            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
-                                                                                     segmentType.getSegmentSide()),
-                                                                               handDesiredControlFrames.get(
-                                                                                     segmentType.getSegmentSide()).getReferenceFrame(),
-                                                                               segmentType.getSegmentName(),
-                                                                               segmentType.getPositionWeight(),
-                                                                               segmentType.getOrientationWeight());
-            message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
-            message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
-
-            message.setHasLinearVelocity(true);
-            message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
-            message.setHasAngularVelocity(true);
-            message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
-//            message.getDesiredOrientationInWorld().transform(message.getAngularVelocityInWorld());
-
-            toolboxInputMessage.getInputs().add().set(message);
-            toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
-
-         });
+         initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+         initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                       initialPelvisTransformToWorld);
       }
+
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
+      tempFramePose.setToZero(initialPelvisFrame);
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+
+      toolboxInputMessage.getInputs().add().set(message);
+   }
+
+   private RigidBodyBasics getControlledSegment(VRTrackedSegmentType segmentType)
+   {
+      return switch (segmentType)
+      {
+         case LEFT_HAND, RIGHT_HAND -> ghostFullRobotModel.getHand(segmentType.getSegmentSide());
+         case LEFT_WRIST, RIGHT_WRIST -> ghostFullRobotModel.getForearm(segmentType.getSegmentSide());
+         case CHEST -> ghostFullRobotModel.getChest();
+         case WAIST -> ghostFullRobotModel.getPelvis();
+         default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
+      };
    }
 
    private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
                                                                     ReferenceFrame desiredControlFrame,
                                                                     String frameName,
-                                                                    double positionWeight,
-                                                                    double orientationWeight)
+                                                                    Vector3D positionWeight,
+                                                                    Vector3D orientationWeight,
+                                                                    double linearMomentumLimit,
+                                                                    double angularMomentumLimit)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(segment.hashCode());
@@ -413,10 +643,7 @@ public class RDXVRKinematicsStreamingMode
       tempFramePose.setToZero(desiredControlFrame);
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // Check if controllers or trackers have been occluded in that frame and reset by default to the World origin
-      if (tempFramePose.getPosition().getZ() < 0.05)
-         streamToController.set(false);
-      // record motion if in recording mode
+      // Record motion if in recording mode
       kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
       if (kinematicsRecorder.isReplaying())
          kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
@@ -424,32 +651,27 @@ public class RDXVRKinematicsStreamingMode
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
 
-      if (!Double.isNaN(positionWeight))
-      {
-         if (positionWeight == 0.0)
-         {
-            message.getLinearSelectionMatrix().setXSelected(false);
-            message.getLinearSelectionMatrix().setYSelected(false);
-            message.getLinearSelectionMatrix().setZSelected(false);
-         }
-         else
-         {
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
-         }
-      }
-      if (!Double.isNaN(orientationWeight))
-      {
-         if (orientationWeight == 0.0)
-         {
-            message.getAngularSelectionMatrix().setXSelected(false);
-            message.getAngularSelectionMatrix().setYSelected(false);
-            message.getAngularSelectionMatrix().setZSelected(false);
-         }
-         else
-         {
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(orientationWeight));
-         }
-      }
+      WeightMatrix3D linearWeightMatrix = new WeightMatrix3D();
+      message.getLinearSelectionMatrix().setXSelected(positionWeight.getX() != 0.0);
+      message.getLinearSelectionMatrix().setYSelected(positionWeight.getY() != 0.0);
+      linearWeightMatrix.setXAxisWeight(positionWeight.getX());
+      linearWeightMatrix.setYAxisWeight(positionWeight.getY());
+      message.getLinearSelectionMatrix().setZSelected(positionWeight.getZ() != 0.0);
+      linearWeightMatrix.setZAxisWeight(positionWeight.getZ());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(linearWeightMatrix));
+
+      WeightMatrix3D angularWeightMatrix = new WeightMatrix3D();
+      message.getAngularSelectionMatrix().setXSelected(orientationWeight.getX() != 0.0);
+      angularWeightMatrix.setXAxisWeight(orientationWeight.getX());
+      message.getAngularSelectionMatrix().setYSelected(orientationWeight.getY() != 0.0);
+      angularWeightMatrix.setYAxisWeight(orientationWeight.getY());
+      message.getAngularSelectionMatrix().setZSelected(orientationWeight.getZ() != 0.0);
+      angularWeightMatrix.setZAxisWeight(orientationWeight.getZ());
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(angularWeightMatrix));
+
+      message.setLinearRateLimitation(linearMomentumLimit);
+      message.setAngularRateLimitation(angularMomentumLimit);
+
       return message;
    }
 
@@ -457,11 +679,15 @@ public class RDXVRKinematicsStreamingMode
    {
       // Safety features!
       if (!ikStreamingModeEnabled)
+      {
          streamToController.set(false);
+      }
       else
       {
          if (!enabled.get())
+         {
             streamToController.set(false);
+         }
 
          if (enabled.get() || kinematicsRecorder.isReplaying())
          {
@@ -479,7 +705,7 @@ public class RDXVRKinematicsStreamingMode
                }
                else
                {
-                  // update IK ghost robot
+                  // Update IK ghost robot
                   ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
                   ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
@@ -492,24 +718,72 @@ public class RDXVRKinematicsStreamingMode
             if (ghostRobotGraphic.isActive())
                ghostRobotGraphic.update();
          }
+
+         // Resumes streaming once walking is done
+         if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
+         {
+            LogTools.info("Finished walking. Resuming streaming");
+            // Restart KST
+            lastStepCompletionTime = System.currentTimeMillis();
+            reintializingToolbox = true;
+         }
+         else if (pausedForWalking && reintializingToolbox)
+         {
+            // Wait a bit for robot to stabilize on last footsteps
+            if (System.currentTimeMillis() - lastStepCompletionTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_AFTER_STEP)
+            {
+               pausedForWalking = false;
+               setEnabled(true);
+               visualizeIKPreviewGraphic(true);
+               streamToController.set(true);
+               reintializingToolbox = false;
+            }
+         }
       }
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-      
+      if (ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController))
+      {
+         if (!streamToController.get())
+            streamingDisabled.set();
+      }
+
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
       }
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
-         if (controlArmsOnly.get())
+         setEnabled(false);
+      }
+
+      Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
+      if (connectedTrackers.contains(CHEST.getSegmentName()))
+      {
+         if (ImGui.checkbox(labels.get("Arm Scaling"), armScaling))
          {
-            pelvisFrame = null;
-            chestFrame = null;
+            setEnabled(false);
          }
+      }
+      else if (armScaling.get())
+      {
+         armScaling.set(false);
+      }
+
+      if (connectedTrackers.contains(WAIST.getSegmentName()) &&
+          connectedTrackers.contains(LEFT_ANKLE.getSegmentName()) &&
+          connectedTrackers.contains(RIGHT_ANKLE.getSegmentName()))
+      {
+         if (ImGui.checkbox(labels.get("CoM Tracking"), comTracking))
+         {
+            setEnabled(false);
+         }
+      }
+      else if (comTracking.get())
+      {
+         comTracking.set(false);
       }
 
       ghostRobotGraphic.renderImGuiWidgets();
@@ -531,13 +805,61 @@ public class RDXVRKinematicsStreamingMode
 
    public void setEnabled(boolean enabled)
    {
-      if (enabled != this.enabled.get())
-         this.enabled.set(enabled);
       if (enabled)
       {
-         wakeUpToolbox();
-         kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
+         if (!this.enabled.get())
+            wakeUpToolbox();
+         else
+         {
+            // Update initial configuration of KST
+            KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
+                    syncedRobot.getFullRobotModel());
+            List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
+               int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
+               int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
+               int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
+
+               initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
+               initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
+               initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
+               initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
+            }
+
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                    .getSimpleRobotName()), initialConfigMessage);
+            wakeUpToolbox();
+            reinitializeToolbox();
+            wakeUpToolbox();
+         }
+         kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
+         initialPelvisFrame = null;
+         initialChestFrame = null;
+         trackerReferenceFrames.clear();
+         if (!pausedForWalking)
+            prescientFootstepStreaming.reset();
+         motionRetargeting.reset();
+         motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
+         motionRetargeting.setArmScaling(armScaling.get());
+         motionRetargeting.setCoMTracking(comTracking.get());
       }
+      else
+      {
+         streamingDisabled.poll();
+         sleepToolbox();
+         prescientFootstepStreaming.reset();
+         pausedForWalking = false;
+         reintializingToolbox = false;
+
+         visualizeIKPreviewGraphic(true);
+         streamToController.set(false);
+      }
+
+      if (enabled != this.enabled.get())
+         this.enabled.set(enabled);
    }
 
    private void reinitializeToolbox()
@@ -567,13 +889,20 @@ public class RDXVRKinematicsStreamingMode
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
+
       if (showReferenceFrameGraphics.get())
       {
          for (RobotSide side : RobotSide.values)
          {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
             handFrameGraphics.get(side).getRenderables(renderables, pool);
+            if (armScaling.get())
+            {
+               motionRetargeting.getShoulderGraphic(side).getRenderables(renderables, pool);
+               motionRetargeting.getScaledHandGraphic(side).getRenderables(renderables, pool);
+            }
          }
+
          for (var trackerGraphics : trackerFrameGraphics.entrySet())
             trackerGraphics.getValue().getRenderables(renderables, pool);
       }
@@ -584,6 +913,11 @@ public class RDXVRKinematicsStreamingMode
       return streamToController.get();
    }
 
+   public Notification getStreamingDisabledNotification()
+   {
+      return streamingDisabled;
+   }
+
    public void visualizeIKPreviewGraphic(boolean visualize)
    {
       ghostRobotGraphic.setActive(visualize);
@@ -591,7 +925,8 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
-//      toolbox.closeAndDispose();
+      if (toolbox != null)
+         toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {

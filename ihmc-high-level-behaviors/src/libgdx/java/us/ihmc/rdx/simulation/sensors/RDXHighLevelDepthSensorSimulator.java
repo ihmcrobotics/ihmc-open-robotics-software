@@ -626,17 +626,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       opencv_imgproc.cvtColor(rgba8Mat, bgr8Mat, opencv_imgproc.COLOR_RGBA2BGR);
 
-      return new RawImage(depthSensorSimulator.getSequenceNumber(),
-                          Instant.now(),
-                          0.0f,
-                          bgr8Mat,
-                          null,
-                          (float) intrinsics.getFx(),
-                          (float) intrinsics.getFy(),
-                          (float) intrinsics.getCx(),
-                          (float) intrinsics.getCy(),
-                          sensorPose.getPosition(),
-                          sensorPose.getOrientation());
+      return RawImage.createWithBGRImage(bgr8Mat, intrinsics, sensorPose, Instant.now(), depthSensorSimulator.getSequenceNumber());
    }
 
    public RawImage createRawDepthImageDiscretized()
@@ -646,17 +636,12 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       float discretization = 0.001f;
       OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(), depthDiscretizedMat, 1.0f / discretization, 0.0);
 
-      return new RawImage(depthSensorSimulator.getSequenceNumber(),
-                          Instant.now(),
-                          discretization,
-                          depthDiscretizedMat,
-                          null,
-                          (float) intrinsics.getFx(),
-                          (float) intrinsics.getFy(),
-                          (float) intrinsics.getCx(),
-                          (float) intrinsics.getCy(),
-                          sensorPose.getPosition(),
-                          sensorPose.getOrientation());
+      return RawImage.createWith16BitDepth(depthDiscretizedMat,
+                                           intrinsics,
+                                           sensorPose,
+                                           Instant.now(),
+                                           depthSensorSimulator.getSequenceNumber(),
+                                           discretization);
    }
 
    public void dispose()

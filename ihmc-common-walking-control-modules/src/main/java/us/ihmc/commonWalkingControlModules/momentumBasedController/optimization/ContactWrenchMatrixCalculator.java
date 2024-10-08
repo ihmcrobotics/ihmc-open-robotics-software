@@ -54,10 +54,17 @@ public class ContactWrenchMatrixCalculator
 
    public ContactWrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox)
    {
-      this.rootBody = toolbox.getRootBody();
-      this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
+      this(toolbox.getRootBody(), toolbox.getWrenchMatrixCalculator(), toolbox.getJointIndexHandler());
+   }
+
+   public ContactWrenchMatrixCalculator(RigidBodyBasics rootBody,
+                                        WrenchMatrixCalculator wrenchMatrixCalculator,
+                                        JointIndexHandler jointIndexHandler)
+   {
+      this.rootBody = rootBody;
+      this.wrenchMatrixCalculator = wrenchMatrixCalculator;
       this.contactableBodies = wrenchMatrixCalculator.getRigidBodies();
-      this.jointIndexHandler = toolbox.getJointIndexHandler();
+      this.jointIndexHandler = jointIndexHandler;
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();

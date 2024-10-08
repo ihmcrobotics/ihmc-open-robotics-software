@@ -1,6 +1,10 @@
 package us.ihmc.perception.cuda;
 
+import org.bytedeco.cuda.global.cudart;
+import org.bytedeco.cuda.global.nvcomp;
+import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Loader;
 import us.ihmc.log.LogTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -8,8 +12,39 @@ import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
 
 public class CUDATools
 {
+   public static boolean hasCUDA()
+   {
+      return hasLibrary(cudart.class);
+   }
+
+   public static boolean hasNVCOMP()
+   {
+      return hasLibrary(nvcomp.class);
+   }
+
+   public static boolean hasNVJPEG()
+   {
+      return hasLibrary(nvjpeg.class);
+   }
+
+   private static boolean hasLibrary(Class<?> libraryClass)
+   {
+      try
+      {
+         Loader.load(libraryClass);
+         return true;
+      }
+      catch (Error libraryNotAvailable)
+      {
+         return false;
+      }
+   }
+
    public static int getCUDADeviceCount()
    {
+      if (!hasCUDA())
+         return 0;
+
       int[] devices = new int[1];
       checkCUDAError(cudaGetDeviceCount(devices));
       return devices[0];

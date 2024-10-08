@@ -13,162 +13,159 @@ permissions:
 
 jobs:
   atlas:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'atlas'
       test-category: 'fast'
   example-simulations:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'example-simulations'
       test-category: 'fast'
   ihmc-avatar-interfaces:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-avatar-interfaces'
       test-category: 'fast'
   ihmc-common-walking-control-modules:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-common-walking-control-modules'
       test-category: 'fast'
   ihmc-communication:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-communication'
       test-category: 'fast'
   ihmc-footstep-planning:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-footstep-planning'
       test-category: 'fast'
+      requires-self-hosted: true
   ihmc-graphics:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-graphics'
       test-category: 'fast'
   ihmc-high-level-behaviors:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-high-level-behaviors'
       test-category: 'fast'
   ihmc-humanoid-behaviors:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-humanoid-behaviors'
       test-category: 'fast'
   ihmc-interfaces:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-interfaces'
       test-category: 'fast'
   ihmc-java-toolkit:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-java-toolkit'
       test-category: 'fast'
   ihmc-manipulation-planning:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-manipulation-planning'
       test-category: 'fast'
   ihmc-model-file-loader:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-model-file-loader'
       test-category: 'fast'
   ihmc-parameter-estimation:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-parameter-estimation'
       test-category: 'fast'
   ihmc-parameter-optimization:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-parameter-optimization'
       test-category: 'fast'
   ihmc-parameter-tuner:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-parameter-tuner'
       test-category: 'fast'
   ihmc-path-planning:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-path-planning'
       test-category: 'fast'
   ihmc-perception:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-perception'
       test-category: 'fast'
+      requires-self-hosted: true
   ihmc-robot-data-visualizer:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-robot-data-visualizer'
       test-category: 'fast'
   ihmc-robot-models:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-robot-models'
       test-category: 'fast'
   ihmc-robotics-toolkit:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-robotics-toolkit'
       test-category: 'fast'
   ihmc-ros-tools:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-ros-tools'
       test-category: 'fast'
   ihmc-sensor-processing:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-sensor-processing'
       test-category: 'fast'
   ihmc-simulation-toolkit:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-simulation-toolkit'
       test-category: 'fast'
   ihmc-state-estimation:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-state-estimation'
       test-category: 'fast'
   ihmc-system-identification:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-system-identification'
       test-category: 'fast'
   ihmc-trajectory-optimization:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-trajectory-optimization'
       test-category: 'fast'
   ihmc-whole-body-controller:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-whole-body-controller'
       test-category: 'fast'
-  promp:
-    uses: ./.github/workflows/gradle-base.yml
-    with:
-      subproject: 'promp'
-      test-category: 'fast'
   robot-environment-awareness:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'robot-environment-awareness'
       test-category: 'fast'
   robotiq-hand-drivers:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'robotiq-hand-drivers'
       test-category: 'fast'
   simulation-construction-set-tools:
-    uses: ./.github/workflows/gradle-base.yml
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'simulation-construction-set-tools'
       test-category: 'fast'

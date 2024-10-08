@@ -52,6 +52,9 @@ public class CUDAJPEGProcessor
     */
    public CUDAJPEGProcessor(int quality)
    {
+      if (!CUDATools.hasNVJPEG())
+         throw new UnsatisfiedLinkError("NVJPEG was not found. To install NVJPEG, see instructions in ihmc-perception/README.md");
+
       // Initialize stream
       cudaStream = CUDAStreamManager.getStream();
 

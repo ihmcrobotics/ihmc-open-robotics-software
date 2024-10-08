@@ -87,7 +87,6 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    model.getPushRecoveryControllerParameters(),
                                                                                                     copTrajectoryParameters,
                                                                                                     model.getSplitFractionCalculatorParameters());
       controllerFactory.useDefaultDoNothingControlState();

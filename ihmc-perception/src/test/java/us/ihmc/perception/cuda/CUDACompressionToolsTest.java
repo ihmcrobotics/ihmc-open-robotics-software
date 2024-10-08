@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,15 +24,10 @@ public class CUDACompressionToolsTest
    private static Path zedDepth16UPath;
 
    @BeforeAll
-   public static void loadFiles()
+   public static void loadFiles() throws URISyntaxException
    {
-      WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(RawImageTest.class);
-
-      WorkspaceFile zedColorBGRFile = new WorkspaceFile(resourceDirectory, "zedColorBGR.raw");
-      WorkspaceFile zedDepth16UFile = new WorkspaceFile(resourceDirectory, "zedDepth16U.raw");
-
-      zedColorBGRPath = zedColorBGRFile.getFilesystemFile();
-      zedDepth16UPath = zedDepth16UFile.getFilesystemFile();
+      zedColorBGRPath = Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI());
+      zedDepth16UPath = Path.of(RawImageTest.class.getResource("zedDepth16U.raw").toURI());
    }
 
    @Test
@@ -52,7 +46,7 @@ public class CUDACompressionToolsTest
       Mat decompressedDepth = new Mat(depthImage.size(), depthImage.type());
       compressor.decompressDepth(compressedDepth, decompressedDepth);
 
-      double averageDifference = averagePixelDifference(depthImage, decompressedDepth);
+      double averageDifference = OpenCVTools.averagePixelDifference(depthImage, decompressedDepth);
       LogTools.info("Difference Ratio: {}", averageDifference);
       assertTrue(averageDifference < 5.0); // On average, decoded pixels differ less than 5mm from the original
 
@@ -82,7 +76,7 @@ public class CUDACompressionToolsTest
 
       Mat cpuDecompressedDepth = new Mat(720, 1280, opencv_core.CV_16UC1, new Scalar(0.0));
       decompressedDepth.download(cpuDecompressedDepth);
-      double averageDifference = averagePixelDifference(depthImage, cpuDecompressedDepth);
+      double averageDifference = OpenCVTools.averagePixelDifference(depthImage, cpuDecompressedDepth);
       LogTools.info("Difference Ratio: {}", averageDifference);
       assertTrue(averageDifference < 5.0); // On average, decoded pixels differ less than 5mm from the original
 
@@ -208,26 +202,5 @@ public class CUDACompressionToolsTest
       }
 
       return true;
-   }
-
-   private double averagePixelDifference(Mat matA, Mat matB)
-   {
-      if (!OpenCVTools.dimensionsMatch(matA, matB))
-         return Double.POSITIVE_INFINITY;
-
-      if (OpenCVTools.dataSize(matA) != OpenCVTools.dataSize(matB))
-         return Double.POSITIVE_INFINITY;
-
-      try (Mat differenceMat = new Mat())
-      {
-         // Find absolute difference for each element
-         opencv_core.absdiff(matA, matB, differenceMat);
-
-         // Find the sum of the differences
-         double totalDifference = opencv_core.sumElems(differenceMat).get();
-
-         // Divide total difference by max difference (255 * total elements)
-         return totalDifference / matA.total();
-      }
    }
 }

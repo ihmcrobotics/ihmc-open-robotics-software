@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
@@ -23,7 +24,6 @@ public class RealsenseColorDepthImageRetriever
 {
    private static final double OUTPUT_FREQUENCY = 20.0;
 
-   private final String realsenseSerialNumber;
    private final RealsenseConfiguration realsenseConfiguration;
    private RealsenseDeviceManager realsenseManager;
    private RealsenseDevice realsense = null;
@@ -34,7 +34,7 @@ public class RealsenseColorDepthImageRetriever
    private RawImage colorImage = null;
 
    private Mat depthMat16UC1;
-   private Mat colorMatRGB;
+   private Mat colorMatBGR;
 
    private final FramePose3D depthPose = new FramePose3D();
    private final FramePose3D colorPose = new FramePose3D();
@@ -53,14 +53,12 @@ public class RealsenseColorDepthImageRetriever
    private int numberOfFailedReads = 0;
 
    public RealsenseColorDepthImageRetriever(RealsenseDeviceManager realsenseManager,
-                                            String realsenseSerialNumber,
                                             RealsenseConfiguration realsenseConfiguration,
                                             Supplier<ReferenceFrame> sensorFrameSupplier,
                                             BooleanSupplier realsenseDemandSupplier)
    {
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
-      this.realsenseSerialNumber = realsenseSerialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.demandSupplier = realsenseDemandSupplier;
 
@@ -101,17 +99,12 @@ public class RealsenseColorDepthImageRetriever
             {
                if (depthImage != null)
                   depthImage.release();
-               depthImage = new RawImage(grabSequenceNumber,
-                                         acquisitionTime,
-                                         (float) realsense.getDepthDiscretization(),
-                                         depthMat16UC1.clone(),
-                                         null,
-                                         (float) realsense.getDepthFocalLengthPixelsX(),
-                                         (float) realsense.getDepthFocalLengthPixelsY(),
-                                         (float) realsense.getDepthPrincipalOffsetXPixels(),
-                                         (float) realsense.getDepthPrincipalOffsetYPixels(),
-                                         depthPose.getPosition(),
-                                         depthPose.getOrientation());
+               depthImage = RawImage.createWith16BitDepth(depthMat16UC1.clone(),
+                                                          realsense.getDepthCameraIntrinsics(),
+                                                          depthPose,
+                                                          acquisitionTime,
+                                                          grabSequenceNumber,
+                                                          (float) realsense.getDepthDiscretization());
 
                newDepthImageAvailable.signal();
             }
@@ -120,26 +113,20 @@ public class RealsenseColorDepthImageRetriever
                newDepthImageLock.unlock();
             }
 
-            if (colorMatRGB != null)
-               colorMatRGB.close();
-            colorMatRGB = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
+            if (colorMatBGR != null)
+               colorMatBGR.close();
+            colorMatBGR = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, realsense.getColorFrameData());
 
             newColorImageLock.lock();
             try
             {
                if (colorImage != null)
                   colorImage.release();
-               colorImage = new RawImage(grabSequenceNumber,
-                                         acquisitionTime,
-                                         (float) realsense.getDepthDiscretization(),
-                                         colorMatRGB.clone(),
-                                         null,
-                                         (float) realsense.getColorFocalLengthPixelsX(),
-                                         (float) realsense.getColorFocalLengthPixelsY(),
-                                         (float) realsense.getColorPrincipalOffsetXPixels(),
-                                         (float) realsense.getColorPrincipalOffsetYPixels(),
-                                         colorPose.getPosition(),
-                                         colorPose.getOrientation());
+               colorImage = RawImage.createWithBGRImage(colorMatBGR.clone(),
+                                                        realsense.getColorCameraIntrinsics(),
+                                                        colorPose,
+                                                        acquisitionTime,
+                                                        grabSequenceNumber);
 
                newColorImageAvailable.signal();
             }
@@ -243,7 +230,7 @@ public class RealsenseColorDepthImageRetriever
       }
 
       realsenseManager = new RealsenseDeviceManager();
-      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseSerialNumber, realsenseConfiguration);
+      realsense = realsenseManager.createBytedecoRealsenseDevice(realsenseConfiguration);
 
       if (realsense != null && realsense.getDevice() != null)
       {

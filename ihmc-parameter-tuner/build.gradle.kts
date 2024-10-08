@@ -16,7 +16,7 @@ mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.apache.commons:commons-math3:3.6.1")
 
-   api("us.ihmc:ihmc-robot-data-logger:0.29.7")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.8")
    api("us.ihmc:ihmc-graphics-javafx:source")
 
    var javaFXVersion = "17.0.9"

@@ -253,6 +253,31 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       placeFootstep();
    }
 
+   public boolean checkAndPlaceFootstep()
+   {
+      // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
+      FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
+      stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
+                                       candidateStepPose,
+                                       currentFootStepSide,
+                                       footstepPlan.getNumberOfFootsteps());
+
+      ArrayList<BipedalFootstepPlannerNodeRejectionReason> failureReasons = stepChecker.getReasons();
+      boolean footstepBeingPlacedIsFeasible = isFootstepBeingPlacedReachable() && failureReasons.get(failureReasons.size()-1) == null;
+      if (footstepBeingPlacedIsFeasible)
+      {
+         // If safe to place footstep
+         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
+         addedStep.copyFrom(baseUI, footstepBeingPlaced);
+         return true;
+      }
+      else
+      {
+         LogTools.info("Footstep Rejected, unfeasible");
+         return false;
+      }
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -365,5 +390,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
+   }
+
+   public void walkFromSteps()
+   {
+      footstepPlan.walkFromSteps();
    }
 }

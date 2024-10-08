@@ -38,4 +38,11 @@ float64 linear_rate_limitation
 # to the robot's end-effectors.
 toolbox_msgs/KinematicsToolboxRigidBodyMessage[] inputs
 
+# When true, the solver will use the center of mass input to control the robot's center of mass.
+bool use_center_of_mass_input
+
+# The (optional) input for controlling the center of mass of the robot.
+# If use_center_of_mass_input is false, this message is ignored.
+toolbox_msgs/KinematicsToolboxCenterOfMassMessage center_of_mass_input
+
 

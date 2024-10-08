@@ -5,6 +5,17 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 
 public abstract class RetargetingParameters
 {
+
+   public double getPelvisHeightExtendedLegs()
+   {
+      return 1.0;
+   }
+
+   public double getArmLength()
+   {
+      return 1.0;
+   }
+
    public Point3D getTranslationFromTracker(VRTrackedSegmentType tracker)
    {
       return new Point3D();

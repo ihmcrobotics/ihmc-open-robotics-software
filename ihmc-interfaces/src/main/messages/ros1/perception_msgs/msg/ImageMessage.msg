@@ -23,8 +23,11 @@ float32 depth_discretization
 # The raw data for the image
 int8[] data
 
-# The image format. Ordinal of ImageMessageFormat
-uint8 format
+# The pixel format. Ordinal of ImageFormat's PixelFormat
+uint8 pixel_format
+
+# The compression type. Ordinal of ImageFormat's CompressionType
+uint8 compression_type
 
 # Position of the focal point at sensor data acquisition
 geometry_msgs/Point position

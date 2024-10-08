@@ -120,12 +120,12 @@ public class OusterHeightMapUpdater
    {
       HighLevelControllerName fromState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
       HighLevelControllerName toState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
-      if (fromState == HighLevelControllerName.WALKING && toState != HighLevelControllerName.CUSTOM1)
+      if (fromState == HighLevelControllerName.WALKING && toState != HighLevelControllerName.QUICKSTER)
       {
          heightMapUpdater.requestClear();
          currentWalkingStatus.set(WalkingStatus.COMPLETED);
       }
-      else if (fromState != HighLevelControllerName.CUSTOM1 && toState == HighLevelControllerName.WALKING)
+      else if (fromState != HighLevelControllerName.QUICKSTER && toState == HighLevelControllerName.WALKING)
       {
          heightMapUpdater.requestClear();
          currentWalkingStatus.set(WalkingStatus.COMPLETED);

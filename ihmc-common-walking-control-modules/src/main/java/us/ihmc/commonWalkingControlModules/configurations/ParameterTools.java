@@ -102,6 +102,9 @@ public class ParameterTools
                                             YoRegistry registry)
    {
       jointWeightMapToPack.clear();
+      if (jointspaceWeights == null)
+         return;
+
       for (GroupParameter<Double> jointGroupParameter : jointspaceWeights)
       {
          String name = jointGroupParameter.getGroupName() + suffix;
@@ -127,6 +130,9 @@ public class ParameterTools
                                          YoRegistry registry)
    {
       weightsToPack.clear();
+      if (weights == null)
+         return;
+
       for (GroupParameter<Vector3DReadOnly> jointGroupWeights : weights)
       {
          String gainName = jointGroupWeights.getGroupName() + suffix;
