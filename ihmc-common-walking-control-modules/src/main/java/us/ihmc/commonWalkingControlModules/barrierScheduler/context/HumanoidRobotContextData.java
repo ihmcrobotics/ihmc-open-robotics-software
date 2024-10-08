@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
@@ -81,6 +82,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     */
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
+   /**
+    * The output of the wholebodyControllerCore. Set by the wholebodyControllerCore thread.
+    */
    private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
 
    /**
@@ -92,6 +96,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * TODO This will be deleted after finishing moving WBCC from controllerThread to WBCCThread.
     */
    private final LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredOutPutList;
+   private final ControllerCoreCommand controllerCoreCommand;
 
    public HumanoidRobotContextData()
    {
@@ -104,6 +109,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       sensorDataContext = new SensorDataContext();
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder();
       controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(null);
+      controllerCoreCommand = new ControllerCoreCommand();
    }
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
@@ -114,6 +120,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
                                    LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
                                    SensorDataContext sensorDataContext,
                                    LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredoutputList,
+                                   ControllerCoreCommand controllerCoreCommand,
                                    ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder)
    {
       this.processedJointData = processedJointData;
@@ -125,6 +132,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.sensorDataContext = sensorDataContext;
       this.wholeBodyControllerCoreDesiredOutPutList = wbccJointDesiredoutputList;
       this.controllerCoreOutPutDataHolder = controllerCoreOutPutDataHolder;
+      this.controllerCoreCommand = controllerCoreCommand;
    }
 
    public HumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel)
@@ -138,6 +146,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       sensorDataContext = new SensorDataContext(fullRobotModel);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      controllerCoreCommand = new ControllerCoreCommand();
    }
 
    public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
@@ -151,6 +160,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       sensorDataContext = new SensorDataContext(joints);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(joints.toArray(new OneDoFJointBasics[0]));
+      controllerCoreCommand = new ControllerCoreCommand();
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
@@ -182,12 +192,25 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       return jointDesiredOutputList;
    }
-   public LowLevelOneDoFJointDesiredDataHolder getWholeBodyControllerCoreDesiredOutPutList() {return wholeBodyControllerCoreDesiredOutPutList;}
-   public ControllerCoreOutPutDataHolder getControllerCoreOutPutDataHolder() { return controllerCoreOutPutDataHolder;}
+
+   public LowLevelOneDoFJointDesiredDataHolder getWholeBodyControllerCoreDesiredOutPutList()
+   {
+      return wholeBodyControllerCoreDesiredOutPutList;
+   }
+
+   public ControllerCoreOutPutDataHolder getControllerCoreOutPutDataHolder()
+   {
+      return controllerCoreOutPutDataHolder;
+   }
 
    public SensorDataContext getSensorDataContext()
    {
       return sensorDataContext;
+   }
+
+   public ControllerCoreCommand getControllerCoreCommand()
+   {
+      return controllerCoreCommand;
    }
 
    @Override
@@ -214,6 +237,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       wholeBodyControllerCoreDesiredOutPutList.set(src.wholeBodyControllerCoreDesiredOutPutList);
       sensorDataContext.set(src.sensorDataContext);
       controllerCoreOutPutDataHolder.set(src.controllerCoreOutPutDataHolder);
+      controllerCoreCommand.set(src.controllerCoreCommand);
    }
 
    public long getTimestamp()
@@ -240,23 +264,27 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       this.controllerRan = controllerRan;
    }
+
    public boolean getControllerRan()
    {
       return controllerRan;
    }
+
    public boolean getWholeBodyControllerCoreRan()
    {
       return wholeBodyControllerCoreRan;
    }
+
    public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
    {
       this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
    }
+
    public void setPerceptionRan(boolean perceptionRan)
    {
       this.perceptionRan = perceptionRan;
    }
-   
+
    public boolean getPerceptionRan()
    {
       return perceptionRan;
@@ -279,9 +307,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       {
          return true;
       }
-      else if (obj instanceof HumanoidRobotContextData)
+      else if (obj instanceof HumanoidRobotContextData other)
       {
-         HumanoidRobotContextData other = (HumanoidRobotContextData) obj;
          if (timestamp != other.timestamp)
             return false;
          if (schedulerTick != other.schedulerTick)
@@ -308,11 +335,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
             return false;
          if (!sensorDataContext.equals(other.sensorDataContext))
             return false;
-         if(!wholeBodyControllerCoreDesiredOutPutList.equals(other.wholeBodyControllerCoreDesiredOutPutList))
+         if (!wholeBodyControllerCoreDesiredOutPutList.equals(other.wholeBodyControllerCoreDesiredOutPutList))
             return false;
-         if(!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
+         if(!controllerCoreCommand.equals(other.controllerCoreCommand))
             return false;
-         return true;
+         return controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder);
       }
       else
       {
