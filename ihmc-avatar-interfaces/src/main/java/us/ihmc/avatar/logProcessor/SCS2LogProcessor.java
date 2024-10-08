@@ -6,6 +6,7 @@ import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +17,7 @@ public class SCS2LogProcessor
 {
    private Path logPath;
    private Path jsonPath;
+   private Path pelvisXYCSVPath;
    private int numberOfEntries = -1;
    private int currentLogPosition;
    private boolean processingLog = false;
@@ -51,6 +53,7 @@ public class SCS2LogProcessor
       }
 
       jsonPath = logPath.resolve("statistics.json");
+      pelvisXYCSVPath = logPath.resolve(logPath.getFileName().toString() + "_PelvisXY.csv");
 
       loadStats();
    }
@@ -120,6 +123,26 @@ public class SCS2LogProcessor
          writeJSON(false);
          loadStats();
          new SCS2LogOverheadSVGPlot(logPath, locomotionData).drawSVG();
+
+         try (BufferedWriter writer = Files.newBufferedWriter(pelvisXYCSVPath))
+         {
+            writer.write("Time,X,Y"); // header
+            writer.newLine();
+            for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+            {
+               for (int i = 0; i < logWalk.getTimes().size(); i++)
+               {
+                  writer.write("%s,%s,%s".formatted(logWalk.getTimes().get(i),
+                                                    logWalk.getPelvisPoses().get(i).getX(),
+                                                    logWalk.getPelvisPoses().get(i).getY()));
+                  writer.newLine();
+               }
+            }
+         }
+         catch (IOException e)
+         {
+            LogTools.error("Failed to write to CSV file.", e);
+         }
       }
 
       locomotionData = null;

@@ -55,14 +55,14 @@ public class SCS2LogFootState
       if (newStep && currentTime - fullSupportTime > 0.1)
       {
          LogTools.info("%s step at %s".formatted(side.getPascalCaseName(), new Point2D(footPolygon_0_x.getValueAsDouble(), footPolygon_0_y.getValueAsDouble())));
-         footsteps.add(new SCS2LogFootstep(side, new double[] {footPolygon_0_x.getValueAsDouble(),
-                                                               footPolygon_1_x.getValueAsDouble(),
-                                                               footPolygon_2_x.getValueAsDouble(),
-                                                               footPolygon_3_x.getValueAsDouble(),
-                                                               footPolygon_0_y.getValueAsDouble(),
-                                                               footPolygon_1_y.getValueAsDouble(),
-                                                               footPolygon_2_y.getValueAsDouble(),
-                                                               footPolygon_3_y.getValueAsDouble()}));
+         footsteps.add(new SCS2LogFootstep(currentTime, side, new double[] {footPolygon_0_x.getValueAsDouble(),
+                                                                            footPolygon_1_x.getValueAsDouble(),
+                                                                            footPolygon_2_x.getValueAsDouble(),
+                                                                            footPolygon_3_x.getValueAsDouble(),
+                                                                            footPolygon_0_y.getValueAsDouble(),
+                                                                            footPolygon_1_y.getValueAsDouble(),
+                                                                            footPolygon_2_y.getValueAsDouble(),
+                                                                            footPolygon_3_y.getValueAsDouble()}));
          newStep = false;
       }
 

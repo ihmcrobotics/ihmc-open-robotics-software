@@ -1,6 +1,8 @@
 package us.ihmc.avatar.logProcessor;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -11,6 +13,8 @@ public class SCS2LogWalk
    private long walkStartTick = -1;
    private final Point2D walkStart = new Point2D();
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
+   private final TDoubleArrayList times = new TDoubleArrayList();
+   private final RecyclingArrayList<Pose3D> pelvisPoses = new RecyclingArrayList<>(Pose3D::new);
    private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point2D> icps = new RecyclingArrayList<>(Point2D::new);
 
@@ -54,6 +58,16 @@ public class SCS2LogWalk
    public void setEndedWithFall(boolean endedWithFall)
    {
       this.endedWithFall = endedWithFall;
+   }
+
+   public TDoubleArrayList getTimes()
+   {
+      return times;
+   }
+
+   public RecyclingArrayList<Pose3D> getPelvisPoses()
+   {
+      return pelvisPoses;
    }
 
    public RecyclingArrayList<Point2D> getComs()
