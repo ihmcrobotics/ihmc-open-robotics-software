@@ -10,12 +10,11 @@ import java.util.Set;
 
 public class ROS2SRTVideoStreamImageMessageRelay
 {
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_stream_subscriber");
    private final ROS2Node loopbackNode = ROS2Tools.createLoopbackROS2Node(PubSubImplementation.FAST_RTPS, "srt_stream_image_message_republisher");
 
    private final Set<ROS2SRTVideoStreamImageMessageRelayWorker> workers = new HashSet<>();
 
-   public ROS2SRTVideoStreamImageMessageRelay(Set<ROS2SRTStreamTopicPair> topicsToRelay)
+   public ROS2SRTVideoStreamImageMessageRelay(Set<ROS2SRTStreamTopicPair> topicsToRelay, ROS2Node ros2Node)
    {
       for (ROS2SRTStreamTopicPair topicPair : topicsToRelay)
          workers.add(new ROS2SRTVideoStreamImageMessageRelayWorker(loopbackNode, ros2Node, topicPair));
@@ -26,7 +25,6 @@ public class ROS2SRTVideoStreamImageMessageRelay
       for (ROS2SRTVideoStreamImageMessageRelayWorker worker : workers)
          worker.destroy();
 
-      ros2Node.destroy();
       loopbackNode.destroy();
    }
 }
