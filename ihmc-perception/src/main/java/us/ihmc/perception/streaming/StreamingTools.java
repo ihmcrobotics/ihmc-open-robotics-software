@@ -43,7 +43,8 @@ public class StreamingTools
                          entry("delay", "0"),         // 0 delay to frame output (can't do lookahead)
                          entry("spatial-aq", "1"),    // Enable spatial AQ
                          entry("zerolatency", "1"),   // Don't introduce reordering delay
-                         entry("cq", "30"));          // Quality level: from 1 (visually lossless) to 51 (bad quality), 0 = auto
+                         entry("cq", "30"),           // Quality level: from 1 (visually lossless) to 51 (bad quality), 0 = auto
+                         entry("b_ref_mode", "0"));   // Don't use B frames (increases latency + not supported on older GPUs)
 
    public static Map<String, String> getHEVCNVENCStreamingOptions()
    {
