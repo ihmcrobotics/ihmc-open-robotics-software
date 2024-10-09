@@ -148,7 +148,7 @@ public class RDXVRKinematicsStreamingMode
 
    public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
    public static final Vector3D HAND_CONTACT_NORMAL_IN_WORLD = new Vector3D();
-   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.3;
+   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.7; // 0.3;
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
@@ -653,12 +653,19 @@ public class RDXVRKinematicsStreamingMode
             KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
             comMessage.setHasDesiredLinearVelocity(false);
             comMessage.getDesiredPositionInWorld().set(comJoystickXYInput.getX(), comJoystickXYInput.getY(), comJoystickZInput.getZ());
+
+            if (comJoystickXYInput.containsNaN() || comJoystickZInput.containsNaN())
+            {
+               LogTools.info("CoM joystick offset contains NaN");
+            }
+
             comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
             comMessage.getSelectionMatrix().setXSelected(true);
             comMessage.getSelectionMatrix().setYSelected(true);
             comMessage.getSelectionMatrix().setZSelected(true);
 
-            double comWeight = 0.5 / ghostFullRobotModel.getTotalMass();
+//            double comWeight = 0.5 / ghostFullRobotModel.getTotalMass();
+            double comWeight = 2.0 / ghostFullRobotModel.getTotalMass();
             comMessage.getWeights().setXWeight(comWeight);
             comMessage.getWeights().setYWeight(comWeight);
             comMessage.getWeights().setZWeight(comWeight);
