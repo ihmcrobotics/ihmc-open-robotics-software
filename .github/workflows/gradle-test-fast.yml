@@ -88,11 +88,6 @@ jobs:
     with:
       subproject: 'ihmc-parameter-optimization'
       test-category: 'fast'
-  ihmc-parameter-tuner:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'ihmc-parameter-tuner'
-      test-category: 'fast'
   ihmc-path-planning:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
