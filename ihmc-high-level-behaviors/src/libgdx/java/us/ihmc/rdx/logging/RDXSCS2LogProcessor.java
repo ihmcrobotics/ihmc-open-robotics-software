@@ -1,24 +1,30 @@
 package us.ihmc.rdx.logging;
 
+import com.github.sh0nk.matplotlib4j.Plot;
+import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImString;
+import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.logProcessor.SCS2LogProcessor;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -84,7 +90,69 @@ public class RDXSCS2LogProcessor
                   ImGui.sameLine();
                   if (ImGui.button(labels.get("Plot Linear Traversals")))
                   {
-                     
+                     ThreadTools.startAsDaemon(() ->
+                     {
+                        try
+                        {
+                           Plot pyplot = Plot.create();
+
+                           double maxX = 0.0;
+                           for (Path logDirectory : logDirectories)
+                           {
+                              String logFolderName = logDirectory.getFileName().toString();
+                              Path pelvisProgressCSV = logDirectory.resolve(logFolderName + "_PelvisDoorProgress.csv");
+
+                              if (Files.exists(pelvisProgressCSV))
+                              {
+                                 try (BufferedReader reader = Files.newBufferedReader(pelvisProgressCSV))
+                                 {
+                                    reader.readLine(); // skip header
+
+                                    ArrayList<Double> xs = new ArrayList<>();
+                                    ArrayList<Double> ys = new ArrayList<>();
+
+                                    String line;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       double x = Double.parseDouble(values[0]);
+                                       xs.add(x);
+                                       ys.add(Double.parseDouble(values[1]));
+
+                                       if (x > maxX)
+                                          maxX = x;
+                                    }
+
+                                    // Convert Pascal case to title case
+                                    String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                    String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                    pyplot.plot().add(xs, ys).label(titleCaseString);
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+                              }
+                           }
+
+                           pyplot.plot().add(Arrays.asList(0.0, maxX), Arrays.asList(0.0, 0.0))
+                                 .label("Door Threshold")
+                                 .color("gray")
+                                 .linestyle("--");
+
+                           pyplot.xlabel("Time (s)");
+                           pyplot.ylabel("Pelvis Distance to Frame (m)");
+                           pyplot.title("Door Traversal Frame-Relative Distance Progress Over Time");
+                           pyplot.legend();
+                           pyplot.show();
+                        }
+                        catch (IOException | PythonExecutionException e)
+                        {
+                           throw new RuntimeException(e);
+                        }
+                     }, "Plot");
                   }
                }
                ImGui.endDisabled();
