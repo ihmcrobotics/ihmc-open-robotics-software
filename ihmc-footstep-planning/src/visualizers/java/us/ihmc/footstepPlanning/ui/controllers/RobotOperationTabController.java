@@ -10,11 +10,11 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import perception_msgs.msg.dds.REAStateRequestMessage;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
-import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -46,7 +46,7 @@ public class RobotOperationTabController
    /** Called by JavaFX via reflection */
    public void initialize()
    {
-      AnchorPane robotIKUIPane = JavaFXMissingTools.loadFromFXML(robotIKUI);
+      AnchorPane robotIKUIPane = JavaFXTools.loadFromFXML(robotIKUI);
       robotOperationHBox.getChildren().add(robotIKUIPane);
       updateButtons();
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));

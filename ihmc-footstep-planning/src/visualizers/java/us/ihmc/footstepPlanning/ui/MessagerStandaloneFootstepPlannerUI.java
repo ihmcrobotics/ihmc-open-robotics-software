@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.ui;
 import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 
 /**

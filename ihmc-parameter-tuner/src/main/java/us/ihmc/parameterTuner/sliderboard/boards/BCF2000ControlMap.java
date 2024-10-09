@@ -1,6 +1,6 @@
-package us.ihmc.robotics.sliderboard.boards;
+package us.ihmc.parameterTuner.sliderboard.boards;
 
-import us.ihmc.robotics.sliderboard.MidiControlMap;
+import us.ihmc.parameterTuner.sliderboard.MidiControlMap;
 
 /**
  * Implementation of the {@link MidiControlMap} for the BCF2000 sliderboard.
