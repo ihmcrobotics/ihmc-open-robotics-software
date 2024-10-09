@@ -77,16 +77,16 @@ public class SCS2LogOverheadSVGPlot
 
             double[] polygon = footstep.getPolygon();
             LogTools.info("Drawing step at {} {}", new Point2D(polygon[0], polygon[4]), new Point2D(metersToMMX(polygon[0]), metersToMMY(polygon[4])));
-            svgGraphics2D.drawPolygon(new int[] {metersToMMX(polygon[0]),
-                                                 metersToMMX(polygon[1]),
-                                                 metersToMMX(polygon[2]),
-                                                 metersToMMX(polygon[3])},
+            svgGraphics2D.drawPolygon(new int[] {metersToMMX(polygon[0]), // front left
+                                                 metersToMMX(polygon[1]), //front right
+                                                 metersToMMX(polygon[2]), // back right
+                                                 metersToMMX(polygon[3])}, // back left
                                       new int[] {metersToMMY(polygon[4]),
                                                  metersToMMY(polygon[5]),
                                                  metersToMMY(polygon[6]),
                                                  metersToMMY(polygon[7])},
                                       4);
-            
+
             Point2D center = new Point2D(polygon[0], polygon[4]);
             center.add(polygon[1], polygon[5]);
             center.add(polygon[2], polygon[6]);
