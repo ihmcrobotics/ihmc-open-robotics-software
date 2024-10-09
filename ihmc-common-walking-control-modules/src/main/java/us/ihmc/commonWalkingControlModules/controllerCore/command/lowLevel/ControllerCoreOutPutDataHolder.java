@@ -165,6 +165,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
 
    public void setRootJointDesiredConfigurationData(RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfigurationData)
    {
+      hasRootJointDesiredConfiguration = true;
       this.rootJointDesiredConfigurationData.set(rootJointDesiredConfigurationData);
    }
 
@@ -178,11 +179,13 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
 
    public void setLowLevelOneDoFJointControllerCoreOutputDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointControllerCoreOutputDataHolder)
    {
+      hasLowLevelOneDoFJointControllerCoreOutputDataHolder = true;
       this.lowLevelOneDoFJointControllerCoreOutputDataHolder.overwriteWith(lowLevelOneDoFJointControllerCoreOutputDataHolder);
    }
 
    public void setJointDesiredOutputList(JointDesiredOutputListReadOnly jointDesiredOutputList)
    {
+      hasJointDesiredOutputList = true;
       this.jointDesiredOutputList.overwriteWith(jointDesiredOutputList);
    }
    @Override
@@ -207,6 +210,16 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    {
       if (this.lowLevelOneDoFJointControllerCoreOutputDataHolder == null)
          throw new RuntimeException("You used the deprecated constructor set is not supported in that case. ");
+
+      hasCenterOfPressure = true;
+      hasDesiredExternalWrench = true;
+      hasLinearMomentum = true;
+      hasLinearMomentumRate = true;
+      hasAngularMomentum = true;
+      hasAngularMomentumRate = true;
+      hasRootJointDesiredConfiguration = true;
+      hasLowLevelOneDoFJointControllerCoreOutputDataHolder = true;
+      hasJointDesiredOutputList = true;
 
       this.centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
       this.desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
@@ -78,6 +79,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
+      ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForWholeBodyControllerCore);
@@ -86,6 +88,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
+      contextDataFactory.setControllerCoreCommandDataHolder(controllerCoreCommandDataHolder);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 

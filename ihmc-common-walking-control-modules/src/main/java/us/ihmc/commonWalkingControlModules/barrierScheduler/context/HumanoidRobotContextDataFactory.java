@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -23,6 +24,8 @@ public class HumanoidRobotContextDataFactory
    protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    protected final RequiredFactoryField<SensorDataContext> sensorDataContext = new RequiredFactoryField<>("sensorDataContext");
    protected final RequiredFactoryField<ControllerCoreOutPutDataHolder> controllerCoreOutputDataHolder = new RequiredFactoryField<>("controllerCoreDataHolder");
+   protected final RequiredFactoryField<ControllerCoreCommandDataHolder> controllerCoreCommandDataHolder = new RequiredFactoryField<>(
+         "controllerCoreCommandDataHolder");
    protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccJointDesiredOutputList = new RequiredFactoryField<>(
          "wholeBodyControllerCoreJointDesiredOutputList");
 
@@ -38,6 +41,7 @@ public class HumanoidRobotContextDataFactory
                                           jointDesiredOutputList.get(),
                                           sensorDataContext.get(),
                                           wbccJointDesiredOutputList.get(),
+                                          controllerCoreCommandDataHolder.get(),
                                           controllerCoreOutputDataHolder.get());
    }
 
@@ -84,5 +88,10 @@ public class HumanoidRobotContextDataFactory
    public void setControllerCoreOutputDataHolder(ControllerCoreOutPutDataHolder value)
    {
       controllerCoreOutputDataHolder.set(value);
+   }
+
+   public void setControllerCoreCommandDataHolder(ControllerCoreCommandDataHolder value)
+   {
+      controllerCoreCommandDataHolder.set(value);
    }
 }

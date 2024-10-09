@@ -39,7 +39,7 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
                                         RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super(processedJointData, forceSensorDataHolder, centerOfMassDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList,
-            sensorDataContext, null, null);
+            sensorDataContext, null, null, null);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
    }
 

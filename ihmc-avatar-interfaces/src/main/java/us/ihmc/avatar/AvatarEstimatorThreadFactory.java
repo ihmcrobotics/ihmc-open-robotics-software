@@ -8,6 +8,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -111,6 +112,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
    private final OptionalFactoryField<ControllerCoreOutPutDataHolder> controllerCoreOutputDataHolderField = new OptionalFactoryField<>("wholeBodyControllerCoreDataHolder");
+   private final OptionalFactoryField<ControllerCoreCommandDataHolder> controllerCoreCommandDataHolderField = new OptionalFactoryField<>("controllerCoreCommandDataHolder");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
 
    private final OptionalFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new OptionalFactoryField<>("contactableBodiesFactory");
@@ -589,6 +591,7 @@ public class AvatarEstimatorThreadFactory
          contextDataFactory.setSensorDataContext(getSensorDataContext());
          contextDataFactory.setWBCCJointDesiredOutputList(getWBCCDesiredJointDataHolder());
          contextDataFactory.setControllerCoreOutputDataHolder(getControllerCoreOutPutDataHolder());
+         contextDataFactory.setControllerCoreCommandDataHolder(getControllerCoreCommandDataHolder());
          humanoidRobotContextDataField.set(contextDataFactory.createHumanoidRobotContextData());
       }
       return humanoidRobotContextDataField.get();
@@ -611,6 +614,12 @@ public class AvatarEstimatorThreadFactory
       if(!controllerCoreOutputDataHolderField.hasValue())
          controllerCoreOutputDataHolderField.set(new ControllerCoreOutPutDataHolder(getControllableOneDoFJoints()));
       return controllerCoreOutputDataHolderField.get();
+   }
+   public ControllerCoreCommandDataHolder getControllerCoreCommandDataHolder()
+   {
+      if(!controllerCoreCommandDataHolderField.hasValue())
+         controllerCoreCommandDataHolderField.set(new ControllerCoreCommandDataHolder());
+      return controllerCoreCommandDataHolderField.get();
    }
 
    public RobotMotionStatusHolder getRobotMotionStatusFromController()
