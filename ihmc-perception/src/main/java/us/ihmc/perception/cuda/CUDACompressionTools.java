@@ -354,11 +354,12 @@ public class CUDACompressionTools
          BytePointer compressedData = new BytePointer(compressedDataSize);
          compressedData.limit(compressedDataSize);
          checkCUDAError(cudaMemcpyAsync(compressedData, compressedDeviceBuffer, compressedDataSize, cudart.cudaMemcpyDeviceToHost, cudaStream));
-         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          // Free GPU memory
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(uncompressedDeviceBuffer, cudaStream));
+
+         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          return compressedData;
       }
@@ -407,12 +408,13 @@ public class CUDACompressionTools
             decompressedData.limit(decompressedDataSize);
          }
          checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudaMemcpyDefault, cudaStream));
-         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
          checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
          decompressionManager.close();
          decompressionConfig.close();
+
+         checkCUDAError(cudaStreamSynchronize(cudaStream));
 
          return decompressedData;
       }
