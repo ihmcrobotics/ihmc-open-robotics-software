@@ -17,7 +17,7 @@ mainDependencies {
    api("org.apache.commons:commons-math3:3.6.1")
 
    api("us.ihmc:ihmc-robot-data-logger:0.29.8")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.10")
    api("us.ihmc:simulation-construction-set-utilities:0.25.1")
 
    var javaFXVersion = "17.0.9"
