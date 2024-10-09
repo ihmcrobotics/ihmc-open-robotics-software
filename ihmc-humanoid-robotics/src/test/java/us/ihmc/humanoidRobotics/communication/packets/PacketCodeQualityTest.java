@@ -25,7 +25,6 @@ import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
@@ -604,10 +603,6 @@ public class PacketCodeQualityTest
       Set<String> enumLowerCaseNames = enumReflections.getSubTypesOf(Enum.class).stream().filter(Class::isEnum).map(Class::getSimpleName)
                                                       .map(name -> name.toLowerCase()).collect(Collectors.toSet());
       enumLowerCaseNames.add("PilotAction".toLowerCase()); // In exo land
-      enumLowerCaseNames.add("QuadrupedControllerEnum".toLowerCase()); // In quadruped land
-      enumLowerCaseNames.add("QuadrupedControllerRequestedEvent".toLowerCase()); // In quadruped land
-      enumLowerCaseNames.add("QuadrupedSteppingStateEnum".toLowerCase()); // In quadruped land
-      enumLowerCaseNames.add("QuadrupedSteppingRequestedEvent".toLowerCase()); // In quadruped land
       enumLowerCaseNames.add("ValkyrieFingerMotorName".toLowerCase()); // In valkyrie land
       enumLowerCaseNames.add("ExtrusionSide".toLowerCase()); // In path planner land
       enumLowerCaseNames.add("Type".toLowerCase()); // In path planner land
@@ -690,8 +685,6 @@ public class PacketCodeQualityTest
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
       fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
-      fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("initial_quadruped_stepping_state_enum_")); // In quadruped land
-      fieldsToIngore.add(QuadrupedSteppingStateChangeMessage.class.getField("end_quadruped_stepping_state_enum_")); // In quadruped land
       fieldsToIngore.add(FootstepPlannerStatusMessage.class.getField("footstep_planner_status_")); // In footstep planner land
 
       for (Class<? extends Packet> packetType : allPacketTypes)
