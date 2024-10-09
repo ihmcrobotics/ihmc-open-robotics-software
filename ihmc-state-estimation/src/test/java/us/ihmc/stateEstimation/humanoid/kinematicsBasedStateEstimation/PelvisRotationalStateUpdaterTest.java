@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -34,6 +35,7 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -121,7 +123,10 @@ public class PelvisRotationalStateUpdaterTest
       PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      
+      // This must be false, otherwise the test fails. When the variable is true, the future updates are done relative to the initial yaw, which causes the
+      // estimate to effectively be in the wrong frame.
+      ((YoBoolean) registry.findVariable("zeroEstimatedRootYawAtInitialization")).set(false);
+
       Quaternion rotationExpected = new Quaternion();
       Twist twistExpected = new Twist();
       Quaternion rotationEstimated = new Quaternion();
@@ -178,7 +183,7 @@ public class PelvisRotationalStateUpdaterTest
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       inverseDynamicsStructure.getElevator().updateFramesRecursively();
-      
+
       for (int i = 0; i < stateEstimatorSensorDefinitions.getIMUSensorDefinitions().size(); i++)
       {
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
