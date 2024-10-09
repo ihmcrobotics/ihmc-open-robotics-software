@@ -7,22 +7,7 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointTorqueAndPowerConstraintHandler;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -200,21 +185,6 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
    }
 
-   public void reset()
-   {
-      optimizationControlModule.initialize();
-      jointAccelerationIntegrationCalculator.resetJointParameters();
-
-      if (updateDynamicMatrixCalculator.getValue())
-      {
-         dynamicsMatrixCalculator.reset();
-      }
-      if (!useDynamicMatrixCalculatorForInverseDynamics.getValue())
-      {
-         inverseDynamicsCalculator.setExternalWrenchesToZero();
-      }
-   }
-
    public void initialize()
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state
@@ -222,7 +192,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       optimizationControlModule.initialize();
       planeContactWrenchProcessor.initialize();
 
-      if (updateDynamicMatrixCalculator.getValue())
+      if (updateDynamicMatrixCalculator.getValue() || useDynamicMatrixCalculatorForInverseDynamics.getBooleanValue())
       {
          dynamicsMatrixCalculator.reset();
       }
@@ -234,6 +204,25 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       optimizationControlModule.resetRateRegularization();
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
+   }
+
+   /**
+    * This reset method is called every time a new controller core command is submitted, which is done right before calling compute. It is called before all
+    * of the commands are submitted internally.
+    */
+   public void reset()
+   {
+      optimizationControlModule.initialize();
+      jointAccelerationIntegrationCalculator.resetJointParameters();
+
+      if (updateDynamicMatrixCalculator.getValue() || useDynamicMatrixCalculatorForInverseDynamics.getBooleanValue())
+      {
+         dynamicsMatrixCalculator.reset();
+      }
+      if (!useDynamicMatrixCalculatorForInverseDynamics.getValue())
+      {
+         inverseDynamicsCalculator.setExternalWrenchesToZero();
+      }
    }
 
    public void compute()
@@ -279,7 +268,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       {
          // TODO Since switch to Mecano: need to update the inverse dynamics to update the rigid-body accelerations, kinda dumb.
          //         rigidBodyAccelerationProvider.compute();
-         inverseDynamicsCalculator.compute(jointAccelerations);
+         inverseDynamicsCalculator.compute(jointAccelerations); // todo i don't think this is necessary
 
          dynamicsMatrixCalculator.compute();
          DMatrixRMaj tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
@@ -290,20 +279,12 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             int jointAccelerationIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
-            double tau = tauSolution.get(jointIndex, 0);
-            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
-                                       || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
-            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
-                                      || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
 
-            if (hasTorqueLimits || hasPowerLimits)
-               jointDesiredOutput.setDesiredTorque(getClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits));
-            else
-               jointDesiredOutput.setDesiredTorque(tau);
+            double tau = tauSolution.get(jointIndex, 0);
+            jointDesiredOutput.setDesiredTorque(applyTorqueAndPowerLimitsToJointTorque(tau, joint));
          }
 
-         if (!kinematicLoopFunctions.isEmpty())
-            throw new UnsupportedOperationException("The use of the dynamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
+         updateKinematicLoopJointEfforts();
       }
       else
       {
@@ -320,16 +301,9 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             int jointIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
-            double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
-            boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
-                                       || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
-            boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
-                                      || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
 
-            if (hasTorqueLimits || hasPowerLimits)
-               jointDesiredOutput.setDesiredTorque(getClampedDesiredTorque(tau, joint, jointDesiredOutput, hasTorqueLimits, hasPowerLimits));
-            else
-               jointDesiredOutput.setDesiredTorque(tau);
+            double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
+            jointDesiredOutput.setDesiredTorque(applyTorqueAndPowerLimitsToJointTorque(tau, joint));
          }
 
          updateKinematicLoopJointEfforts();
@@ -361,6 +335,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
       outputTimer.stopMeasurement();
    }
+
+
 
    private final DMatrixRMaj kinematicLoopJointTau = new DMatrixRMaj(4, 1);
 
@@ -420,6 +396,9 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
          switch (command.getCommandType())
          {
+            case QP_COST:
+               optimizationControlModule.submitQPCostCommand((QPCostCommand) command);
+               break;
             case QP_INPUT:
                optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
                break;
@@ -464,9 +443,6 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
                break;
             case EXTERNAL_WRENCH:
                optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
-               if (useDynamicMatrixCalculatorForInverseDynamics.getValue())
-                  dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(),
-                                                             ((ExternalWrenchCommand) command).getExternalWrench());
                break;
             case CONTACT_WRENCH:
                optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
@@ -548,23 +524,29 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       return group;
    }
 
-   private double getClampedDesiredTorque(double tau,
-                                          OneDoFJointBasics joint,
-                                          JointDesiredOutputBasics jointDesiredOutput,
-                                          boolean hasTorqueLimits,
-                                          boolean hasPowerLimits)
+   private double applyTorqueAndPowerLimitsToJointTorque(double tau, OneDoFJointReadOnly joint)
+   {
+      boolean hasTorqueLimits = (jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                 || jointTorqueLimitEnforcementMethod.getValue() == JointTorqueLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
+      boolean hasPowerLimits = (jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_CONTROLLER
+                                || jointPowerLimitEnforcementMethod.getValue() == JointPowerLimitEnforcementMethod.CONSTRAINTS_IN_QP_AND_CONTROLLER);
+      if (hasTorqueLimits || hasPowerLimits)
+         return getClampedDesiredTorque(tau, joint, hasTorqueLimits, hasPowerLimits);
+
+      return tau;
+   }
+
+   private double getClampedDesiredTorque(double torqueToClamp, OneDoFJointReadOnly joint, boolean hasTorqueLimits, boolean hasPowerLimits)
    {
       double torqueLimitLower = Double.NEGATIVE_INFINITY;
       double torqueLimitUpper = Double.POSITIVE_INFINITY;
-      double powerLimitLower = Double.NEGATIVE_INFINITY;
-      double powerLimitUpper = Double.POSITIVE_INFINITY;
 
       if (hasPowerLimits)
       {
          if (powerConstrainedJointLimits.containsKey(joint.getName()))
          {
-            powerLimitLower = -powerConstrainedJointLimits.get(joint.getName());
-            powerLimitUpper = powerConstrainedJointLimits.get(joint.getName());
+            double powerLimitLower = -powerConstrainedJointLimits.get(joint.getName());
+            double powerLimitUpper = powerConstrainedJointLimits.get(joint.getName());
 
             torqueConstraintHandler.computeTorqueConstraints(joint, powerLimitLower, powerLimitUpper, hasTorqueLimits);
             torqueLimitLower = torqueConstraintHandler.getTorqueLimitLower();
@@ -577,6 +559,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             torqueLimitUpper = joint.getEffortLimitUpper();
          }
       }
-      return MathTools.clamp(tau, torqueLimitLower, torqueLimitUpper);
+
+      return MathTools.clamp(torqueToClamp, torqueLimitLower, torqueLimitUpper);
    }
 }

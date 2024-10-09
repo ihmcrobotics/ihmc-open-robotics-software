@@ -557,8 +557,8 @@ public class PerceptionAndAutonomyProcess
 
          if (planarRegionsExtractor == null)
          {
-            int imageHeight = latestZEDDepthImage.getImageHeight();
-            int imageWidth = latestZEDDepthImage.getImageWidth();
+            int imageHeight = latestZEDDepthImage.getHeight();
+            int imageWidth = latestZEDDepthImage.getWidth();
             double fx = latestZEDDepthImage.getFocalLengthX();
             double fy = latestZEDDepthImage.getFocalLengthY();
             double cx = latestZEDDepthImage.getPrincipalPointX();

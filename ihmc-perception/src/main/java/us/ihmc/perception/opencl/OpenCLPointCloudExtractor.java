@@ -32,7 +32,7 @@ public class OpenCLPointCloudExtractor
       if (depthImage == null || depthImage.getCpuImageMat().isNull() || depthImage.getCpuImageMat().empty())
          return new ArrayList<>();
 
-      int numberOfPixels = depthImage.getImageWidth() * depthImage.getImageHeight();
+      int numberOfPixels = depthImage.getWidth() * depthImage.getHeight();
       if (pointCloudVertexOutput == null)
       {
          pointCloudVertexOutput = new OpenCLFloatBuffer(numberOfPixels * FLOATS_PER_PIXEL);
@@ -43,7 +43,7 @@ public class OpenCLPointCloudExtractor
       depthToWorldTransformParameter.setParameter(depthToWorldTransform);
       depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
 
-      parametersBuffer.setParameter(depthImage.getImageWidth());
+      parametersBuffer.setParameter(depthImage.getWidth());
       parametersBuffer.setParameter(depthImage.getFocalLengthX());
       parametersBuffer.setParameter(depthImage.getFocalLengthY());
       parametersBuffer.setParameter(depthImage.getPrincipalPointX());
@@ -60,7 +60,7 @@ public class OpenCLPointCloudExtractor
       openCLManager.setKernelArgument(kernel, 2, depthToWorldTransformParameter.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 3, pointCloudVertexOutput.getOpenCLBufferObject());
 
-      openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
+      openCLManager.execute2D(kernel, depthImage.getWidth(), depthImage.getHeight());
 
       pointCloudVertexOutput.readOpenCLBufferObject(openCLManager);
       FloatBuffer pointCloudBuffer = pointCloudVertexOutput.getBackingDirectFloatBuffer();

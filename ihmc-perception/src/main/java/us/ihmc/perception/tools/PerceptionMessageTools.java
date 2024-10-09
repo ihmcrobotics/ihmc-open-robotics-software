@@ -21,6 +21,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
@@ -33,6 +35,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 
@@ -173,6 +176,33 @@ public class PerceptionMessageTools
       imageMessage.setSequenceNumber(sequenceNumber);
       MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setDepthDiscretization(depthToMetersRatio);
+   }
+
+   public static void packImageMessage(RawImage originalImage,
+                                       BytePointer compressedData,
+                                       CompressionType compressionType,
+                                       CameraModel cameraModel,
+                                       ImageMessage imageMessageToPack)
+   {
+      packImageMessage(originalImage, compressedData, compressionType, cameraModel, null, null, imageMessageToPack);
+   }
+
+   public static void packImageMessage(RawImage originalImage,
+                                       BytePointer compressedData,
+                                       CompressionType compressionType,
+                                       CameraModel cameraModel,
+                                       @Nullable ByteBuffer ousterBeamAltitudeAngles,
+                                       @Nullable ByteBuffer ousterBeamAzimuthAngles,
+                                       ImageMessage imageMessageToPack)
+   {
+      originalImage.packImageMessageMetaData(imageMessageToPack);
+      packImageMessageData(imageMessageToPack, compressedData);
+      imageMessageToPack.setCompressionType(compressionType.toByte());
+      imageMessageToPack.setCameraModel(cameraModel.toByte());
+      if (ousterBeamAltitudeAngles != null)
+         MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
+      if (ousterBeamAzimuthAngles != null)
+         MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
    }
 
    public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)

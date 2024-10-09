@@ -63,14 +63,14 @@ public class ArUcoDetectionUpdater
          RawImage arUcoImage = distortedInputImage.read();
 
          if (arUcoBytedecoImage == null)
-            initialize(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
+            initialize(arUcoImage.getWidth(), arUcoImage.getHeight());
 
          // Convert color from BGR to RGB
-         GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getHeight(), arUcoImage.getWidth(), arUcoImage.getOpenCVType());
          opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
 
          // Undistort image
-         GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getHeight(), arUcoImage.getWidth(), arUcoImage.getOpenCVType());
          opencv_cudawarping.remap(imageForUndistortionRGB, undistortedImageRGB, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
 
          // Update the Bytedeco image

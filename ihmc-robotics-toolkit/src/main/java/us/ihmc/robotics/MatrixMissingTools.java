@@ -485,13 +485,17 @@ public class MatrixMissingTools
    }
 
    /**
-    * Negates the input matrix in-place.
+    * Negates the input matrix {@param matrixToNegate} and packs the result into {@param negatedMatrix}. Skips the size check, so may throw an
+    * {@link ArrayIndexOutOfBoundsException}
     *
-    * @param matrix the matrix to be negated.
+    * @param matrixToNegate the matrix to be negated. Not modified.
+    * @param negatedMatrix the resulting negated matrix. Modified.
     */
-   public static void negate(DMatrixRMaj matrix)
+   public static void unsafe_changeSign(DMatrixRMaj matrixToNegate, DMatrixRMaj negatedMatrix)
    {
-      CommonOps_DDRM.scale(-1.0, matrix);
+      final double size = matrixToNegate.getNumElements();
+      for (int i = 0; i < size; i++)
+         negatedMatrix.data[i] = -matrixToNegate.data[i];
    }
 
    /**
