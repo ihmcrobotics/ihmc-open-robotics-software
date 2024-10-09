@@ -31,7 +31,7 @@ import javafx.util.Pair;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.robotics.sliderboard.Sliderboard;
+import us.ihmc.parameterTuner.sliderboard.Sliderboard;
 
 public class TuningBox extends VBox
 {
@@ -224,7 +224,7 @@ public class TuningBox extends VBox
       List<Pair<String, Integer>> info = new ArrayList<>();
       parametersBeingTuned.forEach(uniqueName -> {
          int sliderIndex = sliderButtons.get(uniqueName).getIndex();
-         info.add(new Pair<>(uniqueName, new Integer(sliderIndex)));
+         info.add(new Pair<>(uniqueName, Integer.valueOf(sliderIndex)));
       });
       return Collections.unmodifiableList(info);
    }

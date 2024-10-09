@@ -1,4 +1,4 @@
-package us.ihmc.robotics.sliderboard;
+package us.ihmc.parameterTuner.sliderboard;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;

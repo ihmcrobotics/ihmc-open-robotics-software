@@ -14,7 +14,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.robotics.sliderboard.Sliderboard;
+import us.ihmc.parameterTuner.sliderboard.Sliderboard;
 
 public class TuningTab extends Tab
 {

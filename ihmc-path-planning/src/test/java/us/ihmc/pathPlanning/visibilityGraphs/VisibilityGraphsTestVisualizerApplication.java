@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;

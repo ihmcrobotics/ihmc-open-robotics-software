@@ -21,7 +21,7 @@ import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
-import us.ihmc.robotics.sliderboard.SliderboardListener;
+import us.ihmc.parameterTuner.sliderboard.SliderboardListener;
 
 public class Tuner extends VBox implements SliderboardListener
 {

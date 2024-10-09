@@ -1,4 +1,4 @@
-package us.ihmc.robotics.sliderboard;
+package us.ihmc.parameterTuner.sliderboard;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiUnavailableException;

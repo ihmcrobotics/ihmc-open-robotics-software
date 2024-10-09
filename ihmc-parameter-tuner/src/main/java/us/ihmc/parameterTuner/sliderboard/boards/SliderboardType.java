@@ -1,10 +1,10 @@
-package us.ihmc.robotics.sliderboard.boards;
+package us.ihmc.parameterTuner.sliderboard.boards;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.robotics.sliderboard.MidiControlMap;
+import us.ihmc.parameterTuner.sliderboard.MidiControlMap;
 
 public enum SliderboardType
 {

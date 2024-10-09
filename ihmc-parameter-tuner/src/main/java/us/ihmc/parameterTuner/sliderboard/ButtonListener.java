@@ -1,4 +1,4 @@
-package us.ihmc.robotics.sliderboard;
+package us.ihmc.parameterTuner.sliderboard;
 
 public interface ButtonListener
 {
