@@ -361,6 +361,11 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       return true;
    }
 
+   public boolean isDegenerateEdge(int edgeIndex)
+   {
+      return isDegenerateVertex[getVertexBOfEdge(edgeIndex)].getValue();
+   }
+
    private void updateFeasibleRegion()
    {
       feasibleCoMRegion.clear();

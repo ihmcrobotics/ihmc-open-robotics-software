@@ -214,6 +214,9 @@ public class RDXTeleoperationManager extends RDXPanel
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
             String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
+            if (modelFileName == null)
+               continue;
+
             if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getChest().getName()))
             {
                if (interactableChest == null)

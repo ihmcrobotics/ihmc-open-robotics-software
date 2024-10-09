@@ -159,8 +159,8 @@ public class ICPController implements ICPControllerInterface
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
-      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
-      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
+      useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, false); // icpOptimizationParameters.useCMPFeedback());
+      useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, false); // icpOptimizationParameters.useAngularMomentum());
 
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
                                                          registry,

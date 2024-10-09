@@ -199,9 +199,9 @@ public class KinematicsToolboxMultiContactManager
 
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
 
-      double defaultPostureSensitivityThreshold = 0.045;
-      double defaultStabilityMarginThresholdLow = 0.12; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
-      double defaultStabilityMarginThresholdHigh = 0.16; // 0.12;
+      double defaultPostureSensitivityThreshold = 0.04;
+      double defaultStabilityMarginThresholdLow = 0.13; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
+      double defaultStabilityMarginThresholdHigh = 0.18; // 0.12;
 
       postureSensitivityThreshold.set(defaultPostureSensitivityThreshold);
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
@@ -264,7 +264,14 @@ public class KinematicsToolboxMultiContactManager
       if (hasPostureSensitivity)
       {
          double postureSensitivityThreshold = this.postureSensitivityThreshold.getValue() + postureSensitivityHysteresisEpsilon * (mode.getValue() == PostureOptimizerState.OPTIMIZER ? -1.0 : 1.0);
-         isPostureSensitivityHigh.update(postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold);
+         boolean isPostureSensitivityHigh = postureOptimizer.getPostureSensitivity() > postureSensitivityThreshold;
+
+//         if (!isPostureSensitivityHigh)
+//         { // compute sensitivity wrt average stability margin
+//            postureOptimizer.updateSensitivityOfAverageMargin();
+//         }
+
+         this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
 
          if (multiContactRegionCalculator.getCenterOfMassStabilityMargin() < stabilityMarginThresholdLow.getValue())
          {
