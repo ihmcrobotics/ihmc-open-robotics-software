@@ -169,7 +169,6 @@ public class AvatarEstimatorThreadFactory
     * </ul>
     *
     * @param robotModel        the robot model used to configure this factory.
-    * @param robotInitialSetup
     */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
