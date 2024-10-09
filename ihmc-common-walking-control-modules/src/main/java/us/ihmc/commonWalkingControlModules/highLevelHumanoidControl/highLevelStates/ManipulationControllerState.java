@@ -541,4 +541,10 @@ public class ManipulationControllerState extends HighLevelControllerState
    {
       return controllerCore.getControllerCoreOutput();
    }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return controllerCoreCommand;
+   }
 }

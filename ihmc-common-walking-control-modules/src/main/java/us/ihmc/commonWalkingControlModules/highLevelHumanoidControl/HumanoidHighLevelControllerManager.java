@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -70,6 +71,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -102,7 +104,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                              JointDesiredOutputListBasics lowLevelControllerOutput,
-                                             ControllerCoreOutPutDataHolder controllercoreOutputDataHolder)
+                                             ControllerCoreOutPutDataHolder controllercoreOutputDataHolder,
+                                             ControllerCoreCommandDataHolder controllerCoreCommandDataHolder)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -111,6 +114,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
       this.controllerCoreOutPutDataHolder = controllercoreOutputDataHolder;
+      this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -337,6 +341,11 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private void reportControllerCoreOutputDataForWholeBodyControllerCore()
    {
       controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
+
+   }
+   private void reportControllerCoreCommandDataForWholeBodyControllerCore()
+   {
+      controllerCoreCommandDataHolder.setControllerCoreCommandDataHolder(stateMachine.getCurrentState().getControllerCoreCommandData());
    }
 
    private void copyJointDesiredsToJoints()
