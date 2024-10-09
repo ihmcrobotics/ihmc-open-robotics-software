@@ -292,16 +292,16 @@ public final class PerceptionAPI
    }
 
    /* VIDEO STREAMING STUFF */
-   public static final ROS2Topic<?> STREAMING_MODULE = BEST_EFFORT.withModule(STREAMING_NAME);
+   private static final ROS2Topic<?> STREAMING_MODULE = BEST_EFFORT.withModule(STREAMING_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
 
    // Realsense
-   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
+   private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
 
    // ZED
-   public static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
+   private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_RIGHT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_right");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_DEPTH_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("depth");
