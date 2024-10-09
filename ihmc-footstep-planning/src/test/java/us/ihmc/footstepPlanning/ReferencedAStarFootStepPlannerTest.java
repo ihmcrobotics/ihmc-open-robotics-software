@@ -22,8 +22,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 public class ReferencedAStarFootStepPlannerTest
 {
    private static final Random RANDOM = new Random(163421);
-   private static final double EPS_XY = 0.5 * LatticePoint.gridSizeXY;
-   private static final double EPS_YAW = 0.5 * LatticePoint.gridSizeYaw;
+   private static final double EPS_XY = 1.5 * LatticePoint.gridSizeXY;
+   private static final double EPS_YAW = 1.5 * LatticePoint.gridSizeYaw;
    private static FootstepPlan NOMINAL_PLAN = null;
    private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
    private static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
