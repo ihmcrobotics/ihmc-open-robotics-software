@@ -90,10 +90,10 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       newMultiContactSupportRegion.update();
 
-      if (newMultiContactSupportRegion.epsilonEquals(multiContactSupportRegion, 1.0e-3))
-      {
-         return;
-      }
+//      if (newMultiContactSupportRegion.epsilonEquals(multiContactSupportRegion, 1.0e-3))
+//      {
+//         return;
+//      }
 
       multiContactSupportRegion.set(newMultiContactSupportRegion);
 
