@@ -100,9 +100,9 @@ public final class ROS2Tools
       if (FACTORY.getAddressRestriction().length != 0 && !Arrays.asList(FACTORY.getAddressRestriction()).contains(loopbackAddress))
       {
          LogTools.warn("""
-                             You are creating a loopback ROS2 node, but your RTPSSubnet restriction does not allow the loopback address.
-                             For this node to communicate with other nodes, you can add {}/8 to the network parameters file.
-                             (Currently allowed addresses: {})""",
+                       You are creating a loopback ROS2 node, but your RTPSSubnet restriction does not allow the loopback address.
+                       For this node to communicate with other nodes, you can add {}/8 to the network parameters file.
+                       (Currently allowed addresses: {})""",
                        loopbackAddress.getHostAddress(),
                        FACTORY.getAddressRestriction());
       }
