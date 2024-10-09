@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 public class RDXSCS2LogProcessor
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("RDX Log Data Processor");
+   private final RDXBaseUI baseUI = new RDXBaseUI("RDX Log Processor");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ArrayList<Path> logDirectories = new ArrayList<>();
    private final HashMap<Path, SCS2LogProcessor> logProcessors = new HashMap<>();
@@ -81,6 +81,7 @@ public class RDXSCS2LogProcessor
                      }
                   }
 
+                  ImGui.sameLine();
                   if (ImGui.button(labels.get("Plot Linear Traversals")))
                   {
                      

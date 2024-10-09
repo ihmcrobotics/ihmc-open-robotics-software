@@ -1,6 +1,8 @@
 package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.io.JSONFileTools;
@@ -12,12 +14,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class SCS2LogProcessor
 {
    private Path logPath;
    private Path jsonPath;
-   private Path pelvisXYCSVPath;
    private int numberOfEntries = -1;
    private int currentLogPosition;
    private boolean processingLog = false;
@@ -53,7 +55,6 @@ public class SCS2LogProcessor
       }
 
       jsonPath = logPath.resolve("statistics.json");
-      pelvisXYCSVPath = logPath.resolve(logPath.getFileName().toString() + "_PelvisXY.csv");
 
       loadStats();
    }
@@ -124,24 +125,90 @@ public class SCS2LogProcessor
          loadStats();
          new SCS2LogOverheadSVGPlot(logPath, locomotionData).drawSVG();
 
-         try (BufferedWriter writer = Files.newBufferedWriter(pelvisXYCSVPath))
+         String logFolderName = logPath.getFileName().toString();
+
+         boolean rightPullLever = logFolderName.contains("RightPullLever");
+         boolean leftPushBar = logFolderName.contains("LeftPushBar");
+         boolean rightPushKnob = logFolderName.contains("RightPushKnob");
+         boolean rightPullHandle = logFolderName.contains("RightPullHandle");
+         if (rightPullLever || leftPushBar || rightPushKnob || rightPullHandle)
          {
-            writer.write("Time,X,Y"); // header
-            writer.newLine();
-            for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+            SCS2LogFootstep closestStepToDoorFrame = null;
+            double heelToFrame = Double.NaN;
+            SCS2LogWalk firstWalk = locomotionData.getLogWalks().get(0);
+            if (rightPullLever)
             {
-               for (int i = 0; i < logWalk.getTimes().size(); i++)
+               closestStepToDoorFrame = firstWalk.getFootsteps().get(11);
+               heelToFrame = 0.194;
+            }
+            else if (leftPushBar)
+            {
+               closestStepToDoorFrame = firstWalk.getFootsteps().get(8);
+               heelToFrame = -0.038;
+            }
+            else if (rightPushKnob)
+            {
+               closestStepToDoorFrame = firstWalk.getFootsteps().get(5);
+               heelToFrame = 0.0;
+            }
+            else if (rightPullHandle)
+            {
+               closestStepToDoorFrame = firstWalk.getFootsteps().get(11);
+               heelToFrame = 0.123;
+            }
+
+            double[] polygon = closestStepToDoorFrame.getPolygon();
+            Point2D frontMid = new Point2D(polygon[0], polygon[4]);
+            frontMid.add(polygon[1], polygon[5]);
+            frontMid.scale(0.5);
+
+            Point2D backMid = new Point2D(polygon[2], polygon[6]);
+            backMid.add(polygon[3], polygon[7]);
+            backMid.scale(0.5);
+
+            Vector2D backToFront = new Vector2D();
+            backToFront.sub(frontMid, backMid);
+
+            // TODO: Frame the pelvis poses w.r.t. door frame
+
+
+            try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_FootstepTimes.csv")))
+            {
+               writer.write("Index,Time"); // header
+               writer.newLine();
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
                {
-                  writer.write("%s,%s,%s".formatted(logWalk.getTimes().get(i),
-                                                    logWalk.getPelvisPoses().get(i).getX(),
-                                                    logWalk.getPelvisPoses().get(i).getY()));
-                  writer.newLine();
+                  for (int i = 0; i < logWalk.getFootsteps().size(); i++)
+                  {
+                     writer.write("%d,%f".formatted(i, logWalk.getFootsteps().get(i).getTime()));
+                     writer.newLine();
+                  }
                }
             }
-         }
-         catch (IOException e)
-         {
-            LogTools.error("Failed to write to CSV file.", e);
+            catch (IOException e)
+            {
+               LogTools.error("Failed to write to CSV file.", e);
+            }
+
+            try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_PelvisXY.csv")))
+            {
+               writer.write("Time,X,Y"); // header
+               writer.newLine();
+               for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+               {
+                  for (int i = 0; i < logWalk.getTimes().size(); i++)
+                  {
+                     writer.write("%s,%s,%s".formatted(logWalk.getTimes().get(i),
+                                                       logWalk.getPelvisPoses().get(i).getX(),
+                                                       logWalk.getPelvisPoses().get(i).getY()));
+                     writer.newLine();
+                  }
+               }
+            }
+            catch (IOException e)
+            {
+               LogTools.error("Failed to write to CSV file.", e);
+            }
          }
       }
 

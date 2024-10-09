@@ -4,14 +4,20 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SCS2LogFootstep
 {
-   private double time;
-   private RobotSide side;
-   private double[] polygon;
+   private final double time;
+   private final RobotSide side;
+   private final double[] polygon;
 
    public SCS2LogFootstep(double time, RobotSide side, double[] polygon)
    {
+      this.time = time;
       this.side = side;
       this.polygon = polygon.clone();
+   }
+
+   public double getTime()
+   {
+      return time;
    }
 
    public RobotSide getSide()
