@@ -112,6 +112,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                   wholeBodyControllerCoreDesiredJointDataHolder,
                                                                                   desiredJointDataHolder,
                                                                                   controllerCoreOutPutDataHolder,
+                                                                                  controllerCoreCommandDataHolder,
                                                                                   registry,
                                                                                   kinematicSimulation,
                                                                                   arrayOfJointsToIgnore);
@@ -135,6 +136,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
                                                                           ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
+                                                                          ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                                           YoRegistry registry,
                                                                           boolean kinematicsSimulation,
                                                                           JointBasics... jointToIgnore)
@@ -159,6 +161,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                                                 wholeBodyControllerCoreOutput,
                                                                                                                 lowLevelControllerOutput,
                                                                                                                 controllerCoreOutPutDataHolder,
+                                                                                                                controllerCoreCommandDataHolder,
                                                                                                                 jointToIgnore);
 
       scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());

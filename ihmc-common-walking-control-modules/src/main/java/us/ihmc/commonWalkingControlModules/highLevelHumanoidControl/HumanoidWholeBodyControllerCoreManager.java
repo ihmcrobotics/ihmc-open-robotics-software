@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -26,12 +27,14 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private final JointBasics[] controlledJoint;
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
    private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
+   private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
 
    public HumanoidWholeBodyControllerCoreManager(FullHumanoidRobotModel fullRobotModel,
                                                  JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
                                                  ControllerCoreOutPutDataHolder controllerCoreOutputDataHolder,
+                                                 ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                  JointBasics... jointsToIgnore)
    {
 
@@ -40,6 +43,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 //      this.controllerToolbox = controllerToolbox;
       this.wholeBodyControllerCoreOutput = wholeBodyControllerCoreOutput;
       this.controllerCoreOutPutDataHolder = controllerCoreOutputDataHolder;
+      this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
 
       controllerFactoryHelper = new HighLevelControllerFactoryHelper();
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
