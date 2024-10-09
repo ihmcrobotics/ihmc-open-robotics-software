@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,13 +55,14 @@ public class SRTStreamerSubscriberTest
    private static final double TEST_TIMEOUT = 5.0;
    private static final double CALL_TIMEOUT = 0.5 * TEST_TIMEOUT;
    private static final double EXTRA_LONG_TIMEOUT = 2.0 * TEST_TIMEOUT;
+   private static final double ALLOWABLE_PIXEL_DIFFERENCE = 3.0;
 
    private static Mat sampleImage;
 
    @BeforeAll
    public static void readSampleImage() throws URISyntaxException, IOException
    {
-      byte[] imageBytes = Files.readAllBytes(Path.of(RawImageTest.class.getResource("zedColorBGR.raw").toURI()));
+      byte[] imageBytes = Files.readAllBytes(Path.of(Objects.requireNonNull(RawImageTest.class.getResource("zedColorBGR.raw")).toURI()));
       sampleImage = new Mat(720, 1280, opencv_core.CV_8UC3, new BytePointer(imageBytes));
    }
 
@@ -158,6 +160,9 @@ public class SRTStreamerSubscriberTest
       // Ensure we can receive an image
       Mat receivedImage = receiver.getNextFrame(0.5);
       assertNotNull(receivedImage);
+      assertTrue(OpenCVTools.dimensionsMatch(sampleImage, receivedImage));
+      double pixelDifference = OpenCVTools.averagePixelDifference(sampleImage, receivedImage);
+      assertTrue(pixelDifference < ALLOWABLE_PIXEL_DIFFERENCE);
       receivedImage.close();
 
       streamerConnectThread.join();
@@ -292,6 +297,8 @@ public class SRTStreamerSubscriberTest
 
          // Ensure we received the correct frame
          assertTrue(OpenCVTools.dimensionsMatch(receivedImage.getCpuImageMat(), sampleImage));
+         double pixelDifference = OpenCVTools.averagePixelDifference(sampleImage, receivedImage.getCpuImageMat());
+         assertTrue(pixelDifference < ALLOWABLE_PIXEL_DIFFERENCE);
 
          // Ensure we received other data
          assertEquals(depthDescretization, receivedImage.getDepthDiscretization());

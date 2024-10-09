@@ -20,7 +20,6 @@ import static org.bytedeco.ffmpeg.global.avutil.*;
  */
 public class FFmpegDecoder
 {
-   protected final AVFormatContext inputContext;
    protected final AVStream streamToDecode;
    protected final AVCodec decoder;
    protected final AVCodecContext decoderContext;
@@ -35,8 +34,6 @@ public class FFmpegDecoder
 
    public FFmpegDecoder(AVFormatContext inputContext, int wantedStreamIndex, int relatedStreamIndex, int avMediaType)
    {
-      this.inputContext = inputContext;
-
       // Find the stream to decode, and decoder to use
       decoder = new AVCodec();
       int streamIndex = av_find_best_stream(inputContext, avMediaType, wantedStreamIndex, relatedStreamIndex, decoder, 0);
