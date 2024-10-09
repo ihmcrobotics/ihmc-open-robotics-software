@@ -69,6 +69,7 @@ public class SCS2LogOverheadSVGPlot
          String groupName = "Footsteps %d".formatted(walk);
          svgGraphics2D.setRenderingHint(SVGHints.KEY_BEGIN_GROUP, groupName);
 
+         int footstepIndex = 0;
          for (SCS2LogFootstep footstep : logWalk.getFootsteps())
          {
             Color color = FootstepListVisualizer.defaultFeetColors.get(footstep.getSide());
@@ -85,6 +86,18 @@ public class SCS2LogOverheadSVGPlot
                                                  metersToMMY(polygon[6]),
                                                  metersToMMY(polygon[7])},
                                       4);
+            
+            Point2D center = new Point2D(polygon[0], polygon[4]);
+            center.add(polygon[1], polygon[5]);
+            center.add(polygon[2], polygon[6]);
+            center.add(polygon[3], polygon[7]);
+            center.scale(0.25);
+            textStroke();
+            svgGraphics2D.setColor(Color.GRAY);
+            svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 10));
+            svgGraphics2D.drawString("%d".formatted(footstepIndex), metersToMMX(center.getX() - 0.012), metersToMMY(center.getY() - 0.012));
+
+            ++footstepIndex;
          }
 
          svgGraphics2D.setRenderingHint(SVGHints.KEY_END_GROUP, groupName);
@@ -132,10 +145,10 @@ public class SCS2LogOverheadSVGPlot
       }
    }
 
-   private void drawText(String Legend, double x, double y)
+   private void drawText(String text, double x, double y)
    {
       textStroke();
-      svgGraphics2D.drawString(Legend, metersToMMX(x), metersToMMY(y));
+      svgGraphics2D.drawString(text, metersToMMX(x), metersToMMY(y));
    }
 
    private void textStroke()
