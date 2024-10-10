@@ -631,6 +631,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
       }
 
+      //TODO Check when this if statement is triggered.
       if (yoErrorOrientation.getReferenceFrame() != trajectoryFrame)
       {
          yoErrorOrientation.setToZero(trajectoryFrame);
