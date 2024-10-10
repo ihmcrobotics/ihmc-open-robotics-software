@@ -1,11 +1,8 @@
 name: Gradle test (slow)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - develop
-  pull_request:
+  schedule:
+    - cron: '0 */8 * * *'
 
 permissions:
   checks: write
