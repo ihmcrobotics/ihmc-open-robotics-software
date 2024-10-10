@@ -618,6 +618,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          {
             yoErrorPositionIntegrated.setToZero(trajectoryFrame);
          }
+         // if the frame of the error differs the trajectory frame change it into trajectory frame.
          if (yoErrorPosition.getReferenceFrame() != trajectoryFrame)
          {
             yoErrorPosition.setToZero(trajectoryFrame);
