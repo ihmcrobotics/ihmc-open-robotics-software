@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import geometry_msgs.msg.dds.Wrench;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -27,7 +28,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 
 public class ReferenceSpreadingTrajectory
 {
-   private static final double INITIAL_TIME_DURATION = 0.0;
+   private static final double INITIAL_TIME_DURATION = 0.2;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
@@ -47,7 +48,7 @@ public class ReferenceSpreadingTrajectory
       keyMatrix = trajectoryPlayer.getKeyMatrix();
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide, Double startTime)
+   public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide)
    {
 //      trajectoryPlayer.reset();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
@@ -61,6 +62,7 @@ public class ReferenceSpreadingTrajectory
       for (String jointName : JOINT_NAMES)
       {
          jointspaceTrajectoryMessage.getJointTrajectoryMessages().add().set(new OneDoFJointTrajectoryMessage());
+         jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(JOINT_NAMES.indexOf(jointName)).setSequenceId(JOINT_NAMES.indexOf(jointName));
       }
 
       Point3D desiredPosition = new Point3D();
@@ -76,8 +78,6 @@ public class ReferenceSpreadingTrajectory
       makeMap(trajectoryPlayer.play(true), currentFrame);
       Double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
-      String nameSpatial = robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent";
-
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
       int frameIndex = 0;
@@ -89,31 +89,33 @@ public class ReferenceSpreadingTrajectory
          if (frameIndex % frameInterval == 0)
          {
             double currentTime = currentFrame.get("time[sec]");
-            desiredPosition.set(currentFrame.get(nameSpatial + "PositionX"),
-                                currentFrame.get(nameSpatial + "PositionY"),
-                                currentFrame.get(nameSpatial + "PositionZ"));
-            desiredOrientation.setQuaternion(currentFrame.get(nameSpatial + "OrientationQx"),
-                                             currentFrame.get(nameSpatial + "OrientationQy"),
-                                             currentFrame.get(nameSpatial + "OrientationQz"),
-                                             currentFrame.get(nameSpatial + "OrientationQs"));
+            desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionZ"));
+            desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQx"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQy"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQz"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQs"));
 
-            desiredLinearVelocity.set(currentFrame.get(nameSpatial + "LinearVelocityX"),
-                                      currentFrame.get(nameSpatial + "LinearVelocityY"),
-                                      currentFrame.get(nameSpatial + "LinearVelocityZ"));
-            desiredAngularVelocity.set(currentFrame.get(nameSpatial + "AngularVelocityX"),
-                                       currentFrame.get(nameSpatial + "AngularVelocityY"),
-                                       currentFrame.get(nameSpatial + "AngularVelocityZ"));
+            desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityX"),
+                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityY"),
+                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityZ"));
+            desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityX"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityY"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityZ"));
 
             for (String jointName : JOINT_NAMES)
             {
                jointIndex = JOINT_NAMES.indexOf(jointName);
-               jointTrajectoryPointMessage.setTime(currentTime - startTimeCSV + startTime);
+
+               jointTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
                jointTrajectoryPointMessage.setPosition(currentFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName));
                jointTrajectoryPointMessage.setVelocity(currentFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName));
+               jointTrajectoryPointMessage.setSequenceId(frameIndex);
                jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(jointIndex).getTrajectoryPoints().add().set(jointTrajectoryPointMessage);
             }
 
-            se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentTime - startTimeCSV + startTime,
+            se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentTime - startTimeCSV,
                                                                         desiredPosition,
                                                                         desiredOrientation,
                                                                         desiredLinearVelocity,
@@ -129,8 +131,9 @@ public class ReferenceSpreadingTrajectory
                                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackY"),
                                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackZ"));
 
-            wrenchTrajectoryPointMessage.setTime(currentTime - startTimeCSV + startTime);
+            wrenchTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
             wrenchTrajectoryPointMessage.getWrench().set(desiredFeedForwardWrench);
+            wrenchTrajectoryPointMessage.setSequenceId(frameIndex);
             wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(wrenchTrajectoryPointMessage);
          }
          frameIndex++;

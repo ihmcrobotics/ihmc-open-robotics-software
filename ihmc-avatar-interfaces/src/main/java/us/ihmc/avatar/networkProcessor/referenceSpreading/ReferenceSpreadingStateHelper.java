@@ -26,7 +26,6 @@ public class ReferenceSpreadingStateHelper
    YoRegistry registry;
 
    ReferenceSpreadingTrajectory preImpactReference;
-   DoubleProvider time;
 
    public ReferenceSpreadingStateHelper(String filePath, FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
@@ -37,7 +36,6 @@ public class ReferenceSpreadingStateHelper
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
    {
-      this.time = time;
 
       StateMachineFactory<States, State> factory = new StateMachineFactory<>(States.class);
       factory.setNamePrefix("stateMachine").setRegistry(registry).buildYoClock(time);
@@ -76,9 +74,11 @@ public class ReferenceSpreadingStateHelper
          LogTools.info("Entering BeforeState");
          for (RobotSide robotSide : RobotSide.values())
          {
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide, time.getValue());
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
+            LogTools.info(handHybridTrajectoryMessage);
          }
+
          LogTools.info("Published all messages");
       }
 
