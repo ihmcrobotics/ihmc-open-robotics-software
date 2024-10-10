@@ -521,11 +521,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       // un-comment for uneven to work
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
-//         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
-//      }
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
+         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+      }
    }
 
    private void computeSupportZUpTransform(FullHumanoidRobotModel fullRobotModel, RigidBodyTransform transformToPack)
@@ -678,12 +678,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    protected void updateCoMPositionAndFootPoses()
    {
-      updateTools(); // comment for uneven to work
+//      updateTools(); // comment for uneven to work
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
-         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame()); // // comment for uneven to work
+//         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame()); // comment for uneven to work
       }
    }
 
