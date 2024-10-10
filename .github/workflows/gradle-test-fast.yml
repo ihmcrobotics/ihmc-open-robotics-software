@@ -194,11 +194,6 @@ jobs:
     with:
       subproject: 'ihmc-system-identification'
       test-category: 'fast'
-  ihmc-trajectory-optimization:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'ihmc-trajectory-optimization'
-      test-category: 'fast'
   ihmc-whole-body-controller:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
