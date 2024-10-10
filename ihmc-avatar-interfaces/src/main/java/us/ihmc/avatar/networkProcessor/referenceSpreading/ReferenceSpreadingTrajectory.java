@@ -90,7 +90,6 @@ public class ReferenceSpreadingTrajectory
          makeMap(trajectoryPlayer.play(true), currentFrame);
          if (frameIndex % frameInterval == 0)
          {
-            LogTools.info("Time: " + (currentFrame.get("time[sec]")));
             double currentTime = currentFrame.get("time[sec]");
             desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),

@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
@@ -12,6 +14,11 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class ReferenceSpreadingStateHelper
 {
@@ -26,12 +33,17 @@ public class ReferenceSpreadingStateHelper
    YoRegistry registry;
 
    ReferenceSpreadingTrajectory preImpactReference;
+   HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
 
    public ReferenceSpreadingStateHelper(String filePath, FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
       preImpactReference = new ReferenceSpreadingTrajectory(filePath, fullRobotModel);
+
+      for (RobotSide robotSide : RobotSide.values()) {
+         handWrenches.put(robotSide, new SpatialVectorMessage());
+      }
    }
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
@@ -55,6 +67,12 @@ public class ReferenceSpreadingStateHelper
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
+   }
+
+   public void updateHandWrenches(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      handWrenches.get(RobotSide.LEFT).set(capturabilityBasedStatus.getLeftHandWrench());
+      handWrenches.get(RobotSide.RIGHT).set(capturabilityBasedStatus.getRightHandWrench());
    }
 
    private class BeforeState implements State
@@ -96,6 +114,7 @@ public class ReferenceSpreadingStateHelper
       public void doAction(double timeInState)
       {
 //         LogTools.info("AfterState: " + timeInState);
+           LogTools.info("Hand wrenches: " + handWrenches);
       }
 
       public void onEntry()

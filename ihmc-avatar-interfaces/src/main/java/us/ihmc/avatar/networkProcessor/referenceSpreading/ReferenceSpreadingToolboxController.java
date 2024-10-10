@@ -46,6 +46,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
+   private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
 
    private final RSTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
@@ -164,6 +165,12 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    public void updateRobotConfigurationData(RobotConfigurationData robotConfigurationData)
    {
       this.robotConfigurationData.set(robotConfigurationData);
+   }
+
+   public void updateCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      this.capturabilityBasedStatus.set(capturabilityBasedStatus);
+      stateMachineHelper.updateHandWrenches(capturabilityBasedStatus);
    }
 
    @Override

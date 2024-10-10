@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
@@ -64,6 +65,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
@@ -712,6 +715,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       CapturabilityBasedStatus capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
       packHandLoadBearingStatuses(capturabilityBasedStatus);
+      packEstimatedHandWrenches(capturabilityBasedStatus);
       statusOutputManager.reportStatusMessage(capturabilityBasedStatus);
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
@@ -850,6 +854,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), capturabilityBasedStatus.getLeftHandContactPoints(), capturabilityBasedStatus.getLeftHandContactNormal());
       packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), capturabilityBasedStatus.getRightHandContactPoints(), capturabilityBasedStatus.getRightHandContactNormal());
+   }
+
+   private void packEstimatedHandWrenches(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      capturabilityBasedStatus.getLeftHandWrench().getLinearPart().set(controllerToolbox.getEstimatedExternalHandWrench(RobotSide.LEFT).getLinearPart());
+      capturabilityBasedStatus.getLeftHandWrench().getAngularPart().set(controllerToolbox.getEstimatedExternalHandWrench(RobotSide.LEFT).getAngularPart());
+      capturabilityBasedStatus.getRightHandWrench().getLinearPart().set(controllerToolbox.getEstimatedExternalHandWrench(RobotSide.RIGHT).getLinearPart());
+      capturabilityBasedStatus.getRightHandWrench().getAngularPart().set(controllerToolbox.getEstimatedExternalHandWrench(RobotSide.RIGHT).getAngularPart());
    }
 
    private void packBodyLoadStatus(RigidBodyBasics rigidBody, RecyclingArrayList<Point3D> contactPointList, Vector3D contactNormalToPack)

@@ -58,6 +58,14 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
             * Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
             */
    public us.ihmc.euclid.tuple3D.Vector3D right_hand_contact_normal_;
+   /**
+            * The estimated hand wrench of the right hand
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage right_hand_wrench_;
+   /**
+            * The estimated hand wrench of the left hand
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage left_hand_wrench_;
 
    public CapturabilityBasedStatus()
    {
@@ -70,6 +78,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       right_hand_contact_points_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1, new geometry_msgs.msg.dds.PointPubSubType());
       left_hand_contact_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       right_hand_contact_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      right_hand_wrench_ = new controller_msgs.msg.dds.SpatialVectorMessage();
+      left_hand_wrench_ = new controller_msgs.msg.dds.SpatialVectorMessage();
 
    }
 
@@ -94,6 +104,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       right_hand_contact_points_.set(other.right_hand_contact_points_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.left_hand_contact_normal_, left_hand_contact_normal_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.right_hand_contact_normal_, right_hand_contact_normal_);
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.staticCopy(other.right_hand_wrench_, right_hand_wrench_);
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.staticCopy(other.left_hand_wrench_, left_hand_wrench_);
    }
 
    /**
@@ -208,6 +220,24 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    }
 
 
+   /**
+            * The estimated hand wrench of the right hand
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage getRightHandWrench()
+   {
+      return right_hand_wrench_;
+   }
+
+
+   /**
+            * The estimated hand wrench of the left hand
+            */
+   public controller_msgs.msg.dds.SpatialVectorMessage getLeftHandWrench()
+   {
+      return left_hand_wrench_;
+   }
+
+
    public static Supplier<CapturabilityBasedStatusPubSubType> getPubSubType()
    {
       return CapturabilityBasedStatusPubSubType::new;
@@ -262,6 +292,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
 
       if (!this.left_hand_contact_normal_.epsilonEquals(other.left_hand_contact_normal_, epsilon)) return false;
       if (!this.right_hand_contact_normal_.epsilonEquals(other.right_hand_contact_normal_, epsilon)) return false;
+      if (!this.right_hand_wrench_.epsilonEquals(other.right_hand_wrench_, epsilon)) return false;
+      if (!this.left_hand_wrench_.epsilonEquals(other.left_hand_wrench_, epsilon)) return false;
 
       return true;
    }
@@ -288,6 +320,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       if (!this.right_hand_contact_points_.equals(otherMyClass.right_hand_contact_points_)) return false;
       if (!this.left_hand_contact_normal_.equals(otherMyClass.left_hand_contact_normal_)) return false;
       if (!this.right_hand_contact_normal_.equals(otherMyClass.right_hand_contact_normal_)) return false;
+      if (!this.right_hand_wrench_.equals(otherMyClass.right_hand_wrench_)) return false;
+      if (!this.left_hand_wrench_.equals(otherMyClass.left_hand_wrench_)) return false;
 
       return true;
    }
@@ -319,7 +353,11 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       builder.append("left_hand_contact_normal=");
       builder.append(this.left_hand_contact_normal_);      builder.append(", ");
       builder.append("right_hand_contact_normal=");
-      builder.append(this.right_hand_contact_normal_);
+      builder.append(this.right_hand_contact_normal_);      builder.append(", ");
+      builder.append("right_hand_wrench=");
+      builder.append(this.right_hand_wrench_);      builder.append(", ");
+      builder.append("left_hand_wrench=");
+      builder.append(this.left_hand_wrench_);
       builder.append("}");
       return builder.toString();
    }

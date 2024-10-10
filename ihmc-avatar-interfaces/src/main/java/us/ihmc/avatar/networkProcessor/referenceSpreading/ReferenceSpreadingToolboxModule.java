@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -82,6 +83,14 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       {
          if(referenceSpreadingToolboxController != null)
             referenceSpreadingToolboxController.updateRobotConfigurationData(s.takeNextData());
+      });
+
+      ROS2Topic<?> capturabilityOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+
+      ros2Node.createSubscription(capturabilityOutputTopic.withTypeName(CapturabilityBasedStatus.class), s ->
+      {
+         if(referenceSpreadingToolboxController != null)
+            referenceSpreadingToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
       });
    }
 

@@ -36,4 +36,10 @@ geometry_msgs/Vector3 left_hand_contact_normal
 # Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
 geometry_msgs/Vector3 right_hand_contact_normal
 
+# The estimated hand wrench of the right hand
+controller_msgs/SpatialVectorMessage right_hand_wrench
+
+# The estimated hand wrench of the left hand
+controller_msgs/SpatialVectorMessage left_hand_wrench
+
 
