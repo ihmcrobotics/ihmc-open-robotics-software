@@ -70,8 +70,13 @@ public class ReferencedAStarFootStepPlannerTest
       int index = 0;
       FramePose3D nominalStepPose = nominalPlan.getFootstep(index).getFootstepPose();
 
+      // These are the adjustments we want to perform on the step
+      Point3D translationToAppend = new Point3D(LatticePoint.gridSizeXY * 2, -LatticePoint.gridSizeXY * 2, 0);
+      // This is negative because of the specific index we are using
+      double yawToAppend = -LatticePoint.gridSizeYaw * 2;
+
       // We take the adjusted plan and the adjusted footstep pose
-      FootstepPlan adjustedPlan = adjustFootstepAtIndex(nominalPlan, index);
+      FootstepPlan adjustedPlan = adjustFootstepAtIndex(nominalPlan, index, translationToAppend, yawToAppend);
       FramePose3D adjustedStepPose = adjustedPlan.getFootstep(index).getFootstepPose();
 
       // Now we want to set the adjusted plan as a reference, this way the planner will try to use the reference plan
@@ -108,11 +113,13 @@ public class ReferencedAStarFootStepPlannerTest
     * This method adjusts a footstep at the given index, this then returns a plan that will be the original plan passed in but that one index will have been
     * modified.
     *
-    * @param plan  is the footstep plan that we want to modify, only the footstep at the index will be modified
-    * @param index the spot at which we want to modify the step
+    * @param plan                is the footstep plan that we want to modify; only the footstep at the index will be modified
+    * @param index               the spot at which we want to modify the step
+    * @param translationToAppend this is the translation to move the step at the given index
+    * @param yawToAppend         this is the yaw to rotate the step at the given index
     * @return the new footstep plan that contains the modified step
     */
-   private FootstepPlan adjustFootstepAtIndex(FootstepPlan plan, int index)
+   private FootstepPlan adjustFootstepAtIndex(FootstepPlan plan, int index, Point3D translationToAppend, double yawToAppend)
    {
       // Here we check that the index is within the legal bounds of the footstep plan, don't really need to do this since its a test but whatever
       int numSteps = plan.getNumberOfSteps();
@@ -122,11 +129,7 @@ public class ReferencedAStarFootStepPlannerTest
          PlannedFootstep step = adjustedPlan.getFootstep(index);
 
          // We append a translation to the foot that we are trying to modify
-         Point3D translationToAppend = new Point3D(LatticePoint.gridSizeXY * 2, -LatticePoint.gridSizeXY * 2, 0);
          step.getFootstepPose().appendTranslation(translationToAppend);
-
-         // This is negative because of the specific index we are using, this is hacky and won't work for each step, because depending on the foot the yaw limits are different
-         double yawToAppend = -LatticePoint.gridSizeYaw * 2;
          step.getFootstepPose().appendYawRotation(yawToAppend);
 
          return adjustedPlan;
