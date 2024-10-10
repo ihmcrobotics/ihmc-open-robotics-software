@@ -1,0 +1,89 @@
+name: Gradle test (slow)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+  pull_request:
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  atlas-allocation-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'allocation-slow'
+  atlas-allocation-slow-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'allocation-slow-2'
+  atlas-controller-api-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'controller-api-slow'
+  atlas-controller-api-slow-3:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'controller-api-slow-3'
+  atlas-controller-api-slow-4:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'controller-api-slow-4'
+  atlas-humanoid-behaviors-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-behaviors-slow'
+  atlas-humanoid-flat-ground-slow-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-flat-ground-slow-2'
+  atlas-humanoid-flat-ground-slow-3:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-flat-ground-slow-3'
+  atlas-humanoid-flat-ground-slow-4:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-flat-ground-slow-4'
+  atlas-humanoid-obstacle-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-obstacle-slow'
+  atlas-humanoid-obstacle-slow-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-obstacle-slow-2'
+  atlas-humanoid-obstacle-slow-3:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-obstacle-slow-3'
+  atlas-humanoid-push-recovery-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-push-recovery-slow'
+  atlas-humanoid-rough-terrain-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-rough-terrain-slow'
+  atlas-humanoid-stairs-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-stairs-slow'

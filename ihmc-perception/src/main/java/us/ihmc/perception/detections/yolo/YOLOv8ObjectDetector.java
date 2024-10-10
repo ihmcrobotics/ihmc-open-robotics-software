@@ -16,10 +16,7 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
 import us.ihmc.perception.RawImage;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,8 +103,8 @@ public class YOLOv8ObjectDetector
          Set<YOLOv8DetectionOutput> detections = processOutput(outputBlobs,
                                                                confidenceThreshold,
                                                                nonMaximumSuppressionThreshold,
-                                                               bgrImage.getImageWidth(),
-                                                               bgrImage.getImageHeight());
+                                                               bgrImage.getWidth(),
+                                                               bgrImage.getHeight());
          results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage, maskThreshold);
 
          blob.release();

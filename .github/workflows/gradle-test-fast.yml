@@ -17,6 +17,51 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'fast'
+  atlas-controller-api:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'controller-api'
+  atlas-controller-api-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'controller-api-2'
+  atlas-humanoid-behaviors:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-behaviors'
+  atlas-humanoid-flat-ground:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-flat-ground'
+  atlas-humanoid-obstacle:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-obstacle'
+  atlas-humanoid-obstacle-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-obstacle-2'
+  atlas-humanoid-push-recovery:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-push-recovery'
+  atlas-humanoid-rough-terrain:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-rough-terrain'
+  atlas-humanoid-toolbox:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-toolbox'
   example-simulations:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
@@ -42,6 +87,7 @@ jobs:
     with:
       subproject: 'ihmc-footstep-planning'
       test-category: 'fast'
+      requires-self-hosted: true
   ihmc-graphics:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
@@ -86,11 +132,6 @@ jobs:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
       subproject: 'ihmc-parameter-optimization'
-      test-category: 'fast'
-  ihmc-parameter-tuner:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'ihmc-parameter-tuner'
       test-category: 'fast'
   ihmc-path-planning:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
