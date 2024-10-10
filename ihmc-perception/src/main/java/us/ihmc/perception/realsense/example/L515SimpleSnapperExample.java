@@ -12,7 +12,6 @@ import org.bytedeco.librealsense2.rs2_error;
 import org.bytedeco.librealsense2.rs2_frame;
 import org.bytedeco.librealsense2.global.realsense2;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -34,7 +33,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthImageReceiver
+public class L515SimpleSnapperExample implements L515DepthImageReceiver
 {
    private final boolean VISUALIZE_POINT_CLOUD = true;
 
@@ -175,7 +174,6 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
     * Given the depth data from the latest depth frame and a desired footstep location get the
     * different Z heights at the specified sample locations 
     */
-   @Override
    public boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedFootstep)
    {
       desiredFootstepPose.set(footstepPose);
