@@ -92,7 +92,7 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
 
    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
