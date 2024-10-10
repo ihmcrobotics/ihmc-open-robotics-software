@@ -17,6 +17,11 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'fast'
+  atlas-video:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'video'
   atlas-controller-api:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
@@ -37,6 +42,11 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'humanoid-flat-ground'
+  atlas-humanoid-flat-ground-bullet:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'atlas'
+      test-category: 'humanoid-flat-ground-bullet'
   atlas-humanoid-obstacle:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:

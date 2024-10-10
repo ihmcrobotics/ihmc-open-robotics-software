@@ -39,7 +39,6 @@ import us.ihmc.robotics.optimization.OutputCalculator;
 /**
  * see {@link LevenbergMarquardtParameterOptimizer}.
  */
-@Tag("point-cloud-drift-correction-test")
 public class LevenbergMarquardtICPTest
 {
    private boolean visualize = false;

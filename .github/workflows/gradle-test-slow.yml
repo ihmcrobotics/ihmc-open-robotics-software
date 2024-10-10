@@ -84,3 +84,33 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'humanoid-stairs-slow'
+  ihmc-footstep-planning-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'ihmc-footstep-planning'
+      test-category: 'footstep-planning-slow'
+      requires-self-hosted: true
+  ihmc-footstep-planning-slow-2:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'ihmc-footstep-planning'
+      test-category: 'path-planning-slow'
+      requires-self-hosted: true
+  ihmc-java-toolkit-gui-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'ihmc-java-toolkit'
+      test-category: 'gui-slow'
+      requires-self-hosted: true
+  ihmc-path-planning-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'ihmc-path-planning'
+      test-category: 'path-planning-slow'
+      requires-self-hosted: true
+  simulation-construction-set-tools-slow:
+    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
+    with:
+      subproject: 'simulation-construction-set-tools'
+      test-category: 'gui-slow'
+      requires-self-hosted: true
