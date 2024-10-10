@@ -76,7 +76,6 @@ public class ReferenceSpreadingStateHelper
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
-            LogTools.info(handHybridTrajectoryMessage);
          }
 
          LogTools.info("Published all messages");
@@ -123,6 +122,7 @@ public class ReferenceSpreadingStateHelper
       public void onEntry()
       {
          LogTools.info("Entering DoneState");
+
       }
 
       public void onExit(double timeInState)

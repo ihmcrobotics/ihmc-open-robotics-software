@@ -28,7 +28,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 
 public class ReferenceSpreadingTrajectory
 {
-   private static final double INITIAL_TIME_DURATION = 0.2;
+   private static final double INITIAL_TIME_DURATION = 0.5;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
@@ -75,11 +75,13 @@ public class ReferenceSpreadingTrajectory
       Wrench desiredFeedForwardWrench = new Wrench();
 
       HashMap<String, Double> currentFrame = new HashMap<>();
+//      trajectoryPlayer.reset();
       makeMap(trajectoryPlayer.play(true), currentFrame);
-      Double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
+      double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
+      LogTools.info("Total frames: " + totalFrames + ", frame interval: " + frameInterval + ", Calculated total frames: " + (totalFrames/frameInterval));
       int frameIndex = 0;
       int jointIndex;
 
@@ -88,6 +90,7 @@ public class ReferenceSpreadingTrajectory
          makeMap(trajectoryPlayer.play(true), currentFrame);
          if (frameIndex % frameInterval == 0)
          {
+            LogTools.info("Time: " + (currentFrame.get("time[sec]")));
             double currentTime = currentFrame.get("time[sec]");
             desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),

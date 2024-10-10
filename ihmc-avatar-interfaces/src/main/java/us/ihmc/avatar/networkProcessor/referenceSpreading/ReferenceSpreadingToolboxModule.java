@@ -65,7 +65,10 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
          return;
       }
 
-      LogTools.info("Received message to change state to: " + requestedState);
+      if (requestedState == ToolboxState.REINITIALIZE)
+      {
+         referenceSpreadingToolboxController.resetToInitialState();
+      }
    }
 
    @Override
