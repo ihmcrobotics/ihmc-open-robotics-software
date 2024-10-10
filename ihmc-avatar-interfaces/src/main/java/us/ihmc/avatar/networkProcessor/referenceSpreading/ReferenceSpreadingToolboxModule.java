@@ -69,6 +69,12 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       if (requestedState == ToolboxState.REINITIALIZE)
       {
          referenceSpreadingToolboxController.resetToInitialState();
+         referenceSpreadingToolboxController.startRS();
+      }
+
+      if (requestedState == ToolboxState.SLEEP)
+      {
+         referenceSpreadingToolboxController.goToWaiting();
       }
    }
 

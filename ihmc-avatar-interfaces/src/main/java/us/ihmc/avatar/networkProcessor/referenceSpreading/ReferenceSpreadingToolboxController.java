@@ -151,9 +151,14 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       stateMachine.resetToInitialState();
    }
 
-   public void goToLastState()
+   public void goToWaiting()
    {
-      stateMachine.performTransition(States.DONE);
+      stateMachine.performTransition(States.WAITING);
+   }
+
+   public void startRS()
+   {
+      stateMachine.performTransition(States.BEFORE);
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)

@@ -26,7 +26,7 @@ public class ReferenceSpreadingStateHelper
    {
       BEFORE,
       AFTER,
-      DONE
+      WAITING
    }
 
    HandTrajectoryMessagePublisher trajectoryMessagePublisher;
@@ -54,12 +54,13 @@ public class ReferenceSpreadingStateHelper
 
       factory.addState(States.BEFORE, new BeforeState());
       factory.addState(States.AFTER, new AfterState());
-      factory.addState(States.DONE, new DoneState());
+      factory.addState(States.WAITING, new WaitingState());
 
       StateTransitionCondition beforeToAfterTransitionCondition = t -> t>1;
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
-      factory.addDoneTransition(States.AFTER, States.DONE);
+      factory.addDoneTransition(States.AFTER, States.WAITING);
+
 
       return factory.build(States.BEFORE);
    }
@@ -128,9 +129,9 @@ public class ReferenceSpreadingStateHelper
       }
    }
 
-   private class DoneState implements State
+   private class WaitingState implements State
    {
-      public DoneState()
+      public WaitingState()
       {
       }
 
@@ -140,13 +141,12 @@ public class ReferenceSpreadingStateHelper
 
       public void onEntry()
       {
-         LogTools.info("Entering DoneState");
-
+         LogTools.info("Entering WaitingState");
       }
 
       public void onExit(double timeInState)
       {
-         LogTools.info("Exiting DoneState: " + timeInState);
+         LogTools.info("Exiting WaitingState: " + timeInState);
       }
    }
 
