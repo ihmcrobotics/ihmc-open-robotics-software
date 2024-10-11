@@ -30,7 +30,6 @@ import java.util.function.Consumer;
  *    <li>{@link HumanoidControllerAPI}</li>
  *    <li>{@link MissionControlAPI}</li>
  *    <li>{@link PerceptionAPI}</li>
- *    <li>{@link QuadrupedAPI}</li>
  *    <li>{@link SakeHandAPI}</li>
  *    <li>{@link StateEstimatorAPI}</li>
  *    <li>{@link ToolboxAPIs}</li>

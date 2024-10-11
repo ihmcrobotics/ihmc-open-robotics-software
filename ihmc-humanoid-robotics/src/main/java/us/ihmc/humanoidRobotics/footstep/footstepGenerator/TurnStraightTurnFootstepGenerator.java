@@ -30,7 +30,7 @@ public class TurnStraightTurnFootstepGenerator extends AbstractSimpleParametersF
 
    protected void initialize(FramePose2D startPose)
    {
-      setFootstepPath(new TurnStraightTurnOverheadPath(startPose, endPose, pathOrientation, noTranslationTolerance));
+      setFootstepPath(new TurnStraightTurnOverheadPath(startPose, endPose, pathOrientation, AbstractFootstepGenerator.noTranslationTolerance));
       footstepCounter = new FootstepCounterForTurnStraightTurnPaths();
    }
 
@@ -68,7 +68,7 @@ public class TurnStraightTurnFootstepGenerator extends AbstractSimpleParametersF
 
    public boolean hasDisplacement()
    {
-      double eps = noTranslationTolerance;
+      double eps = AbstractFootstepGenerator.noTranslationTolerance;
 
       return (getDistance() > eps) || (Math.abs(getSignedInitialTurnDirection()) > eps);
    }
