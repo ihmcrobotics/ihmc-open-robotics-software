@@ -1,4 +1,4 @@
-package us.ihmc.javafx;
+package us.ihmc.behaviors.tools.perception;
 
 import javafx.scene.paint.Color;
 

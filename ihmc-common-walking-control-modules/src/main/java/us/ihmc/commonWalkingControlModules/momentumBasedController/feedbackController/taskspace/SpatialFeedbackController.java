@@ -12,25 +12,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -958,6 +950,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          {
             yoErrorPositionIntegrated.setToZero(trajectoryFrame);
          }
+         if (yoErrorVector.getReferenceFrame() != trajectoryFrame)
+         {
+            yoErrorVector.setToZero(trajectoryFrame);
+         }
 
          linearFeedbackTermToPack.setIncludingFrame(yoErrorVector.getLinearPart());
          linearFeedbackTermToPack.scale(dt);
@@ -992,10 +988,17 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       }
       else
       {
+         angularFeedbackTermToPack.setToZero(controlFrame);
          // If the trajectory frame changed reset the integration.
          if (yoErrorOrientationCumulated.getReferenceFrame() != trajectoryFrame)
          {
             yoErrorOrientationCumulated.setToZero(trajectoryFrame);
+            yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
+         }
+
+         if (yoErrorOrientation.getReferenceFrame() != trajectoryFrame)
+         {
+            yoErrorOrientation.setToZero(trajectoryFrame);
             yoErrorRotationVectorIntegrated.setToZero(trajectoryFrame);
          }
 
