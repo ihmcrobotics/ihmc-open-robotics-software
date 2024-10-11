@@ -678,7 +678,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    protected void updateCoMPositionAndFootPoses()
    {
-//      updateTools(); // comment for uneven to work
+      updateTools(); // comment for uneven to work
 
       for (RobotSide robotSide : RobotSide.values)
       {
