@@ -156,32 +156,7 @@ class CUDAProgram
 
    private static void launchKernelFunction(CUstream_st stream, CUfunc_st function, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
    {
-      LongPointer argumentsPointer = arguments == null ? new LongPointer() : new LongPointer(arguments.length);
-      if (arguments != null)
-      {
-         for (int i = 0; i < arguments.length; i++)
-         {
-            argumentsPointer.put(i, arguments[i].address());
-         }
-      }
-      PointerPointer<LongPointer> argumentsPointerPointer = new PointerPointer<>(argumentsPointer);
-
-      //Pointer argumentsPointer = Pointer.malloc(arguments == null ? 0L : (long) arguments.length * Long.BYTES);
-//      PointerPointer<Pointer> argumentsPointer = new PointerPointer<>(arguments);
-
-//      PointerPointer<Pointer> argumentsPointer = new PointerPointer<>(arguments);
-//      PointerPointer<PointerPointer<Pointer>> argumentsPointerPointer = new PointerPointer<>(1L);
-//      argumentsPointerPointer.put(argumentsPointer);
-
-//      if (arguments != null)
-//      {
-//         for (int i = 0; i < arguments.length; i++)
-//         {
-//            System.out.println("Running " + i);
-//            argumentsPointer.position(i).put(arguments[i]);
-//         }
-//         argumentsPointer.position(0);
-//      }
+      PointerPointer<Pointer> argumentsPointer = arguments == null ? new PointerPointer<>() : new PointerPointer<>(arguments);
 
       int error = cuLaunchKernel(function,
                                  gridSize.x(),
@@ -192,8 +167,8 @@ class CUDAProgram
                                  blockSize.z(),
                                  sharedMemorySize,
                                  stream,
-                                 argumentsPointerPointer,
-                                 new Pointer());
+                                 argumentsPointer,
+                                 new PointerPointer<>());
 
       CUDATools.checkCUDAError(error);
       argumentsPointer.close();

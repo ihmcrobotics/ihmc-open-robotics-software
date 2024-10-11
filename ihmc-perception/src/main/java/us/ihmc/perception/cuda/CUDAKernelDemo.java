@@ -2,7 +2,6 @@ package us.ihmc.perception.cuda;
 
 import org.apache.logging.log4j.Level;
 import org.bytedeco.cuda.cudart.CUfunc_st;
-import org.bytedeco.cuda.cudart.CUkern_st;
 import org.bytedeco.cuda.cudart.CUmod_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -12,25 +11,20 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import org.bytedeco.opencv.global.opencv_cudawarping;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
-
-import java.util.stream.Stream;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
+import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 
 public class CUDAKernelDemo
 {
    private static String KERNEL = """
                                   extern "C"
-                                  __global__ void test(int * data)
+                                  __global__ void test(int valA, int valB)
                                   {
-                                    int threadIndex = blockDim.x * threadIdx.x + threadIdx.y;
-                                    data[threadIndex] = threadIndex;
+                                    printf("ValA: %d\\n", valA);
+                                    printf("ValB: %d\\n", valB);
                                   }
                                   """;
 
@@ -120,8 +114,8 @@ public class CUDAKernelDemo
                                  sharedMemorySize,
                                  stream,
                                  argumentsPointer,
-                                 new Pointer());
-      CUDATools.checkCUDAError(error);
+                                 new PointerPointer<>());
+      checkCUDAError(error);
       argumentsPointer.close();
    }
 
@@ -132,44 +126,28 @@ public class CUDAKernelDemo
       CUstream_st stream = CUDAStreamManager.getStream();
       BytePointer ptx = compileKernelToPTX(KERNEL, "test.cu", null, null, null);
 
+      System.out.println(ptx.getString());
+
       // Create a module
       CUmod_st module = new CUmod_st();
       error = cuModuleLoadData(module, ptx);
-      CUDATools.checkCUDAError(error);
+      checkCUDAError(error);
 
       // Get the function
       CUfunc_st kernelFunction = new CUfunc_st();
       error = cuModuleGetFunction(kernelFunction, module, "test");
-      CUDATools.checkCUDAError(error);
+      checkCUDAError(error);
 
-      dim3 blockSize = new dim3(10, 5, 1);
+      dim3 blockSize = new dim3(1, 1, 1);
       dim3 gridSize = new dim3(1, 1, 1);
 
-      // Allocate memory on device for output
-      long outputSize = (long) blockSize.x() * blockSize.y() * blockSize.z() * gridSize.x() * gridSize.y() * gridSize.z();
-      IntPointer deviceData = new IntPointer();
-      cudaMallocAsync(deviceData, outputSize * deviceData.sizeof(), stream);
+      IntPointer valA = new IntPointer(1L).put(3);
+      IntPointer valB = new IntPointer(1L).put(4);
 
-      // Launch the kernel
-      launchKernelFunction(stream, kernelFunction, gridSize, blockSize, 0, deviceData);
-
-      // Download device data to host
-      IntPointer hostData = new IntPointer(outputSize * deviceData.sizeof());
-      cudaMemcpyAsync(hostData, deviceData, outputSize * deviceData.sizeof(), cudaMemcpyDefault, stream);
-      cudaFreeAsync(deviceData, stream);
+      launchKernelFunction(stream, kernelFunction, gridSize, blockSize, 0, valA, valB);
 
       // Synchronize stream to ensure data is downloaded
       cudaStreamSynchronize(stream);
-
-      // Print the results
-      for (int y = 0; y < blockSize.y(); ++y)
-      {
-         for (int x = 0; x < blockSize.x(); ++x)
-         {
-            System.out.print(hostData.get((long) y * blockSize.y() + x) + " ");
-         }
-         System.out.println();
-      }
 
       // Close everything
       CUDAStreamManager.releaseStream(stream);
@@ -178,7 +156,7 @@ public class CUDAKernelDemo
       kernelFunction.close();
       blockSize.close();
       gridSize.close();
-      deviceData.close();
-      hostData.close();
+      valA.close();
+      valB.close();
    }
 }
