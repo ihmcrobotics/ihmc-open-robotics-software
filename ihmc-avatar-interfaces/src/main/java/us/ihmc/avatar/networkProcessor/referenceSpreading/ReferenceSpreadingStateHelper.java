@@ -6,6 +6,8 @@ import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxController.HandTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -15,10 +17,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 public class ReferenceSpreadingStateHelper
 {
@@ -29,11 +28,14 @@ public class ReferenceSpreadingStateHelper
       WAITING
    }
 
-   HandTrajectoryMessagePublisher trajectoryMessagePublisher;
-   YoRegistry registry;
+   private HandTrajectoryMessagePublisher trajectoryMessagePublisher;
+   private final YoRegistry registry;
 
-   ReferenceSpreadingTrajectory preImpactReference;
-   HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
+   private ReferenceSpreadingTrajectory preImpactReference;
+   private HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
+   private us.ihmc.idl.IDLSequence.Float jointVelocities = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
+
+   private final CollisionDetection collisionDetection;
 
    public ReferenceSpreadingStateHelper(String filePath, FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
@@ -44,6 +46,9 @@ public class ReferenceSpreadingStateHelper
       for (RobotSide robotSide : RobotSide.values()) {
          handWrenches.put(robotSide, new SpatialVectorMessage());
       }
+
+      collisionDetection = new CollisionDetection(50, 1, fullRobotModel, registry);
+      LogTools.info("Collision detection initialized");
    }
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
@@ -56,7 +61,7 @@ public class ReferenceSpreadingStateHelper
       factory.addState(States.AFTER, new AfterState());
       factory.addState(States.WAITING, new WaitingState());
 
-      StateTransitionCondition beforeToAfterTransitionCondition = t -> t>1;
+      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, t);
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
       factory.addDoneTransition(States.AFTER, States.WAITING);
@@ -76,6 +81,11 @@ public class ReferenceSpreadingStateHelper
       handWrenches.get(RobotSide.RIGHT).set(capturabilityBasedStatus.getRightHandWrench());
    }
 
+   public void updateJointVelocities(us.ihmc.idl.IDLSequence.Float jointVelocities)
+   {
+      this.jointVelocities = jointVelocities;
+   }
+
    private class BeforeState implements State
    {
 
@@ -85,7 +95,6 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-//         LogTools.info("BeforeState: " + timeInState);
       }
 
       public void onEntry()
@@ -114,8 +123,8 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-//         LogTools.info("AfterState: " + timeInState);
-           LogTools.info("Hand wrenches: " + handWrenches);
+         LogTools.info("AfterState: " + timeInState);
+//           LogTools.info("Hand wrenches: " + handWrenches);
       }
 
       public void onEntry()
@@ -137,6 +146,7 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
+         LogTools.info("WaitingState: " + timeInState);
       }
 
       public void onEntry()

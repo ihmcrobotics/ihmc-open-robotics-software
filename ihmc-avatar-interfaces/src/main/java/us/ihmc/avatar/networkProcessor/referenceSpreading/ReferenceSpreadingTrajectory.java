@@ -81,7 +81,6 @@ public class ReferenceSpreadingTrajectory
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
-      LogTools.info("Total frames: " + totalFrames + ", frame interval: " + frameInterval + ", Calculated total frames: " + (totalFrames/frameInterval));
       int frameIndex = 0;
       int jointIndex;
 

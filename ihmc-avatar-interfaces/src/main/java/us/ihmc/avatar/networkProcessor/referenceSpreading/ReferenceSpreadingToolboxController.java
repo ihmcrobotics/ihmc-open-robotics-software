@@ -54,9 +54,6 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    ReferenceSpreadingStateHelper stateMachineHelper;
 
    private final HumanoidReferenceFrames referenceFrames;
-   private final FullHumanoidRobotModel fullRobotModel;
-   private final FloatingJointBasics rootJoint;
-   private final OneDoFJointBasics[] oneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashMap = new TIntObjectHashMap<>();
 
    private HandTrajectoryMessagePublisher trajectoryMessagePublisher = m-> {LogTools.error("No publisher set");};
@@ -73,37 +70,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       timeProvider = RSTimeProvider.createTimeProvider();
 
-      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
-      this.rootJoint = fullRobotModel.getRootJoint();
 
       MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
                           .subtreeIterable()
                           .forEach(rigidBody -> rigidBodyHashMap.put(rigidBody.hashCode(), rigidBody));
 
       JointBasics[] joints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
-
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(robotModel.getControllerDT(),
-                                                                                       9.81,
-                                                                                       fullRobotModel.getRootJoint(),
-                                                                                       joints,
-                                                                                       referenceFrames.getCenterOfMassFrame(),
-                                                                                       robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings(),
-                                                                                       graphicsListRegistry,
-                                                                                       parentRegistry);
-
-      ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyBasics footBody = fullRobotModel.getFoot(robotSide);
-         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-         contactablePlaneBodies.add(ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(footBody, soleFrame));
-      }
-      controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
-
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
-      List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
 
 //      todo: Add proper way of importing the CSV file.
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
@@ -136,14 +109,21 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
          referenceFrames.updateFrames();
          waitingForRobotConfigurationData.set(false);
       }
+      else
+      {
+         waitingForRobotConfigurationData.set(true);
+      }
 
       if (waitingForRobotConfigurationData.getBooleanValue())
          return;
 
       timeProvider.update(robotConfigurationData.getMonotonicTime());
       time.set(timeProvider.getTime());
+      stateMachineHelper.updateJointVelocities(robotConfigurationData.getJointVelocities());
 
       stateMachine.doActionAndTransition();
+
+//      LogTools.info("/dot{q} = " + robotConfigurationData.getJointVelocities());
    }
 
    public void resetToInitialState()

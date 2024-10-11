@@ -87,6 +87,8 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    private final boolean startYoVariableServer;
    protected YoVariableServer yoVariableServer;
 
+   private boolean keepAwake =  false;
+
    public ToolboxModule(String robotName,
                         FullHumanoidRobotModel fullRobotModelToLog,
                         LogModelProvider modelProvider,
@@ -105,6 +107,18 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                         PubSubImplementation pubSubImplementation)
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null, pubSubImplementation);
+   }
+
+   public ToolboxModule(String robotName,
+                        FullHumanoidRobotModel fullRobotModelToLog,
+                        LogModelProvider modelProvider,
+                        boolean startYoVariableServer,
+                        int updatePeriodMilliseconds,
+                        boolean keepAwake,
+                        PubSubImplementation pubSubImplementation)
+   {
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null, pubSubImplementation);
+      this.keepAwake = keepAwake;
    }
 
    protected ToolboxModule(String robotName,
@@ -494,7 +508,10 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       toolboxRunnable = () ->
       {
          if (Thread.interrupted())
+         {
+            LogTools.warn("Thread interrupted, going to sleep.");
             return;
+         }
 
          try
          {
@@ -503,8 +520,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
             if (receivedInput.getAndSet(false))
                timeOfLastInput.set(yoTime.getDoubleValue());
-            if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+            if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue() && !keepAwake)
+            {
+               LogTools.warn("No input for " + (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue()) + " seconds. Going to sleep.");
                sleep();
+            }
             else if (getToolboxController().isDone())
                sleep();
          }
