@@ -38,7 +38,8 @@ public class KinematicsRecordReplay
    private boolean isRecording = false;
 
 //   private final String defaultReplayFile = "241009_wallBracing0_goodRun.csv";
-   private final String defaultReplayFile = "241009_wallBracing_pitchedGoodRun.csv";
+//   private final String defaultReplayFile = "241009_wallBracing_pitchedGoodRun.csv";
+   private final String defaultReplayFile = "241009_wallBracing_uneven.csv";
 
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/" + defaultReplayFile).toString(), 100);
    private final ImBoolean enablerReplay = new ImBoolean(false);
