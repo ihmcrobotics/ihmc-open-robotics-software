@@ -7,7 +7,6 @@ import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.nvrtc._nvrtcProgram;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
@@ -18,7 +17,6 @@ import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
-import static org.bytedeco.cuda.global.nvrtc.nvrtcDestroyProgram;
 import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
 class CUDAProgram
@@ -41,9 +39,28 @@ class CUDAProgram
 
    public CUDAProgram(String programName, String programCode)
    {
-      BytePointer ptx = compileKernelToPTX(programName, programCode, null, null, null);
+      // Compile the program
+      _nvrtcProgram compiledProgram = new _nvrtcProgram();
+      compileProgram(programName, programCode, null, null, null, compiledProgram);
+
+      // Get the program's PTX size
+      SizeTPointer ptxSize = new SizeTPointer(1L);
+      error = nvrtcGetPTXSize(compiledProgram, ptxSize);
+      checkNVRTCError(error);
+
+      // Get the PTX
+      BytePointer ptx = new BytePointer(ptxSize.get());
+      error = nvrtcGetPTX(compiledProgram, ptx);
+      checkNVRTCError(error);
+
+      // Load the module using the PTX
       error = cuModuleLoadData(module, ptx);
       checkNVRTCError(error);
+
+      // Release stuff
+      nvrtcDestroyProgram(compiledProgram);
+      compiledProgram.close();
+      ptxSize.close();
       ptx.close();
    }
 
@@ -89,50 +106,40 @@ class CUDAProgram
       for (CUfunc_st kernel : kernels.values())
          kernel.close();
 
+      cuModuleUnload(module);
       module.close();
    }
 
-   private static BytePointer compileKernelToPTX(String programName,
-                                                 String programCode,
-                                                 String[] headerNames,
-                                                 String[] headerContents,
-                                                 String[] compilationOptions)
+   private static void compileProgram(String programName,
+                                      String programCode,
+                                      String[] headerNames,
+                                      String[] headerContents,
+                                      String[] compilationOptions,
+                                      _nvrtcProgram compiledProgram)
    {
       int error;
       try (BytePointer programNamePointer = new BytePointer(programName);
            BytePointer programCodePointer = new BytePointer(programCode);
-           PointerPointer<BytePointer> headerNamesPointer = headerNames == null ? null : new PointerPointer<>(headerNames);
            PointerPointer<BytePointer> headerContentsPointer = headerContents == null ? null : new PointerPointer<>(headerContents);
-           PointerPointer<BytePointer> options = compilationOptions == null ? null : new PointerPointer<>(compilationOptions);
-
-           _nvrtcProgram program = new _nvrtcProgram();
-           SizeTPointer ptxSize = new SizeTPointer(1L))
+           PointerPointer<BytePointer> headerNamesPointer = headerNames == null ? null : new PointerPointer<>(headerNames);
+           PointerPointer<BytePointer> options = compilationOptions == null ? null : new PointerPointer<>(compilationOptions))
       {
          // Create the program
-         error = nvrtcCreateProgram(program, programCodePointer, programNamePointer, headerNames == null ? 0 : headerNames.length, headerContentsPointer, headerNamesPointer);
+         error = nvrtcCreateProgram(compiledProgram,
+                                    programCodePointer,
+                                    programNamePointer,
+                                    headerNames == null ? 0 : headerNames.length,
+                                    headerContentsPointer,
+                                    headerNamesPointer);
          checkNVRTCError(error);
 
          // Compile the program
-         error = nvrtcCompileProgram(program, compilationOptions == null ? 0 : compilationOptions.length, options);
+         error = nvrtcCompileProgram(compiledProgram, compilationOptions == null ? 0 : compilationOptions.length, options);
          checkNVRTCError(error);
 
          // In case of error, print compilation log
          if (error != NVRTC_SUCCESS)
-            printProgramLog(program, programName, Level.FATAL);
-
-         // Get the PTX size
-         error = nvrtcGetPTXSize(program, ptxSize);
-         checkNVRTCError(error);
-
-         // Get the PTX
-         BytePointer ptx = new BytePointer(ptxSize.get());
-         error = nvrtcGetPTX(program, ptx);
-         checkNVRTCError(error);
-
-         // Destroy the program; we don't need it anymore
-         nvrtcDestroyProgram(program);
-
-         return ptx;
+            printProgramLog(compiledProgram, programName, Level.FATAL);
       }
    }
 
