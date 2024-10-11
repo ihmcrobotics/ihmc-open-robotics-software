@@ -9,6 +9,8 @@ import us.ihmc.log.LogTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvjpeg.NVJPEG_STATUS_SUCCESS;
+import static org.bytedeco.cuda.global.nvrtc.NVRTC_SUCCESS;
+import static org.bytedeco.cuda.global.nvrtc.nvrtcGetErrorString;
 
 public class CUDATools
 {
@@ -94,6 +96,17 @@ public class CUDATools
             default -> "UNKNOWN";
          };
          LogTools.error("NVJPEG Error ({}): {}", errorCode, errorName);
+      }
+   }
+
+   public static void checkNVRTCError(int errorCode)
+   {
+      if (errorCode == NVRTC_SUCCESS)
+         return;
+
+      try (BytePointer errorString = nvrtcGetErrorString(errorCode))
+      {
+         LogTools.error("NVRTC error: {}", errorString);
       }
    }
 }
