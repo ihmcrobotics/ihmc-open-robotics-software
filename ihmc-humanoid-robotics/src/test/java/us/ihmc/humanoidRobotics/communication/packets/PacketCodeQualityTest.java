@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import perception_msgs.msg.dds.VideoPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
@@ -688,7 +687,6 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
-      fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
       fieldsToIngore.add(FootstepPlannerStatusMessage.class.getField("footstep_planner_status_")); // In footstep planner land
 
       for (Class<? extends Packet> packetType : allPacketTypes)
