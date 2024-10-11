@@ -215,7 +215,7 @@ public class CUDACompressionTools
          opencv_cudaarithm.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
 
          checkCUDAError(cudaFreeAsync(decompressedMSBData, stream));
-         cudaStreamSynchronize(stream);
+         checkCUDAError(cudaStreamSynchronize(stream));
       }
 
       for (BytePointer data : depthData)
