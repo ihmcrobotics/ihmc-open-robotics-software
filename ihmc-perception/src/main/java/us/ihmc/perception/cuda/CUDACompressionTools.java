@@ -215,6 +215,7 @@ public class CUDACompressionTools
          opencv_cudaarithm.bitwise_or(decompressedMSBMat, decompressedLSBMat, decompressedDepth);
 
          checkCUDAError(cudaFreeAsync(decompressedMSBData, stream));
+         cudaStreamSynchronize(stream);
       }
 
       for (BytePointer data : depthData)
@@ -376,47 +377,51 @@ public class CUDACompressionTools
    public static BytePointer decompress(BytePointer compressedData, long compressedDataSize, boolean outputToDevice, CUstream_st cudaStream)
    {
       if (!NVCOMP_AVAILABLE)
-         return new BytePointer(1);
+         return new BytePointer(1L);
 
-      try (BytePointer compressedDeviceBuffer = new BytePointer();
-           BytePointer decompressedDeviceBuffer = new BytePointer())
+      BytePointer compressedDeviceBuffer = new BytePointer();
+      BytePointer decompressedDeviceBuffer = new BytePointer();
+
+      // Upload compressed data to GPU
+      checkCUDAError(cudaMallocAsync(compressedDeviceBuffer, compressedDataSize, cudaStream));
+      checkCUDAError(cudaMemcpyAsync(compressedDeviceBuffer, compressedData, compressedDataSize, cudart.cudaMemcpyDefault, cudaStream));
+
+      // Create a decompression manager
+      nvcompManagerBase decompressionManager = nvcomp.create_manager(compressedDeviceBuffer, cudaStream, 0, nvcomp.NoComputeNoVerify);
+      DecompressionConfig decompressionConfig = decompressionManager.configure_decompression(compressedDeviceBuffer);
+      long decompressedDataSize = decompressionConfig.decomp_data_size();
+
+      // Allocate GPU memory for decompressed data
+      checkCUDAError(cudaMallocAsync(decompressedDeviceBuffer, decompressedDataSize, cudaStream));
+
+      // Decompress the data
+      decompressionManager.decompress(decompressedDeviceBuffer, compressedDeviceBuffer, decompressionConfig);
+
+      BytePointer decompressedData;
+      if (outputToDevice) // Copy data to output pointer on device
       {
-         // Upload compressed data to GPU
-         checkCUDAError(cudaMallocAsync(compressedDeviceBuffer, compressedDataSize, cudaStream));
-         checkCUDAError(cudaMemcpyAsync(compressedDeviceBuffer, compressedData, compressedDataSize, cudart.cudaMemcpyDefault, cudaStream));
-
-         // Create a decompression manager
-         nvcompManagerBase decompressionManager = nvcomp.create_manager(compressedDeviceBuffer, cudaStream, 0, nvcomp.NoComputeNoVerify);
-         DecompressionConfig decompressionConfig = decompressionManager.configure_decompression(compressedDeviceBuffer);
-         long decompressedDataSize = decompressionConfig.decomp_data_size();
-
-         // Allocate GPU memory for decompressed data
-         checkCUDAError(cudaMallocAsync(decompressedDeviceBuffer, decompressedDataSize, cudaStream));
-
-         // Decompress the data
-         decompressionManager.decompress(decompressedDeviceBuffer, compressedDeviceBuffer, decompressionConfig);
-
-         BytePointer decompressedData;
-         if (outputToDevice) // Copy data to output pointer on device
-         {
-            decompressedData = new BytePointer();
-            cudaMallocAsync(decompressedData, decompressedDataSize, cudaStream);
-         }
-         else // Download decompressed data to host
-         {
-            decompressedData = new BytePointer(decompressedDataSize);
-            decompressedData.limit(decompressedDataSize);
-         }
-         checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudaMemcpyDefault, cudaStream));
-
-         checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
-         checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
-         decompressionManager.close();
-         decompressionConfig.close();
-
-         checkCUDAError(cudaStreamSynchronize(cudaStream));
-
-         return decompressedData;
+         decompressedData = new BytePointer(Pointer.malloc(Long.BYTES)); // Allocate enough bytes for 1 pointer
+         cudaMallocAsync(decompressedData, decompressedDataSize, cudaStream);
       }
+      else // Download decompressed data to host
+      {
+         decompressedData = new BytePointer(Pointer.malloc(decompressedDataSize));
+         decompressedData.limit(decompressedDataSize);
+      }
+
+      checkCUDAError(cudaMemcpyAsync(decompressedData, decompressedDeviceBuffer, decompressedDataSize, cudaMemcpyDefault, cudaStream));
+
+      checkCUDAError(cudaFreeAsync(compressedDeviceBuffer, cudaStream));
+      checkCUDAError(cudaFreeAsync(decompressedDeviceBuffer, cudaStream));
+
+      checkCUDAError(cudaStreamSynchronize(cudaStream));
+
+      compressedDeviceBuffer.close();
+      decompressedDeviceBuffer.close();
+
+      decompressionManager.close();
+      decompressionConfig.close();
+
+      return decompressedData;
    }
 }
