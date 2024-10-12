@@ -2,12 +2,16 @@ package us.ihmc.avatar.logProcessor;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoPose3D;
@@ -37,7 +41,8 @@ public class SCS2LogLocomotionData
    private YoPoint2D capturePoint;
    private final double plotTimeResolution = 0.1;
    private double lastCoMPlotTime = Double.NaN;
-   private SideDependentList<ArrayList<SCS2LogJointTracker>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<ArrayList<SCS2LogJointTracker>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<ReferenceFrame> handFrames = new SideDependentList<>();
    private boolean requestStopProcessing = false;
 
    public void setup(LogSession logSession)
@@ -95,6 +100,14 @@ public class SCS2LogLocomotionData
                armJointPositions.get(side).add(new SCS2LogJointTracker(yoDouble));
             }
          }
+      }
+
+      Robot robot = logSession.getRobots().get(0);
+      for (RobotSide side : RobotSide.values)
+      {
+         SimRigidBodyBasics handLink = robot.getRigidBody("%s_GRIPPER_YAW_LINK".formatted(side.getSideNameInAllCaps()));
+         MovingReferenceFrame handFrame = handLink.getParentJoint().getFrameAfterJoint();
+         handFrames.set(side, handFrame);
       }
 
       logSession.addAfterReadCallback(this::afterRead);
