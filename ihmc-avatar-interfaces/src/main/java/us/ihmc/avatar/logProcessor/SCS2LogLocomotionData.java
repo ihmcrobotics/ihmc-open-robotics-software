@@ -43,7 +43,9 @@ public class SCS2LogLocomotionData
    private double lastCoMPlotTime = Double.NaN;
    private final SideDependentList<ArrayList<SCS2LogJointTracker>> armJointPositions = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final SideDependentList<ReferenceFrame> handFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<>();
    private boolean requestStopProcessing = false;
+   private Robot robot;
 
    public void setup(LogSession logSession)
    {
@@ -102,12 +104,16 @@ public class SCS2LogLocomotionData
          }
       }
 
-      Robot robot = logSession.getRobots().get(0);
+      robot = logSession.getRobots().get(0);
       for (RobotSide side : RobotSide.values)
       {
          SimRigidBodyBasics handLink = robot.getRigidBody("%s_GRIPPER_YAW_LINK".formatted(side.getSideNameInAllCaps()));
          MovingReferenceFrame handFrame = handLink.getParentJoint().getFrameAfterJoint();
          handFrames.set(side, handFrame);
+
+         SimRigidBodyBasics footLink = robot.getRigidBody("%s_FOOT_LINK".formatted(side.getSideNameInAllCaps()));
+         MovingReferenceFrame footFrame = footLink.getParentJoint().getFrameAfterJoint();
+         footFrames.set(side, footFrame);
       }
 
       logSession.addAfterReadCallback(this::afterRead);
@@ -171,8 +177,12 @@ public class SCS2LogLocomotionData
 
    private void recordEntry(double currentTime, SCS2LogWalk logWalk)
    {
+      robot.updateFrames();
+
       logWalk.getTimes().add(currentTime);
       logWalk.getPelvisPoses().add().set(pelvisPose);
+      for (RobotSide side : RobotSide.values)
+         logWalk.getHandPoses().get(side).add().set(handFrames.get(side).getTransformToDesiredFrame(footFrames.get(side)));
       logWalk.getComs().add().set(centerOfMass);
       logWalk.getIcps().add().set(capturePoint);
       lastCenterOfMass.set(centerOfMass);
