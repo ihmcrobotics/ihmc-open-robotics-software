@@ -19,7 +19,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
 import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
-class CUDAProgram
+public class CUDAProgram
 {
    private final Map<String, CUfunc_st> kernels = new HashMap<>();
 
