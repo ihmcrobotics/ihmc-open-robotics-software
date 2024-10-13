@@ -95,6 +95,11 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
       }
    }
 
+   public void drawToSVG()
+   {
+      new BehaviorTreeSVGWriter(this, saveFileDirectory);
+   }
+
    /**
     * Loads just this node's definition data. Not recursive
     * because higher level node builders are required.
