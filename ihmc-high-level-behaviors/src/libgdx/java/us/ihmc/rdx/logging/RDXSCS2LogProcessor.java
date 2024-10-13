@@ -182,7 +182,7 @@ public class RDXSCS2LogProcessor
                tableFlags += ImGuiTableFlags.BordersV;
                tableFlags += ImGuiTableFlags.NoBordersInBody;
 
-               if (ImGui.beginTable(labels.get("Logs"), 8, tableFlags))
+               if (ImGui.beginTable(labels.get("Logs"), 9, tableFlags))
                {
                   float charWidth = ImGuiTools.calcTextSizeX("A");
                   ImGui.tableSetupColumn(labels.get("Name"), ImGuiTableColumnFlags.WidthFixed, 50 * charWidth);
@@ -193,6 +193,7 @@ public class RDXSCS2LogProcessor
                   ImGui.tableSetupColumn(labels.get("Footsteps"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("Coms"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
                   ImGui.tableSetupColumn(labels.get("workingCounterMismatch"), ImGuiTableColumnFlags.WidthFixed, 9 * charWidth);
+                  ImGui.tableSetupColumn(labels.get("Plot hand poses"), ImGuiTableColumnFlags.WidthFixed, 15 * charWidth);
 
                   ImGui.tableSetupScrollFreeze(0, 1);
                   ImGui.tableHeadersRow();
@@ -255,6 +256,76 @@ public class RDXSCS2LogProcessor
                      textIfPositive(logProcessor.getNumberOfComsStat());
                      ImGui.tableNextColumn();
                      textIfPositive(logProcessor.getWorkingCounterMismatchStat());
+                     ImGui.tableNextColumn();
+                     if (ImGuiTools.textWithUnderlineOnHover("Plot hand poses") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                     {
+                        ThreadTools.startAsDaemon(() ->
+                        {
+                           String logFolderName = logDirectory.getFileName().toString();
+                           Path pelvisProgressCSV = logDirectory.resolve(logFolderName + "_LeftArmPoses.csv");
+
+                           if (Files.exists(pelvisProgressCSV))
+                           {
+                              try
+                              {
+                                 Plot pyplot = Plot.create();
+
+                                 try (BufferedReader reader = Files.newBufferedReader(pelvisProgressCSV))
+                                 {
+                                    reader.readLine(); // skip header
+
+                                    ArrayList<Double> times = new ArrayList<>();
+                                    ArrayList<Double> xs = new ArrayList<>();
+                                    ArrayList<Double> ys = new ArrayList<>();
+                                    ArrayList<Double> zs = new ArrayList<>();
+                                    ArrayList<Double> yaws = new ArrayList<>();
+                                    ArrayList<Double> pitches = new ArrayList<>();
+                                    ArrayList<Double> rolls = new ArrayList<>();
+
+                                    String line;
+                                    while ((line = reader.readLine()) != null)
+                                    {
+                                       String[] values = line.split(",");
+
+                                       times.add(Double.parseDouble(values[0]));
+                                       xs.add(Double.parseDouble(values[1]));
+                                       ys.add(Double.parseDouble(values[2]));
+                                       zs.add(Double.parseDouble(values[3]));
+                                       yaws.add(Double.parseDouble(values[4]));
+                                       pitches.add(Double.parseDouble(values[5]));
+                                       rolls.add(Double.parseDouble(values[6]));
+                                    }
+
+                                    pyplot.plot().add(times, xs).label("x");
+                                    pyplot.plot().add(times, ys).label("y");
+                                    pyplot.plot().add(times, zs).label("z");
+                                    pyplot.plot().add(times, yaws).label("yaw");
+                                    pyplot.plot().add(times, pitches).label("pitch");
+                                    pyplot.plot().add(times, rolls).label("roll");
+                                 }
+                                 catch (IOException e)
+                                 {
+                                    throw new RuntimeException("Error reading CSV file.", e);
+                                 }
+
+                                 // Convert Pascal case to title case
+                                 String afterUnderscore = logFolderName.substring(logFolderName.lastIndexOf("_") + 1);
+                                 String titleCaseString = WordUtils.capitalizeFully(afterUnderscore.replaceAll("([a-z])([A-Z])", "$1 $2"));
+
+                                 pyplot.xlabel("Time (s)");
+//                                 pyplot.ylabel("Pelvis Distance to Frame (m)");
+                                 pyplot.title("%s Hand Pose Trajectory".formatted(titleCaseString));
+                                 pyplot.legend();
+                                 pyplot.show();
+                              }
+                              catch (IOException | PythonExecutionException e)
+                              {
+                                 throw new RuntimeException(e);
+                              }
+                           }
+                        }, "Plot Hand Poses");
+
+                     }
                   }
 
                   ImGui.endTable();
