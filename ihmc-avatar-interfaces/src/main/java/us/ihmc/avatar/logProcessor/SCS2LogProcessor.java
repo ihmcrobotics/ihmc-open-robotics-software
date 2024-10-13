@@ -2,6 +2,7 @@ package us.ihmc.avatar.logProcessor;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -222,6 +224,33 @@ public class SCS2LogProcessor
             catch (IOException e)
             {
                LogTools.error("Failed to write to CSV file.", e);
+            }
+
+            for (RobotSide side : RobotSide.values)
+            {
+               try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve("%s_%sArmPoses.csv".formatted(logFolderName, side.getPascalCaseName()))))
+               {
+                  writer.write("Time,X,Y,Z,Yaw,Pitch,Roll"); // header
+                  writer.newLine();
+                  for (SCS2LogWalk logWalk : locomotionData.getLogWalks())
+                  {
+                     for (int i = 0; i < logWalk.getTimes().size(); i++)
+                     {
+                        writer.write("%f,%f,%f,%f,%f,%f,%f".formatted(logWalk.getTimes().get(i),
+                                                                      logWalk.getHandPoses().get(side).get(i).getX(),
+                                                                      logWalk.getHandPoses().get(side).get(i).getY(),
+                                                                      logWalk.getHandPoses().get(side).get(i).getZ(),
+                                                                      logWalk.getHandPoses().get(side).get(i).getYaw(),
+                                                                      logWalk.getHandPoses().get(side).get(i).getPitch(),
+                                                                      logWalk.getHandPoses().get(side).get(i).getRoll()));
+                        writer.newLine();
+                     }
+                  }
+               }
+               catch (IOException e)
+               {
+                  LogTools.error("Failed to write to CSV file.", e);
+               }
             }
 
             try (BufferedWriter writer = Files.newBufferedWriter(logPath.resolve(logFolderName + "_PelvisDoorProgress.csv")))

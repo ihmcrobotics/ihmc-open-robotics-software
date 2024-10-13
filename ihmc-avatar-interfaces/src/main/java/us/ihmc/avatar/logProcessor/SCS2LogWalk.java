@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ public class SCS2LogWalk
    private final ArrayList<SCS2LogFootstep> footsteps = new ArrayList<>();
    private final TDoubleArrayList times = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> pelvisPoses = new RecyclingArrayList<>(Pose3D::new);
+   private final SideDependentList<RecyclingArrayList<Pose3D>> handPoses = new SideDependentList<>(new RecyclingArrayList<>(Pose3D::new),
+                                                                                                   new RecyclingArrayList<>(Pose3D::new));
    private final RecyclingArrayList<Point2D> coms = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point2D> icps = new RecyclingArrayList<>(Point2D::new);
 
@@ -68,6 +71,11 @@ public class SCS2LogWalk
    public RecyclingArrayList<Pose3D> getPelvisPoses()
    {
       return pelvisPoses;
+   }
+
+   public SideDependentList<RecyclingArrayList<Pose3D>> getHandPoses()
+   {
+      return handPoses;
    }
 
    public RecyclingArrayList<Point2D> getComs()
