@@ -236,7 +236,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (ImGui.menuItem(labels.get("Draw to SVG")))
       {
-         definition.drawToSVG();
+         state.drawToSVG();
       }
    }
 
