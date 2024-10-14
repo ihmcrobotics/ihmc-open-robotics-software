@@ -150,7 +150,7 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void onUpdateEnd()
+   public void onUpdateEnd(ReferenceFrame loadInFrame)
    {
       if (requestRecordReplay && enablerRecording.get())
       { // Toggle record state
@@ -179,7 +179,7 @@ public class KinematicsRecordReplay
          else
          {
             LogTools.info("Starting to replay!");
-            isReplaying = trajectoryRecorder.onReplayStart(replayPath.get());
+            isReplaying = trajectoryRecorder.onReplayStart(replayPath.get(), loadInFrame);
          }
       }
 
@@ -189,7 +189,7 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, double forwardJoystickValue, double lateralJoystickValue)
+   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, double forwardJoystickValue, double lateralJoystickValue, ReferenceFrame recordInFrame)
    {
       if (!isRecording)
          return;
@@ -199,7 +199,8 @@ public class KinematicsRecordReplay
                                               triggerPressed,
                                               forwardJoystickValue,
                                               lateralJoystickValue,
-                                              handDesiredControlFrames.get(robotSide).getReferenceFrame());
+                                              handDesiredControlFrames.get(robotSide).getReferenceFrame(),
+                                              recordInFrame);
    }
 
    /**
