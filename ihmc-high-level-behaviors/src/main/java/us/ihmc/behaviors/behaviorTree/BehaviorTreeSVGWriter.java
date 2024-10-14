@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.jfree.svg.SVGGraphics2D;
+import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.log.LogTools;
 
 import java.io.FileWriter;
@@ -14,6 +15,8 @@ public class BehaviorTreeSVGWriter
    private int i = 0;
    private int x = 100;
    private int y = 100;
+   private int actionSequenceX = x;
+   private int actionSequenceY = y;
    private final ArrayList<BehaviorTreeSVGNode> svgNodes = new ArrayList<>();
 
    public BehaviorTreeSVGWriter(BehaviorTreeNodeState node)
@@ -21,13 +24,22 @@ public class BehaviorTreeSVGWriter
       double documentSize = 2000.0;
       SVGGraphics2D svgGraphics2D = new SVGGraphics2D(documentSize, documentSize);
 
+
       BehaviorTreeTools.runForSubtreeNodes(node, child ->
       {
+         if (child instanceof ActionSequenceState)
+         {
+            actionSequenceX = x;
+            actionSequenceY = y;
+         }
+
          BehaviorTreeSVGNode svgNode = new BehaviorTreeSVGNode(svgGraphics2D, child, svgNodes, i, x, y);
          svgNodes.add(svgNode);
 
-         int verticalSpacing = 10;
-         y += svgNode.getHeight() + verticalSpacing;
+         y += svgNode.getHeight();
+
+         if (svgNodes.size() % 12 == 0)
+            y = actionSequenceY + 30;
 
          ++i;
       });
