@@ -18,7 +18,7 @@ public class BehaviorTreeSVGWriter
 
    public BehaviorTreeSVGWriter(BehaviorTreeNodeState node)
    {
-      double documentSize = 1500.0;
+      double documentSize = 2000.0;
       SVGGraphics2D svgGraphics2D = new SVGGraphics2D(documentSize, documentSize);
 
       BehaviorTreeTools.runForSubtreeNodes(node, child ->
