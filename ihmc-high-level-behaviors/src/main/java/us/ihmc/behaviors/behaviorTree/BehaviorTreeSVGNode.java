@@ -3,8 +3,10 @@ package us.ihmc.behaviors.behaviorTree;
 import org.apache.commons.lang.WordUtils;
 import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
@@ -38,16 +40,47 @@ public class BehaviorTreeSVGNode
       this.originX = originX;
       this.originY = originY;
 
-      x = originX;
-      y = originY;
+      BehaviorTreeSVGNode actionSequenceNode = null;
+      for (BehaviorTreeSVGNode allNode : allNodes)
+      {
+         if (allNode.node instanceof ActionSequenceState)
+         {
+            actionSequenceNode = allNode;
+         }
+      }
 
       if (node instanceof ActionNodeState actionNode)
       {
-//         index = actionNode.getActionIndex();
-//         node.
+         if (actionNode.getDefinition() instanceof ActionNodeDefinition actionNodeDefinition)
+         {
+            if (actionNodeDefinition.getExecuteAfterPrevious().getValue())
+            {
+               originX = allNodes.get(allNodes.size() - 1).x;
+            }
+            else if (actionSequenceNode != null && actionNodeDefinition.getExecuteAfterBeginning().getValue())
+            {
+               originX = actionSequenceNode.x;
+            }
+            else
+            {
+               long afterID = actionNodeDefinition.getExecuteAfterNodeID().getValue();
+               for (BehaviorTreeSVGNode otherNode : allNodes)
+               {
+                  if (otherNode.node instanceof ActionNodeState existingActionNode)
+                  {
+                     if (existingActionNode.getID() == afterID)
+                     {
+                        originX = otherNode.x;
+                     }
+                  }
+               }
+            }
+         }
       }
 
-//      svgGraphics2D.setStroke();
+
+      x = originX;
+      y = originY;
 
       svgGraphics2D.setColor(new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256), 100));
       svgGraphics2D.setStroke(new BasicStroke(0.5f));
@@ -60,7 +93,7 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 8));
       String indexString = "%d".formatted(index);
       svgGraphics2D.drawString(indexString, x + 4 * (2 - indexString.length()), y);
-      x += 12;
+      x += 14;
       y += 4;
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -70,6 +103,7 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 10));
       svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), x, y);
 
+      x = originX + 80;
    }
 
    public int getHeight()
