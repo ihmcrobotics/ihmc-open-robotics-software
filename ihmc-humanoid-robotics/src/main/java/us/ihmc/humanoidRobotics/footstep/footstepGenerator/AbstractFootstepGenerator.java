@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.Overhead
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
+import us.ihmc.robotics.referenceFrames.Pose2DReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -162,7 +162,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       FramePose2D rightPose2d = new FramePose2D(rightPose);
 
       startPose.interpolate(leftPose2d, rightPose2d, 0.5);
-      Pose2dReferenceFrame startFramePose = new Pose2dReferenceFrame("StartPoseFrame", startPose);
+      Pose2DReferenceFrame startFramePose = new Pose2DReferenceFrame("StartPoseFrame", startPose);
 
       leftPose.changeFrame(startFramePose);
       rightPose.changeFrame(startFramePose);

@@ -5,7 +5,7 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 import java.util.EnumMap;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -16,7 +16,7 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoRegistry registry;
 
-   private final FilteredVelocityYoFrameVector localVelocityFromFD;
+   private final FilteredFiniteDifferenceYoFrameVector3D localVelocityFromFD;
 
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
@@ -30,8 +30,8 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    {
       registry = new YoRegistry(namePrefix + "PositionVelocity3DCheck");
       dummyAlpha = new YoDouble("dummyAlpha", registry);
-      localVelocityFromFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
-            position);
+      localVelocityFromFD = new FilteredFiniteDifferenceYoFrameVector3D(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
+                                                                        position);
       int windowSize = 10;
       localVelocityFiltered = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, localVelocityFromFD, registry);
       filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, angularVelocityToCheck, registry);

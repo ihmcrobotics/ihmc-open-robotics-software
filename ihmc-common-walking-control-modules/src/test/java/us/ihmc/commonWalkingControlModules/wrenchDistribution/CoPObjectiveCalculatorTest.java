@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -8,11 +7,8 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -22,8 +18,6 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -43,7 +37,6 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;

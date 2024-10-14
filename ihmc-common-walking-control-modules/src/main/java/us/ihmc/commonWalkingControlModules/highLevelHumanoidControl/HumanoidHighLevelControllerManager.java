@@ -46,6 +46,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.DesiredOutputMessaging;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -358,13 +359,13 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
          return;
       jointDesiredOutputBroadcastCounter = 0;
 
-      lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
+      DesiredOutputMessaging.copyToMessage(lowLevelControllerOutput, robotDesiredConfigurationData);
 
       HighLevelControllerState currentState = stateMachine.getCurrentState();
       if (currentState == null || currentState.getOutputForRootJoint() == null)
          return;
 
-      currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+      DesiredOutputMessaging.copyToMessage(currentState.getOutputForRootJoint(), robotDesiredConfigurationData);
 
       robotDesiredConfigurationData.setWallTime(System.nanoTime());
       // TODO use or remove joint name hash

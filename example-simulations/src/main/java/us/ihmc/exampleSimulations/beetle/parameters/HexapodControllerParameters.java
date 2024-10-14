@@ -2,8 +2,7 @@ package us.ihmc.exampleSimulations.beetle.parameters;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public interface HexapodControllerParameters
@@ -16,7 +15,7 @@ public interface HexapodControllerParameters
 
    double getSwingZProportionalGain();
 
-   PIDSE3Gains getBodySpatialGains();
+   PIDSE3GainsBasics getBodySpatialGains();
 
    void getBodySpatialLinearQPWeight(Vector3D linearWeight);
 
@@ -24,7 +23,7 @@ public interface HexapodControllerParameters
 
    SelectionMatrix6D getBodySpatialSelectionMatrix();
 
-   YoPIDSE3Gains getFootGains();
+   PIDSE3GainsBasics getFootGains();
 
    WholeBodyControllerCoreMode getControlMode();
 }

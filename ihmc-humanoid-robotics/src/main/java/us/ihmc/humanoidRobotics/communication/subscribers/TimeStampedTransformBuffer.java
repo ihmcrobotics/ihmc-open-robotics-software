@@ -13,8 +13,6 @@ public class TimeStampedTransformBuffer
    private long newestTimestamp;
    private boolean filledBufferAtleastOnce;
 
-   private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
-   
    public TimeStampedTransformBuffer(int size)
    {
       this.size = size;
@@ -59,7 +57,7 @@ public class TimeStampedTransformBuffer
 
             TimeStampedTransform3D ceilingData = buffer[index];
 
-            transformInterpolationCalculator.interpolate(floorData, ceilingData, timeStampedTransform3DToPack, timestamp);
+            TransformInterpolationCalculator.interpolate(floorData, ceilingData, timeStampedTransform3DToPack, timestamp);
             return true;
          }
       }

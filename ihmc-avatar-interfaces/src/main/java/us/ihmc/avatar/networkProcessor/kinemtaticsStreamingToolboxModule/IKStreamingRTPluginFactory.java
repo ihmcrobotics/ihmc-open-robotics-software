@@ -30,6 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ThreadTimer;
@@ -251,7 +252,8 @@ public class IKStreamingRTPluginFactory
          HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(desiredFullRobotModel.getOneDoFJoints().length);
          ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(desiredFullRobotModel.getForceSensorDefinitions()));
          CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(desiredFullRobotModel);
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(desiredFullRobotModel.getFoot(RobotSide.LEFT),
+                                                                                                            desiredFullRobotModel.getFoot(RobotSide.RIGHT));
          LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(desiredFullRobotModel.getControllableOneDoFJoints());
          RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
          contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);

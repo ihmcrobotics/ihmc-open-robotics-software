@@ -6,8 +6,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

@@ -14,36 +14,11 @@ import us.ihmc.commons.MathTools;
  */
 public class TransformInterpolationCalculator
 {
-   private final Vector3D transform1Translation = new Vector3D();
-   private final Vector3D transform2Translation = new Vector3D();
-   private final Quaternion transform1Quaternion = new Quaternion();
-   private final Quaternion transform2Quaternion = new Quaternion();
-   private final Vector3D interpolatedTranslation = new Vector3D();
-   private final Quaternion interpolatedQuaternion = new Quaternion();
-   
-   /**
-    *        Computes the interpolation between the two transforms using the alpha parameter to control the blend.
-    *        Note that the transforms must have a proper rotation matrix, meaning it satisfies: R'R = I and det(R) = 1
-    * @param transform1
-    * @param transform2
-    * @param alpha Ranges from [0, 1], where return = (1- alpha) * tansform1 + (alpha) * transform2
-    * @return  return = (1- alpha) * tansform1 + alpha * transform2
-    */
-   public void computeInterpolation(RigidBodyTransform transform1, RigidBodyTransform transform2, RigidBodyTransform result, double alpha)
+   private TransformInterpolationCalculator()
    {
-      alpha = MathTools.clamp(alpha, 0.0, 1.0);
-      
-      transform1.get(transform1Quaternion, transform1Translation);
-      transform2.get(transform2Quaternion, transform2Translation);
-      
-      interpolatedTranslation.interpolate(transform1Translation, transform2Translation, alpha);
-      interpolatedQuaternion.interpolate(transform1Quaternion, transform2Quaternion, alpha);
-      
-      result.setRotationAndZeroTranslation(interpolatedQuaternion);
-      result.getTranslation().set(interpolatedTranslation);
    }
 
-   public void interpolate(TimeStampedTransform3D timeStampedTransform1, TimeStampedTransform3D timeStampedTransform2, TimeStampedTransform3D resultToPack, long timeStamp)
+   public static void interpolate(TimeStampedTransform3D timeStampedTransform1, TimeStampedTransform3D timeStampedTransform2, TimeStampedTransform3D resultToPack, long timeStamp)
    {
       long timeStamp1 = timeStampedTransform1.getTimeStamp();
       long timeStamp2 = timeStampedTransform2.getTimeStamp();
@@ -56,7 +31,6 @@ public class TransformInterpolationCalculator
       resultToPack.setTimeStamp(timeStamp);
 
       double alpha = ((double) (timeStamp - timeStamp1)) / ((double) (timeStamp2 - timeStamp1));
-      RigidBodyTransform interpolatedTransform = resultToPack.getTransform3D();
-      computeInterpolation(transform1, transform2, interpolatedTransform, alpha);
+      resultToPack.getTransform3D().interpolate(transform1, transform2, alpha);
    }
 }

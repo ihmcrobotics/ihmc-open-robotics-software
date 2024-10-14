@@ -1,76 +1,76 @@
 package us.ihmc.robotics.math;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoReferencePose extends ReferenceFrame
 {
-   private final YoFramePoseUsingYawPitchRoll yoFramePose;
+   private final YoFramePose3D yoFramePose;
 
    //Below are used for interpolation only
-   private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
    private final RigidBodyTransform interpolationStartingPosition = new RigidBodyTransform();
    private final RigidBodyTransform interpolationGoalPosition = new RigidBodyTransform();
    private final RigidBodyTransform output = new RigidBodyTransform();
 
-   //Below are used for updating YoFramePose only
-   private final Quaternion rotation = new Quaternion();
-   private final Vector3D translation = new Vector3D();
-
    public YoReferencePose(String frameName, ReferenceFrame parentFrame, YoRegistry registry)
    {
       super(frameName, parentFrame);
-      yoFramePose = new YoFramePoseUsingYawPitchRoll(frameName + "_", this, registry);
+      yoFramePose = new YoFramePose3D(frameName + "_", this, registry);
    }
 
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      rotation.set(yoFramePose.getYawPitchRoll());
-      transformToParent.getRotation().set(rotation);
+      transformToParent.getRotation().set(yoFramePose.getOrientation());
       YoFramePoint3D yoFramePoint = yoFramePose.getPosition();
       transformToParent.getTranslation().set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
    }
 
-   public void setAndUpdate(RigidBodyTransform transform)
+   public void setAndUpdate(RigidBodyTransformReadOnly transform)
    {
-      transform.get(rotation, translation);
-      setAndUpdate(rotation, translation);
+      setAndUpdate(transform.getRotation(), transform.getTranslation());
    }
 
-   public void setAndUpdate(Vector3D newTranslation)
+   public void setAndUpdate(Tuple3DReadOnly newTranslation)
    {
-      set(newTranslation);
+      setTranslation(newTranslation);
       update();
    }
 
-   public void setAndUpdate(Quaternion newRotation)
+   public void setAndUpdate(Orientation3DReadOnly newRotation)
    {
-      set(newRotation);
+      setRotation(newRotation);
       update();
    }
 
-   public void setAndUpdate(Quaternion newRotation, Vector3D newTranslation)
+   public void setAndUpdate(Orientation3DReadOnly newRotation, Tuple3DReadOnly newTranslation)
    {
-      set(newRotation);
-      set(newTranslation);
+      setRotation(newRotation);
+      setTranslation(newTranslation);
       update();
    }
 
-   private void set(Quaternion newRotation)
+   private void setRotation(Orientation3DReadOnly newRotation)
    {
-      yoFramePose.setOrientation(newRotation);
+      yoFramePose.getRotation().set(newRotation);
    }
 
-   private void set(Vector3D newTranslation)
+   private void setTranslation(Tuple3DReadOnly newTranslation)
    {
-      yoFramePose.setPosition(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
+      yoFramePose.getPosition().set(newTranslation);
    }
 
    public void interpolate(YoReferencePose start, YoReferencePose goal, double alpha)
@@ -78,16 +78,16 @@ public class YoReferencePose extends ReferenceFrame
       start.getTransformToDesiredFrame(interpolationStartingPosition, getParent());
       goal.getTransformToDesiredFrame(interpolationGoalPosition, getParent());
 
-      transformInterpolationCalculator.computeInterpolation(interpolationStartingPosition, interpolationGoalPosition, output, alpha);
+      output.interpolate(interpolationStartingPosition, interpolationGoalPosition, alpha);
       setAndUpdate(output);
    }
 
-   public void get(Quaternion rotation)
+   public void getRotation(Orientation3DBasics rotation)
    {
       rotation.set(yoFramePose.getOrientation());
    }
 
-   public void get(Vector3D translation)
+   public void getTranslation(Tuple3DBasics translation)
    {
       translation.set(yoFramePose.getPosition());
    }

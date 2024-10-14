@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
+import us.ihmc.robotics.math.filters.DeadbandedYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -92,9 +92,9 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoDouble xDeadzoneSize;
    private final YoDouble yDeadzoneSize;
    private final YoDouble zDeadzoneSize;
-   private final DeadzoneYoVariable goalTranslationWithDeadzoneX;
-   private final DeadzoneYoVariable goalTranslationWithDeadzoneY;
-   private final DeadzoneYoVariable goalTranslationWithDeadzoneZ;
+   private final DeadbandedYoVariable goalTranslationWithDeadzoneX;
+   private final DeadbandedYoVariable goalTranslationWithDeadzoneY;
+   private final DeadbandedYoVariable goalTranslationWithDeadzoneZ;
    private final YoDouble goalTranslationRawX;
    private final YoDouble goalTranslationRawY;
    private final YoDouble goalTranslationRawZ;
@@ -103,7 +103,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    //Deadzone rotation Variables
    private final YoDouble yawDeadzoneSize;
-   private final DeadzoneYoVariable goalYawWithDeadZone;
+   private final DeadbandedYoVariable goalYawWithDeadZone;
    private final YoDouble goalYawRaw;
    private final FrameQuaternion offsetBetweenStartAndGoal_Rotation = new FrameQuaternion(worldFrame);
    private final FrameQuaternion updatedGoalOffsetWithDeadZone_Rotation = new FrameQuaternion(worldFrame);
@@ -196,14 +196,14 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalTranslationRawY = new YoDouble("goalTranslationRawY", registry);
       goalTranslationRawZ = new YoDouble("goalTranslationRawZ", registry);
 
-      goalTranslationWithDeadzoneX = new DeadzoneYoVariable("goalTranslationWithDeadzoneX", goalTranslationRawX, xDeadzoneSize, registry);
-      goalTranslationWithDeadzoneY = new DeadzoneYoVariable("goalTranslationWithDeadzoneY", goalTranslationRawY, yDeadzoneSize, registry);
-      goalTranslationWithDeadzoneZ = new DeadzoneYoVariable("goalTranslationWithDeadzoneZ", goalTranslationRawZ, zDeadzoneSize, registry);
+      goalTranslationWithDeadzoneX = new DeadbandedYoVariable("goalTranslationWithDeadzoneX", goalTranslationRawX, xDeadzoneSize, registry);
+      goalTranslationWithDeadzoneY = new DeadbandedYoVariable("goalTranslationWithDeadzoneY", goalTranslationRawY, yDeadzoneSize, registry);
+      goalTranslationWithDeadzoneZ = new DeadbandedYoVariable("goalTranslationWithDeadzoneZ", goalTranslationRawZ, zDeadzoneSize, registry);
 
       yawDeadzoneSize = new YoDouble("yawDeadzoneSize", registry);
       yawDeadzoneSize.set(Math.toRadians(parameters.getYawDeadzoneInDegrees()));
       goalYawRaw = new YoDouble("goalYawRaw", registry);
-      goalYawWithDeadZone = new DeadzoneYoVariable("goalYawWithDeadZone", goalYawRaw, yawDeadzoneSize, registry);
+      goalYawWithDeadZone = new DeadbandedYoVariable("goalYawWithDeadZone", goalYawRaw, yawDeadzoneSize, registry);
 
       // for feedback in SCS
       yoStartOffsetErrorPose_InWorldFrame = new YoFramePoseUsingYawPitchRoll("yoStartOffsetErrorPose_InWorldFrame", worldFrame, registry);

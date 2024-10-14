@@ -14,7 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
+import us.ihmc.robotics.referenceFrames.Pose2DReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ public class TurnWalkTurnPlanner
    private final FramePose2D goalPose = new FramePose2D();
    private RobotSide initialStanceSide;
    private RobotSide lastStepSide;
-   private final Pose2dReferenceFrame robotStartFrame = new Pose2dReferenceFrame("RobotStartFrame", ReferenceFrame.getWorldFrame());
-   private final Pose2dReferenceFrame planStanceFootFrame = new Pose2dReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
-   private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame robotStartFrame = new Pose2DReferenceFrame("RobotStartFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame planStanceFootFrame = new Pose2DReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame turningFrame = new Pose2DReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
    private double groundHeight = 0.0;
 
    private final DefaultFootstepPlannerParametersReadOnly parameters;

@@ -2,14 +2,14 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoRegistry registry;
 
-   private final FilteredVelocityYoVariable referenceVelocity;
+   private final FilteredFiniteDifferenceYoVariable referenceVelocity;
 
    private final SimpleMovingAverageFilteredYoVariable filteredRawVelocityToCheck;
    private final SimpleMovingAverageFilteredYoVariable filteredProcessedVelocityToCheck;
@@ -27,7 +27,7 @@ public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
       this.dt = dt;
       registry = new YoRegistry(namePrefix + "PositionVelocity1DCheck");
 
-      referenceVelocity = new FilteredVelocityYoVariable(namePrefix + "_referenceVelocity", "", 0.0, rawPosition, dt, registry);
+      referenceVelocity = new FilteredFiniteDifferenceYoVariable(namePrefix + "_referenceVelocity", "", 0.0, rawPosition, dt, registry);
       int windowSize = 10;
       referenceVelocityFiltered = new SimpleMovingAverageFilteredYoVariable(namePrefix + "_referenceVelocityFiltered", windowSize, referenceVelocity, registry);
 

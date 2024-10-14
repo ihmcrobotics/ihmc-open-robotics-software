@@ -13,7 +13,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;

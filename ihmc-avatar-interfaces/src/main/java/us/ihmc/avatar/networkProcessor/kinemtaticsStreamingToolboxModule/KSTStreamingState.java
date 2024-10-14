@@ -29,8 +29,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -164,7 +164,7 @@ public class KSTStreamingState implements State
    private final AlphaFilteredYoVariable inputFrequency;
 
    private final HumanoidKinematicsToolboxController ikController;
-   private final YoPIDSE3Gains ikSolverSpatialGains;
+   private final PIDSE3GainsBasics ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
    private final YoEnum<InputStateEstimatorType> activeInputStateEstimator = new YoEnum<>("activeInputStateEstimator", registry, InputStateEstimatorType.class);

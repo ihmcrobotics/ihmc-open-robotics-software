@@ -8,13 +8,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -59,9 +59,7 @@ public class RDXSwingTrajectoryGraphic implements RenderableProvider
          }
       }
       swingTrajectoryModel.clear();
-      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = RDXVisualTools.createPolynomial3DList(trajectory.get(Axis3D.X),
-                                                                                                         trajectory.get(Axis3D.Y),
-                                                                                                         trajectory.get(Axis3D.Z));
+      List<Polynomial3D> polynomials = RDXVisualTools.createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
       swingTrajectoryModel.compute(polynomials);
 
       LogTools.info("Swing trajectory type: " + footstep.getTrajectoryType() + ", number of waypoints: " + trajectoryWaypointModel.size() + ", number of polynomials: " + polynomials.size());

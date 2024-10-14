@@ -15,8 +15,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.robotics.math.filters.*;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -672,7 +672,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          int newProcessorID = processors.size();
          processorsIDs.put(imuName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(imuName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = new AlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         AlphaFilteredYoFrameVector3D filter = new AlphaFilteredYoFrameVector3D(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
 
          if (!forVizOnly)
@@ -706,7 +706,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          int newProcessorID = processors.size();
          processorsIDs.put(sensorName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(sensorName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = new AlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
+         AlphaFilteredYoFrameVector3D filter = new AlphaFilteredYoFrameVector3D(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
 
          if (!forVizOnly)
@@ -1297,7 +1297,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint velocities by calculating finite-difference on joint positions using
-    * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered. This is not
+    * {@link FilteredFiniteDifferenceYoVariable}. It is then automatically low-pass filtered. This is not
     * cumulative and has the effect of ignoring the velocity signal provided by the robot.
     *
     * @param alphaFilter low-pass filter parameter.
@@ -1311,7 +1311,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference
-    * on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass
+    * on joint positions using {@link FilteredFiniteDifferenceYoVariable}. It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
     *
@@ -1327,7 +1327,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference
-    * on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass
+    * on joint positions using {@link FilteredFiniteDifferenceYoVariable}. It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
     *
@@ -1354,12 +1354,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix + suffix,
-                                                                                   "",
-                                                                                   alphaFilter,
-                                                                                   intermediateJointPosition,
-                                                                                   updateDT,
-                                                                                   registry);
+         FilteredFiniteDifferenceYoVariable jointVelocity = new FilteredFiniteDifferenceYoVariable(prefix + suffix,
+                                                                                                   "",
+                                                                                                   alphaFilter,
+                                                                                                   intermediateJointPosition,
+                                                                                                   updateDT,
+                                                                                                   registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1369,7 +1369,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint velocities by calculating finite-difference on joint positions and applying a
-    * backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then
+    * backlash compensator (see {@link BacklashCompensatingVelocityYoVariable}). It is then
     * automatically low-pass filtered. This is not cumulative and has the effect of ignoring the
     * velocity signal provided by the robot.
     *
@@ -1385,7 +1385,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference
     * on joint positions and applying a backlash compensator (see
-    * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
+    * {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
     *
@@ -1408,7 +1408,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    /**
     * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference
     * on joint positions and applying a backlash compensator (see
-    * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
+    * {@link BacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
     * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided by
     * the robot.
     *
@@ -1439,13 +1439,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix + suffix,
-                                                                                                                         "",
-                                                                                                                         alphaFilter,
-                                                                                                                         intermediateJointPosition,
-                                                                                                                         updateDT,
-                                                                                                                         slopTime,
-                                                                                                                         registry);
+         BacklashCompensatingVelocityYoVariable jointVelocity = new BacklashCompensatingVelocityYoVariable(prefix + suffix,
+                                                                                                           "",
+                                                                                                           alphaFilter,
+                                                                                                           intermediateJointPosition,
+                                                                                                           updateDT,
+                                                                                                           slopTime,
+                                                                                                           registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
@@ -1529,7 +1529,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint accelerations by calculating finite-difference on joint velocities using
-    * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * {@link FilteredFiniteDifferenceYoVariable}. It is then automatically low-pass filtered.
     *
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
@@ -1542,7 +1542,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    /**
     * Compute the joint accelerations (for a specific subset of joints) by calculating
-    * finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then
+    * finite-difference on joint velocities using {@link FilteredFiniteDifferenceYoVariable}. It is then
     * automatically low-pass filtered.
     *
     * @param alphaFilter    low-pass filter parameter.
@@ -1568,12 +1568,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
          String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix + suffix,
-                                                                                       "",
-                                                                                       alphaFilter,
-                                                                                       intermediateJointVelocity,
-                                                                                       updateDT,
-                                                                                       registry);
+         FilteredFiniteDifferenceYoVariable jointAcceleration = new FilteredFiniteDifferenceYoVariable(prefix + suffix,
+                                                                                                       "",
+                                                                                                       alphaFilter,
+                                                                                                       intermediateJointVelocity,
+                                                                                                       updateDT,
+                                                                                                       registry);
          processors.add(jointAcceleration);
 
          if (!forVizOnly)
@@ -1871,12 +1871,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          int newProcessorID = processors.size();
          processorIDs.put(imuName, newProcessorID);
          String suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, newProcessorID);
-         BacklashProcessingYoFrameVector filteredAngularVelocity = BacklashProcessingYoFrameVector.createBacklashProcessingYoFrameVector(prefix,
-                                                                                                                                         suffix,
-                                                                                                                                         updateDT,
-                                                                                                                                         slopTime,
-                                                                                                                                         registry,
-                                                                                                                                         intermediateAngularVelocity);
+         BacklashProcessingYoFrameVector3D filteredAngularVelocity = new BacklashProcessingYoFrameVector3D(prefix,
+                                                                                                           suffix,
+                                                                                                           updateDT,
+                                                                                                           slopTime,
+                                                                                                           registry,
+                                                                                                           intermediateAngularVelocity);
          processors.add(filteredAngularVelocity);
 
          if (!forVizOnly)

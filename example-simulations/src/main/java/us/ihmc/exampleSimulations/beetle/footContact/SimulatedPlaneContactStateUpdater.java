@@ -89,6 +89,15 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
+   public void clear()
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).setInContact(false);
+      }
+   }
+
+   @Override
    public RigidBodyBasics getRigidBody()
    {
       return rigidBody;
@@ -256,12 +265,6 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       public double getZ()
       {
          return groundContactPoint.getZ();
-      }
-
-      @Override
-      public PlaneContactState getParentContactState()
-      {
-         return null;
       }
    }
 }

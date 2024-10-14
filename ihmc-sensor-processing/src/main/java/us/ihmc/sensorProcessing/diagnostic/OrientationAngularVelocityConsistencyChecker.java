@@ -7,7 +7,7 @@ import java.util.EnumMap;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
+import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector3D;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -17,7 +17,7 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
 {
    private final YoRegistry registry;
 
-   private final FiniteDifferenceAngularVelocityYoFrameVector localVelocityFromFD;
+   private final FiniteDifferenceAngularVelocityYoFrameVector3D localVelocityFromFD;
    private final YoFrameVector3D angularVelocityToCheck;
 
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
@@ -40,7 +40,7 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       registry = new YoRegistry(namePrefix + "OrientationVelocityCheck");
       this.referenceFrameUsedForComparison = referenceFrameUsedForComparison;
 
-      localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector(namePrefix + "referenceFD", orientation, updateDT, registry);
+      localVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector3D(namePrefix + "referenceFD", orientation, updateDT, registry);
       this.angularVelocityToCheck = angularVelocityToCheck;
 
       int windowSize = 10;

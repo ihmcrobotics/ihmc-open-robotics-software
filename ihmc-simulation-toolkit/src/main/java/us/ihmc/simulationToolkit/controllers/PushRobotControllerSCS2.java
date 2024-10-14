@@ -1,7 +1,5 @@
 package us.ihmc.simulationToolkit.controllers;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 

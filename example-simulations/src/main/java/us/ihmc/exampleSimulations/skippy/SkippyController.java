@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -84,7 +84,7 @@ public class SkippyController implements RobotController
    private final YoDouble planarDistanceYZPlane, planarDistanceXZPlane;
 
    private final YoDouble alphaAngularVelocity;
-   private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
+   private final FilteredFiniteDifferenceYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
 
    private final YoFramePoint3D bodyLocation = new YoFramePoint3D("body", ReferenceFrame.getWorldFrame(), registry);
 
@@ -226,10 +226,10 @@ public class SkippyController implements RobotController
 
       alphaAngularVelocity = new YoDouble("alphaAngularVelocity", registry);
       alphaAngularVelocity.set(0.8);
-      angularVelocityToCoMYZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT,
-                                                                    registry);
-      angularVelocityToCoMXZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT,
-                                                                    registry);
+      angularVelocityToCoMYZPlane2 = new FilteredFiniteDifferenceYoVariable("angularVelocityToCoMYZPlane2", "", alphaAngularVelocity, angleToCoMInYZPlane, controlDT,
+                                                                            registry);
+      angularVelocityToCoMXZPlane2 = new FilteredFiniteDifferenceYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT,
+                                                                            registry);
 
       if (skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {

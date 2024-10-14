@@ -80,16 +80,16 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoRandomTools;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.ZeroablePID3DGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
-import us.ihmc.robotics.lists.FrameTupleArrayList;
+import us.ihmc.robotics.lists.FrameTuple3DArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -304,9 +304,9 @@ public class CrossRobotCommandRandomTools
       return EuclidCoreRandomTools.nextRigidBodyTransform(random);
    }
 
-   public static FrameTupleArrayList<FramePoint3D> nextFrameTupleArrayList(Random random, int size, ReferenceFrame... possibleFrames)
+   public static FrameTuple3DArrayList<FramePoint3D> nextFrameTupleArrayList(Random random, int size, ReferenceFrame... possibleFrames)
    {
-      FrameTupleArrayList<FramePoint3D> next = FrameTupleArrayList.createFramePointArrayList();
+      FrameTuple3DArrayList<FramePoint3D> next = FrameTuple3DArrayList.createFramePointArrayList();
       while (next.size() < size)
          next.add().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
       return next;
@@ -502,14 +502,14 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static PID3DGains nextPID3DGains(Random random)
+   public static PID3DGainsBasics nextPID3DGains(Random random)
    {
       return nextDefaultPID3DGains(random);
    }
 
-   public static DefaultPID3DGains nextDefaultPID3DGains(Random random)
+   public static PID3DGains nextDefaultPID3DGains(Random random)
    {
-      DefaultPID3DGains next = new DefaultPID3DGains();
+      PID3DGains next = new PID3DGains();
 
       next.setProportionalGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
       next.setDerivativeGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
@@ -526,14 +526,14 @@ public class CrossRobotCommandRandomTools
       return new ZeroablePID3DGains(nextDefaultPID3DGains(random));
    }
 
-   public static PIDSE3Gains nextPIDSE3Gains(Random random)
+   public static PIDSE3GainsBasics nextPIDSE3Gains(Random random)
    {
       return nextDefaultPIDSE3Gains(random);
    }
 
-   public static DefaultPIDSE3Gains nextDefaultPIDSE3Gains(Random random)
+   public static PIDSE3Gains nextDefaultPIDSE3Gains(Random random)
    {
-      DefaultPIDSE3Gains next = new DefaultPIDSE3Gains();
+      PIDSE3Gains next = new PIDSE3Gains();
       next.setPositionGains(nextDefaultPID3DGains(random));
       next.setOrientationGains(nextDefaultPID3DGains(random));
       return next;
@@ -1978,7 +1978,7 @@ public class CrossRobotCommandRandomTools
       }
    }
 
-   public static void randomizeFrameTupleArrayList(Random random, FrameTupleArrayList<?> listToRandomize, ReferenceFrame... possibleFrames)
+   public static void randomizeFrameTupleArrayList(Random random, FrameTuple3DArrayList<?> listToRandomize, ReferenceFrame... possibleFrames)
    {
       for (int i = 0; i < listToRandomize.size(); i++)
       {
@@ -2054,9 +2054,9 @@ public class CrossRobotCommandRandomTools
       {
          randomizeDenseMatrixArrayList(random, (DenseMatrixArrayList) fieldInstance);
       }
-      else if (fieldType == FrameTupleArrayList.class)
+      else if (fieldType == FrameTuple3DArrayList.class)
       {
-         randomizeFrameTupleArrayList(random, (FrameTupleArrayList<?>) fieldInstance, possibleFrames);
+         randomizeFrameTupleArrayList(random, (FrameTuple3DArrayList<?>) fieldInstance, possibleFrames);
       }
       else if (fieldType == RecyclingArrayList.class)
       {

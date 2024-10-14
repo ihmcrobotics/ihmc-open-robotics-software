@@ -1,7 +1,6 @@
 package us.ihmc.robotics.controllers.pidGains;
 
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 
 /**
  * Write and read interface for PID gains in three dimensions.
@@ -25,8 +24,7 @@ public interface PID3DGains extends PID3DGainsReadOnly
     * implementations will typically update the damping ratio from the current proportional gain and
     * the provided derivative gain if the derivative gain is set. In that case the order in which the
     * proportional and derivative gains are set might influence the outcome. Typically, it is safe to
-    * first set the proportional gain and then set the derivative gain or damping ratio. For an example
-    * of this see {@link DefaultPID3DGains}.
+    * first set the proportional gain and then set the derivative gain or damping ratio.
     * </p>
     * 
     * @param derivativeGainX the new derivative gain for the x direction.

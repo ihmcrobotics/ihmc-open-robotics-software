@@ -19,10 +19,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.PDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.ParameterizedPDGains;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,7 +31,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -257,7 +256,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       this.pelvisHeightGains = pelvisHeightGains;
    }
 
-   private final DefaultPID3DGains pelvisGainsTemp = new DefaultPID3DGains();
+   private final PID3DGains pelvisGainsTemp = new PID3DGains();
 
    public void updateGains()
    {

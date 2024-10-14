@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -23,8 +23,8 @@ public class TaskSpaceStiffnessCalculator
    private final YoFramePoint3D yoForcePointPosition;
    private final YoFrameVector3D yoForcePointForce;
 
-   private final FilteredVelocityYoFrameVector yoForcePointVelocity;
-   private final FilteredVelocityYoFrameVector yoForcePointForceRateOfChange;
+   private final FilteredFiniteDifferenceYoFrameVector3D yoForcePointVelocity;
+   private final FilteredFiniteDifferenceYoFrameVector3D yoForcePointForceRateOfChange;
 
    private final YoDouble yoForceAlongDirectionOfMotion;
    private final YoDouble yoForceRateOfChangeAlongDirectionOfMotion;
@@ -46,10 +46,10 @@ public class TaskSpaceStiffnessCalculator
       yoForcePointPosition = new YoFramePoint3D(namePrefix + "Position", world, registry);
       yoForcePointForce = new YoFrameVector3D(namePrefix + "Force", world, registry);
 
-      yoForcePointVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix + "Velocity", "", alphaLowPass, controlDT, registry,
-            yoForcePointPosition);
-      yoForcePointForceRateOfChange = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix + "ForceRateOfChange", "", alphaLowPass,
-            controlDT, registry, yoForcePointForce);
+      yoForcePointVelocity = new FilteredFiniteDifferenceYoFrameVector3D(namePrefix + "Velocity", "", alphaLowPass, controlDT, registry,
+                                                                         yoForcePointPosition);
+      yoForcePointForceRateOfChange = new FilteredFiniteDifferenceYoFrameVector3D(namePrefix + "ForceRateOfChange", "", alphaLowPass,
+                                                                                  controlDT, registry, yoForcePointForce);
 
       yoForceAlongDirectionOfMotion = new YoDouble(namePrefix + "ForceAlongDirOfMotion", registry);
       yoForceRateOfChangeAlongDirectionOfMotion = new YoDouble(namePrefix + "DeltaForceAlongDirOfMotion", registry);

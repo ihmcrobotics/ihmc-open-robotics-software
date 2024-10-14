@@ -14,8 +14,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
@@ -49,8 +49,8 @@ public class FootRotationDetector
    private final double dt;
    private final MovingReferenceFrame soleFrame;
 
-   private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
-   private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
+   private final AlphaFilteredYoFramePoint2D filteredPointOfRotation;
+   private final AlphaFilteredYoFrameVector2D filteredAxisOfRotation;
 
    private final FixedFrameLine2DBasics lineOfRotationInSole;
    private final YoDouble integratedRotationAngle;
@@ -93,8 +93,8 @@ public class FootRotationDetector
       lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
-      filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
-      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
+      filteredPointOfRotation = new AlphaFilteredYoFramePoint2D(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
+      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2D(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
 
       reset();
 

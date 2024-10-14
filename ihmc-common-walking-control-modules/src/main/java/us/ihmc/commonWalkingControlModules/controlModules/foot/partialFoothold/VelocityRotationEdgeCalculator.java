@@ -8,8 +8,8 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
@@ -25,10 +25,10 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
    private final MovingReferenceFrame soleFrame;
 
    private final FixedFramePoint2DBasics pointOfRotation;
-   private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
+   private final AlphaFilteredYoFramePoint2D filteredPointOfRotation;
 
    private final FixedFrameVector2DBasics axisOfRotation;
-   private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
+   private final AlphaFilteredYoFrameVector2D filteredAxisOfRotation;
 
    private final FixedFrameLine2DBasics lineOfRotationInSole;
 
@@ -76,8 +76,8 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
       parentRegistry.addChild(registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityEdgeFilterBreakFrequency.getValue(), dt);
-      filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
-      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(namePrefix + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);
+      filteredPointOfRotation = new AlphaFilteredYoFramePoint2D(namePrefix + "FilteredPointOfRotation", "", registry, alpha, pointOfRotation);
+      filteredAxisOfRotation = new AlphaFilteredYoFrameVector2D(namePrefix + "FilteredAxisOfRotation", "", registry, alpha, axisOfRotation);
 
       lineOfRotationInSole = new YoFrameLine2D(filteredPointOfRotation, filteredAxisOfRotation);
 
