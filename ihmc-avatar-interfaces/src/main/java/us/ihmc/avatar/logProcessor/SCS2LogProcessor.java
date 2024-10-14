@@ -78,14 +78,14 @@ public class SCS2LogProcessor
          LogSession logSession = new LogSession(logPath.toFile(), null);
 
          logSession.startSessionThread();
-         MissingThreadTools.sleep(0.1);
+         ThreadTools.park(0.1);
 
          numberOfEntries = logSession.getLogDataReader().getNumberOfEntries();
          LogTools.info("numberOfEntries: %d".formatted(numberOfEntries));
 
          logSessionConsumer.accept(logSession);
 
-         MissingThreadTools.sleep(0.1);
+         ThreadTools.park(0.1);
 
          logSession.stopSessionThread();
          logSession.shutdownSession();
