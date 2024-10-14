@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchForDoorBehavior.SearchForDoorBehaviorState;

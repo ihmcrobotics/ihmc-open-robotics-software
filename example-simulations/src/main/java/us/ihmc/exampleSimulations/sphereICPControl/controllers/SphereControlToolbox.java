@@ -28,12 +28,11 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -64,7 +63,7 @@ public class SphereControlToolbox
    private final YoFramePoint3D desiredCMP = new YoFramePoint3D("desiredCMP", worldFrame, registry);
 
    private final YoFramePoint3D icp = new YoFramePoint3D("icp", worldFrame, registry);
-   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final FilteredFiniteDifferenceYoFrameVector3D icpVelocity;
    private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
 
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
@@ -83,7 +82,6 @@ public class SphereControlToolbox
    private final RigidBodyBasics elevator;
    private final FullRobotModel fullRobotModel;
 
-   private final TwistCalculator twistCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
@@ -139,7 +137,7 @@ public class SphereControlToolbox
       setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       capturePointVelocityAlpha.set(0.5);
-      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
+      icpVelocity = new FilteredFiniteDifferenceYoFrameVector3D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -189,7 +187,6 @@ public class SphereControlToolbox
          }
       });
 
-      twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
       icpOptimizationParameters = createICPOptimizationParameters();
@@ -286,11 +283,6 @@ public class SphereControlToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public CenterOfMassJacobian getCenterOfMassJacobian()
@@ -397,7 +389,6 @@ public class SphereControlToolbox
    {
       centerOfMassFrame.update();
 
-      twistCalculator.compute();
       centerOfMassJacobian.reset();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       icpControlPolygons.updateUsingContactStates(contactStates);

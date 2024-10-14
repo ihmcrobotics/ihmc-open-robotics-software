@@ -25,11 +25,11 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -107,7 +107,7 @@ public class SupportState extends AbstractFootControlState
 
    private final BooleanProvider dampFootRotations;
    private final DoubleProvider footDamping;
-   private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
+   private final PIDSE3GainsBasics localGains = new PIDSE3Gains();
 
    private final FootholdCroppingModule footRotationCalculationModule;
 
@@ -303,7 +303,7 @@ public class SupportState extends AbstractFootControlState
       if (!copOnEdge.getBooleanValue() && footRotationCalculationModule.isRotating() && dampFootRotations.getValue())
       {
          PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
-         PID3DGains localOrientationGains = localGains.getOrientationGains();
+         PID3DGainsBasics localOrientationGains = localGains.getOrientationGains();
          localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
          localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
          dampingRotations = true;

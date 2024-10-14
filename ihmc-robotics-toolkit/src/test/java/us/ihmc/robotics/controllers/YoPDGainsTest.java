@@ -1,15 +1,13 @@
 package us.ihmc.robotics.controllers;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class YoPDGainsTest
 {

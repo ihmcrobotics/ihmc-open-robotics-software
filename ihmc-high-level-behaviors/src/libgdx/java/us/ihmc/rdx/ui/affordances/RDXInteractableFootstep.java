@@ -40,7 +40,7 @@ import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -497,7 +497,7 @@ public class RDXInteractableFootstep
       }
 
       swingTrajectoryModel.clear();
-      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = RDXVisualTools.createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
+      List<Polynomial3D> polynomials = RDXVisualTools.createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
       swingTrajectoryModel.compute(polynomials);
    }
 

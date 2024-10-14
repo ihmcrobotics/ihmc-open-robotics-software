@@ -64,7 +64,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj wholeSystemTorques;
 
    private final DMatrixRMaj jointVelocitiesContainer;
-   private final FilteredVelocityYoVariable[] jointAccelerations;
+   private final FilteredFiniteDifferenceYoVariable[] jointAccelerations;
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
@@ -179,13 +179,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       residual = new YoMatrix("residual_", nDoFs, 1, measurementNames, registry);
 
       double dt = toolbox.getControlDT();
-      double defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt);
       accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
       accelerationCalculationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt));
       jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
-      jointAccelerations = new FilteredVelocityYoVariable[nDoFs];
+      jointAccelerations = new FilteredFiniteDifferenceYoVariable[nDoFs];
       for (int i = 0; i < measurementNames.length; i++)
-         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + measurementNames[i], "", defaultAccelerationCalculationAlpha, dt, registry);
+         jointAccelerations[i] = new FilteredFiniteDifferenceYoVariable("jointAcceleration_" + measurementNames[i], "", accelerationCalculationAlpha, dt, registry);
 
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
@@ -248,7 +247,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       if (enableFilter.getValue())
       {
          updateFilterCovariances();
-         updateAccelerationCalculationFilterAlphas();
 
          updateContactJacobians();
          updateContactWrenches();
@@ -298,12 +296,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       filter.setProcessCovariance(covarianceHelper.getProcessCovariance());
       filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
-   }
-
-   private void updateAccelerationCalculationFilterAlphas()
-   {
-      for (FilteredVelocityYoVariable jointAcceleration : jointAccelerations)
-         jointAcceleration.setAlpha(accelerationCalculationAlpha.getValue());
    }
 
    private void updateWholeSystemTorques()

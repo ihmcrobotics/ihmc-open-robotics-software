@@ -31,7 +31,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajector
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;

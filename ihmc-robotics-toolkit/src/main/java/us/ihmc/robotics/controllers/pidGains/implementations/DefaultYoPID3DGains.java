@@ -1,18 +1,14 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.robotics.controllers.pidGains.DampingUpdater;
-import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 
 /**
  * Provides a default implementation for Yo PID gains in three dimensions.

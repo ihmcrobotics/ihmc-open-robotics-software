@@ -23,7 +23,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -96,8 +96,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final SideDependentList<YoFrameVector3D> footForcesRaw = new SideDependentList<>();
    private final SideDependentList<YoFrameVector3D> footTorquesRaw = new SideDependentList<>();
    private final YoDouble alphaFootForce = new YoDouble("alphaDiagFootForce", registry);
-   private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<>();
-   private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<>();
+   private final SideDependentList<AlphaFilteredYoFrameVector3D> footForcesRawFiltered = new SideDependentList<>();
+   private final SideDependentList<AlphaFilteredYoFrameVector3D> footTorquesRawFiltered = new SideDependentList<>();
 
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
@@ -201,13 +201,13 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
-         AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
-                                                                                                                       registry, alphaFootForce, footForceRaw);
+         AlphaFilteredYoFrameVector3D footForceRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootForceRawFilt", "",
+                                                                                              registry, alphaFootForce, footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
-         AlphaFilteredYoFrameVector footTorqueRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
-                                                                                                                        "", registry, alphaFootForce,
-                                                                                                                        footTorqueRaw);
+         AlphaFilteredYoFrameVector3D footTorqueRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootTorqueRawFilt",
+                                                                                               "", registry, alphaFootForce,
+                                                                                               footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);
       }
    }
