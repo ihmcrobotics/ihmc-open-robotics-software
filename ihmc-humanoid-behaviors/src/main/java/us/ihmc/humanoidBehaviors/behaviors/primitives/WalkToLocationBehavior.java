@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
+import us.ihmc.robotics.referenceFrames.Pose2DReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -104,7 +104,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0, 0.0);
 
       ReferenceFrame initialRobotFrame = referenceFrames.getPelvisZUpFrame();
-      ReferenceFrame targetRobotFrame = new Pose2dReferenceFrame("targetFrame", targetPose2dInWorld);
+      ReferenceFrame targetRobotFrame = new Pose2DReferenceFrame("targetFrame", targetPose2dInWorld);
 
       double initialRobotOrientationRelativeToWalkingPath = computeFrameOrientationRelativeToWalkingPath(initialRobotFrame);
       double targetRobotOrientationRelativeToWalkingPath = computeFrameOrientationRelativeToWalkingPath(targetRobotFrame);

@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -313,7 +313,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final YoFramePoint3D rawInputPosition;
       private final YoFramePoint3D rawExtrapolatedInputPosition;
-      private final AlphaFilteredYoFramePoint filteredExtrapolatedInputPosition;
+      private final AlphaFilteredYoFramePoint3D filteredExtrapolatedInputPosition;
 
       private final YoFrameVector3D rawInputLinearVelocity;
       private final YoFrameVector3D decayingInputLinearVelocity;
@@ -323,11 +323,11 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       {
          rawInputPosition = new YoFramePoint3D("CoMInput_FOF_RawPosition", worldFrame, registry);
          rawExtrapolatedInputPosition = new YoFramePoint3D("CoMInput_FOF_RawExtrapolatedPosition", worldFrame, registry);
-         filteredExtrapolatedInputPosition = new AlphaFilteredYoFramePoint("CoMInput_FOF_FilteredExtrapolatedPosition",
-                                                                           "",
-                                                                           registry,
-                                                                           inputsAlphaProvider,
-                                                                           rawExtrapolatedInputPosition);
+         filteredExtrapolatedInputPosition = new AlphaFilteredYoFramePoint3D("CoMInput_FOF_FilteredExtrapolatedPosition",
+                                                                             "",
+                                                                             registry,
+                                                                             inputsAlphaProvider,
+                                                                             rawExtrapolatedInputPosition);
          rawInputLinearVelocity = new YoFrameVector3D("CoMInput_FOF_RawLinearVelocity", worldFrame, registry);
          decayingInputLinearVelocity = new YoFrameVector3D("CoMInput_FOF_DecayingLinearVelocity", worldFrame, registry);
          inputVelocityDecayFactor = new YoDouble("CoMInput_FOF_InputVelocityDecayFactor", registry);

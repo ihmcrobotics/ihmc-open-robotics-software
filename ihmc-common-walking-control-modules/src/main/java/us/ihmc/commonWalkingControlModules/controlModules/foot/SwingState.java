@@ -33,8 +33,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.math.filters.RateLimitedYoFramePose3D;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
@@ -110,7 +110,7 @@ public class SwingState extends AbstractFootControlState
 
 
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
-   private final RateLimitedYoFramePose rateLimitedAdjustedPose;
+   private final RateLimitedYoFramePose3D rateLimitedAdjustedPose;
 
    private final FramePose3D footstepPose = new FramePose3D();
 
@@ -207,7 +207,7 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
-      rateLimitedAdjustedPose = new RateLimitedYoFramePose(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
+      rateLimitedAdjustedPose = new RateLimitedYoFramePose3D(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
 
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();

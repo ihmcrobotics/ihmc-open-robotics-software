@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 
 /**
  * A class that defines the configuration of 3D PID gains. It provides

@@ -108,7 +108,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
-      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
+      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel.getFoot(RobotSide.LEFT),
+                                                                                                         controllerFullRobotModel.getFoot(RobotSide.RIGHT));
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);

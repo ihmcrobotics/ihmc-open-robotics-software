@@ -611,7 +611,8 @@ public class AvatarEstimatorThreadFactory
    public CenterOfPressureDataHolder getCenterOfPressureDataHolderFromController()
    {
       if (!centerOfPressureDataHolderFromControllerField.hasValue())
-         centerOfPressureDataHolderFromControllerField.set(new CenterOfPressureDataHolder(getEstimatorFullRobotModel()));
+         centerOfPressureDataHolderFromControllerField.set(new CenterOfPressureDataHolder(getEstimatorFullRobotModel().getFoot(RobotSide.LEFT),
+                                                                                          getEstimatorFullRobotModel().getFoot(RobotSide.RIGHT)));
       return centerOfPressureDataHolderFromControllerField.get();
    }
 

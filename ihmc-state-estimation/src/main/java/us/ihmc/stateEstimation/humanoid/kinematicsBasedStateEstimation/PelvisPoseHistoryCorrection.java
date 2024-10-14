@@ -458,8 +458,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    //TODO Check how to integrate the rotationCorrection here
    private void sendCorrectionUpdatePacket()
    {
-      totalRotationErrorFrame.get(totalRotationError);
-      totalTranslationErrorFrame.get(totalTranslationError);
+      totalRotationErrorFrame.getRotation(totalRotationError);
+      totalTranslationErrorFrame.getTranslation(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
       
       translationalResidualError.set(errorBetweenCurrentPositionAndCorrected.getTranslation());
