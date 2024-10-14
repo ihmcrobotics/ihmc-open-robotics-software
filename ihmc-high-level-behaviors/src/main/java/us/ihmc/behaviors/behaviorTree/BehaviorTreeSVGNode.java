@@ -104,6 +104,7 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), x, y);
 
       x = originX + 80;
+      y = originY + 30;
    }
 
    public int getHeight()
