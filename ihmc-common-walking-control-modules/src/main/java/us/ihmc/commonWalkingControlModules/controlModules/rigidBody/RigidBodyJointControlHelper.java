@@ -11,8 +11,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.functionGenerator.FunctionGeneratorErrorCalculator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;

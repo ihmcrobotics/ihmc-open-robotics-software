@@ -7,7 +7,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -40,7 +40,7 @@ public class YoFunctionGenerator
 
    private final YoDouble value, offset, amplitude, frequency, phase, resetTime, pauseTime, chirpRate, chirpFrequency, chirpFrequencyMax;
    private final YoDouble valueDot;
-   private final FilteredVelocityYoVariable valueDotFromFilter;
+   private final FilteredFiniteDifferenceYoVariable valueDotFromFilter;
 
    private final YoDouble timeModeChanged;
    private final YoDouble timeInCurrentMode;
@@ -92,7 +92,7 @@ public class YoFunctionGenerator
 
       valueDot = new YoDouble(name + "ValueDot", registry);
       if (dT != -1.0)
-         valueDotFromFilter = new FilteredVelocityYoVariable(name + "ValueDotFromFilter", "", 0.0, value, dT, registry);
+         valueDotFromFilter = new FilteredFiniteDifferenceYoVariable(name + "ValueDotFromFilter", "", 0.0, value, dT, registry);
       else
          valueDotFromFilter = null;
 

@@ -1,15 +1,10 @@
 package us.ihmc.robotics.math.trajectories.abstracts;
 
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3DFrameFactories;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;

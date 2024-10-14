@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.abstracts.AbstractFramePolynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFramePolynomial3D extends AbstractFramePolynomial3D

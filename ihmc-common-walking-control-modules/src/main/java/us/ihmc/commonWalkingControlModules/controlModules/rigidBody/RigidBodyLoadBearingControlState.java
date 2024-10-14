@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -39,9 +38,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.GainCalculator;
+import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDSE3Gains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -87,7 +86,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final LoadBearingParameters loadBearingParameters;
    private final Vector3DReadOnly linearWeight = new Vector3D(50.0, 50.0, 50.0);
    private final Vector3DReadOnly angularWeight = new Vector3D(5.0, 5.0, 5.0);
-   private final DefaultYoPIDSE3Gains feedbackGains;
+   private final YoPIDSE3Gains feedbackGains;
    private final SelectionMatrix3D positionFeedbackSelectionMatrix = new SelectionMatrix3D();
    private final SelectionMatrix6D spatialAccelerationSelectionMatrix = new SelectionMatrix6D();
    private final double nominalRhoWeight;
@@ -160,7 +159,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialAccelerationCommand.set(elevator, bodyToControl);
       spatialAccelerationCommand.setPrimaryBase(baseBody);
 
-      feedbackGains = new DefaultYoPIDSE3Gains("LoadBearing", GainCoupling.XY, false, parentRegistry);
+      feedbackGains = new YoPIDSE3Gains("LoadBearing", GainCoupling.XY, false, parentRegistry);
       configureGains();
 
       yoContactPointInBodyFrame = new YoFramePoint3D("contactPointInBody" + bodyName, bodyFrame, registry);

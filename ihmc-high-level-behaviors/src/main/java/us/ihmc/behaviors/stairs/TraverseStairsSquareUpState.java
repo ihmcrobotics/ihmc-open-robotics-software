@@ -9,8 +9,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
 
 public class TraverseStairsSquareUpState extends TraverseStairsState
 {

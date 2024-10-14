@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.robotics.math.filters.ProcessingYoVariable;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

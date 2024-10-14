@@ -35,8 +35,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.wholeBodyControlCore.pidGains.PDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DGains;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -424,7 +424,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
    }
 
-   private final DefaultPID3DGains gainsTemp = new DefaultPID3DGains();
+   private final PID3DGains gainsTemp = new PID3DGains();
 
    public void updateGains(double gainScaleFactor)
    {

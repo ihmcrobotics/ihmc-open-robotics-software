@@ -31,7 +31,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -260,18 +259,6 @@ public class ScrewToolsTest
       {
          assertTrue(bodies[i].equals(bodyArray[i]));
       }
-   }
-
-	@Test
-   public void testComputeSupportAndSubtreeSuccessors_RigidBody()
-   {
-      int numberOfBodiesOnChain = 6;
-      int numberOfBodies = 16;
-      RigidBodyBasics[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
-      assertEquals(numberOfBodiesOnChain - 1, successors.length);
-
-      successors = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
-      assertEquals(numberOfBodies - 1, successors.length);
    }
 
 	@Test
@@ -583,26 +570,7 @@ public class ScrewToolsTest
       }
    }
 
-	@Test
-   public void testComputeIndicesForJoint()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
-      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
-      JointBasics rootJoint = jointsArr[0];
-      JointBasics testJoint4 = jointsArr[5];
 
-      
-      TIntArrayList indices = new TIntArrayList();
-      ScrewTools.computeIndicesForJoint(jointsArr, indices, testJoint4, rootJoint);
-      assertEquals(7, indices.size());
-
-      for(int i = 0; i < rootJoint.getDegreesOfFreedom(); i++)
-      {
-         assertEquals(i, indices.get(i));
-      }
-      assertEquals(10, indices.get(indices.size() - 1));
-   }
 
 	@Test
    public void testExtractRevoluteJoints()

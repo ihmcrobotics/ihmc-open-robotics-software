@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories.abstracts;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -9,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Trajectory3DFactories;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -48,6 +48,11 @@ public class AbstractPolynomial3D implements Polynomial3DBasics, PositionTraject
    private final Tuple3DReadOnly integralResult;
 
    private final Tuple3DBasics[] coefficients;
+
+   public AbstractPolynomial3D(AbstractPolynomial3D other)
+   {
+      this(other.xPolynomial, other.yPolynomial, other.zPolynomial);
+   }
 
    public AbstractPolynomial3D(PolynomialBasics[] yoPolynomials)
    {

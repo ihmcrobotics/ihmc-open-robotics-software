@@ -12,8 +12,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint3D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -29,7 +29,7 @@ public class FootWrenchSensorUpdater
    private static final String parameterGroup = "Foot";
 
    private final double weight;
-   private final AlphaFilteredYoFrameVector filteredForce;
+   private final AlphaFilteredYoFrameVector3D filteredForce;
    private final ReferenceFrame copFrame;
 
    private final FootVelocitySensor footVelocitySensor;
@@ -45,8 +45,8 @@ public class FootWrenchSensorUpdater
       DoubleProvider forceFilter = FilterTools.findOrCreate(parameterGroup + "WrenchFilter", registry, 100.0);
       DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter.getValue(), dt);
 
-      filteredForce = new AlphaFilteredYoFrameVector(foot.getName() + "Force", "", registry, forceAlpha, ReferenceFrame.getWorldFrame());
-      AlphaFilteredYoFramePoint filteredCoP = new AlphaFilteredYoFramePoint(soleFrame.getName() + "CoPPositionInSole", "", registry, forceAlpha, soleFrame);
+      filteredForce = new AlphaFilteredYoFrameVector3D(foot.getName() + "Force", "", registry, forceAlpha, ReferenceFrame.getWorldFrame());
+      AlphaFilteredYoFramePoint3D filteredCoP = new AlphaFilteredYoFramePoint3D(soleFrame.getName() + "CoPPositionInSole", "", registry, forceAlpha, soleFrame);
       YoFramePoint3D yoCopPosition = new YoFramePoint3D(soleFrame.getName() + "CoPPosition", ReferenceFrame.getWorldFrame(), registry);
 
       copFrame = new ReferenceFrame(soleFrame.getName() + "CopFrame", soleFrame)

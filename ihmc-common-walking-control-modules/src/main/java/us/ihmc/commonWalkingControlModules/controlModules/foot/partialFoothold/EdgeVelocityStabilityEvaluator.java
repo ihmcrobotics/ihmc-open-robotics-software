@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoFrameVector2D;
+import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class EdgeVelocityStabilityEvaluator
 {
    /** Filtered data of the center of rotation linear velocity. */
-   private final FilteredVelocityYoFrameVector2d centerOfRotationVelocity;
+   private final FilteredFiniteDifferenceYoFrameVector2D centerOfRotationVelocity;
    /** Linear velocity of the center of rotation that is transverse (perpendicular) to the line of rotation. */
    private final YoDouble centerOfRotationTransverseVelocity;
 
@@ -24,7 +23,7 @@ public class EdgeVelocityStabilityEvaluator
    /** Absolute angle of the line of rotation. */
    private final YoDouble angleOfLineOfRotation;
    /** Filtered yaw rate of the line of rotation. */
-   private final FilteredVelocityYoVariable lineOfRotationAngularVelocity;
+   private final FilteredFiniteDifferenceYoVariable lineOfRotationAngularVelocity;
 
    /** Threshold on the transverse velocity of the CoR w.r.t. the LoR to determine whether or not the CoR is stable. */
    private final DoubleProvider centerOfRotationStableVelocityThreshold;
@@ -53,22 +52,22 @@ public class EdgeVelocityStabilityEvaluator
       this.stableWindowWize = stableWindowWize;
 
       YoDouble centerOfRotationVelocityAlphaFilter = new YoDouble(namePrefix + "CenterOfRotationVelocityAlphaFilter", registry);
-      centerOfRotationVelocity = new FilteredVelocityYoFrameVector2d(namePrefix + "CenterOfRotationVelocity",
-                                                                     "",
-                                                                     centerOfRotationVelocityAlphaFilter,
-                                                                     dt,
-                                                                     registry,
-                                                                     lineOfRotation.getPoint());
+      centerOfRotationVelocity = new FilteredFiniteDifferenceYoFrameVector2D(namePrefix + "CenterOfRotationVelocity",
+                                                                             "",
+                                                                             centerOfRotationVelocityAlphaFilter,
+                                                                             dt,
+                                                                             registry,
+                                                                             lineOfRotation.getPoint());
       centerOfRotationTransverseVelocity = new YoDouble(namePrefix + "CenterOfRotationTransverseVelocity", registry);
 
       angleOfLineOfRotation = new YoDouble(namePrefix + "AngleOfLineOfRotation", registry);
       YoDouble lineOfRotationAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LineOfRotationAngularVelocityAlphaFilter", registry);
-      lineOfRotationAngularVelocity = new FilteredVelocityYoVariable(namePrefix + "LineOfRotationAngularVelocityFiltered",
-                                                                     "",
-                                                                     lineOfRotationAngularVelocityAlphaFilter,
-                                                                     angleOfLineOfRotation,
-                                                                     dt,
-                                                                     registry);
+      lineOfRotationAngularVelocity = new FilteredFiniteDifferenceYoVariable(namePrefix + "LineOfRotationAngularVelocityFiltered",
+                                                                             "",
+                                                                             lineOfRotationAngularVelocityAlphaFilter,
+                                                                             angleOfLineOfRotation,
+                                                                             dt,
+                                                                             registry);
 
       isLineOfRotationStable = new YoBoolean(namePrefix + "IsLineOfRotationStable", registry);
       isCenterOfRotationStable = new YoBoolean(namePrefix + "IsCenterOfRotationStable", registry);

@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;

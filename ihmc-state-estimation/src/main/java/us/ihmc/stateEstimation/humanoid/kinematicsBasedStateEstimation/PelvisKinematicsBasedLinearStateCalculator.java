@@ -28,10 +28,10 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
+import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -80,7 +80,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    /** Debug variable */
    private final YoDouble slopTimeLinearVelocityDebug = new YoDouble("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
    /** Debug variable */
-   private final BacklashCompensatingVelocityYoFrameVector rootJointLinearVelocityFDDebug;
+   private final BacklashCompensatingVelocityYoFrameVector3D rootJointLinearVelocityFDDebug;
 
    private final DoubleProvider footToRootJointPositionBreakFrequency;
    private final BooleanProvider correctTrustedFeetPositions;
@@ -140,13 +140,13 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
        */
       alphaLinearVelocityDebug.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       slopTimeLinearVelocityDebug.set(0.03);
-      rootJointLinearVelocityFDDebug = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin",
-                                                                                                                                 "",
-                                                                                                                                 alphaLinearVelocityDebug,
-                                                                                                                                 estimatorDT,
-                                                                                                                                 slopTimeLinearVelocityDebug,
-                                                                                                                                 registry,
-                                                                                                                                 rootJointPosition);
+      rootJointLinearVelocityFDDebug = new BacklashCompensatingVelocityYoFrameVector3D("estimatedRootJointLinearVelocityBacklashKin",
+                                                                                       "",
+                                                                                       alphaLinearVelocityDebug,
+                                                                                       estimatorDT,
+                                                                                       slopTimeLinearVelocityDebug,
+                                                                                       registry,
+                                                                                       rootJointPosition);
       /*
        * -------------------------------------------------------------------------------------------------
        */
@@ -335,12 +335,12 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       private final YoFrameVector3D footVelocityInWorld;
-      private final AlphaFilteredYoFrameVector footToRootJointPosition;
+      private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
       private final YoFramePoint3D footPositionInWorld;
       /** Debug variable */
       private final YoFramePoint3D rootJointPositionPerFoot;
       private final YoFramePoint3D copPositionInWorld;
-      private final AlphaFilteredYoFramePoint2d copFilteredInFootFrame;
+      private final AlphaFilteredYoFramePoint2D copFilteredInFootFrame;
       private final YoFramePoint2D copRawInFootFrame;
       private final FrameConvexPolygon2D footPolygon;
       private final FrameLineSegment2D footCenterCoPLineSegment;
@@ -368,7 +368,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
          DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
                                                                                                           estimatorDT);
-         footToRootJointPosition = new AlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+         footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
          footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
          footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
@@ -376,7 +376,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
 
          DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
-         copFilteredInFootFrame = new AlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
+         copFilteredInFootFrame = new AlphaFilteredYoFramePoint2D(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0);
          copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
