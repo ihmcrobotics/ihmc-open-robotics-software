@@ -463,4 +463,26 @@ public class MatrixMissingToolsTest
 
       assertThrows(IllegalArgumentException.class, () -> MatrixMissingTools.elementWiseLessThan(new DMatrixRMaj(1, 2), new DMatrixRMaj(2, 2)));
    }
+
+   @Test
+   public void testSqrt()
+   {
+      Random random = new Random(41584L);
+
+      int iters = 500;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int matrixSize = random.nextInt(2, 4);
+
+         DMatrixRMaj A = RandomMatrices_DDRM.symmetricPosDef(matrixSize, random);
+         DMatrixRMaj A_sqrt = new DMatrixRMaj(matrixSize, matrixSize);
+         MatrixMissingTools.sqrt(A, A_sqrt);
+
+         DMatrixRMaj Asqrt_times_Asqrt = new DMatrixRMaj(matrixSize, matrixSize);
+         CommonOps_DDRM.mult(A_sqrt, A_sqrt, Asqrt_times_Asqrt);
+
+         MatrixTestTools.assertMatrixEquals(A, Asqrt_times_Asqrt, 1.0e-7);
+      }
+   }
 }

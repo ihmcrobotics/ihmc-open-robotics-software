@@ -24,6 +24,7 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.function.Function;
 
@@ -63,13 +64,13 @@ public abstract class CommunicationsSyncedRobotModel
                                                                            fullRobotModel.getIMUDefinitions());
 
       dataReceptionTimer = new Timer();
-
       if (handModels != null)
       {
          for (RobotSide side : handModels.sides())
          {
-            if (robotModel.getRobotVersion().hasSakeGripperJoints(side))
-               handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
+            handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
+//            if (robotModel.getRobotVersion().hasSakeGripperJoints(side))
+//               handWrenchCalculators.put(side, new HandWrenchCalculator(side, fullRobotModel, null, StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          }
       }
    }

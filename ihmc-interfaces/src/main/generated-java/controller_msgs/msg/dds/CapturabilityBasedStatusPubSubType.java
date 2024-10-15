@@ -15,7 +15,7 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a8d1eccd07678b67aa5302370dafbbc31ff789a3f0def2d983b6addf3532cd78";
+   		return "89bd668d0399ecc46454d943374f50831cba27092687a60eb59eb194d287920a";
    }
    
    @Override
@@ -78,6 +78,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -127,6 +131,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRightHandContactNormal(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getCdrSerializedSize(data.getRightHandWrench(), current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getCdrSerializedSize(data.getLeftHandWrench(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -158,6 +166,8 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLeftHandContactNormal(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRightHandContactNormal(), cdr);
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.write(data.getRightHandWrench(), cdr);
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.write(data.getLeftHandWrench(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
@@ -175,6 +185,8 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getRightHandContactPoints());	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLeftHandContactNormal(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRightHandContactNormal(), cdr);	
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.read(data.getRightHandWrench(), cdr);	
+      controller_msgs.msg.dds.SpatialVectorMessagePubSubType.read(data.getLeftHandWrench(), cdr);	
 
    }
 
@@ -197,6 +209,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_a("right_hand_contact_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRightHandContactNormal());
 
+      ser.write_type_a("right_hand_wrench", new controller_msgs.msg.dds.SpatialVectorMessagePubSubType(), data.getRightHandWrench());
+
+      ser.write_type_a("left_hand_wrench", new controller_msgs.msg.dds.SpatialVectorMessagePubSubType(), data.getLeftHandWrench());
+
    }
 
    @Override
@@ -217,6 +233,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_a("left_hand_contact_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLeftHandContactNormal());
 
       ser.read_type_a("right_hand_contact_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRightHandContactNormal());
+
+      ser.read_type_a("right_hand_wrench", new controller_msgs.msg.dds.SpatialVectorMessagePubSubType(), data.getRightHandWrench());
+
+      ser.read_type_a("left_hand_wrench", new controller_msgs.msg.dds.SpatialVectorMessagePubSubType(), data.getLeftHandWrench());
 
    }
 

@@ -101,6 +101,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       SideDependentList<HandModel> handModels = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
+         System.out.println("Handmodel: "+ getHandModel(side));
          HandModel handModel = getHandModel(side);
          if (handModel != null)
          {

@@ -202,6 +202,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleInput(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
+
       if (interactablesAvailable)
       {
          avoidanceCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));

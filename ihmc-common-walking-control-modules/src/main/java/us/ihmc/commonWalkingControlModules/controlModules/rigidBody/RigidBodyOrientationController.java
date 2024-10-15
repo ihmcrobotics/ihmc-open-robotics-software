@@ -56,6 +56,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                          YoDouble yoTime,
                                          RigidBodyJointControlHelper jointControlHelper,
                                          boolean enableFunctionGenerators,
+                                         boolean enableImpedanceControl,
                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -80,6 +81,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
+                                                                enableImpedanceControl,
                                                                 yoTime,
                                                                 registry);
 

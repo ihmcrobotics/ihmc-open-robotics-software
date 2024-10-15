@@ -15,7 +15,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a1a527941f6cd28e76f77f201297285a364074c350a97c45f247dc3eead2bb1b";
+   		return "2077d26b0f5628f92468c5d3e1cca33b18294e7586fdd0f9cc35c20905ba72be";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += ihmc_common_msgs.msg.dds.FrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -103,7 +103,7 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getWrenchTrajectoryPoints().size() <= 50)
+      if(data.getWrenchTrajectoryPoints().size() <= 200)
       cdr.write_type_e(data.getWrenchTrajectoryPoints());else
           throw new RuntimeException("wrench_trajectory_points field exceeds the maximum length");
 

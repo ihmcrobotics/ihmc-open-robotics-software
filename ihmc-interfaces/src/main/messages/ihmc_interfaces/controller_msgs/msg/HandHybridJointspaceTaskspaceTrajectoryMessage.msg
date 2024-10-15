@@ -19,3 +19,5 @@ ihmc_common_msgs/SE3TrajectoryMessage taskspace_trajectory_message
 # The jointspace trajectory information.
 # The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
 JointspaceTrajectoryMessage jointspace_trajectory_message
+# The feedforward taskspace trajectory information.
+WrenchTrajectoryMessage feedforward_taskspace_trajectory_message

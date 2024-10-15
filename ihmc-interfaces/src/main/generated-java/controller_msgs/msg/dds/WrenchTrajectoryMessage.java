@@ -41,7 +41,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
    public WrenchTrajectoryMessage()
    {
-      wrench_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage> (50, new controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType());
+      wrench_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage> (200, new controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType());
       frame_information_ = new ihmc_common_msgs.msg.dds.FrameInformation();
       control_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();

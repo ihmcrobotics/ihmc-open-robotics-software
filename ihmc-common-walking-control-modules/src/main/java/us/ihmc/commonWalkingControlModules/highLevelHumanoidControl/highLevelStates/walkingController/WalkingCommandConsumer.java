@@ -55,6 +55,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajec
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -448,9 +449,19 @@ public class WalkingCommandConsumer
          {
             SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
+            WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
+            {
+               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            }
+            else
+            {
+               LogTools.info("Hybrid message with FeedForward activated");
+               feedForwardCommand.setSequenceId(command.getSequenceId());
+               handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
+            }
          }
       }
 

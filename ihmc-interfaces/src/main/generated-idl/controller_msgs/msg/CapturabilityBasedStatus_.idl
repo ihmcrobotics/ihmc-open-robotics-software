@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__CapturabilityBasedStatus__idl__
 #define __controller_msgs__msg__CapturabilityBasedStatus__idl__
 
+#include "controller_msgs/msg/./SpatialVectorMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
 module controller_msgs
@@ -63,6 +64,14 @@ module controller_msgs
          * Surface normal of the right hand, if in contact. Contact is assumed to be at the hand control frame. Set to zero (the default value) if not in contact.
          */
         geometry_msgs::msg::dds::Vector3 right_hand_contact_normal;
+        /**
+         * The estimated hand wrench of the right hand
+         */
+        controller_msgs::msg::dds::SpatialVectorMessage right_hand_wrench;
+        /**
+         * The estimated hand wrench of the left hand
+         */
+        controller_msgs::msg::dds::SpatialVectorMessage left_hand_wrench;
       };
     };
   };

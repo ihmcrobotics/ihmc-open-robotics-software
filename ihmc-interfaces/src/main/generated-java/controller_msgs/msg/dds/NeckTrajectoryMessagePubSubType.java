@@ -15,7 +15,7 @@ public class NeckTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "04b64929e1d786e4480c66911679cccda5399972d74db97636d0d9c53352d794";
+   		return "6f0cbb178c3cbefe1752ab4de837347160f112e8be1d6f151a0c7f430b20a5e0";
    }
    
    @Override

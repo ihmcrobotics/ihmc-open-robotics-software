@@ -109,6 +109,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private ReferenceFrame controlBaseFrame = null;
 
    /**
+    * Whether to enable impedance control. If true, the controller will use impedance control
+    * to compute the desired acceleration.
+    */
+   private boolean isImpedanceEnabled = false;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -139,7 +145,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       linearGainsFrame = other.linearGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
-
+      isImpedanceEnabled = other.isImpedanceEnabled;
    }
 
    /**
@@ -322,6 +328,18 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       this.controlMode = controlMode;
    }
+
+   /**
+    * Sets the impedance control mode to be used for this command.
+    *
+    *    @param isImpedanceEnabled whether to enable impedance control
+    */
+
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled = isImpedanceEnabled;
+   }
+
 
    /**
     * Configures this feedback command's inputs for inverse kinematics.
@@ -1242,6 +1260,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public PIDSE3Gains getGains()
    {
       return gains;
+   }
+
+   public boolean getIsImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public ReferenceFrame getAngularGainsFrame()

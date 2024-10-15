@@ -6,7 +6,7 @@
 uint32 sequence_id
 
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
-WrenchTrajectoryPointMessage[<=50] wrench_trajectory_points
+WrenchTrajectoryPointMessage[<=200] wrench_trajectory_points
 # Frame information for this message.
 ihmc_common_msgs/FrameInformation frame_information
 # Flag that tells the controller whether the use of a custom control frame is requested.

@@ -5,6 +5,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -71,6 +72,13 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
    }
 
    public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand,
+                                                double[] initialJointPositions)
+   {
+      LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");
+      return false;
+   }
+
+   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command, JointspaceTrajectoryCommand jointspaceCommand, WrenchTrajectoryControllerCommand feedForwardCommand,
                                                 double[] initialJointPositions)
    {
       LogTools.warn("Handling of hybrid command " + command.getClass().getSimpleName() + " not implemented for " + getClass().getSimpleName() + ".");

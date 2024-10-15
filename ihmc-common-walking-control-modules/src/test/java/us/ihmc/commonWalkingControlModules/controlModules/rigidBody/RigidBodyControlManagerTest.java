@@ -522,6 +522,7 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     null,
                                                                     false,
+                                                                    false,
                                                                     nominalRhoWeight,
                                                                     yoTime,
                                                                     0.0,

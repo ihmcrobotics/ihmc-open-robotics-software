@@ -50,6 +50,7 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
       {
          if(forceEstimationToolboxController != null)
+
             forceEstimationToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
 

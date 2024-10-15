@@ -6,6 +6,10 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.CholeskyDecomposition_F64;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -99,6 +103,24 @@ public class MatrixMissingTools
             else
                mat.unsafe_set(row, col, 0.0);
          }
+      }
+   }
+
+
+   public static void diagonal(DMatrixRMaj matrix, DMatrixRMaj diagMatrixToPack) {
+      if (matrix.getNumRows() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The input matrix must be square.");
+      }
+      if (diagMatrixToPack.getNumRows() != matrix.getNumRows() || diagMatrixToPack.getNumCols() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The diagonal matrix must have the same dimensions as the input matrix.");
+      }
+
+      // Set all elements to zero
+      CommonOps_DDRM.fill(diagMatrixToPack, 0.0);
+
+      // Set the diagonal elements
+      for (int i = 0; i < matrix.getNumRows(); i++) {
+         diagMatrixToPack.set(i, i, matrix.get(i, i));
       }
    }
 
@@ -507,6 +529,42 @@ public class MatrixMissingTools
       }
    }
 
+   /**
+    * Computes the square root of a positive definite matrix using the Eigenvalue decomposition.
+    * The result is stored in the provided resultToPack matrix.
+    *
+    * @param input the matrix to compute the square root of. Not modified.
+    * @param resultToPack the matrix to store the result in. Modified.
+    * @throws IllegalArgumentException if the input and resultToPack matrices have incompatible sizes.
+    * @throws RuntimeException if the input matrix is not positive definite.
+    */
+   public static void sqrt(DMatrixRMaj input, DMatrixRMaj resultToPack) {
+      if (input.numCols != resultToPack.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
+      if (input.numRows != resultToPack.numRows)
+         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
+
+      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(input.numRows, true);
+      if (!eig.decompose(input)) {
+         throw new RuntimeException("Eigenvalue decomposition failed.");
+      }
+
+      DMatrixRMaj V = new DMatrixRMaj(input.numRows, input.numCols);
+      DMatrixRMaj D = new DMatrixRMaj(input.numRows, input.numCols);
+
+      for (int i = 0; i < input.numRows; i++) {
+         DMatrixRMaj eigenVector = eig.getEigenVector(i);
+         double eigenValue = eig.getEigenvalue(i).getReal();
+         if (eigenVector != null) {
+            CommonOps_DDRM.insert(eigenVector, V, 0, i);
+            D.set(i, i, Math.sqrt(eigenValue));
+         }
+      }
+
+      DMatrixRMaj temp = new DMatrixRMaj(input.numRows, input.numCols);
+      CommonOps_DDRM.mult(V, D, temp);
+      CommonOps_DDRM.multTransB(temp, V, resultToPack);
+   }
    /**
     * Comparing elements of two matrices.
     * This method results true when all elements in a is less than b. <br>

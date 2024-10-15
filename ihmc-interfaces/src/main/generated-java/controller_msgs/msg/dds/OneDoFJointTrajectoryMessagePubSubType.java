@@ -15,7 +15,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "906a241c529d5f4d4e0a47ba01e65d50152118ec79f67fca45823b510a60e2d8";
+   		return "5332e5b3667fee93391a0c385c48674d5ccdf9b98b30fcb51dc4749d2cef9d1f";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -91,7 +91,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getTrajectoryPoints().size() <= 50)
+      if(data.getTrajectoryPoints().size() <= 200)
       cdr.write_type_e(data.getTrajectoryPoints());else
           throw new RuntimeException("trajectory_points field exceeds the maximum length");
 
