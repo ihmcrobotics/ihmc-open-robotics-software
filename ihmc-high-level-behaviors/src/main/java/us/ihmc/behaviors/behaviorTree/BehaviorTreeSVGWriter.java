@@ -15,6 +15,7 @@ public class BehaviorTreeSVGWriter
    private int i = 0;
    private int x = 100;
    private int y = 100;
+   private int actionSequenceIndex = 0;
    private int actionSequenceX = x;
    private int actionSequenceY = y;
    private final ArrayList<BehaviorTreeSVGNode> svgNodes = new ArrayList<>();
@@ -29,16 +30,23 @@ public class BehaviorTreeSVGWriter
       {
          if (child instanceof ActionSequenceState)
          {
+            actionSequenceIndex = i;
             actionSequenceX = x;
             actionSequenceY = y;
          }
+
+         if (child.getDefinition().getName().equals("Set static for approach"))
+         {
+
+         }
+
 
          BehaviorTreeSVGNode svgNode = new BehaviorTreeSVGNode(svgGraphics2D, child, svgNodes, i, x, y);
          svgNodes.add(svgNode);
 
          y += svgNode.getHeight();
 
-         if (svgNodes.size() % 12 == 0)
+         if ((svgNodes.size() - (actionSequenceIndex + 1)) % 12 == 0)
             y = actionSequenceY + 30;
 
          ++i;
