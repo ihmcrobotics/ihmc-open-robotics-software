@@ -95,9 +95,10 @@ public class TrajectoryRecordReplay
                                     boolean triggerPressed,
                                     double forwardJoystickValue,
                                     double lateralJoystickValue,
-                                    ReferenceFrame desiredControlFrame)
+                                    ReferenceFrame desiredControlFrame,
+                                    ReferenceFrame recordInFrame)
    {
-      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerPressed, forwardJoystickValue, lateralJoystickValue, desiredControlFrame);
+      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerPressed, forwardJoystickValue, lateralJoystickValue, desiredControlFrame, recordInFrame);
    }
 
    /**
@@ -182,7 +183,7 @@ public class TrajectoryRecordReplay
       }
    }
 
-   public boolean onReplayStart(String replayFileToLoad)
+   public boolean onReplayStart(String replayFileToLoad, ReferenceFrame loadInFrame)
    {
       replayIndex = 0;
       joystickData.clear();
@@ -194,7 +195,7 @@ public class TrajectoryRecordReplay
          String line;
          while ((line = fileReader.readLine()) != null)
          {
-            joystickData.add(new JoystickData(line.split(",")));
+            joystickData.add(new JoystickData(line.split(","), loadInFrame));
          }
          fileReader.close();
          return true;
@@ -363,19 +364,21 @@ public class TrajectoryRecordReplay
       private boolean leftTriggerPressed;
       private double leftForwardJoystickValue;
       private double leftLateralJoystickValue;
-      private final FramePose3D leftDesiredControllerPose = new FramePose3D();
+      private final FramePose3D leftDesiredControllerPose;
 
       private boolean rightAButtonPressed;
       private boolean rightTriggerPressed;
       private double rightForwardJoystickValue;
       private double rightLateralJoystickValue;
-      private final FramePose3D rightDesiredControllerPose = new FramePose3D();
+      private final FramePose3D rightDesiredControllerPose;
 
       public JoystickData()
       {
+         leftDesiredControllerPose = new FramePose3D();
+         rightDesiredControllerPose = new FramePose3D();
       }
 
-      public JoystickData(String[] data)
+      public JoystickData(String[] data, ReferenceFrame loadInFrame)
       {
          int index = 0;
 
@@ -383,15 +386,19 @@ public class TrajectoryRecordReplay
          leftTriggerPressed = Boolean.parseBoolean(data[index++]);
          leftForwardJoystickValue = Double.parseDouble(data[index++]);
          leftLateralJoystickValue = Double.parseDouble(data[index++]);
+         leftDesiredControllerPose = new FramePose3D(loadInFrame);
          leftDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          leftDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+         leftDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          rightAButtonPressed = Boolean.parseBoolean(data[index++]);
          rightTriggerPressed = Boolean.parseBoolean(data[index++]);
          rightForwardJoystickValue = Double.parseDouble(data[index++]);
          rightLateralJoystickValue = Double.parseDouble(data[index++]);
+         rightDesiredControllerPose = new FramePose3D(loadInFrame);
          rightDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          rightDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
+         rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
       }
 
       void set(RobotSide robotSide,
@@ -399,7 +406,8 @@ public class TrajectoryRecordReplay
                boolean triggerPressed,
                double forwardJoystickValue,
                double lateralJoystickValue,
-               ReferenceFrame desiredControlFrame)
+               ReferenceFrame desiredControlFrame,
+               ReferenceFrame recordInFrame)
       {
          if (robotSide == RobotSide.LEFT)
          {
@@ -408,7 +416,7 @@ public class TrajectoryRecordReplay
             leftForwardJoystickValue = forwardJoystickValue;
             leftLateralJoystickValue = lateralJoystickValue;
             leftDesiredControllerPose.setToZero(desiredControlFrame);
-            leftDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
+            leftDesiredControllerPose.changeFrame(recordInFrame);
          }
          else
          {
@@ -417,7 +425,7 @@ public class TrajectoryRecordReplay
             rightForwardJoystickValue = forwardJoystickValue;
             rightLateralJoystickValue = lateralJoystickValue;
             rightDesiredControllerPose.setToZero(desiredControlFrame);
-            rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
+            rightDesiredControllerPose.changeFrame(recordInFrame);
          }
       }
 
