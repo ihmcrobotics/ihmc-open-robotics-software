@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 import org.bytedeco.cuda.cudart.CUfunc_st;
 import org.bytedeco.cuda.cudart.CUmod_st;
 import org.bytedeco.cuda.cudart.CUstream_st;
+import org.bytedeco.cuda.cudart.cudaDeviceProp;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.nvrtc._nvrtcProgram;
 import org.bytedeco.javacpp.BytePointer;
@@ -25,13 +26,33 @@ import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
 class CUDAProgram
 {
-   private final Map<String, CUfunc_st> kernels = new HashMap<>();
+   private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
+                                                    "--dopt=on",                     // Optimize code
+                                                    "-G"};                           // More code optimization
 
    private final CUmod_st module = new CUmod_st();
+   private final Map<String, CUfunc_st> kernels = new HashMap<>();
 
    private int error;
 
+   /**
+    * Construct a {@link CUDAProgram} with default compilation options
+    * @param programPath {@link Path} to the .cu file.
+    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    */
    public CUDAProgram(Path programPath, Path... headerPaths)
+   {
+      this(programPath, headerPaths, DEFAULT_OPTIONS);
+   }
+
+   /**
+    * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
+    * @param programPath {@link Path} to the .cu file.
+    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    * @param compilationOptions List of compilation options
+    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    */
+   public CUDAProgram(Path programPath, Path[] headerPaths, String... compilationOptions)
    {
       try
       {
@@ -53,7 +74,7 @@ class CUDAProgram
             }
          }
 
-         initialize(programName, programContents, headerNames, headerContents);
+         initialize(programName, programContents, headerNames, headerContents, compilationOptions);
       }
       catch (IOException e)
       {
@@ -66,9 +87,30 @@ class CUDAProgram
       this(programName, programCode, null, null);
    }
 
+   /**
+    * Construct a {@link CUDAProgram} with default compilation options.
+    * @param programName The name of the program (usually the file name with a .cu extension).
+    * @param programCode The program code (i.e. the contents of the .cu file).
+    * @param headerNames List of header names included (with {@code #include}) in the code.
+    * @param headerContents Contents of the headers included in the code.
+    */
    public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
    {
-      initialize(programName, programCode, headerNames, headerContents);
+      this(programName, programCode, headerNames, headerContents, DEFAULT_OPTIONS);
+   }
+
+   /**
+    * Construct a {@link CUDAProgram} specifying the name, code, header names, header contents, and compilation options.
+    * @param programName The name of the program (usually the file name with a .cu extension).
+    * @param programCode The program code (i.e. the contents of the .cu file).
+    * @param headerNames List of header names included (with {@code #include}) in the code.
+    * @param headerContents Contents of the headers included in the code.
+    * @param compilationOptions List of compilation options
+    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    */
+   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents, String... compilationOptions)
+   {
+      initialize(programName, programCode, headerNames, headerContents, compilationOptions);
    }
 
    public void loadKernel(String kernelName)
@@ -99,11 +141,11 @@ class CUDAProgram
       module.close();
    }
 
-   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents)
+   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions)
    {
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
-      compileProgram(programName, programCode, headerNames, headerContents, null, compiledProgram);
+      compileProgram(programName, programCode, headerNames, headerContents, compilationOptions, compiledProgram);
 
       // Get the program's PTX size
       SizeTPointer ptxSize = new SizeTPointer(1L);
@@ -114,6 +156,8 @@ class CUDAProgram
       BytePointer ptx = new BytePointer(ptxSize.get());
       error = nvrtcGetPTX(compiledProgram, ptx);
       checkNVRTCError(error);
+
+      LogTools.debug("The following PTX was generated for {}:\n{}", programName, ptx.getString());
 
       // Load the module using the PTX
       error = cuModuleLoadData(module, ptx);
@@ -126,6 +170,16 @@ class CUDAProgram
       ptx.close();
    }
 
+   /**
+    * Compiles a CUDA program to an {@code _nvrtcProgram}.
+    * @param programName [IN] The name of the program (usually the file name with a .cu extension).
+    * @param programCode [IN] The program code (i.e. the contents of the .cu file).
+    * @param headerNames [IN] List of header names included (with {@code #include}) in the code.
+    * @param headerContents [IN] Contents of the headers included in the code.
+    * @param compilationOptions [IN] List of compilation options
+    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    * @param compiledProgram [OUT] The compiled program.
+    */
    private static void compileProgram(String programName,
                                       String programCode,
                                       String[] headerNames,
@@ -159,6 +213,12 @@ class CUDAProgram
       }
    }
 
+   /**
+    * Retrieves and logs the compilation log of the compiled {@code program}.
+    * @param program The compiled program.
+    * @param programName Name of the compiled program.
+    * @param logLevel Level at which to output the log.
+    */
    private static void printProgramLog(_nvrtcProgram program, String programName, Level logLevel)
    {
       int error;
@@ -177,6 +237,15 @@ class CUDAProgram
       log.close();
    }
 
+   /**
+    * Launches a CUDA kernel.
+    * @param stream CUDA stream on which the kernel will be synchronized.
+    * @param function The kernel function to launch.
+    * @param gridSize Grid size of the kernel execution.
+    * @param blockSize Block size of the kernel execution. Should not exceed maximum block size of the device.
+    * @param sharedMemorySize Size, in byte, of the memory shared by threads in each block.
+    * @param arguments List of arguments (parameters) being passed into the kernel.
+    */
    private static void launchKernelFunction(CUstream_st stream, CUfunc_st function, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
    {
       PointerPointer<Pointer> argumentsPointer = arguments == null ? new PointerPointer<>() : new PointerPointer<>(arguments);
@@ -195,5 +264,24 @@ class CUDAProgram
 
       CUDATools.checkCUDAError(error);
       argumentsPointer.close();
+   }
+
+   /**
+    * @return A fairly recent compute version available on the device.
+    */
+   private static String getComputeVersion()
+   {
+      cudaDeviceProp deviceProperties = new cudaDeviceProp();
+      cudaGetDeviceProperties(deviceProperties, 0);
+      int majorVersion = deviceProperties.major();
+      int minorVersion = deviceProperties.minor();
+
+      String computeVersion = "compute_" + majorVersion + "0";
+
+      LogTools.debug("Found CUDA architecture {}.{}. Targeting {} for CUDA kernel compilation.", majorVersion, minorVersion, computeVersion);
+
+      deviceProperties.close();
+
+      return computeVersion;
    }
 }
