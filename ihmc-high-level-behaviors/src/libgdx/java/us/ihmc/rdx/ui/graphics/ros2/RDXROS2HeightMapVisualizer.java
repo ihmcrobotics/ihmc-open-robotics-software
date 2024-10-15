@@ -20,7 +20,7 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.rdx.RDXHeightMapRenderer;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
