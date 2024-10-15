@@ -12,11 +12,15 @@ import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
+import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
 public class CUDAProgram
@@ -27,21 +31,79 @@ public class CUDAProgram
 
    private int error;
 
-//   public CUDAProgram(String programFile, String... headerFiles)
-//   {
-//      // Call constructor with default options
-//   }
-//
-//   public CUDAProgram(String programFile, String[] compilationOptions, String... headerFiles)
-//   {
-//      // Create PTX, module
-//   }
+   public CUDAProgram(Path programPath, Path... headerPaths)
+   {
+      try
+      {
+         String programName = programPath.getFileName().toString();
+         String programContents = new String(Files.readAllBytes(programPath));
+
+         String[] headerNames = null;
+         String[] headerContents = null;
+
+         if (headerPaths != null && headerPaths.length > 0)
+         {
+            headerNames = new String[headerPaths.length];
+            headerContents = new String[headerPaths.length];
+
+            for (int i = 0; i < headerPaths.length; i++)
+            {
+               headerNames[i] = headerPaths[i].getFileName().toString();
+               headerContents[i] = new String(Files.readAllBytes(headerPaths[i]));
+            }
+         }
+
+         initialize(programName, programContents, headerNames, headerContents);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
    public CUDAProgram(String programName, String programCode)
    {
+      this(programName, programCode, null, null);
+   }
+
+   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
+   {
+      initialize(programName, programCode, headerNames, headerContents);
+   }
+
+   public void loadKernel(String kernelName)
+   {
+      // Load the kernel from module
+      CUfunc_st kernel = new CUfunc_st();
+      error = cuModuleGetFunction(kernel, module, kernelName);
+      checkCUDAError(error);
+      kernels.put(kernelName, kernel);
+   }
+
+   public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
+   {
+      if (!kernels.containsKey(kernelName))
+         throw new IllegalStateException("Kernel (" + kernelName + ") requested has not been loaded yet.");
+
+      // Run kernel
+      CUfunc_st kernel = kernels.get(kernelName);
+      launchKernelFunction(stream, kernel, gridSize, blockSize, sharedMemorySize, arguments);
+   }
+
+   public void destroy()
+   {
+      for (CUfunc_st kernel : kernels.values())
+         kernel.close();
+
+      cuModuleUnload(module);
+      module.close();
+   }
+
+   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents)
+   {
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
-      compileProgram(programName, programCode, null, null, null, compiledProgram);
+      compileProgram(programName, programCode, headerNames, headerContents, null, compiledProgram);
 
       // Get the program's PTX size
       SizeTPointer ptxSize = new SizeTPointer(1L);
@@ -62,52 +124,6 @@ public class CUDAProgram
       compiledProgram.close();
       ptxSize.close();
       ptx.close();
-   }
-
-   public void loadKernel(String kernelName)
-   {
-      // Load the kernel from module
-      CUfunc_st kernel = new CUfunc_st();
-      error = cuModuleGetFunction(kernel, module, kernelName);
-      checkNVRTCError(error);
-      kernels.put(kernelName, kernel);
-   }
-
-//   public void runKernel(String kernelName, Mat image, Pointer... arguments)
-//   {
-//      GpuMat gpuMat = new GpuMat()
-//      gpuMat.upload(image)
-//      runKernel(...)
-//   }
-//
-//   public void runKernel(String kernelName, GpuMat image, Pointer... arguments)
-//   {
-//      runKernel2D(kernelName, image.getWidth, image.getHeight, /*cuda pointer*/ image.data(), arguments);
-//   }
-//
-//   public void runKernel2D(String kernelName, int dimX, int dimY, Pointer... arguments)
-//   {
-//      runKernel(kernelName, /* dims */);
-//   }
-
-   // TODO: see if shared memory size can be found programmatically
-   public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
-   {
-      if (!kernels.containsKey(kernelName))
-         throw new IllegalStateException("Kernel (" + kernelName + ") requested has not been loaded yet.");
-
-      // Run kernel
-      CUfunc_st kernel = kernels.get(kernelName);
-      launchKernelFunction(stream, kernel, gridSize, blockSize, sharedMemorySize, arguments);
-   }
-
-   public void destroy()
-   {
-      for (CUfunc_st kernel : kernels.values())
-         kernel.close();
-
-      cuModuleUnload(module);
-      module.close();
    }
 
    private static void compileProgram(String programName,
