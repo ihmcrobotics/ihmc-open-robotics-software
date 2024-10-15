@@ -80,24 +80,6 @@ class CUDAProgram
       kernels.put(kernelName, kernel);
    }
 
-//   public void runKernel(String kernelName, Mat image, Pointer... arguments)
-//   {
-//      GpuMat gpuMat = new GpuMat()
-//      gpuMat.upload(image)
-//      runKernel(...)
-//   }
-//
-//   public void runKernel(String kernelName, GpuMat image, Pointer... arguments)
-//   {
-//      runKernel2D(kernelName, image.getWidth, image.getHeight, /*cuda pointer*/ image.data(), arguments);
-//   }
-//
-//   public void runKernel2D(String kernelName, int dimX, int dimY, Pointer... arguments)
-//   {
-//      runKernel(kernelName, /* dims */);
-//   }
-
-   // TODO: see if shared memory size can be found programmatically
    public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
    {
       if (!kernels.containsKey(kernelName))
