@@ -233,6 +233,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             definition.setName(definition.getName() + ".json");
          }
       }
+
+      if (ImGui.menuItem(labels.get("Draw to SVG")))
+      {
+         state.drawToSVG();
+      }
    }
 
    public void renderNodeSettingsWidgets()
