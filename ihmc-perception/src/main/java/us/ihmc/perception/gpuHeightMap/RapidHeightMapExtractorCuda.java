@@ -388,4 +388,7 @@ public class RapidHeightMapExtractorCuda {
          CudaHeightMapTools.TransformToPointer(groundToSensorTransformArray,groundToSensorTransformPointer);
       }
 
+
+      snappedAreaFractionImage.getBytedecoOpenCVMat().data()
+
 }
