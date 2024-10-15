@@ -525,7 +525,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.clipToMaxNorm(gains.getMaximumProportionalError());
 
       yoErrorPosition.setIncludingFrame(feedbackTermToPack);
-      yoErrorPosition.changeFrame(trajectoryFrame);
+      yoErrorPosition.changeFrame(controlFrame);
       yoErrorPosition.setCommandId(currentCommandId);
 
       if (linearGainsFrame != null)
@@ -610,34 +610,40 @@ public class PointFeedbackController implements FeedbackControllerInterface
          feedbackTermToPack.setToZero(controlFrame);
          yoErrorPositionIntegrated.setToZero(trajectoryFrame);
          yoErrorPositionIntegrated.setCommandId(currentCommandId);
-         return;
       }
-
-      // If the trajectory frame changed reset the integration.
-      if (yoErrorPositionIntegrated.getReferenceFrame() != trajectoryFrame)
-      {
-         yoErrorPositionIntegrated.setToZero(trajectoryFrame);
-      }
-
-      feedbackTermToPack.setIncludingFrame(yoErrorPosition);
-      feedbackTermToPack.scale(dt);
-      feedbackTermToPack.add(yoErrorPositionIntegrated);
-      feedbackTermToPack.changeFrame(controlFrame);
-      selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.clipToMaxNorm(maximumIntegralError);
-      yoErrorPositionIntegrated.setIncludingFrame(feedbackTermToPack);
-      yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
-      yoErrorPositionIntegrated.setCommandId(currentCommandId);
-
-      if (linearGainsFrame != null)
-         feedbackTermToPack.changeFrame(linearGainsFrame);
       else
+      {
+         // If the trajectory frame changed reset the integration.
+         if (yoErrorPositionIntegrated.getReferenceFrame() != trajectoryFrame)
+         {
+            yoErrorPositionIntegrated.setToZero(trajectoryFrame);
+         }
+         // if the frame of the error differs the trajectory frame change it into trajectory frame.
+         if (yoErrorPosition.getReferenceFrame() != trajectoryFrame)
+         {
+            yoErrorPosition.setToZero(trajectoryFrame);
+         }
+
+         feedbackTermToPack.setIncludingFrame(yoErrorPosition);
+         feedbackTermToPack.scale(dt);
+         feedbackTermToPack.add(yoErrorPositionIntegrated);
          feedbackTermToPack.changeFrame(controlFrame);
+         selectionMatrix.applyLinearSelection(feedbackTermToPack);
+         feedbackTermToPack.clipToMaxNorm(maximumIntegralError);
+         yoErrorPositionIntegrated.setIncludingFrame(feedbackTermToPack);
+         yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
+         yoErrorPositionIntegrated.setCommandId(currentCommandId);
 
-      gains.getIntegralGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(feedbackTermToPack);
+         if (linearGainsFrame != null)
+            feedbackTermToPack.changeFrame(linearGainsFrame);
+         else
+            feedbackTermToPack.changeFrame(controlFrame);
 
-      feedbackTermToPack.changeFrame(controlFrame);
+         gains.getIntegralGainMatrix(tempGainMatrix);
+         tempGainMatrix.transform(feedbackTermToPack);
+
+         feedbackTermToPack.changeFrame(controlFrame);
+      }
    }
 
    /**
