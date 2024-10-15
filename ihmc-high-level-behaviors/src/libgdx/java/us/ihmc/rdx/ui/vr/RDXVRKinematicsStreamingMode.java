@@ -108,6 +108,7 @@ public class RDXVRKinematicsStreamingMode
    private MutableReferenceFrame headsetReferenceFrame;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final ImBoolean replayInMidFeetZUpFrame = new ImBoolean(false);
    private final Notification streamingDisabled = new Notification();
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
@@ -347,9 +348,12 @@ public class RDXVRKinematicsStreamingMode
 
                                                                    // Check if left joystick is pressed in order to trigger recording or replay of motion
                                                                    gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-                                                                   kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-                                                                });
-         }
+                                                                   if (replayInMidFeetZUpFrame.get())
+                                                                      kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+                                                                   else
+                                                                      kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, ReferenceFrame.getWorldFrame());
+         });
+      }
 
       // Handle right joystick input
       if (kinematicsRecorder.isReplaying())
@@ -377,12 +381,10 @@ public class RDXVRKinematicsStreamingMode
                                                                                                      lateralJoystickValue);
 
                                                                     gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
-                                                                    kinematicsRecorder.recordControllerData(RobotSide.RIGHT,
-                                                                                                            rightAButtonPressed,
-                                                                                                            rightTriggerPressed,
-                                                                                                            forwardJoystickValue,
-                                                                                                            lateralJoystickValue,
-                                                                                                            syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+                                                                    if (replayInMidFeetZUpFrame.get())
+                                                                       kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+                                                                    else
+                                                                       kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, ReferenceFrame.getWorldFrame());
                                                                  });
       }
 
@@ -1047,6 +1049,9 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(enabled.get());
       }
+
+      ImGui.checkbox(labels.get("Replay in midFeetZUp Frame"), replayInMidFeetZUpFrame);
+
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
          setEnabled(false);
