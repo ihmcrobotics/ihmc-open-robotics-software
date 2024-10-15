@@ -12,11 +12,15 @@ import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
+import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
 class CUDAProgram
@@ -27,41 +31,44 @@ class CUDAProgram
 
    private int error;
 
-//   public CUDAProgram(String programFile, String... headerFiles)
-//   {
-//      // Call constructor with default options
-//   }
-//
-//   public CUDAProgram(String programFile, String[] compilationOptions, String... headerFiles)
-//   {
-//      // Create PTX, module
-//   }
+   public CUDAProgram(Path programPath, Path... headerPaths)
+   {
+      try
+      {
+         String programName = programPath.getFileName().toString();
+         String programContents = new String(Files.readAllBytes(programPath));
+
+         String[] headerNames = null;
+         String[] headerContents = null;
+
+         if (headerPaths != null && headerPaths.length > 0)
+         {
+            headerNames = new String[headerPaths.length];
+            headerContents = new String[headerPaths.length];
+
+            for (int i = 0; i < headerPaths.length; i++)
+            {
+               headerNames[i] = headerPaths[i].getFileName().toString();
+               headerContents[i] = new String(Files.readAllBytes(headerPaths[i]));
+            }
+         }
+
+         initialize(programName, programContents, headerNames, headerContents);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
    public CUDAProgram(String programName, String programCode)
    {
-      // Compile the program
-      _nvrtcProgram compiledProgram = new _nvrtcProgram();
-      compileProgram(programName, programCode, null, null, null, compiledProgram);
+      this(programName, programCode, null, null);
+   }
 
-      // Get the program's PTX size
-      SizeTPointer ptxSize = new SizeTPointer(1L);
-      error = nvrtcGetPTXSize(compiledProgram, ptxSize);
-      checkNVRTCError(error);
-
-      // Get the PTX
-      BytePointer ptx = new BytePointer(ptxSize.get());
-      error = nvrtcGetPTX(compiledProgram, ptx);
-      checkNVRTCError(error);
-
-      // Load the module using the PTX
-      error = cuModuleLoadData(module, ptx);
-      checkNVRTCError(error);
-
-      // Release stuff
-      nvrtcDestroyProgram(compiledProgram);
-      compiledProgram.close();
-      ptxSize.close();
-      ptx.close();
+   public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
+   {
+      initialize(programName, programCode, headerNames, headerContents);
    }
 
    public void loadKernel(String kernelName)
@@ -69,7 +76,7 @@ class CUDAProgram
       // Load the kernel from module
       CUfunc_st kernel = new CUfunc_st();
       error = cuModuleGetFunction(kernel, module, kernelName);
-      checkNVRTCError(error);
+      checkCUDAError(error);
       kernels.put(kernelName, kernel);
    }
 
@@ -108,6 +115,33 @@ class CUDAProgram
 
       cuModuleUnload(module);
       module.close();
+   }
+
+   private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents)
+   {
+      // Compile the program
+      _nvrtcProgram compiledProgram = new _nvrtcProgram();
+      compileProgram(programName, programCode, headerNames, headerContents, null, compiledProgram);
+
+      // Get the program's PTX size
+      SizeTPointer ptxSize = new SizeTPointer(1L);
+      error = nvrtcGetPTXSize(compiledProgram, ptxSize);
+      checkNVRTCError(error);
+
+      // Get the PTX
+      BytePointer ptx = new BytePointer(ptxSize.get());
+      error = nvrtcGetPTX(compiledProgram, ptx);
+      checkNVRTCError(error);
+
+      // Load the module using the PTX
+      error = cuModuleLoadData(module, ptx);
+      checkNVRTCError(error);
+
+      // Release stuff
+      nvrtcDestroyProgram(compiledProgram);
+      compiledProgram.close();
+      ptxSize.close();
+      ptx.close();
    }
 
    private static void compileProgram(String programName,

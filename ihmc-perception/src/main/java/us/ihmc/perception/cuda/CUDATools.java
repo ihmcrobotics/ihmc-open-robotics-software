@@ -106,7 +106,7 @@ public class CUDATools
 
       try (BytePointer errorString = nvrtcGetErrorString(errorCode))
       {
-         LogTools.error("NVRTC error: {}", errorString);
+         LogTools.error("NVRTC error: {}", errorString.getString());
       }
    }
 }
