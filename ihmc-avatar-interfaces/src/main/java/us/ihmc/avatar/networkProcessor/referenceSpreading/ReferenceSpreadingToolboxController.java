@@ -120,6 +120,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       timeProvider.update(robotConfigurationData.getMonotonicTime());
       time.set(timeProvider.getTime());
       stateMachineHelper.updateJointVelocities(robotConfigurationData.getJointVelocities());
+      stateMachineHelper.updateJointTorques(robotConfigurationData.getJointTorques());
 
       stateMachine.doActionAndTransition();
 

@@ -34,6 +34,7 @@ public class ReferenceSpreadingStateHelper
    private ReferenceSpreadingTrajectory preImpactReference;
    private HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
    private us.ihmc.idl.IDLSequence.Float jointVelocities = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
+   private us.ihmc.idl.IDLSequence.Float jointTorques = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
 
    private final CollisionDetection collisionDetection;
 
@@ -47,7 +48,7 @@ public class ReferenceSpreadingStateHelper
          handWrenches.put(robotSide, new SpatialVectorMessage());
       }
 
-      collisionDetection = new CollisionDetection(50, 1, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(30, 10, fullRobotModel, registry);
       LogTools.info("Collision detection initialized");
    }
 
@@ -61,7 +62,7 @@ public class ReferenceSpreadingStateHelper
       factory.addState(States.AFTER, new AfterState());
       factory.addState(States.WAITING, new WaitingState());
 
-      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, t);
+      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, jointTorques, t);
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
       factory.addDoneTransition(States.AFTER, States.WAITING);
@@ -84,6 +85,11 @@ public class ReferenceSpreadingStateHelper
    public void updateJointVelocities(us.ihmc.idl.IDLSequence.Float jointVelocities)
    {
       this.jointVelocities = jointVelocities;
+   }
+
+   public void updateJointTorques(us.ihmc.idl.IDLSequence.Float jointTorques)
+   {
+      this.jointTorques = jointTorques;
    }
 
    private class BeforeState implements State
