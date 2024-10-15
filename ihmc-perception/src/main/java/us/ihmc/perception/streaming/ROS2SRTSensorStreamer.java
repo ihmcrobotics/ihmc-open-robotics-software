@@ -52,7 +52,7 @@ public class ROS2SRTSensorStreamer
 
    public void sendFrame(ROS2Topic<SRTStreamStatus> streamTopic, RawImage frame)
    {
-      if (frame.get() == null)
+      if (frame != null && frame.get() == null)
          return;
 
       if (!hasStream(streamTopic))
