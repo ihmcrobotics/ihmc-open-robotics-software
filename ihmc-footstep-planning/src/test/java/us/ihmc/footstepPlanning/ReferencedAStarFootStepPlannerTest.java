@@ -11,11 +11,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ReferencedAStarFootStepPlannerTest
 {
-   // The epsilons are multiplied by 0.5 so that we allow a max epsilon of half the distance between two grid points, we hope to round to the nearest grid point so if we are greater than 0.5 we should round up
+   // The epsilons are multiplied by 0.5 so that we allow a max epsilon of half the distance between two grid points, we hope to round to the nearest grid point, so if we are greater than 0.5 we should round up
    private static final double EPSILON = 0.5 * LatticePoint.gridSizeXY;
    private static final double EPSLILON_YAW = 0.5 * LatticePoint.gridSizeYaw;
    private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
@@ -77,16 +79,16 @@ public class ReferencedAStarFootStepPlannerTest
 
       // We take the adjusted plan and the adjusted footstep pose
       FootstepPlan adjustedPlan = adjustFootstepAtIndex(nominalPlan, index, translationToAppend, yawToAppend);
-      FramePose3D adjustedStepPose = adjustedPlan.getFootstep(index).getFootstepPose();
+      FramePose3D adjustedStepPose = Objects.requireNonNull(adjustedPlan).getFootstep(index).getFootstepPose();
 
       // Now we want to set the adjusted plan as a reference, this way the planner will try to use the reference plan
-      // Specifically the adjusted step that we changed, that is what we will be comparing against
+      // Specifically the adjusted step that we changed; that is what we will be comparing against
       footstepPlannerRequest.setReferencePlan(adjustedPlan);
 
       // We want to test that the reference alpha is working as expected, and the range of its values are from 0 to 1 so we will loop through all of these values
       for (double referenceAlpha = 0.0; referenceAlpha <= 1.0; referenceAlpha += 0.1)
       {
-         // Each loop through we update the reference alpha to the new value, then we plan new footsteps and get the output pose at the index we care about
+         // Each loop through, we update the reference alpha to the new value, then we plan new footsteps and get the output pose at the index we care about
          footstepPlannerModule.getFootstepPlannerParameters().setReferencePlanAlpha(referenceAlpha);
          FootstepPlannerOutput output = footstepPlannerModule.handleRequest(footstepPlannerRequest);
          FramePose3D outputStep = output.getFootstepPlan().getFootstep(index).getFootstepPose();
