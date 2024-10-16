@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;

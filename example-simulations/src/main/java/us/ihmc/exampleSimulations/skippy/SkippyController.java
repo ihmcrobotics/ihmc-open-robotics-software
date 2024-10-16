@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;

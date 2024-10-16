@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoVariable;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
+import us.ihmc.yoVariables.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class PositionVelocity1DConsistencyChecker implements DiagnosticUpdatable
 {

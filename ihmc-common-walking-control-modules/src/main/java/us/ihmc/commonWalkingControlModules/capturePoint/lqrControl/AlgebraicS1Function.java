@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.careSolvers.CARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
-import us.ihmc.robotics.linearAlgebra.careSolvers.SignFunctionCARESolver;
+import us.ihmc.math.linearAlgebra.careSolvers.CARESolver;
+import us.ihmc.math.linearAlgebra.careSolvers.DefectCorrectionCARESolver;
+import us.ihmc.math.linearAlgebra.careSolvers.SignFunctionCARESolver;
 
 public class AlgebraicS1Function implements S1Function
 {

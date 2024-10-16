@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.data;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
-import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
+import us.ihmc.mecano.yoVariables.spatial.YoMutableFrameSpatialVector;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
 /**

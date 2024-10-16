@@ -12,8 +12,8 @@ import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
+import us.ihmc.yoVariables.filters.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
