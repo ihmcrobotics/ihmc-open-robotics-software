@@ -4,7 +4,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface SensorReaderFactory

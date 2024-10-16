@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 

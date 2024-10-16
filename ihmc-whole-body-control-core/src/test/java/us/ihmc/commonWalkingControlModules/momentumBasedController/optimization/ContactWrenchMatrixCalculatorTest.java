@@ -13,9 +13,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ContactWrenchMatrixCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -33,7 +30,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ContactWrenchMatrixCalculatorTest

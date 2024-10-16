@@ -1,7 +1,7 @@
 package us.ihmc.avatar.handControl;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public interface HandFingerTrajectoryMessagePublisher
 {

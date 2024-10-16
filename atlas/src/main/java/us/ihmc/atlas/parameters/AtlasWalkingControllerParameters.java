@@ -32,12 +32,12 @@ import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters

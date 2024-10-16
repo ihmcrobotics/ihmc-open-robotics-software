@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;

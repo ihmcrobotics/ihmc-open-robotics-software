@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.function.ToDoubleFunction;
 

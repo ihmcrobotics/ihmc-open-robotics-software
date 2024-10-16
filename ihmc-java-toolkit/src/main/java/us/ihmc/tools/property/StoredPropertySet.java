@@ -9,7 +9,7 @@ import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.*;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.io.PrintWriter;
 import java.nio.file.Path;

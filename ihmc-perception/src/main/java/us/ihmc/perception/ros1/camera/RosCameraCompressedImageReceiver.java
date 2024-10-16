@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;

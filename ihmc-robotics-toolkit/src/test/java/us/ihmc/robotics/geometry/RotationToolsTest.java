@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -20,7 +21,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
-import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.commons.math.QuaternionCalculus;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import static org.junit.jupiter.api.Assertions.*;

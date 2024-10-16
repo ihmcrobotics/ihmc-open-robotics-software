@@ -6,7 +6,7 @@ import us.ihmc.avatar.warmup.HumanoidControllerWarmupVisualizer;
 import us.ihmc.avatar.warmup.HumanoidControllerWarumupTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class AtlasControllerWarmup extends HumanoidControllerWarmup

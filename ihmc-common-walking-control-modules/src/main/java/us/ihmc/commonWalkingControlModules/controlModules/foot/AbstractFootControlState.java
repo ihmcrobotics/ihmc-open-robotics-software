@@ -11,9 +11,9 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.stateMachine.core.State;
 
 public abstract class AbstractFootControlState implements State, SCS2YoGraphicHolder
 {

@@ -39,7 +39,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.msgToPacket.converter.CustomFieldConversions;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;

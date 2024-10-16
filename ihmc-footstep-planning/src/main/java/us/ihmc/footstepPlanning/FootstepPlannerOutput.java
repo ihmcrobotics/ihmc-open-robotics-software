@@ -5,8 +5,8 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

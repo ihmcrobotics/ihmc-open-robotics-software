@@ -5,11 +5,9 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {

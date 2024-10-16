@@ -8,14 +8,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 
 public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {

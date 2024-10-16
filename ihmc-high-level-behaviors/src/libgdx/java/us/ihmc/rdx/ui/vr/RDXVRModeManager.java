@@ -26,7 +26,7 @@ import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

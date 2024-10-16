@@ -17,6 +17,7 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
    api("us.ihmc:ihmc-commons-controls:source")
    api("us.ihmc:ihmc-commons-utils:source")
+   api("us.ihmc:ihmc-commons-yo:source")
    api("us.ihmc:ihmc-yovariables-filters:source")
    api("us.ihmc:mecano-yovariables-filters:source")
 }

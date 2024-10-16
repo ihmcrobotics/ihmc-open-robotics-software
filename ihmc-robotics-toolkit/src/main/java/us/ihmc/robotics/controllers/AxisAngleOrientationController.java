@@ -13,7 +13,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;

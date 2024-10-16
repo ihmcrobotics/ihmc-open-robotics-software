@@ -7,8 +7,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 

@@ -2,8 +2,6 @@ package us.ihmc.manipulation.planning.rrt.configurationAndTimeSpace;
 
 import java.util.Random;
 
-import us.ihmc.robotics.robotSide.RobotSide;
-
 public class CTTreeTools
 {
    /*

@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics

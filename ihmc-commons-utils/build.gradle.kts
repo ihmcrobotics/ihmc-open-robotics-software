@@ -13,10 +13,11 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:scs2-definition:17-0.27.3")
-   api("us.ihmc:ihmc-graphics-description:0.25.1")
-   api("us.ihmc:mecano-yovariables:17-0.18.1")
-   api("us.ihmc:ihmc-yovariables-filters:source")
+   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:euclid:0.21.0")
+   api("us.ihmc:euclid-frame:0.21.0")
+   api("us.ihmc:euclid-geometry:0.21.0")
+   api("us.ihmc:mecano:17-0.18.1")
    api("jgraph:jgraph:5.13.0.0")
 }
 

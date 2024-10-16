@@ -3,9 +3,8 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.io.File;
 import java.util.ArrayList;

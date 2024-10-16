@@ -15,7 +15,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 

@@ -14,7 +14,7 @@ import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;

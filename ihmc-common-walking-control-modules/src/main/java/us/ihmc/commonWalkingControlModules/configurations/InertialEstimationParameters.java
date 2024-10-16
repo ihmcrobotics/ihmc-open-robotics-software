@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialEstimatorType;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 

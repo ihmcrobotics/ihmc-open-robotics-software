@@ -5,11 +5,11 @@ import java.util.List;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutput;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {

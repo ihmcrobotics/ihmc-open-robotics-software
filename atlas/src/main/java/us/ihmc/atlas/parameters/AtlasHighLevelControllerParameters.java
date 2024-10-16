@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
+import static us.ihmc.commons.robotics.outputData.JointDesiredControlMode.EFFORT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,15 +16,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVeloci
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.commons.robotics.outputData.JointDesiredControlMode;
 
 public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
 {

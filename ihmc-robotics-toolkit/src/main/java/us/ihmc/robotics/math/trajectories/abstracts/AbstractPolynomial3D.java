@@ -7,11 +7,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Trajectory3DFactories;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.time.TimeIntervalBasics;
 
 import java.util.List;
 

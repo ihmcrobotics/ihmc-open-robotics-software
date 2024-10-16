@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;

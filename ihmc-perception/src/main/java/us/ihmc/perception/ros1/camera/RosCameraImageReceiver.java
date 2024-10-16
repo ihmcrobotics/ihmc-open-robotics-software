@@ -3,7 +3,7 @@ package us.ihmc.perception.ros1.camera;
 import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;

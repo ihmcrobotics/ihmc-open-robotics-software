@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.tools.UnitConversions;
 

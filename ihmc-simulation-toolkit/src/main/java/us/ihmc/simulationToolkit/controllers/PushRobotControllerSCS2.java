@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;

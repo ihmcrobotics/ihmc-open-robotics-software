@@ -7,8 +7,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 /**
  * Upon receiving a {@link GoHomeCommand} the controller will bring the given part of the body back

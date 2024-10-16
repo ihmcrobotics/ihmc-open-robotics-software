@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 import java.util.ArrayList;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 
 // a behavior action can be used in either a StateMachine or a pipeline.
 

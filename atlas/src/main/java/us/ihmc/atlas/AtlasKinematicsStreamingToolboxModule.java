@@ -14,11 +14,11 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {

@@ -1,9 +1,9 @@
 package us.ihmc.math;
 
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.core.PolynomialMath;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.core.PolynomialMath;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 
 public class ComplexPolynomialTools
 {
