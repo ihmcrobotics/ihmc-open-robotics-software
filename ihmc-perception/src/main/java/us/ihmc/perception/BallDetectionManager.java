@@ -12,7 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredRigidBodyTransform;
 
 import java.time.Instant;
 import java.util.concurrent.Executor;

@@ -1,6 +1,6 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
-import us.ihmc.robotics.math.filters.DelayedYoDouble;
+import us.ihmc.yoVariables.filters.DelayedYoDouble;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

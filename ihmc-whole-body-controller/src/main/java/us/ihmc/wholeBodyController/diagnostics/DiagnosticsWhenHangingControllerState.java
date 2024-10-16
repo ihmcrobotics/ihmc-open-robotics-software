@@ -23,8 +23,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -42,6 +41,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -187,7 +187,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
       // Foot force sensors tarring stuff
       footSwitches = controllerToolbox.getFootSwitches();
-      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
+      alphaFootForce.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)
