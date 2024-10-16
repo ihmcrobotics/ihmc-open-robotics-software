@@ -11,7 +11,7 @@ import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;

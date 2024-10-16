@@ -63,7 +63,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.Kinematic
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;

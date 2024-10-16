@@ -9,7 +9,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;

@@ -22,7 +22,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

@@ -74,7 +74,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;

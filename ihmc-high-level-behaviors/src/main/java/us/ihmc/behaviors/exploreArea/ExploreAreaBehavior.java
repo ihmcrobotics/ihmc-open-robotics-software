@@ -10,7 +10,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.tools.Destroyable;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 

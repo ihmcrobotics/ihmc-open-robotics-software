@@ -27,7 +27,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.commons.time.TimeIntervalReadOnly;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;

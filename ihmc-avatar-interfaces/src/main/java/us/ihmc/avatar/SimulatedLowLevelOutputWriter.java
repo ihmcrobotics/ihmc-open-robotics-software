@@ -8,7 +8,7 @@ import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter

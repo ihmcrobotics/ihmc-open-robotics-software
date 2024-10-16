@@ -40,7 +40,7 @@ import us.ihmc.commons.stateMachine.core.StateChangedListener;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.core.StateTransition;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
