@@ -1890,6 +1890,9 @@ public class HumanoidMessageTools
       configureForStreaming(messageToModify.getLeftHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getRightHandTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getSpineTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
+
+      // TODO com traj isn't setup for streaming yet, setup for queueing
+      configureForOverriding(messageToModify.getComTrajectory().getEuclideanTrajectory());
    }
 
    public static void configureForStreaming(JointspaceTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
@@ -1931,6 +1934,7 @@ public class HumanoidMessageTools
       configureForOverriding(messageToModify.getLeftHandTrajectoryMessage().getSe3Trajectory());
       configureForOverriding(messageToModify.getRightHandTrajectoryMessage().getSe3Trajectory());
       configureForOverriding(messageToModify.getSpineTrajectoryMessage().getJointspaceTrajectory());
+      configureForOverriding(messageToModify.getComTrajectory().getEuclideanTrajectory());
    }
 
    public static void configureForOverriding(JointspaceTrajectoryMessage messageToModify)

@@ -43,4 +43,7 @@ controller_msgs/NeckTrajectoryMessage neck_trajectory_message
 # Trajectory for the head
 controller_msgs/HeadTrajectoryMessage head_trajectory_message
 
+# Desired Center of Mass, only xy components are used
+controller_msgs/CenterOfMassTrajectoryMessage com_trajectory
+
 

@@ -29,7 +29,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -48,6 +47,9 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final ConvexPolygon2D newMultiContactSupportRegion = new ConvexPolygon2D();
    private final ConvexPolygon2D multiContactSupportRegion = new ConvexPolygon2D();
 
+   private final FramePoint3D comCurrent = new FramePoint3D();
+   private final FramePoint3D comDesired = new FramePoint3D();
+
    private final FramePoint3D comXYAtFootHeight = new FramePoint3D();
    private final ConvexPolygon2D closestProximityEdge = new ConvexPolygon2D();
 
@@ -61,6 +63,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final FramePoint3D desiredCoMXYAtFootHeight = new FramePoint3D();
 
    private ModelInstance modelInstance;
    private Model lastModel;
@@ -72,7 +75,7 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
       this.midFeetZUpFrame = new MidFrameZUpFrame("midFeedZUpWhost", ReferenceFrame.getWorldFrame(), ghostFullRobotModel.getSoleFrame(RobotSide.LEFT), ghostFullRobotModel.getSoleFrame(RobotSide.RIGHT));
    }
 
-   public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus)
+   public void update(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, double desiredCoMX, double desiredCoMY, double desiredCoMZ)
    {
 //      LogTools.info(kinematicsToolboxOutputStatus.getPostureOptimizerState());
       postureOptimizerState = PostureOptimizerState.fromByte(kinematicsToolboxOutputStatus.getPostureOptimizerState());
@@ -87,10 +90,10 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       newMultiContactSupportRegion.update();
 
-      if (newMultiContactSupportRegion.epsilonEquals(multiContactSupportRegion, 1.0e-3))
-      {
-         return;
-      }
+//      if (newMultiContactSupportRegion.epsilonEquals(multiContactSupportRegion, 1.0e-3))
+//      {
+//         return;
+//      }
 
       multiContactSupportRegion.set(newMultiContactSupportRegion);
 
@@ -124,14 +127,28 @@ public class RDXMultiContactRegionGraphic implements RenderableProvider
 
       meshBuilder.addPolygon(transform, multiContactSupportRegion, getPolygonColor());
 
-      comXYAtFootHeight.setToZero(centerOfMassFrame);
-      comXYAtFootHeight.changeFrame(ReferenceFrame.getWorldFrame());
+      comCurrent.setToZero(centerOfMassFrame);
+      comCurrent.changeFrame(ReferenceFrame.getWorldFrame());
+      comDesired.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredCoMX, desiredCoMY, desiredCoMZ);
+
+      meshBuilder.addSphere(0.03f, comCurrent, Color.BLACK);
+      meshBuilder.addSphere(0.03f, comDesired, Color.GREEN);
+
+      comXYAtFootHeight.setIncludingFrame(comCurrent);
       comXYAtFootHeight.setZ(footZ);
       meshBuilder.addSphere(0.03f, comXYAtFootHeight, Color.BLACK);
 
       FramePoint3D comXYElevated = new FramePoint3D(comXYAtFootHeight);
       comXYElevated.addZ(STABILITY_GRAPHIC_HEIGHT);
       meshBuilder.addLine(comXYAtFootHeight, comXYElevated, 0.005f, Color.BLACK);
+
+      desiredCoMXYAtFootHeight.setIncludingFrame(comDesired);
+      desiredCoMXYAtFootHeight.setZ(footZ);
+      meshBuilder.addSphere(0.03f, desiredCoMXYAtFootHeight, Color.GREEN);
+
+      FramePoint3D desiredComXYElevated = new FramePoint3D(desiredCoMXYAtFootHeight);
+      desiredComXYElevated.addZ(STABILITY_GRAPHIC_HEIGHT);
+      meshBuilder.addLine(desiredCoMXYAtFootHeight, desiredComXYElevated, 0.005f, Color.GREEN);
 
       if (SHOW_EDGE_PROXIMITY_POLYGON)
       {

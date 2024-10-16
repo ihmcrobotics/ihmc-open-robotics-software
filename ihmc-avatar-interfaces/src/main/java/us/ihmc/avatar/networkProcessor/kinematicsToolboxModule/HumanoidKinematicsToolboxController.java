@@ -9,6 +9,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -277,7 +278,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodies,
             updateDT,
-            runWithPostureOptimizer,
+            KinematicsStreamingToolboxModule.PUBLISH_TO_CONTROLLER,
             new YoGraphicsListRegistry(),
             parentRegistry);
 
@@ -413,7 +414,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       resetInternalData();
 
+      // seems to set the robot state based on latest RCD
       boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+
       if (!wasRobotUpdated)
       {
          commandInputManager.clearAllCommands();
@@ -424,7 +427,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateContactInfo();
 
-      if (initialRobotConfigurationMap != null)
+      if (!ALWAYS_SNAP_PRIV_CONFIG_TO_CURRENT && initialRobotConfigurationMap != null)
       {
          if (hasMultiContactBalanceStatus)
             throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
@@ -458,6 +461,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
       updateCoMPositionAndFootPoses();
+
       // TODO Add API to switch between the two methods for deciding what CoM position to hold.
       //  Method1:
       //   Initialize the CoM position to the current position and keep it constant during the run.
@@ -508,6 +512,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             isHandInSupport.get(robotSide).set(false);
          }
          isUpperBodyLoadBearing.set(false);
+      }
+
+      // un-comment for uneven to work
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
+         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
    }
 
@@ -623,12 +634,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             updateSupportPolygonConstraint(activeContactPointPositions);
          }
 
-         if (runWithPostureOptimizer)
-         {
-            multiContactManager.update();
-            inverseKinematicsSolution.setPostureOptimizerState(multiContactManager.getCurrentState().toByte());
-//            LogTools.info(multiContactManager.getCurrentState() + ", " + multiContactManager.getCurrentState().toByte());
-         }
+         multiContactManager.update();
+         inverseKinematicsSolution.setPostureOptimizerState(multiContactManager.getCurrentState().toByte());
       }
 
       super.updateInternal();
@@ -665,12 +672,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    protected void updateCoMPositionAndFootPoses()
    {
-      updateTools();
+      updateTools(); // comment for uneven to work
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
-         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+//         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame()); // comment for uneven to work
       }
    }
 
@@ -914,7 +921,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!isUpperBodyLoadBearing.getValue())
          return;
 
-      if (runWithPostureOptimizer && (command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.LEFT) || command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT)))
+      if (runWithPostureOptimizer && command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT))
       {
          double activationAlpha = multiContactManager.getActivationAlpha();
          double orientationWeightRatio = 1.0 - activationAlpha;
@@ -953,8 +960,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private void initializePostureAdjustment()
    {
-      if (runWithPostureOptimizer)
-         multiContactManager.initialize(privilegedConfigurationCommand);
+      multiContactManager.initialize(privilegedConfigurationCommand);
    }
 
    private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)

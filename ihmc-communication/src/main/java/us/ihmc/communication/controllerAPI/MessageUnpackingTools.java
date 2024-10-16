@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -48,6 +49,7 @@ public final class MessageUnpackingTools
             FootTrajectoryMessage rightFootTrajectoryMessage = multipleMessageHolder.getRightFootTrajectoryMessage();
             LegTrajectoryMessage leftLegTrajectoryMessage = multipleMessageHolder.getLeftLegTrajectoryMessage();
             LegTrajectoryMessage rightLegTrajectoryMessage = multipleMessageHolder.getRightLegTrajectoryMessage();
+            CenterOfMassTrajectoryMessage comTrajectory = multipleMessageHolder.getComTrajectory();
 
             if (!leftHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
             {
@@ -108,6 +110,11 @@ public final class MessageUnpackingTools
                messagesToPack.add(leftFootTrajectoryMessage);
             if (!rightFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(rightFootTrajectoryMessage);
+            if (!comTrajectory.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
+            {
+               LogTools.info("unpacking com trajectory");
+               messagesToPack.add(comTrajectory);
+            }
          }
       };
    }
