@@ -348,10 +348,7 @@ public class RDXVRKinematicsStreamingMode
 
                                                                    // Check if left joystick is pressed in order to trigger recording or replay of motion
                                                                    gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-                                                                   if (replayInMidFeetZUpFrame.get())
-                                                                      kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-                                                                   else
-                                                                      kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, ReferenceFrame.getWorldFrame());
+                                                                   kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, getTrajectoryRecordFrame());
          });
       }
 
@@ -381,10 +378,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                                      lateralJoystickValue);
 
                                                                     gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
-                                                                    if (replayInMidFeetZUpFrame.get())
-                                                                       kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-                                                                    else
-                                                                       kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, ReferenceFrame.getWorldFrame());
+                                                                    kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, getTrajectoryRecordFrame());
                                                                  });
       }
 
@@ -658,7 +652,17 @@ public class RDXVRKinematicsStreamingMode
          outputFrequencyPlot.recordEvent();
       }
 
-      kinematicsRecorder.onUpdateEnd(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      kinematicsRecorder.onUpdateEnd(getTrajectoryReplayFrame());
+   }
+
+   private ReferenceFrame getTrajectoryRecordFrame()
+   {
+      return syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
+   }
+
+   private ReferenceFrame getTrajectoryReplayFrame()
+   {
+      return replayInMidFeetZUpFrame.get() ? syncedRobot.getReferenceFrames().getMidFeetZUpFrame() : ReferenceFrame.getWorldFrame();
    }
 
    private void handleLeftControllJoystickInput(boolean leftAButtonPressed, boolean leftTriggerPressed, double forwardJoystickValue, double lateralJoystickValue, boolean leftJoystickButtonClicked)

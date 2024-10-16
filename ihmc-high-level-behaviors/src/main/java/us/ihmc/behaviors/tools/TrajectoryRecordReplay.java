@@ -429,16 +429,6 @@ public class TrajectoryRecordReplay
          }
       }
 
-      void set(RobotSide robotSide,
-               boolean aButtonPressed,
-               boolean triggerPressed,
-               double forwardJoystickValue,
-               double lateralJoystickValue,
-               ReferenceFrame desiredControlFrame)
-      {
-         set(robotSide, aButtonPressed, triggerPressed, forwardJoystickValue, lateralJoystickValue, desiredControlFrame, ReferenceFrame.getWorldFrame());
-      }
-
       @Override
       public String toString()
       {
