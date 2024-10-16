@@ -37,6 +37,7 @@ public class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options
+    *
     * @param programPath {@link Path} to the .cu file.
     * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     */
@@ -47,10 +48,12 @@ public class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
-    * @param programPath {@link Path} to the .cu file.
-    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    *
+    * @param programPath        {@link Path} to the .cu file.
+    * @param headerPaths        {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     * @param compilationOptions List of compilation options
-    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    *                           (You can see the available options <a
+    *                           href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
    public CUDAProgram(Path programPath, Path[] headerPaths, String... compilationOptions)
    {
@@ -89,9 +92,10 @@ public class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
+    *
+    * @param programName    The name of the program (usually the file name with a .cu extension).
+    * @param programCode    The program code (i.e. the contents of the .cu file).
+    * @param headerNames    List of header names included (with {@code #include}) in the code.
     * @param headerContents Contents of the headers included in the code.
     */
    public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
@@ -101,25 +105,37 @@ public class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} specifying the name, code, header names, header contents, and compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
-    * @param headerContents Contents of the headers included in the code.
+    *
+    * @param programName        The name of the program (usually the file name with a .cu extension).
+    * @param programCode        The program code (i.e. the contents of the .cu file).
+    * @param headerNames        List of header names included (with {@code #include}) in the code.
+    * @param headerContents     Contents of the headers included in the code.
     * @param compilationOptions List of compilation options
-    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    *                           (You can see the available options <a
+    *                           href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
    public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents, String... compilationOptions)
    {
       initialize(programName, programCode, headerNames, headerContents, compilationOptions);
    }
 
-   public void loadKernel(String kernelName)
+   public CUDAKernelHandle loadKernel(String kernelName)
    {
       // Load the kernel from module
       CUfunc_st kernel = new CUfunc_st();
       error = cuModuleGetFunction(kernel, module, kernelName);
       checkCUDAError(error);
       kernels.put(kernelName, kernel);
+
+      CUDAKernelHandle kernelHandle = new CUDAKernelHandle(kernelName);
+      // TODO figure out how to load the grid size and block size from the kernel definition when the kernel is loaded. Then set them here.
+
+      return kernelHandle;
+   }
+
+   public void runKernel(CUstream_st stream, CUDAKernelHandle kernelHandle, int sharedMemorySize, Pointer... arguments)
+   {
+      runKernel(stream, kernelHandle.getName(), kernelHandle.getGridSize(), kernelHandle.getBlockSize(), sharedMemorySize, arguments);
    }
 
    public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
