@@ -32,18 +32,6 @@ public enum YawPitchRollAxis
       return yawPitchRoll;
    }
 
-   public YawPitchRoll createYawPitchRollFromReference(YawPitchRollReadOnly reference, double angleToUpdate)
-   {
-      YawPitchRoll yawPitchRoll = new YawPitchRoll(reference);
-      switch (this)
-      {
-         case YAW -> yawPitchRoll.appendYawRotation(angleToUpdate);
-         case PITCH -> yawPitchRoll.appendPitchRotation(angleToUpdate);
-         case ROLL -> yawPitchRoll.appendRollRotation(angleToUpdate);
-      }
-      return yawPitchRoll;
-   }
-
    public double getFromYawPitchRoll(YawPitchRollReadOnly yawPitchRollReadOnly)
    {
       return switch (this)

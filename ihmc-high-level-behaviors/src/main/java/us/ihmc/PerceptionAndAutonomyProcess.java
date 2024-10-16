@@ -211,7 +211,7 @@ public class PerceptionAndAutonomyProcess
          robotPelvisFrameSupplier = syncedRobot.getReferenceFrames()::getPelvisZUpFrame;
          for (RobotSide side : RobotSide.values)
          {
-            blackflyFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(side));
+            blackflyFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getStereoCameraFrame(side));
             soleFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSoleFrame(side));
          }
       }
