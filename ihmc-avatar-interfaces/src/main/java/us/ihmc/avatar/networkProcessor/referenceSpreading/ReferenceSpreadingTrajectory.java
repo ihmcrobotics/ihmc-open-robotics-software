@@ -14,8 +14,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import geometry_msgs.msg.dds.Wrench;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +30,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 
 public class ReferenceSpreadingTrajectory
 {
+   protected final YoRegistry registry;
+
    private static final double INITIAL_TIME_DURATION = 0.5;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
@@ -37,10 +41,19 @@ public class ReferenceSpreadingTrajectory
    private List<String> keyMatrix = new ArrayList<>();
    FullHumanoidRobotModel fullRobotModel;
 
-   ReferenceSpreadingTrajectory(String filePath, FullHumanoidRobotModel fullRobotModel)
+   ReferenceSpreadingTrajectory(TrajectoryRecordReplay trajectoryPlayer, List<String> keyMatrix, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+   {
+      this.trajectoryPlayer = trajectoryPlayer;
+      this.keyMatrix = keyMatrix;
+      this.fullRobotModel = fullRobotModel;
+      this.registry = registry;
+   }
+
+   ReferenceSpreadingTrajectory(String filePath, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
       this.filePath = filePath;
+      this.registry = registry;
 
       trajectoryPlayer = new TrajectoryRecordReplay(filePath, 1, true);
       trajectoryPlayer.importData(true);
@@ -58,6 +71,9 @@ public class ReferenceSpreadingTrajectory
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
       TrajectoryPoint1DMessage jointTrajectoryPointMessage = new TrajectoryPoint1DMessage();
+      OneDoFJointBasics joint;
+      double jointPosition;
+      double jointVelocity;
 
       for (String jointName : JOINT_NAMES)
       {
@@ -75,8 +91,8 @@ public class ReferenceSpreadingTrajectory
       Wrench desiredFeedForwardWrench = new Wrench();
 
       HashMap<String, Double> currentFrame = new HashMap<>();
-//      trajectoryPlayer.reset();
-      makeMap(trajectoryPlayer.play(true), currentFrame);
+      trajectoryPlayer.reset();
+      makeMap(trajectoryPlayer.play(false), currentFrame);
       double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
@@ -86,7 +102,7 @@ public class ReferenceSpreadingTrajectory
 
       while (!trajectoryPlayer.hasDoneReplay())
       {
-         makeMap(trajectoryPlayer.play(true), currentFrame);
+         makeMap(trajectoryPlayer.play(false), currentFrame);
          if (frameIndex % frameInterval == 0)
          {
             double currentTime = currentFrame.get("time[sec]");
@@ -110,8 +126,11 @@ public class ReferenceSpreadingTrajectory
                jointIndex = JOINT_NAMES.indexOf(jointName);
 
                jointTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
-               jointTrajectoryPointMessage.setPosition(currentFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName));
-               jointTrajectoryPointMessage.setVelocity(currentFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName));
+               joint = fullRobotModel.getOneDoFJointByName(robotSide.getUpperCaseName() + "_" + jointName);
+               jointPosition = Math.max(joint.getJointLimitLower(), Math.min(joint.getJointLimitUpper(), currentFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName)));
+               jointVelocity = Math.max(joint.getVelocityLimitLower(), Math.min(joint.getVelocityLimitUpper(), currentFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName)));
+               jointTrajectoryPointMessage.setPosition(jointPosition);
+               jointTrajectoryPointMessage.setVelocity(jointVelocity);
                jointTrajectoryPointMessage.setSequenceId(frameIndex);
                jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(jointIndex).getTrajectoryPoints().add().set(jointTrajectoryPointMessage);
             }
@@ -154,7 +173,7 @@ public class ReferenceSpreadingTrajectory
    {
       for (int i = 0; i < values.length; i++)
       {
-         mapToPack.put(trajectoryPlayer.getKeyMatrix().get(i), values[i]);
+         mapToPack.put(this.keyMatrix.get(i), values[i]);
       }
    }
 }

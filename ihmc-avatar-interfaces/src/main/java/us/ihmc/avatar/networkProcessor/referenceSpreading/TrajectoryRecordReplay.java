@@ -1,10 +1,13 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
+import us.ihmc.log.LogTools;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,6 +23,7 @@ public class TrajectoryRecordReplay
    private String filePath;
    private int numberOfParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
    private final List<double[]> dataMatrix = new ArrayList<>();
+   private final List<double[]> dataMatrixSaved = new ArrayList<>();
    private final List<String> keyMatrix = new ArrayList<>();
    private final List<double[]> concatenatedDataMatrix = new ArrayList<>();
    private final List<double[]> splitDataMatrix = new ArrayList<>();
@@ -33,8 +37,7 @@ public class TrajectoryRecordReplay
 
    public TrajectoryRecordReplay(String filePath, int numberParts)
    {
-      this.filePath = filePath;
-      this.numberOfParts = numberParts;
+      this(filePath, numberParts, false);
    }
 
    public TrajectoryRecordReplay(String filePath, int numberParts, boolean createKeyMap)
@@ -53,7 +56,13 @@ public class TrajectoryRecordReplay
    {
       if (timeStepReplay < 1 && dataMatrix.isEmpty())
       {
-         this.readCSV();
+         if (dataMatrixSaved.isEmpty())
+            this.readCSV();
+         else
+         {
+            dataMatrix.addAll(dataMatrixSaved);
+            doneReplaying = false;
+         }
          if (split)
             this.splitData();
       }
@@ -138,6 +147,20 @@ public class TrajectoryRecordReplay
             splitDataMatrix.add(splitRow);
          }
       }
+   }
+
+   public void clearRecordingMemory()
+   {
+      dataMatrixSaved.clear();
+      this.reset();
+   }
+
+   public void saveRecordingMemory()
+   {
+      dataMatrixSaved.clear();
+      dataMatrixSaved.addAll(dataMatrix);
+      this.reset();
+
    }
 
    public void saveRecording()

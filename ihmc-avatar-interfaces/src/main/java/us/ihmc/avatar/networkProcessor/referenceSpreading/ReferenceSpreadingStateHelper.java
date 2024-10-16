@@ -17,6 +17,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.*;
 import java.util.HashMap;
 
 public class ReferenceSpreadingStateHelper
@@ -42,19 +43,18 @@ public class ReferenceSpreadingStateHelper
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
-      preImpactReference = new ReferenceSpreadingTrajectory(filePath, fullRobotModel);
+      collisionDetection = new CollisionDetection(15, 10, fullRobotModel, registry);
+      ReferenceSpreader referenceSpreader = new ReferenceSpreader(filePath, 0.01, fullRobotModel, collisionDetection, registry);
+
+      preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
 
       for (RobotSide robotSide : RobotSide.values()) {
          handWrenches.put(robotSide, new SpatialVectorMessage());
       }
-
-      collisionDetection = new CollisionDetection(30, 10, fullRobotModel, registry);
-      LogTools.info("Collision detection initialized");
    }
 
    public StateMachine<States, State> setUpStateMachines(DoubleProvider time)
    {
-
       StateMachineFactory<States, State> factory = new StateMachineFactory<>(States.class);
       factory.setNamePrefix("stateMachine").setRegistry(registry).buildYoClock(time);
 
@@ -62,7 +62,7 @@ public class ReferenceSpreadingStateHelper
       factory.addState(States.AFTER, new AfterState());
       factory.addState(States.WAITING, new WaitingState());
 
-      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, jointTorques, t);
+      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, t);
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
       factory.addDoneTransition(States.AFTER, States.WAITING);
@@ -109,6 +109,7 @@ public class ReferenceSpreadingStateHelper
          for (RobotSide robotSide : RobotSide.values())
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide);
+//            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 
@@ -129,8 +130,7 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         LogTools.info("AfterState: " + timeInState);
-//           LogTools.info("Hand wrenches: " + handWrenches);
+//         LogTools.info("AfterState: " + timeInState);
       }
 
       public void onEntry()
