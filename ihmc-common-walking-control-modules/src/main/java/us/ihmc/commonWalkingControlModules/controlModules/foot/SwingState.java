@@ -34,7 +34,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePose3D;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePose3D;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;

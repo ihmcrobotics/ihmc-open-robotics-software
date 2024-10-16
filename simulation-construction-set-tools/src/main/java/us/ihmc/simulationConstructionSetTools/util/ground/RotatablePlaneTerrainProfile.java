@@ -15,8 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -64,9 +64,9 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       
       this.groundContactPoints = robot.getGroundContactPoints(0);
       
-      filteredDesiredGroundYawAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
-      filteredDesiredGroundPitchAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
-      filteredDesiredGroundRollAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
+      filteredDesiredGroundYawAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
+      filteredDesiredGroundPitchAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
+      filteredDesiredGroundRollAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.2, dt));
       
       yoPlanePose.attachVariableChangedListener(new YoVariableChangedListener()
       {

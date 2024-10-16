@@ -41,7 +41,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.wholeBodyControlCore.pidGains.GainCalculator;
 import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDSE3Gains;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;

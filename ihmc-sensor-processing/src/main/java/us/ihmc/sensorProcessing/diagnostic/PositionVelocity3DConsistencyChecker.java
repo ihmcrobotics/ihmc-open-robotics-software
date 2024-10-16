@@ -1,12 +1,12 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
+import static us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D.createSimpleMovingAverageFilteredYoFrameVector;
 
 import java.util.EnumMap;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.robotics.math.filters.FilteredFiniteDifferenceYoFrameVector3D;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -18,8 +18,8 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 
    private final FilteredFiniteDifferenceYoFrameVector3D localVelocityFromFD;
 
-   private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
-   private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
+   private final SimpleMovingAverageFilteredYoFrameVector3D localVelocityFiltered;
+   private final SimpleMovingAverageFilteredYoFrameVector3D filteredVelocityToCheck;
 
    private final EnumMap<Axis3D, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis3D.class);
 

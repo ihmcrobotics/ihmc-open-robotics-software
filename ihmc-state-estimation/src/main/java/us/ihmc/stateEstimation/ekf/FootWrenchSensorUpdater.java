@@ -12,10 +12,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -43,7 +43,7 @@ public class FootWrenchSensorUpdater
 
       weightThresholdForTrust = FilterTools.findOrCreate(parameterGroup + "WeightThresholdForTrust", registry, 0.3);
       DoubleProvider forceFilter = FilterTools.findOrCreate(parameterGroup + "WrenchFilter", registry, 100.0);
-      DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter.getValue(), dt);
+      DoubleProvider forceAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(forceFilter.getValue(), dt);
 
       filteredForce = new AlphaFilteredYoFrameVector3D(foot.getName() + "Force", "", registry, forceAlpha, ReferenceFrame.getWorldFrame());
       AlphaFilteredYoFramePoint3D filteredCoP = new AlphaFilteredYoFramePoint3D(soleFrame.getName() + "CoPPositionInSole", "", registry, forceAlpha, soleFrame);

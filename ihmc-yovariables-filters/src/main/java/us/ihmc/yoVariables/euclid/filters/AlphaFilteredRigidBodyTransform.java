@@ -1,0 +1,43 @@
+package us.ihmc.yoVariables.euclid.filters;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+
+public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
+{
+   // an alpha of zero applies zero filtering, accepting the entirely new input.
+   private double alpha = 0.0;
+   private final RigidBodyTransform previousFiltered = new RigidBodyTransform();
+
+   public AlphaFilteredRigidBodyTransform()
+   {
+      reset();
+   }
+
+   public void update(RigidBodyTransform measured)
+   {
+      if (containsNaN())
+      {
+         set(measured);
+      }
+      else
+      {
+         previousFiltered.set(this);
+         interpolate(measured, previousFiltered, alpha);
+      }
+   }
+
+   public double getAlpha()
+   {
+      return alpha;
+   }
+
+   public void setAlpha(double alpha)
+   {
+      this.alpha = alpha;
+   }
+
+   public void reset()
+   {
+      setToNaN();
+   }
+}

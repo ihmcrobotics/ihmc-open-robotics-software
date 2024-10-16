@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

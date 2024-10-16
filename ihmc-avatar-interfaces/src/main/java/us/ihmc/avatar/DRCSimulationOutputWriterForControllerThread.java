@@ -3,7 +3,7 @@ package us.ihmc.avatar;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.robotics.math.filters.DelayedYoDouble;
+import us.ihmc.yoVariables.filters.DelayedYoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
