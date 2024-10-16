@@ -187,9 +187,7 @@ public interface ControllerCoreOptimizationSettings
     */
    public enum JointPowerLimitEnforcementMethod
    {
-
       NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER, CONSTRAINTS_IN_QP_AND_CONTROLLER;
-
    }
 
    /**
