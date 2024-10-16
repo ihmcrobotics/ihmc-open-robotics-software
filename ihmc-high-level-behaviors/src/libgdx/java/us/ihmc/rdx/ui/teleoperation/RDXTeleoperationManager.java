@@ -89,8 +89,9 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXStoredPropertySetTuner teleoperationParametersTuner = new RDXStoredPropertySetTuner("Teleoperation Parameters");
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
 
-   private final RDXPelvisHeightSlider pelvisHeightSlider;
-   private final RDXHumanoidDoFsWidgets dofsWidgets;
+//   private final RDXPelvisHeightSlider pelvisHeightSlider;
+//   private final RDXHumanoidDoFsWidgets dofsWidgets;
+
    private final RDXDesiredRobot desiredRobot;
    private RDXRobotCollisionModel avoidanceCollisionModel;
    private RDXRobotCollisionModel contactCollisionModel;
@@ -178,8 +179,8 @@ public class RDXTeleoperationManager extends RDXPanel
                                      interactableHands,
                                      wholeBodyIKManager::getEnabled);
 
-      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
-      dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
+//      pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
+//      dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
    }
@@ -188,7 +189,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       this.baseUI = baseUI;
       desiredRobot.create();
-      dofsWidgets.getDesiredRobot().create();
+//      dofsWidgets.getDesiredRobot().create();
 
       // This button is created before locomotion manager to make the toolbar button ordering correct
       RDX3DPanelToolbarButton deleteAllInteractablesButton = baseUI.getPrimary3DPanel().addToolbarButton();
@@ -212,6 +213,9 @@ public class RDXTeleoperationManager extends RDXPanel
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
             String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
+
+            if (modelFileName == null)
+               continue;
 
             if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getChest().getName()))
             {
@@ -364,7 +368,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       syncedRobot.update();
       desiredRobot.update();
-      dofsWidgets.getDesiredRobot().update();
+//      dofsWidgets.getDesiredRobot().update();
 
       locomotionManager.update();
       armManager.update(interactablesEnabled.get());
@@ -523,8 +527,8 @@ public class RDXTeleoperationManager extends RDXPanel
 
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      pelvisHeightSlider.renderImGuiWidgets();
-      dofsWidgets.renderImGuiWidgets();
+//      pelvisHeightSlider.renderImGuiWidgets();
+//      dofsWidgets.renderImGuiWidgets();
 
       trajectoryTimeSlider.renderImGuiWidget();
 
@@ -660,7 +664,7 @@ public class RDXTeleoperationManager extends RDXPanel
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          desiredRobot.getRenderables(renderables, pool, sceneLevels);
-         dofsWidgets.getDesiredRobot().getRenderables(renderables, pool, sceneLevels);
+//         dofsWidgets.getDesiredRobot().getRenderables(renderables, pool, sceneLevels);
 
          if (showGraphics.get())
          {
@@ -688,7 +692,7 @@ public class RDXTeleoperationManager extends RDXPanel
    public void clearInteractablesAndLocomotionGraphics()
    {
       locomotionManager.deleteAll();
-      dofsWidgets.reset();
+//      dofsWidgets.reset();
 
       for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
          robotPartInteractable.delete();
@@ -698,7 +702,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       desiredRobot.destroy();
       locomotionManager.destroy();
-      dofsWidgets.destroy();
+//      dofsWidgets.destroy();
    }
 
    public ImBoolean getInteractablesEnabled()

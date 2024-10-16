@@ -22,6 +22,10 @@ public class RDXInteractableTools
       {
          LogTools.error("Interactables need a model file or implementation of shape visuals");
       }
+
+      if (modelFileGeometryDefinition == null)
+         return null;
+
       return modelFileGeometryDefinition.getFileName();
    }
 }

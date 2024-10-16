@@ -58,6 +58,8 @@ import java.util.Map;
  */
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
+   public static boolean PUBLISH_TO_CONTROLLER = true;
+
    protected final KinematicsStreamingToolboxController controller;
    private ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private ROS2PublisherBasics<WholeBodyStreamingMessage> streamingMessagePublisher;
@@ -108,7 +110,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
 
-      if (runPostureOptimizer)
+      if (PUBLISH_TO_CONTROLLER)
       {
          controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
          controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
@@ -147,7 +149,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public DataServerSettings createYoVariableServerSettings()
    {
-      return super.createYoVariableServerSettings(runPostureOptimizer);
+      return super.createYoVariableServerSettings(KinematicsStreamingToolboxModule.PUBLISH_TO_CONTROLLER);
    }
 
    @Override

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -176,6 +177,24 @@ public class KinematicsToolboxOutputConverter
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
+   }
+
+   public void computeCenterOfMassTrajectoryMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      EuclideanTrajectoryMessage comTrajectory = output.getComTrajectory().getEuclideanTrajectory();
+      comTrajectory.getTaskspaceTrajectoryPoints().clear();
+
+      comTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
+      comTrajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+
+      EuclideanTrajectoryPointMessage trajectoryPoint = comTrajectory.getTaskspaceTrajectoryPoints().add();
+      desiredPose.setToZero(referenceFrames.getCenterOfMassFrame());
+      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      trajectoryPoint.getPosition().set(desiredPose.getPosition());
+      trajectoryPoint.getLinearVelocity().setToZero();
+      trajectoryPoint.setTime(trajectoryTime);
    }
 
    public void computeNeckTrajectoryMessage()
