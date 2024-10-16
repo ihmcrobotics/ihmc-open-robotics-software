@@ -26,8 +26,8 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsBasics;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 
 import java.util.List;
 

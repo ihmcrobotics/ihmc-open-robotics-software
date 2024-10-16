@@ -1,14 +1,12 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.behaviors.tools.MinimalFootstep;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 

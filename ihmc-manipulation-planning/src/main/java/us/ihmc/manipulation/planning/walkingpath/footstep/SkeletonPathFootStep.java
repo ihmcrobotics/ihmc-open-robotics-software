@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.walkingpath.footstep;
 
 import java.awt.geom.Point2D;
 
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class SkeletonPathFootStep
 {

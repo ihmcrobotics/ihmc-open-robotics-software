@@ -4,9 +4,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.core.PolynomialMath;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.core.PolynomialMath;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
 
 public class ComplexPolynomialToolsTest
 {

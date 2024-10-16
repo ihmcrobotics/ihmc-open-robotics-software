@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;

@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSegment;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSegment;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
 
 public class AdditionalSimulationContactPoints<E extends Enum<E> & RobotSegment<E>> implements FootContactPoints<E>
 {

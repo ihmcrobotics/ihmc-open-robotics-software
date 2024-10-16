@@ -1,11 +1,7 @@
 package us.ihmc.robotics.time;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.time.TimeInterval;
-
-import static us.ihmc.robotics.Assert.*;
+import us.ihmc.commons.time.TimeInterval;
 
 import static us.ihmc.robotics.Assert.*;
 

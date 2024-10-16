@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCal
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class WholeBodyTrajectoryToolboxOutputConverter
 {

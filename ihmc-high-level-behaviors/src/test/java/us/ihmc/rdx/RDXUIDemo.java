@@ -1,6 +1,5 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -10,14 +9,13 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.StringTools;
 
 public class RDXUIDemo
 {

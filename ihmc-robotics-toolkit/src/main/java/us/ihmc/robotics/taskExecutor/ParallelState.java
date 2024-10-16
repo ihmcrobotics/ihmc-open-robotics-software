@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.StateMachineClock;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParallelState<T> implements State

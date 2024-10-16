@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSextant;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSextant;
 
 public enum RhinoBeetleJointName
 {

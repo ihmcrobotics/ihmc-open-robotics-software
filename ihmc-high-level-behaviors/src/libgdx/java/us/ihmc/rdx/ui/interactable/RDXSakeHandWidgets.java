@@ -17,7 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;

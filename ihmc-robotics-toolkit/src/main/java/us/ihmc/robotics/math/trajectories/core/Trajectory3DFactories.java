@@ -5,8 +5,8 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.commons.time.TimeIntervalBasics;
+import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.function.DoubleConsumer;

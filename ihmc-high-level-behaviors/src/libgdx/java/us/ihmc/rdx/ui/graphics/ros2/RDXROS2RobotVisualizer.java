@@ -31,8 +31,8 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD455;
 import us.ihmc.rdx.ui.interactable.RDXInteractableZED2i;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;

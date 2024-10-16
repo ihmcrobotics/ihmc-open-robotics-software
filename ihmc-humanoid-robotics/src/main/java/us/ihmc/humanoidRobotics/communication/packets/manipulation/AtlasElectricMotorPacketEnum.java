@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 /**
  * Enum for the various joints in the Atlas forearm. Note the joint names correspond to their

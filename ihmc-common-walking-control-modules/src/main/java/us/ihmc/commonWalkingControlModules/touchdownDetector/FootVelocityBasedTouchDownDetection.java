@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.commons.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;

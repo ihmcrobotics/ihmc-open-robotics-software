@@ -7,7 +7,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.robotics.taskExecutor.NullState;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
 

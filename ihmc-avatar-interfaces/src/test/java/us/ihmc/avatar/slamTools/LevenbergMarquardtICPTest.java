@@ -10,16 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import cern.colt.list.BooleanArrayList;
@@ -31,8 +28,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
 

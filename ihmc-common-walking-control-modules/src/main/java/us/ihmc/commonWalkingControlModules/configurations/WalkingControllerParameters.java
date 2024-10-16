@@ -22,7 +22,7 @@ import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters

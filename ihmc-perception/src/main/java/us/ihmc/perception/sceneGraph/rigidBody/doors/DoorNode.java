@@ -24,7 +24,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.Collection;
 import java.util.HashMap;

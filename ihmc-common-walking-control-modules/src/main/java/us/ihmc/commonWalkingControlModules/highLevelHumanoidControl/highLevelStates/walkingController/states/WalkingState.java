@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class WalkingState implements State

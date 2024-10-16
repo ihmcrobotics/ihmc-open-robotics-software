@@ -28,8 +28,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

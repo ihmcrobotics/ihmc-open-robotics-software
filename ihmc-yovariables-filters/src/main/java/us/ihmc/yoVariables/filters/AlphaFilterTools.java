@@ -1,5 +1,6 @@
 package us.ihmc.yoVariables.filters;
 
+import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.MathTools;
 
 public class AlphaFilterTools

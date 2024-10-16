@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.commons.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 
 /**

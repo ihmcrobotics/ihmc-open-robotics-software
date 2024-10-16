@@ -3,7 +3,7 @@ package us.ihmc.robotiq.data;
 import static us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal.*;
 
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.RobotiqReadResponse;
 import us.ihmc.robotiq.communication.registers.FaultStatusRegister.gFLT;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;

@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, FootTrajectoryMessage>, FrameBasedCommand<FootTrajectoryMessage>, EpsilonComparable<FootTrajectoryCommand>

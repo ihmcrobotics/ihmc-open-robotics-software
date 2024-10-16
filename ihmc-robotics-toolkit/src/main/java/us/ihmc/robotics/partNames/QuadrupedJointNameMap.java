@@ -1,6 +1,8 @@
 package us.ihmc.robotics.partNames;
 
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.QuadrupedJointName;
+import us.ihmc.commons.robotics.robotSide.RobotQuadrant;
 
 public interface QuadrupedJointNameMap extends LeggedJointNameMap<RobotQuadrant>
 {

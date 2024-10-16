@@ -12,8 +12,8 @@ import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>

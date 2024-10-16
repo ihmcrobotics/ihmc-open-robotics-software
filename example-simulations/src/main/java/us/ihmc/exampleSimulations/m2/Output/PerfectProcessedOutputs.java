@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.m2.Output;
 
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 
 /**

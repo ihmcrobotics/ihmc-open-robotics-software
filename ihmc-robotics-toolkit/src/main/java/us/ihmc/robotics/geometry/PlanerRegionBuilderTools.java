@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DRe
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameFace3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameVertex3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
 
 public class PlanerRegionBuilderTools
 {
