@@ -33,6 +33,7 @@ public class ReferenceSpreadingStateHelper
    private final YoRegistry registry;
 
    private ReferenceSpreadingTrajectory preImpactReference;
+   private ReferenceSpreadingTrajectory postImpactReference;
    private HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
    private us.ihmc.idl.IDLSequence.Float jointVelocities = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
    private us.ihmc.idl.IDLSequence.Float jointTorques = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
@@ -47,6 +48,7 @@ public class ReferenceSpreadingStateHelper
       ReferenceSpreader referenceSpreader = new ReferenceSpreader(filePath, 0.01, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
+      postImpactReference = referenceSpreader.getPostImpactReferenceTrajectory();
 
       for (RobotSide robotSide : RobotSide.values()) {
          handWrenches.put(robotSide, new SpatialVectorMessage());
@@ -136,6 +138,14 @@ public class ReferenceSpreadingStateHelper
       public void onEntry()
       {
          LogTools.info("Entering AfterState");
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = postImpactReference.getHandHybridTrajectoryMessage(robotSide);
+            //            LogTools.info("Message: " + handHybridTrajectoryMessage);
+            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
+         }
+
+         LogTools.info("Published all messages");
       }
 
       public void onExit(double timeInState)

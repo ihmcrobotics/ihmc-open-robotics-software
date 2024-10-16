@@ -34,6 +34,7 @@ public class ReferenceSpreader
    private final TrajectoryRecordReplay originalReference;
    private final TrajectoryRecordReplay preImpactReference;
    private final TrajectoryRecordReplay postImpactReference;
+   private final TrajectoryRecordReplay blendedImpactReference;
    private List<String> keyMatrix = new ArrayList<>();
 
    private int impactIndex = -1;
@@ -43,7 +44,7 @@ public class ReferenceSpreader
    private HashMap<RobotSide, SpatialVectorMessage> handWrenches = new HashMap<>(RobotSide.values().length);
    private us.ihmc.idl.IDLSequence.Float jointVelocities = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
    private List<String> jointNames = new ArrayList<>();
-   private final List<double[]> postImpactData = new ArrayList<>();
+   private double[] postImpactData = null;
 
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
@@ -66,6 +67,7 @@ public class ReferenceSpreader
       this.originalReference = new TrajectoryRecordReplay(filePath, 1, true);
       this.preImpactReference = new TrajectoryRecordReplay(filePath+"_pre.csv", 1, false);
       this.postImpactReference = new TrajectoryRecordReplay(filePath+"_post.csv", 1, false);
+      this.blendedImpactReference = new TrajectoryRecordReplay(filePath+"_blended.csv", 1, false);
       this.originalReference.importData(true);
       this.keyMatrix = originalReference.getKeyMatrix();
 
@@ -80,17 +82,18 @@ public class ReferenceSpreader
 
       detectImpact();
       extendPreImpactTrajectory();
+      extendPostImpactTrajectory();
    }
 
    public void detectImpact(){
       impactIndex = -1;
-      postImpactData.clear();
+      postImpactData = null;
 
-      while (!originalReference.hasDoneReplay() && postImpactData.isEmpty())
+      while (!originalReference.hasDoneReplay() && postImpactData == null)
       {
          double[] values = originalReference.play(true);
          makeMap(values, currentFrame);
-//         Hard-coded with jointMap of CollisionDetection
+//         Hard-coded with jointMap of `CollisionDetection`
          for (int i = 12; i <= 28; i++)
          {
             jointVelocities.set(i, currentFrame.get("qd_" + jointNames.get(i)).floatValue());
@@ -115,7 +118,8 @@ public class ReferenceSpreader
 
             if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
             {
-               postImpactData.add(values);
+               postImpactData = new double[values.length];
+               System.arraycopy(values, 0, postImpactData, 0, values.length);
                break;
             }
          }
@@ -193,6 +197,67 @@ public class ReferenceSpreader
       LogTools.info("PreImpact trajectory extended (Saved to Memory)");
    }
 
+   private void extendPostImpactTrajectory()
+   {
+      String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
+
+      originalReference.reset();
+      makeMap(originalReference.play(false), currentFrame);
+
+      while (!originalReference.hasDoneReplay())
+      {
+         double[] values = originalReference.play(false);
+         makeMap(values, currentFrame);
+
+         if(currentFrame.get("time[sec]") >= impactTime-excludeInterval)
+         {
+            postImpactReference.record(values);
+         }
+         else
+         {
+            makeMap(postImpactData, tempFrame);
+            LogTools.info("tempFrame time: " + tempFrame.get("time[sec]") + " Current time " + currentFrame.get("time[sec]"));
+            tempFrame.put("time[sec]", currentFrame.get("time[sec]"));
+            timeDiff = currentFrame.get("time[sec]") - impactTime;
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionX",
+                             tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "PositionX")
+                             + tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "LinearVelocityX")* timeDiff);
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionY",
+                             tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "PositionY")
+                             + tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "LinearVelocityY")* timeDiff);
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionZ",
+                             tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "PositionZ")
+                             + tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "LinearVelocityZ")* timeDiff);
+
+               rotation.set(tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQx"),
+                            tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQy"),
+                            tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQz"),
+                            tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQs"));
+               rotationVectorIntegrated.set(tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "AngularVelocityX")* timeDiff,
+                                            tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "AngularVelocityY")* timeDiff,
+                                            tempFrame.get(robotSide.getUpperCaseName() + nameEndEffector + "AngularVelocityZ")* timeDiff);
+               quaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
+               rotation.multiply(rotationIntegrated);
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQx", rotation.getX());
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQy", rotation.getY());
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQz", rotation.getZ());
+               tempFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQs", rotation.getS());
+
+               for (String jointName : JOINT_NAMES)
+               {
+                  tempFrame.put("q_" + robotSide.getUpperCaseName() + "_" + jointName, tempFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName) + tempFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName) * timeDiff);
+               }
+            }
+
+            postImpactReference.record(tempFrame.values().stream().mapToDouble(Double::doubleValue).toArray());
+         }
+      }
+      postImpactReference.saveRecordingMemory();
+      LogTools.info("PostImpact trajectory extended (Saved to Memory)");
+   }
+
    public ReferenceSpreadingTrajectory getOriginalReferenceTrajectory()
    {
       return new ReferenceSpreadingTrajectory(originalReference, keyMatrix, fullRobotModel, registry);
@@ -206,6 +271,11 @@ public class ReferenceSpreader
    public ReferenceSpreadingTrajectory getPostImpactReferenceTrajectory()
    {
       return new ReferenceSpreadingTrajectory(postImpactReference, keyMatrix, fullRobotModel, registry);
+   }
+
+   public ReferenceSpreadingTrajectory getBlendedImpactReferenceTrajectory()
+   {
+      return new ReferenceSpreadingTrajectory(blendedImpactReference, keyMatrix, fullRobotModel, registry);
    }
 
    private void makeMap(double[] values, LinkedHashMap<String, Double> mapToPack)
