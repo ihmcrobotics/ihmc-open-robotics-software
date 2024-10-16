@@ -12,14 +12,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.yoVariables.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -50,7 +50,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
       initializationDuration = new DoubleParameter("initializationDurationWrenchSensorDriftEstimator", registry, 10.0);
       biasFilterBreakFrequency = new DoubleParameter("wrenchBiasFilterBreakFrequency", "", registry, 0.5);
       minJacobianDeterminant = new DoubleParameter("wrenchBiasEstimatorMinJacobianDet", registry, 0.05);
-      DoubleProvider filterAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency.getValue(), updateDT);
+      DoubleProvider filterAlphaProvider = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency.getValue(), updateDT);
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
@@ -147,7 +147,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
       public void setInitializationDuration(double initializationDuration)
       {
          this.initializationDuration = initializationDuration;
-         initializationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / initializationDuration, updateDT);
+         initializationAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(1.0 / initializationDuration, updateDT);
       }
 
       public void reset()

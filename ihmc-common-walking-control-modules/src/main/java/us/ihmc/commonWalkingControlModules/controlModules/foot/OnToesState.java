@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint2D;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePoint2D;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;

@@ -6,9 +6,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -335,7 +336,7 @@ public class FeedbackControllerFilterFactory
 
       public YoLPFilterDouble1D(String namePrefix, DoubleProvider breakFrequency, double dt, YoRegistry registry)
       {
-         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
          output = new AlphaFilteredYoVariable(namePrefix + "Output", registry, alpha);
       }
 

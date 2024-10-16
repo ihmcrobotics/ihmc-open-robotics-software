@@ -3,12 +3,12 @@ package us.ihmc.sensorProcessing.diagnostic;
 import org.ejml.data.DMatrixRMaj;
 import org.jtransforms.fft.DoubleFFT_1D;
 
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoInteger;
 
 public class Online1DSignalFourierAnalysis
 {
@@ -97,7 +97,7 @@ public class Online1DSignalFourierAnalysis
 
    public void setMagnitudeFilterBreakFrequency(double breakFrequency)
    {
-      magnitudeAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt));
+      magnitudeAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt));
    }
 
    public void setFrequencyGlitchFilterWindow(double window)

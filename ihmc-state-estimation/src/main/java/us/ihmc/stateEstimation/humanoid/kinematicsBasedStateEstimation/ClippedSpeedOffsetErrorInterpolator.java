@@ -12,8 +12,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.DeadbandedYoVariable;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.DeadbandedYoVariable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -163,8 +164,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       hasBeenCalled.set(false);
 
       alphaFilter_AlphaValue = new YoDouble("alphaFilter_AlphaValue", registry);
-      alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(this.alphaFilterBreakFrequency.getValue(),
-                                                                                                 this.dt.getValue()));
+      alphaFilter_AlphaValue.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(this.alphaFilterBreakFrequency.getValue(),
+                                                                                          this.dt.getValue()));
       alphaFilter_PositionValue = new YoDouble("alphaFilter_PositionValue", registry);
       alphaFilter_PositionValue.set(0.0);
       alphaFilter = new AlphaFilteredYoVariable("alphaFilter", registry, alphaFilter_AlphaValue, alphaFilter_PositionValue);

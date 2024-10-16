@@ -10,9 +10,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -85,8 +86,8 @@ public class JointAccelerationIntegrationCalculator
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration() || !parameters.isEnabled())
             continue;
 
-         double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT);
-         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getVelocityBreakFrequency(), controlDT);
+         double alphaPosition = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT);
+         double alphaVelocity = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(parameters.getVelocityBreakFrequency(), controlDT);
          double maxPositionError = parameters.getMaxPositionError();
          double maxVelocityError = parameters.getMaxVelocityError();
          double velocityReferenceAlpha = parameters.getVelocityReferenceAlpha();

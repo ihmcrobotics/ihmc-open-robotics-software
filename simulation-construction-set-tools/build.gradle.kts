@@ -23,6 +23,7 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-math-linear-dynamic-systems:source")
 
    api("us.ihmc:simulation-construction-set-test:0.25.1")
 }

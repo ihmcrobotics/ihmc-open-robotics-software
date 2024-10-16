@@ -5,7 +5,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.yoVariables.filters.SimpleMovingAverageFilteredYoVariable;
 
 public class ExecutionTimer
 {

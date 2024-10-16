@@ -3,7 +3,7 @@ package us.ihmc.perception.sceneGraph.arUco;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredRigidBodyTransform;
 
 /**
  * A scene object detectable via an ArUco marker.
