@@ -18,6 +18,7 @@ mainDependencies {
    api("us.ihmc:ihmc-whole-body-controller:source")
 
    api("us.ihmc:ihmc-simulation-toolkit:source")
+   api("us.ihmc:ihmc-math-linear-dynamic-systems:source")
 }
 
 testDependencies {

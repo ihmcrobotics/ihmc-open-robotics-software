@@ -5,8 +5,9 @@ import java.util.List;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -15,10 +16,8 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.filters.FirstOrderBandPassFilteredYoDouble;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -43,8 +42,8 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final ForceSensorData forceSensorData;
 
    private final YoDouble yoWristSensorForceMagnitude;
-   private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
-   private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
+   private final AlphaFilteredYoVariable yoWristSensorForceMagnitudeBias;
+   private final FirstOrderBandPassFilteredYoDouble yoWristSensorForceMagnitudeBandPassFiltered;
 
    private final YoInteger yoCollisionSeverityLevelOneToThree;
    private final YoBoolean yoForceLimitExceeded;
@@ -96,18 +95,16 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       this.sensorMassCompensator = new ForceSensorDistalMassCompensator(wristSensorDefinition, DT, registry);
 
       yoWristSensorForceMagnitude = new YoDouble(forceSensorName + "ForceMag", registry);
-      yoWristSensorForceMagnitudeBias = new FirstOrderFilteredYoVariable(forceSensorName + "ForceBias",
-                                                                         "",
-                                                                         0.0001,
-                                                                         DT,
-                                                                         FirstOrderFilterType.LOW_PASS,
-                                                                         registry);
-      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoVariable(forceSensorName + "ForceMagFiltered",
-                                                                                             "",
-                                                                                             forceSensorMinPassThroughFreq_Hz,
-                                                                                             forceSensorMaxPassThroughFreq_Hz,
-                                                                                             DT,
-                                                                                             registry);
+      yoWristSensorForceMagnitudeBias = new AlphaFilteredYoVariable(forceSensorName + "ForceBias",
+                                                                    registry,
+                                                                    new AlphaBasedOnBreakFrequencyProvider(() -> 0.0001, DT));
+      yoWristSensorForceMagnitudeBandPassFiltered = new FirstOrderBandPassFilteredYoDouble(forceSensorName + "ForceMagFiltered",
+                                                                                           "",
+                                                                                           forceSensorMinPassThroughFreq_Hz,
+                                                                                           forceSensorMaxPassThroughFreq_Hz,
+                                                                                           DT,
+                                                                                           FirstOrderBandPassFilteredYoDouble.FirstOrderFilterType.BAND,
+                                                                                           registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);
 

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.parameters;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class AvatarRobotCameraParameters implements AvatarRobotSensorParameters
 {

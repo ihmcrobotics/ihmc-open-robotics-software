@@ -7,9 +7,9 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.session.YoFixedReferenceFrameUsingYawPitchRoll;
@@ -43,14 +43,14 @@ public class SCS2StateEstimatorDebugVariables implements Controller
    private final YoFrameVector2D centroidalMomentPivot;
 
    private final YoDouble actualAccelerationFilterBreakFrequency;
-   private final AlphaFilteredYoFrameVector centerOfMassAccelerationFiltered;
-   private final AlphaFilteredYoFrameVector linearMomentumRateFiltered;
-   private final AlphaFilteredYoFrameVector angularMomentumRateFiltered;
-   private final AlphaFilteredYoFrameVector2d centroidalMomentPivotFiltered;
-   private final AlphaFilteredYoFrameVector centerOfMassAccelerationFiltered2;
-   private final AlphaFilteredYoFrameVector linearMomentumRateFiltered2;
-   private final AlphaFilteredYoFrameVector angularMomentumRateFiltered2;
-   private final AlphaFilteredYoFrameVector2d centroidalMomentPivotFiltered2;
+   private final AlphaFilteredYoFrameVector3D centerOfMassAccelerationFiltered;
+   private final AlphaFilteredYoFrameVector3D linearMomentumRateFiltered;
+   private final AlphaFilteredYoFrameVector3D angularMomentumRateFiltered;
+   private final AlphaFilteredYoFrameVector2D centroidalMomentPivotFiltered;
+   private final AlphaFilteredYoFrameVector3D centerOfMassAccelerationFiltered2;
+   private final AlphaFilteredYoFrameVector3D linearMomentumRateFiltered2;
+   private final AlphaFilteredYoFrameVector3D angularMomentumRateFiltered2;
+   private final AlphaFilteredYoFrameVector2D centroidalMomentPivotFiltered2;
 
    private final YoFixedReferenceFrameUsingYawPitchRoll centerOfMassFrame;
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
@@ -87,31 +87,31 @@ public class SCS2StateEstimatorDebugVariables implements Controller
       actualAccelerationFilterBreakFrequency.set(0.05 / dt); // 50Hz when running at 1kHz
       DoubleProvider alphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(actualAccelerationFilterBreakFrequency.getValue(),
                                                                                                            dt);
-      centerOfMassAccelerationFiltered = new AlphaFilteredYoFrameVector("actualCenterOfMassAccelerationFiltered",
-                                                                        "",
-                                                                        registry,
-                                                                        alphaProvider,
-                                                                        centerOfMassAcceleration);
-      linearMomentumRateFiltered = new AlphaFilteredYoFrameVector("actualLinearMomentumRateFiltered", "", registry, alphaProvider, linearMomentumRate);
-      angularMomentumRateFiltered = new AlphaFilteredYoFrameVector("actualAngularMomentumRateFiltered", "", registry, alphaProvider, angularMomentumRate);
-      centroidalMomentPivotFiltered = new AlphaFilteredYoFrameVector2d("actualCMPFiltered", "", registry, alphaProvider, centroidalMomentPivot);
+      centerOfMassAccelerationFiltered = new AlphaFilteredYoFrameVector3D("actualCenterOfMassAccelerationFiltered",
+                                                                          "",
+                                                                          registry,
+                                                                          alphaProvider,
+                                                                          centerOfMassAcceleration);
+      linearMomentumRateFiltered = new AlphaFilteredYoFrameVector3D("actualLinearMomentumRateFiltered", "", registry, alphaProvider, linearMomentumRate);
+      angularMomentumRateFiltered = new AlphaFilteredYoFrameVector3D("actualAngularMomentumRateFiltered", "", registry, alphaProvider, angularMomentumRate);
+      centroidalMomentPivotFiltered = new AlphaFilteredYoFrameVector2D("actualCMPFiltered", "", registry, alphaProvider, centroidalMomentPivot);
 
-      centerOfMassAccelerationFiltered2 = new AlphaFilteredYoFrameVector("actualCenterOfMassAccelerationFiltered2",
-                                                                         "",
-                                                                         registry,
-                                                                         alphaProvider,
-                                                                         centerOfMassAccelerationFiltered);
-      linearMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualLinearMomentumRateFiltered2",
-                                                                   "",
-                                                                   registry,
-                                                                   alphaProvider,
-                                                                   linearMomentumRateFiltered);
-      angularMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualAngularMomentumRateFiltered2",
-                                                                    "",
-                                                                    registry,
-                                                                    alphaProvider,
-                                                                    angularMomentumRateFiltered);
-      centroidalMomentPivotFiltered2 = new AlphaFilteredYoFrameVector2d("actualCMPFiltered2", "", registry, alphaProvider, centroidalMomentPivotFiltered);
+      centerOfMassAccelerationFiltered2 = new AlphaFilteredYoFrameVector3D("actualCenterOfMassAccelerationFiltered2",
+                                                                           "",
+                                                                           registry,
+                                                                           alphaProvider,
+                                                                           centerOfMassAccelerationFiltered);
+      linearMomentumRateFiltered2 = new AlphaFilteredYoFrameVector3D("actualLinearMomentumRateFiltered2",
+                                                                     "",
+                                                                     registry,
+                                                                     alphaProvider,
+                                                                     linearMomentumRateFiltered);
+      angularMomentumRateFiltered2 = new AlphaFilteredYoFrameVector3D("actualAngularMomentumRateFiltered2",
+                                                                      "",
+                                                                      registry,
+                                                                      alphaProvider,
+                                                                      angularMomentumRateFiltered);
+      centroidalMomentPivotFiltered2 = new AlphaFilteredYoFrameVector2D("actualCMPFiltered2", "", registry, alphaProvider, centroidalMomentPivotFiltered);
    }
 
    @Override

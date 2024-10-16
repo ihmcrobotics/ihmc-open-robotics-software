@@ -30,8 +30,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -263,18 +263,6 @@ public class ScrewToolsTest
    }
 
 	@Test
-   public void testComputeSupportAndSubtreeSuccessors_RigidBody()
-   {
-      int numberOfBodiesOnChain = 6;
-      int numberOfBodies = 16;
-      RigidBodyBasics[] successors = ScrewTools.computeSupportAndSubtreeSuccessors(secondLevelSubTrees.get(0));
-      assertEquals(numberOfBodiesOnChain - 1, successors.length);
-
-      successors = ScrewTools.computeSupportAndSubtreeSuccessors(elevator);
-      assertEquals(numberOfBodies - 1, successors.length);
-   }
-
-	@Test
    public void testComputeSupportAndSubtreeJoints_RigidBody()
    {
       int numberOfJointsOnChain = 5;
@@ -500,28 +488,6 @@ public class ScrewToolsTest
    }
 
 	@Test
-   public void testCreateGravitationalSpatialAcceleration()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
-      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
-
-      double gravity = RandomNumbers.nextDouble(random, 100.0);
-      SpatialAcceleration result = ScrewTools.
-            createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
-
-      Vector3DReadOnly angularPart = result.getAngularPart();
-      Vector3D zeroes = new Vector3D(0.0, 0.0, 0.0);
-
-      assertTrue(angularPart.epsilonEquals(zeroes, epsilon));
-
-      Vector3DReadOnly linearPart = result.getLinearPart();
-      assertEquals(zeroes.getX(), linearPart.getX(), epsilon);
-      assertEquals(zeroes.getY(), linearPart.getY(), epsilon);
-      assertEquals(gravity, linearPart.getZ(), epsilon);
-   }
-
-	@Test
    public void testSetDesiredAccelerations()
    {
       Vector3D[] jointAxes = {X, Y, Z, Y, X};
@@ -583,26 +549,7 @@ public class ScrewToolsTest
       }
    }
 
-	@Test
-   public void testComputeIndicesForJoint()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
-      JointBasics[] jointsArr = MultiBodySystemTools.collectSubtreeJoints(chain.getElevator());
-      JointBasics rootJoint = jointsArr[0];
-      JointBasics testJoint4 = jointsArr[5];
 
-      
-      TIntArrayList indices = new TIntArrayList();
-      ScrewTools.computeIndicesForJoint(jointsArr, indices, testJoint4, rootJoint);
-      assertEquals(7, indices.size());
-
-      for(int i = 0; i < rootJoint.getDegreesOfFreedom(); i++)
-      {
-         assertEquals(i, indices.get(i));
-      }
-      assertEquals(10, indices.get(indices.size() - 1));
-   }
 
 	@Test
    public void testExtractRevoluteJoints()

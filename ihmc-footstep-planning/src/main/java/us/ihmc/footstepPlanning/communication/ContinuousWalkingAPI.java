@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 
 public class ContinuousWalkingAPI

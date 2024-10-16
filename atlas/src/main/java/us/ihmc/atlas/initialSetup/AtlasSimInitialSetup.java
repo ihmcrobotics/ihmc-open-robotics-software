@@ -1,10 +1,10 @@
 package us.ihmc.atlas.initialSetup;
 
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class AtlasSimInitialSetup extends HumanoidRobotInitialSetup

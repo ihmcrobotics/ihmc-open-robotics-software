@@ -23,11 +23,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class KinematicsToolboxHelper
     * @param gains   the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains)
+   static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGainsBasics gains)
    {
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
       consumeCenterOfMassCommand(command, gains, feedbackControlCommand);
@@ -53,7 +53,7 @@ public class KinematicsToolboxHelper
    }
 
    static void consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command,
-                                          PID3DGains gains,
+                                          PID3DGainsBasics gains,
                                           CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setGains(gains);
@@ -73,7 +73,7 @@ public class KinematicsToolboxHelper
     * @param gains   the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3Gains gains)
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBodyBasics base, PIDSE3GainsBasics gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       consumeRigidBodyCommand(command, base, gains, feedbackControlCommand);
@@ -82,19 +82,19 @@ public class KinematicsToolboxHelper
 
    public static void consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command,
                                               RigidBodyBasics base,
-                                              PIDSE3Gains gains,
+                                              PIDSE3GainsBasics gains,
                                               SpatialFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.set(base, command.getEndEffector());
       feedbackControlCommandToPack.setGains(gains);
       if (command.getLinearRateLimitation() > 0.0)
       {
-         PID3DGains positionGains = feedbackControlCommandToPack.getGains().getPositionGains();
+         PID3DGainsBasics positionGains = feedbackControlCommandToPack.getGains().getPositionGains();
          positionGains.setMaxFeedbackAndFeedbackRate(command.getLinearRateLimitation(), positionGains.getMaximumFeedbackRate());
       }
       if (command.getAngularRateLimitation() > 0.0)
       {
-         PID3DGains orientationGains = feedbackControlCommandToPack.getGains().getOrientationGains();
+         PID3DGainsBasics orientationGains = feedbackControlCommandToPack.getGains().getOrientationGains();
          orientationGains.setMaxFeedbackAndFeedbackRate(command.getAngularRateLimitation(), orientationGains.getMaximumFeedbackRate());
       }
       feedbackControlCommandToPack.setWeightMatrixForSolver(command.getWeightMatrix());

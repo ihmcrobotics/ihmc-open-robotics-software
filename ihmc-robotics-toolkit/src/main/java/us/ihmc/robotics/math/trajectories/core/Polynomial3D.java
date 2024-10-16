@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.core;
 
+import us.ihmc.commons.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.abstracts.AbstractPolynomial3D;
 
 import java.util.Arrays;
@@ -30,11 +31,15 @@ public class Polynomial3D extends AbstractPolynomial3D
                + " YoTrajectories.");
    }
 
+   public Polynomial3D(Polynomial3D other)
+   {
+      super(other);
+   }
+
    public Polynomial3D(Polynomial xTrajectory, Polynomial yTrajectory, Polynomial zTrajectory)
    {
       super(xTrajectory, yTrajectory, zTrajectory);
    }
-
 
    public static Polynomial3D[] createTrajectory3DArray(Polynomial[] xTrajectory, Polynomial[] yTrajectory, Polynomial[] zTrajectory)
    {

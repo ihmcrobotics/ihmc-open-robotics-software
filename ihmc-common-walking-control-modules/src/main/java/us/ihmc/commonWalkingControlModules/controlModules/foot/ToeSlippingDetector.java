@@ -7,8 +7,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -23,7 +23,7 @@ public class ToeSlippingDetector
 
    private final YoDouble alpha;
    private final AlphaFilteredYoVariable toeForceFiltered;
-   private final AlphaFilteredYoFrameVector toeLinearVelocityFiltered;
+   private final AlphaFilteredYoFrameVector3D toeLinearVelocityFiltered;
 
    private final YoFramePoint3D initialToePosition;
    private final YoDouble toeSlippageDistance;
@@ -48,8 +48,7 @@ public class ToeSlippingDetector
 
       alpha = new YoDouble(namePrefix + "AlphaFilter", registry);
       toeForceFiltered = new AlphaFilteredYoVariable(namePrefix + "ToeForceFiltered", "", registry, alpha);
-      toeLinearVelocityFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha,
-                                                                                              worldFrame);
+      toeLinearVelocityFiltered = new AlphaFilteredYoFrameVector3D(namePrefix + "ToeLinearVelocityFiltered", "", registry, alpha, worldFrame);
 
       initialToePosition = new YoFramePoint3D(namePrefix + "ToeInitial", worldFrame, registry);
       toeSlippageDistance = new YoDouble(namePrefix + "ToeSlippageDistance", registry);

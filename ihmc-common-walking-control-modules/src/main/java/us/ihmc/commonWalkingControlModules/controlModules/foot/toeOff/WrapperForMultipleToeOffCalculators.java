@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 import java.util.EnumMap;
 
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;

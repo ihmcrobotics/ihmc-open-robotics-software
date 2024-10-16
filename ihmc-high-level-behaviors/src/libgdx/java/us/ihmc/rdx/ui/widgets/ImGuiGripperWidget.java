@@ -5,7 +5,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 

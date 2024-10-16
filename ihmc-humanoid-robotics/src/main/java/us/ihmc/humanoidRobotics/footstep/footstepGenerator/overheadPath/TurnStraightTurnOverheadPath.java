@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 
 public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
 {

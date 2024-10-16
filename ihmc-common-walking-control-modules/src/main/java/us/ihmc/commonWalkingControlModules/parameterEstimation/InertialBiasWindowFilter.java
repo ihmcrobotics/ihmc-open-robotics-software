@@ -4,7 +4,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.yoVariables.filters.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**

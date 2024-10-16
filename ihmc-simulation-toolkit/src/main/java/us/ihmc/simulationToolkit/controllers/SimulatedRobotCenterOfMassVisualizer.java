@@ -3,7 +3,7 @@ package us.ihmc.simulationToolkit.controllers;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -18,7 +18,7 @@ public class SimulatedRobotCenterOfMassVisualizer implements RobotController
    private final YoRegistry registry = new YoRegistry("ExactCoMCalcualtor");
    private final YoFramePoint3D exactCenterOfMassPosition = new YoFramePoint3D("exactCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D exactCenterOfMassVelocity = new YoFrameVector3D("exactCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final FilteredVelocityYoFrameVector exactCenterOfMassAcceleration;
+   private final FilteredFiniteDifferenceYoFrameVector3D exactCenterOfMassAcceleration;
    
    
    private final Point3D tempCenterOfMassPoint = new Point3D();
@@ -30,7 +30,7 @@ public class SimulatedRobotCenterOfMassVisualizer implements RobotController
    {
       this.robot = robot;
       YoDouble alphaSimCoMAcceleration = new YoDouble("alphaSimCoMAcceleration", registry);
-      exactCenterOfMassAcceleration = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("exactCenterOfMassAcceleration", "", alphaSimCoMAcceleration, dt, registry, exactCenterOfMassVelocity);
+      exactCenterOfMassAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("exactCenterOfMassAcceleration", "", alphaSimCoMAcceleration, dt, registry, exactCenterOfMassVelocity);
       alphaSimCoMAcceleration.set(0.99);
    }
 

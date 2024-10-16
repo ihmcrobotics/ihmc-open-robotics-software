@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 /**
  * This object represents a node on the graph search by the footstep planner.

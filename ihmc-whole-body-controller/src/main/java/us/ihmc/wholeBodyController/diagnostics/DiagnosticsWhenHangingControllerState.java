@@ -23,25 +23,25 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -96,8 +96,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final SideDependentList<YoFrameVector3D> footForcesRaw = new SideDependentList<>();
    private final SideDependentList<YoFrameVector3D> footTorquesRaw = new SideDependentList<>();
    private final YoDouble alphaFootForce = new YoDouble("alphaDiagFootForce", registry);
-   private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<>();
-   private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<>();
+   private final SideDependentList<AlphaFilteredYoFrameVector3D> footForcesRawFiltered = new SideDependentList<>();
+   private final SideDependentList<AlphaFilteredYoFrameVector3D> footTorquesRawFiltered = new SideDependentList<>();
 
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
@@ -187,7 +187,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
       // Foot force sensors tarring stuff
       footSwitches = controllerToolbox.getFootSwitches();
-      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
+      alphaFootForce.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -201,13 +201,13 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
-         AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
-                                                                                                                       registry, alphaFootForce, footForceRaw);
+         AlphaFilteredYoFrameVector3D footForceRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootForceRawFilt", "",
+                                                                                              registry, alphaFootForce, footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
-         AlphaFilteredYoFrameVector footTorqueRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
-                                                                                                                        "", registry, alphaFootForce,
-                                                                                                                        footTorqueRaw);
+         AlphaFilteredYoFrameVector3D footTorqueRawFiltered = new AlphaFilteredYoFrameVector3D(sidePrefix + "DiagFootTorqueRawFilt",
+                                                                                               "", registry, alphaFootForce,
+                                                                                               footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);
       }
    }

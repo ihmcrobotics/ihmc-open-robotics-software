@@ -1,6 +1,9 @@
 package us.ihmc.robotics.partNames;
 
-import us.ihmc.robotics.robotSide.RobotSegment;
+import us.ihmc.commons.robotics.partNames.JointRole;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSegment;
 
 import java.util.Set;
 

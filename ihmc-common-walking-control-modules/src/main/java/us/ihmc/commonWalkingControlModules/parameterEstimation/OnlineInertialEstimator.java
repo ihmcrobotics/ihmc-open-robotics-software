@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 /**
  * Any inertial estimator intended for online use inside {@link InertialParameterManager} should implement this interface.

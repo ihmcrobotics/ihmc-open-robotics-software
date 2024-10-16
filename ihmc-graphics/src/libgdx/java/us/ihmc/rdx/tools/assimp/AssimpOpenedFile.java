@@ -8,7 +8,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.net.URL;
 import java.nio.ByteBuffer;

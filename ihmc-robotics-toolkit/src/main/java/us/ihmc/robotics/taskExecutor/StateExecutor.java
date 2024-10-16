@@ -2,8 +2,8 @@ package us.ihmc.robotics.taskExecutor;
 
 import java.util.ArrayDeque;
 
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.StateMachineClock;
 
 public class StateExecutor
 {

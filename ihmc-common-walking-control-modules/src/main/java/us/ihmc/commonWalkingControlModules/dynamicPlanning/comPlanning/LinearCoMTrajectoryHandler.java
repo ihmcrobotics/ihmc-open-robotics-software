@@ -12,10 +12,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.commons.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;

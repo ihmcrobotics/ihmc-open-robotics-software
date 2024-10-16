@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import us.ihmc.avatar.handControl.FingerJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 public class SandiaHandModel

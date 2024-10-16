@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import us.ihmc.avatar.AvatarStairsSimulation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 

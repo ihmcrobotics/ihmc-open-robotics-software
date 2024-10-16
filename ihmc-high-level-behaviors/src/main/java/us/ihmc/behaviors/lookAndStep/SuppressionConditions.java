@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.util.function.Supplier;
 

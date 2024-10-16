@@ -9,10 +9,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector2D;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
+import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -32,7 +32,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector2D desiredVelocity = new YoFrameVector2D("scriptedDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final RateLimitedYoFrameVector2d desiredVelocityRateLimited;
+   private final RateLimitedYoFrameVector2D desiredVelocityRateLimited;
    private final YoDouble desiredTurningVelocity = new YoDouble("scriptedDesiredTurningVelocity", registry);
    private final RateLimitedYoVariable desiredTurningVelocityRateLimited;
    private final YoDouble acceleration = new YoDouble("acceleration", registry);
@@ -102,8 +102,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       cruiseVelocity.set(parameters.getCruiseVelocity());
       sidestepVelocity.set(parameters.getSideStepVelocity());
 
-      desiredVelocityRateLimited = RateLimitedYoFrameVector2d.createRateLimitedYoFrameVector2d("scriptDesiredVelocityRateLimited", "", registry, acceleration,
-                                                                                               controlDT, desiredVelocity);
+      desiredVelocityRateLimited = new RateLimitedYoFrameVector2D("scriptDesiredVelocityRateLimited", registry, acceleration,
+                                                                  controlDT, desiredVelocity);
       desiredTurningVelocityRateLimited = new RateLimitedYoVariable("scriptDesiredTurningVelocityRateLimited", registry, turningAcceleration,
                                                                     desiredTurningVelocity, controlDT);
 

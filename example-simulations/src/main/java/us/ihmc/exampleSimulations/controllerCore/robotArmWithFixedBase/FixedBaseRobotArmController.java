@@ -30,11 +30,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -77,8 +77,7 @@ public class FixedBaseRobotArmController implements RobotController
    private final WholeBodyControllerCore controllerCore;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
-   private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
-   private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
+   private final SymmetricYoPIDSE3Gains handGains = new SymmetricYoPIDSE3Gains("hand", registry);
    private final YoFramePoint3D handTargetPosition = new YoFramePoint3D("handTarget", worldFrame, registry);
 
    private final YoFrameYawPitchRoll handTargetOrientation = new YoFrameYawPitchRoll("handTarget", worldFrame, registry);
@@ -164,11 +163,8 @@ public class FixedBaseRobotArmController implements RobotController
 
       handWeight.set(1.0);
 
-      handPositionGains.setProportionalGains(100.0);
-      handPositionGains.setDampingRatios(1.0);
-
-      handOrientationGains.setProportionalGains(100.0);
-      handOrientationGains.setDampingRatios(1.0);
+      handGains.setProportionalGains(100.0);
+      handGains.setDampingRatios(1.0);
 
       FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);
@@ -259,21 +255,21 @@ public class FixedBaseRobotArmController implements RobotController
 
       handPointCommand.setBodyFixedPointToControl(controlFramePose.getPosition());
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handPointCommand.setGains(handPositionGains);
+      handPointCommand.setGains(handGains.getPositionGains());
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());
       handPointCommand.setInverseDynamics(position, linearVelocity, linearAcceleration);
       handPointCommand.setControlMode(controllerCoreMode.getValue());
 
       handOrientationCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handOrientationCommand.setGains(handOrientationGains);
+      handOrientationCommand.setGains(handGains.getOrientationGains());
       handOrientationCommand.setSelectionMatrix(computeAngularSelectionMatrix());
       handOrientationCommand.setInverseDynamics(orientation, angularVelocity, angularAcceleration);
       handOrientationCommand.setControlMode(controllerCoreMode.getValue());
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handSpatialCommand.setPositionGains(handPositionGains);
-      handSpatialCommand.setOrientationGains(handOrientationGains);
+      handSpatialCommand.setPositionGains(handGains.getPositionGains());
+      handSpatialCommand.setOrientationGains(handGains.getOrientationGains());
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.setInverseDynamics(orientation, position, angularVelocity, linearVelocity, angularAcceleration, linearAcceleration);
       handSpatialCommand.setControlMode(controllerCoreMode.getValue());

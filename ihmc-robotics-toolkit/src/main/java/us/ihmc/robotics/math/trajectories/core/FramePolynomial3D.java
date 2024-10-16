@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.core;
 
+import us.ihmc.commons.trajectories.core.Polynomial;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.abstracts.AbstractFramePolynomial3D;
 

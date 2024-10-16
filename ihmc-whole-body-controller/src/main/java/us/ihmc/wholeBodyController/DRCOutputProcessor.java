@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public interface DRCOutputProcessor

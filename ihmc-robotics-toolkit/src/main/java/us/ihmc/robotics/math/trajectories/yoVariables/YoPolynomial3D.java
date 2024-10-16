@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.yoVariables;
 
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
