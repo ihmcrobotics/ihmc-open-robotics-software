@@ -39,7 +39,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
+import us.ihmc.mecano.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;

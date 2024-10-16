@@ -23,6 +23,7 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-commons-controls:source")
+   api("us.ihmc:ihmc-mecano-tools:source")
 }
 
 testDependencies {

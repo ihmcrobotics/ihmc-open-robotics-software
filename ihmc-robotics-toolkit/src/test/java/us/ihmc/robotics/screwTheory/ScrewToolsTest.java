@@ -30,6 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
@@ -484,28 +485,6 @@ public class ScrewToolsTest
       }
 
       MultiBodySystemTools.computeDegreesOfFreedom(jointsList);
-   }
-
-	@Test
-   public void testCreateGravitationalSpatialAcceleration()
-   {
-      Vector3D[] jointAxes = {X, Y, Z, Y, X};
-      RandomFloatingRevoluteJointChain chain = new RandomFloatingRevoluteJointChain(random, jointAxes);
-      chain.nextState(random, JointStateType.CONFIGURATION, JointStateType.VELOCITY);
-
-      double gravity = RandomNumbers.nextDouble(random, 100.0);
-      SpatialAcceleration result = ScrewTools.
-            createGravitationalSpatialAcceleration(chain.getElevator(), gravity);
-
-      Vector3DReadOnly angularPart = result.getAngularPart();
-      Vector3D zeroes = new Vector3D(0.0, 0.0, 0.0);
-
-      assertTrue(angularPart.epsilonEquals(zeroes, epsilon));
-
-      Vector3DReadOnly linearPart = result.getLinearPart();
-      assertEquals(zeroes.getX(), linearPart.getX(), epsilon);
-      assertEquals(zeroes.getY(), linearPart.getY(), epsilon);
-      assertEquals(gravity, linearPart.getZ(), epsilon);
    }
 
 	@Test

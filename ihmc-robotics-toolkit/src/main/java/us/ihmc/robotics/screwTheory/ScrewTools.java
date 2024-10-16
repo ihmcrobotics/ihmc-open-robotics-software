@@ -12,7 +12,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class ScrewTools
@@ -21,18 +25,6 @@ public class ScrewTools
    {
       return MultiBodySystemTools.collectSuccessors(MultiBodySystemTools.collectSubtreeJoints(bodies));
    }
-
-   public static SpatialAcceleration createGravitationalSpatialAcceleration(RigidBodyBasics rootBody, double gravity)
-   {
-      Vector3D gravitationalAcceleration = new Vector3D(0.0, 0.0, gravity);
-      Vector3D zero = new Vector3D();
-      SpatialAcceleration rootAcceleration = new SpatialAcceleration(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(),
-                                                                     zero, gravitationalAcceleration);
-
-      return rootAcceleration;
-   }
-
-
 
    public static JointBasics[] findJointsWithNames(JointBasics[] allJoints, String... jointNames)
    {

@@ -3,7 +3,7 @@ package us.ihmc.tools.thread;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.TestTools;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 public class ThrottlerAndFrequencyCounterTest

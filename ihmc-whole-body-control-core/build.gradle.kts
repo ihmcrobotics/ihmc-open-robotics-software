@@ -20,6 +20,7 @@ mainDependencies {
    api("us.ihmc:ihmc-commons-yo:source")
    api("us.ihmc:ihmc-yovariables-filters:source")
    api("us.ihmc:mecano-yovariables-filters:source")
+   api("us.ihmc:ihmc-mecano-tools:source")
 }
 
 testDependencies {

@@ -15,6 +15,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:ihmc-commons-utils:source")
    api("us.ihmc:ihmc-yovariables:0.12.2")
+   api("us.ihmc:ihmc-yovariables-filters:source")
    // TODO push in SCS2YoGraphicHolder and bump this version
    api("us.ihmc:ihmc-graphics-description:0.25.1")
 }

@@ -8,7 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

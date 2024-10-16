@@ -31,7 +31,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.extra.EnumBasedStateMachineFactory;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.commons.thread.TypedNotification;
 

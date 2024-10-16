@@ -38,7 +38,7 @@ import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;

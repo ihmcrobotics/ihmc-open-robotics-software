@@ -21,7 +21,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
