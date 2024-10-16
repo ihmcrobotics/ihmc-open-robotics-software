@@ -36,6 +36,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    private final RecyclingArrayList<PrivilegedJointSpaceCommand> privilegedJointSpaceCommandBuffer = new RecyclingArrayList<>(PrivilegedJointSpaceCommand.class);
    private final RecyclingArrayList<PrivilegedConfigurationCommand> privilegedConfigurationCommandBuffer = new RecyclingArrayList<>(PrivilegedConfigurationCommand.class);
    private final RecyclingArrayList<QPObjectiveCommand> qPObjectiveCommandBuffer = new RecyclingArrayList<>(QPObjectiveCommand.class);
+   private final RecyclingArrayList<QPCostCommand> qPCostCommandBuffer = new RecyclingArrayList<>(QPCostCommand.class);
    private final RecyclingArrayList<JointTorqueCommand> jointTorqueCommandBuffer = new RecyclingArrayList<>(JointTorqueCommand.class);
 
    public InverseDynamicsCommandBuffer()
@@ -65,6 +66,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       privilegedJointSpaceCommandBuffer.clear();
       privilegedConfigurationCommandBuffer.clear();
       qPObjectiveCommandBuffer.clear();
+      qPCostCommandBuffer.clear();
       jointTorqueCommandBuffer.clear();
    }
 
@@ -286,7 +288,19 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    }
 
    /**
-    * Gets an available {@link QPObjectiveCommand} and registers it to this list.
+    * Gets an available {@link QPCostCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public QPCostCommand addQPCostCommand()
+   {
+      QPCostCommand command = qPCostCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link JointTorqueCommand} and registers it to this list.
     *
     * @return the available command ready to be set.
     */

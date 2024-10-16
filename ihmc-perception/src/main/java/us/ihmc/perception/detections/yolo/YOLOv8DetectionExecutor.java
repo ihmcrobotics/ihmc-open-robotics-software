@@ -29,6 +29,7 @@ import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -171,7 +172,7 @@ public class YOLOv8DetectionExecutor
                RawImage objectMask = simpleDetectionEntry.getValue();
 
                // Erode mask to get better segmentation
-               Mat erodedMask = new Mat(objectMask.getImageHeight(), objectMask.getImageWidth(), objectMask.getOpenCVType());
+               Mat erodedMask = new Mat(objectMask.getHeight(), objectMask.getWidth(), objectMask.getOpenCVType());
                opencv_imgproc.erode(objectMask.getCpuImageMat(),
                                     erodedMask,
                                     opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
@@ -283,8 +284,8 @@ public class YOLOv8DetectionExecutor
          // Draw text background
          Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
 
-         int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getImageWidth() - textSize.width());
-         int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getImageHeight() - textSize.height());
+         int textBoxClampedX = MathTools.clamp(detection.x(), 0, colorImage.getWidth() - textSize.width());
+         int textBoxClampedY = MathTools.clamp(detection.y() - textSize.height(), 0, colorImage.getHeight() - textSize.height());
 
          Rect textBox = new Rect(textBoxClampedX, textBoxClampedY, textSize.width(), textSize.height());
 
@@ -302,7 +303,7 @@ public class YOLOv8DetectionExecutor
 
          // Add green tint to show mask
          // first convert 32F mask to 8U
-         Mat maskMat = new Mat(maskImage.getImageHeight(), maskImage.getImageWidth(), opencv_core.CV_8U);
+         Mat maskMat = new Mat(maskImage.getHeight(), maskImage.getWidth(), opencv_core.CV_8U);
          maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
 
          // resize the mask to fit the result image
@@ -323,23 +324,7 @@ public class YOLOv8DetectionExecutor
       opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN
 
       ImageMessage imageMessage = new ImageMessage();
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(annotatedImagePointer.limit());
-      imageMessageDataPacker.pack(imageMessage, annotatedImagePointer);
-      MessageTools.toMessage(colorImage.getAcquisitionTime(), imageMessage.getAcquisitionTime());
-      imageMessage.setFocalLengthXPixels(colorImage.getFocalLengthX());
-      imageMessage.setFocalLengthYPixels(colorImage.getFocalLengthY());
-      imageMessage.setPrincipalPointXPixels(colorImage.getPrincipalPointX());
-      imageMessage.setPrincipalPointYPixels(colorImage.getPrincipalPointY());
-      imageMessage.setImageWidth(colorImage.getImageWidth());
-      imageMessage.setImageHeight(colorImage.getImageHeight());
-      imageMessage.getPosition().set(colorImage.getPosition());
-      imageMessage.getOrientation().set(colorImage.getOrientation());
-      imageMessage.setSequenceNumber(colorImage.getSequenceNumber());
-      imageMessage.setDepthDiscretization(colorImage.getDepthDiscretization());
-      imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
-      imageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
-      imageMessage.setCompressionType(CompressionType.JPEG.toByte());
-
+      PerceptionMessageTools.packImageMessage(colorImage, annotatedImagePointer, CompressionType.JPEG, CameraModel.PINHOLE, imageMessage);
       annotatedImagePublisher.publish(imageMessage);
 
       resultMat.close();

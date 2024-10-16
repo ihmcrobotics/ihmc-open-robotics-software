@@ -1,12 +1,12 @@
 package us.ihmc.perception.ouster;
 
-import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.opencl.OpenCLManager;
 
 import java.util.concurrent.TimeUnit;
@@ -20,6 +20,7 @@ public class OusterDepthImageRetriever
    private long depthSequenceNumber = 0L;
 
    private RawImage depthImage = null;
+   private CameraIntrinsics approximateIntrinsics;
 
    private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final FramePose3D sensorFramePose = new FramePose3D();
@@ -64,6 +65,14 @@ public class OusterDepthImageRetriever
 
          if (ouster.isInitialized() && running)
          {
+            if (approximateIntrinsics == null)
+               approximateIntrinsics = new CameraIntrinsics(ouster.getImageHeight(),
+                                                            ouster.getImageWidth(),
+                                                            ouster.getImageWidth() / (2.0 * Math.PI),
+                                                            ouster.getImageHeight() / (Math.PI / 2.0),
+                                                            0.0,
+                                                            0.0);
+
             sensorFramePose.setToZero(sensorFrameSupplier.get());
             sensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -76,19 +85,12 @@ public class OusterDepthImageRetriever
             {
                if (depthImage != null)
                   depthImage.release();
-               depthImage = new RawImage(depthSequenceNumber++,
-                                         ouster.getAquisitionInstant(),
-                                         1.0f,
-                                         depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat().clone(),
-                                         null,
-                                         ouster.getImageWidth() / (2.0f * (float) Math.PI),
-                                         // These are nominal values approximated by Duncan & Tomasz
-                                         ouster.getImageHeight() / ((float) Math.PI / 2.0f),
-                                         0,
-                                         0,
-                                         sensorFramePose.getPosition(),
-                                         sensorFramePose.getOrientation());
-
+               depthImage = RawImage.createWith16BitDepth(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
+                                                          approximateIntrinsics,
+                                                          sensorFramePose,
+                                                          ouster.getAquisitionInstant(),
+                                                          depthSequenceNumber++,
+                                                          1.0f);
                newImageAvailable.signal();
             }
             finally

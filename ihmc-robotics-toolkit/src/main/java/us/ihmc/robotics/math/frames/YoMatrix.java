@@ -6,6 +6,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 /**
  * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound. Has a
  * maximum number of rows and columns and an actual number of rows and columns. If you set with a
@@ -71,7 +74,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
             {
                case NONE:
                {
-                  variables[row][column] = new YoDouble(name  + row  + column, description, registry);  // names are simply the row and column indices
+                  variables[row][column] = new YoDouble(getFieldName(name, row, column), description, registry);  // names are simply the row and column indices
                   variables[row][column].setToNaN();
                   break;
                }
@@ -81,19 +84,29 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
                      throw new IllegalArgumentException(
                            "The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
 
-                  variables[row][column] = new YoDouble(name + rowNames[row], description, registry);  // names are the row names, no column identifier
+                  variables[row][column] = new YoDouble(getFieldName(name, rowNames[row], ""), description, registry);  // names are the row names, no column identifier
                   variables[row][column].setToNaN();
                   break;
                }
                case ROWS_AND_COLUMNS:
                {
-                  variables[row][column] = new YoDouble(name + rowNames[row] + columnNames[column], description, registry);  // names are the row and column names
+                  variables[row][column] = new YoDouble(getFieldName(name, rowNames[row], columnNames[column]), description, registry);  // names are the row and column names
                   variables[row][column].setToNaN();
                   break;
                }
             }
          }
       }
+   }
+
+   public static String getFieldName(String prefix, int row, int column)
+   {
+      return getFieldName(prefix, "_" + row, "_" + column);
+   }
+
+   public static String getFieldName(String prefix, String rowName, String columName)
+   {
+      return prefix + rowName + columName;
    }
 
    private enum NamesProvided
@@ -136,7 +149,12 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
    @Override
    public void unsafe_set(int row, int col, double val)
    {
-      variables[row][col].set(val);
+      unsafe_set(row, col, val, true);
+   }
+
+   private void unsafe_set(int row, int col, double val, boolean notifyListeners)
+   {
+      variables[row][col].set(val, notifyListeners);
    }
 
    @Override
@@ -197,7 +215,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
          {
             for (int col = 0; col < getNumCols(); col++)
             {
-               set(row, col, otherMatrix.unsafe_get(row, col));
+               unsafe_set(row, col, otherMatrix.unsafe_get(row, col), false);
             }
          }
       }
@@ -238,7 +256,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
       {
          for (int col = numCols; col < maxNumberOfColumns; col++)
          {
-            unsafe_set(row, col, Double.NaN);
+            unsafe_set(row, col, Double.NaN, false);
          }
       }
 
@@ -246,7 +264,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
       {
          for (int col = 0; col < maxNumberOfColumns; col++)
          {
-            unsafe_set(row, col, Double.NaN);
+            unsafe_set(row, col, Double.NaN, false);
          }
       }
    }
@@ -266,14 +284,17 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
+            double value;
             if ((row < numRows) && (column < numCols))
             {
-               variables[row][column].set(matrix.get(row, column));
+               value = matrix.unsafe_get(row, column);
             }
             else
             {
-               variables[row][column].set(Double.NaN);
+               value = Double.NaN;
             }
+            unsafe_set(row, column, value, false);
+
          }
       }
    }
@@ -298,7 +319,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
       {
          for (int column = 0; column < numCols; column++)
          {
-            matrixToPack.set(row, column, variables[row][column].getDoubleValue());
+            matrixToPack.unsafe_set(row, column, variables[row][column].getDoubleValue());
          }
       }
    }
@@ -310,7 +331,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
       {
          for (int col = 0; col < numberOfColumns; col++)
          {
-            unsafe_set(row, col, Double.NaN);
+            unsafe_set(row, col, Double.NaN, false);
          }
       }
    }
@@ -318,5 +339,14 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
    public YoDouble getYoDouble(int row, int col)
    {
       return variables[row][col];
+   }
+
+   @Override
+   public String toString()
+   {
+      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      MatrixIO.print(new PrintStream(stream), this);
+
+      return stream.toString();
    }
 }

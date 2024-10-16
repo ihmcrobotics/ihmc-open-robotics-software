@@ -29,7 +29,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
 
-@Tag("point-cloud-drift-correction-test")
 public class SurfaceElementICPTest
 {
    private static final boolean VISUALIZE = true;

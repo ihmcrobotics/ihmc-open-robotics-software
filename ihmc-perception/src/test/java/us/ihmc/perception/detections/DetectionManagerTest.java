@@ -5,14 +5,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -330,15 +330,13 @@ public class DetectionManagerTest
    public static RawImage createRawImage(Instant now)
    {
       Mat mat = new Mat(10, 10, opencv_core.CV_8UC1);
-      return new RawImage(0,
-                          now,
-                          0.0f,
-                          mat,
+      return new RawImage(mat,
                           null,
-                          10.0f,
-                          10.0f,
-                          mat.cols() / 2.0f,
-                          mat.rows() / 2.0f,
-                          new FramePoint3D(ReferenceFrame.getWorldFrame()),
-                          new FrameQuaternion(ReferenceFrame.getWorldFrame()));   }
+                          PixelFormat.GRAY8,
+                          new CameraIntrinsics(mat.rows(), mat.cols(), 10.0f, 10.0f, mat.cols() / 2.0f, mat.rows() / 2.0f),
+                          new FramePose3D(),
+                          now,
+                          0,
+                          0.0f);
+   }
 }

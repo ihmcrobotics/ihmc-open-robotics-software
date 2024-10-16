@@ -201,25 +201,25 @@ public class RDXHumanoidDoFsWidgets
       final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
       final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
       return new ImDoubleWrapper(() -> jointWidgetValues[jointIndex],
-                          jointAngle -> jointWidgetValues[jointIndex] = jointAngle,
-                          imDouble ->
-                          {
-                             if (fancyInput.getValue() == null)
-                             {
-                                fancyInput.setValue(new ImGuiInputDouble("j" + jointIndex, "%.3f", imDouble));
-                                fancyInput.getValue().setWidgetWidth(119.0f);
+                                 jointAngle -> jointWidgetValues[jointIndex] = jointAngle,
+                                 imDouble ->
+                                 {
+                                    if (fancyInput.getValue() == null)
+                                    {
+                                       fancyInput.setValue(new ImGuiInputDouble("j" + jointIndex, "%.3f", imDouble));
+                                       fancyInput.getValue().setWidgetWidth(119.0f);
 
-                                fancySlider.setValue(new ImGuiSliderDouble("", "", imDouble));
-                             }
+                                       fancySlider.setValue(new ImGuiSliderDouble("", "", imDouble));
+                                    }
 
-                             fancyInput.getValue().render(0.01, 0.1);
+                                    fancyInput.getValue().render(0.01, 0.1);
 
-                             ImGui.sameLine();
-                             fancySlider.getValue().setWidgetText("%s %.1f%s".formatted(jointNames[jointIndex],
-                                                                                        Math.toDegrees(imDouble.get()),
-                                                                                        EuclidCoreMissingTools.DEGREE_SYMBOL));
-                             fancySlider.getValue().render(lowerLimits[jointIndex], upperLimits[jointIndex]);
-                          });
+                                    ImGui.sameLine();
+                                    fancySlider.getValue().setWidgetText("%s %.1f%s".formatted(jointNames[jointIndex],
+                                                                                               Math.toDegrees(imDouble.get()),
+                                                                                               EuclidCoreMissingTools.DEGREE_SYMBOL));
+                                    fancySlider.getValue().render(lowerLimits[jointIndex], upperLimits[jointIndex]);
+                                 });
    }
 
    private void receiveRobotConfigurationData()
@@ -294,7 +294,7 @@ public class RDXHumanoidDoFsWidgets
    public void renderImGuiWidgets()
    {
       ImGui.pushItemWidth(200.0f);
-//      ImGui.combo(labels.get("Controllable Robot Part"), currentInteractablePart, interactableParts);
+      //      ImGui.combo(labels.get("Controllable Robot Part"), currentInteractablePart, interactableParts);
       if (ImGui.beginCombo(labels.get("Controllable Robot Part"), interactableParts[currentInteractablePart.get()]))
       {
          for (InteractableDoFs part : InteractableDoFs.values())
@@ -512,7 +512,7 @@ public class RDXHumanoidDoFsWidgets
       double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNamesAsStrings(side).size()];
 
       for (int i = 0; i < jointAngles.length; i++)
-            jointAngles[i] = armJointWidgetValues.get(side)[i];
+         jointAngles[i] = armJointWidgetValues.get(side)[i];
 
       for (double q : jointAngles)
       {

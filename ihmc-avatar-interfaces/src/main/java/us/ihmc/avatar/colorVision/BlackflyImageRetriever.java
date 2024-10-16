@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -35,6 +36,7 @@ public class BlackflyImageRetriever
    private SpinnakerBlackflyManager blackflyManager;
    private SpinnakerBlackfly blackfly;
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
+   private CameraIntrinsics ousterFisheyeColorCameraIntrinsics;
 
    private final Supplier<ReferenceFrame> cameraFrameSupplier;
    private final FramePose3D cameraPose = new FramePose3D();
@@ -90,6 +92,13 @@ public class BlackflyImageRetriever
                {
                   this.imageWidth = blackfly.getWidth(spinImage);
                   this.imageHeight = blackfly.getHeight(spinImage);
+
+                  ousterFisheyeColorCameraIntrinsics = new CameraIntrinsics(imageHeight,
+                                                                            imageWidth,
+                                                                            ousterFisheyeColoringIntrinsics.getFocalLengthX(),
+                                                                            ousterFisheyeColoringIntrinsics.getFocalLengthY(),
+                                                                            ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
+                                                                            ousterFisheyeColoringIntrinsics.getPrinciplePointY());
                }
 
                // Get image data
@@ -111,17 +120,11 @@ public class BlackflyImageRetriever
                {
                   if (distortedImage != null)
                      distortedImage.release();
-                  distortedImage = new RawImage(sequenceNumber++,
-                                                acquisitionTime,
-                                                0,
-                                                null,
-                                                sourceImageBGR.clone(),
-                                                (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
-                                                (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
-                                                (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),
-                                                (float) ousterFisheyeColoringIntrinsics.getPrinciplePointY(),
-                                                cameraPose.getPosition(),
-                                                cameraPose.getOrientation());
+                  distortedImage = RawImage.createWithBGRImage(sourceImageBGR.clone(),
+                                                               ousterFisheyeColorCameraIntrinsics,
+                                                               cameraPose,
+                                                               acquisitionTime,
+                                                               sequenceNumber++);
 
                   newImageAvailable.signal();
                }

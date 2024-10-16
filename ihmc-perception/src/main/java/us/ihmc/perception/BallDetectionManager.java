@@ -10,9 +10,8 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 
 import java.time.Instant;
@@ -106,29 +105,20 @@ public class BallDetectionManager
          // If we got a segmentation image from the detector
          if (maskMat.rows() > 0 && maskMat.cols() > 0)
          {
+            RawImage maskImage = colorImage.replaceImage(maskMat);
+
             // compress the image to PNG
             BytePointer compressedImage = new BytePointer();
             OpenCVTools.compressImagePNG(maskMat, compressedImage);
 
             // send it out to UI
             ImageMessage imageMessage = new ImageMessage();
-            ImageMessageDataPacker dataPacker = new ImageMessageDataPacker(compressedImage.limit());
-            dataPacker.pack(imageMessage, compressedImage);
-            MessageTools.toMessage(maskAcquisitionTime, imageMessage.getAcquisitionTime());
-            imageMessage.setFocalLengthXPixels(colorImage.getFocalLengthX());
-            imageMessage.setFocalLengthYPixels(colorImage.getFocalLengthY());
-            imageMessage.setPrincipalPointXPixels(colorImage.getPrincipalPointX());
-            imageMessage.setPrincipalPointYPixels(colorImage.getPrincipalPointY());
-            imageMessage.setImageWidth(maskMat.cols());
-            imageMessage.setImageHeight(maskMat.rows());
-            imageMessage.getPosition().set(colorImage.getPosition());
-            imageMessage.getOrientation().set(colorImage.getOrientation());
+            PerceptionMessageTools.packImageMessage(maskImage, compressedImage, CompressionType.PNG, CameraModel.PINHOLE, imageMessage);
             imageMessage.setSequenceNumber(maskImageSequenceNumber++);
-            imageMessage.setDepthDiscretization(-1.0f);
-            imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
-            imageMessage.setPixelFormat(PixelFormat.GRAY8.toByte());
-            imageMessage.setCompressionType(CompressionType.PNG.toByte());
+            MessageTools.toMessage(maskAcquisitionTime, imageMessage.getAcquisitionTime());
             ros2Helper.publish(PerceptionAPI.BALL_SEGMENTATION_IMAGE, imageMessage);
+
+            maskImage.release();
          }
 
          maskMat.close();

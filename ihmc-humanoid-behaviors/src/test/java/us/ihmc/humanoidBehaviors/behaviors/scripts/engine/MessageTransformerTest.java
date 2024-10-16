@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import perception_msgs.msg.dds.VehiclePosePacket;
 import perception_msgs.msg.dds.VideoPacket;
@@ -67,30 +66,6 @@ public class MessageTransformerTest
       }
 
       PelvisHeightTrajectoryMessage actual = new PelvisHeightTrajectoryMessage(original);
-
-      MessageTransformer.transform(actual, transform);
-
-      assertTrue(expected.epsilonEquals(actual, 1.0e-5));
-   }
-
-   @Test
-   public void testQuadrupedBodyHeightMessage()
-   {
-      Random random = new Random(6543);
-
-      QuadrupedBodyHeightMessage original = RandomHumanoidMessages.nextQuadrupedBodyHeightMessage(random);
-
-      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
-      QuadrupedBodyHeightMessage expected = new QuadrupedBodyHeightMessage(original);
-      for (int i = 0; i < expected.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
-      {
-         EuclideanTrajectoryPointMessage trajectoryPoint = expected.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().get(i);
-         trajectoryPoint.getPosition().applyTransform(transform);
-         trajectoryPoint.getLinearVelocity().applyTransform(transform);
-      }
-
-      QuadrupedBodyHeightMessage actual = new QuadrupedBodyHeightMessage(original);
 
       MessageTransformer.transform(actual, transform);
 
