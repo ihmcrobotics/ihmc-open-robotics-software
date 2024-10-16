@@ -121,8 +121,6 @@ public class RDXBehaviorTreeNodeCreationMenu
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
          }
-
-         ImGui.unindent();
       }
       ImGui.unindent();
       ImGui.spacing();

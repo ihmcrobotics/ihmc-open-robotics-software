@@ -123,6 +123,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -2644,7 +2645,7 @@ public class HumanoidMessageTools
 
    public static FrameConvexPolygon2D unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
    {
-      if (robotSide == RobotSide.LEFT && capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0)
+      if (robotSide == RobotSide.LEFT && !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty())
          return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(),
                                          Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon3d()));
       else if (capturabilityBasedStatus.getRightFootSupportPolygon3d() != null)
@@ -2656,15 +2657,36 @@ public class HumanoidMessageTools
 
    public static boolean unpackIsInDoubleSupport(CapturabilityBasedStatus capturabilityBasedStatus)
    {
-      return capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() != 0 & capturabilityBasedStatus.getRightFootSupportPolygon3d().size() != 0;
+      return !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty() & !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
    }
 
    public static boolean unpackIsSupportFoot(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotside)
    {
       if (robotside == RobotSide.LEFT)
-         return capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() != 0;
+         return !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
       else
-         return capturabilityBasedStatus.getRightFootSupportPolygon3d().size() != 0;
+         return !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
+   }
+
+   public static boolean isHandLoadBearing(RobotSide robotSide, CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      if (robotSide == RobotSide.LEFT)
+         return !capturabilityBasedStatus.getLeftHandContactPoints().isEmpty();
+      else
+         return !capturabilityBasedStatus.getRightHandContactPoints().isEmpty();
+   }
+
+   public static boolean unpackIsSupportHand(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide, FullHumanoidRobotModel fullRobotModel, FramePoint3DBasics contactPointToPack)
+   {
+      List<Point3D> handContactPointList = robotSide == RobotSide.LEFT ? capturabilityBasedStatus.getLeftHandContactPoints() : capturabilityBasedStatus.getRightHandContactPoints();
+      boolean isLoadBearing = !handContactPointList.isEmpty();
+
+      if (isLoadBearing)
+         contactPointToPack.setIncludingFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handContactPointList.get(0));
+      else
+         contactPointToPack.setToNaN();
+
+      return isLoadBearing;
    }
 
    public static void packManifold(byte[] configurationSpaces, double[] lowerLimits, double[] upperLimits, ReachingManifoldMessage reachingManifoldMessage)
