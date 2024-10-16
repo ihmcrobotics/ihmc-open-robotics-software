@@ -8,6 +8,7 @@ public enum VRTrackedSegmentType
    // TODO Override parameters in robot dependent class
    // Hands defaults are 20 and 1. Reduce the orientation to 0.25 for the nub forearms
    LEFT_HAND("Left Hand", RobotSide.LEFT, -1.0, 1.5),
+//   RIGHT_HAND("Left Hand", RobotSide.RIGHT, -1.0, 1.5),
    RIGHT_HAND("Right Hand", RobotSide.RIGHT, -1.0, -1.0, 0.0, 0.0, 1.5, -1.0, -1.0),
    LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 0.0),
    RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 0.0),
