@@ -7,8 +7,8 @@ import us.ihmc.math.ComplexConjugateMode;
 import us.ihmc.math.EigenvalueDecomposer;
 import us.ihmc.math.SingleRealMode;
 import us.ihmc.math.ComplexNumber;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 
 import java.util.ArrayList;
 

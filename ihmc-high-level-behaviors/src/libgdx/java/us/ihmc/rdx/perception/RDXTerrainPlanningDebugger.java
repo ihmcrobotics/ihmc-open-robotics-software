@@ -29,10 +29,10 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

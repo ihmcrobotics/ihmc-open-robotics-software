@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
+import us.ihmc.commons.robotics.outputData.JointDesiredControlMode;
+
 /**
  * Parameter class that defines desired joint behavior.
  * <p>

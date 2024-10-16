@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.functionGenerator;
 
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class BaseFunctionGenerator

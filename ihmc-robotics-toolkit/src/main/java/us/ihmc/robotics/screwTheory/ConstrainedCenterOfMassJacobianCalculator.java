@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import us.ihmc.mecano.DynamicallyConsistentNullspaceCalculator;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -20,7 +21,7 @@ public class ConstrainedCenterOfMassJacobianCalculator
 
    public ConstrainedCenterOfMassJacobianCalculator(FloatingJointBasics rootJoint)
    {
-      this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint, true);
+      this.dynamicallyConsistentNullspaceCalculator = new DynamicallyConsistentNullspaceCalculator(rootJoint, true);
       this.centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getSuccessor(), rootJoint.getSuccessor().getBodyFixedFrame());
    }
 

@@ -10,7 +10,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.commons.math.QuaternionCalculus;
 
 public class RobotJointVelocityAccelerationIntegrator
 {

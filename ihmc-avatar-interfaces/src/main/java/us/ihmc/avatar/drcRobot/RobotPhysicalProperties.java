@@ -1,7 +1,7 @@
 package us.ihmc.avatar.drcRobot;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public interface RobotPhysicalProperties
 {

@@ -6,16 +6,15 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.time.TimeIntervalProvider;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
-import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.commons.time.TimeIntervalProvider;
+import us.ihmc.commons.time.TimeIntervalReadOnly;
+import us.ihmc.commons.time.TimeIntervalTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 

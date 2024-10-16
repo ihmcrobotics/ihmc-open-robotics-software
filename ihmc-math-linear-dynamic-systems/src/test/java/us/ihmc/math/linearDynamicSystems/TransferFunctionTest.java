@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.commons.trajectories.core.Polynomial;
 
 import static org.junit.jupiter.api.Assertions.*;
 

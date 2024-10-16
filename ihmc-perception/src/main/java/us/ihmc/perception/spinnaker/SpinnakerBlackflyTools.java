@@ -4,7 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;

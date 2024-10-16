@@ -15,6 +15,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.12.2")
    api("org.ejml:ejml-ddense:0.39")
+   api("us.ihmc:ihmc-commons-utils:source")
 }
 
 testDependencies {

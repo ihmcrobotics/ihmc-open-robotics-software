@@ -2,7 +2,7 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
 
 public class PlanAgainTransitionCondition implements StateTransitionCondition
 {

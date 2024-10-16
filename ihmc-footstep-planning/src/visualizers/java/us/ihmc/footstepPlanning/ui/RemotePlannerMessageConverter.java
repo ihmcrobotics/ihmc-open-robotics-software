@@ -17,7 +17,7 @@ import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class RemotePlannerMessageConverter

@@ -15,7 +15,7 @@ import us.ihmc.mecano.yoVariables.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;

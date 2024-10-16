@@ -33,7 +33,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.EuclidGeometryMissingTools;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 public class PlanarRegionSLAMTools
 {

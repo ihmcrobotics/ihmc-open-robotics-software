@@ -2,7 +2,7 @@ package us.ihmc.atlas.diagnostic;
 
 import static us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters.configureBehavior;
 import static us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters.configureSymmetricBehavior;
-import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
+import static us.ihmc.commons.robotics.outputData.JointDesiredControlMode.EFFORT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,11 +12,11 @@ import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;

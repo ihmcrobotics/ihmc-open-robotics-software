@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.buildingPendulum;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class BuildingPendulumController extends SimpleRobotController

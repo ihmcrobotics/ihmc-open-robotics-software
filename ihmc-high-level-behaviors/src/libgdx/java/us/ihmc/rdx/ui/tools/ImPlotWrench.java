@@ -5,8 +5,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.rdx.imgui.ImPlotPlotPanel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class ImPlotWrench
 {

@@ -30,7 +30,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredTuple2D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;

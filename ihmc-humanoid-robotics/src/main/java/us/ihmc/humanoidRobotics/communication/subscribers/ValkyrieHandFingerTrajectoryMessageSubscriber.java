@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
 
 public class ValkyrieHandFingerTrajectoryMessageSubscriber implements NewMessageListener<ValkyrieHandFingerTrajectoryMessage>

@@ -40,7 +40,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygon2dTestHelpers;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 public class ClusterToolsTest
 {

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.core;
 
+import us.ihmc.commons.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.abstracts.AbstractPolynomial3D;
 
 import java.util.Arrays;
