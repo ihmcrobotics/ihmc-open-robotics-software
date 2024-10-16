@@ -139,7 +139,7 @@ public class ReferencedAStarFootStepPlannerTest
       else
       {
          // Again, don't really need this in the test case
-         LogTools.warn("index of step to perturb is out of bounds !");
+         LogTools.warn("index of step to adjust is out of bounds !");
          return null;
       }
    }
