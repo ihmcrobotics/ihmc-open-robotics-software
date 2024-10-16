@@ -1,6 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public interface RobotVersion
 {

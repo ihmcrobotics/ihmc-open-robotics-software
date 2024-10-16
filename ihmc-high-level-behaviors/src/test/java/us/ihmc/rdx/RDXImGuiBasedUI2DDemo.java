@@ -6,7 +6,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.ui.RDXBaseUI2D;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 import java.time.LocalDateTime;
 

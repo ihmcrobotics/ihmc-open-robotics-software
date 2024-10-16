@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.mecano.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.PointJacobian;
 
 public class ForcePolytopeCalculator

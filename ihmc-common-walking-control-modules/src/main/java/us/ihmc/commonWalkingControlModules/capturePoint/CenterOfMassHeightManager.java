@@ -18,11 +18,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.BooleanParameter;

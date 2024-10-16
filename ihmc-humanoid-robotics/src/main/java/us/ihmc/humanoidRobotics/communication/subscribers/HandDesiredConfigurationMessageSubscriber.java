@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
 
 public class HandDesiredConfigurationMessageSubscriber implements NewMessageListener<HandDesiredConfigurationMessage>

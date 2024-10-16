@@ -2,7 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class FMSPeterPlanarWalkerController implements RobotController

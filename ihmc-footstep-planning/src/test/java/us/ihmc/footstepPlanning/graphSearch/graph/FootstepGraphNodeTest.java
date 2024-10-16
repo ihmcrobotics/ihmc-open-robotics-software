@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 

@@ -2,8 +2,8 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.HashMap;
 import java.util.function.ToDoubleFunction;

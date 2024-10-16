@@ -17,7 +17,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;

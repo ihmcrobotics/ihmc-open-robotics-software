@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 
 public class PolynomialSplineTest
 {

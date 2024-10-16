@@ -5,7 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 /**
  * Represents a list of footsteps that should only be modified by one actor type

@@ -16,8 +16,8 @@ mainDependencies {
    api("us.ihmc:mecano:17-0.18.1")
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:ihmc-commons-utils:source")
-   api("us.ihmc:ihmc-yovariables:0.12.2")
    api("net.sf.trove4j:trove4j:3.0.3")
+   api("com.google.guava:guava:18.0")
 }
 
 testDependencies {

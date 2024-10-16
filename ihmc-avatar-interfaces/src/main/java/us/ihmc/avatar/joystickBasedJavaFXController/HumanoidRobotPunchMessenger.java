@@ -1,6 +1,6 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public interface HumanoidRobotPunchMessenger
 {

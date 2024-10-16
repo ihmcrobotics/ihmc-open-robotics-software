@@ -7,8 +7,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class PosePlaybackExampleSequence
 {

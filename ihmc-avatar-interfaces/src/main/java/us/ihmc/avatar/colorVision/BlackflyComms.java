@@ -3,7 +3,7 @@ package us.ihmc.avatar.colorVision;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 
 public class BlackflyComms

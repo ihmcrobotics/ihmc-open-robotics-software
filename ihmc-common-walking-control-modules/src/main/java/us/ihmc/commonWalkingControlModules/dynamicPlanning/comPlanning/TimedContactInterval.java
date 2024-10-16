@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.commons.time.TimeIntervalProvider;
 
 public class TimedContactInterval implements TimeIntervalProvider
 {

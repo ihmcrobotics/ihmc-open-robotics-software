@@ -2,8 +2,8 @@ package us.ihmc.atlas;
 
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.atlas.ros.ROSSandiaJointMap;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 

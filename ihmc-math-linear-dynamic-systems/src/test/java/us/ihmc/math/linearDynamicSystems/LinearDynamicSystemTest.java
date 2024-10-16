@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.math.ComplexMatrix;
 import us.ihmc.math.ComplexNumber;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 
 import static org.junit.jupiter.api.Assertions.*;
 

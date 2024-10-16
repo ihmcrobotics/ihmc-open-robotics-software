@@ -13,7 +13,7 @@ import us.ihmc.euclid.shape.primitives.Ramp3D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
 
 import java.util.Stack;
 

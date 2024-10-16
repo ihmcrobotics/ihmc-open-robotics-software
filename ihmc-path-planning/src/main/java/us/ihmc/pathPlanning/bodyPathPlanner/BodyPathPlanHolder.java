@@ -5,21 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.commons.AngleTools;
 
 public interface BodyPathPlanHolder
 {

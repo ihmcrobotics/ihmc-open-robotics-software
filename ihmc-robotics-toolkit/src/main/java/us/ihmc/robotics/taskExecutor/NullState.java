@@ -1,6 +1,6 @@
 package us.ihmc.robotics.taskExecutor;
 
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 
 public class NullState implements State
 {

@@ -7,9 +7,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSextant;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotQuadrant;
+import us.ihmc.commons.robotics.robotSide.RobotSextant;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 
 import java.lang.reflect.InvocationTargetException;

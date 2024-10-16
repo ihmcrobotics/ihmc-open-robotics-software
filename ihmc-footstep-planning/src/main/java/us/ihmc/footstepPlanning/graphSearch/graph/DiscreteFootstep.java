@@ -3,10 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class DiscreteFootstep

@@ -7,7 +7,7 @@ import us.ihmc.exampleSimulations.m2.ContactPointName;
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -9,7 +9,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.behaviors.tools.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

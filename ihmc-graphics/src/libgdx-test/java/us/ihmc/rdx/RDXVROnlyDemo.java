@@ -3,7 +3,7 @@ package us.ihmc.rdx;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRApplication;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class RDXVROnlyDemo
 {

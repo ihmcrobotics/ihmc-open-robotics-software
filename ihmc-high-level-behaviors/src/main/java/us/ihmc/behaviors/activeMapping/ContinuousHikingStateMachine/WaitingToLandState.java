@@ -9,7 +9,7 @@ import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Topic;
 
 public class WaitingToLandState implements State

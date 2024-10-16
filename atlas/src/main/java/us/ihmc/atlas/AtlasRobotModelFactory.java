@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasRobotModelFactory

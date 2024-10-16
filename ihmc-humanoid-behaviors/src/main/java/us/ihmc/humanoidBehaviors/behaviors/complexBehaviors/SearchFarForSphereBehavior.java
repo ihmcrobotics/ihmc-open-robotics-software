@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavi
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 

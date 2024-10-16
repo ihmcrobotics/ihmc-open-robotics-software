@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.simulationStarter.AvatarSimulationToolsSCS2;
 import us.ihmc.avatar.simulationStarter.AvatarSimulationToolsSCS2.AvatarSimulationEnvironment;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;

@@ -2,11 +2,11 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotDescription.collisionMeshDefinitionData.BoxCollisionMeshDefinitionData;
 import us.ihmc.robotics.robotDescription.collisionMeshDefinitionData.CollisionMeshDefinitionData;
 import us.ihmc.robotics.robotDescription.collisionMeshDefinitionData.CollisionMeshDefinitionDataHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class AtlasCollisionMeshDefinitionDataHolder extends CollisionMeshDefinitionDataHolder
 {

@@ -2,7 +2,7 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
 
 import java.util.concurrent.atomic.AtomicReference;
 

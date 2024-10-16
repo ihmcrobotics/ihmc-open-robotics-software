@@ -20,8 +20,8 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 

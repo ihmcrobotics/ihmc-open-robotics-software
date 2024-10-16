@@ -15,7 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.wholeBodyControlCore.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
 
 /**
  * Used with {@link KinematicsSimulationVirtualGroundReactionManager}.

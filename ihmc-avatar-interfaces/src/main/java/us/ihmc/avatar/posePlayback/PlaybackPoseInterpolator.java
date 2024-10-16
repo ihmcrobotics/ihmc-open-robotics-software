@@ -4,7 +4,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 
 public class PlaybackPoseInterpolator
 {

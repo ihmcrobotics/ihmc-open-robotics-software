@@ -1,5 +1,6 @@
 package us.ihmc.yoVariables.filters;
 
+import us.ihmc.commons.DeadbandTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 
 public interface PelvisOrientationControlState extends State
 {

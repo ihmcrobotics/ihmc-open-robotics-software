@@ -5,7 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.StringTools;
 
 /**
  * Command corresponds to the operator changing a parameter in the UI.

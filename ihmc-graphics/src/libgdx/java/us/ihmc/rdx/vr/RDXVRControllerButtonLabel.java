@@ -10,7 +10,7 @@ import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class RDXVRControllerButtonLabel
 {

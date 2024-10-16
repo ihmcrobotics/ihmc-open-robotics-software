@@ -6,7 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

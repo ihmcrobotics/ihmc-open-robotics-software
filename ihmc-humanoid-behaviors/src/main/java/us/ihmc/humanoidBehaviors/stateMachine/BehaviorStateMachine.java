@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.core.StateMachine;
 
 public class BehaviorStateMachine<E extends Enum<E>>
 {

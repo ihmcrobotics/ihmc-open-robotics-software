@@ -1,5 +1,6 @@
 package us.ihmc.yoVariables.filters;
 
+import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;

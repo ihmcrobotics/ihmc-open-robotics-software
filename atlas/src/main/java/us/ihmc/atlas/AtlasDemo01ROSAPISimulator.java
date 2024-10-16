@@ -20,7 +20,7 @@ import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;

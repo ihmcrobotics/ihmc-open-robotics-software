@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class RDX3DPanelHandWrenchIndicatorSide
 {

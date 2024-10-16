@@ -4,7 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.function.Supplier;

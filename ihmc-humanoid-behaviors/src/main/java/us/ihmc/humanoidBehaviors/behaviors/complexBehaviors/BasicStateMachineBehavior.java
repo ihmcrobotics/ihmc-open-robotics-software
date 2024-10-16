@@ -10,8 +10,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 

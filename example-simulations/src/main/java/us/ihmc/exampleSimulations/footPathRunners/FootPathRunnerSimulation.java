@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.footPathRunners;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 

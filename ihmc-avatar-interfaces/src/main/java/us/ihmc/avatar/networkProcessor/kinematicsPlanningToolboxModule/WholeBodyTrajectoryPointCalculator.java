@@ -15,7 +15,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
 /**

@@ -3,8 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.commons.time.TimeIntervalBasics;
 
 public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeIntervalMessage>
 {

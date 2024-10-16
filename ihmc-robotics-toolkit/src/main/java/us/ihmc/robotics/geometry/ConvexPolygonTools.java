@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.List;
-import java.util.PriorityQueue;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
@@ -31,7 +30,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
 {

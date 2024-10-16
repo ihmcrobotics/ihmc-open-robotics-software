@@ -18,9 +18,9 @@ import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInt
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;

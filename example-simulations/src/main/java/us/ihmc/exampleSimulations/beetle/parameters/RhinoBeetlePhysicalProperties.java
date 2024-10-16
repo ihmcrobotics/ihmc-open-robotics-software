@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.robotSide.RobotSextant;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSextant;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
 
 public class RhinoBeetlePhysicalProperties
 {
