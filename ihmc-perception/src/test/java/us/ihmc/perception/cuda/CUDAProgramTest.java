@@ -5,11 +5,13 @@ import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.cuda.dataTypes.CUDAInteger;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static org.bytedeco.cuda.global.cudart.add;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -90,7 +92,9 @@ public class CUDAProgramTest
       CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
 
       // Load the kernel
-      additionProgram.loadKernel("add");
+      CUDAKernelHandle addKernel = additionProgram.loadKernel("add");
+      addKernel.setGridSize(new dim3(1, 1, 1));
+      addKernel.setBlockSize(new dim3(1, 1, 1));
 
       // Create pointer
       IntPointer sum = new IntPointer(1L);
@@ -98,7 +102,7 @@ public class CUDAProgramTest
       sumPointer.put(sum);
 
       // Run the kernel
-      additionProgram.runKernel(stream, "add", new dim3(1, 1, 1), new dim3(1, 1, 1), 0, sumPointer);
+      additionProgram.runKernel(stream, addKernel, 0, sumPointer);
       cudaStreamSynchronize(stream);
 
       // Ensure we got the correct result!
@@ -129,17 +133,13 @@ public class CUDAProgramTest
       program.loadKernel("subtract");
 
       // Create pointer
-      IntPointer sum = new IntPointer(1L);
-      PointerPointer<IntPointer> sumPointer = new PointerPointer<>(1L);
-      sumPointer.put(sum);
+      CUDAInteger sum = new CUDAInteger(1L);
 
-      IntPointer difference = new IntPointer(1L);
-      PointerPointer<IntPointer> differencePointer = new PointerPointer<>(1L);
-      differencePointer.put(difference);
+      CUDAInteger difference = new CUDAInteger(1L);
 
       // Run the kernels
-      program.runKernel(stream, "add", new dim3(), new dim3(), 0, sumPointer);
-      program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, differencePointer);
+      program.runKernel(stream, "add", new dim3(), new dim3(), 0, sum);
+      program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, difference);
       cudaStreamSynchronize(stream);
 
       // Ensure we got the correct result!
@@ -148,9 +148,7 @@ public class CUDAProgramTest
 
       // Free memory
       sum.close();
-      sumPointer.close();
       difference.close();
-      differencePointer.close();
 
       program.destroy();
 
