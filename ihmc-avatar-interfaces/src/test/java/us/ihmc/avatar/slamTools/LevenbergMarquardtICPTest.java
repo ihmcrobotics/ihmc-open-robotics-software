@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import rosgraph_msgs.Log;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -34,8 +35,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class LevenbergMarquardtICPTest
 {
-   private boolean visualize = true;
-   private boolean runDrawer = true;
+   private boolean visualize = false;
+   private boolean runDrawer = false;
 
    private XYPlaneDrawer drawer;
    private JFrame frame;
@@ -410,18 +411,21 @@ public class LevenbergMarquardtICPTest
       purterbationVector.set(1, 0.00001);
       purterbationVector.set(2, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
-      boolean isSolved = false;
+      optimizer.initialize();
+      boolean converged = false;
       for (int i = 0; i < 30; i++)
       {
          optimizer.iterate();
+         LogTools.info("Optimizer iteration {} resulted in {} quality", i, optimizer.getQuality());
+
          if (optimizer.getQuality() < 0.4)
          {
-            isSolved = true;
+            LogTools.info("Found convergence on iteration {}", i);
+            converged = true;
             break;
          }
-         System.out.println(i + " " + optimizer.getQuality());
       }
-      LogTools.info("Found solution? {}. Converged in {} iterations with {} quality", isSolved, optimizer.getIteration(), optimizer.getQuality());
+      LogTools.info("Found solution? {}. Converged in {} iterations with {} quality", converged, optimizer.getIteration(), optimizer.getQuality());
       RigidBodyTransformReadOnly optimalTransform = transformFromMatrixFunction.apply(optimizer.getOptimalParameter());
       LogTools.info("The computed transform is \n" + optimalTransform);
 
