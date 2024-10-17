@@ -68,6 +68,11 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       }
       elapsedTime = time - startTime;
 
+      if (elapsedTime > MAX_TIME)
+      {
+         throw new RuntimeException("Exceeded the maximum time");
+      }
+
       if (!initialPoseHasBeenSet)
       {
          getCurrentTestFramePose(initialPose);
@@ -114,10 +119,8 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
             setShouldBehaviorRunnerBeStopped(true);
          }
       }
-      else if (elapsedTime > MAX_TIME)
-      {
-         throw new RuntimeException("Exceeded the maximum time");
-      }
+
+
       elapsedTimeOld = elapsedTime;
       percentTrajectoryCompletedOld = percentTrajectoryCompleted;
    }
