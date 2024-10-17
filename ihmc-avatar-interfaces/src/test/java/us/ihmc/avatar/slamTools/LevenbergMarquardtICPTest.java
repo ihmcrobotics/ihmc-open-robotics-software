@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import javax.annotation.Nullable;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -41,8 +42,9 @@ import us.ihmc.robotics.optimization.OutputCalculator;
  */
 public class LevenbergMarquardtICPTest
 {
-   private boolean visualize = false;
+   private final boolean visualize = false;
    private XYPlaneDrawer drawer;
+   @Nullable
    private JFrame frame;
 
    private List<Point2D> fullModel = new ArrayList<>();
@@ -59,10 +61,13 @@ public class LevenbergMarquardtICPTest
    private void setupPointCloud()
    {
       drawer = new XYPlaneDrawer(10.0, -10.0, 10.0, -10.0);
-      frame = new JFrame("2D_LM_ICP_TEST");
+      if (visualize)
+      {
+         frame = new JFrame("2D_LM_ICP_TEST");
 
-      frame.setPreferredSize(drawer.getDimension());
-      frame.setLocation(200, 100);
+         frame.setPreferredSize(drawer.getDimension());
+         frame.setLocation(200, 100);
+      }
 
       fullModel.addAll(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
       fullModel.addAll(generatePointsOnEllipsoid(70, Math.toRadians(90.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
