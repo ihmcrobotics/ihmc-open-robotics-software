@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -16,14 +17,13 @@ import java.util.List;
 public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInterface
 {
    private final IdealStepCalculator nominalIdealStepCalculator;
-   private FootstepPlan referenceFootstepPlan;
-   private DirectedGraph<FootstepGraphNode> footstepGraph;
-   private DiscreteFootstep nominalIdealStep;
    private final YoBoolean stepSideIncorrect;
-
    // This will be used to query what reference alpha to use.
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final YoBoolean usingReferenceStep;
+   private FootstepPlan referenceFootstepPlan;
+   private DirectedGraph<FootstepGraphNode> footstepGraph;
+   private DiscreteFootstep nominalIdealStep;
 
    public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                             IdealStepCalculator nominalIdealStepCalculator,
@@ -65,11 +65,11 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       double nominalIdealStepYaw = nominalIdealStep.getYaw();
       double interpolatedYaw = AngleTools.interpolateAngle(nominalIdealStepYaw, referenceFootstep.getFootstepPose().getYaw(), referenceAlpha);
 
-      Point2D interpolatedTranslation = new Point2D(nominalIdealStepX, nominalIdealStepY);
-      Point2D referenceStepTranslation = new Point2D(referenceFootstep.getFootstepPose().getX(), referenceFootstep.getFootstepPose().getY());
-      interpolatedTranslation.interpolate(referenceStepTranslation, referenceAlpha);
-
-      return new DiscreteFootstep(interpolatedTranslation.getX(), interpolatedTranslation.getY(), interpolatedYaw, referenceFootstep.getRobotSide());
+      Pose2D nominalStepPose = new Pose2D(nominalIdealStep.getX(), nominalIdealStep.getY(), nominalIdealStep.getYaw());
+      Pose2D referenceStepPose = new Pose2D(referenceFootstep.getFootstepPose());
+      Pose2D interpolatedPose = new Pose2D(nominalStepPose);
+      interpolatedPose.interpolate(referenceStepPose, referenceAlpha);
+      return new DiscreteFootstep(interpolatedPose.getX(), interpolatedPose.getY(), interpolatedPose.getYaw(), referenceFootstep.getRobotSide());
    }
 
    public void setReferenceFootstepPlan(FootstepPlan referenceFootstepPlan)
