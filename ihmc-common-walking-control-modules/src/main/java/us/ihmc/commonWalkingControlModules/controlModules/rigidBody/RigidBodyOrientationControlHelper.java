@@ -34,6 +34,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -91,6 +92,7 @@ public class RigidBodyOrientationControlHelper
    RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
 
    private final BooleanProvider useBaseFrameForControl;
+   private final YoBoolean isImpedanceEnabled;
 
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
    private final FixedFrameQuaternionBasics controlFrameOrientation;
@@ -115,7 +117,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
-                                            boolean enableImpedanceControl,
+                                            YoBoolean enableImpedanceControl,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -138,7 +140,8 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -306,6 +309,7 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       return done;
    }

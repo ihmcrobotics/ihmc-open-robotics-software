@@ -63,6 +63,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final RigidBodyOrientationControlHelper orientationHelper;
 
    private final YoBoolean hybridModeActive;
+   private final YoBoolean isImpedanceEnabled;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
@@ -75,7 +76,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                   YoDouble yoTime,
                                   RigidBodyJointControlHelper jointControlHelper,
                                   boolean enableFunctionGenerators,
-                                  boolean enableImpedanceControl,
+                                  YoBoolean enableImpedanceControl,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -89,6 +90,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
+
+
       positionHelper = new RigidBodyPositionControlHelper(warningPrefix,
                                                           bodyToControl,
                                                           baseBody,
@@ -123,7 +126,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setSelectionMatrixToIdentity();
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
 
    }
 
@@ -213,6 +217,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
+
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
    }
 
    @Override

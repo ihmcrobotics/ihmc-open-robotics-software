@@ -45,6 +45,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
 
+
    public RigidBodyPositionController(RigidBodyBasics bodyToControl,
                                       RigidBodyBasics baseBody,
                                       RigidBodyBasics elevator,
@@ -52,7 +53,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
                                       ReferenceFrame baseFrame,
                                       YoDouble yoTime,
                                       boolean enableFunctionGenerators,
-                                      boolean enableImpedanceControl,
+                                      YoBoolean enableImpedanceControl,
                                       YoRegistry parentRegistry,
                                       YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -92,6 +93,24 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       hideGraphics();
 
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
+   }
+
+   public RigidBodyPositionController(RigidBodyBasics bodyToControl,
+                                      RigidBodyBasics baseBody,
+                                      RigidBodyBasics elevator,
+                                      ReferenceFrame controlFrame,
+                                      ReferenceFrame baseFrame,
+                                      YoDouble yoTime,
+                                      boolean enableFunctionGenerators,
+                                      boolean enableImpedanceControl,
+                                      YoRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime, enableFunctionGenerators,
+           new YoBoolean(bodyToControl.getName() + "EnableImpedanceControlOrientation", parentRegistry),
+           parentRegistry, graphicsListRegistry);
+      YoBoolean enableImpedanceControlYoBoolean = (YoBoolean) parentRegistry.getVariable(bodyToControl.getName() + "EnableImpedanceControlOrientation");
+      enableImpedanceControlYoBoolean.set(enableImpedanceControl);
    }
 
    public void setGains(PID3DGainsReadOnly gains)

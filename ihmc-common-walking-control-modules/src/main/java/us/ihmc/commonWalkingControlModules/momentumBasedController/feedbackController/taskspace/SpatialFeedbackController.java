@@ -58,7 +58,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoBoolean isEnabled;
-   protected final YoBoolean isImpedanceEnabled;
+   protected boolean isImpedanceEnabled;
 
    protected final FBPose3D yoDesiredPose;
    protected final FBPose3D yoCurrentPose;
@@ -220,8 +220,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
-      isImpedanceEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerImpedanceEnabled", fbToolbox.getRegistry());
-      isImpedanceEnabled.set(false);
+      isImpedanceEnabled = false;
 
       yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", worldFrame, parentRegistry);
       yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", worldFrame, parentRegistry);
@@ -433,7 +432,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    @Override
    public void setImpedanceEnabled(boolean isImpedanceEnabled)
    {
-      this.isImpedanceEnabled.set(isImpedanceEnabled);
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    @Override
@@ -1155,7 +1154,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    @Override
    public boolean isImpedanceEnabled()
    {
-      return isImpedanceEnabled.getBooleanValue();
+      return isImpedanceEnabled;
    }
 
    @Override

@@ -43,6 +43,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -102,6 +103,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    SpatialVector desiredFeedForwardSpatialVector;
 
    private final BooleanProvider useBaseFrameForControl;
+   private final YoBoolean isImpedanceEnabled;
 
    private final RigidBodyTransform previousControlFramePose = new RigidBodyTransform();
    private final RigidBodyTransform controlFramePose = new RigidBodyTransform();
@@ -130,7 +132,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
                                          BooleanProvider useBaseFrameForControl,
                                          BooleanProvider useWeightFromMessage,
                                          boolean enableFunctionGenerators,
-                                         boolean enableImpedanceControl,
+                                         YoBoolean enableImpedanceControl,
                                          DoubleProvider time,
                                          YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
@@ -154,7 +156,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
-      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -363,6 +366,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       if (yoCurrentPosition != null && yoDesiredPosition != null)
       {

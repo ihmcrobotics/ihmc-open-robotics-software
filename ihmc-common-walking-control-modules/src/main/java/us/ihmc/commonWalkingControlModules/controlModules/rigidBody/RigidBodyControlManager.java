@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -64,6 +62,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final String bodyName;
    private final RigidBodyBasics bodyToControl;
    private final YoRegistry registry;
+   private final YoBoolean isImpedanceEnabled;
+
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
    private final EnumParameter<RigidBodyControlMode> defaultControlMode;
@@ -111,6 +111,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
+      this.isImpedanceEnabled = new YoBoolean(namePrefix + "-EnableImpedanceControl", registry);
+      this.isImpedanceEnabled.set(enableImpedanceControl);
 
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
@@ -134,7 +136,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
                                                                                                    enableFunctionGenerators,
-                                                                                                   enableImpedanceControl,
+                                                                                                   this.isImpedanceEnabled,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -143,7 +145,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + enableImpedanceControl + ")");
+         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + this.isImpedanceEnabled + ")");
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
@@ -154,7 +156,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
-                                                                                             enableImpedanceControl,
+                                                                                             this.isImpedanceEnabled,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -176,7 +178,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
-                                                                                     enableImpedanceControl,
+                                                                                     this.isImpedanceEnabled,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
