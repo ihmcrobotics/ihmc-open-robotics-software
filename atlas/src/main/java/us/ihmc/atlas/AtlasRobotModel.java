@@ -533,7 +533,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return sensorSuiteManager;
    }
 
-   @Override
    public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
