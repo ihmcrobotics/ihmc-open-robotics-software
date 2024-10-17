@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -91,11 +92,20 @@ public class KinematicsSolutionQualityCalculator
       return computeQualityFromError(command.getMomentum(), weightMatrix, selectionMatrix) / totalRobotMass;
    }
 
+   FramePose3D controlFramePoseTemp = new FramePose3D();
+
    private double calculateCommandQuality(SpatialVelocityCommand command)
    {
       RigidBodyBasics endEffector = command.getEndEffector();
 
-      controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
+      // FIXME this does not seem to account for when the user request a custom control frame with non-zero position/orientation.
+//      controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
+
+      // This seems that it should be the proper implementation
+      controlFramePoseTemp.setToZero(endEffector.getBodyFixedFrame());
+      controlFramePoseTemp.setMatchingFrame(command.getControlFramePose());
+      controlFramePoseTemp.changeFrame(controlFrame.getParent());
+      controlFrame.setPoseAndUpdate(controlFramePoseTemp);
 
       command.getDesiredAngularVelocity().get(0, error);
       command.getDesiredLinearVelocity().get(3, error);

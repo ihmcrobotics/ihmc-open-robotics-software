@@ -8,11 +8,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
@@ -20,13 +16,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
@@ -57,14 +48,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -93,13 +77,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 
@@ -468,7 +447,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
-      totalRobotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
+      totalRobotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody); // TODO Remove me! Duplicate of robotMass
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
@@ -937,6 +916,7 @@ public class KinematicsToolboxController extends ToolboxController
       currentCenterOfMassGraphic.update();
 
       // Updating the the robot state from the current solution, initializing the next control tick.
+      // TODO Double check, this might need to be executed before computing the solution quality as the solution quality calculator uses the robot state to compute errors used to compute the quality.
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCoreOutput, rootJoint, desiredOneDoFJoints);
       updateVisualization();
 
