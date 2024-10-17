@@ -1,0 +1,26 @@
+#ifndef __controller_msgs__msg__PIDGains__idl__
+#define __controller_msgs__msg__PIDGains__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * this represents the gains for a PID controller
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PIDGains_")
+      struct PIDGains
+      {
+        double kp;
+        double kd;
+        double ki;
+        double zeta;
+      };
+    };
+  };
+};
+
+#endif

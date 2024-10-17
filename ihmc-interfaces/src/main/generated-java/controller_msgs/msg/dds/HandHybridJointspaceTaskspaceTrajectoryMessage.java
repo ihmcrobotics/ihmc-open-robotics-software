@@ -41,12 +41,17 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
             * The feedforward taskspace trajectory information.
             */
    public controller_msgs.msg.dds.WrenchTrajectoryMessage feedforward_taskspace_trajectory_message_;
+   /**
+            * The PIDGains for the taskspace controller.
+            */
+   public controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage taskspace_pid_gains_;
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {
       taskspace_trajectory_message_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
       feedforward_taskspace_trajectory_message_ = new controller_msgs.msg.dds.WrenchTrajectoryMessage();
+      taskspace_pid_gains_ = new controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage();
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage other)
@@ -66,6 +71,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
       controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.staticCopy(other.feedforward_taskspace_trajectory_message_, feedforward_taskspace_trajectory_message_);
+      controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.staticCopy(other.taskspace_pid_gains_, taskspace_pid_gains_);
    }
 
    /**
@@ -144,6 +150,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    }
 
 
+   /**
+            * The PIDGains for the taskspace controller.
+            */
+   public controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage getTaskspacePidGains()
+   {
+      return taskspace_pid_gains_;
+   }
+
+
    public static Supplier<HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType> getPubSubType()
    {
       return HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType::new;
@@ -170,6 +185,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       if (!this.taskspace_trajectory_message_.epsilonEquals(other.taskspace_trajectory_message_, epsilon)) return false;
       if (!this.jointspace_trajectory_message_.epsilonEquals(other.jointspace_trajectory_message_, epsilon)) return false;
       if (!this.feedforward_taskspace_trajectory_message_.epsilonEquals(other.feedforward_taskspace_trajectory_message_, epsilon)) return false;
+      if (!this.taskspace_pid_gains_.epsilonEquals(other.taskspace_pid_gains_, epsilon)) return false;
 
       return true;
    }
@@ -192,6 +208,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       if (!this.taskspace_trajectory_message_.equals(otherMyClass.taskspace_trajectory_message_)) return false;
       if (!this.jointspace_trajectory_message_.equals(otherMyClass.jointspace_trajectory_message_)) return false;
       if (!this.feedforward_taskspace_trajectory_message_.equals(otherMyClass.feedforward_taskspace_trajectory_message_)) return false;
+      if (!this.taskspace_pid_gains_.equals(otherMyClass.taskspace_pid_gains_)) return false;
 
       return true;
    }
@@ -213,7 +230,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       builder.append("jointspace_trajectory_message=");
       builder.append(this.jointspace_trajectory_message_);      builder.append(", ");
       builder.append("feedforward_taskspace_trajectory_message=");
-      builder.append(this.feedforward_taskspace_trajectory_message_);
+      builder.append(this.feedforward_taskspace_trajectory_message_);      builder.append(", ");
+      builder.append("taskspace_pid_gains=");
+      builder.append(this.taskspace_pid_gains_);
       builder.append("}");
       return builder.toString();
    }

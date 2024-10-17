@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.referenceSpreading;
 
 import controller_msgs.msg.dds.SpatialVectorMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence.Float;
@@ -30,6 +31,7 @@ public class ReferenceSpreader
    private final String baseFinalPath;
 
    private final FullHumanoidRobotModel fullRobotModel;
+   private final DRCRobotModel robotModel;
 
    private final TrajectoryRecordReplay originalReference;
    private final TrajectoryRecordReplay preImpactReference;
@@ -56,13 +58,18 @@ public class ReferenceSpreader
    private final Quaternion rotationIntegrated = new Quaternion();
    private final Quaternion rotation = new Quaternion();
 
-   private double excludeInterval;
+   private final Quaternion preRotation = new Quaternion();
+   private final Quaternion postRotation = new Quaternion();
 
-   ReferenceSpreader(String filePath, Double excludeInterval, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
+   private double excludeInterval;
+   private double blendInterval;
+
+   ReferenceSpreader(String filePath, Double excludeInterval, Double blendInterval, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
    {
       this.registry = registry;
       this.baseFinalPath = filePath.replace(".csv", "");
       this.fullRobotModel = fullRobotModel;
+      this.robotModel = robotModel;
 
       this.originalReference = new TrajectoryRecordReplay(filePath, 1, true);
       this.preImpactReference = new TrajectoryRecordReplay(filePath+"_pre.csv", 1, false);
@@ -73,6 +80,7 @@ public class ReferenceSpreader
 
       this.collisionDetection = collisionDetection;
       this.excludeInterval = excludeInterval;
+      this.blendInterval = blendInterval;
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
@@ -155,7 +163,6 @@ public class ReferenceSpreader
             }
 
             makeMap(preImpactData, tempFrame);
-            LogTools.info("tempFrame time: " + tempFrame.get("time[sec]") + " Current time " + currentFrame.get("time[sec]"));
             tempFrame.put("time[sec]", currentFrame.get("time[sec]"));
             timeDiff = currentFrame.get("time[sec]") - impactTime;
             for (RobotSide robotSide : RobotSide.values())
@@ -216,7 +223,6 @@ public class ReferenceSpreader
          else
          {
             makeMap(postImpactData, tempFrame);
-            LogTools.info("tempFrame time: " + tempFrame.get("time[sec]") + " Current time " + currentFrame.get("time[sec]"));
             tempFrame.put("time[sec]", currentFrame.get("time[sec]"));
             timeDiff = currentFrame.get("time[sec]") - impactTime;
             for (RobotSide robotSide : RobotSide.values())
@@ -258,24 +264,118 @@ public class ReferenceSpreader
       LogTools.info("PostImpact trajectory extended (Saved to Memory)");
    }
 
+   public void blendImpactTrajectory(double impactTime)
+   {
+      this.impactTime = impactTime;
+
+      preImpactReference.reset();
+      postImpactReference.reset();
+      preImpactReference.play(false);
+      postImpactReference.play(false);
+
+      double[] preImpactValues;
+      double[] postImpactValues;
+      double blendFactor = 0.0;
+
+      while (!preImpactReference.hasDoneReplay())
+      {
+         preImpactValues = preImpactReference.play(false);
+         postImpactValues = postImpactReference.play(false);
+         if (preImpactValues == null || postImpactValues == null)
+         {
+            break;
+         }
+         makeMap(postImpactValues, currentFrame);
+
+         if(currentFrame.get("time[sec]") >= impactTime && currentFrame.get("time[sec]") < impactTime + blendInterval)
+         {
+            blendFactor = (currentFrame.get("time[sec]") - impactTime) / blendInterval;
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               for (String jointName : JOINT_NAMES)
+               {
+                  currentFrame.put("q_" + robotSide.getUpperCaseName() + "_" + jointName,
+                                preImpactValues[getKeyIndex("q_" + robotSide.getUpperCaseName() + "_" + jointName)] * (1 - blendFactor)
+                                + postImpactValues[getKeyIndex("q_" + robotSide.getUpperCaseName() + "_" + jointName)] * blendFactor);
+               }
+
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX")] * blendFactor);
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY")] * blendFactor);
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ")] * blendFactor);
+
+               preRotation.set(preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs")]);
+               postRotation.set(postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs")]);
+               quaternionCalculus.interpolate(blendFactor,preRotation, postRotation, rotation);
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx", rotation.getX());
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy", rotation.getY());
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz", rotation.getZ());
+               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs", rotation.getS());
+
+               currentFrame.put("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps())] * blendFactor);
+               currentFrame.put("filteredWrenchLinearPartY"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchLinearPartY"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchLinearPartY"+robotSide.getSideNameInAllCaps())] * blendFactor);
+               currentFrame.put("filteredWrenchLinearPartZ"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchLinearPartZ"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchLinearPartZ"+robotSide.getSideNameInAllCaps())] * blendFactor);
+               currentFrame.put("filteredWrenchAngularPartX"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchAngularPartX"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchAngularPartX"+robotSide.getSideNameInAllCaps())] * blendFactor);
+               currentFrame.put("filteredWrenchAngularPartY"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchAngularPartY"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchAngularPartY"+robotSide.getSideNameInAllCaps())] * blendFactor);
+               currentFrame.put("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps(),
+                                 preImpactValues[getKeyIndex("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps())] * blendFactor);
+            }
+            blendedImpactReference.record(currentFrame.values().stream().mapToDouble(Double::doubleValue).toArray());
+         }
+         else if (currentFrame.get("time[sec]") >= impactTime)
+         {
+            blendedImpactReference.record(postImpactValues);
+         }
+      }
+      blendedImpactReference.saveRecordingMemory();
+      LogTools.info("BlendedImpact trajectory extended (Saved to Memory)");
+   }
+
    public ReferenceSpreadingTrajectory getOriginalReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(originalReference, keyMatrix, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(originalReference, keyMatrix, robotModel, fullRobotModel, registry);
    }
 
    public ReferenceSpreadingTrajectory getPreImpactReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(preImpactReference, keyMatrix, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(preImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
    }
 
    public ReferenceSpreadingTrajectory getPostImpactReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(postImpactReference, keyMatrix, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(postImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
    }
 
-   public ReferenceSpreadingTrajectory getBlendedImpactReferenceTrajectory()
+   public ReferenceSpreadingTrajectory getBlendedReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(blendedImpactReference, keyMatrix, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(blendedImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
+   }
+
+   private int getKeyIndex(String key)
+   {
+      return keyMatrix.indexOf(key);
    }
 
    private void makeMap(double[] values, LinkedHashMap<String, Double> mapToPack)

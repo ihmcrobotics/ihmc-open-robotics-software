@@ -3,11 +3,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.Random;
 
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import controller_msgs.msg.dds.WrenchTrajectoryMessage;
-import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -22,7 +18,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
    private final WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand = new WrenchTrajectoryControllerCommand();
-
+   private final SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand = new SE3PIDGainsTrajectoryControllerCommand();
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -39,6 +35,17 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
+                                                         SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand)
+   {
+      this.robotSide = robotSide;
+      this.setForceExecution(forceExecution);
+      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+      this.pidGainsTrajectoryCommand.set(pidGainsTrajectoryCommand);
+   }
+
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
+                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
                                                          WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand)
    {
       this.robotSide = robotSide;
@@ -46,6 +53,19 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
       this.feedForwardTrajectoryCommand.set(feedForwardTrajectoryCommand);
+   }
+
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
+                                                         JointspaceTrajectoryCommand jointspaceTrajectoryCommand,
+                                                         WrenchTrajectoryControllerCommand feedForwardTrajectoryCommand,
+                                                         SE3PIDGainsTrajectoryControllerCommand pidGainsTrajectoryCommand)
+   {
+      this.robotSide = robotSide;
+      this.setForceExecution(forceExecution);
+      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+      this.feedForwardTrajectoryCommand.set(feedForwardTrajectoryCommand);
+      this.pidGainsTrajectoryCommand.set(pidGainsTrajectoryCommand);
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
@@ -69,6 +89,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
       feedForwardTrajectoryCommand.clear();
+      pidGainsTrajectoryCommand.clear();
    }
 
    @Override
@@ -86,13 +107,14 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
       feedForwardTrajectoryCommand.set(resolver, message.getFeedforwardTaskspaceTrajectoryMessage());
+      pidGainsTrajectoryCommand.setFromMessage(message.getTaskspacePidGains());
    }
 
    @Override
    public boolean isCommandValid()
    {
       return robotSide != null && jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid()
-             && feedForwardTrajectoryCommand.isCommandValid();
+             && feedForwardTrajectoryCommand.isCommandValid() && pidGainsTrajectoryCommand.isCommandValid();
    }
 
    @Override
@@ -104,6 +126,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
       feedForwardTrajectoryCommand.set(other.getFeedForwardTrajectoryCommand());
+      pidGainsTrajectoryCommand.set(other.getPIDGainsTrajectoryCommand());
    }
 
    public RobotSide getRobotSide()
@@ -134,6 +157,11 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    public WrenchTrajectoryControllerCommand getFeedForwardTrajectoryCommand()
    {
       return feedForwardTrajectoryCommand;
+   }
+
+   public SE3PIDGainsTrajectoryControllerCommand getPIDGainsTrajectoryCommand()
+   {
+      return pidGainsTrajectoryCommand;
    }
 
    @Override

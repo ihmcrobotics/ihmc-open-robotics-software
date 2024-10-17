@@ -263,6 +263,13 @@ public class ParameterizedPID3DGains implements PID3DGainsReadOnly
       return tempIntegralGains;
    }
 
+   @Override
+   public double[] getDampingRatios()
+   {
+      fillFromMap(zetaMap, tempProportionalGains);
+      return tempProportionalGains;
+   }
+
    private static void fillFromMap(Map<Axis3D, DoubleParameter> map, double[] arrayToFill)
    {
       arrayToFill[0] = map.get(Axis3D.X).getValue();

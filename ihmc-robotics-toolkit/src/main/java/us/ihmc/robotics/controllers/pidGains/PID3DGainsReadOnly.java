@@ -35,6 +35,14 @@ public interface PID3DGainsReadOnly
    public abstract double[] getIntegralGains();
 
    /**
+    * Returns the derivative damping ratio for all three dimensions. The returned
+    * array is of length three.
+    *
+    * @return the derivative damping ratio as double array.
+    */
+   public abstract double[] getDampingRatios();
+
+   /**
     * Returns the maximum integral error allowed by the PID controller
     *
     * @return the maximum integral error.

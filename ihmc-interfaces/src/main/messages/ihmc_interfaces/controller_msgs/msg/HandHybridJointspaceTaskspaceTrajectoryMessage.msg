@@ -21,3 +21,5 @@ ihmc_common_msgs/SE3TrajectoryMessage taskspace_trajectory_message
 JointspaceTrajectoryMessage jointspace_trajectory_message
 # The feedforward taskspace trajectory information.
 WrenchTrajectoryMessage feedforward_taskspace_trajectory_message
+# The PIDGains for the taskspace controller.
+SE3PIDGainsTrajectoryMessage taskspace_pid_gains

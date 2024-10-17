@@ -15,7 +15,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5d8bc7a76ed1c1a32252fd99a707541b07dcddb2543404d9902df407b944d3af";
+   		return "8bda6ed1a3f257f885969da69d607dde8787f11cd3f127c25696ddf89f9dcf5b";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
       current_alignment += controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +94,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
       current_alignment += controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.getCdrSerializedSize(data.getFeedforwardTaskspaceTrajectoryMessage(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspacePidGains(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -107,6 +111,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.write(data.getFeedforwardTaskspaceTrajectoryMessage(), cdr);
+      controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.write(data.getTaskspacePidGains(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -120,6 +125,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType.read(data.getFeedforwardTaskspaceTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType.read(data.getTaskspacePidGains(), cdr);	
 
    }
 
@@ -135,6 +141,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
       ser.write_type_a("feedforward_taskspace_trajectory_message", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getFeedforwardTaskspaceTrajectoryMessage());
 
+      ser.write_type_a("taskspace_pid_gains", new controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType(), data.getTaskspacePidGains());
+
    }
 
    @Override
@@ -148,6 +156,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
       ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectoryMessage());
 
       ser.read_type_a("feedforward_taskspace_trajectory_message", new controller_msgs.msg.dds.WrenchTrajectoryMessagePubSubType(), data.getFeedforwardTaskspaceTrajectoryMessage());
+
+      ser.read_type_a("taskspace_pid_gains", new controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessagePubSubType(), data.getTaskspacePidGains());
 
    }
 

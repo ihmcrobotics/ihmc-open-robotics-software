@@ -3,12 +3,15 @@ package us.ihmc.avatar.networkProcessor.referenceSpreading;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PIDGainsTrajectoryMessage;
+import controller_msgs.msg.dds.PIDGainsTrajectoryPointMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -16,6 +19,7 @@ import geometry_msgs.msg.dds.Wrench;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -32,26 +36,32 @@ public class ReferenceSpreadingTrajectory
 {
    protected final YoRegistry registry;
 
-   private static final double INITIAL_TIME_DURATION = 0.5;
+   private static final double INITIAL_TIME_DURATION = 0;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
    private final TrajectoryRecordReplay trajectoryPlayer;
    private String filePath;
    private List<String> keyMatrix = new ArrayList<>();
-   FullHumanoidRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
+   DRCRobotModel robotModel;
 
-   ReferenceSpreadingTrajectory(TrajectoryRecordReplay trajectoryPlayer, List<String> keyMatrix, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+
+   private Double startTimeCSV = null;
+
+   ReferenceSpreadingTrajectory(TrajectoryRecordReplay trajectoryPlayer, List<String> keyMatrix, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       this.trajectoryPlayer = trajectoryPlayer;
       this.keyMatrix = keyMatrix;
       this.fullRobotModel = fullRobotModel;
+      this.robotModel = robotModel;
       this.registry = registry;
    }
 
-   ReferenceSpreadingTrajectory(String filePath, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+   ReferenceSpreadingTrajectory(String filePath, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.robotModel = robotModel;
       this.filePath = filePath;
       this.registry = registry;
 
@@ -63,6 +73,8 @@ public class ReferenceSpreadingTrajectory
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide)
    {
+
+      LogTools.info("Test: "+ robotModel.getWalkingControllerParameters());
 //      trajectoryPlayer.reset();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
       se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
@@ -90,10 +102,16 @@ public class ReferenceSpreadingTrajectory
       WrenchTrajectoryPointMessage wrenchTrajectoryPointMessage = new WrenchTrajectoryPointMessage();
       Wrench desiredFeedForwardWrench = new Wrench();
 
+      PIDGainsTrajectoryMessage pidGainsTrajectoryMessage = new PIDGainsTrajectoryMessage();
+      PIDGainsTrajectoryPointMessage pidGainsTrajectoryPointMessage = new PIDGainsTrajectoryPointMessage();
+      PIDGains linearGains = robotModel.getWalkingControllerParameters().getLinearGains();
+      PIDGains angularGains = robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains();
+
+
       HashMap<String, Double> currentFrame = new HashMap<>();
       trajectoryPlayer.reset();
       makeMap(trajectoryPlayer.play(false), currentFrame);
-      double startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
+      startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
@@ -167,6 +185,18 @@ public class ReferenceSpreadingTrajectory
       handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
       handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
       return handHybridTrajectoryMessage;
+   }
+
+   public double getStartTimeCSV()
+   {
+      if (startTimeCSV == null)
+      {
+         HashMap<String, Double> currentFrame = new HashMap<>();
+         trajectoryPlayer.reset();
+         makeMap(trajectoryPlayer.play(false), currentFrame);
+         startTimeCSV = currentFrame.get("time[sec]");
+      }
+      return startTimeCSV;
    }
 
    private void makeMap(double[] values, HashMap<String, Double> mapToPack)

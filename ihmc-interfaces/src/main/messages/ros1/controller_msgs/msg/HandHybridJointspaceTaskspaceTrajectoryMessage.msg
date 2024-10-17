@@ -27,4 +27,7 @@ controller_msgs/JointspaceTrajectoryMessage jointspace_trajectory_message
 # The feedforward taskspace trajectory information.
 controller_msgs/WrenchTrajectoryMessage feedforward_taskspace_trajectory_message
 
+# The PIDGains for the taskspace controller.
+controller_msgs/SE3PIDGainsTrajectoryMessage taskspace_pid_gains
+
 

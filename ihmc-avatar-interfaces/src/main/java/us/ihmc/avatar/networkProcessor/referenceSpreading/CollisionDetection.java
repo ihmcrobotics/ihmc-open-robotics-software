@@ -95,7 +95,7 @@ public class CollisionDetection
 
          sigmaDot.get(robotSide).set(-kd*kd*sigma.get(robotSide).getDoubleValue() + kd*powerMatrix.get(0, 0));
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
-         LogTools.info(robotSide.getCamelCaseName() + " - Sigma: " + sigma.get(robotSide).getDoubleValue() + " SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue() + " Power: " + powerMatrix.get(0, 0));
+//         LogTools.info(robotSide.getCamelCaseName() + " - Sigma: " + sigma.get(robotSide).getDoubleValue() + " SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue() + " Power: " + powerMatrix.get(0, 0));
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
             return true;

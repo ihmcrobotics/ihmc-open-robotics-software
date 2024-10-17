@@ -865,7 +865,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
       orientationGains.getDerivativeGainMatrix(tempMatrix3D);
 
-      if (isImpedanceEnabled() && (tempGainMatrix.containsNaN() || tempMatrix3D.containsNaN()))
+      if (isImpedanceEnabled())
       {
          positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
          orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
