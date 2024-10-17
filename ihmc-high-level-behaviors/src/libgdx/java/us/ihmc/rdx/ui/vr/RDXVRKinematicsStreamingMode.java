@@ -326,9 +326,9 @@ public class RDXVRKinematicsStreamingMode
       {
          boolean leftAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.LEFT);
          boolean leftTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.LEFT);
-         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.LEFT);
          double forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.LEFT);
-         handleLeftControllJoystickInput(leftAButtonPressed, leftTriggerPressed, lateralJoystickValue, forwardJoystickValue, false);
+         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.LEFT);
+         handleLeftControllJoystickInput(leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, false);
       }
       else
       {
@@ -341,8 +341,8 @@ public class RDXVRKinematicsStreamingMode
 
             boolean leftAButtonPressed = aButton.bChanged() && !aButton.bState();
             boolean leftTriggerPressed = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
-            double lateralJoystickValue = controller.getJoystickActionData().x();
             double forwardJoystickValue = controller.getJoystickActionData().y();
+            double lateralJoystickValue = controller.getJoystickActionData().x();
             handleLeftControllJoystickInput(leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, leftJoystickButtonClicked);
 
             // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -356,8 +356,8 @@ public class RDXVRKinematicsStreamingMode
       {
          boolean rightAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.RIGHT);
          boolean rightTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.RIGHT);
-         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.RIGHT);
          double forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.RIGHT);
+         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.RIGHT);
          handleRightControllJoystickInput(rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue);
       }
       else
