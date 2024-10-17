@@ -89,7 +89,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class SCS2AvatarSimulationFactory
 {
@@ -447,7 +448,8 @@ public class SCS2AvatarSimulationFactory
          ros2Node = realtimeROS2Node.get();
       }
 
-      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(contextDataFactory,
+      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(robotName,
+                                                                              contextDataFactory,
                                                                               null,
                                                                               robotModel.get(),
                                                                               robotModel.get().getSensorInformation(),

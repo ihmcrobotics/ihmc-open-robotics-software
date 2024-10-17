@@ -60,7 +60,8 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    private ModularRobotController wholeBodyControllerCoreCalculator = new ModularRobotController("WBCC");
    private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
 
-   public AvatarWholeBodyControllerCoreThread(HumanoidRobotContextDataFactory contextDataFactory,
+   public AvatarWholeBodyControllerCoreThread(String robotName,
+                                              HumanoidRobotContextDataFactory contextDataFactory,
                                               StatusMessageOutputManager walkingOutputManager,
                                               DRCRobotModel robotModel,
                                               HumanoidRobotSensorInformation sensorInformation,
@@ -93,6 +94,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerCoreFullRobotModel, robotModel, sensorInformation);
+
       if (outputProcessor != null)
       {
          outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
@@ -116,7 +118,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                   registry,
                                                                                   kinematicSimulation,
                                                                                   arrayOfJointsToIgnore);
-//      desiredJointDataHolder.set(wholeBodyControllerCoreDesiredJointDataHolder);
+      //      desiredJointDataHolder.set(wholeBodyControllerCoreDesiredJointDataHolder);
 
       wholeBodyControllerCoreThreadTimer = new ExecutionTimer("WholeBodyControllerCoreTimer111", registry);
 
@@ -127,7 +129,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
    private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel controllerCoreModel,
                                                                           HighLevelHumanoidControllerFactory controllerFactory,
                                                                           YoDouble yoTime,
-                                                                          double wbccDT,
+                                                                          double controllerCoreDT,
                                                                           double gravity,
                                                                           ForceSensorDataHolderReadOnly forceSensorDataHolderForControllerCore,
                                                                           CenterOfMassDataHolderReadOnly centerOfMassDataHolderForControllerCore,
@@ -158,6 +160,12 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       }
 
       HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
+                                                                                                                controllerCoreDT,
+                                                                                                                gravity,
+                                                                                                                kinematicsSimulation,
+                                                                                                                yoTime,
+                                                                                                                forceSensorDataHolderForControllerCore,
+                                                                                                                centerOfMassDataHolderForControllerCore,
                                                                                                                 wholeBodyControllerCoreOutput,
                                                                                                                 lowLevelControllerOutput,
                                                                                                                 controllerCoreOutPutDataHolder,
