@@ -56,14 +56,14 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
          {
             if (printInfo)
                System.out.println("Adding Device Number " + i + " to list of potential input devices.\n");
-            inDeviceNumbers.add(new Integer(i));
+            inDeviceNumbers.add(Integer.valueOf(i));
          }
 
          else if (info.getName().indexOf("YAMAHA USB OUT") >= 0)
          {
             if (printInfo)
                System.out.println("Adding Device Number " + i + " to list of potential output devices.");
-            outDeviceNumbers.add(new Integer(i));
+            outDeviceNumbers.add(Integer.valueOf(i));
          }
 
       }

@@ -49,7 +49,7 @@ public class OcTreeEssentialsAnchorPaneController extends REABasicUIController
       @Override
       public Number interpret(Integer newValue)
       {
-         return new Double(newValue.doubleValue());
+         return Double.valueOf(newValue.doubleValue());
       }
    };
 

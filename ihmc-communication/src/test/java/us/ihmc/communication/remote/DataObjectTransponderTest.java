@@ -98,7 +98,7 @@ public class DataObjectTransponderTest
    @Test
    public void testSerializabilityOfInteger() throws IOException
    {
-      Integer integer = new Integer(2);
+      Integer integer = Integer.valueOf(2);
       Assertions.assertSerializable(integer);
    }
 

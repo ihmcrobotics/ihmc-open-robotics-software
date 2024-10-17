@@ -83,7 +83,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private final String capitalizedClassName;
    private WorkspaceResourceFile workspaceJSONFile;
 
-   private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
+   private final Map<StoredPropertyKey<?>, List<Runnable>> propertyChangedListeners = new HashMap<>();
    private final List<Notification> anyPropertyChangedListeners = new ArrayList<>();
 
    public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading)

@@ -18,6 +18,7 @@ public enum SaitekX52Mapping implements JoystickMapping
    /** Mappings for Windows, Mac, Linux */
    TRIGGER_PARITIAL,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    TRIGGER_FULL,
    PINKY_TRIGGER,
    SAFE_FIRE,
@@ -42,8 +43,10 @@ public enum SaitekX52Mapping implements JoystickMapping
    BASE_SWITCH_CENTER_UP,
    BASE_SWITCH_CENTER_DOWN,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    BASE_SWITCH_RIGHT_UP,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    BASE_SWITCH_RIGHT_DOWN,
    STICK_PITCH,
    STICK_ROLL,
@@ -53,18 +56,25 @@ public enum SaitekX52Mapping implements JoystickMapping
    BIG_ROTARY_KNOB,
    LITTLE_ROTARY_KNOB,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    FUNCTION,
    /** @deprecated Only works on Linux */
+   @Deprecated
    START_STOP,
    /** @deprecated Only works on Linux */
+   @Deprecated
    RESET,
    /** @deprecated Only works on Linux */
+   @Deprecated
    INFO,
    /** @deprecated Only works on Linux */
+   @Deprecated
    MOUSE_TOGGLE,
    /** @deprecated Only works on Windows and Linux */
+   @Deprecated
    NIPPLE_LEFT_RIGHT,
    /** @deprecated Only works on Windows and Linux */
+   @Deprecated
    NIPPLE_UP_DOWN,
    ;
    

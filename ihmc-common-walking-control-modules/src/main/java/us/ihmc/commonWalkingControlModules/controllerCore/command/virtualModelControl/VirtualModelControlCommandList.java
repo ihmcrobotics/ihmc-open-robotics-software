@@ -99,6 +99,7 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
     * @return the last command.
     * @deprecated this method should be removed and it is not really useful anyway.
     */
+   @Deprecated
    public VirtualModelControlCommand<?> pollCommand()
    {
       if (commandList.isEmpty())

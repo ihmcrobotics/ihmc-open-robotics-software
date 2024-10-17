@@ -5,6 +5,7 @@ package us.ihmc.robotics;
  *             This was created as part of the transition from JUnit 4 to JUnit 5 and should
  *             be removed.
  */
+@Deprecated
 public class Assert
 {
    @Deprecated

@@ -8,6 +8,7 @@ import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
  * @author twan
 *         Date: 6/8/13
 */
+@Deprecated
 public enum HandConfiguration
 {
    @RosEnumValueDocumentation(documentation = "stops the fingers at their current position")

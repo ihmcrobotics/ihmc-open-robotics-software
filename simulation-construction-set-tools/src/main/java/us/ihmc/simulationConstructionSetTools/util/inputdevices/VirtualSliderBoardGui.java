@@ -310,7 +310,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       {
          try
          {
-            Double val = new Double(slider.value.getText());
+            Double val = Double.valueOf(slider.value.getText());
             sliderSlid(slider, val);
          }
          catch (Exception ex)

@@ -9,6 +9,7 @@ public enum NeckJointName
    /**
     * @deprecated Do not iterate over these values!
     */
+   @Deprecated
    public static final NeckJointName[] values = values();
    
    public String getUnderBarName()
@@ -56,6 +57,7 @@ public enum NeckJointName
    /**
     * @deprecated Use getCamelCaseName() instead.
     */
+   @Deprecated
    public String getCamelCaseNameForStartOfExpression()
    {
       return getCamelCaseName();
@@ -69,6 +71,7 @@ public enum NeckJointName
    /**
     * @deprecated Use getPascalCaseName() instead.
     */
+   @Deprecated
    public String getCamelCaseNameForMiddleOfExpression()
    {
       return getPascalCaseName();

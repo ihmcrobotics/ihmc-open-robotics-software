@@ -44,6 +44,7 @@ public class NavigableRegionsManager
    private HashSet<VisibilityGraphNode> expandedNodes;
 
    /** @deprecated Use only for serialization. */
+   @Deprecated
    public NavigableRegionsManager()
    {
       this(null, null, null);

@@ -98,6 +98,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
     * @return the last command.
     * @deprecated this method should be removed and it is not really useful anyway.
     */
+   @Deprecated
    public InverseDynamicsCommand<?> pollCommand()
    {
       if (commandList.isEmpty())

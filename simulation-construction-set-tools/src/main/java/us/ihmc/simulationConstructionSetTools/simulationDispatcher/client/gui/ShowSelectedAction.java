@@ -37,7 +37,7 @@ public class ShowSelectedAction extends AbstractAction implements Runnable
       this.GUI = GUI;
 
       this.putValue(Action.SMALL_ICON, icon);
-      this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
+      this.putValue(Action.MNEMONIC_KEY, Integer.valueOf(KeyEvent.VK_E));
       this.putValue(Action.LONG_DESCRIPTION, "Long Description");
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
 

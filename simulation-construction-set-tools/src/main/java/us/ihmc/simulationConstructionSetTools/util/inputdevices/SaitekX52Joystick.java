@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * @deprecated Use us.ihmc.tools.inputDevices.joystick.Joystick
  */
+@Deprecated
 public class SaitekX52Joystick
 {
    private static final int DEFAULT_POLL_INTERVAL_MS = 100;
@@ -138,6 +139,7 @@ public class SaitekX52Joystick
    }
 
    /** @deprecated */
+   @Deprecated
    public void attachVariableChangedListener(YoVariableChangedListener listener)
    {      
       

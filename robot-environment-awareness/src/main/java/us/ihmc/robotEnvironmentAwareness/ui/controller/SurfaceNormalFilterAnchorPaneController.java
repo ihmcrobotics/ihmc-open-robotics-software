@@ -32,7 +32,7 @@ public class SurfaceNormalFilterAnchorPaneController extends REABasicUIControlle
       @Override
       public Number interpret(Integer newValue)
       {
-         return new Double(newValue.doubleValue());
+         return Double.valueOf(newValue.doubleValue());
       }
    };
 
@@ -47,7 +47,7 @@ public class SurfaceNormalFilterAnchorPaneController extends REABasicUIControlle
       @Override
       public Number interpret(Double newValue)
       {
-         return new Double(newValue.doubleValue());
+         return Double.valueOf(newValue.doubleValue());
       }
    };
 

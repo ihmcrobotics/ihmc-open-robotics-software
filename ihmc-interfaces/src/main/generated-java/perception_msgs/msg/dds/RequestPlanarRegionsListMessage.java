@@ -12,6 +12,7 @@ import us.ihmc.pubsub.TopicDataType;
        * Use this message to request new planar regions
        * @deprecated REA always publishes planar regions when running. To request REA to clear its internal state, see REAStateRequestMessage.
        */
+@Deprecated
 public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage> implements Settable<RequestPlanarRegionsListMessage>, EpsilonComparable<RequestPlanarRegionsListMessage>
 {
    public static final byte SINGLE_UPDATE = (byte) 0;

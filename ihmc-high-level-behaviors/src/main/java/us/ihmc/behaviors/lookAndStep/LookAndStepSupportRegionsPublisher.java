@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * @deprecated This class isn't currently used.
  */
+@Deprecated
 public class LookAndStepSupportRegionsPublisher
 {
    private ResettableExceptionHandlingExecutorService executor;

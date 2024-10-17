@@ -153,6 +153,7 @@ public class YoMinimumJerkTrajectory
     * @param t double : Time to start looking for a maximum velocity and acceleration.
     * @param maximums double[2] : {max velocity, max acceleration}
     */
+   @Deprecated
    public void findMaxVelocityAndAccel(double currentTime, double[] maximums)
    {
       if (currentTime >= Tf.getDoubleValue())
@@ -209,6 +210,7 @@ public class YoMinimumJerkTrajectory
     * @param maxA double: maximum acceleration to use
     * @return double
     */
+   @Deprecated
    public double timeExtension(double currentTime, double maxV, double maxA, boolean Fix)
    {
       // Error if parameters are already higher, ignore extension

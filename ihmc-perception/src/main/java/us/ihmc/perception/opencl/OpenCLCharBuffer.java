@@ -10,6 +10,7 @@ import java.nio.ByteOrder;
  * To use this, you need to make sure to use native byte order on the ByteBuffers.
  * @deprecated TODO: I made this but I'm not sure if it works.
  */
+@Deprecated
 public class OpenCLCharBuffer
 {
    private long numberOfChars;

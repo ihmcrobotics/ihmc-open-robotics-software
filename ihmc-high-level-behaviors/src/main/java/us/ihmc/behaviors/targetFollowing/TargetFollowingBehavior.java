@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * are good videos of it following Bhavyansh.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class TargetFollowingBehavior extends ResettingNode implements Destroyable
 {
    private final BehaviorHelper helper;

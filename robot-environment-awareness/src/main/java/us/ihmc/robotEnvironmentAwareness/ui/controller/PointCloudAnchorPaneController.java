@@ -40,7 +40,7 @@ public class PointCloudAnchorPaneController extends REABasicUIController
       @Override
       public Number interpret(Integer newValue)
       {
-         return new Double(newValue.intValue());
+         return Double.valueOf(newValue.intValue());
       }
    };
 

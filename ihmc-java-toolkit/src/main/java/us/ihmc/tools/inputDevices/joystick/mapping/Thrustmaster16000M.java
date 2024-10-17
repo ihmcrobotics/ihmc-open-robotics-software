@@ -31,12 +31,15 @@ public enum Thrustmaster16000M implements JoystickMapping
    BASE_BUTTON_LEFT_SIDE_LOWER_CENTER,
    BASE_BUTTON_LEFT_SIDE_LOWER_RIGHT,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    BASE_BUTTON_RIGHT_SIDE_UPPER_LEFT,
    BASE_BUTTON_RIGHT_SIDE_UPPER_CENTER,
    BASE_BUTTON_RIGHT_SIDE_UPPER_RIGHT,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    BASE_BUTTON_RIGHT_SIDE_LOWER_LEFT,
    /** @deprecated Only works on Windows and Mac */
+   @Deprecated
    BASE_BUTTON_RIGHT_SIDE_LOWER_CENTER,
    BASE_BUTTON_RIGHT_SIDE_LOWER_RIGHT,
    ;

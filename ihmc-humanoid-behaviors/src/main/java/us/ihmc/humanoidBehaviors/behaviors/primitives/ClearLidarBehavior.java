@@ -7,6 +7,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 /**
  * @deprecated The lidar stuff is broken. What about implement a centralized LidarBufferBehavior that records lidar in an internal buffer.
  */
+@Deprecated
 public class ClearLidarBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);

@@ -147,7 +147,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       @Override
       public default Number getNumber(T parameters)
       {
-         return new Double(get(parameters));
+         return Double.valueOf(get(parameters));
       }
    }
 
@@ -177,7 +177,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       @Override
       public default Number getNumber(T parameters)
       {
-         return new Float(get(parameters));
+         return Float.valueOf(get(parameters));
       }
    }
 
@@ -371,17 +371,17 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    private void setNumberValue(Property<? extends Number> numberProperty, Field field)
    {
       if (numberProperty.getValue() instanceof Double)
-         ((Property<Double>) numberProperty).setValue(new Double(field.getNumber(getValue()).doubleValue()));
+         ((Property<Double>) numberProperty).setValue(Double.valueOf(field.getNumber(getValue()).doubleValue()));
       else if (numberProperty.getValue() instanceof Integer)
-         ((Property<Integer>) numberProperty).setValue(new Integer(field.getNumber(getValue()).intValue()));
+         ((Property<Integer>) numberProperty).setValue(Integer.valueOf(field.getNumber(getValue()).intValue()));
       else if (numberProperty.getValue() instanceof Float)
-         ((Property<Float>) numberProperty).setValue(new Float(field.getNumber(getValue()).floatValue()));
+         ((Property<Float>) numberProperty).setValue(Float.valueOf(field.getNumber(getValue()).floatValue()));
       else if (numberProperty.getValue() instanceof Long)
-         ((Property<Long>) numberProperty).setValue(new Long(field.getNumber(getValue()).longValue()));
+         ((Property<Long>) numberProperty).setValue(Long.valueOf(field.getNumber(getValue()).longValue()));
       else if (numberProperty.getValue() instanceof Short)
-         ((Property<Short>) numberProperty).setValue(new Short(field.getNumber(getValue()).shortValue()));
+         ((Property<Short>) numberProperty).setValue(Short.valueOf(field.getNumber(getValue()).shortValue()));
       else if (numberProperty.getValue() instanceof Byte)
-         ((Property<Byte>) numberProperty).setValue(new Byte(field.getNumber(getValue()).byteValue()));
+         ((Property<Byte>) numberProperty).setValue(Byte.valueOf(field.getNumber(getValue()).byteValue()));
       else
          throw new RuntimeException("Unhandled instance of Number: " + numberProperty.getValue().getClass().getSimpleName());
    }

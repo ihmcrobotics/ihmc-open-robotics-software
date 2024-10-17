@@ -34,6 +34,7 @@ import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
  * stairs autonomously, I think we might be able to simplify it on Nadia.
  * @deprecated Not supported right now. Being kept for reference or revival.
  */
+@Deprecated
 public class TraverseStairsBehavior extends ResettingNode
 {
    private static final int UPDATE_RATE_MILLIS = 100;

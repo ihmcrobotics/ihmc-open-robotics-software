@@ -43,6 +43,7 @@ public enum LegJointName
    /**
     * @deprecated Do not use this!
     */
+   @Deprecated
    public static final LegJointName[] values = values();
 
    public String getUnderBarName()
@@ -135,6 +136,7 @@ public enum LegJointName
    /**
     * @deprecated Use getCamelCaseName() instead.
     */
+   @Deprecated
    public String getCamelCaseNameForStartOfExpression()
    {
       return getCamelCaseName();
@@ -173,6 +175,7 @@ public enum LegJointName
    /**
     * @deprecated Use getPascalCaseName() instead.
     */
+   @Deprecated
    public String getCamelCaseNameForMiddleOfExpression()
    {
       return getPascalCaseName();

@@ -126,7 +126,7 @@ public class FootstepUtils
          FramePoint3D footstepPosition = new FramePoint3D();
          footSteps.get(side).getPosition(footstepPosition);
          footstepPosition.changeFrame(worldFrame);
-         distances.set(side, new Double(footstepPosition.distanceSquared(destinationInWorld)));
+         distances.set(side, Double.valueOf(footstepPosition.distanceSquared(destinationInWorld)));
       }
 
       RobotSide frontSide = (distances.get(RobotSide.LEFT) <= distances.get(RobotSide.RIGHT)) ? RobotSide.LEFT : RobotSide.RIGHT;

@@ -78,7 +78,7 @@ public class SimpleLidarRobotController implements RobotController
          public void changed(YoVariable v)
          {
             localQuaternion.set(lidarYawPitchRoll);
-            rootJoint.setQuaternion(localQuaternion);
+            rootJoint.setOrientation(localQuaternion);
          }
       });
 

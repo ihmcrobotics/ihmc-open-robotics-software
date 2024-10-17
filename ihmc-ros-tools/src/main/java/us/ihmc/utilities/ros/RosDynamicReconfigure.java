@@ -162,13 +162,13 @@ public class RosDynamicReconfigure
       ReconfigureResponse response = client.call(request);
       HashMap<String, Object> allSettings = new HashMap<>();
       for (DoubleParameter param : response.getConfig().getDoubles())
-         allSettings.put(param.getName(), new Double(param.getValue()));
+         allSettings.put(param.getName(), Double.valueOf(param.getValue()));
       for (IntParameter param : response.getConfig().getInts())
-         allSettings.put(param.getName(), new Integer(param.getValue()));
+         allSettings.put(param.getName(), Integer.valueOf(param.getValue()));
       for (StrParameter param : response.getConfig().getStrs())
-         allSettings.put(param.getName(), new String(param.getValue()));
+         allSettings.put(param.getName(), String.valueOf(param.getValue()));
       for (BoolParameter param : response.getConfig().getBools())
-         allSettings.put(param.getName(), new Boolean(param.getValue()));
+         allSettings.put(param.getName(), Boolean.valueOf(param.getValue()));
       return allSettings;
    }
 

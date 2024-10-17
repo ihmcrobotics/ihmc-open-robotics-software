@@ -144,6 +144,7 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
     * @return the last command.
     * @deprecated this method should be removed and it is not really useful anyway.
     */
+   @Deprecated
    public FeedbackControlCommand<?> pollCommand()
    {
       if (commandList.isEmpty())
