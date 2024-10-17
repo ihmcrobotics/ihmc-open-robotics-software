@@ -22,10 +22,12 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -77,7 +79,10 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start(false);
+      boolean success = simulationTestHelper.simulateNow(0.1);
+
       ((YoBoolean) simulationTestHelper.getControllerRegistry().findVariable("doToeOffIfPossibleInSingleSupport")).set(true);
+      publishHeightOffset(-0.05);
 
       Point3D cameraFix = new Point3D(-4.68, -7.8, 0.55);
       Point3D cameraPosition = new Point3D(-8.6, -4.47, 0.58);
@@ -85,7 +90,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       simulationTestHelper.setCamera(cameraFix, cameraPosition);
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(2.0);
+      success &= simulationTestHelper.simulateNow(0.5);
 
       Quaternion footRotation = new Quaternion();
       footRotation.setToYawOrientation(selectedLocation.getStartingLocationOffset().getYaw());
@@ -123,6 +128,16 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private void publishHeightOffset(double heightOffset)
+   {
+      if (!Double.isFinite(heightOffset) || EuclidCoreTools.epsilonEquals(0.0, heightOffset, 1.0e-3))
+         return;
+      MovingReferenceFrame rootJointFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      double z = rootJointFrame.getTransformToRoot().getTranslationZ();
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, z + heightOffset));
+      Assertions.assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
    @Test

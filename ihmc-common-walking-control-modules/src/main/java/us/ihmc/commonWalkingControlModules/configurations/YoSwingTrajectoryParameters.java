@@ -21,6 +21,7 @@ public class YoSwingTrajectoryParameters
    private final DoubleParameter defaultSwingStepDownHeight;
    private final BooleanParameter addOrientationMidpointForClearance;
    private final BooleanParameter addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown;
+   private final DoubleParameter fractionOfSwingToPitchFootNormal;
    private final DoubleParameter fractionOfSwingToPitchFootDown;
    private final DoubleParameter footPitchAngleToAvoidHeelStrike;
    private final DoubleParameter midpointOrientationInterpolationForClearance;
@@ -71,6 +72,9 @@ public class YoSwingTrajectoryParameters
       addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown = new BooleanParameter(namePrefix + "AddFootPitchToAvoidHeelStrikeWhenSteppingDown",
                                                                                      registry,
                                                                                      parameters.addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown());
+      fractionOfSwingToPitchFootNormal = new DoubleParameter(namePrefix + "FractionOfSwingToPitchFootNormal",
+                                                           registry,
+                                                           parameters.getFractionOfSwingToPitchFootNormal());
       fractionOfSwingToPitchFootDown = new DoubleParameter(namePrefix + "FractionOfSwingToPitchFootDown",
                                                            registry,
                                                            parameters.getFractionOfSwingToPitchFootDown());
@@ -162,6 +166,11 @@ public class YoSwingTrajectoryParameters
    public boolean addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()
    {
       return addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown.getValue();
+   }
+
+   public double getFractionOfSwingToPitchFootNormal()
+   {
+      return fractionOfSwingToPitchFootNormal.getValue();
    }
 
    public double getFractionOfSwingToPitchFootDown()
