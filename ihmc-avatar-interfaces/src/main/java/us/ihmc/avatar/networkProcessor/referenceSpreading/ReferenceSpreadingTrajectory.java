@@ -3,8 +3,8 @@ package us.ihmc.avatar.networkProcessor.referenceSpreading;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PIDGainsTrajectoryMessage;
-import controller_msgs.msg.dds.PIDGainsTrajectoryPointMessage;
+//import controller_msgs.msg.dds.PIDGainsTrajectoryMessage;
+//import controller_msgs.msg.dds.PIDGainsTrajectoryPointMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
@@ -102,10 +102,10 @@ public class ReferenceSpreadingTrajectory
       WrenchTrajectoryPointMessage wrenchTrajectoryPointMessage = new WrenchTrajectoryPointMessage();
       Wrench desiredFeedForwardWrench = new Wrench();
 
-      PIDGainsTrajectoryMessage pidGainsTrajectoryMessage = new PIDGainsTrajectoryMessage();
-      PIDGainsTrajectoryPointMessage pidGainsTrajectoryPointMessage = new PIDGainsTrajectoryPointMessage();
-      PIDGains linearGains = robotModel.getWalkingControllerParameters().getLinearGains();
-      PIDGains angularGains = robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains();
+//      PIDGainsTrajectoryMessage pidGainsTrajectoryMessage = new PIDGainsTrajectoryMessage();
+//      PIDGainsTrajectoryPointMessage pidGainsTrajectoryPointMessage = new PIDGainsTrajectoryPointMessage();
+//      PIDGains linearGains = robotModel.getWalkingControllerParameters().getLinearGains();
+//      PIDGains angularGains = robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains();
 
 
       HashMap<String, Double> currentFrame = new HashMap<>();
