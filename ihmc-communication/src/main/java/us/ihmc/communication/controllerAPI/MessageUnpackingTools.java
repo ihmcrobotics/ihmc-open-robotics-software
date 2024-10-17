@@ -49,7 +49,6 @@ public final class MessageUnpackingTools
             FootTrajectoryMessage rightFootTrajectoryMessage = multipleMessageHolder.getRightFootTrajectoryMessage();
             LegTrajectoryMessage leftLegTrajectoryMessage = multipleMessageHolder.getLeftLegTrajectoryMessage();
             LegTrajectoryMessage rightLegTrajectoryMessage = multipleMessageHolder.getRightLegTrajectoryMessage();
-            CenterOfMassTrajectoryMessage comTrajectory = multipleMessageHolder.getComTrajectory();
 
             if (!leftHandTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
             {
@@ -110,11 +109,6 @@ public final class MessageUnpackingTools
                messagesToPack.add(leftFootTrajectoryMessage);
             if (!rightFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(rightFootTrajectoryMessage);
-            if (!comTrajectory.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
-            {
-               LogTools.info("unpacking com trajectory");
-               messagesToPack.add(comTrajectory);
-            }
          }
       };
    }

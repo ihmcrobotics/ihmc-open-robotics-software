@@ -37,6 +37,3 @@ LegTrajectoryMessage right_leg_trajectory_message
 NeckTrajectoryMessage neck_trajectory_message
 # Trajectory for the head
 HeadTrajectoryMessage head_trajectory_message
-
-# Desired Center of Mass, only xy components are used
-CenterOfMassTrajectoryMessage com_trajectory

@@ -179,24 +179,6 @@ public class KinematicsToolboxOutputConverter
       packSE3TrajectoryPointMessage(trajectoryTime, desiredPose, desiredSpatialVelocity, taskspaceTrajectoryPoints.add());
    }
 
-   public void computeCenterOfMassTrajectoryMessage()
-   {
-      checkIfDataHasBeenSet();
-
-      EuclideanTrajectoryMessage comTrajectory = output.getComTrajectory().getEuclideanTrajectory();
-      comTrajectory.getTaskspaceTrajectoryPoints().clear();
-
-      comTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
-      comTrajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
-
-      EuclideanTrajectoryPointMessage trajectoryPoint = comTrajectory.getTaskspaceTrajectoryPoints().add();
-      desiredPose.setToZero(referenceFrames.getCenterOfMassFrame());
-      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
-      trajectoryPoint.getPosition().set(desiredPose.getPosition());
-      trajectoryPoint.getLinearVelocity().setToZero();
-      trajectoryPoint.setTime(trajectoryTime);
-   }
-
    public void computeNeckTrajectoryMessage()
    {
       checkIfDataHasBeenSet();

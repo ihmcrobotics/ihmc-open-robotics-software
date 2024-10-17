@@ -1,17 +1,12 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingIterator;
 import us.ihmc.commons.lists.RecyclingLinkedList;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
@@ -19,7 +14,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -40,8 +34,8 @@ public class EuclideanTrajectoryHandler
    private final EuclideanTrajectoryPointBasics tempPoint = new EuclideanTrajectoryPoint();
 
    private final RecyclingLinkedList<EuclideanTrajectoryPointBasics> trajectoryPoints = new RecyclingLinkedList<>(defaultMaxNumberOfPoints,
-                                                                                                                     EuclideanTrajectoryPoint::new,
-                                                                                                                     EuclideanTrajectoryPointBasics::set);
+                                                                                                                  EuclideanTrajectoryPoint::new,
+                                                                                                                  EuclideanTrajectoryPointBasics::set);
    private final RecyclingIterator<EuclideanTrajectoryPointBasics> trajectoryIterator = trajectoryPoints.createForwardIterator();
 
    private final DoubleProvider yoTime;
@@ -50,12 +44,6 @@ public class EuclideanTrajectoryHandler
    private final YoFrameVector3D velocity;
    private final YoFrameVector3D acceleration;
    private final YoInteger numberOfPoints;
-   /**
-    * Used when streaming to account for time variations occurring during the transport of the message
-    * over the network.
-    */
-   private final YoDouble streamTimestampOffset;
-   private final YoDouble streamTimestampSource;
 
    private long lastMessageID = -1L;
 
@@ -76,11 +64,6 @@ public class EuclideanTrajectoryHandler
       velocity = new YoFrameVector3D(name + "Velocity", ReferenceFrame.getWorldFrame(), registry);
       acceleration = new YoFrameVector3D(name + "Acceleration", ReferenceFrame.getWorldFrame(), registry);
       numberOfPoints = new YoInteger(name + "NumberOfPoints", registry);
-
-      streamTimestampOffset = new YoDouble(name + "StreamTimestampOffset", registry);
-      streamTimestampOffset.setToNaN();
-      streamTimestampSource = new YoDouble(name + "StreamTimestampSource", registry);
-      streamTimestampSource.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -107,97 +90,37 @@ public class EuclideanTrajectoryHandler
 
    protected void handleTrajectory(EuclideanTrajectoryControllerCommand command)
    {
-      double streamTimeOffset = 0.0;
-      double streamTimestampOffset = this.streamTimestampOffset.getValue();
-      double streamTimestampSource = this.streamTimestampSource.getValue();
-
-      if (command.getExecutionMode() == ExecutionMode.STREAM)
-      { // Need to do time checks before moving on.
-         if (command.getTimestamp() <= 0)
-         {
-            streamTimestampOffset = Double.NaN;
-            streamTimestampSource = Double.NaN;
-         }
-         else
-         {
-            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
-
-            if (!Double.isNaN(streamTimestampSource) && senderTime < streamTimestampSource)
-            {
-               // Messages are out of order which is fine, we just don't want to handle the new message.
-               return;
-            }
-
-            streamTimestampSource = senderTime;
-
-            streamTimeOffset = yoTime.getValue() - senderTime;
-
-            if (Double.isNaN(streamTimestampOffset))
-            {
-               streamTimestampOffset = streamTimeOffset;
-            }
-            else
-            {
-               /*
-                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
-                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
-                * for safety.
-                */
-               if (Math.abs(streamTimeOffset - streamTimestampOffset) > 0.5)
-                  streamTimestampOffset = streamTimeOffset;
-               else
-                  streamTimestampOffset = Math.min(streamTimeOffset, streamTimestampOffset);
-            }
-         }
-      }
-
       switch (command.getExecutionMode())
       {
-      case OVERRIDE:
-         command.addTimeOffset(yoTime.getValue());
-         while (!trajectoryPoints.isEmpty())
-         {
-            trajectoryPoints.removeFirst();
-         }
-         break;
-      case QUEUE:
-         if (trajectoryPoints.isEmpty())
-         {
-            PrintTools.warn("Can not queue without points");
-            return;
-         }
-         if (command.getTrajectoryPoint(0).getTime() <= 0.0)
-         {
-            PrintTools.warn("Can not queue trajectory with initial time 0.0");
-            return;
-         }
-         if (command.getPreviousCommandId() != lastMessageID)
-         {
-            PrintTools.warn("Invalid message ID.");
-            return;
-         }
-         trajectoryPoints.peekLast(lastPoint);
-         double lastTime = lastPoint.getTime();
-         command.addTimeOffset(lastTime);
-         break;
-      case STREAM:
-         {
-
-
-            this.streamTimestampOffset.set(streamTimestampOffset);
-            this.streamTimestampSource.set(streamTimestampSource);
-
-            int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
-            if (command.getNumberOfTrajectoryPoints() == 0 || numberOfTrajectoryPoints > 2)
+         case OVERRIDE:
+            command.addTimeOffset(yoTime.getValue());
+            while (!trajectoryPoints.isEmpty())
             {
-               LogTools.warn("When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + command.getNumberOfTrajectoryPoints());
+               trajectoryPoints.removeFirst();
+            }
+            break;
+         case QUEUE:
+            if (trajectoryPoints.isEmpty())
+            {
+               PrintTools.warn("Can not queue without points");
                return;
             }
-
-            FrameEuclideanTrajectoryPointList trajectoryPoints = command.getTrajectoryPointList();
-         }
-      default:
-         throw new RuntimeException("Unhadled execution mode.");
+            if (command.getTrajectoryPoint(0).getTime() <= 0.0)
+            {
+               PrintTools.warn("Can not queue trajectory with initial time 0.0");
+               return;
+            }
+            if (command.getPreviousCommandId() != lastMessageID)
+            {
+               PrintTools.warn("Invalid message ID.");
+               return;
+            }
+            trajectoryPoints.peekLast(lastPoint);
+            double lastTime = lastPoint.getTime();
+            command.addTimeOffset(lastTime);
+            break;
+         default:
+            throw new RuntimeException("Unhadled execution mode.");
       }
 
       lastMessageID = command.getCommandId();
