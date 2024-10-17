@@ -76,7 +76,6 @@ public class RelativeEndEffectorControlTest
    private static final double controlDT = 1.0e-4;
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
