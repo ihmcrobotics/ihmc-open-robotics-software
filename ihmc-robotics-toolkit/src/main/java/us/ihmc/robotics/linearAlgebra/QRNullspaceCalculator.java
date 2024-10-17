@@ -84,11 +84,15 @@ public class QRNullspaceCalculator implements NullspaceCalculator
       int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
       computeNullspace(nullspace, matrixToComputeNullspaceOf, nullity);
 
-      nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-      CommonOps_DDRM.multOuter(nullspace, nullspaceProjectorToPack);
+      if (nullspaceProjectorToPack != null)
+      {
+         nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
+         CommonOps_DDRM.multOuter(nullspace, nullspaceProjectorToPack);
+      }
    }
 
    private final DMatrixRMaj transposed = new DMatrixRMaj(0, 0);
+
    private void computeNullspace(DMatrixRMaj nullspaceToPack, DMatrixRMaj matrixToComputeNullspaceOf, int nullity)
    {
       int size = matrixToComputeNullspaceOf.getNumCols();
@@ -103,5 +107,10 @@ public class QRNullspaceCalculator implements NullspaceCalculator
       decomposer.getQ(Q, false);
 
       CommonOps_DDRM.extract(Q, 0, Q.getNumRows(), Q.getNumCols() - nullity, Q.getNumCols(), nullspaceToPack, 0, 0);
+   }
+
+   public DMatrixRMaj getNullspace()
+   {
+      return nullspace;
    }
 }

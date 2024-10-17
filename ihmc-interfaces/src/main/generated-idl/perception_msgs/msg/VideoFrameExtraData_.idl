@@ -1,0 +1,40 @@
+#ifndef __perception_msgs__msg__VideoFrameExtraData__idl__
+#define __perception_msgs__msg__VideoFrameExtraData__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * THIS MESSAGE IS SENT OVER VIDEO STREAMS.
+       * MAX SIZE OF THIS MESSAGE IS LIMITED (~881 bytes from a bit of testing).
+       * BE CAUTIOUS WHEN ADDING MORE FIELDS.
+       * If adding a field that only needs to be sent once,
+       * consider putting it in SRTStreamStatus.msg instead.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::VideoFrameExtraData_")
+      struct VideoFrameExtraData
+      {
+        /**
+         * Frame sequence number
+         */
+        unsigned long sequence_number;
+        /**
+         * Frame acquisition time
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage acquisition_time;
+        /**
+         * Sensor pose at time of acquisition
+         */
+        geometry_msgs::msg::dds::Pose sensor_pose;
+      };
+    };
+  };
+};
+
+#endif

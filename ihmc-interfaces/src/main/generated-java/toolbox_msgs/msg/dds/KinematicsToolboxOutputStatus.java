@@ -63,9 +63,17 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
    /**
-            * Support region used by the toolbox
+            * Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  multi_contact_feasible_com_region_;
+   /**
+            * Lowest-proximity edge index in multi-contact com region (if computed)
+            */
+   public int closest_edge_index_ = -1;
+   /**
+            * CoM stability margin if upper body is load-bearing
+            */
+   public double center_of_mass_stability_margin_ = -1.0;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -78,7 +86,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (32, new geometry_msgs.msg.dds.PointPubSubType());
+      multi_contact_feasible_com_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (18, new geometry_msgs.msg.dds.PointPubSubType());
 
    }
 
@@ -102,7 +110,11 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       desired_joint_velocities_.set(other.desired_joint_velocities_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
-      support_region_.set(other.support_region_);
+      multi_contact_feasible_com_region_.set(other.multi_contact_feasible_com_region_);
+      closest_edge_index_ = other.closest_edge_index_;
+
+      center_of_mass_stability_margin_ = other.center_of_mass_stability_margin_;
+
       solution_quality_ = other.solution_quality_;
 
    }
@@ -202,11 +214,41 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Support region used by the toolbox
+            * Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
             */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getSupportRegion()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getMultiContactFeasibleComRegion()
    {
-      return support_region_;
+      return multi_contact_feasible_com_region_;
+   }
+
+   /**
+            * Lowest-proximity edge index in multi-contact com region (if computed)
+            */
+   public void setClosestEdgeIndex(int closest_edge_index)
+   {
+      closest_edge_index_ = closest_edge_index;
+   }
+   /**
+            * Lowest-proximity edge index in multi-contact com region (if computed)
+            */
+   public int getClosestEdgeIndex()
+   {
+      return closest_edge_index_;
+   }
+
+   /**
+            * CoM stability margin if upper body is load-bearing
+            */
+   public void setCenterOfMassStabilityMargin(double center_of_mass_stability_margin)
+   {
+      center_of_mass_stability_margin_ = center_of_mass_stability_margin;
+   }
+   /**
+            * CoM stability margin if upper body is load-bearing
+            */
+   public double getCenterOfMassStabilityMargin()
+   {
+      return center_of_mass_stability_margin_;
    }
 
    public void setSolutionQuality(double solution_quality)
@@ -250,12 +292,16 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!this.desired_root_linear_velocity_.epsilonEquals(other.desired_root_linear_velocity_, epsilon)) return false;
       if (!this.desired_root_angular_velocity_.epsilonEquals(other.desired_root_angular_velocity_, epsilon)) return false;
-      if (this.support_region_.size() != other.support_region_.size()) { return false; }
+      if (this.multi_contact_feasible_com_region_.size() != other.multi_contact_feasible_com_region_.size()) { return false; }
       else
       {
-         for (int i = 0; i < this.support_region_.size(); i++)
-         {  if (!this.support_region_.get(i).epsilonEquals(other.support_region_.get(i), epsilon)) return false; }
+         for (int i = 0; i < this.multi_contact_feasible_com_region_.size(); i++)
+         {  if (!this.multi_contact_feasible_com_region_.get(i).epsilonEquals(other.multi_contact_feasible_com_region_.get(i), epsilon)) return false; }
       }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.closest_edge_index_, other.closest_edge_index_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_of_mass_stability_margin_, other.center_of_mass_stability_margin_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
@@ -284,7 +330,11 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_joint_velocities_.equals(otherMyClass.desired_joint_velocities_)) return false;
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
-      if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
+      if (!this.multi_contact_feasible_com_region_.equals(otherMyClass.multi_contact_feasible_com_region_)) return false;
+      if(this.closest_edge_index_ != otherMyClass.closest_edge_index_) return false;
+
+      if(this.center_of_mass_stability_margin_ != otherMyClass.center_of_mass_stability_margin_) return false;
+
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -315,8 +365,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_linear_velocity_);      builder.append(", ");
       builder.append("desired_root_angular_velocity=");
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
-      builder.append("support_region=");
-      builder.append(this.support_region_);      builder.append(", ");
+      builder.append("multi_contact_feasible_com_region=");
+      builder.append(this.multi_contact_feasible_com_region_);      builder.append(", ");
+      builder.append("closest_edge_index=");
+      builder.append(this.closest_edge_index_);      builder.append(", ");
+      builder.append("center_of_mass_stability_margin=");
+      builder.append(this.center_of_mass_stability_margin_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");
