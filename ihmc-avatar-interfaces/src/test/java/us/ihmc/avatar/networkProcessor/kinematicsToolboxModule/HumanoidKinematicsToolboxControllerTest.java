@@ -76,7 +76,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
@@ -242,9 +242,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       runKinematicsToolboxController(numberOfIterations);
 
-      assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
-      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
-                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+      assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
+      assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
    }
 
    @Test
@@ -300,11 +299,11 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 3.0e-3);
+         assertTrue(solutionQuality < 3.0e-3, "Poor solution quality: " + solutionQuality);
       }
    }
 
@@ -363,7 +362,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
@@ -375,8 +374,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       {
          LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-3);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-3);
+      assertTrue(worstSolutionQuality < 5.0e-3, "Poor worst solution quality: " + worstSolutionQuality);
+      assertTrue(averageSolutionQuality < 1.0e-3, "Poor average solution quality: " + averageSolutionQuality);
    }
 
    @Test
@@ -451,7 +450,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             LogTools.info("Solution quality: " + solutionQuality);
@@ -463,8 +462,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       {
          LogTools.info("Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-2);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 6.5e-3);
+      assertTrue(worstSolutionQuality < 5.0e-2, "Poor worst solution quality: " + worstSolutionQuality);
+      assertTrue(averageSolutionQuality < 6.5e-3, "Poor average solution quality: " + averageSolutionQuality);
    }
 
    @Test
@@ -521,9 +520,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
-         assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
-                    toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
+         assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
       }
 
       for (int i = 0; i < 15; i++)
@@ -554,7 +552,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          runKinematicsToolboxController(numberOfIterations);
 
          Point2D centerOfMass2D = new Point2D(computeCenterOfMass3D(toolboxController.getDesiredFullRobotModel()));
-         assertTrue("Error: " + shrunkSupportPolygon.signedDistance(centerOfMass2D), shrunkSupportPolygon.isPointInside(centerOfMass2D, 1.0e-7));
+         assertTrue(shrunkSupportPolygon.isPointInside(centerOfMass2D, 1.0e-7), "Error: " + shrunkSupportPolygon.signedDistance(centerOfMass2D));
       }
    }
 
