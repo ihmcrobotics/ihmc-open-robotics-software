@@ -329,7 +329,7 @@ public class RDXVRKinematicsStreamingMode
          boolean leftTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.LEFT);
          double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.LEFT);
          double forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.LEFT);
-         handleLeftControllJoystickInput(leftAButtonPressed, leftTriggerPressed, lateralJoystickValue, forwardJoystickValue, false);
+         handleLeftControllJoystickInput(leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, false);
       }
       else
       {
