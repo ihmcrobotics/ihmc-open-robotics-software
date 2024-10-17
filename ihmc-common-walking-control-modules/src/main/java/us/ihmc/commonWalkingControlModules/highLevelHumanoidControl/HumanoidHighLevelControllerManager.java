@@ -1,15 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -54,6 +52,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
@@ -67,7 +69,9 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
+   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -99,7 +103,9 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                             JointDesiredOutputListBasics lowLevelControllerOutput)
+                                             JointDesiredOutputListBasics lowLevelControllerOutput,
+                                             ControllerCoreOutPutDataHolder controllercoreOutputDataHolder,
+                                             ControllerCoreCommandDataHolder controllerCoreCommandDataHolder)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -107,6 +113,8 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
+      this.controllerCoreOutPutDataHolder = controllercoreOutputDataHolder;
+      this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -148,7 +156,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param pluginFactory the factory used to create the new plugin to be registered.
     */
    public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
@@ -163,7 +171,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
     * setup. Ideally, the plugin can be registered before creating the controller via the
     * {@link HighLevelHumanoidControllerFactory}.
     * </p>
-    * 
+    *
     * @param plugin the plugin to be registered.
     */
    public void addControllerPlugin(HighLevelHumanoidControllerPlugin plugin)
@@ -229,9 +237,12 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       highLevelControllerTimer.stopMeasurement();
 
+      // TODO This should be moved to the WholeBodyControllerCore Thread.
+      // new Thread will update the joint with desired values
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
+      reportControllerCoreOutputDataForWholeBodyControllerCore();
 
       if (inertialParameterManager != null)
          inertialParameterManager.update();
@@ -327,6 +338,16 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       }
    }
 
+   private void reportControllerCoreOutputDataForWholeBodyControllerCore()
+   {
+      controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
+
+   }
+   private void reportControllerCoreCommandDataForWholeBodyControllerCore()
+   {
+      controllerCoreCommandDataHolder.setControllerCoreCommandDataHolder(stateMachine.getCurrentState().getControllerCoreCommandData());
+   }
+
    private void copyJointDesiredsToJoints()
    {
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
@@ -340,6 +361,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
       }
 
+      // lowLevelControllerOutput is the source for contextData
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 

@@ -1666,7 +1666,7 @@ public class CrossRobotCommandRandomTools
    {
       return nextHumanoidRobotContextData(random, false, rootBody, possibleFrames);
    }
-
+   //TODO This is called in nextHumanoidRobotContextData. But nextHumanoidRobotContextData is not called in anywhere
    public static HumanoidRobotContextData nextHumanoidRobotContextData(Random random,
                                                                        boolean ensureNonEmptyCommand,
                                                                        RigidBodyBasics rootBody,
@@ -1688,12 +1688,16 @@ public class CrossRobotCommandRandomTools
                                                                    centerOfPressureDataHolder,
                                                                    robotMotionStatusHolder,
                                                                    jointDesiredOutputList,
-                                                                   sensorDataContext);
+                                                                   sensorDataContext,
+                                                                   null,
+                                                                   null,
+                                                                   null);
       next.setTimestamp(random.nextLong());
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
       next.setPerceptionRan(random.nextBoolean());
+      next.setWholeBodyControllerCoreRan(random.nextBoolean());
       return next;
    }
 

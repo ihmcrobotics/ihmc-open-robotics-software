@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -48,6 +49,7 @@ public class WalkingControllerState extends HighLevelControllerState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final KinematicsSimulationVirtualGroundReactionManager kinematicsSimulationVirtualGroundReactionManager;
+   private final ControllerCoreCommand controllerCoreCommandData;
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -86,6 +88,8 @@ public class WalkingControllerState extends HighLevelControllerState
       else
          kinematicsSimulationVirtualGroundReactionManager = null;
 
+      controllerCoreCommandData = new ControllerCoreCommand();
+
       registry.addChild(walkingController.getYoVariableRegistry());
    }
 
@@ -94,6 +98,7 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCore.initialize();
       walkingController.initialize();
       linearMomentumRateControlModule.reset();
+      controllerCoreCommandData.clear();
       requestIntegratorReset = true;
 
       if (kinematicsSimulationVirtualGroundReactionManager != null)
@@ -148,6 +153,7 @@ public class WalkingControllerState extends HighLevelControllerState
       }
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
+      controllerCoreCommandData.set(controllerCoreCommand);
       controllerCoreTimer.startMeasurement();
       controllerCore.compute(controllerCoreCommand);
       controllerCoreTimer.stopMeasurement();
@@ -172,6 +178,17 @@ public class WalkingControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
+   }
+
+   @Override
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return controllerCore.getControllerCoreOutput();
+   }
+   @Override
+   public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return controllerCoreCommandData;
    }
 
    @Override

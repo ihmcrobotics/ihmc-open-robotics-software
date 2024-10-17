@@ -3,6 +3,7 @@ package us.ihmc.avatar.scs2;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.AvatarWholeBodyControllerCoreThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -48,6 +49,7 @@ public class SCS2AvatarSimulation
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
+   private AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
    private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
@@ -418,11 +420,16 @@ public class SCS2AvatarSimulation
    {
       this.controllerThread = controllerThread;
    }
+   public void setWholeBodyControllerCoreThread(AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread)
+   {
+      this.wholeBodyControllerCoreThread = wholeBodyControllerCoreThread;
+   }
 
    public AvatarControllerThread getControllerThread()
    {
       return controllerThread;
    }
+   public AvatarWholeBodyControllerCoreThread getWholeBodyControllerCoreThread() {return wholeBodyControllerCoreThread;}
 
    public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
    {

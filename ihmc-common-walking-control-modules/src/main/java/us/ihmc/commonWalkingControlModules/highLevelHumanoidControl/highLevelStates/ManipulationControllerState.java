@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -532,5 +533,17 @@ public class ManipulationControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
+   }
+
+   @Override
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return controllerCore.getControllerCoreOutput();
+   }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return controllerCoreCommand;
    }
 }
