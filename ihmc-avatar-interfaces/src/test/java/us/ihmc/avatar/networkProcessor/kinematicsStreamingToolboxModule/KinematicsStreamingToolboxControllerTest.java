@@ -153,6 +153,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      if (!visualize)
+         simulationTestHelper.getAvatarSimulation().setShowGUI(false);
       YoBoolean isAutomaticManipulationAbortEnabled = (YoBoolean) simulationTestHelper.getControllerRegistry()
                                                                                       .findVariable(WalkingCommandConsumer.class.getSimpleName(),
                                                                                                     "isAutomaticManipulationAbortEnabled");
@@ -516,20 +518,22 @@ public abstract class KinematicsStreamingToolboxControllerTest
       simulationTestHelper.start();
       SimRunner simRunner = new SimRunner(simulationTestHelper);
 
-      SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
-      scs.waitUntilVisualizerFullyUp();
-      Platform.runLater(() ->
-                        {
-                           Button restart = new Button("Restart");
-                           restart.setOnAction(event -> simRunner.reset());
-                           scs.addCustomGUIControl(restart);
-                        });
+      if (visualize)
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         scs.waitUntilVisualizerFullyUp();
+         Platform.runLater(() ->
+                           {
+                              Button restart = new Button("Restart");
+                              restart.setOnAction(event -> simRunner.reset());
+                              scs.addCustomGUIControl(restart);
+                           });
+      }
 
       assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
 
       assertTrue(simRunner.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
-
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
       inputPublisher.publish(message);
