@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

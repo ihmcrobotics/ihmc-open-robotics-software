@@ -16,6 +16,7 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,7 +37,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanc
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygon2dTestHelpers;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -933,7 +933,7 @@ public class ClusterToolsTest
          ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
          ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
 
-         boolean completelyInside = ConvexPolygon2dCalculator.isPolygonInside(smallPolygon, bigPolygon);
+         boolean completelyInside = EuclidGeometryMissingTools.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
       }
    }

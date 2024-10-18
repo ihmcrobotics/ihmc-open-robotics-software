@@ -5,6 +5,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +23,6 @@ import us.ihmc.commons.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -39,9 +39,9 @@ public class FootstepPoseHeuristicChecker
    private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
 
-   private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
-   private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
-   private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame startOfSwingFrame = new PoseReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame candidateFootFrame = new PoseReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
    private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(startOfSwingFrame, "startOfSwingZUpFrame");
    private final ZUpFrame stanceFootZUpFrame = new ZUpFrame(stanceFootFrame, "stanceFootZUpFrame");
    private final FramePose3D stanceFootPose = new FramePose3D();

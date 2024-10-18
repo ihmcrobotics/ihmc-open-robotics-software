@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -514,8 +514,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       RotationMatrix startRotation = new RotationMatrix();
       RotationMatrix endRotation = new RotationMatrix();
 
-      startOfSwingReferenceFrame.getOrientation(startRotation);
-      endOfSwingReferenceFrame.getOrientation(endRotation);
+      startOfSwingReferenceFrame.getOrientation().get(startRotation);
+      endOfSwingReferenceFrame.getOrientation().get(endRotation);
 
       collisionBox.getOrientation().interpolate(startRotation, endRotation, 0.5);
 
@@ -622,8 +622,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       RotationMatrix startRotation = new RotationMatrix();
       RotationMatrix endRotation = new RotationMatrix();
 
-      startOfSwingReferenceFrame.getOrientation(startRotation);
-      endOfSwingReferenceFrame.getOrientation(endRotation);
+      startOfSwingReferenceFrame.getOrientation().get(startRotation);
+      endOfSwingReferenceFrame.getOrientation().get(endRotation);
 
       for (double fraction = 0.0; fraction <= 1.0; fraction += stepAmount)
       {

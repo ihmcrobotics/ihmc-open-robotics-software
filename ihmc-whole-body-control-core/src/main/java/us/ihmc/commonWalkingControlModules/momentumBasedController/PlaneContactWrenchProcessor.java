@@ -63,7 +63,7 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
       {
          feet.add(contactableBody.getRigidBody());
 
-         String name = contactableBody.getSoleFrame().getName();
+         String name = contactableBody.getContactFrame().getName();
          YoDouble forceMagnitude = new YoDouble(name + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 
@@ -73,17 +73,17 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
          String copName = name + "CoP";
          String listName = getClass().getSimpleName();
 
-         YoFramePoint2D cop2d = new YoFramePoint2D(copName + "2d", "", contactableBody.getSoleFrame(), registry);
+         YoFramePoint2D cop2d = new YoFramePoint2D(copName + "2d", "", contactableBody.getContactFrame(), registry);
          centersOfPressure2d.put(contactableBody, cop2d);
 
          YoFramePoint3D cop = new YoFramePoint3D(copName, ReferenceFrame.getWorldFrame(), registry);
          centersOfPressureWorld.put(contactableBody, cop);
 
-         FramePoint2D footCenter2d = new FramePoint2D(contactableBody.getSoleFrame());
+         FramePoint2D footCenter2d = new FramePoint2D(contactableBody.getContactFrame());
          footCenter2d.setToNaN();
          cops.put(contactableBody, footCenter2d);
 
-         YoFramePoint2D yoCop = new YoFramePoint2D(contactableBody.getName() + "CoP", contactableBody.getSoleFrame(), registry);
+         YoFramePoint2D yoCop = new YoFramePoint2D(contactableBody.getName() + "CoP", contactableBody.getContactFrame(), registry);
          yoCop.set(footCenter2d);
          yoCops.put(contactableBody, yoCop);
 
@@ -122,7 +122,7 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
          {
             tempForce.setIncludingFrame(wrench.getLinearPart());
 
-            double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getSoleFrame());
+            double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getContactFrame());
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
 
@@ -149,7 +149,7 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
-         cops.get(contactablePlaneBody).setToZero((contactablePlaneBody.getSoleFrame()));
+         cops.get(contactablePlaneBody).setToZero((contactablePlaneBody.getContactFrame()));
       }
    }
 

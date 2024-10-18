@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeMissingTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -14,9 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCutter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
@@ -54,7 +52,7 @@ public class PlanarRegionCuttingTools
       Line3D cuttingLine3D = new Line3D();
       Line2D cuttingLine2D = new Line2D();
 
-      GeometryTools.getIntersectionBetweenTwoPlanes(plane, region.getPlane(), cuttingLine3D);
+      EuclidFrameShapeMissingTools.getIntersectionBetweenTwoPlanes(plane, region.getPlane(), cuttingLine3D);
       cuttingLine3D.applyTransform(region.getTransformToLocal());
       cuttingLine2D.set(cuttingLine3D);
 

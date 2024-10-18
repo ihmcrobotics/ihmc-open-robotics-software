@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.time.ExecutionTimer;

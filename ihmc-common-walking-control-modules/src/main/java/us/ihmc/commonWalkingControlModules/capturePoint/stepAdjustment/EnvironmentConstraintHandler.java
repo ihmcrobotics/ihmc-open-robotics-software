@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -242,10 +243,10 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       return foundSolution.getBooleanValue();
    }
 
-   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Pose3DReadOnly footPose)
+   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DReadOnly> predictedContactPoints, Pose3DReadOnly footPose)
    {
       if (predictedContactPoints.isEmpty() || !usePredictedContactPoints.getValue())
-         predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
+         predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2D();
 
       footstepPolygon.clear();
       for (int i = 0; i < predictedContactPoints.size(); i++)

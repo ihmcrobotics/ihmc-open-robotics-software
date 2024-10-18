@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;

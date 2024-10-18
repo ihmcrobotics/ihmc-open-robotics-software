@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.commons.trajectories.core.Polynomial;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

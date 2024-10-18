@@ -14,7 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.referenceFrames.Pose2DReferenceFrame;
+import us.ihmc.euclid.referenceFrame.Pose2DReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;

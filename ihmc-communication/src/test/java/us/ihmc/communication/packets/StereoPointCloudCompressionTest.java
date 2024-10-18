@@ -17,10 +17,7 @@ import us.ihmc.communication.packets.StereoPointCloudCompression.CompressionInte
 import us.ihmc.communication.packets.StereoPointCloudCompression.DiscretizationParameters;
 import us.ihmc.communication.packets.StereoPointCloudCompression.PointAccessor;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 

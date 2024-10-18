@@ -24,7 +24,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;

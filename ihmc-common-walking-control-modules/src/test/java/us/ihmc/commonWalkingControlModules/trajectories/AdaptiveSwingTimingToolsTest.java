@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;

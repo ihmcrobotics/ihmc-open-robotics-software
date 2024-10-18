@@ -35,7 +35,7 @@ public class FootstepUtils
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
-      FramePose3D footFramePose = new FramePose3D(endEffector.getSoleFrame());
+      FramePose3D footFramePose = new FramePose3D(endEffector.getContactFrame());
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
@@ -105,7 +105,7 @@ public class FootstepUtils
       FramePoint3D footCenter = new FramePoint3D();
       for (RobotSide side : RobotSide.values)
       {
-         footCenter.setToZero(bipedFeet.get(side).getSoleFrame());
+         footCenter.setToZero(bipedFeet.get(side).getContactFrame());
          footCenter.changeFrame(worldFrame);
          distances.set(side, footCenter.distanceSquared(destinationInWorld));
       }

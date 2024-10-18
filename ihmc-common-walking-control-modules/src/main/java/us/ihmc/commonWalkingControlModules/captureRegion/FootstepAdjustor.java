@@ -55,7 +55,7 @@ public class FootstepAdjustor implements SCS2YoGraphicHolder
       defaultSupportPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         defaultSupportPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2d())));
+         defaultSupportPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2D())));
       }
    }
 

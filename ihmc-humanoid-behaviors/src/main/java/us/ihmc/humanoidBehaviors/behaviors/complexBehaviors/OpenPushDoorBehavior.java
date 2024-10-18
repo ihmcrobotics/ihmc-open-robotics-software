@@ -22,7 +22,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;

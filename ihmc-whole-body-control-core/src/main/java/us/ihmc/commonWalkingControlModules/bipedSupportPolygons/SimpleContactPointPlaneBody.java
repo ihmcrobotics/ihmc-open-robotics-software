@@ -10,7 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 /**
  * Simple implementation of {@link #ContactablePlaneBody} for a single contact point.
@@ -33,7 +33,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
 
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
       contactFrame = new PoseReferenceFrame(name + "Frame", frameAfterJoint);
-      contactFrame.setPoseAndUpdate(contactFramePoseInJointFrame);
+      contactFrame.setTransformAndUpdate(contactFramePoseInJointFrame);
       contactPoints.add(new FramePoint2D(contactFrame));
    }
 
@@ -70,21 +70,14 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public ReferenceFrame getSoleFrame()
+   public ReferenceFrame getContactFrame()
    {
       return contactFrame;
    }
 
    @Override
-   public List<FramePoint2D> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2D()
    {
       return contactPoints;
    }
-
-   @Override
-   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
-   {
-      contactFrame.setPoseAndUpdate(transform);
-   }
-
 }

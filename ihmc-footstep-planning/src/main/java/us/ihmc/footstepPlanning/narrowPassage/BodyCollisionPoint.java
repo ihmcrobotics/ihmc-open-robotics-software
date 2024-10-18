@@ -19,7 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;

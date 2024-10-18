@@ -4,6 +4,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 

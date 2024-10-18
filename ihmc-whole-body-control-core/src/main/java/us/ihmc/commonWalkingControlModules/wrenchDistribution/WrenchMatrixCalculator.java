@@ -159,7 +159,7 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
 
-         String copName = contactablePlaneBody.getSoleFrame().getName() + "CommandedCoP";
+         String copName = contactablePlaneBody.getContactFrame().getName() + "CommandedCoP";
          YoFramePoint3D cop = new YoFramePoint3D(copName, ReferenceFrame.getWorldFrame(), registry);
          commandedCoPs.put(rigidBody, cop);
 

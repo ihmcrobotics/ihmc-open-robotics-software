@@ -15,7 +15,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePoint2D;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -112,7 +112,7 @@ public class OnToesState extends AbstractFootControlState
       zeroAccelerationCommand.setPrimaryBase(pelvis);
 
       SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
-      feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getSoleFrame(), worldFrame);
+      feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getContactFrame(), worldFrame);
       feedbackControlSelectionMatrix.selectLinearZ(false); // We want to do zero acceleration along z-world.
       feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(feedbackControlSelectionMatrix);
@@ -245,7 +245,7 @@ public class OnToesState extends AbstractFootControlState
       contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
-      toeOffFrame.updateTranslation(contactPointPosition);
+      toeOffFrame.setTranslationAndUpdate(contactPointPosition);
 
       desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       desiredContactPointPosition.changeFrame(worldFrame);
@@ -258,7 +258,7 @@ public class OnToesState extends AbstractFootControlState
 
       contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      toeOffFrame.updateTranslation(contactPointPosition);
+      toeOffFrame.setTranslationAndUpdate(contactPointPosition);
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
       desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);

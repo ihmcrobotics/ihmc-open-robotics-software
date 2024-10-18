@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class SphereWithConvexPolygonIntersectorTest
 {
@@ -76,7 +76,7 @@ public class SphereWithConvexPolygonIntersectorTest
                                      sphereWithConvexPolygonIntersector.getClosestPointOnPolygon(), Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame1", WORLD);
-      frame.setPositionWithoutChecksAndUpdate(5.0, 3.0, 0.0);
+      frame.setPositionAndUpdate(5.0, 3.0, 0.0);
       sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 0.5);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
@@ -93,7 +93,7 @@ public class SphereWithConvexPolygonIntersectorTest
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame2", WORLD);
-      frame.setPositionWithoutChecksAndUpdate(5.0, 3.0, 0.0);
+      frame.setPositionAndUpdate(5.0, 3.0, 0.0);
       sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 1.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
@@ -110,7 +110,7 @@ public class SphereWithConvexPolygonIntersectorTest
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame3", WORLD);
-      frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
+      frame.setPositionAndUpdate(4.0, 2.0, 0.0);
       sphere = new FrameSphere3D(WORLD, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
@@ -127,7 +127,7 @@ public class SphereWithConvexPolygonIntersectorTest
                                      closestPointOnPolygon, Epsilons.ONE_TRILLIONTH);
       
       frame = new PoseReferenceFrame("testFrame4", WORLD);
-      frame.setPositionWithoutChecksAndUpdate(4.0, 2.0, 0.0);
+      frame.setPositionAndUpdate(4.0, 2.0, 0.0);
       sphere = new FrameSphere3D(frame, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();
       vertices.add(new Point2D(-1.0, -1.0));
@@ -135,7 +135,7 @@ public class SphereWithConvexPolygonIntersectorTest
       vertices.add(new Point2D(1.0, 1.0));
       vertices.add(new Point2D(1.0, -1.0));
       frame2 = new PoseReferenceFrame("testFrame4", WORLD);
-      frame2.setPositionWithoutChecksAndUpdate(9.5, 5.5, 0.0);
+      frame2.setPositionAndUpdate(9.5, 5.5, 0.0);
       polygon = new FrameConvexPolygon2D(frame2, Vertex2DSupplier.asVertex2DSupplier(vertices));
       assertTrue(sphereWithConvexPolygonIntersector.checkIfIntersectionExists(sphere, polygon));
       closestPointOnPolygon = sphereWithConvexPolygonIntersector.getClosestPointOnPolygon();

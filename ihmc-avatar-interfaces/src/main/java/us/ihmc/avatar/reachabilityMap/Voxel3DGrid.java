@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
 {
@@ -132,7 +132,7 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
    public void setGridPose(RigidBodyTransformReadOnly pose)
    {
-      referenceFrame.setPoseAndUpdate(pose);
+      referenceFrame.setTransformAndUpdate(pose);
    }
 
    public void setGridPose(Pose3DReadOnly pose)

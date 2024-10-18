@@ -17,10 +17,10 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
  * This class gathers different filters on a concave hull. The filters aim to reduce the hull
@@ -656,19 +656,19 @@ public class ConcaveHullPruningFilteringTools
             if (perimeterDistanceBetweenVertices(iEdgeEndB, iEdgeStartA, concaveHullToFilter) <= 2.0 * alphaRadius)
                continue;
 
-            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(edgeStartA, edgeEndA, edgeStartB, edgeEndB);
+            double distance = EuclidGeometryMissingTools.distanceBetweenTwoLineSegment2Ds(edgeStartA, edgeEndA, edgeStartB, edgeEndB);
 
             if (distance > 2.0 * alphaRadius)
                continue;
 
             Point2D closestPointOnEdgeA = new Point2D();
             Point2D closestPointOnEdgeB = new Point2D();
-            EuclidCoreMissingTools.closestPoint2DsBetweenTwoLineSegment2Ds(edgeStartA,
-                                                                           edgeEndA,
-                                                                           edgeStartB,
-                                                                           edgeEndB,
-                                                                           closestPointOnEdgeA,
-                                                                           closestPointOnEdgeB);
+            EuclidGeometryMissingTools.closestPoint2DsBetweenTwoLineSegment2Ds(edgeStartA,
+                                                                               edgeEndA,
+                                                                               edgeStartB,
+                                                                               edgeEndB,
+                                                                               closestPointOnEdgeA,
+                                                                               closestPointOnEdgeB);
 
             // Splitting the hull into 2:
             List<Point2D> concaveHullVertices = concaveHullToFilter.getConcaveHullVertices();

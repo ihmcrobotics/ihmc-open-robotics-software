@@ -256,7 +256,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
-         ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getSoleFrame();
+         ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getContactFrame();
          footFrames.put(foot, footFrame);
 
          String footPrefix = foot.getName();

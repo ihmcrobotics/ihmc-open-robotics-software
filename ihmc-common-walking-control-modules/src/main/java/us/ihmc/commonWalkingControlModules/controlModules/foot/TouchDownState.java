@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -114,7 +114,7 @@ public class TouchDownState extends AbstractFootControlState
 
       SideDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getFootSwitches();
       footSwitch = footSwitches.get(robotSide);
-      soleFrame = contactableFoot.getSoleFrame();
+      soleFrame = contactableFoot.getContactFrame();
 
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression();
       registry = new YoRegistry(namePrefix + name);
@@ -268,7 +268,7 @@ public class TouchDownState extends AbstractFootControlState
       contactLine.changeFrame(footFixedFrame);
       contactPointPositionToPack.setToNaN(footFixedFrame);
       contactLine.midpoint(contactPointPositionToPack);
-      groundContactFrameToUpdate.updateTranslation(contactPointPositionToPack);
+      groundContactFrameToUpdate.setTranslationAndUpdate(contactPointPositionToPack);
    }
 
    /**

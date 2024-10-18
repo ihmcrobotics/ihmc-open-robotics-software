@@ -40,7 +40,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
 import us.ihmc.commons.robotics.partNames.LegJointName;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -217,7 +217,7 @@ public class SwingState extends AbstractFootControlState
 
       RigidBodyTransform soleToControlFrameTransform = new RigidBodyTransform();
       originOfControlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
-      desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
+      desiredControlFrame.setTransformAndUpdate(soleToControlFrameTransform);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);

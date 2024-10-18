@@ -362,7 +362,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          this.footSwitch = footSwitch;
          this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
          foot = contactableFoot.getRigidBody();
-         soleFrame = contactableFoot.getSoleFrame();
+         soleFrame = contactableFoot.getContactFrame();
 
          String namePrefix = foot.getName();
 
@@ -371,7 +371,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
          footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
-         footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+         footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
          footCenterCoPLineSegment = new FrameLineSegment2D(soleFrame);
          copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
 

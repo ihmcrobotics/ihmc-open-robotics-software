@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class KinematicsSolutionQualityCalculator
 {
@@ -95,7 +95,7 @@ public class KinematicsSolutionQualityCalculator
    {
       RigidBodyBasics endEffector = command.getEndEffector();
 
-      controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
+      controlFrame.setTransformAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
 
       command.getDesiredAngularVelocity().get(0, error);
       command.getDesiredLinearVelocity().get(3, error);

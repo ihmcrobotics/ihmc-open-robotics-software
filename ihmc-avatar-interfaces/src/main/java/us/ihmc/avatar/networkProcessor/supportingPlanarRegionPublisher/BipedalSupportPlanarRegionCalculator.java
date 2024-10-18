@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -70,7 +71,7 @@ public class BipedalSupportPlanarRegionCalculator
       for (RobotSide robotSide : RobotSide.values)
       {
          scaledContactPointList.get(robotSide).clear();
-         for (FramePoint2D contactPoint : contactableFeet.get(robotSide).getContactPoints2d())
+         for (FramePoint2DReadOnly contactPoint : contactableFeet.get(robotSide).getContactPoints2D())
          {
             FramePoint2D scaledContactPoint = new FramePoint2D(contactPoint);
             scaledContactPoint.scale(scaleFactor);
@@ -87,7 +88,7 @@ public class BipedalSupportPlanarRegionCalculator
 
       if (feetAreInSamePlane(isInSupport))
       {
-         ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
+         ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getContactFrame();
 
          List<FramePoint2D> allContactPoints = new ArrayList<>();
          allContactPoints.addAll(scaledContactPointList.get(RobotSide.LEFT));
@@ -107,7 +108,7 @@ public class BipedalSupportPlanarRegionCalculator
             {
                ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
                List<FramePoint2D> contactPoints = scaledContactPointList.get(robotSide);
-               RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
+               RigidBodyTransform transformToWorld = contactableFoot.getContactFrame().getTransformToWorldFrame();
                supportRegions.set(robotSide.ordinal(),
                                   new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
             }
@@ -130,8 +131,8 @@ public class BipedalSupportPlanarRegionCalculator
             return false;
          }
       }
-      ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
-      ReferenceFrame rightSoleFrame = contactableFeet.get(RobotSide.RIGHT).getSoleFrame();
+      ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getContactFrame();
+      ReferenceFrame rightSoleFrame = contactableFeet.get(RobotSide.RIGHT).getContactFrame();
       RigidBodyTransform relativeSoleTransform = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
       RotationMatrixReadOnly relativeOrientation = relativeSoleTransform.getRotation();
 
