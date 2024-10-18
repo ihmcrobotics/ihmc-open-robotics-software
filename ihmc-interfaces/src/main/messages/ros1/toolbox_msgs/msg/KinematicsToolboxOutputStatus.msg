@@ -40,16 +40,8 @@ geometry_msgs/Vector3 desired_root_linear_velocity
 # Desired angular velocity of the root joint expressed in local frame.
 geometry_msgs/Vector3 desired_root_angular_velocity
 
-# Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
-geometry_msgs/Point[] multi_contact_feasible_com_region
-
-# Lowest-proximity edge index in multi-contact com region (if computed)
-# Field default value -1
-int32 closest_edge_index
-
-# CoM stability margin if upper body is load-bearing
-# Field default value -1.0
-float64 center_of_mass_stability_margin
+# Support region used by the toolbox
+geometry_msgs/Point[] support_region
 
 # Field default value -1.0
 float64 solution_quality

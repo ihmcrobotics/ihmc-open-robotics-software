@@ -77,19 +77,9 @@ module toolbox_msgs
          */
         geometry_msgs::msg::dds::Vector3 desired_root_angular_velocity;
         /**
-         * Multi-contact feasible com region computed by the toolbox (if upper body is load-bearing)
+         * Support region used by the toolbox
          */
-        sequence<geometry_msgs::msg::dds::Point, 18> multi_contact_feasible_com_region;
-        /**
-         * Lowest-proximity edge index in multi-contact com region (if computed)
-         */
-        @defaultValue(value=-1)
-        long closest_edge_index;
-        /**
-         * CoM stability margin if upper body is load-bearing
-         */
-        @defaultValue(value=-1.0)
-        double center_of_mass_stability_margin;
+        sequence<geometry_msgs::msg::dds::Point, 32> support_region;
         @defaultValue(value=-1.0)
         double solution_quality;
       };
