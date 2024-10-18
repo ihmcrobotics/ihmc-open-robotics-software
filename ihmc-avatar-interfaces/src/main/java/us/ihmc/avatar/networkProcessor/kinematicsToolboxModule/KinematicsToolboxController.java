@@ -197,7 +197,7 @@ public class KinematicsToolboxController extends ToolboxController
     * configuration obtained from {@link #desiredOneDoFJoints} and also with the solution quality which can be
     * used to quickly see if the solution is viable. It is sent back to the caller only.
     */
-   protected final KinematicsToolboxOutputStatus inverseKinematicsSolution;
+   private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
    /**
     * Variable to keep track of when the last solution was published.
     */
@@ -317,7 +317,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
    protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
-   protected final FramePoint3D centerOfMass = new FramePoint3D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
    /**
     * Distance to shrink the support polygon for safety purpose.
     */
@@ -852,7 +852,7 @@ public class KinematicsToolboxController extends ToolboxController
       isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
-      inverseKinematicsSolution.getMultiContactFeasibleComRegion().clear();
+      inverseKinematicsSolution.getSupportRegion().clear();
    }
 
    /**
@@ -1605,35 +1605,6 @@ public class KinematicsToolboxController extends ToolboxController
       for (int i = 0; i < previousFBCommands.size(); i++)
       {
          if (previousFBCommands.get(i).getEndEffector() == rigidBody)
-            return true;
-      }
-
-      return false;
-   }
-
-   public boolean isUserControllingRigidBodyPosition(RigidBodyBasics rigidBody)
-   {
-      RecyclingArrayList<SpatialFeedbackControlCommand> currentFBCommands = userFBCommands.getSpatialFeedbackControlCommandBuffer();
-
-      for (int i = 0; i < currentFBCommands.size(); i++)
-      {
-         SpatialFeedbackControlCommand command = currentFBCommands.get(i);
-         if (command.getEndEffector() != rigidBody)
-            continue;
-         SelectionMatrix6D selectionMatrix = command.getSpatialAccelerationCommand().getSelectionMatrix();
-         if (selectionMatrix.isLinearPartActive())
-            return true;
-      }
-
-      RecyclingArrayList<SpatialFeedbackControlCommand> previousFBCommands = previousUserFBCommands.getSpatialFeedbackControlCommandBuffer();
-
-      for (int i = 0; i < previousFBCommands.size(); i++)
-      {
-         SpatialFeedbackControlCommand command = previousFBCommands.get(i);
-         if (command.getEndEffector() != rigidBody)
-            continue;
-         SelectionMatrix6D selectionMatrix = command.getSpatialAccelerationCommand().getSelectionMatrix();
-         if (selectionMatrix.isLinearPartActive())
             return true;
       }
 
