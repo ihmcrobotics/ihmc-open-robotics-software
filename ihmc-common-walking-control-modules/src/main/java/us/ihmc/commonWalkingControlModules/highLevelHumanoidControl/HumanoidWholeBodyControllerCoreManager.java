@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -89,6 +90,9 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
                return centerOfMassJacobian.getCenterOfMassVelocity();
          }
       };
+
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
+
 
       this.lowLevelControllerOutput = lowLevelControllerOutput;
       //      this.controllerToolbox = controllerToolbox;
