@@ -80,6 +80,7 @@ public class KinematicsRecordReplay
 
    public void requestRecordReplay()
    {
+      LogTools.info("record/replay requested");
       requestRecordReplay = true;
    }
 

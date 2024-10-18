@@ -118,7 +118,14 @@ public abstract class RDXVRTrackedDevice
 
    public String getModelName()
    {
-      return VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
+      try
+      {
+         return VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
+      }
+      catch (NullPointerException e)
+      {
+         return "";
+      }
    }
 
    public ReferenceFrame getDeviceYUpZBackFrame()
