@@ -1,11 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
@@ -15,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationPara
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -55,11 +51,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -74,6 +66,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
@@ -371,7 +369,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     */
@@ -384,7 +382,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
@@ -428,14 +426,17 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
-                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
+                                                           boolean kinematicsSimulation,
+                                                           // For fast non-physics preview simulations
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                           ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
+                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                            JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
@@ -566,7 +567,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
+                                                                                  wholeBodyControllerCoreOutput,
+                                                                                  controllerCoreOutPutDataHolder,
+                                                                                  controllerCoreCommandDataHolder);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
@@ -747,5 +750,4 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       else
          isListeningToHighLevelStatePackets = isListening;
    }
-
 }
