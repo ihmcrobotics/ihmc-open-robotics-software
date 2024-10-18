@@ -3,6 +3,7 @@ package us.ihmc.avatar.drcRobot;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.jme3.math.Transform;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
@@ -25,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.LocomotionParameters;
@@ -49,7 +51,6 @@ import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
-import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
@@ -204,14 +205,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new DefaultSimulationLowLevelControllerFactory(getJointMap(), getSimulateDT());
    }
 
-   /**
-    * @return parameters used in the user interface only.
-    */
-   public default UIParameters getUIParameters()
-   {
-      return null;
-   }
-
    public default LocomotionParameters getLocomotionParameters()
    {
       return null;
@@ -325,4 +318,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
+
+   public default RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
+   {
+      return new RigidBodyTransform();
+   }
+
+   public abstract Transform getJmeTransformWristToHand(RobotSide side);
+
 }

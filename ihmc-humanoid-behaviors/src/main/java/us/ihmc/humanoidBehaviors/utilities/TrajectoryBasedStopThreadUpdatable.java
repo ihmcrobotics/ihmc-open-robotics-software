@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.utilities;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -9,9 +10,12 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 
+import java.util.concurrent.TimeoutException;
+
 public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
 {
    private final boolean DEBUG = false;
+   private static final double MAX_TIME = Conversions.minutesToSeconds(1.0);
 
    private final FramePose3D initialPose;
    private final FramePose3D currentPose;
@@ -64,6 +68,11 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       }
       elapsedTime = time - startTime;
 
+      if (elapsedTime > MAX_TIME)
+      {
+         throw new RuntimeException("Exceeded the maximum time");
+      }
+
       if (!initialPoseHasBeenSet)
       {
          getCurrentTestFramePose(initialPose);
@@ -110,6 +119,8 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
             setShouldBehaviorRunnerBeStopped(true);
          }
       }
+
+
       elapsedTimeOld = elapsedTime;
       percentTrajectoryCompletedOld = percentTrajectoryCompleted;
    }

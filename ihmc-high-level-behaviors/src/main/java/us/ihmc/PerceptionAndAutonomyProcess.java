@@ -45,6 +45,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -186,6 +187,7 @@ public class PerceptionAndAutonomyProcess
    private final IterativeClosestPointManager icpManager;
 
    private final OpenCLManager openCLManager = new OpenCLManager();
+   private final ROS2SRTSensorStreamer sensorStreamer = new ROS2SRTSensorStreamer();
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -356,6 +358,7 @@ public class PerceptionAndAutonomyProcess
 //      openCLManager.destroy();
 
       overlapRemover.destroy();
+      sensorStreamer.destroy();
 
       depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
@@ -414,10 +417,8 @@ public class PerceptionAndAutonomyProcess
          }
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
-         for (RobotSide side : RobotSide.values)
-         {
-            zedImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
-         }
+         sensorStreamer.sendFrame(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, zedColorImages.get(RobotSide.LEFT));
+         sensorStreamer.sendFrame(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, zedColorImages.get(RobotSide.RIGHT));
 
          zedDepthImage.release();
          zedColorImages.forEach(RawImage::release);
@@ -439,7 +440,7 @@ public class PerceptionAndAutonomyProcess
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
-         realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
+         sensorStreamer.sendFrame(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, realsenseColorImage);
 
          realsenseDepthImage.release();
          realsenseColorImage.release();

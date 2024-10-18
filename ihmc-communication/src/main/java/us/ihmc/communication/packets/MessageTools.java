@@ -81,6 +81,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
@@ -91,6 +93,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -1573,5 +1576,51 @@ public class MessageTools
          return Level.TRACE;
       else
          return Level.INFO;
+   }
+
+   /**
+    * Serializes the given ROS2 message/
+    * @param message The ROS2 message to be serialized
+    * @return A ByteBuffer containing the serialized message
+    * @param <T> The type of the ROS2 message
+    */
+   public static <T extends Packet<T>> ByteBuffer serialize(T message)
+   {
+      SerializedPayload payload = new SerializedPayload(message.getPubSubTypePacket().get().getTypeSize());
+      try
+      {
+         @SuppressWarnings("unchecked")
+         TopicDataType<T> pubSubType = message.getPubSubTypePacket().get();
+         pubSubType.serialize(message, payload);
+         return payload.getData();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /**
+    * Deserializes the given serialized message, and packs it into the {@code messageToPack}.
+    * @param serializedData The serialized data of a ROS2 message
+    * @param messageToPack ROS2 message into which the deserialized message will be packed. Must be of the same type as the serialized message.
+    * @param <T> The type of the ROS2 message
+    */
+   public static <T extends Packet<T>> void deserialize(ByteBuffer serializedData, T messageToPack)
+   {
+      SerializedPayload payload = new SerializedPayload(serializedData.limit());
+      payload.getData().put(serializedData);
+      payload.getData().position(0);
+
+      try
+      {
+         @SuppressWarnings("unchecked")
+         TopicDataType<T> pubSubType = messageToPack.getPubSubTypePacket().get();
+         pubSubType.deserialize(payload, messageToPack);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }
