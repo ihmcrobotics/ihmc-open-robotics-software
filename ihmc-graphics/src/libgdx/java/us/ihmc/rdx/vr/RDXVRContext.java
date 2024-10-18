@@ -337,6 +337,12 @@ public class RDXVRContext
       {
          controllers.get(side).updatePickResults();
       }
+
+      updateVRProcessors();
+   }
+
+   public void updateVRProcessors()
+   {
       for (Consumer<RDXVRContext> vrInputProcessor : vrInputProcessors)
       {
          vrInputProcessor.accept(this);
@@ -363,6 +369,9 @@ public class RDXVRContext
 
    public void dispose()
    {
+      if (!RDXVRManager.ENABLE_VR)
+         return;
+
       for (RDXVREye eyeData : eyes)
          eyeData.getFrameBuffer().dispose();
 

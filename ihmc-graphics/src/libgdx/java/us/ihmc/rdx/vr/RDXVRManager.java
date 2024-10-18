@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 public class RDXVRManager
 {
+   public static final boolean ENABLE_VR = false;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RDXVRContext context = new RDXVRContext();
@@ -101,24 +103,34 @@ public class RDXVRManager
          {
             initializing = true;
             contextCreatedNotification = new Notification();
-            MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            if (ENABLE_VR)
             {
-               synchronized (syncObject)
+               MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
                {
-                  initSystemCount++;
-                  context.initSystem();
-               }
+                  synchronized (syncObject)
+                  {
+                     initSystemCount++;
+                     context.initSystem();
+                  }
+                  contextCreatedNotification.set();
+               });
+            }
+            else
+            {
                contextCreatedNotification.set();
-            });
+            }
          }
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {
             initializing = false;
 
-            synchronized (syncObject)
+            if (ENABLE_VR)
             {
-               setupEyesCount++;
-               context.setupEyes();
+               synchronized (syncObject)
+               {
+                  setupEyesCount++;
+                  context.setupEyes();
+               }
             }
 
             scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
@@ -147,9 +159,14 @@ public class RDXVRManager
                waitingOnPoses = false;
             }
 
-            if (posesReadyThisFrame)
+            if (!ENABLE_VR)
+            {
+               context.updateVRProcessors();
+            }
+            else if (posesReadyThisFrame)
             {
                // pollEventsFrequencyCalculator.ping();
+
                context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
 
                // A tracker has disconnected
@@ -221,6 +238,9 @@ public class RDXVRManager
 
    private void waitOnPoses()
    {
+      if (!ENABLE_VR)
+         return;
+
       while (waitGetPosesThreadRunning)
       {
          waitOnPosesNotification.blockingPoll();
@@ -344,7 +364,7 @@ public class RDXVRManager
    public boolean isVRReady()
    {
       // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
-      return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
+      return vrEnabled.get() && contextInitialized && (!ENABLE_VR || context.getHeadset().isConnected());
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

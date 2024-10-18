@@ -70,6 +70,7 @@ import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule.getInputTopic;
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
@@ -92,7 +93,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(45.0); // 120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -108,6 +109,7 @@ public class RDXVRKinematicsStreamingMode
    private MutableReferenceFrame headsetReferenceFrame;
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final AtomicBoolean requestRecordReplay = new AtomicBoolean(false);
    private final Notification streamingDisabled = new Notification();
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
@@ -117,7 +119,7 @@ public class RDXVRKinematicsStreamingMode
    private final RDXManualFootstepPlacement footstepPlacer;
    private final RDXHandConfigurationManager handManager;
    private boolean pausedForWalking = false;
-   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
+   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>(0.0f, 0.0f);
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
@@ -319,6 +321,9 @@ public class RDXVRKinematicsStreamingMode
 
    public void processVRInput()
    {
+      if (!toolboxInputStreamRateLimiter.run(streamPeriod))
+         return;
+
       kinematicsRecorder.onUpdateStart();
 
       // Handle left joystick input
@@ -351,6 +356,11 @@ public class RDXVRKinematicsStreamingMode
          });
       }
 
+      if (requestRecordReplay.getAndSet(false))
+      {
+         kinematicsRecorder.requestRecordReplay();
+      }
+
       // Handle right joystick input
       if (kinematicsRecorder.isReplaying())
       {
@@ -378,7 +388,7 @@ public class RDXVRKinematicsStreamingMode
          });
       }
 
-      if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if ((enabled.get() || kinematicsRecorder.isReplaying()))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
 
@@ -1042,6 +1052,10 @@ public class RDXVRKinematicsStreamingMode
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
          setEnabled(false);
+      }
+      if (ImGui.button(labels.get("Start record/replay")))
+      {
+         requestRecordReplay.set(true);
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
