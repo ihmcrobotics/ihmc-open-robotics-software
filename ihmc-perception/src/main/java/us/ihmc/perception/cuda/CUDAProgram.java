@@ -161,7 +161,7 @@ class CUDAProgram
 
       // Load the module using the PTX
       error = cuModuleLoadData(module, ptx);
-      checkNVRTCError(error);
+      checkCUDAError(error);
 
       // Release stuff
       nvrtcDestroyProgram(compiledProgram);
