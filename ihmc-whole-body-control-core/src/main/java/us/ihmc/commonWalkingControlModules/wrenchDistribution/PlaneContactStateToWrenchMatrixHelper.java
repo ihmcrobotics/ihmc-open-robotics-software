@@ -24,7 +24,7 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -101,7 +101,7 @@ public class PlaneContactStateToWrenchMatrixHelper
                                                 int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
                                                 YoRegistry parentRegistry)
    {
-      List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
+      List<? extends FramePoint2DReadOnly> contactPoints2d = contactablePlaneBody.getContactPoints2D();
 
       if (contactPoints2d.size() > maxNumberOfContactPoints)
          throw new RuntimeException("Unexpected number of contact points: " + contactPoints2d.size());
@@ -139,7 +139,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       RigidBodyBasics rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = new PoseReferenceFrame(namePrefix + "ContactFrame", rigidBody.getBodyFixedFrame());
-      planeFrame.setPoseAndUpdate(contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
+      planeFrame.setTransformAndUpdate(contactablePlaneBody.getContactFrame().getTransformToDesiredFrame(rigidBody.getBodyFixedFrame()));
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
       yoPlaneContactState.clear();
       yoPlaneContactState.computeSupportPolygon();
@@ -187,7 +187,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    {
       RigidBodyTransform contactFramePose = command.getContactFramePoseInBodyFixedFrame();
       if (!contactFramePose.containsNaN())
-         planeFrame.setPoseAndUpdate(contactFramePose);
+         planeFrame.setTransformAndUpdate(contactFramePose);
 
       int previousNumberOfContacts = yoPlaneContactState.getNumberOfContactPointsInContact();
 

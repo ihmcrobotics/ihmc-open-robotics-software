@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -19,7 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

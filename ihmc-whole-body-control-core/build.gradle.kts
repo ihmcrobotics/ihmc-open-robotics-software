@@ -15,12 +15,15 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
-   api("us.ihmc:ihmc-commons-controls:source")
+   api("us.ihmc:ihmc-commons-robotics:source")
    api("us.ihmc:ihmc-commons-utils:source")
-   api("us.ihmc:ihmc-commons-yo:source")
+   api("us.ihmc:ihmc-robotics-tools:source")
+   api("us.ihmc:euclid-update:source")
+   api("us.ihmc:euclid-update-frame:source")
+   api("us.ihmc:euclid-update-frame-shape:source")
    api("us.ihmc:ihmc-yovariables-filters:source")
-   api("us.ihmc:mecano-yovariables-filters:source")
-   api("us.ihmc:ihmc-mecano-tools:source")
+   api("us.ihmc:mecano-update-yovariables-filters:source")
+   api("us.ihmc:mecano-update:source")
 }
 
 testDependencies {

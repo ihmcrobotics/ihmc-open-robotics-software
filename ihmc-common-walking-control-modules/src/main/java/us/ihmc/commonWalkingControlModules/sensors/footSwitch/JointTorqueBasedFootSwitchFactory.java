@@ -112,7 +112,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
                                             jointDescriptionToCheck,
                                             foot.getRigidBody(),
                                             rootBody,
-                                            (MovingReferenceFrame) foot.getSoleFrame(),
+                                            (MovingReferenceFrame) foot.getContactFrame(),
                                             contactThresholdTorque,
                                             higherContactThresholdTorque,
                                             contactForceThreshold,

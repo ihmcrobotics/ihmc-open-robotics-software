@@ -80,8 +80,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      soleFrame = contactableFoot.getSoleFrame();
-      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+      soleFrame = contactableFoot.getContactFrame();
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
 
       angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
       angleThreshold = explorationParameters.getGeometricDetectionAngleThreshold();

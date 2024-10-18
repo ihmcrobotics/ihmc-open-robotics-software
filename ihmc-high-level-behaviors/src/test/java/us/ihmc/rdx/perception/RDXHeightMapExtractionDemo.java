@@ -31,7 +31,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;

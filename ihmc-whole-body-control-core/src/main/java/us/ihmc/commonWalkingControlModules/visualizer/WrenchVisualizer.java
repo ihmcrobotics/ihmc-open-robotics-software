@@ -145,7 +145,7 @@ public class WrenchVisualizer
 
       public ContactablePlaneBodyWrenchVisualizer(ContactablePlaneBody contactablePlaneBody)
       {
-         this(contactablePlaneBody.getName(), contactablePlaneBody.getSoleFrame());
+         this(contactablePlaneBody.getName(), contactablePlaneBody.getContactFrame());
       }
 
       public ContactablePlaneBodyWrenchVisualizer(String planeBodyName, ReferenceFrame soleFrame)

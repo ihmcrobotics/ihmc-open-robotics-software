@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.List;
 
@@ -64,13 +64,13 @@ public class FootPlacementConstraintCalculator
          Point2DReadOnly vertex = polygon.getVertex(i);
          Point2DReadOnly nextVertex = polygon.getVertex((i + 1) % polygon.getNumberOfVertices());
 
-         double distanceSquared = EuclidCoreMissingTools.distanceSquaredFromPoint2DToLineSegment2D(queryPoint.getX(),
-                                                                                                   queryPoint.getY(),
-                                                                                                   vertex.getX(),
-                                                                                                   vertex.getY(),
-                                                                                                   nextVertex.getX(),
-                                                                                                   nextVertex.getY(),
-                                                                                                   tempPoint);
+         double distanceSquared = EuclidGeometryMissingTools.distanceSquaredFromPoint2DToLineSegment2D(queryPoint.getX(),
+                                                                                                       queryPoint.getY(),
+                                                                                                       vertex.getX(),
+                                                                                                       vertex.getY(),
+                                                                                                       nextVertex.getX(),
+                                                                                                       nextVertex.getY(),
+                                                                                                       tempPoint);
          if (distanceSquared < minimumDistanceSquared)
          {
             minimumDistanceSquared = distanceSquared;

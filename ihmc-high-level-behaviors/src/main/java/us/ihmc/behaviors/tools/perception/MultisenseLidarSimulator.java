@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.robotics.partNames.NeckJointName;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;

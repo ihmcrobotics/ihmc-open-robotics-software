@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 /**
  * @author Nicolas EYSSETTE

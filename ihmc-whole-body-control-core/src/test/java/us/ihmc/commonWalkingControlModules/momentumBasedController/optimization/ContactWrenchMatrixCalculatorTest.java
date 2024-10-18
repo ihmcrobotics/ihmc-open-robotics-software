@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -108,7 +109,7 @@ public class ContactWrenchMatrixCalculatorTest
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
       next.setCoefficientOfFriction(random.nextDouble());
-      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getSoleFrame(), 1.0));
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getContactFrame(), 1.0));
       next.setHasContactStateChanged(true);
 
       for (FramePoint3D contactPoint : contactablePlaneBody.getContactPointsCopy())

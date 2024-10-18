@@ -43,7 +43,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;

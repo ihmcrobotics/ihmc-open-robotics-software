@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;

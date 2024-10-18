@@ -24,7 +24,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 import static org.junit.jupiter.api.Assertions.*;
 

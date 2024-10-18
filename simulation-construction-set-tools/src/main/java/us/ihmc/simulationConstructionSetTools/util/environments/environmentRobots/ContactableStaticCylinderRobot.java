@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,7 +18,6 @@ import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -63,7 +60,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       offset.set(cylinderTransform.getTranslation());
       rotation.set(cylinderTransform.getRotation());
       
-      FramePoint3D cylinderCenter = new FramePoint3D(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
+      FramePoint3D cylinderCenter = new FramePoint3D(new PoseReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
       cylinderCenterTransformToWorld.set(rotation, new Vector3D(cylinderCenter));
       

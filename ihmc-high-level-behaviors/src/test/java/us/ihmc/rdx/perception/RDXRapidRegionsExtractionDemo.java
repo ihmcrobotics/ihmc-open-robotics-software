@@ -32,7 +32,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;

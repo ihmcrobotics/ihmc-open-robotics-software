@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;

@@ -14,27 +14,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
  */
 public class ConvexPolygon2dCalculator
 {
-   /**
-    * Determines if the polygonToTest is inside the convex polygon.
-    */
-   public static boolean isPolygonInside(ConvexPolygon2DReadOnly polygonToTest, double epsilon, ConvexPolygon2DReadOnly polygon)
-   {
-      for (int i = 0; i < polygonToTest.getNumberOfVertices(); i++)
-      {
-         if (!polygon.isPointInside(polygonToTest.getVertex(i), epsilon))
-            return false;
-      }
-
-      return true;
-   }
-
-   /**
-    * Determines if the polygonToTest is inside the convex polygon.
-    */
-   public static boolean isPolygonInside(ConvexPolygon2DReadOnly polygonToTest, ConvexPolygon2DReadOnly polygon)
-   {
-      return isPolygonInside(polygonToTest, 0.0, polygon);
-   }
 
    /**
     * Returns the index in the middle of the range from firstIndex to secondIndex moving counter clockwise.

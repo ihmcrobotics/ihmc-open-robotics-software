@@ -419,9 +419,9 @@ public class ICPCoPConstraintHandlerTest
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBodyBasics foot = contactableFoot.getRigidBody();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         ReferenceFrame soleFrame = contactableFoot.getContactFrame();
          soleFrames.put(robotSide, soleFrame);
-         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2D();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix
                + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);

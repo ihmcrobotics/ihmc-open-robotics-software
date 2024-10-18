@@ -110,7 +110,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
 
-      footPolygon.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(RobotSide.LEFT).getContactPoints2d()));
+      footPolygon.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(RobotSide.LEFT).getContactPoints2D()));
 
       parentRegistry.addChild(registry);
 

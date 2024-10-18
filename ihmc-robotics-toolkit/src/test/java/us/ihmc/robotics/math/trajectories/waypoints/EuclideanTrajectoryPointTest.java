@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.assertFalse;

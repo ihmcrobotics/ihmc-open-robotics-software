@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
-import us.ihmc.commons.math.QuaternionCalculus;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import static org.junit.jupiter.api.Assertions.*;

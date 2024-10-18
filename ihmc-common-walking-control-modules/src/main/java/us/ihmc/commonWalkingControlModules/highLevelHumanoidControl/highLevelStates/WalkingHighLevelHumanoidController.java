@@ -561,7 +561,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
@@ -698,9 +698,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          // This happens on the first tick when the controller core has not yet run to update the center of pressure.
-         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
+         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getContactFrame())
          {
-            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          }
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();

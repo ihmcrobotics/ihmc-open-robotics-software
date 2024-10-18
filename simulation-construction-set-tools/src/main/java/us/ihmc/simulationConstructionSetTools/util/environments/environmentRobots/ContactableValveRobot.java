@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.environments.ValveType;
@@ -110,7 +110,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       YoGraphicsListRegistry graphListRegistry = new YoGraphicsListRegistry();
 
       valveFrame = new PoseReferenceFrame("valveFrame", valvePoseInWorld);
-      valveFrame.getPose(originalValvePose);
+      originalValvePose.set(valveFrame.getPose());
 
       //creating the pinJoint 
       Vector3D jointAxisVector = new Vector3D(1.0, 0.0, 0.0);
@@ -199,7 +199,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQYoVariable().getDoubleValue());
       newValvePose.set(originalValvePose);
       newValvePose.multiply(pinJointTransform);
-      valveFrame.setPoseAndUpdate(newValvePose);
+      valveFrame.setTransformAndUpdate(newValvePose);
 
       super.updateAllGroundContactPointVelocities();
    }

@@ -86,7 +86,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame soleFrame = feet.get(robotSide).getSoleFrame();
+         ReferenceFrame soleFrame = feet.get(robotSide).getContactFrame();
          soleFrames.put(robotSide, soleFrame);
 
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());

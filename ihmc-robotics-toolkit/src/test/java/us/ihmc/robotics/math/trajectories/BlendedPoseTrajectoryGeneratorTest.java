@@ -23,7 +23,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BlendedPoseTrajectoryGeneratorTest

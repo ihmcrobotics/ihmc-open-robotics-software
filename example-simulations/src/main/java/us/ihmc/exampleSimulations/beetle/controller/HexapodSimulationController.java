@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;

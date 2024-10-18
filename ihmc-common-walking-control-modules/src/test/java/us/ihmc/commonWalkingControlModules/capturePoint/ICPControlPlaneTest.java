@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPControlPlaneTest
@@ -567,7 +567,7 @@ public class ICPControlPlaneTest
       icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
       TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
-      referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
+      referenceFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.1));
 
       ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
       Point2D point1 = new Point2D(0.2, 0.2);
@@ -620,7 +620,7 @@ public class ICPControlPlaneTest
       icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
       TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
-      referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
+      referenceFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.1));
 
       ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
       Point2D point1 = new Point2D(0.2, 0.2);
@@ -672,7 +672,7 @@ public class ICPControlPlaneTest
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)
    {
       TranslationReferenceFrame centerOfMassFrame = new TranslationReferenceFrame("centerOfMass", worldFrame);
-      centerOfMassFrame.updateTranslation(new Vector3D(x, y, z));
+      centerOfMassFrame.setTranslationAndUpdate(new Vector3D(x, y, z));
 
       return centerOfMassFrame;
    }

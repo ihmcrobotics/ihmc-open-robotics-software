@@ -31,7 +31,7 @@ import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
 import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
@@ -128,7 +128,7 @@ public class SupportState extends AbstractFootControlState
       parentRegistry.addChild(registry);
 
       footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);
-      controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
+      controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getContactFrame());
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
       footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
@@ -183,7 +183,7 @@ public class SupportState extends AbstractFootControlState
       double dt = controllerToolbox.getControlDT();
       footRotationCalculationModule = new FootholdCroppingModule(robotSide,
                                                                  soleFrame,
-                                                                 footControlHelper.getContactableFoot().getContactPoints2d(),
+                                                                 footControlHelper.getContactableFoot().getContactPoints2D(),
                                                                  footControlHelper.getFootholdRotationParameters(),
                                                                  dt,
                                                                  registry,
@@ -245,7 +245,7 @@ public class SupportState extends AbstractFootControlState
 
       footSwitch.getCenterOfPressure(cop2d);
       if (cop2d.containsNaN())
-         cop2d.setToZero(contactableFoot.getSoleFrame());
+         cop2d.setToZero(contactableFoot.getContactFrame());
 
       // handle partial foothold detection
       boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
@@ -311,7 +311,7 @@ public class SupportState extends AbstractFootControlState
 
       // update the control frame
       framePosition.setIncludingFrame(cop2d, 0.0);
-      frameOrientation.setToZero(contactableFoot.getSoleFrame());
+      frameOrientation.setToZero(contactableFoot.getContactFrame());
       controlFrame.setPoseAndUpdate(framePosition, frameOrientation);
 
       // assemble acceleration command
@@ -381,17 +381,17 @@ public class SupportState extends AbstractFootControlState
 
    private void computeFootPolygon()
    {
-      ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+      ReferenceFrame soleFrame = contactableFoot.getContactFrame();
       footPolygon.clear(soleFrame);
       for (int i = 0; i < contactableFoot.getTotalNumberOfContactPoints(); i++)
-         footPolygon.addVertex(contactableFoot.getContactPoints2d().get(i));
+         footPolygon.addVertex(contactableFoot.getContactPoints2D().get(i));
       footPolygon.update();
    }
 
    private void updateHoldPositionSetpoints()
    {
-      footPosition.setToZero(contactableFoot.getSoleFrame());
-      footOrientation.setToZero(contactableFoot.getSoleFrame());
+      footPosition.setToZero(contactableFoot.getContactFrame());
+      footOrientation.setToZero(contactableFoot.getContactFrame());
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
       footPosition.changeFrame(soleZUpFrame);
       footOrientation.changeFrame(soleZUpFrame);
@@ -542,7 +542,7 @@ public class SupportState extends AbstractFootControlState
 
    private double computeCurrentFootPitchInSoleZUp()
    {
-      footOrientation.setToZero(contactableFoot.getSoleFrame());
+      footOrientation.setToZero(contactableFoot.getContactFrame());
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
       footOrientation.changeFrame(soleZUpFrame);
       return footOrientation.getPitch();

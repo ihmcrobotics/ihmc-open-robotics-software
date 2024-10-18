@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -56,9 +56,9 @@ public class ConvexStepConstraintOptimizerTest
 
       ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
 
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      assertFalse(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
       foot.applyTransform(wiggleTransform, false);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
 
       // Now, let's translation it a lot, and make sure the constraints on max translation prevent it from moving too much
       initialFootTransform.setToZero();
@@ -69,7 +69,7 @@ public class ConvexStepConstraintOptimizerTest
       parameters.setMaxY(0.05);
 
       foot.set(initialFoot);
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      assertFalse(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
       wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters);
 
       assertEquals(-0.05, wiggleTransform.getTranslationX(), 1e-6);
@@ -77,13 +77,13 @@ public class ConvexStepConstraintOptimizerTest
 
 
       foot.applyTransform(wiggleTransform, false);
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      assertFalse(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
 
       parameters.setConstrainMaxAdjustment(false);
       wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters);
       foot.set(initialFoot);
       foot.applyTransform(wiggleTransform, false);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
 
 
       double distanceInside = 0.05;
