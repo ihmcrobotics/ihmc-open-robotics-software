@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Class for recording or replaying motions in the UI.
@@ -56,6 +57,7 @@ public class KinematicsRecordReplay
    private final Map<String, FramePose3D> firstFramePose = new HashMap<>();
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames;
    private boolean requestRecordReplay;
+   private Consumer<Boolean> replayCallback = b -> {};
 
    public KinematicsRecordReplay(SceneGraph sceneGraph, ImBoolean enabledKinematicsStreaming, SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
    {
@@ -141,6 +143,11 @@ public class KinematicsRecordReplay
       }
    }
 
+   public void setReplayCallback(Consumer<Boolean> replayCallback)
+   {
+      this.replayCallback = replayCallback;
+   }
+
    public void onUpdateStart()
    {
       requestRecordReplay = false;
@@ -161,12 +168,14 @@ public class KinematicsRecordReplay
             isRecording = false;
             trajectoryRecorder.setPath(recordPath.get());
             trajectoryRecorder.onRecordEnd();
+            replayCallback.accept(false);
          }
          else
          {
             LogTools.info("Starting to record!");
             isRecording = true;
             trajectoryRecorder.onRecordStart();
+            replayCallback.accept(true);
          }
       }
 
