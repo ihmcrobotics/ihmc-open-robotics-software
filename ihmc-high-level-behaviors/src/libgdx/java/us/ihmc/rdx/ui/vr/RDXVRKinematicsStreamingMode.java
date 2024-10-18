@@ -226,6 +226,13 @@ public class RDXVRKinematicsStreamingMode
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
+      kinematicsRecorder.setReplayCallback(isRecordStarting ->
+                                                {
+                                                   KSTLoggingMessage loggingMessage = new KSTLoggingMessage();
+                                                   loggingMessage.setStartLogging(isRecordStarting);
+                                                   ros2ControllerHelper.publishToController(loggingMessage);
+                                                });
+
       // TODO Luigi. remove when Nadia chest link has been replaced and we can remove the fake joints from the urdf
       // Message for deactivating the spine pitch and roll joints
       ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());

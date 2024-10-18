@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ObjectCarryMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KSTLoggingMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -244,6 +245,14 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void onObjectCarryMessageReceived(ObjectCarryMessage objectCarryMessage)
    {
       tools.onObjectCarryMessageReceived(objectCarryMessage);
+   }
+
+   public void onLoggingRequestReceived(KSTLoggingMessage loggingMessage)
+   {
+      if (loggingMessage.getStartLogging())
+         tools.getLogger().onLogRequestStart();
+      else
+         tools.getLogger().onLogRequestFinish();
    }
 
    @Override

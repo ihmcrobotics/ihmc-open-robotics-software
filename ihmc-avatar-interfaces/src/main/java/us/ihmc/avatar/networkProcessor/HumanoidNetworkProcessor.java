@@ -7,7 +7,6 @@ import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorT
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
@@ -242,8 +241,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    {
       try
       {
-         modulesToClose.add(new KinematicsStreamingToolboxMessageLogger(robotModel.getSimpleRobotName(), pubSubImplementation));
-
          if (launcherClass == null)
          {
             checkIfModuleCanBeCreated(KinematicsStreamingToolboxModule.class);

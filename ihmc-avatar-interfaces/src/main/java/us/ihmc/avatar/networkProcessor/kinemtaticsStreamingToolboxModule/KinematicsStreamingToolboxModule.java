@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.ObjectCarryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KSTLoggingMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
@@ -25,7 +26,6 @@ import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ObjectCarryCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -182,6 +182,13 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       {
          LogTools.info("received object carry message");
          controller.onObjectCarryMessageReceived(s.takeNextData());
+      });
+
+      ROS2Topic<KSTLoggingMessage> loggingTopic = HumanoidControllerAPI.getTopic(KSTLoggingMessage.class, robotName);
+      ros2Node.createSubscription(loggingTopic, s ->
+      {
+         LogTools.info("received logging request");
+         controller.onLoggingRequestReceived(s.takeNextData());
       });
    }
 
