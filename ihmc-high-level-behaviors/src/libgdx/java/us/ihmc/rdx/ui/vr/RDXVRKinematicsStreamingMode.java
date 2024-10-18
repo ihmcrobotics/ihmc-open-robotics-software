@@ -47,7 +47,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,6 +61,7 @@ import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
@@ -106,7 +106,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
-   private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
+//   private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
@@ -185,8 +185,8 @@ public class RDXVRKinematicsStreamingMode
 
       // TODO Luigi. remove when Nadia chest link has been replaced and we can remove the fake joints from the urdf
       // Message for deactivating the spine pitch and roll joints
-      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
-      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
+//      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
+//      ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
       if (createToolbox)
       {
          KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
@@ -205,14 +205,14 @@ public class RDXVRKinematicsStreamingMode
          parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
          parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
          parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-         parameters.setUseBBXInputFilter(true);
+         parameters.setUseBBXInputFilter(false);
          parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
          parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
          parameters.setOutputLPFBreakFrequency(10.0);
          parameters.setOutputJointVelocityScale(0.65);
 
          parameters.setMinimizeAngularMomentum(true);
-         parameters.setMinimizeLinearMomentum(true);
+         parameters.setMinimizeLinearMomentum(false);
          parameters.setAngularMomentumWeight(0.20);
          // TODO should prob be something like 0.01, 0.25 makes it feels like it's moving through mud, the pelvis height mainly won't move fast up/down cuz it generates too much momentum.
          parameters.setLinearMomentumWeight(0.01);
@@ -232,10 +232,28 @@ public class RDXVRKinematicsStreamingMode
 
          if (robotModel != null)
          {
+            // reduce limit for elbow to avoid singularity
             Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
+            Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
             for (RobotSide robotSide : RobotSide.values)
-               jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -0.10);
+            {
+               OneDoFJointBasics elbowJoint = syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
+               double upperLimit = elbowJoint.getJointLimitUpper();
+               double lowerLimit = elbowJoint.getJointLimitLower();
+               double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
+               if (fullyExtendedLimit > 0)
+               {
+                  fullyExtendedLimit = -0.10;
+                  jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
+               }
+               else
+               {
+                  fullyExtendedLimit = 0.10;
+                  jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
+               }
+            }
             parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
+            parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
             parameters.setInitialConfigurationMap(createInitialConfiguration(robotModel));
          }
 
@@ -313,17 +331,19 @@ public class RDXVRKinematicsStreamingMode
                List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
                for (RobotSide robotSide : RobotSide.values)
                {
-                  int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
-                  int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
-                  int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
-                  int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
-
-                  // TODO extract this initial configuration in robot specific class
-                  initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
-                  initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
-                  initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
-                  initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
-                  // TODO add also default for wrist joints if they exist
+                  List<ArmJointName> armJointNames = Arrays.asList(ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW,
+                                                                   ArmJointName.ELBOW_PITCH,
+                                                                   ArmJointName.WRIST_YAW, ArmJointName.WRIST_ROLL, ArmJointName.GRIPPER_YAW);
+                  List<Integer> armIndices = armJointNames.stream()
+                                                          .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
+                                                          .toList();
+                  for (int i=0; i < armJointNames.size(); i++)
+                  {
+                     if (armIndices.get(i) != -1)
+                     {
+                        initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
+                     }
+                  }
                }
                ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                        .getSimpleRobotName()), initialConfigMessage);
@@ -406,10 +426,10 @@ public class RDXVRKinematicsStreamingMode
                         KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                            trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
                                                                                            segmentType.getSegmentName(),
-                                                                                           segmentType.getPositionWeight(),
-                                                                                           segmentType.getOrientationWeight(),
-                                                                                           segmentType.getLinearRateLimitation(),
-                                                                                           segmentType.getAngularRateLimitation());
+                                                                                           retargetingParameters.getPositionWeight(segmentType),
+                                                                                           retargetingParameters.getOrientationWeight(segmentType),
+                                                                                           retargetingParameters.getLinearRateLimitation(segmentType),
+                                                                                           retargetingParameters.getAngularRateLimitation(segmentType));
                         message.setHasDesiredLinearVelocity(true);
                         message.getDesiredLinearVelocityInWorld().set(tracker.getLinearVelocity());
                         message.setHasDesiredAngularVelocity(true);
@@ -447,10 +467,10 @@ public class RDXVRKinematicsStreamingMode
                                                                                      handDesiredControlFrames.get(
                                                                                            segmentType.getSegmentSide()).getReferenceFrame(),
                                                                                      segmentType.getSegmentName(),
-                                                                                     segmentType.getPositionWeight(),
-                                                                                     segmentType.getOrientationWeight(),
-                                                                                     segmentType.getLinearRateLimitation(),
-                                                                                     segmentType.getAngularRateLimitation());
+                                                                                     retargetingParameters.getPositionWeight(segmentType),
+                                                                                     retargetingParameters.getOrientationWeight(segmentType),
+                                                                                     retargetingParameters.getLinearRateLimitation(segmentType),
+                                                                                     retargetingParameters.getAngularRateLimitation(segmentType));
                   message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
                   message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
 
@@ -482,10 +502,10 @@ public class RDXVRKinematicsStreamingMode
                KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                   motionRetargeting.getDesiredFrame(segmentType),
                                                                                   segmentType.getSegmentName(),
-                                                                                  segmentType.getPositionWeight(),
-                                                                                  segmentType.getOrientationWeight(),
-                                                                                  segmentType.getLinearRateLimitation(),
-                                                                                  segmentType.getAngularRateLimitation());
+                                                                                  retargetingParameters.getPositionWeight(segmentType),
+                                                                                  retargetingParameters.getOrientationWeight(segmentType),
+                                                                                  retargetingParameters.getLinearRateLimitation(segmentType),
+                                                                                  retargetingParameters.getAngularRateLimitation(segmentType));
                // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
                if (segmentType.isHandRelated())
                {
@@ -569,7 +589,7 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+//         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
