@@ -115,6 +115,11 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return getOrCreateRobotInterface().newSyncedRobot();
    }
 
+   public ROS2SyncedRobotModel newSyncedRobot(boolean enforceUniqueReferenceFrames)
+   {
+      return getOrCreateRobotInterface().newSyncedRobot(enforceUniqueReferenceFrames);
+   }
+
    public VisibilityGraphPathPlanner newBodyPathPlanner()
    {
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
