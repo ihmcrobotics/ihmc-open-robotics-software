@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +36,16 @@ public class BehaviorTreeTools
       operation.accept(node);
 
       for (BehaviorTreeNodeDefinition child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static void runForSubtreeNodes(BehaviorTreeNodeState<?> node, Consumer<BehaviorTreeNodeState<?>> operation)
+   {
+      operation.accept(node);
+
+      for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          runForSubtreeNodes(child, operation);
       }
