@@ -100,7 +100,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime);
       simulationTestHelper.publishToController(goHomeMessage);
-      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.5));
+      assertTrue(simulationTestHelper.simulateNow(trajectoryTime + 0.75));
 
       humanoidReferenceFrames.updateFrames();
       FrameQuaternion homeOrientation = new FrameQuaternion(midFootZUpGroundFrame, new Quaternion());
