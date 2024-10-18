@@ -75,7 +75,7 @@ public class CoPObjectiveCalculatorTest
 
          for (ContactablePlaneBody contactablePlaneBody : toolbox.getContactablePlaneBodies())
          {
-            FramePoint2D desiredCoP = EuclidFrameRandomTools.nextFramePoint2D(random, contactablePlaneBody.getSoleFrame());
+            FramePoint2D desiredCoP = EuclidFrameRandomTools.nextFramePoint2D(random, contactablePlaneBody.getContactFrame());
 
             PlaneContactStateToWrenchMatrixHelper helper = wrenchMatrixCalculator.getPlaneContactStateToWrenchMatrixHelper(contactablePlaneBody.getRigidBody());
             DMatrixRMaj jacobian = new DMatrixRMaj(2, helper.getRhoSize());
@@ -88,7 +88,7 @@ public class CoPObjectiveCalculatorTest
             DMatrixRMaj randomWrenchVector = new DMatrixRMaj(6, 1);
             CommonOps_DDRM.mult(helper.getWrenchJacobianMatrix(), randomRhoVector, randomWrenchVector);
 
-            Wrench wrench = new Wrench(contactablePlaneBody.getRigidBody().getBodyFixedFrame(), contactablePlaneBody.getSoleFrame());
+            Wrench wrench = new Wrench(contactablePlaneBody.getRigidBody().getBodyFixedFrame(), contactablePlaneBody.getContactFrame());
             wrench.set(randomWrenchVector);
 
             FramePoint2DReadOnly achievedCoP = computeCoPFromWrench(wrench);
@@ -281,7 +281,7 @@ public class CoPObjectiveCalculatorTest
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
       next.setCoefficientOfFriction(random.nextDouble());
-      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getSoleFrame(), 1.0));
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getContactFrame(), 1.0));
       next.setHasContactStateChanged(true);
 
       for (FramePoint3D contactPoint : contactablePlaneBody.getContactPointsCopy())

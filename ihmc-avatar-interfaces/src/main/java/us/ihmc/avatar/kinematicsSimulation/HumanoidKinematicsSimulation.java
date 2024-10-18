@@ -59,7 +59,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;

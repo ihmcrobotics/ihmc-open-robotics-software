@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
@@ -27,8 +28,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 
@@ -226,10 +225,10 @@ public class ConvexPolygonTools
       {
          for (int indexB = 0; indexB < polygonB.getNumberOfVertices(); indexB++)
          {
-            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
-                                                               polygonA.getNextVertex(indexA),
-                                                               polygonB.getVertex(indexB),
-                                                               polygonB.getNextVertex(indexB));
+            double distance = EuclidGeometryMissingTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
+                                                                                          polygonA.getNextVertex(indexA),
+                                                                                          polygonB.getVertex(indexB),
+                                                                                          polygonB.getNextVertex(indexB));
             minDistance = Math.min(minDistance, distance);
          }
       }
@@ -753,10 +752,10 @@ public class ConvexPolygonTools
    private static boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
                                                                                                                       ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
    {
-      return EuclidGeometryPolygonMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
-                                                                                          polygonWithExactlyTwoVertices.getVertex(1),
-                                                                                          polygonWithAtLeastTwoVertices.getPolygonVerticesView(),
-                                                                                          polygonWithAtLeastTwoVertices.getNumberOfVertices());
+      return EuclidGeometryMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
+                                                                                   polygonWithExactlyTwoVertices.getVertex(1),
+                                                                                   polygonWithAtLeastTwoVertices.getPolygonVerticesView(),
+                                                                                   polygonWithAtLeastTwoVertices.getNumberOfVertices());
    }
 
    private static boolean findCrossingIndices(boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ, ConvexPolygon2DReadOnly polygonP,
@@ -882,7 +881,7 @@ public class ConvexPolygonTools
          Point2DReadOnly startQ = polygonQ.getVertex(startIndexQ);
          Point2DReadOnly endQ = polygonQ.getVertex(endIndexQ);
 
-         boolean success = EuclidCoreMissingTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ, intersection);
+         boolean success = EuclidGeometryMissingTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ, intersection);
          if (!success)
          {
             if (DEBUG)

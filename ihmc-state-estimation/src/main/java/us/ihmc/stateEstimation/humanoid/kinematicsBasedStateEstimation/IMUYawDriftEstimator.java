@@ -119,7 +119,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry, 0);
          areFeetTrusted.put(foot, isFootTrusted);
 
-         ReferenceFrame soleFrame = feet.get(foot).getSoleFrame();
+         ReferenceFrame soleFrame = feet.get(foot).getContactFrame();
          footSoleFrames.put(foot, soleFrame);
       }
 

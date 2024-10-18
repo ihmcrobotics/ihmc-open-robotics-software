@@ -9,7 +9,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -48,7 +48,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DGains;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
 import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;

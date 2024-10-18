@@ -146,7 +146,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
          Footstep footstepAtCurrentLocation = new Footstep(robotSide);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
-         soleFrames.put(robotSide, contactableFoot.getSoleFrame());
+         soleFrames.put(robotSide, contactableFoot.getContactFrame());
 
          upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class, FootTrajectoryCommand::set));
          upcomingLegTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(LegTrajectoryCommand.class, LegTrajectoryCommand::set));

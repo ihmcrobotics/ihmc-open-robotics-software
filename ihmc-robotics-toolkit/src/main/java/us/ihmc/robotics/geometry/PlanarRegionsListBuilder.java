@@ -13,7 +13,7 @@ import us.ihmc.euclid.shape.primitives.Ramp3D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 import java.util.Stack;
 
@@ -173,7 +173,7 @@ public class PlanarRegionsListBuilder
 
    public void pushOffset(Tuple3DReadOnly positionOffset, Orientation3DReadOnly orientationOffset)
    {
-      Pose3D originalPlacementFrame = new Pose3D(placementFrame.getPosition(), placementFrame.getOrientation());
+      Pose3D originalPlacementFrame = new Pose3D(placementFrame.getTranslation(), placementFrame.getOrientation());
       placementFrameStack.push(originalPlacementFrame);
       Pose3D offsetPose = new Pose3D(originalPlacementFrame);
       if (positionOffset != null)

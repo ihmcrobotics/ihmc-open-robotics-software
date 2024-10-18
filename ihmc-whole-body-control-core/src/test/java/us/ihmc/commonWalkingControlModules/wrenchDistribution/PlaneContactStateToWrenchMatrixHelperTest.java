@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +16,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class PlaneContactStateToWrenchMatrixHelperTest
          planeContactStateCommand.setCoefficientOfFriction(1.0);
          planeContactStateCommand.setContactNormal(new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0));
          planeContactStateCommand.setHasContactStateChanged(true);
-         contactablePlaneBody.getContactPoints2d().forEach(planeContactStateCommand::addPointInContact);
+         contactablePlaneBody.getContactPoints2D().forEach(planeContactStateCommand::addPointInContact);
 
          helper.setPlaneContactStateCommand(planeContactStateCommand);
          helper.computeMatrices(1e-8, 1e-9, new Vector2D(1e-5, 1e-5), new Vector2D(1e-6, 1e-6));

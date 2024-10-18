@@ -26,7 +26,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class SO3TrajectoryPointTest
 {

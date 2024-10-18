@@ -37,7 +37,7 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.commons.math.QuaternionCalculus;
+import us.ihmc.euclid.QuaternionCalculus;
 
 public class TwistCalculatorTest
 {

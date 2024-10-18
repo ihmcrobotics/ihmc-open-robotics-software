@@ -17,7 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSextant;
 import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;

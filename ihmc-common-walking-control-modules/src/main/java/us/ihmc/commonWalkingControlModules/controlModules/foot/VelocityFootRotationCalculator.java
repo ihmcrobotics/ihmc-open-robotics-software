@@ -134,10 +134,10 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    {
       this.namePrefix = namePrefix;
       this.rotatingBody = rotatingFoot;
-      this.soleFrame = rotatingFoot.getSoleFrame();
+      this.soleFrame = rotatingFoot.getContactFrame();
       this.controllerDt = dt;
 
-      footPolygonInSoleFrame.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(rotatingFoot.getContactPoints2d()));
+      footPolygonInSoleFrame.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(rotatingFoot.getContactPoints2D()));
 
       String name = getClass().getSimpleName();
       YoRegistry registry = new YoRegistry(namePrefix + name);

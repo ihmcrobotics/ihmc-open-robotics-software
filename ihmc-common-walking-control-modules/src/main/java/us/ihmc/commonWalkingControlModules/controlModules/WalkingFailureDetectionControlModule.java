@@ -49,7 +49,7 @@ public class WalkingFailureDetectionControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2D footPolygonInFootFrame = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFeet.get(robotSide)
-                                                                                                                                             .getContactPoints2d()));
+                                                                                                                                             .getContactPoints2D()));
          footPolygons.put(robotSide, footPolygonInFootFrame);
 
          FrameConvexPolygon2D footPolygonInWorldFrame = new FrameConvexPolygon2D();

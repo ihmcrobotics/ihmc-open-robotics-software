@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -40,13 +41,13 @@ public class YoPlaneContactState implements PlaneContactState
 
    private final YoBoolean hasContactStateChanged;
 
-   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<? extends FramePoint2DReadOnly> contactFramePoints,
                               double coefficientOfFriction, YoRegistry parentRegistry)
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
 
-   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+   public YoPlaneContactState(String namePrefix, RigidBodyBasics rigidBody, ReferenceFrame planeFrame, List<? extends FramePoint2DReadOnly> contactFramePoints,
                               double coefficientOfFriction, double defaultRhoWeight, YoRegistry parentRegistry)
    {
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -61,7 +62,7 @@ public class YoPlaneContactState implements PlaneContactState
 
       this.contactNormalFrameVector = new FrameVector3D(planeFrame, 0.0, 0.0, 1.0);
 
-      contactPoints = new ArrayList<YoContactPoint>(contactFramePoints.size());
+      contactPoints = new ArrayList<>(contactFramePoints.size());
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
          YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, contactFramePoints.get(i), this, registry);
@@ -226,7 +227,7 @@ public class YoPlaneContactState implements PlaneContactState
       this.contactPointCentroid.set(contactPointsPolygon.getCentroid());
    }
 
-   public void setContactFramePoints(List<FramePoint2D> contactPointLocations)
+   public void setContactFramePoints(List<? extends FramePoint2DReadOnly> contactPointLocations)
    {
       int contactPointLocationsSize = contactPointLocations.size();
 
@@ -237,7 +238,7 @@ public class YoPlaneContactState implements PlaneContactState
 
       for (int i = 0; i < contactPointLocationsSize; i++)
       {
-         FramePoint2D contactPointLocation = contactPointLocations.get(i);
+         FramePoint2DReadOnly contactPointLocation = contactPointLocations.get(i);
          YoContactPoint yoContactPoint = contactPoints.get(i);
 
          yoContactPoint.set(contactPointLocation);

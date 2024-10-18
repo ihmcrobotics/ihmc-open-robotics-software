@@ -5,19 +5,12 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 
 /**
  * Theoretically finished but not unit tested or bug free. Have to abandon this
@@ -27,8 +20,8 @@ import us.ihmc.robotics.geometry.shapes.FramePlane3d;
  */
 public class FrameConvexPolygon2dIntersector
 {
-   private final FramePlane3d planeOne;
-   private final FramePlane3d planeTwo;
+   private final FramePlane3D planeOne;
+   private final FramePlane3D planeTwo;
    private final FrameLine3D intersectionOfPlanes;
    private final FrameLine2D planeIntersectionOnPolygonPlane;
    private final Pair<FramePoint2D, FramePoint2D> lineIntersectionOnPolygonPlane;
@@ -41,8 +34,8 @@ public class FrameConvexPolygon2dIntersector
 
    public FrameConvexPolygon2dIntersector()
    {
-      planeOne = new FramePlane3d();
-      planeTwo = new FramePlane3d();
+      planeOne = new FramePlane3D();
+      planeTwo = new FramePlane3D();
       intersectionOfPlanes = new FrameLine3D();
       planeIntersectionOnPolygonPlane = new FrameLine2D();
       lineIntersectionOnPolygonPlane = new Pair<FramePoint2D, FramePoint2D>(new FramePoint2D(), new FramePoint2D());
@@ -309,7 +302,7 @@ public class FrameConvexPolygon2dIntersector
       }
    };
 
-   public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine3D intersectionToPack)
+   public static void intersectTwoPlanes(FramePlane3D planeOne, FramePlane3D planeTwo, FrameLine3D intersectionToPack)
    {
       ReferenceFrame previousPlaneTwoReferenceFrame = planeTwo.getReferenceFrame();
       planeTwo.changeFrame(planeOne.getReferenceFrame());

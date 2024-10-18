@@ -67,7 +67,7 @@ public class ExplorationHelper implements SCS2YoGraphicHolder
          copCommandWeight = explorationParameters.getCopCommandWeight();
       else
          copCommandWeight = null;
-      soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
+      soleFrame = footControlHelper.getContactableFoot().getContactFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
       commandWeight.setToZero(soleFrame);

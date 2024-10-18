@@ -13,7 +13,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -92,7 +92,7 @@ public class SnapAndWiggleSingleStep
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       regionToMoveTo.getTransformToWorld(regionToWorld);
       PoseReferenceFrame regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
-      regionFrame.setPoseAndUpdate(regionToWorld);
+      regionFrame.setTransformAndUpdate(regionToWorld);
       PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
 
       RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
@@ -140,7 +140,7 @@ public class SnapAndWiggleSingleStep
       {
          RigidBodyTransform transform = new RigidBodyTransform();
          region.getTransformToWorld(transform);
-         planarRegionFrame.setPoseAndUpdate(transform);
+         planarRegionFrame.setTransformAndUpdate(transform);
 
          planarRegionPolygon.set(region.getConvexHull());
          planarRegionPolygon.setReferenceFrame(planarRegionFrame);

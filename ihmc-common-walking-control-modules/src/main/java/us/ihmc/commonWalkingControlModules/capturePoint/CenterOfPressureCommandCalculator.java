@@ -69,13 +69,13 @@ public class CenterOfPressureCommandCalculator
          for (RobotSide robotSide : RobotSide.values)
          {
             desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
+            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getContactFrame());
             if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0 && footSupportPolygonsInSoleFrame.get(robotSide).isPointInside(desiredCoPFootFrame))
             {
                // it is to the outside of the foot, so add the command
                centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
                centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getSoleFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getContactFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
                setCommand = true;
                break;
             }

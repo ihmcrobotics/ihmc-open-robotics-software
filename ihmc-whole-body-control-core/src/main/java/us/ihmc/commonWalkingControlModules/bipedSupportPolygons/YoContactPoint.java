@@ -4,6 +4,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -16,14 +18,14 @@ public class YoContactPoint implements ContactPointBasics
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
-   public YoContactPoint(String namePrefix, int index, FramePoint2D contactPointPosition2d, PlaneContactState parentContactState,
+   public YoContactPoint(String namePrefix, int index, FramePoint2DReadOnly contactPointPosition2d, PlaneContactState parentContactState,
                          YoRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
       set(contactPointPosition2d);
    }
 
-   public YoContactPoint(String namePrefix, int index, FramePoint3D contactPointPosition, PlaneContactState parentContactState,
+   public YoContactPoint(String namePrefix, int index, FramePoint3DReadOnly contactPointPosition, PlaneContactState parentContactState,
                          YoRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition.getReferenceFrame(), parentContactState, parentRegistry);

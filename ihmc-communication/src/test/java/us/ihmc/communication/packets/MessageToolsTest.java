@@ -3,6 +3,7 @@ package us.ihmc.communication.packets;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 

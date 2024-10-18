@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.Overhead
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.commons.referenceFrames.Pose2DReferenceFrame;
+import us.ihmc.euclid.referenceFrame.Pose2DReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 

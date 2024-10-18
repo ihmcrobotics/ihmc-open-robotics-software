@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
-import us.ihmc.commons.math.QuaternionCalculus;
+import us.ihmc.euclid.QuaternionCalculus;
 
 public class KSTToolsTest
 {

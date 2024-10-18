@@ -25,7 +25,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
@@ -340,13 +340,13 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       hingeRotation.setToYawOrientation(getHingeYaw());
       RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
       newDoorPose.getRotation().set(hingeRotation);
-      doorFrame.setPoseAndUpdate(newDoorPose);
+      doorFrame.setTransformAndUpdate(newDoorPose);
       
       for(RobotSide robotSide : RobotSide.values())
       {
          RigidBodyTransform handlePose = handlePoses.get(robotSide).getTransformToDesiredFrame(doorFrame);
          handlePose.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
-         handlePoses.get(robotSide).setPoseAndUpdate(handlePose);
+         handlePoses.get(robotSide).setTransformAndUpdate(handlePose);
       }
       
       super.updateAllGroundContactPointVelocities();

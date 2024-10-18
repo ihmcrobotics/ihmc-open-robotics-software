@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public interface VirtualEffortCommand<T extends VirtualEffortCommand<T>> extends VirtualModelControlCommand<T>
 {

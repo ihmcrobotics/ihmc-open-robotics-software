@@ -33,7 +33,7 @@ import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.wholeBodyControlCore.pidGains.*;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPID3DGains;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;

@@ -239,7 +239,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         ReferenceFrame soleFrame = contactableFoot.getContactFrame();
          String namePrefix = soleFrame.getName() + "DesiredCoP";
          YoFramePoint2D yoDesiredCenterOfPressure = new YoFramePoint2D(namePrefix, soleFrame, registry);
          footDesiredCenterOfPressures.put(contactableFoot, yoDesiredCenterOfPressure);
@@ -256,17 +256,17 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(),
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getContactFrame().getName(),
                                                                     rigidBody,
-                                                                    contactableFoot.getSoleFrame(),
-                                                                    contactableFoot.getContactPoints2d(),
+                                                                    contactableFoot.getContactFrame(),
+                                                                    contactableFoot.getContactPoints2D(),
                                                                     coefficientOfFriction,
                                                                     registry);
 
          footContactStates.put(robotSide, contactState);
-         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
+         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2D());
 
-         FrameConvexPolygon2D defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+         FrameConvexPolygon2D defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
          defaultFootPolygons.put(robotSide, defaultFootPolygon);
       }
 
@@ -289,7 +289,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       for (RobotSide robotSide : RobotSide.values)
       {
          yoCoPError.put(robotSide,
-                        new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
+                        new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getContactFrame(), registry));
       }
 
       if (wristForceSensors == null)
@@ -559,7 +559,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
-         ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
+         ReferenceFrame planeFrame = contactablePlaneBody.getContactFrame();
 
          copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
 
@@ -736,7 +736,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      List<FramePoint2D> defaultContactPoints = foot.getContactPoints2d();
+      List<? extends FramePoint2DReadOnly> defaultContactPoints = foot.getContactPoints2D();
       previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(defaultContactPoints);
       footContactState.setContactFramePoints(defaultContactPoints);
    }

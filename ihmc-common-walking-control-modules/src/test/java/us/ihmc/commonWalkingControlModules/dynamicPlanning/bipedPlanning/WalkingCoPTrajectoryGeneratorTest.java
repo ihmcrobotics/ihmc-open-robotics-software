@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
@@ -75,7 +75,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
+         soleFrames.get(robotSide).setPositionAndUpdate(0.0, robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
          polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
@@ -152,7 +152,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
+         soleFrames.get(robotSide).setPositionAndUpdate(0.0, robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
          polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 
@@ -245,7 +245,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
+         soleFrames.get(robotSide).setPositionAndUpdate(0.0, robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
          polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon().get(robotSide)));
       }
 

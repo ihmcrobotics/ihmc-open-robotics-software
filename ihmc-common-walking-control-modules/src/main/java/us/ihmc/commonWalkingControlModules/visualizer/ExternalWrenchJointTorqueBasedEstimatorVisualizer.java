@@ -60,7 +60,7 @@ public class ExternalWrenchJointTorqueBasedEstimatorVisualizer
                                                                    rootBody,
                                                                    contactableBodies.stream().map(ContactablePlaneBody::getRigidBody)
                                                                                     .collect(Collectors.toList()),
-                                                                   contactableBodies.stream().map(ContactablePlaneBody::getSoleFrame)
+                                                                   contactableBodies.stream().map(ContactablePlaneBody::getContactFrame)
                                                                                     .collect(Collectors.toList()),
                                                                    vizScaling,
                                                                    yoGraphicsListRegistry,

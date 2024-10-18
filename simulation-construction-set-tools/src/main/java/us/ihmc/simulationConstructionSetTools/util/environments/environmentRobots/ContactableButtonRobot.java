@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -207,7 +207,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonPushVector.normalize();
       newButtonPose.set(originalButtonTransform);
       newButtonPose.multiply(sliderJointTransform);
-      buttonFrame.setPoseAndUpdate(newButtonPose);
+      buttonFrame.setTransformAndUpdate(newButtonPose);
 
       super.updateAllGroundContactPointVelocities();
    }

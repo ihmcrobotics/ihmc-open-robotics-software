@@ -37,11 +37,4 @@ public class JUnitTools
          assertEquals("Array disagree at index " + i + " :", expectedDoubleArray[i], actualDoubleArray[i], epsilon);
       }
    }
-
-   public static void assertTDoubleArrayListEquals(TDoubleArrayList expected, TDoubleArrayList actual, double epsilon)
-   {
-      assertEquals("Size is not equal. Expected " + expected.size() + ", received " + actual.size() + ".", expected.size(), actual.size());
-      for (int i = 0; i < expected.size(); i++)
-         assertEquals("Value " + i + " is not equal. Expected " + expected.get(i) + ", received " + actual.get(i) + ".", expected.get(i), actual.get(i), epsilon);
-   }
 }

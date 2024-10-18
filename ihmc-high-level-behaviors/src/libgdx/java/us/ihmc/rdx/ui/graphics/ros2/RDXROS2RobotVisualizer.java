@@ -15,6 +15,7 @@ import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreMissingTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.RDXFocusBasedCamera;
@@ -30,7 +31,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD455;
 import us.ihmc.rdx.ui.interactable.RDXInteractableZED2i;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 

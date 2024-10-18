@@ -32,7 +32,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConver
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
@@ -278,7 +278,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       convexPolygon2D.update();
 
       TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
-      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+      planarRegionFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.3));
 
       PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;
@@ -296,7 +296,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       convexPolygon2D.update();
 
       TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
-      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+      planarRegionFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.3));
 
       PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;

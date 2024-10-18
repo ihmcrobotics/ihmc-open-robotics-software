@@ -42,7 +42,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3Traject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSO3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class FrameSO3TrajectoryPointTest
 {

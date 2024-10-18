@@ -120,8 +120,8 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       this.robotSide = robotSide;
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
-      soleFrame = contactableFoot.getSoleFrame();
-      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+      soleFrame = contactableFoot.getContactFrame();
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
       shrunkFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
       shrunkFootPolygonInWorld = new FrameConvexPolygon2D(defaultFootPolygon);
       controllerFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
@@ -201,7 +201,7 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
       lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
-      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getSoleFrame(), explorationParameters, registry);
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getContactFrame(), explorationParameters, registry);
 
       unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);

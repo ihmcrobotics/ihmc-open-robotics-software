@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
-import us.ihmc.commons.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;

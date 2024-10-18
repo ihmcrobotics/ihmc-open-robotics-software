@@ -20,7 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
