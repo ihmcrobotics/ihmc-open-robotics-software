@@ -61,7 +61,6 @@ import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
@@ -214,7 +213,6 @@ public class RDXVRKinematicsStreamingMode
          parameters.setMinimizeAngularMomentum(true);
          parameters.setMinimizeLinearMomentum(false);
          parameters.setAngularMomentumWeight(0.20);
-         // TODO should prob be something like 0.01, 0.25 makes it feels like it's moving through mud, the pelvis height mainly won't move fast up/down cuz it generates too much momentum.
          parameters.setLinearMomentumWeight(0.01);
 
          parameters.setMinimizeAngularMomentumRate(true);
@@ -228,7 +226,7 @@ public class RDXVRKinematicsStreamingMode
          parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
          parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
 
-         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
+         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(true);
 
          if (robotModel != null)
          {
