@@ -183,7 +183,7 @@ public class EigenvalueDecomposer
          ComplexNumber complexNumber = new ComplexNumber(matrix.get(index, column), matrix.get(index, column + 1));
 
          ret[0][index] = complexNumber;
-         ret[1][index] = complexNumber.conj();
+         ret[1][index] = complexNumber.conjugate();
 
          index++;
       }

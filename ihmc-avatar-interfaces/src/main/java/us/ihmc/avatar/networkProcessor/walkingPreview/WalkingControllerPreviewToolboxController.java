@@ -53,7 +53,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;

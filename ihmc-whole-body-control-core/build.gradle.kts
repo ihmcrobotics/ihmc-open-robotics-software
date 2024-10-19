@@ -15,7 +15,7 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
-   api("us.ihmc:ihmc-commons-robotics:source")
+   api("us.ihmc:ihmc-commons-utils-robotics:source")
    api("us.ihmc:ihmc-commons-utils:source")
    api("us.ihmc:ihmc-robotics-tools:source")
    api("us.ihmc:euclid-update:source")

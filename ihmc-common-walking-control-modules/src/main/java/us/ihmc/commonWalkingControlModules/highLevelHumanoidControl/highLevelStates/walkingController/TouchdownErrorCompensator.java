@@ -4,7 +4,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;

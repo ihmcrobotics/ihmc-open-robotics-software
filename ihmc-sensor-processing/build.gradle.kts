@@ -22,7 +22,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-commons-robotics:source")
+   api("us.ihmc:ihmc-commons-utils-robotics:source")
    api("us.ihmc:mecano-update:source")
 }
 

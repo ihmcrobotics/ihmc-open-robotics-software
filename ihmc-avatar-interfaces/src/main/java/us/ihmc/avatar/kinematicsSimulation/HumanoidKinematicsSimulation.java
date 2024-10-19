@@ -50,16 +50,18 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.commons.robotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
@@ -344,7 +346,7 @@ public class HumanoidKinematicsSimulation
          yoVariableServer = new YoVariableServer(getClass().getSimpleName(), robotModel.getLogModelProvider(), new DataServerSettings(false), 0.01);
          // Some robots have four bar linkages and need the `getSubtreeJointsIncludingFourBars` call
          yoVariableServer.setMainRegistry(registry,
-                                          MultiBodySystemMissingTools.getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
+                                          getSubtreeJointsIncludingFourBars(fullRobotModel.getElevator()),
                                           yoGraphicsListRegistry);
          yoVariableServer.start();
          LogTools.info("YoVariable server started.");
@@ -361,6 +363,25 @@ public class HumanoidKinematicsSimulation
       {
          controlThread = null;
       }
+   }
+
+   public static List<JointBasics> getSubtreeJointsIncludingFourBars(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof CrossFourBarJoint)
+         {
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 
    public RobotConfigurationDataPublisher createRobotConfigurationDataPublisher(String robotName)

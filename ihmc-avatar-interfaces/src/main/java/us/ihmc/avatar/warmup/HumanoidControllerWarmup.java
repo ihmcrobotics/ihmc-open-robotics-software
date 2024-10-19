@@ -39,7 +39,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.commons.robotics.robotSide.RobotSide;

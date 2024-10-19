@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.commons.lists.FrameTuple2DArrayList;
+import us.ihmc.commons.robotics.lists.FrameTuple2DArrayList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;

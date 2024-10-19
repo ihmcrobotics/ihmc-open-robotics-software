@@ -107,7 +107,7 @@ public class RobotJointVelocityAccelerationIntegrator
             if (angularVelocityMagnitude > maximumSixDoFJointAngularVelocity)
                angularVelocity.scale(maximumSixDoFJointAngularVelocity / angularVelocityMagnitude);
             rotationVectorIntegrated.setAndScale(controlDT, angularVelocity);
-            quaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
+            QuaternionCalculus.exp(rotationVectorIntegrated, rotationIntegrated);
 
             rotation.set(previousOrientation);
             rotation.multiply(rotationIntegrated);

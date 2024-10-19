@@ -9,16 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SingleRealModeTest
 {
    @BeforeEach
-   public void setUp() throws Exception
+   public void setUp()
    {
    }
 
    @AfterEach
-   public void tearDown() throws Exception
+   public void tearDown()
    {
    }
 
-	@Test
+   @Test
    public void testDifferentLengths()
    {
       double eigenvalue = -2.0;
@@ -35,7 +35,7 @@ public class SingleRealModeTest
       }
    }
 
-	@Test
+   @Test
    public void testDotEqualsOne()
    {
       double eigenvalue = -2.0;
@@ -44,8 +44,7 @@ public class SingleRealModeTest
 
       try
       {
-         @SuppressWarnings("unused")
-         SingleRealMode singleRealMode = new SingleRealMode(eigenvalue, leftEigenvectorV, rightEigenvectorW);
+         @SuppressWarnings("unused") SingleRealMode singleRealMode = new SingleRealMode(eigenvalue, leftEigenvectorV, rightEigenvectorW);
          fail();
       }
       catch (Exception e)

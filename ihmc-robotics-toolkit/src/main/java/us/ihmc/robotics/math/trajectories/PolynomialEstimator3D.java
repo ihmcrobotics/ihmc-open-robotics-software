@@ -5,7 +5,7 @@ import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.commons.time.TimeIntervalProvider;
 

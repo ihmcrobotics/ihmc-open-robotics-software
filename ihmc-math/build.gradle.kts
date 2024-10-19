@@ -18,9 +18,23 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-tools:source")
    api("org.ejml:ejml-simple:0.39")
    api("gov.nist.math:jama:1.0.3")
+}
+
+linearAlgebraDependencies {
+   api(ihmc.sourceSetProject("main"))
+}
+
+linearDynamicSystemsDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api(ihmc.sourceSetProject("linear-algebra"))
+   api("org.ejml:ejml-simple:0.39")
+   api("gov.nist.math:jama:1.0.3")
    api("org.jfree:jfreechart:1.0.19")
 }
 
+
 testDependencies {
    api(ihmc.sourceSetProject("main"))
+   api(ihmc.sourceSetProject("linear-algebra"))
+   api(ihmc.sourceSetProject("linear-dynamic-systems"))
 }

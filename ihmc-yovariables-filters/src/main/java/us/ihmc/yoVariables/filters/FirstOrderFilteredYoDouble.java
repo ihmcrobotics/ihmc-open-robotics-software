@@ -20,7 +20,7 @@ public class FirstOrderFilteredYoDouble extends YoDouble
    private final DoubleProvider yoTime;
    private double dt;
 
-   private FirstOrderFilterType filterType;
+   private final FirstOrderFilterType filterType;
 
    public FirstOrderFilteredYoDouble(String name,
                                      String description,

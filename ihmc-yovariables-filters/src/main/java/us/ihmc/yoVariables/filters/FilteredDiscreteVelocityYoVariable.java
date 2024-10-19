@@ -37,11 +37,6 @@ public class FilteredDiscreteVelocityYoVariable extends YoDouble
    private final YoDouble lastPosition;
    private boolean hasBeenCalled;
 
-   public FilteredDiscreteVelocityYoVariable(String name, String description, double alpha, YoDouble time, YoRegistry registry)
-   {
-      this(name, description, alpha, null, time, registry);
-   }
-
    public FilteredDiscreteVelocityYoVariable(String name, String description, double alpha, YoDouble positionVariable, YoDouble time,
          YoRegistry registry)
    {

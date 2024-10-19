@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;

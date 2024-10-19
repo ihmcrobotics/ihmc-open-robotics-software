@@ -28,7 +28,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
 import us.ihmc.scs2.sharedMemory.YoVariableBuffer;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;

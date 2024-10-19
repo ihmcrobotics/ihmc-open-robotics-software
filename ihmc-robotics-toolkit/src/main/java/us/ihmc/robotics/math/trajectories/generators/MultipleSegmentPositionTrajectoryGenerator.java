@@ -5,7 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.commons.time.TimeIntervalReadOnly;
 import us.ihmc.commons.time.TimeIntervalTools;

@@ -4,9 +4,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -86,7 +86,7 @@ public class DDogLegArmIKSolver
 
    public void copyActualToWork()
    {
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(actualArmJacobian.getJointsInOrder(), workArmJacobian.getJointsInOrder());
+      us.ihmc.mecano.MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(actualArmJacobian.getJointsInOrder(), workArmJacobian.getJointsInOrder());
    }
 
    public void solve()
@@ -102,7 +102,7 @@ public class DDogLegArmIKSolver
 
    public void copyWorkToDesired()
    {
-      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(workArmJacobian.getJointsInOrder(), desiredArmJacobian.getJointsInOrder());
+      us.ihmc.mecano.MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(workArmJacobian.getJointsInOrder(), desiredArmJacobian.getJointsInOrder());
    }
 
    public void setDesiredToCurrent()

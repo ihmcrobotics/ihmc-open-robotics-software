@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoSO3TrajectoryPoint;

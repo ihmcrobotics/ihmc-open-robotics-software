@@ -25,7 +25,7 @@ import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 

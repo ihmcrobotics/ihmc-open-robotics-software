@@ -48,7 +48,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -373,7 +373,7 @@ public class LookAndStepBodyPathPlanningTask
       footstepPlannerRequest.getStartFootPoses().put(RobotSide.RIGHT, new Pose3D(startFramePose));
       goalFramePose.setToZero(goalFrame);
       goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      LogTools.info(StringTools.tupleString(goalFramePose.getPosition()));
+      LogTools.info(goalFramePose.getPosition().toString());
       LogTools.info("Yaw: {}", goalFramePose.getOrientation().getYaw());
       goalFramePose.setToZero(goalFrame);
       goalFramePose.getPosition().setY(0.2);

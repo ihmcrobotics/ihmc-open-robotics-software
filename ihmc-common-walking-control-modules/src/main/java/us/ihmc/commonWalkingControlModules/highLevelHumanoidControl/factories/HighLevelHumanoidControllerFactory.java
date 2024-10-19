@@ -49,7 +49,7 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;

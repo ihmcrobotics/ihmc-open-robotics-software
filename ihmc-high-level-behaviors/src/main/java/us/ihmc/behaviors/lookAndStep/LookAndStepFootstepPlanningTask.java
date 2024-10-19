@@ -60,7 +60,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 

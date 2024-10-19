@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.robotics.math.trajectories.SimpleHermiteCurvedBasedOrientationTrajectoryCalculator;
+import us.ihmc.robotics.math.trajectories.core.SimpleHermiteCurvedBasedOrientationTrajectoryCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;

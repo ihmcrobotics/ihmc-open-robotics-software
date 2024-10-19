@@ -19,7 +19,7 @@ import us.ihmc.mecano.algorithms.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.mecano.GravityCoriolisExternalWrenchMatrixCalculator;

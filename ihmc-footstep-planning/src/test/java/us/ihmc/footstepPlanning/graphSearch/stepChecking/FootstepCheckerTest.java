@@ -6,7 +6,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;

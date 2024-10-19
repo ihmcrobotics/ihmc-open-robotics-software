@@ -180,27 +180,6 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setCoefficient(0, getCoefficient(0) + offsetValue);
    }
 
-   /**
-    * Dont use this. It creates garbage
-    *
-    * @param from
-    * @param to
-    * @return
-    */
-   default double getIntegral(double from, double to)
-   {
-      double[] fromPowers = new double[getNumberOfCoefficients() + 1];
-      double[] toPowers = new double[getNumberOfCoefficients() + 1];
-      PolynomialTools.setXPowers(fromPowers, from);
-      PolynomialTools.setXPowers(toPowers, to);
-      double integral = 0;
-      for (int i = 0; i < getNumberOfCoefficients(); i++)
-      {
-         integral += (1.0 / ((double) i + 1.0)) * getCoefficient(i) * (toPowers[i + 1] - fromPowers[i + 1]);
-      }
-      return integral;
-   }
-
    default void reset()
    {
       getTimeInterval().reset();

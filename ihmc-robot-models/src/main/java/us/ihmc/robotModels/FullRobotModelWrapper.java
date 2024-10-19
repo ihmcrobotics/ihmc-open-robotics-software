@@ -29,7 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.description.CrossFourBarJointDescription;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.commons.robotics.partNames.JointRole;
 import us.ihmc.commons.robotics.partNames.NeckJointName;

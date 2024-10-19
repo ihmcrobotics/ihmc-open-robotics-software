@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.ExecutionTimer;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;

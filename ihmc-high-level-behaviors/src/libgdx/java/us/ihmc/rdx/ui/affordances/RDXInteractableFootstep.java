@@ -40,7 +40,7 @@ import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.commons.trajectories.core.Polynomial3D;
 import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;

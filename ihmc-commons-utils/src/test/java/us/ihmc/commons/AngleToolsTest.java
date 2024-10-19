@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.robotics.HeadingAngleTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -392,27 +393,27 @@ public class AngleToolsTest
       vectorA = new Vector2D(0.0, 1.0);
       vectorB = new Vector2D(1.0, 0.0);
       expected = -0.5 * Math.PI;
-      actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
+      actual = HeadingAngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
       vectorA = new Vector2D(0.0, 1.0);
       vectorB = new Vector2D(-1.0, 0.0);
       expected = 0.5 * Math.PI;
-      actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
+      actual = HeadingAngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
 
       vectorA = new Vector2D(1.0, 1.0);
       vectorB = new Vector2D(-1.0, 0.0);
       expected = 0.75 * Math.PI;
-      actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
+      actual = HeadingAngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
 
 
       vectorA = new Vector2D(0.0, 1.0);
       vectorB = new Vector2D(0.0, 0.0);
-      expected = AngleTools.angleMinusPiToPi(vectorA, vectorB);
+      expected = HeadingAngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertTrue(Double.isNaN(expected));
    }
 
@@ -429,47 +430,47 @@ public class AngleToolsTest
    {
 	   FramePose2D start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   FramePoint2D end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, 1.0);
-	   double heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   double heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 45.0, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, 0.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 0.0, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 0.0, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 1.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 90.0, 1e-7);
 
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, -1.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -90.0, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), -1.0, -1.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -135.0, 1e-7);
 
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), -1.0, 0.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -180.0, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), 1.0, -1.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -45, 1e-7);
 	   
 	   start = new FramePose2D(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2D(ReferenceFrame.getWorldFrame(), -1.0, 1.0);
-	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
+	   heading = Math.toDegrees(HeadingAngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 135.0, 1e-7);
    }
 

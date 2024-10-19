@@ -14,7 +14,7 @@ public class ComplexTools
          for (int j = 0; j < ret.numCols; j++)
          {
             ComplexNumber c = ihmc.get(i, j);
-            ret.set(i, j, c.real(), c.imag());
+            ret.set(i, j, c.real(), c.imaginary());
          }
       }
 
