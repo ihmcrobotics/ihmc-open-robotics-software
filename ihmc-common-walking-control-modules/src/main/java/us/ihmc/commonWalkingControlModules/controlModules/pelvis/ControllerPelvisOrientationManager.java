@@ -15,7 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsReadOnly;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.core.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;

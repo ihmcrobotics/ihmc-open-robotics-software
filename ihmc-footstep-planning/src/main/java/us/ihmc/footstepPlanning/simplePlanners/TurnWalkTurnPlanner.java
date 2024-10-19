@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.robotics.HeadingAngleTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -102,7 +103,7 @@ public class TurnWalkTurnPlanner
       if (isGoalOutOfReach())
       {
          // turn
-         double headingTurnAngle = AngleTools.calculateHeading(robotStartPose, goalPoint, -robotStartPose.getYaw(), 0.0);
+         double headingTurnAngle = HeadingAngleTools.calculateHeading(robotStartPose, goalPoint, -robotStartPose.getYaw(), 0.0);
          double minTurn = AngleTools.computeAngleDifferenceMinusPiToPi(initialStanceFootPose.getYaw(), goalPose.getYaw());
          boolean walkingBackwards = Math.abs(headingTurnAngle) > Math.PI / 2.0 && Math.abs(minTurn) < Math.PI / 2.0;
          if (walkingBackwards)

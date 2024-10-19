@@ -33,7 +33,7 @@ import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.nio.ByteBuffer;
 import java.util.Set;

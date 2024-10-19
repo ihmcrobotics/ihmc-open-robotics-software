@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePolynomial3DBasics;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

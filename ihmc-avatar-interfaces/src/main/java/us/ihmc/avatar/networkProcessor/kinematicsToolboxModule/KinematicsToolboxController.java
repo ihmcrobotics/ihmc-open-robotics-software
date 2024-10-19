@@ -73,7 +73,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDSE3Gains;

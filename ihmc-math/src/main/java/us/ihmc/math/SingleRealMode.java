@@ -18,7 +18,7 @@ public class SingleRealMode
       verifySameLength(realV, realW);
       verifyDotProductEqualsOne(realV, realW);
 
-      if (Math.abs(eigenvalue.imag()) > 1e-7)
+      if (Math.abs(eigenvalue.imaginary()) > 1e-7)
          throw new RuntimeException("Eigenvalue must be real!");
 
       this.eigenvalue = eigenvalue.real();
@@ -41,7 +41,7 @@ public class SingleRealMode
 
    private double verifyRealAndReturnRealPart(ComplexNumber complexNumber)
    {
-      if (Math.abs(complexNumber.imag()) > 1e-6)
+      if (Math.abs(complexNumber.imaginary()) > 1e-6)
       {
          throw new RuntimeException("Should only be real for SingleRealMode!. complexNumber = " + complexNumber);
       }

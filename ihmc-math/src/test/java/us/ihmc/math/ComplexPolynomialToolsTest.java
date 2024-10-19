@@ -10,8 +10,6 @@ import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
 
 public class ComplexPolynomialToolsTest
 {
-
-
    private Polynomial constant5Polynomial, twoXPlus3Polynomial, fourX4ThreeX3TwoX2OneX1Polynomial;
 
    @BeforeEach
@@ -29,7 +27,6 @@ public class ComplexPolynomialToolsTest
       twoXPlus3Polynomial = null;
       fourX4ThreeX3TwoX2OneX1Polynomial = null;
    }
-
 
    @Test
    public void testConstructFromRealRoot()
@@ -94,9 +91,7 @@ public class ComplexPolynomialToolsTest
       verifyEvaluations(new ComplexNumber(1.0, 0.0));
       verifyEvaluations(new ComplexNumber(0.0, 1.0));
       verifyEvaluations(new ComplexNumber(5.76, 3.96));
-
    }
-
 
    private void verifyEvaluations(double x)
    {
@@ -131,22 +126,9 @@ public class ComplexPolynomialToolsTest
       verifyEpsilonEquals(fourX4ThreeX3TwoX2OneX1, ComplexPolynomialTools.evaluate(fourX4ThreeX3TwoX2OneX1Polynomial, x), 1e-7);
    }
 
-   private void verifyEpsilonEquals(double[] expectedArray, double[] actualArray, double epsilon)
-   {
-      Assertions.assertEquals(expectedArray.length, actualArray.length);
-
-      for (int i = 0; i < expectedArray.length; i++)
-      {
-         Assertions.assertEquals(expectedArray[i], actualArray[i], epsilon);
-      }
-   }
-
    private void verifyEpsilonEquals(ComplexNumber expectedComplexNumber, ComplexNumber actualComplexNumber, double epsilon)
    {
       Assertions.assertEquals(expectedComplexNumber.real(), actualComplexNumber.real(), epsilon);
-      Assertions.assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
+      Assertions.assertEquals(expectedComplexNumber.imaginary(), actualComplexNumber.imaginary(), epsilon);
    }
-
-
-
 }

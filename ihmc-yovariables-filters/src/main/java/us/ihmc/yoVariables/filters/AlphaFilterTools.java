@@ -7,7 +7,13 @@ public class AlphaFilterTools
 {
    /**
     * This computes the alpha
-    * variable for an alpha filtered yo variable that is equivalent to a first order low pass frequnecy at filter {@param breakFrequencyInHertz}
+    * variable for an alpha filtered yo variable that is equivalent to a first order low pass frequnecy at filter {@param breakFrequencyInHertz}.
+    *
+    * <p>
+    * If this
+    * calculation is done as part of a double provider, consider using {@link AlphaBasedOnBreakFrequencyProvider}, which only updates the alpha estimate
+    * on a change in the break frequency, saving computation.
+    * </p>
     *
     * @return alpha value
     */

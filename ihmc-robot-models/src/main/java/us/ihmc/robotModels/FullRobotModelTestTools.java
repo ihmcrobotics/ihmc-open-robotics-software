@@ -17,7 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.commons.robotics.partNames.LegJointName;
 import us.ihmc.commons.robotics.partNames.LimbName;

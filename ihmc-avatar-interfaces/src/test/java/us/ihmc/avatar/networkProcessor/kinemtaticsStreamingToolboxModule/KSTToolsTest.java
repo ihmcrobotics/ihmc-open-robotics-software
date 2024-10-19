@@ -37,9 +37,9 @@ public class KSTToolsTest
          KSTTools.computeAngularVelocity(dt, previousOrientation, currentOrientation, actual);
 
          Vector4DBasics qDot = new Vector4D();
-         calculus.computeQDotByFiniteDifferenceCentral(previousOrientation, currentOrientation, 0.5 * dt, qDot);
+         QuaternionCalculus.computeQDotByFiniteDifferenceCentral(previousOrientation, currentOrientation, 0.5 * dt, qDot);
          Vector3DBasics expected = new Vector3D();
-         calculus.computeAngularVelocityInBodyFixedFrame(currentOrientation, qDot, expected);
+         calculus.computeAngularVelocityInRotatedFrame(currentOrientation, qDot, expected);
 
          EuclidCoreTestTools.assertEquals(expected, actual, EPSILON);
       }

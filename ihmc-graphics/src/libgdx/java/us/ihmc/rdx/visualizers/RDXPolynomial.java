@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.commons.trajectories.core.Polynomial3D;
 import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 
 import java.awt.*;

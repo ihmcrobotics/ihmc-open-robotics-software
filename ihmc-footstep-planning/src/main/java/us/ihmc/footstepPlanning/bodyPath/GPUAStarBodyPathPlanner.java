@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.robotics.HeadingAngleTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -1275,7 +1276,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             else
             {
                // Since we didn't do smoothing, set the yaw as the heading to get to the next waypoint.
-               waypoint.getOrientation().setToYawOrientation(AngleTools.calculateHeading(bodyPath.get(i), bodyPath.get(i + 1), 0.0));
+               waypoint.getOrientation().setToYawOrientation(HeadingAngleTools.calculateHeading(bodyPath.get(i), bodyPath.get(i + 1), 0.0));
             }
 
             outputToPack.getBodyPath().add(waypoint);

@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;

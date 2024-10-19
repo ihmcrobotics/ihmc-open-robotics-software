@@ -1,61 +1,29 @@
 package us.ihmc.math;
 
+import Jama.Matrix;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import Jama.Matrix;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ComplexMatrixTest
 {
-   private final double[][][] realElements = new double[][][]
-   {
-      {
-         {1.0, 0.0}, {2.0, 0.0}
-      },
-      {
-         {3.0, 0.0}, {4.0, 0.0}
-      }
-   };
+   private final double[][][] realElements = new double[][][] {{{1.0, 0.0}, {2.0, 0.0}}, {{3.0, 0.0}, {4.0, 0.0}}};
 
-   private final double[][][] singleElements = new double[][][]
-   {
-      {
-         {1.0, 1.0}
-      }
-   };
+   private final double[][][] singleElements = new double[][][] {{{1.0, 1.0}}};
 
-   private final double[][][] complexElements = new double[][][]
-   {
-      {
-         {1.0, 7.0}, {2.0, 9.0}
-      },
-      {
-         {3.0, 11.0}, {4.0, 15.0}
-      }
-   };
+   private final double[][][] complexElements = new double[][][] {{{1.0, 7.0}, {2.0, 9.0}}, {{3.0, 11.0}, {4.0, 15.0}}};
 
-   private final double[][][] threeByFourElements = new double[][][]
-   {
-      {
-         {1.0, 7.0}, {2.0, 9.0}, {2.0, 9.0}, {-0.88, 1.9}
-      },
-      {
-         {3.0, 11.0}, {4.0, 5.0}, {2.0, 9.0}, {1.1, 1.9}
-      },
-      {
-         {3.0, 19.0}, {4.0, 15.0}, {2.0, 39.0}, {1.1, 1.9}
-      },
-   };
-
+   private final double[][][] threeByFourElements = new double[][][] {{{1.0, 7.0}, {2.0, 9.0}, {2.0, 9.0}, {-0.88, 1.9}},
+                                                                      {{3.0, 11.0}, {4.0, 5.0}, {2.0, 9.0}, {1.1, 1.9}},
+                                                                      {{3.0, 19.0}, {4.0, 15.0}, {2.0, 39.0}, {1.1, 1.9}},};
 
    private ComplexMatrix realExample, singleComplexNumber, complexExample, threeByFour, identityOne, identityFour;
    private ComplexMatrix[] allExamples;
 
    @BeforeEach
-   public void setUp() throws Exception
+   public void setUp()
    {
       realExample = new ComplexMatrix(realElements);
       singleComplexNumber = new ComplexMatrix(singleElements);
@@ -65,14 +33,11 @@ public class ComplexMatrixTest
       identityOne = ComplexMatrix.constructIdentity(1);
       identityFour = ComplexMatrix.constructIdentity(4);
 
-      allExamples = new ComplexMatrix[]
-      {
-         realExample, singleComplexNumber, complexExample, threeByFour, identityOne, identityFour
-      };
+      allExamples = new ComplexMatrix[] {realExample, singleComplexNumber, complexExample, threeByFour, identityOne, identityFour};
    }
 
    @AfterEach
-   public void tearDown() throws Exception
+   public void tearDown()
    {
       realExample = null;
       singleComplexNumber = null;
@@ -85,16 +50,13 @@ public class ComplexMatrixTest
       allExamples = null;
    }
 
-	@Test
+   @Test
    public void testIdentity()
    {
-      assertTrue(identityOne.epsilonEquals(new Matrix(new double[][]
-      {
-         {1.0}
-      }), 1e-7));
+      assertTrue(identityOne.epsilonEquals(new Matrix(new double[][] {{1.0}}), 1e-7));
    }
 
-	@Test
+   @Test
    public void testGetRowAndColumnDimensions()
    {
       assertEquals(2, realExample.getRowDimension());
@@ -116,7 +78,7 @@ public class ComplexMatrixTest
       assertEquals(4, threeByFour.getColumnDimension());
    }
 
-	@Test
+   @Test
    public void testEpsilonEquals()
    {
       for (int i = 0; i < allExamples.length; i++)
@@ -131,7 +93,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@Test
+   @Test
    public void testConstructDiagonalMatrix()
    {
       ComplexNumber[] diagonalElements = new ComplexNumber[] {new ComplexNumber(1.0, 2.0), new ComplexNumber(3.0, 4.0)};
@@ -151,10 +113,9 @@ public class ComplexMatrixTest
                assertTrue(matrix.get(i, j).epsilonEquals(0.0, 1e-7));
          }
       }
-
    }
 
-	@Test
+   @Test
    public void testTranspose()
    {
       ComplexMatrix fourByThree = threeByFour.transpose();
@@ -174,7 +135,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@Test
+   @Test
    public void testTimes()
    {
       double timesByReal = 7.11;
@@ -182,7 +143,6 @@ public class ComplexMatrixTest
 
       verifyTimes(threeByFour, new ComplexNumber(timesByReal, 0.0), threeByFour.times(timesByReal));
       verifyTimes(threeByFour, timesByComplex, threeByFour.times(timesByComplex));
-
    }
 
    private void verifyTimes(ComplexMatrix original, ComplexNumber timesBy, ComplexMatrix result)
@@ -199,7 +159,7 @@ public class ComplexMatrixTest
       }
    }
 
-	@Test
+   @Test
    public void testMatrixTimes()
    {
       ComplexMatrix fourByThree = threeByFour.transpose();
@@ -209,19 +169,23 @@ public class ComplexMatrixTest
       assertEquals(3, result.getColumnDimension());
 
       // Just verify manually here:
-      ComplexNumber result00 = threeByFour.get(0,
-                                  0).times(fourByThree.get(0, 0)).plus(threeByFour.get(0, 1).times(fourByThree.get(1, 0))).plus(threeByFour.get(0,
-                                     2).times(fourByThree.get(2, 0))).plus(threeByFour.get(0, 3).times(fourByThree.get(3, 0)));
+      ComplexNumber result00 = threeByFour.get(0, 0)
+                                          .times(fourByThree.get(0, 0))
+                                          .plus(threeByFour.get(0, 1).times(fourByThree.get(1, 0)))
+                                          .plus(threeByFour.get(0, 2).times(fourByThree.get(2, 0)))
+                                          .plus(threeByFour.get(0, 3).times(fourByThree.get(3, 0)));
 
-      ComplexNumber result12 = threeByFour.get(1,
-                                  0).times(fourByThree.get(0, 2)).plus(threeByFour.get(1, 1).times(fourByThree.get(1, 2))).plus(threeByFour.get(1,
-                                     2).times(fourByThree.get(2, 2))).plus(threeByFour.get(1, 3).times(fourByThree.get(3, 2)));
+      ComplexNumber result12 = threeByFour.get(1, 0)
+                                          .times(fourByThree.get(0, 2))
+                                          .plus(threeByFour.get(1, 1).times(fourByThree.get(1, 2)))
+                                          .plus(threeByFour.get(1, 2).times(fourByThree.get(2, 2)))
+                                          .plus(threeByFour.get(1, 3).times(fourByThree.get(3, 2)));
 
       assertTrue(result00.epsilonEquals(result.get(0, 0), 1e-7));
       assertTrue(result12.epsilonEquals(result.get(1, 2), 1e-7));
    }
 
-	@Test
+   @Test
    public void testInverse()
    {
       ComplexMatrix fourByThree = threeByFour.transpose();
@@ -235,7 +199,5 @@ public class ComplexMatrixTest
 
       assertTrue(identity.epsilonEquals(identityOne, 1e-7));
       assertTrue(identity.epsilonEquals(identityTwo, 1e-7));
-
    }
-
 }

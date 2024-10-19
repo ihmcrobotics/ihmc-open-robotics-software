@@ -64,8 +64,8 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.commons.lists.DenseMatrixArrayList;
-import us.ihmc.commons.lists.FrameTuple3DArrayList;
+import us.ihmc.commons.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.commons.robotics.lists.FrameTuple3DArrayList;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 

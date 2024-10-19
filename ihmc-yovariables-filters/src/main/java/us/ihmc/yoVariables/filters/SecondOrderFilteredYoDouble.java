@@ -201,4 +201,9 @@ public class SecondOrderFilteredYoDouble extends YoDouble implements ProcessingY
       a[1] = 2.0 * omega * omega - 8.0 / (dt * dt);
       a[2] = 4.0 / (dt * dt) - 4.0 / dt * xi * omega + omega * omega;
    }
+
+   public enum SecondOrderFilterType
+   {
+      LOW_PASS, NOTCH, BAND, HIGH_PASS
+   }
 }

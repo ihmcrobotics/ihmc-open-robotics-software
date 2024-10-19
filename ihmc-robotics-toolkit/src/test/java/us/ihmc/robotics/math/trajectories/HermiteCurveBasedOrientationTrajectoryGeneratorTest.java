@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.euclid.QuaternionCalculus;
+import us.ihmc.robotics.math.trajectories.yoVariables.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class HermiteCurveBasedOrientationTrajectoryGeneratorTest

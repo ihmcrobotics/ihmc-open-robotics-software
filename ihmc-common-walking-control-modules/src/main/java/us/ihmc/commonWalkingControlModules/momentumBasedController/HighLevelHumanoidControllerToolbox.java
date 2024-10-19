@@ -41,12 +41,12 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MultiBodySystemMissingTools;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.commons.lists.FrameTuple2DArrayList;
+import us.ihmc.commons.robotics.lists.FrameTuple2DArrayList;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
@@ -78,7 +78,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static us.ihmc.commons.lists.FrameTuple2DArrayList.createFramePoint2dArrayList;
+import static us.ihmc.commons.robotics.lists.FrameTuple2DArrayList.createFramePoint2dArrayList;
 
 public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {

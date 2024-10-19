@@ -5,7 +5,7 @@ import org.bytedeco.ffmpeg.global.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.util.HashMap;
 import java.util.function.Supplier;

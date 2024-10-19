@@ -5,9 +5,9 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
+import us.ihmc.commons.stateMachine.StateMachinesJPanel;
 import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.commons.stateMachine.core.StateMachine;
-import us.ihmc.commons.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class StateMachineJPanelGuiSetterUpper<K extends Enum<K>> implements GUISetterUpper

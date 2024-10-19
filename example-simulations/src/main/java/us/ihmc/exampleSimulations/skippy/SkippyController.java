@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
-import us.ihmc.commons.stateMachine.extra.StateMachinesJPanel;
+import us.ihmc.commons.stateMachine.StateMachinesJPanel;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;

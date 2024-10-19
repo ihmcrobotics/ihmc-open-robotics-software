@@ -14,29 +14,9 @@ public class AlphaFilteredYoMatrix extends YoMatrix
 
    private final YoDouble alpha;
 
-   public AlphaFilteredYoMatrix(String name, double alpha, int numberOfRows, int numberOfColumns, YoRegistry registry)
-   {
-      this(name, null, alpha, numberOfRows, numberOfColumns, null, null, registry);
-   }
-
-   public AlphaFilteredYoMatrix(String name, double alpha, int numberOfRows, int numberOfColumns, String[] rowNames, YoRegistry registry)
-   {
-      this(name, null, alpha, numberOfRows, numberOfColumns, rowNames, null, registry);
-   }
-
    public AlphaFilteredYoMatrix(String name, double alpha, int numberOfRows, int numberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)
    {
       this(name, null, alpha, numberOfRows, numberOfColumns, rowNames, columnNames, registry);
-   }
-
-   public AlphaFilteredYoMatrix(String name, String description, double alpha, int numberOfRows, int numberOfColumns, YoRegistry registry)
-   {
-      this(name, description, alpha, numberOfRows, numberOfColumns, null, null, registry);
-   }
-
-   public AlphaFilteredYoMatrix(String name, String description, double alpha, int numberOfRows, int numberOfColumns, String[] rowNames, YoRegistry registry)
-   {
-      this(name, description, alpha, numberOfRows, numberOfColumns, rowNames, null, registry);
    }
 
    public AlphaFilteredYoMatrix(String name, String description, double alpha, int numberOfRows, int numberOfColumns, String[] rowNames, String[] columnNames, YoRegistry registry)

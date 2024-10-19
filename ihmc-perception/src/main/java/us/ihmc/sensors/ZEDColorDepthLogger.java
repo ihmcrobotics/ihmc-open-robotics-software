@@ -13,7 +13,7 @@ import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;

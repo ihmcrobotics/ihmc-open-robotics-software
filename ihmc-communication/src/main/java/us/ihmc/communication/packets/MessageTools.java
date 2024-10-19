@@ -1055,7 +1055,7 @@ public class MessageTools
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       quaternionDot.sub(orientationEnd, orientationStart);
       quaternionDot.scale(alphaDot);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
+      quaternionCalculus.computeAngularVelocityInRotatedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(1.0 - alpha, angularVelocityStart, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(alpha, angularVelocityEnd, angularVelocityInterpolated);
 

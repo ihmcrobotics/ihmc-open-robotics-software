@@ -21,7 +21,7 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;

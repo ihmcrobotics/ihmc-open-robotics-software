@@ -37,7 +37,7 @@ public class ComplexPolynomialTools
    public static Polynomial constructFromComplexPairRoot(ComplexNumber oneComplexRoot)
    {
       double a = oneComplexRoot.real();
-      double b = oneComplexRoot.imag();
+      double b = oneComplexRoot.imaginary();
 
       return new Polynomial(a * a + b * b, -2.0 * a, 1.0);
    }

@@ -15,10 +15,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.math.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.commons.trajectories.core.Polynomial3D;
 
 import java.util.ArrayList;
 import java.util.List;
