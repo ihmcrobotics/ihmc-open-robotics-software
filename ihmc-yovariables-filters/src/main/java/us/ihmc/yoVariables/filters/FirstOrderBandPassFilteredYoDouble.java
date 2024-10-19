@@ -10,7 +10,7 @@ public class FirstOrderBandPassFilteredYoDouble extends YoDouble
    private final YoBoolean hasBeenCalled;
 
    private double filterUpdateTimeOld;
-   private FirstOrderFilterType filterType;
+   private final FirstOrderFilterType filterType;
 
    private final YoDouble firstCutoffFrequencyHz;
    private final YoDouble secondCutoffFrequencyHz;
@@ -18,10 +18,9 @@ public class FirstOrderBandPassFilteredYoDouble extends YoDouble
    private final DoubleProvider yoTime;
    private double dt;
 
-
    public enum FirstOrderFilterType
    {
-       NOTCH, BAND
+      NOTCH, BAND
    }
 
    public FirstOrderBandPassFilteredYoDouble(String name,
@@ -176,7 +175,7 @@ public class FirstOrderBandPassFilteredYoDouble extends YoDouble
       return alpha * this.getDoubleValue() + (1.0 - alpha) * filterInput;
    }
 
-   private double applyHighPassFilter(double filterInput,  double breakFrequency, double dt)
+   private double applyHighPassFilter(double filterInput, double breakFrequency, double dt)
    {
       double lowPassValue = applyLowPassFilter(filterInput, breakFrequency, dt);
 

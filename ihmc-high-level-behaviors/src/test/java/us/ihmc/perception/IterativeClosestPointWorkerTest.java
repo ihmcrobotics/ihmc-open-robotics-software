@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -73,8 +73,8 @@ public class IterativeClosestPointWorkerTest
    {
       for (int i = 0; i < 5; i++)
       {
-         Vector3D translationError = EuclidCoreMissingRandomTools.nextVector3D(random, 0.05);
-         Quaternion rotationError = EuclidCoreMissingRandomTools.nextQuaternion(random, Math.toRadians(10.0));
+         Vector3D translationError = EuclidCoreRandomTools.nextVector3D(random, 0.05);
+         Quaternion rotationError = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(10.0));
 
          Pose3D actualBoxPose = EuclidGeometryRandomTools.nextPose3D(random, 0.5, Math.toRadians(90.0));
 

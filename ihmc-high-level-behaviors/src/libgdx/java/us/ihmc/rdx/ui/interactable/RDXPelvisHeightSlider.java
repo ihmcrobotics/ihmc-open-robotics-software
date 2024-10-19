@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXPelvisHeightSlider

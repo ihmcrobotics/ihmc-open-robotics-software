@@ -11,7 +11,7 @@ import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.commons.stateMachine.core.StateMachine;
 import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
-import us.ihmc.commons.stateMachine.extra.StateMachinesJPanel;
+import us.ihmc.commons.stateMachine.StateMachinesJPanel;
 import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;

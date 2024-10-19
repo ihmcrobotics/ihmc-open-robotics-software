@@ -8,22 +8,17 @@ import java.util.List;
 public class FastFourierTransform
 {
    private static final double logTwo = Math.log(2.0);
-   /**
-    * standard FFT object available for all to use
-    */
-   public static final FastFourierTransform fft = new FastFourierTransform(8);
 
-   public static FastFourierTransform getFourierTransformer()
-   {
-      return fft;
-   }
+   private boolean isTransformUpToDate = false;
+   private boolean isInverseTransformUpToDate = false;
 
-   private int maxNumberOfCoefficients;
-   private int logMaxNumberOfCoefficients;
+   private final int maxNumberOfCoefficients;
+   private final int logMaxNumberOfCoefficients;
    private int numberOfCoefficients;
-   private List<ComplexNumber> rootsOfUnity;
-   private ComplexNumber[] coefficients;
-   private ComplexNumber[] transformedCoeffs;
+   private final List<ComplexNumber> rootsOfUnity;
+   private final ComplexNumber[] coefficients;
+   private final ComplexNumber[] transformedCoeffs;
+   private final ComplexNumber[] inverseTransformedCoeffs;
 
    public FastFourierTransform(int maxNumberOfCoefficients)
    {
@@ -32,15 +27,24 @@ public class FastFourierTransform
       this.rootsOfUnity = RootsOfUnity.getRootsOfUnity(this.maxNumberOfCoefficients);
       this.coefficients = new ComplexNumber[this.maxNumberOfCoefficients];
       this.transformedCoeffs = new ComplexNumber[this.maxNumberOfCoefficients];
+      this.inverseTransformedCoeffs = new ComplexNumber[this.maxNumberOfCoefficients];
       for (int i = 0; i < this.maxNumberOfCoefficients; i++)
       {
          coefficients[i] = new ComplexNumber();
          transformedCoeffs[i] = new ComplexNumber();
+         inverseTransformedCoeffs[i] = new ComplexNumber();
       }
    }
 
+   /**
+    * Sets the array of coefficients of which we want to compute the transform.
+    * @param coefficients coefficient values.
+    */
    public void setCoefficients(ComplexNumber[] coefficients)
    {
+      isTransformUpToDate = false;
+      isInverseTransformUpToDate = false;
+
       numberOfCoefficients = coefficients.length;
       if (numberOfCoefficients > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
@@ -56,8 +60,15 @@ public class FastFourierTransform
       }
    }
 
+   /**
+    * Sets the array of coefficients of which we want to compute the transform. This sets them to real only values.
+    * @param coefficients real only coefficient values.
+    */
    public void setCoefficients(double[] coefficients)
    {
+      isTransformUpToDate = false;
+      isInverseTransformUpToDate = false;
+
       numberOfCoefficients = coefficients.length;
       if (numberOfCoefficients > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
@@ -73,38 +84,23 @@ public class FastFourierTransform
       }
    }
 
-   public void setCoefficients(double[] coefficients, int numberOfCoefficientsToUse)
-   {
-      numberOfCoefficients = numberOfCoefficientsToUse;
-      if (numberOfCoefficientsToUse > maxNumberOfCoefficients)
-         throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
-               + numberOfCoefficientsToUse);
-      int index = 0;
-      for (; index < numberOfCoefficientsToUse; index++)
-      {
-         this.coefficients[index].setToPurelyReal(coefficients[index]);
-      }
-      for (; index < maxNumberOfCoefficients; index++)
-      {
-         this.coefficients[index].setToPurelyReal(0.0);
-      }
-   }
-
-   private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
+   private final ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
 
    public ComplexNumber[] getForwardTransform()
    {
-      transform(false);
+      if (!isTransformUpToDate)
+         computeFastFourierTransform();
       return transformedCoeffs;
    }
 
    public ComplexNumber[] getInverseTransform()
    {
-      transform(true);
-      return transformedCoeffs;
+      if (!isInverseTransformUpToDate)
+         computeInverseFastFourierTransform();
+      return inverseTransformedCoeffs;
    }
 
-   private void transform(boolean inverse)
+   private void computeFastFourierTransform()
    {
       bitReverseCopy(transformedCoeffs, coefficients);
 
@@ -120,25 +116,49 @@ public class FastFourierTransform
          {
             for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
             {
-               tempComplex1.timesAndStore(tempComplex, transformedCoeffs[k + half_m]);
+               tempComplex1.times(tempComplex, transformedCoeffs[k + half_m]);
                tempComplex2.set(transformedCoeffs[k]);
-               transformedCoeffs[k].plusAndStore(tempComplex1, tempComplex2);
-               transformedCoeffs[k + half_m].minusAndStore(tempComplex2, tempComplex1);
+               transformedCoeffs[k].add(tempComplex1, tempComplex2);
+               transformedCoeffs[k + half_m].minus(tempComplex2, tempComplex1);
             }
-            if (!inverse)
-               tempComplex.timesAndStore(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
-            else
-               tempComplex.timesAndStore(rootsOfUnity.get(maxNumberOfCoefficients / m));
+            tempComplex.timesEquals(rootsOfUnity.get(maxNumberOfCoefficients - maxNumberOfCoefficients / m));
          }
       }
-      if (inverse)
-      {
-         for (int i = 0; i < transformedCoeffs.length; i++)
-            transformedCoeffs[i].scale(1.0 / maxNumberOfCoefficients);
-      }
+      isTransformUpToDate = true;
    }
 
-   private void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
+   private void computeInverseFastFourierTransform()
+   {
+      bitReverseCopy(inverseTransformedCoeffs, coefficients);
+
+      int m = 1;
+
+      for (int i = 1; i <= logMaxNumberOfCoefficients; i++)
+      {
+         int half_m = m;
+         m = m << 1; // Computing m = 2^i
+
+         tempComplex.setToPurelyReal(1.0);
+         for (int j = 0; j < half_m; j++)
+         {
+            for (int k = j; k < maxNumberOfCoefficients - 1; k += m)
+            {
+               tempComplex1.times(tempComplex, inverseTransformedCoeffs[k + half_m]);
+               tempComplex2.set(inverseTransformedCoeffs[k]);
+               inverseTransformedCoeffs[k].add(tempComplex1, tempComplex2);
+               inverseTransformedCoeffs[k + half_m].minus(tempComplex2, tempComplex1);
+            }
+            tempComplex.timesEquals(rootsOfUnity.get(maxNumberOfCoefficients / m));
+         }
+      }
+
+      for (int i = 0; i < inverseTransformedCoeffs.length; i++)
+         inverseTransformedCoeffs[i].scale(1.0 / maxNumberOfCoefficients);
+
+      isInverseTransformUpToDate = true;
+   }
+
+   private static void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
    {
       int temp = (int) (Math.log(arrayToCopy.length) / logTwo);
       for (int i = 0; i < arrayToCopy.length; i++)
@@ -147,39 +167,11 @@ public class FastFourierTransform
       }
    }
 
-   public int bitReverse(int a, int numberOfBits)
+   static int bitReverse(int a, int numberOfBits)
    {
       int temp = 0;
       for (; numberOfBits > 0; numberOfBits--, temp += a % 2, a /= 2)
          temp <<= 1;
       return temp;
-   }
-
-   private void clearTransformed()
-   {
-      for (int i = 0; i < maxNumberOfCoefficients; i++)
-         transformedCoeffs[i].set(0.0, 0.0);
-   }
-
-   private void clearInput()
-   {
-      for (int i = 0; i < numberOfCoefficients; i++)
-         coefficients[i].set(0.0, 0.0);
-   }
-
-   public void clear()
-   {
-      clearTransformed();
-      clearInput();
-   }
-
-   public int getMaxNumberOfCoefficients()
-   {
-      return maxNumberOfCoefficients;
-   }
-
-   public List<ComplexNumber> getRootsOfUnity()
-   {
-      return rootsOfUnity;
    }
 }

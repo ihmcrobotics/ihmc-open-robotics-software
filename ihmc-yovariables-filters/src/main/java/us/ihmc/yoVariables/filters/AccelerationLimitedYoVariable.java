@@ -6,6 +6,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Creates a yo variable
+ */
 public class AccelerationLimitedYoVariable extends YoDouble
 {
    private final double dt;

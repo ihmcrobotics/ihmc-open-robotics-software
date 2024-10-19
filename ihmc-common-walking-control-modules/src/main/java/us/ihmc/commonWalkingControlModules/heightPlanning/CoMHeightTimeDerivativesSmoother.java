@@ -104,11 +104,11 @@ public class CoMHeightTimeDerivativesSmoother
 
       ComplexNumber[] eigenvalues = eigenvalueDecomposer.getEigenvalues();
       eigenValueOneReal.set(eigenvalues[0].real());
-      eigenValueOneImag.set(eigenvalues[0].imag());
+      eigenValueOneImag.set(eigenvalues[0].imaginary());
       eigenValueTwoReal.set(eigenvalues[1].real());
-      eigenValueTwoImag.set(eigenvalues[1].imag());
+      eigenValueTwoImag.set(eigenvalues[1].imaginary());
       eigenValueThreeReal.set(eigenvalues[2].real());
-      eigenValueThreeImag.set(eigenvalues[2].imag());
+      eigenValueThreeImag.set(eigenvalues[2].imaginary());
 
       if (DEBUG)
       {

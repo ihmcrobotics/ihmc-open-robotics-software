@@ -33,7 +33,7 @@ public class ComplexConjugateMode
          dotProduct = dotProduct.plus(leftEigenvectorV[i].times(rightEigenvectorW[i]));
       }
 
-      if ((Math.abs(dotProduct.real() - 1.0) > 1e-7) || (Math.abs(dotProduct.imag() - 0.0) > 1e-7))
+      if ((Math.abs(dotProduct.real() - 1.0) > 1e-7) || (Math.abs(dotProduct.imaginary() - 0.0) > 1e-7))
       {
          throw new IllegalArgumentException("leftEigenvectorV.dot(rightEigenvectorW) must be 1.0!");
       }
@@ -43,16 +43,16 @@ public class ComplexConjugateMode
    {
       return eigenvalue;
    }
-   
+
    public ComplexNumber[] getLeftEigenvectorVCopy()
    {
       ComplexNumber[] ret = new ComplexNumber[leftEigenvectorV.length];
-      
-      for (int i=0; i<leftEigenvectorV.length; i++)
+
+      for (int i = 0; i < leftEigenvectorV.length; i++)
       {
          ret[i] = new ComplexNumber(leftEigenvectorV[i]);
       }
-      
+
       return ret;
    }
 
@@ -60,25 +60,29 @@ public class ComplexConjugateMode
    {
       ComplexNumber[] ret = new ComplexNumber[rightEigenvectorW.length];
 
-      for (int i=0; i<rightEigenvectorW.length; i++)
+      for (int i = 0; i < rightEigenvectorW.length; i++)
       {
          ret[i] = new ComplexNumber(rightEigenvectorW[i]);
       }
 
       return ret;
    }
-   
+
    public double[] getZetaAndOmega()
    {
-      double omega = eigenvalue.magnitude();
-      double zeta = -eigenvalue.real()/omega;
-      
-      return new double[]{zeta, omega};
+      return computeZetaAndOmega(eigenvalue);
+   }
+
+   public static double[] computeZetaAndOmega(ComplexNumber eigenValue)
+   {
+      double omega = eigenValue.magnitude();
+      double zeta = -eigenValue.real() / omega;
+
+      return new double[] {zeta, omega};
    }
 
    public String toString()
    {
       return "ComplexConjugateMode: eigenvalue = " + eigenvalue + ", omega = " + getZetaAndOmega()[1] + ", zeta = " + getZetaAndOmega()[0];
    }
-
 }

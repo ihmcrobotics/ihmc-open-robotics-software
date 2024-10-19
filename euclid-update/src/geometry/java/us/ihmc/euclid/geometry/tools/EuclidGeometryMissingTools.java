@@ -10,7 +10,6 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -93,7 +92,7 @@ public class EuclidGeometryMissingTools
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
     *                       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(double, double, double, double,
-    *      double, double, Orientation3DBasics)
+    *       double, double, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromFirstToSecondVector3D(double firstVectorX,
                                                                 double firstVectorY,
@@ -169,7 +168,7 @@ public class EuclidGeometryMissingTools
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
     *                       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(Vector3DReadOnly,
-    *      Vector3DReadOnly, Orientation3DBasics)
+    *       Vector3DReadOnly, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromFirstToSecondVector3D(Vector3DReadOnly firstVector,
                                                                 Vector3DReadOnly secondVector,
@@ -342,13 +341,33 @@ public class EuclidGeometryMissingTools
       return closestPoint2DsBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
    }
 
+   /**
+    * Returns the square of the minimum distance between a point and a given line segment, and packs the closest point on the line segment in
+    * {@code pointOnSegmentToPack}
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if {@code lineSegmentStart.distanceSquared(lineSegmentEnd) < }{@value #ONE_TRILLIONTH}, this
+    * method returns the distance between {@code lineSegmentStart} and the given {@code point}.
+    * </ul>
+    * </p>
+    *
+    * @param pointX               x coordinate of point to be tested.
+    * @param pointY               y coordinate of point to be tested.
+    * @param lineSegmentStartX    the x-coordinate of the line segment first endpoint.
+    * @param lineSegmentStartY    the y-coordinate of the line segment first endpoint.
+    * @param lineSegmentEndX      the x-coordinate of the line segment second endpoint.
+    * @param lineSegmentEndY      the y-coordinate of the line segment second endpoint.
+    * @param pointOnSegmentToPack the closest point on the line segment to the point to be tested. Modified.
+    * @return the square of the minimum distance between the 2D point and the 2D line segment.
+    */
    public static double distanceSquaredFromPoint2DToLineSegment2D(double pointX,
                                                                   double pointY,
                                                                   double lineSegmentStartX,
                                                                   double lineSegmentStartY,
                                                                   double lineSegmentEndX,
                                                                   double lineSegmentEndY,
-                                                                  Point2D intersectionPointToPack)
+                                                                  Point2DBasics pointOnSegmentToPack)
    {
       double percentage = EuclidGeometryTools.percentageAlongLineSegment2D(pointX,
                                                                            pointY,
@@ -365,8 +384,8 @@ public class EuclidGeometryMissingTools
       double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
       double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
 
-      if (intersectionPointToPack != null)
-         intersectionPointToPack.set(projectionX, projectionY);
+      if (pointOnSegmentToPack != null)
+         pointOnSegmentToPack.set(projectionX, projectionY);
 
       double dx = projectionX - pointX;
       double dy = projectionY - pointY;
@@ -381,16 +400,16 @@ public class EuclidGeometryMissingTools
                                                                    Point2DBasics secondIntersectionToPack)
    {
       return intersectionBetweenLine2DAndCircle(circleRadius,
-                                                                       circlePosition.getX(),
-                                                                       circlePosition.getY(),
-                                                                       startPoint.getX(),
-                                                                       startPoint.getY(),
-                                                                       false,
-                                                                       endPoint.getX(),
-                                                                       endPoint.getY(),
-                                                                       false,
-                                                                       firstIntersectionToPack,
-                                                                       secondIntersectionToPack);
+                                                circlePosition.getX(),
+                                                circlePosition.getY(),
+                                                startPoint.getX(),
+                                                startPoint.getY(),
+                                                false,
+                                                endPoint.getX(),
+                                                endPoint.getY(),
+                                                false,
+                                                firstIntersectionToPack,
+                                                secondIntersectionToPack);
    }
 
    public static int intersectionBetweenLine2DAndCircle(double circleRadius,
@@ -444,8 +463,8 @@ public class EuclidGeometryMissingTools
          double intersection1X = dCircle1 * dx + startX;
          double intersection1Y = dCircle1 * dy + startY;
 
-         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection1X, intersection1Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius
-               - ONE_TRILLIONTH)
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection1X, intersection1Y, circlePositionX, circlePositionY, 1.0, 0.0))
+             > circleRadius - ONE_TRILLIONTH)
             dCircle1 = Double.NaN;
 
          if (Double.isFinite(dCircle1))
@@ -468,8 +487,8 @@ public class EuclidGeometryMissingTools
          double intersection2X = dCircle2 * dx + startX;
          double intersection2Y = dCircle2 * dy + startY;
 
-         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection2X, intersection2Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius
-               - ONE_TRILLIONTH)
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection2X, intersection2Y, circlePositionX, circlePositionY, 1.0, 0.0))
+             > circleRadius - ONE_TRILLIONTH)
             dCircle2 = Double.NaN;
          else if (Math.abs(dCircle1 - dCircle2) < ONE_TRILLIONTH)
             dCircle2 = Double.NaN;
@@ -490,7 +509,6 @@ public class EuclidGeometryMissingTools
                dIntersection2 = dCircle2;
             }
          }
-
       }
 
       if (!canIntersectionOccurBeforeStart)
@@ -610,7 +628,19 @@ public class EuclidGeometryMissingTools
     * </ul>
     * </p>
     *
-    * @param intersectionToPack point in which the coordinates of the intersection are stored.
+    * @param pointOnPlaneX       x-value of a point located on the plane.
+    * @param pointOnPlaneY       y-value of a point located on the plane.
+    * @param pointOnPlaneZ       z-value of a point located on the plane.
+    * @param planeNormalX       x-value of the normal of the plane.
+    * @param planeNormalY       y-value of the normal of the plane.
+    * @param planeNormalZ       z-value of the normal of the plane.
+    * @param pointOnLineX       x-value of a point located on the line.
+    * @param pointOnLineY       y-value of a point located on the line.
+    * @param pointOnLineZ       z-value of a point located on the line.
+    * @param lineDirectionX       x-value of the direction of the line.
+    * @param lineDirectionY       y-value of the direction of the line.
+    * @param lineDirectionZ       z-value of the direction of the line.
+    * @param intersectionToPack point in which the coordinates of the intersection are stored. Modified.
     * @return {@code true} if the method succeeds, {@code false} otherwise.
     */
    public static boolean intersectionBetweenLine3DAndPlane3D(double pointOnPlaneX,
@@ -683,7 +713,7 @@ public class EuclidGeometryMissingTools
 
       if (Math.abs(determinant) < epsilon)
       { // The lines are parallel
-        // Check if they are collinear
+         // Check if they are collinear
          double dx = start2x - start1x;
          double dy = start2y - start1y;
          double cross = dx * direction1y - dy * direction1x;
@@ -894,7 +924,7 @@ public class EuclidGeometryMissingTools
     * @param segmentTravel2x x-component of the second line direction.
     * @param segmentTravel2y y-component of the second line direction.
     * @return {@code alpha} the percentage along the first line of the intersection location. This
-    *         method returns {@link Double#NaN} if the lines do not intersect.
+    *       method returns {@link Double#NaN} if the lines do not intersect.
     */
    public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x,
                                                                          double startPoint1y,
@@ -919,7 +949,7 @@ public class EuclidGeometryMissingTools
 
       if (Math.abs(determinant) < ONE_TRILLIONTH)
       { // The lines are parallel
-        // Check if they are collinear
+         // Check if they are collinear
          double cross = dx * segmentTravel1y - dy * segmentTravel1x;
          if (Math.abs(cross) < ONE_TRILLIONTH)
          {
@@ -1008,15 +1038,14 @@ public class EuclidGeometryMissingTools
 
    public static double computeBoundingBoxVolume3D(BoundingBox3DReadOnly boundingBox)
    {
-      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX())
-           * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
-           * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
+      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX()) * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY()) * Math.abs(
+            boundingBox.getMaxZ() - boundingBox.getMinZ());
    }
 
    public static boolean doLineSegment2DAndConvexPolygon2DIntersect(Point2DReadOnly lineSegmentStart,
-                                                                        Point2DReadOnly lineSegmentEnd,
-                                                                        List<? extends Point2DReadOnly> convexPolygon2D,
-                                                                        int numberOfVertices)
+                                                                    Point2DReadOnly lineSegmentEnd,
+                                                                    List<? extends Point2DReadOnly> convexPolygon2D,
+                                                                    int numberOfVertices)
    {
       checkNumberOfVertices(convexPolygon2D, numberOfVertices);
 
@@ -1029,7 +1058,6 @@ public class EuclidGeometryMissingTools
       if (numberOfVertices == 2)
          return EuclidGeometryTools.doLineSegment2DsIntersect(convexPolygon2D.get(0), convexPolygon2D.get(1), lineSegmentStart, lineSegmentEnd);
 
-
       for (int edgeIndex = 0; edgeIndex < numberOfVertices; edgeIndex++)
       {
          Point2DReadOnly edgeStart = convexPolygon2D.get(edgeIndex);
@@ -1037,7 +1065,6 @@ public class EuclidGeometryMissingTools
 
          if (EuclidGeometryTools.doLineSegment2DsIntersect(edgeStart, edgeEnd, lineSegmentStart, lineSegmentEnd))
             return true;
-
       }
 
       return false;

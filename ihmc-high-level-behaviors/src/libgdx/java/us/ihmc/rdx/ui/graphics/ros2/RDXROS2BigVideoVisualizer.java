@@ -12,7 +12,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.commons.StringTools;
+import us.ihmc.tools.StringTools;
 
 public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
 {

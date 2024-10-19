@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
-import static us.ihmc.commons.StringTools.format;
+import static us.ihmc.tools.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress

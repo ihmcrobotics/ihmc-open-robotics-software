@@ -24,9 +24,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryCo
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;

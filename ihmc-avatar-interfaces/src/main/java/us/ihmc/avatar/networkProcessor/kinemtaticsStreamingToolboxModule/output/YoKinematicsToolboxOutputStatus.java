@@ -186,7 +186,7 @@ public class YoKinematicsToolboxOutputStatus implements KSTOutputDataBasics
       }
       else
       {
-         quaternionCalculus.computeAngularVelocityInBodyFixedFrame(rootJointPose.getOrientation(), quaternionDot, rootJointVelocity.getAngularPart());
+         quaternionCalculus.computeAngularVelocityInRotatedFrame(rootJointPose.getOrientation(), quaternionDot, rootJointVelocity.getAngularPart());
       }
    }
 

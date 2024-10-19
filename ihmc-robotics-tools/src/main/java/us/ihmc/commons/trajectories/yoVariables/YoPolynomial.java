@@ -290,6 +290,7 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
       doubleDerivativeCoefficientVector.reshape(numberOfCoefficientsRequired, 1);
 
       constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
+      constraintVector.reshape(numberOfCoefficientsRequired, 1);
       numberOfCoefficients.set(numberOfCoefficientsRequired);
       xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
 

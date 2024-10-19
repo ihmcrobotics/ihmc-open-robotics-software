@@ -32,7 +32,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables-filters:source")
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:ihmc-commons-utils:source")
-   api("us.ihmc:ihmc-commons-robotics:source")
+   api("us.ihmc:ihmc-commons-utils-robotics:source")
    api("us.ihmc:ihmc-messager-kryo:0.2.0")
    api("us.ihmc:ihmc-matrix-library:0.19.0")
    api("us.ihmc:ihmc-graphics-description:0.25.1")

@@ -5,10 +5,10 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -41,9 +41,9 @@ public class QuaternionCalculusTest
          Quaternion vExp = new Quaternion();
          
          quaternionCalculus.log(q, qLog);
-         Vector3D v = new Vector3D(qLog.getX(),qLog.getY(),qLog.getZ()); 
-         
-         quaternionCalculus.exp(v, vExp);
+         Vector3D v = new Vector3D(qLog.getX(),qLog.getY(),qLog.getZ());
+
+         QuaternionCalculus.exp(v, vExp);
 
          assertTrue(Math.abs(q.getX() - vExp.getX()) < 10e-10);
          assertTrue(Math.abs(q.getY() - vExp.getY()) < 10e-10);
@@ -63,15 +63,15 @@ public class QuaternionCalculusTest
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
          Quaternion q = EuclidCoreRandomTools.nextQuaternion(random);
-         double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
+         double length = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
          Vector3D expectedAngularVelocity = EuclidCoreRandomTools.nextVector3D(random, length);
          if (random.nextBoolean())
             expectedAngularVelocity.negate();
          Vector3D actualAngularVelocity = new Vector3D();
          Vector4D qDot = new Vector4D();
 
-         quaternionCalculus.computeQDotInWorldFrame(q, expectedAngularVelocity, qDot);
-         quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
+         QuaternionCalculus.computeQDotInParentFrame(q, expectedAngularVelocity, qDot);
+         quaternionCalculus.computeAngularVelocityInParentFrame(q, qDot, actualAngularVelocity);
 
          EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON);
       }
@@ -86,7 +86,7 @@ public class QuaternionCalculusTest
       {
          QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
          Quaternion q = EuclidCoreRandomTools.nextQuaternion(random);
-         double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
+         double length = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, length);
          if (random.nextBoolean())
             angularVelocity.negate();
@@ -97,22 +97,22 @@ public class QuaternionCalculusTest
          Vector4D qDot = new Vector4D();
          Vector4D qDDot = new Vector4D();
 
-         quaternionCalculus.computeQDotInWorldFrame(q, angularVelocity, qDot);
+         QuaternionCalculus.computeQDotInParentFrame(q, angularVelocity, qDot);
 
-         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
-         quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
+         quaternionCalculus.computeQDDotInParentFrame(q, qDot, expectedAngularAcceleration, qDDot);
+         quaternionCalculus.computeAngularAccelerationInRotatedFrame(q, qDot, qDDot, actualAngularAcceleration);
          EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
-         quaternionCalculus.computeQDDotInWorldFrame(q, angularVelocity, actualAngularAcceleration, qDDot);
-         quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
+         quaternionCalculus.computeQDDotInParentFrame(q, angularVelocity, actualAngularAcceleration, qDDot);
+         quaternionCalculus.computeAngularAccelerationInRotatedFrame(q, qDot, qDDot, actualAngularAcceleration);
          EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
-         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, angularVelocity, actualAngularAcceleration, qDDot);
-         quaternionCalculus.computeAngularAcceleration(q, qDot, qDDot, actualAngularAcceleration);
+         quaternionCalculus.computeQDDotInParentFrame(q, qDot, angularVelocity, actualAngularAcceleration, qDDot);
+         quaternionCalculus.computeAngularAccelerationInRotatedFrame(q, qDot, qDDot, actualAngularAcceleration);
          EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
 
-         quaternionCalculus.computeQDDotInWorldFrame(q, qDot, expectedAngularAcceleration, qDDot);
-         quaternionCalculus.computeAngularAccelerationInWorldFrame(q, qDDot, angularVelocity, actualAngularAcceleration);
+         quaternionCalculus.computeQDDotInParentFrame(q, qDot, expectedAngularAcceleration, qDDot);
+         quaternionCalculus.computeAngularAccelerationInParentFrame(q, qDDot, angularVelocity, actualAngularAcceleration);
          EuclidCoreTestTools.assertEquals(expectedAngularAcceleration, actualAngularAcceleration, EPSILON);
       }
    }
@@ -160,12 +160,12 @@ public class QuaternionCalculusTest
 //   }
 
    @Test
-   public void testFDSimpleCase() throws Exception
+   public void testFDSimpleCase()
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Random random = new Random(65265L);
       double integrationTime = 1.0;
-      double angleVelocity = RandomNumbers.nextDouble(random, 0.0, 2.0 * PI) / integrationTime;
+      double angleVelocity = EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0 * PI) / integrationTime;
       Vector3D expectedAngularVelocity = new Vector3D(angleVelocity, 0.0, 0.0);
       Vector3D expectedAngularAcceleration = new Vector3D();
       AxisAngle axisAnglePrevious = new AxisAngle(1.0, 0.0, 0.0, 0.0);
@@ -183,18 +183,18 @@ public class QuaternionCalculusTest
       double dt = 1.0e-4;
       for (double time = dt; time < integrationTime; time += dt)
       {
-         axisAnglePrevious.setAngle(trimAngleMinusPiToPi(angleVelocity * (time - dt)) - PI);
+         axisAnglePrevious.setAngle(EuclidCoreTools.trimAngleMinusPiToPi(angleVelocity * (time - dt)) - PI);
          qPrevious.set(axisAnglePrevious);
-         axisAngleCurrent.setAngle(trimAngleMinusPiToPi(angleVelocity * time) - PI);
+         axisAngleCurrent.setAngle(EuclidCoreTools.trimAngleMinusPiToPi(angleVelocity * time) - PI);
          qCurrent.set(axisAngleCurrent);
-         axisAngleNext.setAngle(trimAngleMinusPiToPi(angleVelocity * (time + dt)) - PI);
+         axisAngleNext.setAngle(EuclidCoreTools.trimAngleMinusPiToPi(angleVelocity * (time + dt)) - PI);
          qNext.set(axisAngleNext);
 
-         quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dt, qDot);
-         quaternionCalculus.computeAngularVelocityInWorldFrame(qCurrent, qDot, actualAngularVelocity);
+         QuaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dt, qDot);
+         quaternionCalculus.computeAngularVelocityInParentFrame(qCurrent, qDot, actualAngularVelocity);
 
-         quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, qCurrent, qNext, dt, qDDot);
-         quaternionCalculus.computeAngularAcceleration(qCurrent, qDot, qDDot, actualAngularAcceleration);
+         QuaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, qCurrent, qNext, dt, qDDot);
+         quaternionCalculus.computeAngularAccelerationInRotatedFrame(qCurrent, qDot, qDDot, actualAngularAcceleration);
 
          boolean sameVelocity = expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7);
          if (!sameVelocity)
@@ -268,17 +268,6 @@ public class QuaternionCalculusTest
 
          EuclidCoreTestTools.assertEquals(expectedQInterpolated, actualQInterpolated, EPSILON);
       }
-   }
-
-
-   public static double trimAngleMinusPiToPi(double angle)
-   {
-      return shiftAngleToStartOfRange(angle, -PI);
-   }
-
-   static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange)
-   {
-      return shiftAngleToStartOfRange(angleToShift, startOfAngleRange, 2.0 * Math.PI);
    }
 
    static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange, double endOfAngleRange)

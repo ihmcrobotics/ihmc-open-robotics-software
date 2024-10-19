@@ -1,26 +1,24 @@
 package us.ihmc.math;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FastFourierTransformTest
 {
    @Test
    public void testBitReverse()
    {
-      FastFourierTransform fft = FastFourierTransform.getFourierTransformer();
-      assertTrue (fft.bitReverse(0, 3) == 0);
-      assertTrue (fft.bitReverse(1, 3) == 4);
-      assertTrue (fft.bitReverse(2, 3) == 2);
-      assertTrue (fft.bitReverse(3, 3) == 6);
-      assertTrue (fft.bitReverse(4, 3) == 1);
-      assertTrue (fft.bitReverse(5, 3) == 5);
-      assertTrue (fft.bitReverse(6, 3) == 3);
-      assertTrue (fft.bitReverse(7, 3) == 7);
+      assertEquals(FastFourierTransform.bitReverse(0, 3), 0);
+      assertEquals(FastFourierTransform.bitReverse(1, 3), 4);
+      assertEquals(FastFourierTransform.bitReverse(2, 3), 2);
+      assertEquals(FastFourierTransform.bitReverse(3, 3), 6);
+      assertEquals(FastFourierTransform.bitReverse(4, 3), 1);
+      assertEquals(FastFourierTransform.bitReverse(5, 3), 5);
+      assertEquals(FastFourierTransform.bitReverse(6, 3), 3);
+      assertEquals(FastFourierTransform.bitReverse(7, 3), 7);
    }
 
    @Test
@@ -34,10 +32,9 @@ public class FastFourierTransformTest
       fft.setCoefficients(result);
       result = fft.getInverseTransform();
       for (int i = 0; i < 5; i++)
-         assertTrue (MathTools.epsilonCompare(result[i].real(), 1, Epsilons.ONE_BILLIONTH));
+         assertEquals(result[i].real(), 1, Epsilons.ONE_BILLIONTH);
       for (int i = 5; i < result.length; i++)
-         assertTrue (MathTools.epsilonCompare(result[i].real(), 0, Epsilons.ONE_BILLIONTH));
-
+         assertEquals(result[i].real(), 0, Epsilons.ONE_BILLIONTH);
    }
 
    @Test
@@ -49,24 +46,23 @@ public class FastFourierTransformTest
 
       fft.setCoefficients(testArray1);
       ComplexNumber[] result1 = fft.getForwardTransform();
-      
+
       ComplexNumber[] saveVals = new ComplexNumber[4];
-      for(int i = 0; i < 4; i++)
+      for (int i = 0; i < 4; i++)
          saveVals[i] = new ComplexNumber(result1[i]);
-      
+
       fft.setCoefficients(testArray2);
       ComplexNumber[] result2 = fft.getForwardTransform();
 
       for (int i = 0; i < result1.length; i++)
-         saveVals[i].timesAndStore(result2[i]);
+         saveVals[i].timesEquals(result2[i]);
 
       fft.setCoefficients(saveVals);
       result1 = fft.getInverseTransform();
-      
-      assertTrue (MathTools.epsilonCompare(result1[0].real(), 1, Epsilons.ONE_BILLIONTH));
-      assertTrue (MathTools.epsilonCompare(result1[1].real(), 2, Epsilons.ONE_BILLIONTH));
-      assertTrue (MathTools.epsilonCompare(result1[2].real(), 2, Epsilons.ONE_BILLIONTH));
-      assertTrue (MathTools.epsilonCompare(result1[3].real(), 1, Epsilons.ONE_BILLIONTH));
-   }
 
+      assertTrue(MathTools.epsilonCompare(result1[0].real(), 1, Epsilons.ONE_BILLIONTH));
+      assertTrue(MathTools.epsilonCompare(result1[1].real(), 2, Epsilons.ONE_BILLIONTH));
+      assertTrue(MathTools.epsilonCompare(result1[2].real(), 2, Epsilons.ONE_BILLIONTH));
+      assertTrue(MathTools.epsilonCompare(result1[3].real(), 1, Epsilons.ONE_BILLIONTH));
+   }
 }

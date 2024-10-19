@@ -14,7 +14,7 @@ public class EigenvalueDecomposerTest
    wn = 1.0, zeta = 0.5;
    private static final double
    P1 = zeta * wn, P2 = Math.sqrt(1.0 - zeta * zeta) * wn, P3 = wn * wn;
-   private double epsilon = 1e-7;
+   private static double epsilon = 1e-7;
 
 	@Test
    public void testGetEigenvalues()
@@ -83,7 +83,7 @@ public class EigenvalueDecomposerTest
    {
       assertEquals(1, eigenvalues.length);
       assertEquals(real, eigenvalues[0].real(), 1e-7);
-      assertEquals(0.0, eigenvalues[0].imag(), epsilon);
+      assertEquals(0.0, eigenvalues[0].imaginary(), epsilon);
    }
 
    private void verifyTwoComplexConjugateEigenvalue(ComplexNumber[] eigenvalues, double real, double imag)
@@ -97,9 +97,9 @@ public class EigenvalueDecomposerTest
       assertEquals(real, eigenvalueOne.real(), 1e-7);
       assertEquals(real, eigenvalueTwo.real(), 1e-7);
 
-      assertEquals(Math.abs(imag), Math.abs(eigenvalueOne.imag()), 1e-7);
-      assertEquals(Math.abs(imag), Math.abs(eigenvalueTwo.imag()), 1e-7);
-      assertEquals(eigenvalueOne.imag(), -eigenvalueTwo.imag(), 1e-7);
+      assertEquals(Math.abs(imag), Math.abs(eigenvalueOne.imaginary()), 1e-7);
+      assertEquals(Math.abs(imag), Math.abs(eigenvalueTwo.imaginary()), 1e-7);
+      assertEquals(eigenvalueOne.imaginary(), -eigenvalueTwo.imaginary(), 1e-7);
    }
 
    private void verifyOneRealTwoComplexConjugateEigenvalue(ComplexNumber[] eigenvalues, double oneReal, double realPart, double imagPart)
@@ -113,7 +113,7 @@ public class EigenvalueDecomposerTest
       {
          ComplexNumber eigenvalue = eigenvalues[index];
 
-         if (eigenvalue.imag() == 0.0)
+         if (eigenvalue.imaginary() == 0.0)
          {
             assertFalse(foundRealOne);
             assertEquals(oneReal, eigenvalue.real(), 1e-7);

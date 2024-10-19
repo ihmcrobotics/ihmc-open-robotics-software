@@ -19,7 +19,7 @@ public class SecondOrderFilteredYoDoubleTest
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
       SecondOrderFilteredYoDouble filteredYoVariable = new SecondOrderFilteredYoDouble("lowPass", registry, dt, naturalFrequencyInHz, dampingRatio,
-                                                                                       SecondOrderFilterType.LOW_PASS);
+                                                                                       SecondOrderFilteredYoDouble.SecondOrderFilterType.LOW_PASS);
 
       double[] b = new double[3];
       double[] a = new double[3];
@@ -38,7 +38,7 @@ public class SecondOrderFilteredYoDoubleTest
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
       SecondOrderFilteredYoDouble filteredYoVariable = new SecondOrderFilteredYoDouble("notch", registry, dt, naturalFrequencyInHz, dampingRatio,
-                                                                                       SecondOrderFilterType.NOTCH);
+                                                                                       SecondOrderFilteredYoDouble.SecondOrderFilterType.NOTCH);
 
       double[] b = new double[3];
       double[] a = new double[3];
@@ -57,7 +57,7 @@ public class SecondOrderFilteredYoDoubleTest
       double[] aAssert = {4255275.254047619, -7992104.316479129, 3752620.429473252};
 
       SecondOrderFilteredYoDouble filteredYoVariable = new SecondOrderFilteredYoDouble("highPass", registry, dt, naturalFrequencyInHz, dampingRatio,
-                                                                                       SecondOrderFilterType.HIGH_PASS);
+                                                                                       SecondOrderFilteredYoDouble.SecondOrderFilterType.HIGH_PASS);
 
       double[] b = new double[3];
       double[] a = new double[3];

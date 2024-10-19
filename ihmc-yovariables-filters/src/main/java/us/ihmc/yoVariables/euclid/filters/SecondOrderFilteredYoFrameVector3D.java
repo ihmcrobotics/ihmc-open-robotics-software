@@ -5,7 +5,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.filters.ProcessingYoVariable;
-import us.ihmc.yoVariables.filters.SecondOrderFilterType;
 import us.ihmc.yoVariables.filters.SecondOrderFilteredYoDouble;
 import us.ihmc.yoVariables.filters.SecondOrderFilteredYoVariableParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -46,7 +45,7 @@ public class SecondOrderFilteredYoFrameVector3D extends YoFrameVector3D implemen
                                                                                            double dt,
                                                                                            double naturalFrequencyInHz,
                                                                                            double dampingRatio,
-                                                                                           SecondOrderFilterType filterType,
+                                                                                           SecondOrderFilteredYoDouble.SecondOrderFilterType filterType,
                                                                                            ReferenceFrame referenceFrame)
 
    {
@@ -78,7 +77,7 @@ public class SecondOrderFilteredYoFrameVector3D extends YoFrameVector3D implemen
                                                                                            double dt,
                                                                                            double naturalFrequencyInHz,
                                                                                            double dampingRatio,
-                                                                                           SecondOrderFilterType filterType,
+                                                                                           SecondOrderFilteredYoDouble.SecondOrderFilterType filterType,
                                                                                            YoFrameVector3D unfilteredVector)
    {
       SecondOrderFilteredYoVariableParameters parameters = new SecondOrderFilteredYoVariableParameters(namePrefix + nameSuffix,
