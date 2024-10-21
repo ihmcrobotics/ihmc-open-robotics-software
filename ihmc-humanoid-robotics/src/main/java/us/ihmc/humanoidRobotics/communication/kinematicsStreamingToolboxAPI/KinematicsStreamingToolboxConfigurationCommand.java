@@ -23,6 +23,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
    private boolean enableRightHandTaskspace = true;
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
+   private boolean enableCenterOfMassTrajectory = true;
 
    private long leftHandTrajectoryFrameId = WORLD_FRAME_ID;
    private long rightHandTrajectoryFrameId = WORLD_FRAME_ID;
@@ -48,6 +49,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = true;
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
+      enableCenterOfMassTrajectory = true;
 
       leftHandTrajectoryFrameId = WORLD_FRAME_ID;
       rightHandTrajectoryFrameId = WORLD_FRAME_ID;
@@ -70,6 +72,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = other.enableRightHandTaskspace;
       enableChestTaskspace = other.enableChestTaskspace;
       enablePelvisTaskspace = other.enablePelvisTaskspace;
+      enableCenterOfMassTrajectory = other.enableCenterOfMassTrajectory;
 
       leftHandTrajectoryFrameId = other.leftHandTrajectoryFrameId;
       rightHandTrajectoryFrameId = other.rightHandTrajectoryFrameId;
@@ -95,6 +98,7 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = message.getEnableRightHandTaskspace();
       enableChestTaskspace = message.getEnableChestTaskspace();
       enablePelvisTaskspace = message.getEnablePelvisTaskspace();
+      enableCenterOfMassTrajectory = message.getEnableCenterOfMassControl();
 
       leftHandTrajectoryFrameId = message.getLeftHandTrajectoryFrameId();
       rightHandTrajectoryFrameId = message.getRightHandTrajectoryFrameId();
@@ -161,6 +165,11 @@ public class KinematicsStreamingToolboxConfigurationCommand
    public boolean isPelvisTaskspaceEnabled()
    {
       return enablePelvisTaskspace;
+   }
+
+   public boolean isCenterOfMassTrajectoryEnabled()
+   {
+      return enableCenterOfMassTrajectory;
    }
 
    public long getHandTrajectoryFrameId(RobotSide robotSide)

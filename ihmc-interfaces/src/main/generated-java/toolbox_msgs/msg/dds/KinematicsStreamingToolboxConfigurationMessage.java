@@ -67,6 +67,11 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
             */
    public boolean enable_pelvis_taskspace_ = true;
    /**
+            * Whether center of mass should be controlled.
+            * Default value is true.
+            */
+   public boolean enable_center_of_mass_control_ = true;
+   /**
             * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
             * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
             */
@@ -118,6 +123,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_chest_taskspace_ = other.enable_chest_taskspace_;
 
       enable_pelvis_taskspace_ = other.enable_pelvis_taskspace_;
+
+      enable_center_of_mass_control_ = other.enable_center_of_mass_control_;
 
       left_hand_trajectory_frame_id_ = other.left_hand_trajectory_frame_id_;
 
@@ -308,6 +315,23 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
    }
 
    /**
+            * Whether center of mass should be controlled.
+            * Default value is true.
+            */
+   public void setEnableCenterOfMassControl(boolean enable_center_of_mass_control)
+   {
+      enable_center_of_mass_control_ = enable_center_of_mass_control;
+   }
+   /**
+            * Whether center of mass should be controlled.
+            * Default value is true.
+            */
+   public boolean getEnableCenterOfMassControl()
+   {
+      return enable_center_of_mass_control_;
+   }
+
+   /**
             * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
             * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
             */
@@ -413,6 +437,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_pelvis_taskspace_, other.enable_pelvis_taskspace_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_center_of_mass_control_, other.enable_center_of_mass_control_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_hand_trajectory_frame_id_, other.left_hand_trajectory_frame_id_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_hand_trajectory_frame_id_, other.right_hand_trajectory_frame_id_, epsilon)) return false;
@@ -454,6 +480,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if(this.enable_pelvis_taskspace_ != otherMyClass.enable_pelvis_taskspace_) return false;
 
+      if(this.enable_center_of_mass_control_ != otherMyClass.enable_center_of_mass_control_) return false;
+
       if(this.left_hand_trajectory_frame_id_ != otherMyClass.left_hand_trajectory_frame_id_) return false;
 
       if(this.right_hand_trajectory_frame_id_ != otherMyClass.right_hand_trajectory_frame_id_) return false;
@@ -492,6 +520,8 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       builder.append(this.enable_chest_taskspace_);      builder.append(", ");
       builder.append("enable_pelvis_taskspace=");
       builder.append(this.enable_pelvis_taskspace_);      builder.append(", ");
+      builder.append("enable_center_of_mass_control=");
+      builder.append(this.enable_center_of_mass_control_);      builder.append(", ");
       builder.append("left_hand_trajectory_frame_id=");
       builder.append(this.left_hand_trajectory_frame_id_);      builder.append(", ");
       builder.append("right_hand_trajectory_frame_id=");

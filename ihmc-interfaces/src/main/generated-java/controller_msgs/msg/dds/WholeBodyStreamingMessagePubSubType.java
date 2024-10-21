@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9cefce68b58b7434f96f5fba2cff80a26d4ebfcbb0effeb059052069398dc61a";
+   		return "54e59564971229a55c43fda365c2db67f54ac60ae24a420c8db14fbabbcd1175";
    }
    
    @Override
@@ -86,6 +86,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -146,6 +150,11 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassTrajectoryMessage(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getCdrSerializedSize(data.getNeckStreamingMessage(), current_alignment);
 
 
@@ -180,6 +189,9 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_7(data.getEnableUserPelvisControl());
 
       ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.write(data.getPelvisStreamingMessage(), cdr);
+      cdr.write_type_7(data.getHasCenterOfMassTrajectoryMessage());
+
+      ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType.write(data.getCenterOfMassTrajectoryMessage(), cdr);
       cdr.write_type_7(data.getHasNeckStreamingMessage());
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getNeckStreamingMessage(), cdr);
@@ -213,6 +225,9 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setEnableUserPelvisControl(cdr.read_type_7());
       	
       ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.read(data.getPelvisStreamingMessage(), cdr);	
+      data.setHasCenterOfMassTrajectoryMessage(cdr.read_type_7());
+      	
+      ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType.read(data.getCenterOfMassTrajectoryMessage(), cdr);	
       data.setHasNeckStreamingMessage(cdr.read_type_7());
       	
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getNeckStreamingMessage(), cdr);	
@@ -244,6 +259,9 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
       ser.write_type_a("pelvis_streaming_message", new ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType(), data.getPelvisStreamingMessage());
 
+      ser.write_type_7("has_center_of_mass_trajectory_message", data.getHasCenterOfMassTrajectoryMessage());
+      ser.write_type_a("center_of_mass_trajectory_message", new ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType(), data.getCenterOfMassTrajectoryMessage());
+
       ser.write_type_7("has_neck_streaming_message", data.getHasNeckStreamingMessage());
       ser.write_type_a("neck_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getNeckStreamingMessage());
 
@@ -273,6 +291,9 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setHasPelvisStreamingMessage(ser.read_type_7("has_pelvis_streaming_message"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
       ser.read_type_a("pelvis_streaming_message", new ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType(), data.getPelvisStreamingMessage());
+
+      data.setHasCenterOfMassTrajectoryMessage(ser.read_type_7("has_center_of_mass_trajectory_message"));
+      ser.read_type_a("center_of_mass_trajectory_message", new ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType(), data.getCenterOfMassTrajectoryMessage());
 
       data.setHasNeckStreamingMessage(ser.read_type_7("has_neck_streaming_message"));
       ser.read_type_a("neck_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getNeckStreamingMessage());

@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "adbb80bba9ebc6c0eaf0144915b2372c04de0e848973c03fde8e09a0dc1fe236";
+   		return "783dda11ae5c3be6e1bea60db73ce72c5a66865eee783d401e846b4f4b922356";
    }
    
    @Override
@@ -53,6 +53,8 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -123,6 +125,9 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -161,6 +166,8 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
 
       cdr.write_type_7(data.getEnablePelvisTaskspace());
 
+      cdr.write_type_7(data.getEnableCenterOfMassControl());
+
       cdr.write_type_11(data.getLeftHandTrajectoryFrameId());
 
       cdr.write_type_11(data.getRightHandTrajectoryFrameId());
@@ -193,6 +200,8 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       	
       data.setEnablePelvisTaskspace(cdr.read_type_7());
       	
+      data.setEnableCenterOfMassControl(cdr.read_type_7());
+      	
       data.setLeftHandTrajectoryFrameId(cdr.read_type_11());
       	
       data.setRightHandTrajectoryFrameId(cdr.read_type_11());
@@ -217,6 +226,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       ser.write_type_7("enable_right_hand_taskspace", data.getEnableRightHandTaskspace());
       ser.write_type_7("enable_chest_taskspace", data.getEnableChestTaskspace());
       ser.write_type_7("enable_pelvis_taskspace", data.getEnablePelvisTaskspace());
+      ser.write_type_7("enable_center_of_mass_control", data.getEnableCenterOfMassControl());
       ser.write_type_11("left_hand_trajectory_frame_id", data.getLeftHandTrajectoryFrameId());
       ser.write_type_11("right_hand_trajectory_frame_id", data.getRightHandTrajectoryFrameId());
       ser.write_type_11("chest_trajectory_frame_id", data.getChestTrajectoryFrameId());
@@ -236,6 +246,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       data.setEnableRightHandTaskspace(ser.read_type_7("enable_right_hand_taskspace"));
       data.setEnableChestTaskspace(ser.read_type_7("enable_chest_taskspace"));
       data.setEnablePelvisTaskspace(ser.read_type_7("enable_pelvis_taskspace"));
+      data.setEnableCenterOfMassControl(ser.read_type_7("enable_center_of_mass_control"));
       data.setLeftHandTrajectoryFrameId(ser.read_type_11("left_hand_trajectory_frame_id"));
       data.setRightHandTrajectoryFrameId(ser.read_type_11("right_hand_trajectory_frame_id"));
       data.setChestTrajectoryFrameId(ser.read_type_11("chest_trajectory_frame_id"));

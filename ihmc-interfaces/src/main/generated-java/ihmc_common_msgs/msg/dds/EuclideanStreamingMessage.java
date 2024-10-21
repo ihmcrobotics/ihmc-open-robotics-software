@@ -23,13 +23,17 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
             */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
-            * Define the desired 3D position to be reached.
+            * Define the desired 3D position, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Point3D position_;
    /**
-            * Define the desired 3D linear velocity to be reached.
+            * Define the desired 3D linear velocity, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_;
+   /**
+            * Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
 
    public EuclideanStreamingMessage()
    {
@@ -37,6 +41,7 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
       control_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public EuclideanStreamingMessage(EuclideanStreamingMessage other)
@@ -53,6 +58,7 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.control_frame_pose_, control_frame_pose_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_velocity_, linear_velocity_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_acceleration_, linear_acceleration_);
    }
 
 
@@ -88,7 +94,7 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
 
 
    /**
-            * Define the desired 3D position to be reached.
+            * Define the desired 3D position, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Point3D getPosition()
    {
@@ -97,11 +103,20 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
 
 
    /**
-            * Define the desired 3D linear velocity to be reached.
+            * Define the desired 3D linear velocity, expressed in world frame, to be reached.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getLinearVelocity()
    {
       return linear_velocity_;
+   }
+
+
+   /**
+            * Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getLinearAcceleration()
+   {
+      return linear_acceleration_;
    }
 
 
@@ -128,6 +143,7 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
       if (!this.control_frame_pose_.epsilonEquals(other.control_frame_pose_, epsilon)) return false;
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.linear_velocity_.epsilonEquals(other.linear_velocity_, epsilon)) return false;
+      if (!this.linear_acceleration_.epsilonEquals(other.linear_acceleration_, epsilon)) return false;
 
       return true;
    }
@@ -147,6 +163,7 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
       if (!this.control_frame_pose_.equals(otherMyClass.control_frame_pose_)) return false;
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.linear_velocity_.equals(otherMyClass.linear_velocity_)) return false;
+      if (!this.linear_acceleration_.equals(otherMyClass.linear_acceleration_)) return false;
 
       return true;
    }
@@ -166,7 +183,9 @@ public class EuclideanStreamingMessage extends Packet<EuclideanStreamingMessage>
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("linear_velocity=");
-      builder.append(this.linear_velocity_);
+      builder.append(this.linear_velocity_);      builder.append(", ");
+      builder.append("linear_acceleration=");
+      builder.append(this.linear_acceleration_);
       builder.append("}");
       return builder.toString();
    }

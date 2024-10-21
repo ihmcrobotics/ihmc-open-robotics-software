@@ -62,6 +62,11 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    public boolean enable_user_pelvis_control_;
    public ihmc_common_msgs.msg.dds.SE3StreamingMessage pelvis_streaming_message_;
    /**
+            * Information for the CoM
+            */
+   public boolean has_center_of_mass_trajectory_message_;
+   public ihmc_common_msgs.msg.dds.EuclideanStreamingMessage center_of_mass_trajectory_message_;
+   /**
             * Information for the neck joints
             */
    public boolean has_neck_streaming_message_;
@@ -75,6 +80,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       right_arm_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
       chest_streaming_message_ = new ihmc_common_msgs.msg.dds.SO3StreamingMessage();
       pelvis_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
+      center_of_mass_trajectory_message_ = new ihmc_common_msgs.msg.dds.EuclideanStreamingMessage();
       neck_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
    }
 
@@ -112,6 +118,9 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       enable_user_pelvis_control_ = other.enable_user_pelvis_control_;
 
       ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.pelvis_streaming_message_, pelvis_streaming_message_);
+      has_center_of_mass_trajectory_message_ = other.has_center_of_mass_trajectory_message_;
+
+      ihmc_common_msgs.msg.dds.EuclideanStreamingMessagePubSubType.staticCopy(other.center_of_mass_trajectory_message_, center_of_mass_trajectory_message_);
       has_neck_streaming_message_ = other.has_neck_streaming_message_;
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.neck_streaming_message_, neck_streaming_message_);
@@ -310,6 +319,27 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
    /**
+            * Information for the CoM
+            */
+   public void setHasCenterOfMassTrajectoryMessage(boolean has_center_of_mass_trajectory_message)
+   {
+      has_center_of_mass_trajectory_message_ = has_center_of_mass_trajectory_message;
+   }
+   /**
+            * Information for the CoM
+            */
+   public boolean getHasCenterOfMassTrajectoryMessage()
+   {
+      return has_center_of_mass_trajectory_message_;
+   }
+
+
+   public ihmc_common_msgs.msg.dds.EuclideanStreamingMessage getCenterOfMassTrajectoryMessage()
+   {
+      return center_of_mass_trajectory_message_;
+   }
+
+   /**
             * Information for the neck joints
             */
    public void setHasNeckStreamingMessage(boolean has_neck_streaming_message)
@@ -374,6 +404,9 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_user_pelvis_control_, other.enable_user_pelvis_control_, epsilon)) return false;
 
       if (!this.pelvis_streaming_message_.epsilonEquals(other.pelvis_streaming_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_center_of_mass_trajectory_message_, other.has_center_of_mass_trajectory_message_, epsilon)) return false;
+
+      if (!this.center_of_mass_trajectory_message_.epsilonEquals(other.center_of_mass_trajectory_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_neck_streaming_message_, other.has_neck_streaming_message_, epsilon)) return false;
 
       if (!this.neck_streaming_message_.epsilonEquals(other.neck_streaming_message_, epsilon)) return false;
@@ -416,6 +449,9 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if(this.enable_user_pelvis_control_ != otherMyClass.enable_user_pelvis_control_) return false;
 
       if (!this.pelvis_streaming_message_.equals(otherMyClass.pelvis_streaming_message_)) return false;
+      if(this.has_center_of_mass_trajectory_message_ != otherMyClass.has_center_of_mass_trajectory_message_) return false;
+
+      if (!this.center_of_mass_trajectory_message_.equals(otherMyClass.center_of_mass_trajectory_message_)) return false;
       if(this.has_neck_streaming_message_ != otherMyClass.has_neck_streaming_message_) return false;
 
       if (!this.neck_streaming_message_.equals(otherMyClass.neck_streaming_message_)) return false;
@@ -461,6 +497,10 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       builder.append(this.enable_user_pelvis_control_);      builder.append(", ");
       builder.append("pelvis_streaming_message=");
       builder.append(this.pelvis_streaming_message_);      builder.append(", ");
+      builder.append("has_center_of_mass_trajectory_message=");
+      builder.append(this.has_center_of_mass_trajectory_message_);      builder.append(", ");
+      builder.append("center_of_mass_trajectory_message=");
+      builder.append(this.center_of_mass_trajectory_message_);      builder.append(", ");
       builder.append("has_neck_streaming_message=");
       builder.append(this.has_neck_streaming_message_);      builder.append(", ");
       builder.append("neck_streaming_message=");

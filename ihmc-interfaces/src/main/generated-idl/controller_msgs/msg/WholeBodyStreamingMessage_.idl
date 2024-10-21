@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__WholeBodyStreamingMessage__idl__
 
 #include "controller_msgs/msg/./JointspaceStreamingMessage_.idl"
+#include "ihmc_common_msgs/msg/./EuclideanStreamingMessage_.idl"
 #include "ihmc_common_msgs/msg/./SE3StreamingMessage_.idl"
 #include "ihmc_common_msgs/msg/./SO3StreamingMessage_.idl"
 module controller_msgs
@@ -67,6 +68,11 @@ module controller_msgs
          */
         boolean enable_user_pelvis_control;
         ihmc_common_msgs::msg::dds::SE3StreamingMessage pelvis_streaming_message;
+        /**
+         * Information for the CoM
+         */
+        boolean has_center_of_mass_trajectory_message;
+        ihmc_common_msgs::msg::dds::EuclideanStreamingMessage center_of_mass_trajectory_message;
         /**
          * Information for the neck joints
          */
