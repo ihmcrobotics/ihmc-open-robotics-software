@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import com.jme3.math.Transform;
 import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
@@ -14,12 +15,10 @@ import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.atlas.parameters.AtlasICPSplitFractionCalculatorParameters;
 import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasPushRecoveryControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasUIParameters;
 import us.ihmc.atlas.parameters.AtlasVisibilityGraphParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
@@ -44,15 +43,16 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -83,7 +83,6 @@ import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
-import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -112,7 +111,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
-   private final AtlasPushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
 
@@ -203,7 +201,6 @@ public class AtlasRobotModel implements DRCRobotModel
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
-      pushRecoveryControllerParameters = new AtlasPushRecoveryControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
    }
 
@@ -307,12 +304,6 @@ public class AtlasRobotModel implements DRCRobotModel
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
-   }
-
-   @Override
-   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
-   {
-      return pushRecoveryControllerParameters;
    }
 
    @Override
@@ -542,13 +533,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return sensorSuiteManager;
    }
 
-   @Override
-   public UIParameters getUIParameters()
-   {
-      return new AtlasUIParameters(selectedVersion, atlasPhysicalProperties);
-   }
-
-   @Override
    public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
@@ -762,5 +746,25 @@ public class AtlasRobotModel implements DRCRobotModel
    public void setUseHandMutatorCollisions(boolean useHandMutatorCollisions)
    {
       this.useHandMutatorCollisions = useHandMutatorCollisions;
+   }
+
+   @Override
+   public Transform getJmeTransformWristToHand(RobotSide side)
+   {
+      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
+      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
+      return jmeAttachmentPlateToPalm;
+   }
+
+   @Override
+   public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
+   {
+      RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
+      handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
+      // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
+      // 0.126 from debugger on GDXGraphicsObject
+      // Where does the 0.042 come from?
+      handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
+      return handGraphicToHandTransform;
    }
 }

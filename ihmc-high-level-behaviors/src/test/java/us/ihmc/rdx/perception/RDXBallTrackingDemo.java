@@ -133,7 +133,7 @@ public class RDXBallTrackingDemo
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("Point Cloud",
-                                                                                                             PubSubImplementation.FAST_RTPS,
+                                                                                                             ros2Node,
                                                                                                              PerceptionAPI.ZED2_DEPTH,
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             pointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);

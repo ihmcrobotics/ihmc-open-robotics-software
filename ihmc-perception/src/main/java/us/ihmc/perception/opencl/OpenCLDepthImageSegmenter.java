@@ -51,7 +51,7 @@ public class OpenCLDepthImageSegmenter
       bytedecoMaskImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoMaskImage.writeOpenCLImage(openCLManager);
 
-      BytedecoImage bytedecoSegmentedDepth = new BytedecoImage(depthImage.getImageWidth(), depthImage.getImageHeight(), depthImage.getOpenCVType());
+      BytedecoImage bytedecoSegmentedDepth = new BytedecoImage(depthImage.getWidth(), depthImage.getHeight(), depthImage.getOpenCVType());
       bytedecoSegmentedDepth.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
       openCLManager.setKernelArgument(kernel, 0, bytedecoDepthImage.getOpenCLImageObject());
@@ -60,7 +60,7 @@ public class OpenCLDepthImageSegmenter
       openCLManager.setKernelArgument(kernel, 3, depthToMaskTransformParameter.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 4, bytedecoSegmentedDepth.getOpenCLImageObject());
 
-      openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
+      openCLManager.execute2D(kernel, depthImage.getWidth(), depthImage.getHeight());
 
       bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
       Mat segmentedDepthImageMat = bytedecoSegmentedDepth.getBytedecoOpenCVMat().clone();
@@ -71,17 +71,7 @@ public class OpenCLDepthImageSegmenter
       depthImage.release();
       imageMask.release();
 
-      return new RawImage(depthImage.getSequenceNumber(),
-                          depthImage.getAcquisitionTime(),
-                          depthImage.getDepthDiscretization(),
-                          segmentedDepthImageMat,
-                          null,
-                          depthImage.getFocalLengthX(),
-                          depthImage.getFocalLengthY(),
-                          depthImage.getPrincipalPointX(),
-                          depthImage.getPrincipalPointY(),
-                          depthImage.getPosition(),
-                          depthImage.getOrientation());
+      return depthImage.replaceImage(segmentedDepthImageMat);
    }
 
    public void destroy()

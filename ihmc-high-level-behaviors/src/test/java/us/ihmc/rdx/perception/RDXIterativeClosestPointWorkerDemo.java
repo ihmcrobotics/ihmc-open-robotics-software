@@ -225,7 +225,7 @@ public class RDXIterativeClosestPointWorkerDemo
             perceptionVisualizerPanel.addVisualizer(zedDepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Point Cloud",
-                                                                                                                DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                                                node,
                                                                                                                 PerceptionAPI.ZED2_DEPTH,
                                                                                                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);

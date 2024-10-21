@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public class JointTorqueAndPowerConstraintHandler
 {
@@ -30,14 +30,12 @@ public class JointTorqueAndPowerConstraintHandler
     * have effort limits), power limits, and a boolean, which dictates whether the joint effort limits
     * are considered. You must call this each tick to update the torque limits.
     */
-   public void computeTorqueConstraints(OneDoFJointBasics joint, double powerLimitLower, double powerLimitUpper, boolean hasTorqueConstraint)
+   public void computeTorqueConstraints(OneDoFJointReadOnly joint, double powerLimitLower, double powerLimitUpper, boolean hasTorqueConstraint)
    {
       if (powerLimitLower > powerLimitUpper)
          throw new RuntimeException("powerLimitLower cannot be larger than powerLimitUpper");
 
       qd = joint.getQd();
-      torqueLimitFromPowerLower = powerLimitUpper / qd;
-      torqueLimitFromPowerUpper = powerLimitLower / qd;
       if (qd < 0)
       {
          torqueLimitFromPowerLower = powerLimitUpper / qd;

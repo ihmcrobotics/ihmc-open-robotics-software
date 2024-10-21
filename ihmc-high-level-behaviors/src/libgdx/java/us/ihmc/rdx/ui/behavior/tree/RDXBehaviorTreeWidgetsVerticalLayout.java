@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.thread.TypedNotification;
@@ -10,7 +11,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {
@@ -151,9 +151,18 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
    private void renderNodeCreationModalDialog(RDXBehaviorTreeNode<?, ?> node)
    {
-      if (ImGui.beginPopupModal(node.getModalPopupID()))
+      float parentWindowHeight = ImGui.getWindowSizeY();
+
+      // Make sure the menu doesn't grow to be taller than the main window
+      // and keep it in the main viewport.
+      // We can get a native crash if this popup creates its own viewport.
+      ImGui.setNextWindowViewport(ImGui.getMainViewport().getID());
+      int windowFlags = ImGuiWindowFlags.None;
+      if (ImGui.beginPopupModal(node.getModalPopupID(), windowFlags))
       {
+         ImGui.beginChild(labels.get("Node Creation Modal Section"), 50.0f * ImGuiTools.calcTextSizeX("A"), 0.8f * parentWindowHeight);
          tree.getNodeCreationMenu().renderImGuiWidgets(modalPopupNode, insertionType);
+         ImGui.endChild();
 
          ImGui.separator();
          if (ImGui.button(labels.get("Cancel")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))

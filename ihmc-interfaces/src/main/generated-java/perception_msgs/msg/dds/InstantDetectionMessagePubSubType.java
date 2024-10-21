@@ -15,7 +15,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7c898085303e81dc7b162eaf656d700b27ba8f7f140be03a6b8effaa931e855b";
+   		return "1156e540781804a7e2bb9b6e1733a5a66bebb0d0cdfb75c029b782aaeb35931d";
    }
    
    @Override

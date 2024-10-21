@@ -6,10 +6,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -137,27 +139,17 @@ public class ZEDColorDepthImagePublisher
          depthImageToPublish.get();
 
          // Encode depth image to png
-         BytePointer depthPNGPointer = dataCompressor.compressDepth(depthImageToPublish.getGpuImageMat());
+         BytePointer compressedDepthPointer = dataCompressor.compressDepth(depthImageToPublish.getGpuImageMat());
 
-         // Publish image
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-         imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-         MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
-         depthImageMessage.setFocalLengthXPixels(depthImageToPublish.getFocalLengthX());
-         depthImageMessage.setFocalLengthYPixels(depthImageToPublish.getFocalLengthY());
-         depthImageMessage.setPrincipalPointXPixels(depthImageToPublish.getPrincipalPointX());
-         depthImageMessage.setPrincipalPointYPixels(depthImageToPublish.getPrincipalPointY());
-         depthImageMessage.setImageWidth(depthImageToPublish.getImageWidth());
-         depthImageMessage.setImageHeight(depthImageToPublish.getImageHeight());
-         depthImageMessage.getPosition().set(depthImageToPublish.getPosition());
-         depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
-         depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
-         depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_HYBRID_ZSTD_JPEG_16UC1.packMessageFormat(depthImageMessage);
+         // Pack the image message
+         PerceptionMessageTools.packImageMessage(depthImageToPublish,
+                                                 compressedDepthPointer,
+                                                 CompressionType.ZSTD_NVJPEG_HYBRID,
+                                                 CameraModel.PINHOLE,
+                                                 depthImageMessage);
 
          // Close GpuMat
-         depthPNGPointer.close();
+         compressedDepthPointer.close();
 
          depthImageToPublish.release();
       }
@@ -222,26 +214,12 @@ public class ZEDColorDepthImagePublisher
             imageEncoders.put(side, new CUDAJPEGProcessor());
 
          // Compress image
-         BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getImageHeight() * colorImageToPublish.getImageWidth());
+         BytePointer colorJPEGPointer = new BytePointer((long) colorImageToPublish.getHeight() * colorImageToPublish.getWidth());
          imageEncoders.get(side).encodeBGR(colorImageToPublish.getGpuImageMat(), colorJPEGPointer);
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(colorJPEGPointer.limit());
-         imageMessageDataPacker.pack(colorImageMessage, colorJPEGPointer);
-         MessageTools.toMessage(colorImageToPublish.getAcquisitionTime(), colorImageMessage.getAcquisitionTime());
-         colorImageMessage.setFocalLengthXPixels(colorImageToPublish.getFocalLengthX());
-         colorImageMessage.setFocalLengthYPixels(colorImageToPublish.getFocalLengthY());
-         colorImageMessage.setPrincipalPointXPixels(colorImageToPublish.getPrincipalPointX());
-         colorImageMessage.setPrincipalPointYPixels(colorImageToPublish.getPrincipalPointY());
-         colorImageMessage.setImageWidth(colorImageToPublish.getImageWidth());
-         colorImageMessage.setImageHeight(colorImageToPublish.getImageHeight());
-         colorImageMessage.getPosition().set(colorImageToPublish.getPosition());
-         colorImageMessage.getOrientation().set(colorImageToPublish.getOrientation());
-         colorImageMessage.setSequenceNumber(colorImageToPublish.getSequenceNumber());
-         colorImageMessage.setDepthDiscretization(colorImageToPublish.getDepthDiscretization());
-         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-         ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(colorImageMessage);
+         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, CameraModel.PINHOLE, colorImageMessage);
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());
