@@ -17,8 +17,8 @@ public enum NetworkParameterKeys
    rightHand("Hostname/IP of the right hand.", "", true),
 
    RTPSDomainID("RTPS Domain ID used for rtps publishers and subscribers", "-1", false),
-   RTPSSubnet("RTPS subnet restriction, expected format: \"192.168.1.0/24\". "
-              + "When provided RTPS only communicate through the indicated sub-network. "
+   RTPSSubnet("RTPS subnet restriction, expected format: \"192.168.1.0/24, 127.0.0.1/8\". "
+              + "When provided RTPS only communicate through the indicated sub-network(s). "
               + "Might not work on Windows!", null, true);
 
    private final String description;

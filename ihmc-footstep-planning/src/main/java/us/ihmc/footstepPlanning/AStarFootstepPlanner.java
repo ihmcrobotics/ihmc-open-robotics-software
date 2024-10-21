@@ -23,7 +23,6 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedStepExpansion;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -53,7 +52,6 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEnvironmentHandler plannerEnvironmentHandler;
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
-   private final ReferenceBasedStepExpansion referenceBasedExpansion;
    private final HeightMapFootstepChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
@@ -105,12 +103,11 @@ public class AStarFootstepPlanner
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
       this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
-      this.referenceBasedExpansion = new ReferenceBasedStepExpansion(referenceBasedIdealStepCalculator, nominalExpansion);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
       stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
-      this.iterationConductor = new AStarFootstepPlannerIterationConductor(referenceBasedExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
+      this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
 
       referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
@@ -207,14 +204,9 @@ public class AStarFootstepPlanner
       }
 
       // Start planning loop
-      if (request.getReferencePlan() == null)
-      {
-         referenceBasedIdealStepCalculator.clearReferencePlan();
-      }
-      else
-      {
-         referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
-      }
+
+      // Either the request has a null reference plan, or a plan we can use
+      referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
 
       while (true)
       {

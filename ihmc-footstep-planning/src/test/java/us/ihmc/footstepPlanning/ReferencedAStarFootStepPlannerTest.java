@@ -1,12 +1,9 @@
 package us.ihmc.footstepPlanning;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -14,99 +11,135 @@ import us.ihmc.log.LogTools;
 import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 
-import java.util.Random;
+import java.util.Objects;
 
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ReferencedAStarFootStepPlannerTest
 {
-   private static final Random RANDOM = new Random(163421);
-   private static final double EPS_XY = 0.5 * LatticePoint.gridSizeXY;
-   private static final double EPS_YAW = 0.5 * LatticePoint.gridSizeYaw;
-   private static FootstepPlan NOMINAL_PLAN = null;
+   // The epsilons are multiplied by 0.5 so that we allow a max epsilon of half the distance between two grid points, we hope to round to the nearest grid point, so if we are greater than 0.5 we should round up
+   private static final double EPSILON = 0.5 * LatticePoint.gridSizeXY;
+   private static final double EPSLILON_YAW = 0.5 * LatticePoint.gridSizeYaw;
    private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
    private static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
-   private static final FootstepPlannerRequest FOOTSTEP_PLANNER_REQUEST = new FootstepPlannerRequest();
-   private static final FootstepPlanningModule FOOTSTEP_PLANNING_MODULE = new FootstepPlanningModule("testerModule");
+   private static final FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+   private static final FootstepPlanningModule footstepPlannerModule = new FootstepPlanningModule("testerModule");
 
-   // These tests needs to be tested in the order. Results from 1st test is used in the 2nd test
-   @Test
-   @Order(1)
-   public void testNominalAStarPlanner()
+   private static FootstepPlannerOutput plannerOutput;
+
+   @BeforeAll
+   public static void generateAStarPlan()
    {
-      FOOTSTEP_PLANNER_REQUEST.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
-      FOOTSTEP_PLANNER_REQUEST.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
+      // Here we set up parameters to test the specific case we need
+      footstepPlannerRequest.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
+      footstepPlannerRequest.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
 
-      FOOTSTEP_PLANNER_REQUEST.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
-      FOOTSTEP_PLANNER_REQUEST.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
+      footstepPlannerRequest.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
+      footstepPlannerRequest.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
 
-      FOOTSTEP_PLANNER_REQUEST.setRequestedInitialStanceSide(RobotSide.LEFT);
-      FOOTSTEP_PLANNER_REQUEST.setReferencePlan(null);
+      footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.LEFT);
+      footstepPlannerRequest.setReferencePlan(null);
+      footstepPlannerRequest.setAssumeFlatGround(true);
 
-      FootstepPlannerOutput outputA = FOOTSTEP_PLANNING_MODULE.handleRequest(FOOTSTEP_PLANNER_REQUEST);
-      int numSteps = outputA.getFootstepPlan().getNumberOfSteps();
-
-      PlannedFootstep leftFinalStep = outputA.getFootstepPlan().getFootstep(numSteps - 2);
-      PlannedFootstep rightFinalStep = outputA.getFootstepPlan().getFootstep(numSteps - 1);
-      assertTrue(leftNominalGoalPose.epsilonEquals(leftFinalStep.getFootstepPose(), EPS_XY) &&
-                 rightNominalGoalPose.epsilonEquals(rightFinalStep.getFootstepPose(), EPS_XY));
-
-      NOMINAL_PLAN = outputA.getFootstepPlan();
+      plannerOutput = footstepPlannerModule.handleRequest(footstepPlannerRequest);
    }
 
+   /**
+    * This test is here to make sure the planner is working, its nothing special and could probably be removed if this case is covered in another class
+    */
    @Test
-   @Order(2)
-   public void testStepGenerationFromReference()
+   public void testNominalAStarPlanner()
    {
-      int index = RANDOM.nextInt(NOMINAL_PLAN.getNumberOfSteps() - 1);
-      // this will be referenced
-      FootstepPlan perturbedPlan = perturbPlan(NOMINAL_PLAN, index);
-      // set reference plan
-      FOOTSTEP_PLANNER_REQUEST.setReferencePlan(perturbedPlan);
+      int numSteps = plannerOutput.getFootstepPlan().getNumberOfSteps();
 
-      FramePose3D nominalStepPose = NOMINAL_PLAN.getFootstep(index).getFootstepPose();
-      for (double alpha = 0.0; alpha <= 1.0; alpha += 0.1)
+      PlannedFootstep leftFinalStep = plannerOutput.getFootstepPlan().getFootstep(numSteps - 2);
+      PlannedFootstep rightFinalStep = plannerOutput.getFootstepPlan().getFootstep(numSteps - 1);
+      assertTrue(leftNominalGoalPose.epsilonEquals(leftFinalStep.getFootstepPose(), EPSILON));
+      assertTrue(rightNominalGoalPose.epsilonEquals(rightFinalStep.getFootstepPose(), EPSILON));
+   }
+
+   /**
+    * This test is rather complex, here we are testing that the
+    * {@link us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters#referencePlanAlpha} works as expected given a translation in the
+    * x, the y and a rotation about the yaw axis.
+    */
+   @Test
+   public void testReferenceAlphaXYAndYaw()
+   {
+      // Here we take the nominal plan (the expected plan given no reference plan) and we save the first step in that plan to compare against later
+      // The reason we take the first step is that it's not a starting pose, and its not a goal post, so it won't be affected by those kind of parameters
+      FootstepPlan nominalPlan = plannerOutput.getFootstepPlan();
+      int index = 0;
+      FramePose3D nominalStepPose = nominalPlan.getFootstep(index).getFootstepPose();
+
+      // These are the adjustments we want to perform on the step
+      Point3D translationToAppend = new Point3D(LatticePoint.gridSizeXY * 2, -LatticePoint.gridSizeXY * 2, 0);
+      // This is negative because of the specific index we are using
+      double yawToAppend = -LatticePoint.gridSizeYaw * 2;
+
+      // We take the adjusted plan and the adjusted footstep pose
+      FootstepPlan adjustedPlan = adjustFootstepAtIndex(nominalPlan, index, translationToAppend, yawToAppend);
+      FramePose3D adjustedStepPose = Objects.requireNonNull(adjustedPlan).getFootstep(index).getFootstepPose();
+
+      // Now we want to set the adjusted plan as a reference, this way the planner will try to use the reference plan
+      // Specifically the adjusted step that we changed; that is what we will be comparing against
+      footstepPlannerRequest.setReferencePlan(adjustedPlan);
+
+      // We want to test that the reference alpha is working as expected, and the range of its values are from 0 to 1 so we will loop through all of these values
+      for (double referenceAlpha = 0.0; referenceAlpha <= 1.0; referenceAlpha += 0.1)
       {
-         // set alpha
-         FOOTSTEP_PLANNING_MODULE.getFootstepPlannerParameters().setReferencePlanAlpha(alpha);
+         // Each loop through, we update the reference alpha to the new value, then we plan new footsteps and get the output pose at the index we care about
+         footstepPlannerModule.getFootstepPlannerParameters().setReferencePlanAlpha(referenceAlpha);
+         FootstepPlannerOutput output = footstepPlannerModule.handleRequest(footstepPlannerRequest);
+         FramePose3D outputStep = output.getFootstepPlan().getFootstep(index).getFootstepPose();
 
-         FramePose3D outputStepPose = FOOTSTEP_PLANNING_MODULE.handleRequest(FOOTSTEP_PLANNER_REQUEST).getFootstepPlan().getFootstep(index).getFootstepPose();
-
-         FramePose3D perturbedStepPose = perturbedPlan.getFootstep(index).getFootstepPose();
-         RobotSide side = perturbedPlan.getFootstep(index).getRobotSide();
-
+         // We calculate the expected adjustment using an interpolation between the nominal step and the reference step
+         // This should match what the planner is doing give or take a few less parameters
          Point3D expectedTranslation = new Point3D();
-         expectedTranslation.setX(EuclidCoreTools.interpolate(nominalStepPose.getX(), perturbedStepPose.getX(), alpha));
-         expectedTranslation.setY(EuclidCoreTools.interpolate(nominalStepPose.getY(), perturbedStepPose.getY(), alpha));
-         double expectedYaw = AngleTools.interpolateAngle(nominalStepPose.getYaw(), perturbedStepPose.getYaw(), alpha);
+         expectedTranslation.setX(EuclidCoreTools.interpolate(nominalStepPose.getX(), adjustedStepPose.getX(), referenceAlpha));
+         expectedTranslation.setY(EuclidCoreTools.interpolate(nominalStepPose.getY(), adjustedStepPose.getY(), referenceAlpha));
+         double expectedYaw = AngleTools.interpolateAngle(nominalStepPose.getYaw(), adjustedStepPose.getYaw(), referenceAlpha);
 
-         String msg = "pose does not match expected at alpha: " + alpha + "\noutputPose: " + outputStepPose.getTranslation().toString() + ", yaw: " + outputStepPose.getYaw() +
-                      "\nexpectedPose: x: " + expectedTranslation.getX() + ", y: " + expectedTranslation.getY() + ", yaw: " + expectedYaw;
-         assertTrue(  msg,
-                      EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationX(), expectedTranslation.getX(), EPS_XY) &&
-                      EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationY(), expectedTranslation.getY(), EPS_XY) &&
-                      EuclidCoreTools.epsilonEquals(outputStepPose.getYaw(), expectedYaw, EPS_YAW));
+         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getTranslationX(), expectedTranslation.getX(), EPSILON),
+                    "The actual pose was: " + outputStep.getTranslationX() + " and the expected is: " + expectedTranslation.getX() + "! referenceAlpha: "
+                    + referenceAlpha);
+         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getTranslationY(), expectedTranslation.getY(), EPSILON),
+                    "The actual pose was: " + outputStep.getTranslationY() + " and the expected is: " + expectedTranslation.getY() + "! referenceAlpha: "
+                    + referenceAlpha);
+         assertTrue(EuclidCoreTools.epsilonEquals(outputStep.getYaw(), expectedYaw, EPSLILON_YAW),
+                    "The actual yaw was: " + outputStep.getYaw() + " and the expected is: " + expectedYaw + "! referenceAlpha: " + referenceAlpha);
       }
    }
 
-   private FootstepPlan perturbPlan(FootstepPlan plan, int index)
+   /**
+    * This method adjusts a footstep at the given index, this then returns a plan that will be the original plan passed in but that one index will have been
+    * modified.
+    *
+    * @param plan                is the footstep plan that we want to modify; only the footstep at the index will be modified
+    * @param index               the spot at which we want to modify the step
+    * @param translationToAppend this is the translation to move the step at the given index
+    * @param yawToAppend         this is the yaw to rotate the step at the given index
+    * @return the new footstep plan that contains the modified step
+    */
+   private FootstepPlan adjustFootstepAtIndex(FootstepPlan plan, int index, Point3D translationToAppend, double yawToAppend)
    {
-      // perturb one random step from the given plan. This step will be tested against output from the planner.
+      // Here we check that the index is within the legal bounds of the footstep plan, don't really need to do this since its a test but whatever
       int numSteps = plan.getNumberOfSteps();
       if (index >= 0 && index < numSteps)
       {
-         FootstepPlan perturbedPlan = new FootstepPlan(plan);
-         PlannedFootstep step = perturbedPlan.getFootstep(index);
-         Point3D translationToAppend = EuclidCoreRandomTools.nextPoint3D(RANDOM, 0.2, 0.2, 0);
-         double yawToAppend = EuclidCoreRandomTools.nextDouble(RANDOM, Math.PI / 20);
+         FootstepPlan adjustedPlan = new FootstepPlan(plan);
+         PlannedFootstep step = adjustedPlan.getFootstep(index);
+
+         // We append a translation to the foot that we are trying to modify
          step.getFootstepPose().appendTranslation(translationToAppend);
          step.getFootstepPose().appendYawRotation(yawToAppend);
-         return perturbedPlan;
+
+         return adjustedPlan;
       }
       else
       {
-         LogTools.warn("index of step to perturb is out of bounds !");
+         // Again, don't really need this in the test case
+         LogTools.warn("index of step to adjust is out of bounds !");
          return null;
       }
    }

@@ -125,7 +125,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private FootstepDataListMessage startTest()
    {
-      simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));

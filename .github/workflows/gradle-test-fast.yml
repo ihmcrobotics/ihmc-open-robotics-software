@@ -57,6 +57,7 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'humanoid-obstacle-2'
+      requires-self-hosted: true
   atlas-humanoid-push-recovery:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:

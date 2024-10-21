@@ -205,13 +205,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new DefaultSimulationLowLevelControllerFactory(getJointMap(), getSimulateDT());
    }
 
-   public abstract Transform getJmeTransformWristToHand(RobotSide side);
-
-   default RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
-   {
-      return new RigidBodyTransform();
-   }
-
    public default LocomotionParameters getLocomotionParameters()
    {
       return null;
@@ -325,4 +318,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
+
+   public default RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
+   {
+      return new RigidBodyTransform();
+   }
+
+   public abstract Transform getJmeTransformWristToHand(RobotSide side);
+
 }

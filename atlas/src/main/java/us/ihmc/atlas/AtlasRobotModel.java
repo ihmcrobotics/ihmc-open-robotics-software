@@ -534,26 +534,6 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public Transform getJmeTransformWristToHand(RobotSide side)
-   {
-      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
-      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
-      return jmeAttachmentPlateToPalm;
-   }
-
-   @Override
-   public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
-   {
-      RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
-      // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
-      // 0.126 from debugger on GDXGraphicsObject
-      // Where does the 0.042 come from?
-      handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
-      return handGraphicToHandTransform;
-   }
-
-   @Override
    public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
@@ -767,5 +747,25 @@ public class AtlasRobotModel implements DRCRobotModel
    public void setUseHandMutatorCollisions(boolean useHandMutatorCollisions)
    {
       this.useHandMutatorCollisions = useHandMutatorCollisions;
+   }
+
+   @Override
+   public Transform getJmeTransformWristToHand(RobotSide side)
+   {
+      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
+      Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
+      return jmeAttachmentPlateToPalm;
+   }
+
+   @Override
+   public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
+   {
+      RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
+      handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
+      // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
+      // 0.126 from debugger on GDXGraphicsObject
+      // Where does the 0.042 come from?
+      handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
+      return handGraphicToHandTransform;
    }
 }

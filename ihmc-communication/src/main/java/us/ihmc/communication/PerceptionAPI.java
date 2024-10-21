@@ -12,11 +12,14 @@ import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.Set;
 
 public final class PerceptionAPI
 {
@@ -45,6 +48,8 @@ public final class PerceptionAPI
    public static final String BLACKFLY_NAME = "blackfly";
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
+
+   public static final String STREAMING_NAME = "streaming";
 
    public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
    public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
@@ -285,4 +290,26 @@ public final class PerceptionAPI
    {
       return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
    }
+
+   /* VIDEO STREAMING STUFF */
+   private static final ROS2Topic<?> STREAMING_MODULE = BEST_EFFORT.withModule(STREAMING_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
+
+   // Realsense
+   private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
+   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
+
+   // ZED
+   private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");
+   public static final ROS2Topic<SRTStreamStatus> SRT_ZED_RIGHT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_right");
+   public static final ROS2Topic<SRTStreamStatus> SRT_ZED_DEPTH_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("depth");
+
+   public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
+         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE, false),
+                  new ROS2SRTStreamTopicPair(SRT_REALSENSE_DEPTH_STREAM_STATUS, D455_DEPTH_IMAGE, true),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.LEFT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_DEPTH_STREAM_STATUS, ZED2_DEPTH, true));
 }

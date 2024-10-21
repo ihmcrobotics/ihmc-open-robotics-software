@@ -527,6 +527,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
          controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
 
+      if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
+         controllerToolbox.setupMultiContactPostureAdjustmentProvider();
+      
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();

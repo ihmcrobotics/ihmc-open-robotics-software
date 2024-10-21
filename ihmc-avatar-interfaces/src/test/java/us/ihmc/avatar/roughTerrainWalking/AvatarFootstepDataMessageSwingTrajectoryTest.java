@@ -1,8 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +45,8 @@ import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements MultiRobotTestInterface
 {
@@ -162,9 +161,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       simulationTestHelper.publishToController(message);
       assertTrue(simulationTestHelper.simulateNow(initialTransferTime + (1.0 - lastPortion / 2.0) * swingTime));
-      Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
+      assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
       assertTrue(simulationTestHelper.simulateNow(lastPortion));
-      Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
+      assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
    }
 
    @Test
@@ -297,9 +296,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) simulationTestHelper.findVariable(swingStateNamespace, typeName);
       YoVariable currentWaypointIndex = simulationTestHelper.findVariable(linearNamespace, currentIndexName);
 
-      assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
+      assertEquals(TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue(), "Unexpected Trajectory Type");
       assertTrue(simulationTestHelper.simulateNow(swingTime + transferTime));
-      assertEquals("Swing Trajectory did not execute.", points, currentWaypointIndex.getValueAsLongBits());
+      assertEquals(points, currentWaypointIndex.getValueAsLongBits(), "Swing Trajectory did not execute.");
    }
 
    private DRCRobotModel setup(DRCStartingLocation startingLocation)
