@@ -127,6 +127,13 @@ public abstract class FFmpegEncoder
       return error != AVERROR_EOF();
    }
 
+   public boolean flush(Consumer<AVPacket> packetConsumer)
+   {
+      av_frame_free(frameToEncode);
+      frameToEncode.close();
+      return encodeNextFrame(packetConsumer);
+   }
+
    public AVRational getTimeBase()
    {
       return encoderContext.time_base();
@@ -134,12 +141,8 @@ public abstract class FFmpegEncoder
 
    public void destroy()
    {
-      frameToEncode.close();
-      encodeNextFrame(null);
-
       avcodec_close(encoderContext);
       avcodec_free_context(encoderContext);
-      av_frame_free(frameToEncode);
       av_packet_free(encodedPacket);
 
       encoder.close();

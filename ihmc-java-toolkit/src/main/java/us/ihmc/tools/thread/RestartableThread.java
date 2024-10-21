@@ -92,7 +92,7 @@ public class RestartableThread
 
    public boolean isRunning()
    {
-      return running.getPlain();
+      return running.get();
    }
 
    boolean isAlive()
