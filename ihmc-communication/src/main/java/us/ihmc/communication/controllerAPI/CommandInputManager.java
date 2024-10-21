@@ -215,13 +215,13 @@ public class CommandInputManager
       ConcurrentRingBuffer buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
-         LogTools.error("{}The message type {} is not supported.", printStatementPrefix, message.getClass().getSimpleName());
+//         LogTools.error("{}The message type {} is not supported.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
       Command nextCommand = (Command) buffer.next();
       if (nextCommand == null)
       {
-         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
+//         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
 

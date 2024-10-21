@@ -135,9 +135,20 @@ public class PelvisICPBasedTranslationManager
                                                                                      worldFrame,
                                                                                      registry);
 
+      // default - 16.5cm min clearance
       proportionalGain.set(0.5);
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
+
+      // too high
+      proportionalGain.set(0.7);
+      integralGain.set(2.2);
+      maximumIntegralError.set(0.13);
+
+      // too high
+      proportionalGain.set(0.5);
+      integralGain.set(1.8);
+      maximumIntegralError.set(0.1);
 
       manualMode.addListener(v -> initialize());
 
