@@ -149,6 +149,9 @@ public class SE3PIDGainsTrajectoryControllerCommand extends QueueableCommand<SE3
       newGains.setProportionalGains(gains.getGainsX().getKp(), gains.getGainsY().getKp(), gains.getGainsZ().getKp());
       newGains.setDerivativeGains(gains.getGainsX().getKd(), gains.getGainsY().getKd(), gains.getGainsZ().getKd());
       newGains.setIntegralGains(gains.getGainsX().getKi(), gains.getGainsY().getKi(), gains.getGainsZ().getKi(), gains.getMaximumIntegralError());
+      newGains.getDampingRatios()[0] = gains.getGainsX().getZeta();
+      newGains.getDampingRatios()[1] = gains.getGainsY().getZeta();
+      newGains.getDampingRatios()[2] = gains.getGainsZ().getZeta();
       newGains.setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       newGains.setMaxDerivativeError(gains.getMaximumDerivativeError());
       newGains.setMaxProportionalError(gains.getMaximumProportionalError());

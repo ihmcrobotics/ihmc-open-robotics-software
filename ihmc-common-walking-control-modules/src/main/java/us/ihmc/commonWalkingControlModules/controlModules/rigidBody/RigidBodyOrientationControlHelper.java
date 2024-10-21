@@ -27,6 +27,7 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3PIDGainsTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -37,6 +38,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.Arrays;
 
 /**
  * The base functionality of the taskspace orientation control state for a rigid body.
@@ -90,6 +93,7 @@ public class RigidBodyOrientationControlHelper
 
    TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
    RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
+   RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
 
    private final BooleanProvider useBaseFrameForControl;
    private final YoBoolean isImpedanceEnabled;
@@ -142,6 +146,8 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
       isImpedanceEnabled = enableImpedanceControl;
+
+      gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -279,6 +285,20 @@ public class RigidBodyOrientationControlHelper
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
       updateFunctionGenerators();
 
+      if (!feedForwardTrajectoryList.isEmpty())
+      {
+         feedForwardAcceleration.set(feedForwardTrajectoryList.get(
+               feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+                                                              .getAngularPart());
+      }
+
+      if (!gainsTrajectoryPoints.isEmpty())
+      {
+         gains = gainsTrajectoryPoints.get(
+               gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+                                      .getAngular();
+      }
+
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
@@ -286,10 +306,6 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
       feedbackControlCommand.setGains(gains);
 
-      if (!feedForwardTrajectoryList.isEmpty())
-      {
-         feedForwardAcceleration.set(feedForwardTrajectoryList.get(trajectoryGenerator.getCurrentWaypointIndex()).getLinearPart());
-      }
 
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
@@ -635,6 +651,21 @@ public class RigidBodyOrientationControlHelper
       {
          return pointQueue.peekLast().getTime();
       }
+   }
+
+   public TDoubleArrayList getFeedForwardTrajectoryTimes()
+   {
+      return feedForwardTrajectoryTimes;
+   }
+
+   public RecyclingArrayList<SpatialVector> getFeedForwardTrajectoryList()
+   {
+      return feedForwardTrajectoryList;
+   }
+
+   public RecyclingArrayList<SE3PIDGainsTrajectoryPoint> getGainsTrajectoryPoints()
+   {
+      return gainsTrajectoryPoints;
    }
 
    public void clear()

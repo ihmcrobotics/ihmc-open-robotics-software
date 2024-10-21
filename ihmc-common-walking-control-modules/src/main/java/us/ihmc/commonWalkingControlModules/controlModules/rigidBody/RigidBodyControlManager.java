@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3PIDGainsTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -391,7 +392,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand, WrenchTrajectoryControllerCommand feedForwardCommand)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand,
+                                             WrenchTrajectoryControllerCommand feedForwardCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
 
@@ -401,6 +403,48 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
       }
       else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, initialJointPositions))
+      { // Otherwise execute in TASKSPACE mode
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+         hold();
+      }
+   }
+
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand,
+                                             SE3PIDGainsTrajectoryControllerCommand gainsCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+      }
+      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, gainsCommand, initialJointPositions))
+      { // Otherwise execute in TASKSPACE mode
+         requestState(taskspaceControlState.getControlMode());
+      }
+      else
+      {
+         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " received invalid hybrid SE3 trajectory command.");
+         hold();
+      }
+   }
+
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointSpaceCommand,
+                                             WrenchTrajectoryControllerCommand feedForwardCommand, SE3PIDGainsTrajectoryControllerCommand gainsCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+      }
+      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, feedForwardCommand, gainsCommand, initialJointPositions))
       { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
       }

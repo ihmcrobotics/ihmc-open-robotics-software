@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3PIDGainsTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
@@ -364,10 +365,78 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
          positionHelper.getFeedForwardTrajectoryList().clear();
          positionHelper.getFeedForwardTrajectoryTimes().clear();
+         orientationHelper.getFeedForwardTrajectoryList().clear();
+         orientationHelper.getFeedForwardTrajectoryTimes().clear();
          for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
          {
             positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
             positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+            orientationHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+            orientationHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+         }
+         return true;
+      }
+
+      clear();
+      positionHelper.clear();
+      orientationHelper.clear();
+      return false;
+   }
+
+   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
+                                                JointspaceTrajectoryCommand jointspaceCommand,
+                                                SE3PIDGainsTrajectoryControllerCommand gainsCommand,
+                                                double[] initialJointPositions)
+   {
+      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+      {
+         hybridModeActive.set(true);
+         statusHelper.registerNewTrajectory(command);
+
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
+
+         for (int i = 0; i < gainsCommand.getNumberOfTrajectoryPoints(); i++)
+         {
+            positionHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+            orientationHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+         }
+         return true;
+      }
+
+      clear();
+      positionHelper.clear();
+      orientationHelper.clear();
+      return false;
+   }
+
+   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
+                                                JointspaceTrajectoryCommand jointspaceCommand,
+                                                WrenchTrajectoryControllerCommand feedForwardCommand,
+                                                SE3PIDGainsTrajectoryControllerCommand gainsCommand,
+                                                double[] initialJointPositions)
+   {
+      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+      {
+         hybridModeActive.set(true);
+         statusHelper.registerNewTrajectory(command);
+
+         positionHelper.getFeedForwardTrajectoryList().clear();
+         positionHelper.getFeedForwardTrajectoryTimes().clear();
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getFeedForwardTrajectoryList().clear();
+         orientationHelper.getFeedForwardTrajectoryTimes().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
+
+         for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
+         {
+            positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+            positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+            orientationHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+            orientationHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+
+            positionHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
+            orientationHelper.getGainsTrajectoryPoints().add().set(gainsCommand.getTrajectoryPoint(i));
          }
          return true;
       }

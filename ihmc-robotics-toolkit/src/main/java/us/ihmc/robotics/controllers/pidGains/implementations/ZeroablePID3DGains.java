@@ -15,6 +15,7 @@ public class ZeroablePID3DGains implements PID3DGains, Settable<ZeroablePID3DGai
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
    private double[] integralGains = new double[3];
+   private double[] dampingRatios = new double[3];
 
    private double maxIntegralError = 0.0;
    private double maxDerivativeError = Double.POSITIVE_INFINITY;
@@ -58,7 +59,7 @@ public class ZeroablePID3DGains implements PID3DGains, Settable<ZeroablePID3DGai
    @Override
    public double[] getDampingRatios()
    {
-      return new double[3];
+      return dampingRatios;
    }
 
    @Override
@@ -134,6 +135,14 @@ public class ZeroablePID3DGains implements PID3DGains, Settable<ZeroablePID3DGai
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError = maxProportionalError;
+   }
+
+   @Override
+   public void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ)
+   {
+      dampingRatios[0] = dampingRatioX;
+      dampingRatios[1] = dampingRatioY;
+      dampingRatios[2] = dampingRatioZ;
    }
 
    @Override

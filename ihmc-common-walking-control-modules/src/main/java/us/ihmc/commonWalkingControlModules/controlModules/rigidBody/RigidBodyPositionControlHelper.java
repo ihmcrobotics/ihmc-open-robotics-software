@@ -31,6 +31,7 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3PIDGainsTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -100,7 +101,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
    TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
    RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
-   SpatialVector desiredFeedForwardSpatialVector;
+   RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
 
    private final BooleanProvider useBaseFrameForControl;
    private final YoBoolean isImpedanceEnabled;
@@ -158,6 +159,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
       isImpedanceEnabled = enableImpedanceControl;
+
+      gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -338,7 +341,16 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       if (!feedForwardTrajectoryList.isEmpty())
       {
-         feedForwardAcceleration.set(feedForwardTrajectoryList.get(trajectoryGenerator.getCurrentWaypointIndex()).getLinearPart());
+         feedForwardAcceleration.set(feedForwardTrajectoryList.get(
+              feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+                                                              .getLinearPart());
+      }
+
+      if (!gainsTrajectoryPoints.isEmpty())
+      {
+         gains = gainsTrajectoryPoints.get(
+                  gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+                                      .getLinear();
       }
 
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -685,6 +697,11 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
    public RecyclingArrayList<SpatialVector> getFeedForwardTrajectoryList()
    {
       return feedForwardTrajectoryList;
+   }
+
+   public RecyclingArrayList<SE3PIDGainsTrajectoryPoint> getGainsTrajectoryPoints()
+   {
+      return gainsTrajectoryPoints;
    }
 
    public void clear()

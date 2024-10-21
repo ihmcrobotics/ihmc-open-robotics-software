@@ -70,6 +70,23 @@ public interface PID3DGains extends PID3DGainsReadOnly
    public abstract void setMaxProportionalError(double maxProportionalError);
 
    /**
+    * Sets the damping ratio for all three dimensions.
+    * <p>
+    * Note: Depending on the implementation the damping ratio might be used to determine the derivative
+    * gains from the current proportional gains and the current damping ratio. Those implementations will
+    * typically update the damping ratio from the current proportional gain and the provided derivative
+    * gain if the derivative gain is set. In that case the order in which the proportional and derivative
+    * gains are set might influence the outcome. Typically, it is safe to first set the proportional gain
+    * and then set the derivative gain or damping ratio. For an example of this see {@link DefaultPID3DGains}.
+    * </p>
+    *
+    * @param dampingRatioX the new damping ratio for the x direction.
+    * @param dampingRatioY the new damping ratio for the y direction.
+    * @param dampingRatioZ the new damping ratio for the z direction.
+    */
+   public abstract void setDampingRatios(double dampingRatioX, double dampingRatioY, double dampingRatioZ);
+
+   /**
     * Sets the proportional PID gains for all three dimensions from a double array. The provided array
     * must be of length three.
     *
@@ -234,6 +251,29 @@ public interface PID3DGains extends PID3DGainsReadOnly
    }
 
    /**
+    * Sets the damping ratio for all three dimensions.
+    *
+    * @param dampingRatio the new damping ratio for all three dimensions.
+    * @see PID3DGains#setDampingRatios(double, double, double)
+    */
+   public default void setDampingRatios(double dampingRatio)
+   {
+      setDampingRatios(dampingRatio, dampingRatio, dampingRatio);
+   }
+
+   /**
+    * Sets the damping ratio for all three dimensions.
+    *
+    * @param dampingRatios the new damping ratios for the three directions.
+    * @see PID3DGains#setDampingRatios(double, double, double)
+    */
+   public default void setDampingRatios(double[] dampingRatios)
+   {
+      PID3DGainsReadOnly.checkArrayLength(dampingRatios);
+      setDampingRatios(dampingRatios[0], dampingRatios[1], dampingRatios[2]);
+   }
+
+   /**
     * Copies the gains and parameters from the provided {@link PID3DGainsReadOnly} parameters into
     * this.
     * <p>
@@ -256,5 +296,6 @@ public interface PID3DGains extends PID3DGainsReadOnly
       setMaxFeedbackAndFeedbackRate(other.getMaximumFeedback(), other.getMaximumFeedbackRate());
       setMaxDerivativeError(other.getMaximumDerivativeError());
       setMaxProportionalError(other.getMaximumProportionalError());
+      setDampingRatios(other.getDampingRatios());
    }
 }
