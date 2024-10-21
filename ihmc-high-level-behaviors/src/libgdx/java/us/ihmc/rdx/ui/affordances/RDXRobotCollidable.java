@@ -97,7 +97,7 @@ public class RDXRobotCollidable implements RenderableProvider
       linkFrame = syncedLinkFrame;
 
       RigidBodyTransform collisionToLinkFrameTransform = new RigidBodyTransform();
-      collisionShapeFrame = new MutableReferenceFrame("collisionShapeFrame" + rigidBodyName, linkFrame);
+      collisionShapeFrame = new MutableReferenceFrame("collisionShapeFrame" + rigidBodyName + collidableIndex, linkFrame);
 
       mouseCollidable = new MouseCollidable(this.shape);
       vrPickRayCollidable = new MouseCollidable(this.shape);

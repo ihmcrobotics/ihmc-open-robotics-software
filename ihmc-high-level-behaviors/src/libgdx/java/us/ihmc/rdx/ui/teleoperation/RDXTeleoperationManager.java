@@ -149,7 +149,7 @@ public class RDXTeleoperationManager extends RDXPanel
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
-      syncedRobot = communicationHelper.newSyncedRobot();
+      syncedRobot = communicationHelper.newSyncedRobot(false);
 
       robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
 
