@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameMissingFactories;
-import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.commons.time.TimeIntervalProvider;
 

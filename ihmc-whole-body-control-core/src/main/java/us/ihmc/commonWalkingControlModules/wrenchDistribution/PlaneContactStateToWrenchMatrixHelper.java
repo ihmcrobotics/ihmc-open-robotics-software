@@ -23,7 +23,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;

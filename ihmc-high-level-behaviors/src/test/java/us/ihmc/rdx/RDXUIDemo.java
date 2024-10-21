@@ -14,7 +14,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.StringTools;
 
 public class RDXUIDemo

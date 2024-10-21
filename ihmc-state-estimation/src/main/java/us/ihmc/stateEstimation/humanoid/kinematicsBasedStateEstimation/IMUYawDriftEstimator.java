@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.commons.AngleTools;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;

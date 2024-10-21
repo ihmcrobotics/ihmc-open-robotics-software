@@ -39,8 +39,8 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;

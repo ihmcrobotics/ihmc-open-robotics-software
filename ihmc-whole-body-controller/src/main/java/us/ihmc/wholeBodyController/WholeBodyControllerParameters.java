@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commons.robotics.robotSide.RobotSegment;
+import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 

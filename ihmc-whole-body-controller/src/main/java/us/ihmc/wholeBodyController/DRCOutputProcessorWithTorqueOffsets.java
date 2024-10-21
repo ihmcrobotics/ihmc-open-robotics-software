@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputListBasics;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

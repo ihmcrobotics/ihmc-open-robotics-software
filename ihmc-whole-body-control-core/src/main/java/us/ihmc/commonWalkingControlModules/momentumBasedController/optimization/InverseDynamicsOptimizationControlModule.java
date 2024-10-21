@@ -27,7 +27,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.time.ExecutionTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -43,7 +43,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.commons.SCS2YoGraphicHolder;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;

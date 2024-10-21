@@ -21,7 +21,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;

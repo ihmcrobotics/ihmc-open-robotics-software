@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXVRHandPlacedFootstep
 {

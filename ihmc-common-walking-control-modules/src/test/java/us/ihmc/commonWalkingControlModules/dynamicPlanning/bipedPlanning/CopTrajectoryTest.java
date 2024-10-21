@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;

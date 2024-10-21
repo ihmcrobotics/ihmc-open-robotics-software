@@ -11,8 +11,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSextant;
-import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.robotSide.RobotSextant;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class HexapodReferenceFrames implements ReferenceFrames

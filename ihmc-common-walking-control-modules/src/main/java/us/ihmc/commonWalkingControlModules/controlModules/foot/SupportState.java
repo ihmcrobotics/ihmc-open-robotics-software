@@ -30,7 +30,7 @@ import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
-import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;

@@ -21,8 +21,8 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetect
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

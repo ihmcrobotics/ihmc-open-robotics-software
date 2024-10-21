@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.math.ComplexPolynomialTools;
-import us.ihmc.commons.trajectories.core.Polynomial;
-import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.math.linearDynamicSystems.PolynomialMatrix;
 
 import static org.junit.jupiter.api.Assertions.*;

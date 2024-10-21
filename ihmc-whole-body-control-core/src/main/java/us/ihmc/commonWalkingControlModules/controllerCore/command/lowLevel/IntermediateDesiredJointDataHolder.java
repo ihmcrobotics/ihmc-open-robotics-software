@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import us.ihmc.commons.robotics.outputData.JointDesiredOutput;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.robotics.outputData.JointDesiredOutput;
+import us.ihmc.robotics.outputData.JointDesiredOutputList;
 
 public class IntermediateDesiredJointDataHolder
 {

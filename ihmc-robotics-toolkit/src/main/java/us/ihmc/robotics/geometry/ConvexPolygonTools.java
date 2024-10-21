@@ -29,7 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
 {

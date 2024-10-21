@@ -15,8 +15,8 @@ import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 

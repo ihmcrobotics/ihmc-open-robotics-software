@@ -22,7 +22,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 /**

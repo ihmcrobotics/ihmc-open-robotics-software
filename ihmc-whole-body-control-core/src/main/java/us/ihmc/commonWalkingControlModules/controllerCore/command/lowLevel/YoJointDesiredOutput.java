@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import us.ihmc.commons.robotics.outputData.JointDesiredControlMode;
-import us.ihmc.commons.robotics.outputData.JointDesiredLoadMode;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredControlMode;
+import us.ihmc.robotics.outputData.JointDesiredLoadMode;
+import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -15,7 +15,7 @@ import javax.swing.event.ChangeListener;
 import controller_msgs.msg.dds.ManualHandControlPacket;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 
 public class RobotiqHandTesting

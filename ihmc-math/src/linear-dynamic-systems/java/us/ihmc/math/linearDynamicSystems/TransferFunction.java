@@ -2,9 +2,9 @@ package us.ihmc.math.linearDynamicSystems;
 
 import us.ihmc.math.ComplexNumber;
 import us.ihmc.math.ComplexPolynomialTools;
-import us.ihmc.commons.trajectories.core.Polynomial;
-import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 
 /**
  * TransferFunction.

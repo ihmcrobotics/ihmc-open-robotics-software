@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutput;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutput;
+import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

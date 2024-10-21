@@ -5,8 +5,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 public class MonteCarloFootstepPlannerRequest

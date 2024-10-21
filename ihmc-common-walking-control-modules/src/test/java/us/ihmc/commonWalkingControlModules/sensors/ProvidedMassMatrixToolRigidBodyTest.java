@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest

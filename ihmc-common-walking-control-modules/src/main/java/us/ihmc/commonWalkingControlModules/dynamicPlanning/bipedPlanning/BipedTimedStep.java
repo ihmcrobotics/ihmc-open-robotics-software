@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.time.TimeInterval;
 import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.commons.time.TimeIntervalProvider;

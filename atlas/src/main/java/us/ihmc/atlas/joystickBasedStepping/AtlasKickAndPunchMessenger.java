@@ -16,8 +16,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
 

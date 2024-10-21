@@ -1,0 +1,16 @@
+euclid-update
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/referenceFrames/Pose2dReferenceFrame.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/referenceFrames/PoseReferenceFrame.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/referenceFrames/TranslationReferenceFrame.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/geometry/shapes/FramePlane3d.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/math/QuaternionCalculus.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/EuclidCoreMissingTools.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/EuclidGeometryMissingTools.java
+ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/EuclidGeometryPolygonMissingTools.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/EuclidCoreMissingToolsTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/EuclidGeometryMissingToolsTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/geometry/shapes/FramePlane3dTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/referenceFrames/Pose2dReferenceFrameTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/referenceFrames/PoseReferenceFrameTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/referenceFrames/TranslationReferenceFrameTest.java
+ihmc-robotics-toolkit/test/main/java/us/ihmc/robotics/math/QuaternionCalculusTest.java

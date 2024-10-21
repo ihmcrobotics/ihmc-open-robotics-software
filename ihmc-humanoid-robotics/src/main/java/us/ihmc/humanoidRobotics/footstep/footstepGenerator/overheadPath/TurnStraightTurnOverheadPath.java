@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.robotics.HeadingAngleTools;
+import us.ihmc.robotics.HeadingAngleTools;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;

@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Objects;
 

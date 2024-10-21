@@ -6,10 +6,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.commons.SCS2YoGraphicHolder;
-import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class HighLevelControllerState implements State, JointLoadStatusProvider, SCS2YoGraphicHolder

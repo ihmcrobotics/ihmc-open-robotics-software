@@ -36,7 +36,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.messager.javafx.JavaFXMessager;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class FootstepPlannerStatusBarController

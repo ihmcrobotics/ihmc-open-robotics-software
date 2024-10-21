@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.math.ComplexConjugateMode;
 import us.ihmc.math.ComplexNumber;
 import us.ihmc.math.SingleRealMode;
-import us.ihmc.commons.trajectories.core.Polynomial;
-import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.math.linearDynamicSystems.TransferFunction;
 import us.ihmc.math.linearDynamicSystems.TransferFunctionMatrix;
 

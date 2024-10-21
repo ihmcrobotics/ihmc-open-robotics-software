@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 

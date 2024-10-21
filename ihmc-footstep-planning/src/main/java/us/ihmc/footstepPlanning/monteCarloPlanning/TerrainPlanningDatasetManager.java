@@ -15,8 +15,8 @@ import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.tools.PerceptionLoggingTools;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;

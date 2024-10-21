@@ -13,8 +13,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class HeightMapSnapWiggler
 {

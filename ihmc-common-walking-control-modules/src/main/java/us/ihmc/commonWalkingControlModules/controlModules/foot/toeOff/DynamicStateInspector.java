@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
