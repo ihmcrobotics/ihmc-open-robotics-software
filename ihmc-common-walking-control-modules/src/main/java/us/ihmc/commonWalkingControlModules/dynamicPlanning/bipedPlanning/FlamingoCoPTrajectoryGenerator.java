@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FlamingoCoPTrajectoryGenerator extends CoPTrajectoryGenerator

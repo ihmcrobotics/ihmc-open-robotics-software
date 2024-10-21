@@ -15,7 +15,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.commons.DeadbandTools;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;

@@ -4,8 +4,8 @@ import controller_msgs.msg.dds.JointDesiredOutputMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
 
 public class DesiredOutputMessaging
 {

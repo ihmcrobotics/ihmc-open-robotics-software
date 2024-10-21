@@ -83,7 +83,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.robotics.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;

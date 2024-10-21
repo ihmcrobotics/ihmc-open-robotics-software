@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.time.ExecutionTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;

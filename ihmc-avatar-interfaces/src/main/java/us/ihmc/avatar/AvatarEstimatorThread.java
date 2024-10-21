@@ -24,7 +24,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.commons.time.ExecutionTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;

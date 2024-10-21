@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.commons.SCS2YoGraphicHolder;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {

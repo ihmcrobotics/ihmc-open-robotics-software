@@ -80,8 +80,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;

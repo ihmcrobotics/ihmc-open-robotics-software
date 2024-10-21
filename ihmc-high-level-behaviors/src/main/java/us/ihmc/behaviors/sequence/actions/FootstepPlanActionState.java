@@ -18,8 +18,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>

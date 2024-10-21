@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;

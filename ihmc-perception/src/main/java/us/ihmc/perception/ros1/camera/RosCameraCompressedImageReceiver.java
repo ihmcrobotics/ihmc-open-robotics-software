@@ -3,7 +3,7 @@ package us.ihmc.perception.ros1.camera;
 import java.awt.image.BufferedImage;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;

@@ -36,7 +36,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.commons.SCS2YoGraphicHolder;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;

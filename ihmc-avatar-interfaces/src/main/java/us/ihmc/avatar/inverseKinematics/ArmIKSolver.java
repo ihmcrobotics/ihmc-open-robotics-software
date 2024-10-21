@@ -22,12 +22,12 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingFactories;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**

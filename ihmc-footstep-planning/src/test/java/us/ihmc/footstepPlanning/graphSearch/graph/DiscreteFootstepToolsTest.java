@@ -11,7 +11,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DiscreteFootstepToolsTest
 {

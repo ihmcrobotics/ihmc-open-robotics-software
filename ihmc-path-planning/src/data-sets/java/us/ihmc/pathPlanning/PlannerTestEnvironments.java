@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
 import java.time.LocalDateTime;

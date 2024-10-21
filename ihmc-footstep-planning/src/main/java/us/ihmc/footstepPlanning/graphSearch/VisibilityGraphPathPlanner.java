@@ -22,7 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;

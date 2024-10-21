@@ -31,10 +31,10 @@ import com.jgraph.layout.tree.JGraphTreeLayout;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.commons.stateMachine.core.State;
-import us.ihmc.commons.stateMachine.core.StateChangedListener;
-import us.ihmc.commons.stateMachine.core.StateMachine;
-import us.ihmc.commons.stateMachine.core.StateTransition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 
 /**
  * This is an old piece code that has been upgraded to work with the new {@link StateMachine}.

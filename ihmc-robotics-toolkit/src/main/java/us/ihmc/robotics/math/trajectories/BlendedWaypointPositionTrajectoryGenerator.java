@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.commons.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BlendedWaypointPositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator

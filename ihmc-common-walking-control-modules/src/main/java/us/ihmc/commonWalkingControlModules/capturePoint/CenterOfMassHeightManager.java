@@ -20,9 +20,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.stateMachine.core.StateMachine;
-import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.BooleanParameter;

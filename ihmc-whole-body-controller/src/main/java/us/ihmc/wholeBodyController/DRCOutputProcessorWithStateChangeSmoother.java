@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.robotics.outputData.JointDesiredOutputListBasics;
 import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;

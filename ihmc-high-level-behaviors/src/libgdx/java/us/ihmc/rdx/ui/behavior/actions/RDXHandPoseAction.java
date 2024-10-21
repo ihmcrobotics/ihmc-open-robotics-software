@@ -37,13 +37,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MultiBodySystemMissingFactories;
 import us.ihmc.robotics.interaction.MouseCollidable;
-import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.wholeBodyController.HandTransformTools;
 

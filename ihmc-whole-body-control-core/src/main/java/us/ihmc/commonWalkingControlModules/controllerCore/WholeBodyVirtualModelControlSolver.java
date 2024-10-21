@@ -33,13 +33,13 @@ import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.commons.SCS2YoGraphicHolder;
-import us.ihmc.commons.parameters.ParameterVector3D;
+import us.ihmc.robotics.parameters.ParameterVector3D;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.commons.robotics.outputData.JointDesiredControlMode;
-import us.ihmc.commons.robotics.outputData.JointDesiredOutputBasics;
+import us.ihmc.robotics.outputData.JointDesiredControlMode;
+import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

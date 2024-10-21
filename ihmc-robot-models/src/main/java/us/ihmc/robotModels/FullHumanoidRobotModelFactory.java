@@ -1,6 +1,6 @@
 package us.ihmc.robotModels;
 
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface FullHumanoidRobotModelFactory extends FullLeggedRobotModelFactory<RobotSide>
 {

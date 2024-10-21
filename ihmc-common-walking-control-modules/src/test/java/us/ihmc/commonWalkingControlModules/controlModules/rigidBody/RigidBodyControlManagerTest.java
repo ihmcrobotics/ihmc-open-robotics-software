@@ -30,7 +30,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.wholeBodyControlCore.pidGains.*;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPID3DGains;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;

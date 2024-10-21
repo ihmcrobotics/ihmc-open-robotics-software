@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.commons.time.TimeInterval;
 
 import java.util.ArrayList;

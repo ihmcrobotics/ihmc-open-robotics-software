@@ -35,7 +35,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.commons.AngleTools;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 public class RobotIKUI

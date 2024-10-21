@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.robotics.HeadingAngleTools;
+import us.ihmc.robotics.HeadingAngleTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.AngleTools;
 import us.ihmc.euclid.referenceFrame.Pose2DReferenceFrame;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;

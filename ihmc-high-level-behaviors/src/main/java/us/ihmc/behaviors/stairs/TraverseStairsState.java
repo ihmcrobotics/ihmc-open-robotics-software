@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.stairs;
 
-import us.ihmc.commons.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.State;
 
 public abstract class TraverseStairsState implements State
 {

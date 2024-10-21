@@ -1,6 +1,6 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Make a new enum when you need a new video source.

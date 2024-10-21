@@ -32,9 +32,9 @@ import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.commons.robotics.partNames.ArmJointName;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
-import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.function.BooleanSupplier;

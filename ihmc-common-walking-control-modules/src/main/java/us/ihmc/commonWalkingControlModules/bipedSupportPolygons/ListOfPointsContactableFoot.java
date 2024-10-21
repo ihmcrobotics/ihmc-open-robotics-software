@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.List;
 
-import us.ihmc.commons.robotics.contactable.ListOfPointsContactablePlaneBody;
+import us.ihmc.robotics.contactable.ListOfPointsContactablePlaneBody;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;

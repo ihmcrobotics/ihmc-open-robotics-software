@@ -28,7 +28,7 @@ import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.vr.RDXVRManager;
-import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
 
