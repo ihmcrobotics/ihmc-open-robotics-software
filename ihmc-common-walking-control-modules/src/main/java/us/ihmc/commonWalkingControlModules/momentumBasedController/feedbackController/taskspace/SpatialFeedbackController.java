@@ -889,10 +889,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          CommonOps_DDRM.extract(tempDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
          tempMatrix3D.set(tempMatrix);
          tempMatrix3D.transform(linearFeedbackTermToPack);
-
+         linearFeedbackTermToPack.scale(gains.getPositionGains().getDampingRatios()[0], gains.getPositionGains().getDampingRatios()[1], gains.getPositionGains().getDampingRatios()[2]);
+         
          CommonOps_DDRM.extract(tempDerivativeGainMatrix, 0, 3,0, 3, tempMatrix, 0, 0);
          tempMatrix3D.set(tempMatrix);
          tempMatrix3D.transform(angularFeedbackTermToPack);
+         angularFeedbackTermToPack.scale(gains.getOrientationGains().getDampingRatios()[0], gains.getOrientationGains().getDampingRatios()[1], gains.getOrientationGains().getDampingRatios()[2]);
       }
       else
       {
