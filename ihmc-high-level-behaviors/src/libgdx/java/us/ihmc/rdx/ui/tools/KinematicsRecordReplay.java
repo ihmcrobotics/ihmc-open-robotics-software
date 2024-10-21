@@ -39,7 +39,7 @@ public class KinematicsRecordReplay
    private boolean isRecording = false;
 
    private final String defaultReplayFile = "241009_wallBracing0_goodRun.csv";
-//   private final String defaultReplayFile = "241009_wallBracing_pitchedGoodRun.csv";
+   //   private final String defaultReplayFile = "241009_wallBracing_pitchedGoodRun.csv";
 //   private final String defaultReplayFile = "241009_wallBracing_uneven.csv";
 
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/" + defaultReplayFile).toString(), 100);
@@ -168,34 +168,31 @@ public class KinematicsRecordReplay
             isRecording = false;
             trajectoryRecorder.setPath(recordPath.get());
             trajectoryRecorder.onRecordEnd();
-            replayCallback.accept(false);
          }
          else
          {
             LogTools.info("Starting to record!");
             isRecording = true;
             trajectoryRecorder.onRecordStart();
-            replayCallback.accept(true);
          }
       }
 
-      else if (requestRecordReplay && enablerReplay.get())
-      { // Toggle replay State
-         if (isReplaying)
-         {
-            LogTools.info("Finished replayed!");
-            isReplaying = false;
-         }
-         else
-         {
-            LogTools.info("Starting to replay!");
-            isReplaying = trajectoryRecorder.onReplayStart(replayPath.get());
-         }
+      else if (requestRecordReplay && enablerReplay.get() && !isReplaying)
+      { // Start to replay
+         LogTools.info("Starting to replay!");
+         isReplaying = trajectoryRecorder.onReplayStart(replayPath.get());
+         replayCallback.accept(true);
       }
 
       else if (isReplaying)
       {
          isReplaying = trajectoryRecorder.onUpdateEnd();
+         if (!isReplaying)
+         { // Finished replaying
+            LogTools.info("Finished replayed!");
+            isReplaying = false;
+            replayCallback.accept(false);
+         }
       }
    }
 

@@ -466,11 +466,15 @@ public class KSTTools
       }
       else if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
       {
-         trajectoryMessagePublisher.publish(setupTrajectoryMessage(outputToPublish));
+         WholeBodyTrajectoryMessage messageToPublish = setupTrajectoryMessage(outputToPublish);
+         logger.update(messageToPublish);
+         trajectoryMessagePublisher.publish(messageToPublish);
       }
       else
       {
-         streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
+         WholeBodyStreamingMessage messageToPublish = setupStreamingMessage(outputToPublish);
+         logger.update(messageToPublish);
+         streamingMessagePublisher.publish(messageToPublish);
       }
    }
 
