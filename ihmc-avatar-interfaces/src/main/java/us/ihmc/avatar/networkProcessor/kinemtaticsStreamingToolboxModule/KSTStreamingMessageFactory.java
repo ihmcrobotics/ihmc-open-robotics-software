@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import ihmc_common_msgs.msg.dds.EuclideanStreamingMessage;
 import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
 import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
 import us.ihmc.commons.MathTools;
@@ -14,7 +15,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -62,6 +65,7 @@ public class KSTStreamingMessageFactory
    private final YoJointspaceStreamingMessage yoNeckStreamingMessage;
    private final SideDependentList<YoJointspaceStreamingMessage> yoArmStreamingMessages = new SideDependentList<>();
 
+   private final YoEuclideanStreamingMessage yoCenterOfMassStreamingMessage;
    private final YoSE3StreamingMessage yoPelvisStreamingMessage;
    private final YoSO3StreamingMessage yoChestStreamingMessage;
    private final SideDependentList<YoSE3StreamingMessage> yoHandStreamingMessages = new SideDependentList<>();
@@ -99,6 +103,7 @@ public class KSTStreamingMessageFactory
          yoHandStreamingMessages.put(robotSide, new YoSE3StreamingMessage(hand, registry));
       }
 
+      yoCenterOfMassStreamingMessage = new YoEuclideanStreamingMessage("com", registry);
       yoPelvisStreamingMessage = new YoSE3StreamingMessage(fullRobotModel.getPelvis(), registry);
       yoChestStreamingMessage = new YoSO3StreamingMessage(chest, registry);
 
@@ -320,6 +325,24 @@ public class KSTStreamingMessageFactory
       output.setHasPelvisStreamingMessage(true);
    }
 
+   public void computeCenterOfMassStreamingMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      desiredPose.setToZero(referenceFrames.getCenterOfMassFrame());
+      desiredPose.changeFrame(worldFrame);
+
+      spatialVelocity((MovingReferenceFrame) referenceFrames.getCenterOfMassFrame(), worldFrame, enableVelocity.getValue(), desiredSpatialVelocity);
+
+      EuclideanStreamingMessage centerOfMassStreamingMessage = output.getCenterOfMassTrajectoryMessage();
+      centerOfMassStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
+      centerOfMassStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+
+      packEuclideanTrajectoryPointMessage(desiredPose.getPosition(), desiredSpatialVelocity.getLinearPart(), centerOfMassStreamingMessage);
+      yoCenterOfMassStreamingMessage.setFromMessage(centerOfMassStreamingMessage);
+      output.setHasCenterOfMassTrajectoryMessage(true);
+   }
+
    private static <T> T select(RobotSide robotSide, T left, T right)
    {
       return robotSide == RobotSide.LEFT ? left : right;
@@ -504,6 +527,14 @@ public class KSTStreamingMessageFactory
       messageToPack.getAngularAcceleration().set(spatialAcceleration.getAngularPart());
    }
 
+   public static void packEuclideanTrajectoryPointMessage(Point3DReadOnly position,
+                                                          FrameVector3DReadOnly linearVelocity,
+                                                          EuclideanStreamingMessage messageToPack)
+   {
+      messageToPack.getPosition().set(position);
+      messageToPack.getLinearVelocity().set(linearVelocity);
+   }
+
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
@@ -612,6 +643,24 @@ public class KSTStreamingMessageFactory
          angularVelocity.set(message.getAngularVelocity());
          linearAcceleration.set(message.getLinearAcceleration());
          angularAcceleration.set(message.getAngularAcceleration());
+      }
+   }
+
+   private class YoEuclideanStreamingMessage
+   {
+      private final YoVector3D position;
+      private final YoVector3D linearVelocity;
+
+      public YoEuclideanStreamingMessage(String prefix, YoRegistry registry)
+      {
+         position = new YoVector3D(prefix + "PositionMSG", registry);
+         linearVelocity = new YoVector3D(prefix + "LinearVelocityMSG", registry);
+      }
+
+      public void setFromMessage(EuclideanStreamingMessage message)
+      {
+         position.set(message.getPosition());
+         linearVelocity.set(message.getLinearVelocity());
       }
    }
 }

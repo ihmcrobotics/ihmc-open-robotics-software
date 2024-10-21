@@ -103,6 +103,7 @@ public class KSTTools
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
+   private final YoBoolean isCenterOfMassOutputEnabled;
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
 
@@ -225,6 +226,7 @@ public class KSTTools
       isNeckJointspaceOutputEnabled = new YoBoolean("isNeckJointspaceOutputEnabled", registry);
       isChestTaskspaceOutputEnabled = new YoBoolean("isChestTaskspaceOutputEnabled", registry);
       isPelvisTaskspaceOutputEnabled = new YoBoolean("isPelvisTaskspaceOutputEnabled", registry);
+      isCenterOfMassOutputEnabled = new YoBoolean("isCenterOfMassOutputEnabled", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -260,6 +262,7 @@ public class KSTTools
       isNeckJointspaceOutputEnabled.set(configurationCommand.isNeckJointspaceEnabled());
       isChestTaskspaceOutputEnabled.set(configurationCommand.isChestTaskspaceEnabled());
       isPelvisTaskspaceOutputEnabled.set(configurationCommand.isPelvisTaskspaceEnabled());
+      isCenterOfMassOutputEnabled.set(configurationCommand.isCenterOfMassTrajectoryEnabled());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -500,6 +503,8 @@ public class KSTTools
          streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrameId());
       if (isPelvisTaskspaceOutputEnabled.getValue())
          streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrameId());
+      if (isCenterOfMassOutputEnabled.getValue())
+         streamingMessageFactory.computeCenterOfMassStreamingMessage();
 
       currentMessageId.increment();
       return streamingMessageFactory.getOutput();
@@ -528,6 +533,7 @@ public class KSTTools
          trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrameId());
       if (isPelvisTaskspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrameId());
+      // TODO pack com trajectory
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
@@ -560,6 +566,7 @@ public class KSTTools
          trajectoryMessageFactory.computeChestTrajectoryMessage();
       if (isPelvisTaskspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computePelvisTrajectoryMessage();
+      // TODO pack com trajectory
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);

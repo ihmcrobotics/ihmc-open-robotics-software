@@ -68,6 +68,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
             * Trajectory for the head
             */
    public controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
+   /**
+            * Trajectory for the CoM
+            */
+   public controller_msgs.msg.dds.CenterOfMassTrajectoryMessage center_of_mass_trajectory_message_;
 
    public WholeBodyTrajectoryMessage()
    {
@@ -84,6 +88,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       right_leg_trajectory_message_ = new controller_msgs.msg.dds.LegTrajectoryMessage();
       neck_trajectory_message_ = new controller_msgs.msg.dds.NeckTrajectoryMessage();
       head_trajectory_message_ = new controller_msgs.msg.dds.HeadTrajectoryMessage();
+      center_of_mass_trajectory_message_ = new controller_msgs.msg.dds.CenterOfMassTrajectoryMessage();
    }
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
@@ -109,6 +114,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       controller_msgs.msg.dds.LegTrajectoryMessagePubSubType.staticCopy(other.right_leg_trajectory_message_, right_leg_trajectory_message_);
       controller_msgs.msg.dds.NeckTrajectoryMessagePubSubType.staticCopy(other.neck_trajectory_message_, neck_trajectory_message_);
       controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.staticCopy(other.head_trajectory_message_, head_trajectory_message_);
+      controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType.staticCopy(other.center_of_mass_trajectory_message_, center_of_mass_trajectory_message_);
    }
 
    /**
@@ -244,6 +250,15 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    }
 
 
+   /**
+            * Trajectory for the CoM
+            */
+   public controller_msgs.msg.dds.CenterOfMassTrajectoryMessage getCenterOfMassTrajectoryMessage()
+   {
+      return center_of_mass_trajectory_message_;
+   }
+
+
    public static Supplier<WholeBodyTrajectoryMessagePubSubType> getPubSubType()
    {
       return WholeBodyTrajectoryMessagePubSubType::new;
@@ -276,6 +291,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (!this.right_leg_trajectory_message_.epsilonEquals(other.right_leg_trajectory_message_, epsilon)) return false;
       if (!this.neck_trajectory_message_.epsilonEquals(other.neck_trajectory_message_, epsilon)) return false;
       if (!this.head_trajectory_message_.epsilonEquals(other.head_trajectory_message_, epsilon)) return false;
+      if (!this.center_of_mass_trajectory_message_.epsilonEquals(other.center_of_mass_trajectory_message_, epsilon)) return false;
 
       return true;
    }
@@ -304,6 +320,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (!this.right_leg_trajectory_message_.equals(otherMyClass.right_leg_trajectory_message_)) return false;
       if (!this.neck_trajectory_message_.equals(otherMyClass.neck_trajectory_message_)) return false;
       if (!this.head_trajectory_message_.equals(otherMyClass.head_trajectory_message_)) return false;
+      if (!this.center_of_mass_trajectory_message_.equals(otherMyClass.center_of_mass_trajectory_message_)) return false;
 
       return true;
    }
@@ -341,7 +358,9 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       builder.append("neck_trajectory_message=");
       builder.append(this.neck_trajectory_message_);      builder.append(", ");
       builder.append("head_trajectory_message=");
-      builder.append(this.head_trajectory_message_);
+      builder.append(this.head_trajectory_message_);      builder.append(", ");
+      builder.append("center_of_mass_trajectory_message=");
+      builder.append(this.center_of_mass_trajectory_message_);
       builder.append("}");
       return builder.toString();
    }

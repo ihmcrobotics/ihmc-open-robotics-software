@@ -43,4 +43,7 @@ controller_msgs/NeckTrajectoryMessage neck_trajectory_message
 # Trajectory for the head
 controller_msgs/HeadTrajectoryMessage head_trajectory_message
 
+# Trajectory for the CoM
+controller_msgs/CenterOfMassTrajectoryMessage center_of_mass_trajectory_message
+
 

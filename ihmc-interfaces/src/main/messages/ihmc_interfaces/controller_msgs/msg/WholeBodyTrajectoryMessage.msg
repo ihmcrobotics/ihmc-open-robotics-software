@@ -37,3 +37,6 @@ LegTrajectoryMessage right_leg_trajectory_message
 NeckTrajectoryMessage neck_trajectory_message
 # Trajectory for the head
 HeadTrajectoryMessage head_trajectory_message
+
+# Trajectory for the CoM
+controller_msgs/CenterOfMassTrajectoryMessage center_of_mass_trajectory_message

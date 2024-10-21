@@ -30,13 +30,17 @@ module ihmc_common_msgs
          */
         geometry_msgs::msg::dds::Pose control_frame_pose;
         /**
-         * Define the desired 3D position to be reached.
+         * Define the desired 3D position, expressed in world frame, to be reached.
          */
         geometry_msgs::msg::dds::Point position;
         /**
-         * Define the desired 3D linear velocity to be reached.
+         * Define the desired 3D linear velocity, expressed in world frame, to be reached.
          */
         geometry_msgs::msg::dds::Vector3 linear_velocity;
+        /**
+         * Define the desired 3D linear acceleration, expressed in world frame,  to be reached.
+         */
+        geometry_msgs::msg::dds::Vector3 linear_acceleration;
       };
     };
   };

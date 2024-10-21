@@ -36,6 +36,10 @@ bool has_pelvis_streaming_message
 bool enable_user_pelvis_control false
 ihmc_common_msgs/SE3StreamingMessage pelvis_streaming_message
 
+# Information for the CoM
+bool has_center_of_mass_trajectory_message
+ihmc_common_msgs/EuclideanStreamingMessage center_of_mass_trajectory_message
+
 # Information for the neck joints
 bool has_neck_streaming_message
 JointspaceStreamingMessage neck_streaming_message

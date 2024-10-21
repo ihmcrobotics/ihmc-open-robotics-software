@@ -52,6 +52,11 @@ bool enable_chest_taskspace
 # Field default value True
 bool enable_pelvis_taskspace
 
+# Whether center of mass should be controlled.
+# Default value is true.
+# Field default value True
+bool enable_center_of_mass_control
+
 # Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
 # Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
 # Field default value 83766130
