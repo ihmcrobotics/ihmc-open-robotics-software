@@ -84,7 +84,9 @@ public class WalkingControllerState extends HighLevelControllerState
 
       // support non-physics simulation for motion previewing by holding the feet in contact virtually
       if (controllerToolbox.isKinematicsSimulation())
-         kinematicsSimulationVirtualGroundReactionManager = new KinematicsSimulationVirtualGroundReactionManager(controllerToolbox, statusOutputManager, walkingController);
+         kinematicsSimulationVirtualGroundReactionManager = new KinematicsSimulationVirtualGroundReactionManager(controllerToolbox,
+                                                                                                                 statusOutputManager,
+                                                                                                                 walkingController);
       else
          kinematicsSimulationVirtualGroundReactionManager = null;
 
@@ -185,10 +187,17 @@ public class WalkingControllerState extends HighLevelControllerState
    {
       return controllerCore.getControllerCoreOutput();
    }
+
    @Override
    public ControllerCoreCommand getControllerCoreCommandData()
    {
       return controllerCoreCommandData;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
+   {
+      return controllerCore;
    }
 
    @Override
@@ -205,7 +214,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    /**
     * Returns the currently active walking state. This is used for unit testing.
-    * 
+    *
     * @return WalkingStateEnum
     */
    public WalkingStateEnum getWalkingStateEnum()

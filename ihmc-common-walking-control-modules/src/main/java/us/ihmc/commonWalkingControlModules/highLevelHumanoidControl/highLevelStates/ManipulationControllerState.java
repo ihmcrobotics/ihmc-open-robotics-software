@@ -31,7 +31,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -90,7 +93,7 @@ public class ManipulationControllerState extends HighLevelControllerState
    private final MultiBodySystemBasics controllerSystem;
    private final ReferenceFrame centerOfMassFrame;
    private final WholeBodyControllerCore controllerCore;
-   private SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
 
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
@@ -171,7 +174,13 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                 handControlFrameTransform));
          }
 
-         RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrames.get(robotSide), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+         RigidBodyControlManager handManager = createRigidBodyManager(hand,
+                                                                      chest,
+                                                                      handControlFrames.get(robotSide),
+                                                                      chest.getBodyFixedFrame(),
+                                                                      elevator,
+                                                                      yoTime,
+                                                                      graphicsListRegistry);
          handManager.setDoPrepareForLocomotion(false);
          handManagers.put(robotSide, handManager);
 
@@ -545,5 +554,11 @@ public class ManipulationControllerState extends HighLevelControllerState
    public ControllerCoreCommand getControllerCoreCommandData()
    {
       return controllerCoreCommand;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
+   {
+      return controllerCore;
    }
 }

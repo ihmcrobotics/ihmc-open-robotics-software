@@ -54,7 +54,9 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
                                                        registry,
                                                        true);
-      standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition(controllerState));
+      standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration",
+                                                    registry,
+                                                    highLevelControllerParameters.getTimeInStandTransition(controllerState));
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
 
@@ -152,6 +154,12 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
    @Override
    public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
    {
       return null;
    }

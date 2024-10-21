@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.falling;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -72,6 +73,12 @@ public class FallingControllerState extends HighLevelControllerState
 
    @Override
    public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore   getControllerCore()
    {
       return null;
    }

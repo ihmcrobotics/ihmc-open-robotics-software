@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -111,9 +112,12 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   public DiagnosticsWhenHangingControllerState(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
+   public DiagnosticsWhenHangingControllerState(HumanoidJointPoseList humanoidJointPoseList,
+                                                boolean useArms,
+                                                boolean robotIsHanging,
                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                HighLevelControllerParameters highLevelControllerParameters, TorqueOffsetPrinter torqueOffsetPrinter)
+                                                HighLevelControllerParameters highLevelControllerParameters,
+                                                TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
 
@@ -179,8 +183,12 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       factory.setNamePrefix("DiagnosticState").setRegistry(registry).buildYoClock(yoTime);
 
       factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.INITIALIZE, new InitializeState(), DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
-      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS, new SplineBetweenPositionsState(), DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
-      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS, new CheckDiagnosticsState(), DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS,
+                                        new SplineBetweenPositionsState(),
+                                        DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS);
+      factory.addStateAndDoneTransition(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS,
+                                        new CheckDiagnosticsState(),
+                                        DiagnosticsWhenHangingState.SPLINE_BETWEEN_POSITIONS);
 
       StateTransitionCondition finishedTransitionCondition = timeInState -> finishedDiagnostics.getBooleanValue();
       factory.addTransition(DiagnosticsWhenHangingState.CHECK_DIAGNOSTICS, DiagnosticsWhenHangingState.FINISHED, finishedTransitionCondition);
@@ -203,12 +211,17 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
-         AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",
-                                                                                                                       registry, alphaFootForce, footForceRaw);
+         AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt",
+                                                                                                                       "",
+                                                                                                                       registry,
+                                                                                                                       alphaFootForce,
+                                                                                                                       footForceRaw);
          footForcesRawFiltered.put(robotSide, footForceRawFiltered);
 
          AlphaFilteredYoFrameVector footTorqueRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootTorqueRawFilt",
-                                                                                                                        "", registry, alphaFootForce,
+                                                                                                                        "",
+                                                                                                                        registry,
+                                                                                                                        alphaFootForce,
                                                                                                                         footTorqueRaw);
          footTorquesRawFiltered.put(robotSide, footTorqueRawFiltered);
       }
@@ -241,8 +254,15 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    {
       return null;
    }
+
    @Override
    public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
    {
       return null;
    }
@@ -418,7 +438,6 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
             OneDoFJointBasics legJoint = legJoints.get(i);
             positionListToSet.get(legJoint).set(legJointAngles[i]);
          }
-
       }
 
       for (int i = 0; i < spineJoints.size(); i++)
@@ -819,7 +838,6 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setProportionalGain(16.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setDerivativeGain(1.0);
-
       }
    }
 
@@ -926,7 +944,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       offsetString += "\n      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_" + timestamp
-            + ", rightFootForceSensorTareOffset_" + timestamp + ");";
+                      + ", rightFootForceSensorTareOffset_" + timestamp + ");";
 
       System.out.println(offsetString);
    }

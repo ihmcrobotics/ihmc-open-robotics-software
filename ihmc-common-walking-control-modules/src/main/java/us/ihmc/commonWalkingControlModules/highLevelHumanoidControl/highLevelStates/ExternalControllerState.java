@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.ExternalControlCommandConsumer;
@@ -65,6 +66,12 @@ public class ExternalControllerState extends HighLevelControllerState
 
    @Override
    public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
    {
       return null;
    }

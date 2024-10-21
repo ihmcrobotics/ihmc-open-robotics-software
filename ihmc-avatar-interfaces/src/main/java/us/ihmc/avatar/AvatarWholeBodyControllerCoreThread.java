@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -72,6 +72,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                               boolean kinematicSimulation)
    {
       this.controllerCoreFullRobotModel = robotModel.createFullRobotModel();
+
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerCoreFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForWholeBodyControllerCore = new ForceSensorDataHolder(Arrays.asList(controllerCoreFullRobotModel.getForceSensorDefinitions()));
       CenterOfMassDataHolder centerOfMassDataHolderForWholeBodyControllerCore = new CenterOfMassDataHolder();
@@ -93,7 +94,14 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerCoreFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
+      /**
+       * Something related to realtimeROS2Node should be here?
+       */ // TODO check crashNotificationPublisher should be here which is called and set in the AvatarControllerThread
+      // WholeBodyControllerCoreThread has not been yet made the API.
+
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerCoreFullRobotModel, robotModel, sensorInformation);
+
+      //TODO I'm not sure this can be defined here. This was used to be written in the AvatarControllerThread.
 
       if (outputProcessor != null)
       {
@@ -102,6 +110,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
 
+      // similar role with the robotController in AvatarControllerThread
       wholeBodyControllerCoreCalculator = createWholeBodyControllerCoreCalculator(controllerCoreFullRobotModel,
                                                                                   controllerFactory,
                                                                                   wholeBodyControllerCoreTime,
@@ -141,8 +150,9 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                                           YoRegistry registry,
                                                                           boolean kinematicsSimulation,
-                                                                          JointBasics... jointToIgnore)
+                                                                          JointBasics... jointsToIgnore)
    {
+      // same with the controllerThread call the estimated CoM from the context
       if (CREATE_COM_CALIBRATION_TOOL)
       {
          try
@@ -159,22 +169,50 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          }
       }
 
-      HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
-                                                                                                                controllerCoreDT,
-                                                                                                                gravity,
-                                                                                                                kinematicsSimulation,
-                                                                                                                yoTime,
-                                                                                                                forceSensorDataHolderForControllerCore,
-                                                                                                                centerOfMassDataHolderForControllerCore,
-                                                                                                                wholeBodyControllerCoreOutput,
-                                                                                                                lowLevelControllerOutput,
-                                                                                                                controllerCoreOutPutDataHolder,
-                                                                                                                controllerCoreCommandDataHolder,
-                                                                                                                jointToIgnore);
+      // similar with the controllerFactory.getController from ControllerThread.
+      // TODO Is it possible to make controller with the same way of ControllerThread.
+      // Tried other way by making separate manager without using the controllerFactory. But, states are needed to be shared between the controllerThread and wholeBodyControllerCoreThread.
+      // Each state has its own set for the controllerCore constructor, and these were saved to the controllerCoreToolbox, which is defined from the controlToolbox.
+      // Assume that the controllerFactory.getController should be defined here again.
+      // Guess two separate thread generate in-defendant constructors.
 
-      scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());
+      //first try to generate the controllerManager without using the controllerFactory.
+      //      HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
+      //                                                                                                                controllerCoreDT,
+      //                                                                                                                gravity,
+      //                                                                                                                kinematicsSimulation,
+      //                                                                                                                yoTime,
+      //                                                                                                                forceSensorDataHolderForControllerCore,
+      //                                                                                                                centerOfMassDataHolderForControllerCore,
+      //                                                                                                                wholeBodyControllerCoreOutput,
+      //                                                                                                                lowLevelControllerOutput,
+      //                                                                                                                controllerCoreOutPutDataHolder,
+      //                                                                                                                controllerCoreCommandDataHolder,
+      //                                                                                                                jointToIgnore);
 
-      ModularRobotController modularRobotController = new ModularRobotController("WholeBodyControllerCore");
+      // new try using the controllerFactory to keep the same stateMachine structure of controllerThread and use it.
+      // use the same constructor is not possible. The registry values can not be generated with the same name.
+      // Generating new one can't be. When set the feet, contactableBodiesFactory should createFootContactableFeet, but this is cannot be called twice.
+      // ControllerCoreFactory should be shared through the context.
+      // If so, how the stateMachine is shared?
+      HumanoidHighLevelControllerManager controllerCoreManager = controllerFactory.getControllerCoreCalculator(controllerCoreModel,
+                                                                                                               controllerCoreDT,
+                                                                                                               gravity,
+                                                                                                               kinematicsSimulation,
+                                                                                                               yoTime,
+                                                                                                               yoGraphicsListRegistry,
+                                                                                                               sensorInformation,
+                                                                                                               forceSensorDataHolderForControllerCore,
+                                                                                                               centerOfMassDataHolderForControllerCore,
+                                                                                                               centerOfPressureDataHolderForEstimator,
+                                                                                                               wholeBodyControllerCoreOutput,
+                                                                                                               controllerCoreOutPutDataHolder,
+                                                                                                               controllerCoreCommandDataHolder,
+                                                                                                               jointsToIgnore);
+
+//      scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());
+
+      ModularRobotController modularRobotController = new ModularRobotController("WholeBodyControllerCoreThread1");
       modularRobotController.addRobotController(controllerCoreManager);
 
       return modularRobotController;
