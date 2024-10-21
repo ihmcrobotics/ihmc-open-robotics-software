@@ -84,7 +84,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
@@ -1058,7 +1058,7 @@ public class MessageTools
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       quaternionDot.sub(orientationEnd, orientationStart);
       quaternionDot.scale(alphaDot);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
+      quaternionCalculus.computeAngularVelocityInRotatedFrame(orientationInterpolated, quaternionDot, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(1.0 - alpha, angularVelocityStart, angularVelocityInterpolated);
       angularVelocityInterpolated.scaleAdd(alpha, angularVelocityEnd, angularVelocityInterpolated);
 

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 import java.util.EnumMap;
 
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;

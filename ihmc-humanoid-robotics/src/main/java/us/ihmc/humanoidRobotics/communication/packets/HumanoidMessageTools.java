@@ -163,7 +163,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 

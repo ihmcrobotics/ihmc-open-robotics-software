@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tools.EuclidCoreMissingTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,7 +13,6 @@ import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class RDXProjectionSphere extends RDXProjectionShape
 {

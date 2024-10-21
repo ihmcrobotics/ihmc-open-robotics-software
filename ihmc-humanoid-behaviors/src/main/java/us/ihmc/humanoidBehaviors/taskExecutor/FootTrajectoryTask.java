@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class FootTrajectoryTask extends BehaviorAction
 {

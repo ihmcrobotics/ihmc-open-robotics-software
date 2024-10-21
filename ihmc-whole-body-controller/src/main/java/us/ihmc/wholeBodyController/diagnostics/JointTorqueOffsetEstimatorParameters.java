@@ -1,8 +1,8 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
 
 public class JointTorqueOffsetEstimatorParameters
 {

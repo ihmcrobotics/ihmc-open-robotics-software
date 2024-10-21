@@ -7,17 +7,14 @@ import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class HeightMapSnapWiggler
 {

@@ -11,7 +11,7 @@ import us.ihmc.exampleSimulations.m2.RobotOrientation;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 /**
  * <p>

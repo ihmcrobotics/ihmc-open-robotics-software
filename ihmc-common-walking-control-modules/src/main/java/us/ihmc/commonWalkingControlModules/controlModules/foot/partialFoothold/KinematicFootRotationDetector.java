@@ -4,9 +4,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -25,7 +25,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
    /** Alpha filter to filter the foot angular velocity. */
    private final DoubleProvider angularVelocityFilterBreakFrequency;
    /** Foot filtered angular velocity in the sole frame. The yaw rate is intentionally ignored. */
-   private final AlphaFilteredYoFrameVector2d footAngularVelocityFiltered;
+   private final AlphaFilteredYoFrameVector2D footAngularVelocityFiltered;
 
    /** Foot angular velocity around the estimated line of rotation. */
    private final YoDouble angularVelocityMagnitude;
@@ -59,7 +59,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
       parentRegistry.addChild(registry);
 
       angularVelocityFilterBreakFrequency = rotationParameters.getAngularVelocityFilterBreakFrequency();
-      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered",
+      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2D(namePrefix + "AngularVelocityFiltered",
                                                                      "",
                                                                      registry,
                                                                      () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(

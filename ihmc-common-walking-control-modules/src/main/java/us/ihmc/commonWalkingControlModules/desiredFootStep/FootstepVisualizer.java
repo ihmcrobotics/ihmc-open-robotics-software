@@ -15,8 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -53,7 +53,7 @@ public class FootstepVisualizer
                              YoGraphicsListRegistry yoGraphicsListRegistry,
                              YoRegistry registry)
    {
-      this(name, graphicListName, robotSide, contactableFoot.getContactPoints2d(), footstepColor, yoGraphicsListRegistry, registry);
+      this(name, graphicListName, robotSide, contactableFoot.getContactPoints2D(), footstepColor, yoGraphicsListRegistry, registry);
    }
 
    public FootstepVisualizer(String name,

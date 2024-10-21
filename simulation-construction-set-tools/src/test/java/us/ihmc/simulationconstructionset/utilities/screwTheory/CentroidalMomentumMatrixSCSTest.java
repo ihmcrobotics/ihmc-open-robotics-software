@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.utilities.screwTheory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
@@ -44,7 +46,7 @@ public class CentroidalMomentumMatrixSCSTest
       double gravity = 0.0;
 
       int numberOfJoints = 3;
-      InverseDynamicsCalculatorSCSTest.createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
             true, true, random);
       robot.updateVelocities();
 
@@ -128,6 +130,63 @@ public class CentroidalMomentumMatrixSCSTest
          EuclidCoreTestTools.assertEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
          EuclidCoreTestTools.assertEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
       }
+   }
+
+   public static void createRandomTreeRobotAndSetJointPositionsAndVelocities(Robot robot, HashMap<RevoluteJoint, PinJoint> jointMap, ReferenceFrame worldFrame, RigidBodyBasics elevator, int numberOfJoints, double gravity, boolean useRandomVelocity, boolean useRandomAcceleration, Random random)
+   {
+      robot.setGravity(gravity);
+
+      ArrayList<PinJoint> potentialParentJoints = new ArrayList<PinJoint>();
+      ArrayList<RevoluteJoint> potentialInverseDynamicsParentJoints = new ArrayList<RevoluteJoint>(); // synchronized with potentialParentJoints
+
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         jointAxis.normalize();
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
+         double mass = random.nextDouble();
+         Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
+         double jointPosition = random.nextDouble();
+         double jointVelocity = useRandomVelocity ? random.nextDouble() : 0.0;
+         double jointAcceleration = useRandomAcceleration ? random.nextDouble() : 0.0;
+
+         PinJoint currentJoint = new PinJoint("joint" + i, jointOffset, robot, jointAxis);
+         currentJoint.setInitialState(jointPosition, jointVelocity);
+         RigidBodyBasics inverseDynamicsParentBody;
+         if (potentialParentJoints.isEmpty())
+         {
+            robot.addRootJoint(currentJoint);
+            inverseDynamicsParentBody = elevator;
+         }
+         else
+         {
+            int parentIndex = random.nextInt(potentialParentJoints.size());
+            potentialParentJoints.get(parentIndex).addJoint(currentJoint);
+            RevoluteJoint inverseDynamicsParentJoint = potentialInverseDynamicsParentJoints.get(parentIndex);
+            inverseDynamicsParentBody = inverseDynamicsParentJoint.getSuccessor();
+         }
+
+         RevoluteJoint currentIDJoint = new RevoluteJoint("jointID" + i, inverseDynamicsParentBody, jointOffset, jointAxis);
+         currentIDJoint.setQ(jointPosition);
+         currentIDJoint.setQd(jointVelocity);
+         currentIDJoint.setQdd(jointAcceleration);
+         new RigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
+
+         Link currentBody = new Link("body" + i);
+         currentBody.setComOffset(comOffset);
+         currentBody.setMass(mass);
+         currentBody.setMomentOfInertia(momentOfInertia);
+         currentJoint.setLink(currentBody);
+
+         jointMap.put(currentIDJoint, currentJoint);
+
+         potentialParentJoints.add(currentJoint);
+         potentialInverseDynamicsParentJoints.add(currentIDJoint);
+      }
+
+      elevator.updateFramesRecursively();
    }
 
    public static Momentum computeCoMMomentum(RigidBodyBasics elevator, ReferenceFrame centerOfMassFrame, CentroidalMomentumCalculator centroidalMomentumMatrix)

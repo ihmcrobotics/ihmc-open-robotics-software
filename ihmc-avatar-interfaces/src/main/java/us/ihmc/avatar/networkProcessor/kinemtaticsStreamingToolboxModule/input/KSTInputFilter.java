@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;

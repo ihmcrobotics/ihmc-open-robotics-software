@@ -15,8 +15,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSegment;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSegment;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
 
 public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {

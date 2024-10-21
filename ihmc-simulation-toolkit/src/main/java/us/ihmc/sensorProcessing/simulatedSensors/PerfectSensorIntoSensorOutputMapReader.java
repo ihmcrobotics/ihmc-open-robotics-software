@@ -10,13 +10,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -50,7 +50,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
-   private final TransformReferenceFrame rootJointReferenceFrame = new TransformReferenceFrame("rootJointReferenceFrame", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame rootJointReferenceFrame = new PoseReferenceFrame("rootJointReferenceFrame", ReferenceFrame.getWorldFrame());
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
    private final SensorOutputMap sensorOutputMap;

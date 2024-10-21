@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.robotics.HeadingAngleTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,11 +27,11 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLFloatMemory;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -1275,7 +1276,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             else
             {
                // Since we didn't do smoothing, set the yaw as the heading to get to the next waypoint.
-               waypoint.getOrientation().setToYawOrientation(AngleTools.calculateHeading(bodyPath.get(i), bodyPath.get(i + 1), 0.0));
+               waypoint.getOrientation().setToYawOrientation(HeadingAngleTools.calculateHeading(bodyPath.get(i), bodyPath.get(i + 1), 0.0));
             }
 
             outputToPack.getBodyPath().add(waypoint);

@@ -11,11 +11,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -55,7 +55,7 @@ public class FootstepAdjustor implements SCS2YoGraphicHolder
       defaultSupportPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         defaultSupportPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2d())));
+         defaultSupportPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2D())));
       }
    }
 

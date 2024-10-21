@@ -1,5 +1,19 @@
 package us.ihmc.avatar.slamTools;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import cern.colt.list.BooleanArrayList;
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
@@ -16,8 +30,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
 

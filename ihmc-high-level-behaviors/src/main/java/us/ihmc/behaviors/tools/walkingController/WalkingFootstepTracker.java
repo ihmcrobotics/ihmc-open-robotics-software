@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Subscription;
 
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
-import static us.ihmc.tools.string.StringTools.format;
+import static us.ihmc.tools.StringTools.format;
 
 /**
  * The purpose of this class is to check on the robot progress

@@ -44,8 +44,8 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectory
 import us.ihmc.robotics.math.trajectories.generators.OneDoFTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;

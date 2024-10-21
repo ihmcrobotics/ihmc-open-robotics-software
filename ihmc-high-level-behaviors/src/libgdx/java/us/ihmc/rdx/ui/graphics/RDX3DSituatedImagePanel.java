@@ -32,8 +32,8 @@ import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 

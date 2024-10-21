@@ -13,7 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 
 public class DesiredFootstepCalculatorTools
 {
@@ -45,7 +45,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getSoleFrame());
+         tempFramePoint.changeFrame(contactableBody.getContactFrame());
          tempVector.set(tempFramePoint);
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)

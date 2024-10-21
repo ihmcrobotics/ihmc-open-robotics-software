@@ -4,13 +4,13 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreMissingTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class RDXVRControllerButtonLabel
 {

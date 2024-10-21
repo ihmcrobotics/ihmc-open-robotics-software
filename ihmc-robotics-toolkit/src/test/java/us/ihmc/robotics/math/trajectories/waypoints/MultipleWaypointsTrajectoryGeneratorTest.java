@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;

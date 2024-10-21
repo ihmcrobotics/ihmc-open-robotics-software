@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.teleoperation;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class RDXHandQuickAccessButtons
 {

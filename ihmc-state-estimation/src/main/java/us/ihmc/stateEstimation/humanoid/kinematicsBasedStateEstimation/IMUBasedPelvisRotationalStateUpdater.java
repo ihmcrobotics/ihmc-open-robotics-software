@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FiniteDifferenceAngularVelocityYoFrameVector3D;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -44,7 +44,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
-   private final FiniteDifferenceAngularVelocityYoFrameVector yoRootJointAngularVelocityFromFD;
+   private final FiniteDifferenceAngularVelocityYoFrameVector3D yoRootJointAngularVelocityFromFD;
 
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame rootJointFrame;
@@ -90,10 +90,10 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointAngularVelocityInWorld = new YoFrameVector3D("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityMeasFrame = new YoFrameVector3D("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
 
-      yoRootJointAngularVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector("estimatedRootJointAngularVelocityFromFD",
-                                                                                          yoRootJointFrameQuaternion,
-                                                                                          dt,
-                                                                                          registry);
+      yoRootJointAngularVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector3D("estimatedRootJointAngularVelocityFromFD",
+                                                                                            yoRootJointFrameQuaternion,
+                                                                                            dt,
+                                                                                            registry);
 
       parentRegistry.addChild(registry);
    }

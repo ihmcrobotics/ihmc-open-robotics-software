@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatable

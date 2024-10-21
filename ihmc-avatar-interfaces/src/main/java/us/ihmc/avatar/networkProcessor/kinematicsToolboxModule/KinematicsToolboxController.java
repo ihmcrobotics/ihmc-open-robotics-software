@@ -73,17 +73,17 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
+import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -153,7 +153,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * The same set of gains is used for controlling any part of the desired robot body.
     */
-   private final YoPIDSE3Gains spatialGains = new DefaultYoPIDSE3Gains("GenericSpatialGains", GainCoupling.XYZ, false, registry);
+   private final PIDSE3GainsBasics spatialGains = new YoPIDSE3Gains("GenericSpatialGains", GainCoupling.XYZ, false, registry);
    /**
     * The same set of gains is used for controlling any joint of the desired robot body.
     */
@@ -1643,7 +1643,7 @@ public class KinematicsToolboxController extends ToolboxController
       return isUserProvidingSupportPolygon.getValue();
    }
 
-   public YoPIDSE3Gains getDefaultSpatialGains()
+   public PIDSE3GainsBasics getDefaultSpatialGains()
    {
       return spatialGains;
    }

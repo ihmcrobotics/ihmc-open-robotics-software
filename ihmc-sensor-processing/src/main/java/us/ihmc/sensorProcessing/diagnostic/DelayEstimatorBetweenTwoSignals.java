@@ -3,11 +3,11 @@ package us.ihmc.sensorProcessing.diagnostic;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
  * This class aims to estimate the delay (lag or lead) between two given signals.
@@ -82,7 +82,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       delayedSignalBuffer = new DMatrixRMaj(bufferSize, 1);
 
       correlationAlpha = new YoDouble(namePrefix + "CorrelationApha", registry);
-      correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
+      correlationAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
       correlationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
       filteredCorrelationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
    }
@@ -102,7 +102,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
 
    public void setAlphaFilterBreakFrequency(double breakFrequency)
    {
-      correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt));
+      correlationAlpha.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt));
    }
 
    public void setEstimationParameters(int maxAbsoluteLeadInTicks, int maxAbsoluteLagInTicks, int numberOfObservations)

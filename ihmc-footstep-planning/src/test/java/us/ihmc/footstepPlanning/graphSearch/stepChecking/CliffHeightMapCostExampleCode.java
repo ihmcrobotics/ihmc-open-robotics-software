@@ -10,7 +10,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 public class CliffHeightMapCostExampleCode

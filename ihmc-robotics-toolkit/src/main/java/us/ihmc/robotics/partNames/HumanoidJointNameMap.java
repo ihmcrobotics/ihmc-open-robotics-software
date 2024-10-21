@@ -1,10 +1,14 @@
 package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;

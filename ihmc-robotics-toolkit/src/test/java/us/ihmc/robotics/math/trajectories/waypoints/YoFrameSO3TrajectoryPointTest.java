@@ -28,7 +28,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;

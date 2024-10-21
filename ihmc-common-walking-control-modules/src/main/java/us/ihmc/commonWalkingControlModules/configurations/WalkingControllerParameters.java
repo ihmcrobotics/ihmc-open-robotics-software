@@ -18,11 +18,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PID3DConfiguration;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters

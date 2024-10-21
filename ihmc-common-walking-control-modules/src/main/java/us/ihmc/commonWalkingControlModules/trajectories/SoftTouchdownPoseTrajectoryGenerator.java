@@ -9,9 +9,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
+import us.ihmc.commons.trajectories.interfaces.FixedFramePolynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
+import us.ihmc.commons.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

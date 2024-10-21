@@ -5,7 +5,7 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Path;

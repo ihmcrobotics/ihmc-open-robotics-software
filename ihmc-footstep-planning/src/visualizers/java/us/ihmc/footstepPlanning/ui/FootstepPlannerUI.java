@@ -87,8 +87,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.OcTreeViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 /**

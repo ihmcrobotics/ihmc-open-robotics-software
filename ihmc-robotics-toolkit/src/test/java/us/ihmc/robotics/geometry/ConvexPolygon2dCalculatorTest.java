@@ -7,12 +7,11 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -27,62 +26,6 @@ public class ConvexPolygon2dCalculatorTest
    public void testConstruction()
    {
       new ConvexPolygon2dCalculator();
-   }
-
-   @Test
-   public void testIsPolygonInside1()
-   {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.addVertex(new Point2D(2.0, 1.0));
-      polygon.addVertex(new Point2D(1.0, 2.0));
-      polygon.update();
-
-      ConvexPolygon2D polygonToTest1 = new ConvexPolygon2D();
-      polygonToTest1.addVertex(new Point2D(0.1, 0.1));
-      polygonToTest1.addVertex(new Point2D(0.2, 0.2));
-      polygonToTest1.update();
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest1, polygon));
-
-      ConvexPolygon2D polygonToTest2 = new ConvexPolygon2D(polygon);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, polygon));
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, epsilon, polygon));
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, -epsilon, polygon));
-
-      ConvexPolygon2D polygonToTest3 = new ConvexPolygon2D();
-      polygonToTest3.addVertex(new Point2D(0.3, 0.9));
-      polygonToTest3.addVertex(new Point2D(0.1, 0.1));
-      polygonToTest3.addVertex(new Point2D(1.0, 1.2));
-      polygonToTest3.update();
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest3, polygon));
-
-      ConvexPolygon2D polygonToTest4 = new ConvexPolygon2D();
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest4, polygon));
-
-      ConvexPolygon2D polygonToTest5 = new ConvexPolygon2D();
-      polygonToTest5.addVertex(new Point2D(-0.1, 0.1));
-      polygonToTest5.update();
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest5, polygon));
-   }
-
-   @Test
-   public void testTranslatePolygon1()
-   {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(new Point2D(0.0, 0.0));
-      polygon.addVertex(new Point2D(10.0, 0.0));
-      polygon.addVertex(new Point2D(0.0, 10.0));
-      polygon.update();
-
-      Vector2D translation1 = new Vector2D(0.0, 0.0);
-      ConvexPolygon2DBasics polygon1 = polygon.translateCopy(translation1);
-      assertTrue(polygon1.epsilonEquals(polygon, epsilon));
-
-      Vector2D translation2 = new Vector2D(1.0, 0.5);
-      ConvexPolygon2DBasics polygon2 = polygon.translateCopy(translation2);
-      assertTrue(polygon2.getVertex(2).epsilonEquals(new Point2D(1.0, 0.5), epsilon));
-      assertTrue(polygon2.getVertex(1).epsilonEquals(new Point2D(11.0, 0.5), epsilon));
-      assertTrue(polygon2.getVertex(0).epsilonEquals(new Point2D(1.0, 10.5), epsilon));
    }
 
    @Test

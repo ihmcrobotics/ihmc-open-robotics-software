@@ -1,8 +1,8 @@
 package us.ihmc.avatar.factory;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;

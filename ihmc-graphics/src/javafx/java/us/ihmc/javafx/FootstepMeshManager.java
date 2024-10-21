@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.MeshHolder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;

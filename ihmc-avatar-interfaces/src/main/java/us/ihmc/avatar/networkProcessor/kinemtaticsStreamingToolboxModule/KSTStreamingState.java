@@ -29,15 +29,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDGains;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePose3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -164,7 +164,7 @@ public class KSTStreamingState implements State
    private final AlphaFilteredYoVariable inputFrequency;
 
    private final HumanoidKinematicsToolboxController ikController;
-   private final YoPIDSE3Gains ikSolverSpatialGains;
+   private final PIDSE3GainsBasics ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
    private final YoEnum<InputStateEstimatorType> activeInputStateEstimator = new YoEnum<>("activeInputStateEstimator", registry, InputStateEstimatorType.class);

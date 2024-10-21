@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -40,8 +39,8 @@ import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.Random;
 

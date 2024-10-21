@@ -3,12 +3,12 @@ package us.ihmc.robotEnvironmentAwareness.geometry;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonCutResult;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
@@ -87,14 +87,14 @@ public class ConcaveHullCutter
           */
          double lineSegmentDirectionX = concaveHullVertices.get(nextVertex).getX() - concaveHullVertices.get(i).getX();
          double lineSegmentDirectionY = concaveHullVertices.get(nextVertex).getY() - concaveHullVertices.get(i).getY();
-         double percentage = EuclidCoreMissingTools.percentageOfIntersectionBetweenTwoLine2DsInfCase(concaveHullVertices.get(i).getX(),
-                                                                                                     concaveHullVertices.get(i).getY(),
-                                                                                                     lineSegmentDirectionX,
-                                                                                                     lineSegmentDirectionY,
-                                                                                                     cuttingLine.getPoint().getX(),
-                                                                                                     cuttingLine.getPoint().getY(),
-                                                                                                     cuttingLine.getDirection().getX(),
-                                                                                                     cuttingLine.getDirection().getY());
+         double percentage = EuclidGeometryMissingTools.percentageOfIntersectionBetweenTwoLine2DsInfCase(concaveHullVertices.get(i).getX(),
+                                                                                                         concaveHullVertices.get(i).getY(),
+                                                                                                         lineSegmentDirectionX,
+                                                                                                         lineSegmentDirectionY,
+                                                                                                         cuttingLine.getPoint().getX(),
+                                                                                                         cuttingLine.getPoint().getY(),
+                                                                                                         cuttingLine.getDirection().getX(),
+                                                                                                         cuttingLine.getDirection().getY());
 
          if (percentage == Double.NaN) // non-intersecting parallel
          {

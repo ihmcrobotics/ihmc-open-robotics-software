@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.HandLoadBearingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, HandLoadBearingMessage>
 {

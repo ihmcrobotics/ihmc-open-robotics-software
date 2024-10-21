@@ -13,9 +13,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -105,7 +105,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
-      ReferenceFrame soleFrame = contactablePlaneBody.getSoleFrame();
+      ReferenceFrame soleFrame = contactablePlaneBody.getContactFrame();
       yoFootForceTorque = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "Torque", measurementFrame, registry),
                                                         new YoFrameVector3D(namePrefix + "Force", measurementFrame, registry));
       yoFootForceTorqueInSole = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueSoleFrame", soleFrame, registry),
@@ -174,7 +174,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       if (fZPlus < MIN_FORCE_TO_COMPUTE_COP)
          centerOfPressure.setToNaN();
       else
-         copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, footWrench, contactablePlaneBody.getSoleFrame());
+         copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, footWrench, contactablePlaneBody.getContactFrame());
 
       // Testing CoP threshold
       if (Double.isNaN(contactCoPThreshold.getValue()))
@@ -244,10 +244,10 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
    private static double computeLength(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector3D forward = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      FrameVector3D forward = new FrameVector3D(contactablePlaneBody.getContactFrame(), 1.0, 0.0, 0.0);
       List<FramePoint3D> maxForward = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), forward, 1);
 
-      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getContactFrame(), -1.0, 0.0, 0.0);
       List<FramePoint3D> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxForward.get(0).getX() - maxBack.get(0).getX();
@@ -255,7 +255,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
    private static double computeMinX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getContactFrame(), -1.0, 0.0, 0.0);
       List<FramePoint3D> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxBack.get(0).getX();
@@ -263,7 +263,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
    private static double computeMaxX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector3D front = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      FrameVector3D front = new FrameVector3D(contactablePlaneBody.getContactFrame(), 1.0, 0.0, 0.0);
       List<FramePoint3D> maxFront = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), front, 1);
 
       return maxFront.get(0).getX();

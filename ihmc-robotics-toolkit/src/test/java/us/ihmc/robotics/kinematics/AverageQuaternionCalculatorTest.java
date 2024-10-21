@@ -5,13 +5,12 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 

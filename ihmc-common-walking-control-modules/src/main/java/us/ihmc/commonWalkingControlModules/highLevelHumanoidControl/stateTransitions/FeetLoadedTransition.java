@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransi
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.filters.SimpleMovingAverageFilteredYoVariable;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

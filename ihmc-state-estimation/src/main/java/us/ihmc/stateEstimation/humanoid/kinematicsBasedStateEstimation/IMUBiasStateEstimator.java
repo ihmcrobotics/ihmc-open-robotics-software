@@ -14,9 +14,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.math.filters.AlphaBasedOnBreakFrequencyProvider;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -38,8 +38,8 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoFrameQuaternion> rawOrientationBiases = new ArrayList<>();
    private final List<AlphaFilteredYoFrameQuaternion> orientationBiases = new ArrayList<>();
    private final List<YoDouble> orientationBiasMagnitudes = new ArrayList<>();
-   private final List<AlphaFilteredYoFrameVector> angularVelocityBiases = new ArrayList<>();
-   private final List<AlphaFilteredYoFrameVector> linearAccelerationBiases = new ArrayList<>();
+   private final List<AlphaFilteredYoFrameVector3D> angularVelocityBiases = new ArrayList<>();
+   private final List<AlphaFilteredYoFrameVector3D> linearAccelerationBiases = new ArrayList<>();
    private final List<YoFrameVector3D> angularVelocityBiasesInWorld = new ArrayList<>();
    private final List<YoFrameVector3D> linearAccelerationBiasesInWorld = new ArrayList<>();
 
@@ -103,7 +103,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          imuBiasEstimationThreshold = new DoubleParameter("imuBiasEstimationThreshold", registry);
       }
 
-      AlphaBasedOnBreakFrequencyProvider alphaProvider = new AlphaBasedOnBreakFrequencyProvider(() -> biasFilterBreakFrequency.getValue(), updateDT);
+      DoubleProvider alphaProvider = new AlphaBasedOnBreakFrequencyProvider(() -> biasFilterBreakFrequency.getValue(), updateDT);
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
          IMUSensorReadOnly imuSensor = imuProcessedOutputs.get(i);
@@ -114,12 +114,12 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
          imuToIndexMap.put(imuSensor, i);
 
-         AlphaFilteredYoFrameVector angularVelocityBias = new AlphaFilteredYoFrameVector("estimated" + sensorName
-               + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
+         AlphaFilteredYoFrameVector3D angularVelocityBias = new AlphaFilteredYoFrameVector3D("estimated" + sensorName
+                                                                                             + "AngularVelocityBias", "", registry, alphaProvider, measurementFrame);
          angularVelocityBiases.add(angularVelocityBias);
 
-         AlphaFilteredYoFrameVector linearAccelerationBias = new AlphaFilteredYoFrameVector("estimated" + sensorName
-               + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
+         AlphaFilteredYoFrameVector3D linearAccelerationBias = new AlphaFilteredYoFrameVector3D("estimated" + sensorName
+                                                                                                + "LinearAccelerationBias", "", registry, alphaProvider, measurementFrame);
          linearAccelerationBiases.add(linearAccelerationBias);
 
          YoFrameQuaternion rawOrientationBias = new YoFrameQuaternion("estimated" + sensorName + "RawQuaternionBias", measurementFrame, registry);

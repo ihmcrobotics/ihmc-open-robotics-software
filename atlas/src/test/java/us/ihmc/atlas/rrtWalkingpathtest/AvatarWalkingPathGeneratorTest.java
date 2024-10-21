@@ -27,7 +27,7 @@ import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinition;

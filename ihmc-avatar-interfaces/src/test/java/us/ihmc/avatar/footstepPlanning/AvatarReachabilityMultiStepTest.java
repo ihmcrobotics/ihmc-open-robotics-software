@@ -23,9 +23,7 @@ import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -36,8 +34,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -215,7 +212,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          Point3D loadedPose = footstep.getInputMessage().getDesiredPositionInWorld();
          Quaternion loadedOrientation = footstep.getInputMessage().getDesiredOrientationInWorld();
 
-         TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
+         PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
          stanceFootFrame.setTransformAndUpdate(new RigidBodyTransform(new Quaternion(previousYaw, 0, 0), previousPose));
 
          // Adjust candidate foot position if right step
@@ -230,7 +227,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
             loadedOrientation.setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
          }
 
-         TransformReferenceFrame loadedFootFrame = new TransformReferenceFrame("loadedFootFrame", stanceFootFrame);
+         PoseReferenceFrame loadedFootFrame = new PoseReferenceFrame("loadedFootFrame", stanceFootFrame);
          loadedFootFrame.setTransformAndUpdate(new RigidBodyTransform(loadedOrientation, loadedPose));
 
          LogTools.info(loadedPose);

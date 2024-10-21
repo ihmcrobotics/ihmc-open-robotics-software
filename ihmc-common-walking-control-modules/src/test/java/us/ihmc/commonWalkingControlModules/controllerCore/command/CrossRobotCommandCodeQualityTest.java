@@ -64,10 +64,10 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.lists.DenseMatrixArrayList;
-import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.commons.robotics.lists.FrameTuple3DArrayList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class CrossRobotCommandCodeQualityTest
 {
@@ -683,7 +683,7 @@ public class CrossRobotCommandCodeQualityTest
       safeTypes.add(TDoubleArrayList.class);
       safeTypes.add(ReferenceFrame.class);
       safeTypes.add(MovingReferenceFrame.class);
-      safeTypes.add(FrameTupleArrayList.class);
+      safeTypes.add(FrameTuple3DArrayList.class);
       safeTypes.add(RecyclingArrayList.class);
       safeTypes.add(SideDependentList.class);
       safeTypes.add(DMatrixRMaj.class);

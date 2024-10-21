@@ -1,12 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -20,14 +17,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -245,10 +243,10 @@ public class EnvironmentConstraintHandler implements SCS2YoGraphicHolder
       return foundSolution.getBooleanValue();
    }
 
-   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Pose3DReadOnly footPose)
+   private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DReadOnly> predictedContactPoints, Pose3DReadOnly footPose)
    {
       if (predictedContactPoints.isEmpty() || !usePredictedContactPoints.getValue())
-         predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
+         predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2D();
 
       footstepPolygon.clear();
       for (int i = 0; i < predictedContactPoints.size(); i++)

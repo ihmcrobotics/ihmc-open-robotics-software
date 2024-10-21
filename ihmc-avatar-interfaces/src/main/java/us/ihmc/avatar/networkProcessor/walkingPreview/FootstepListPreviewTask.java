@@ -18,8 +18,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class FootstepListPreviewTask implements WalkingPreviewTask
 {

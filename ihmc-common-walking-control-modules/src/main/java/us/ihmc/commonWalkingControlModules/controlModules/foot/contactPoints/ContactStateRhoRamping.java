@@ -5,8 +5,8 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.robotSide.RobotSegment;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.robotics.robotSide.RobotSegment;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

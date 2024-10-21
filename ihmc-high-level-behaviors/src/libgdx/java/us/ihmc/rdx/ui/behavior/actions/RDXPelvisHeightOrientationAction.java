@@ -23,7 +23,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.MultiBodySystemMissingFactories;
 import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -97,7 +97,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
 
-      MultiBodySystemBasics pelvisOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getPelvis());
+      MultiBodySystemBasics pelvisOnlySystem = MultiBodySystemMissingFactories.createSingleBodySystem(syncedFullRobotModel.getPelvis());
       List<Collidable> pelvisCollidables = selectionCollisionModel.getRobotCollidables(pelvisOnlySystem);
 
       for (Collidable pelvisCollidable : pelvisCollidables)

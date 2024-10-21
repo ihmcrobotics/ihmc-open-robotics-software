@@ -10,11 +10,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.commons.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.commons.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;

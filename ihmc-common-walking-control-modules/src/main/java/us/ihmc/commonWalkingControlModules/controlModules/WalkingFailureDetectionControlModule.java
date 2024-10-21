@@ -13,9 +13,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -49,7 +49,7 @@ public class WalkingFailureDetectionControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2D footPolygonInFootFrame = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFeet.get(robotSide)
-                                                                                                                                             .getContactPoints2d()));
+                                                                                                                                             .getContactPoints2D()));
          footPolygons.put(robotSide, footPolygonInFootFrame);
 
          FrameConvexPolygon2D footPolygonInWorldFrame = new FrameConvexPolygon2D();

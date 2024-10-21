@@ -3,13 +3,13 @@ package us.ihmc.behaviors.tools.perception;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 
 public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 {
-   private final TransformReferenceFrame realsenseSensorFrame;
+   private final PoseReferenceFrame realsenseSensorFrame;
    private volatile PlanarRegionsList map;
 
    private ROS2SyncedRobotModel syncedRobot;
@@ -58,7 +58,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
-      realsenseSensorFrame = new TransformReferenceFrame("Realsense", pelvisFrame, transform);
+      realsenseSensorFrame = new PoseReferenceFrame("Realsense", pelvisFrame, transform);
 
       double verticalFOV = 80.0; // real fov is 58.0;
       double horizontalFOV = 87.0;

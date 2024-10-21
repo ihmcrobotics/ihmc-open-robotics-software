@@ -20,8 +20,8 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;

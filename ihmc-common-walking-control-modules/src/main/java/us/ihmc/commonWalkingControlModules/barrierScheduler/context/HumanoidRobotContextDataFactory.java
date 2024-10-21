@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;

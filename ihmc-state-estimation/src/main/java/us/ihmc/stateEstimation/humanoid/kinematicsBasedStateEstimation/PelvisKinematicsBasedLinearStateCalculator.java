@@ -20,18 +20,17 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.BacklashCompensatingVelocityYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -44,6 +43,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -80,7 +80,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    /** Debug variable */
    private final YoDouble slopTimeLinearVelocityDebug = new YoDouble("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
    /** Debug variable */
-   private final BacklashCompensatingVelocityYoFrameVector rootJointLinearVelocityFDDebug;
+   private final BacklashCompensatingVelocityYoFrameVector3D rootJointLinearVelocityFDDebug;
 
    private final DoubleProvider footToRootJointPositionBreakFrequency;
    private final BooleanProvider correctTrustedFeetPositions;
@@ -138,15 +138,15 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       /*
        * These are for debug purposes, not need to clutter the state estimator parameters class with them.
        */
-      alphaLinearVelocityDebug.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
+      alphaLinearVelocityDebug.set(AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       slopTimeLinearVelocityDebug.set(0.03);
-      rootJointLinearVelocityFDDebug = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin",
-                                                                                                                                 "",
-                                                                                                                                 alphaLinearVelocityDebug,
-                                                                                                                                 estimatorDT,
-                                                                                                                                 slopTimeLinearVelocityDebug,
-                                                                                                                                 registry,
-                                                                                                                                 rootJointPosition);
+      rootJointLinearVelocityFDDebug = new BacklashCompensatingVelocityYoFrameVector3D("estimatedRootJointLinearVelocityBacklashKin",
+                                                                                       "",
+                                                                                       alphaLinearVelocityDebug,
+                                                                                       estimatorDT,
+                                                                                       slopTimeLinearVelocityDebug,
+                                                                                       registry,
+                                                                                       rootJointPosition);
       /*
        * -------------------------------------------------------------------------------------------------
        */
@@ -335,12 +335,12 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       private final YoFrameVector3D footVelocityInWorld;
-      private final AlphaFilteredYoFrameVector footToRootJointPosition;
+      private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
       private final YoFramePoint3D footPositionInWorld;
       /** Debug variable */
       private final YoFramePoint3D rootJointPositionPerFoot;
       private final YoFramePoint3D copPositionInWorld;
-      private final AlphaFilteredYoFramePoint2d copFilteredInFootFrame;
+      private final AlphaFilteredYoFramePoint2D copFilteredInFootFrame;
       private final YoFramePoint2D copRawInFootFrame;
       private final FrameConvexPolygon2D footPolygon;
       private final FrameLineSegment2D footCenterCoPLineSegment;
@@ -362,21 +362,21 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          this.footSwitch = footSwitch;
          this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
          foot = contactableFoot.getRigidBody();
-         soleFrame = contactableFoot.getSoleFrame();
+         soleFrame = contactableFoot.getContactFrame();
 
          String namePrefix = foot.getName();
 
-         DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
-                                                                                                          estimatorDT);
-         footToRootJointPosition = new AlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+         DoubleProvider alphaFoot = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
+                                                                                                   estimatorDT);
+         footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
          footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
-         footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+         footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
          footCenterCoPLineSegment = new FrameLineSegment2D(soleFrame);
          copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
 
-         DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
-         copFilteredInFootFrame = new AlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
+         DoubleProvider alphaCop = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
+         copFilteredInFootFrame = new AlphaFilteredYoFramePoint2D(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0);
          copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);

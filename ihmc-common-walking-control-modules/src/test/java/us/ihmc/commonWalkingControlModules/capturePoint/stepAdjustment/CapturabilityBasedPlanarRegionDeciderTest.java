@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,10 +15,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -53,7 +51,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       constraintRegions.add(groundPlane);
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
+      centerOfMassFrame.prependTranslationAndUpdate(0.0, 0.0, 1.0);
       CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(new YoRegistry("Dummy"), null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 
@@ -237,7 +235,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       convexPolygon2D.update();
 
       TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
-      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+      planarRegionFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.3));
 
       PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;
@@ -255,7 +253,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       convexPolygon2D.update();
 
       TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
-      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+      planarRegionFrame.setTranslationAndUpdate(new Vector3D(0.0, 0.0, 0.3));
 
       PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;

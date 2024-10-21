@@ -36,6 +36,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -156,7 +157,7 @@ public class LeggedRobotEKF implements StateEstimatorController
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   List<Sensor> sensors)
    {
-      RigidBodyBasics[] allBodies = ScrewTools.computeSubtreeSuccessors(rootJoint.getPredecessor());
+      RigidBodyBasics[] allBodies = MultiBodySystemTools.collectSuccessors(MultiBodySystemTools.collectSubtreeJoints(rootJoint.getPredecessor()));
       Double mass = Arrays.asList(allBodies).stream().collect(Collectors.summingDouble(body -> body.getInertia().getMass()));
       double weight = -mass * gravity;
 

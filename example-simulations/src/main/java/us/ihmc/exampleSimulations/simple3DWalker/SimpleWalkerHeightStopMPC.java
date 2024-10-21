@@ -8,7 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
-import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.yoVariables.filters.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

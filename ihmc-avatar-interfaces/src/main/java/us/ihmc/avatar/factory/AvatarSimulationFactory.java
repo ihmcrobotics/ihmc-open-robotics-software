@@ -27,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -50,7 +49,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;

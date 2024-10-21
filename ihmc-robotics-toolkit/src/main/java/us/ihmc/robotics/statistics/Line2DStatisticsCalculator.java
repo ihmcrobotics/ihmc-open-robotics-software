@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.functionApproximation.ProbabilityDensityFunction;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

@@ -42,8 +42,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.StringTools;
 
 public class RosTools
 {

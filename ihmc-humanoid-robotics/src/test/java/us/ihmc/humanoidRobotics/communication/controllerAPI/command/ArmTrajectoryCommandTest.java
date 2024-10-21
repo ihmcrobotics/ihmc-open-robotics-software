@@ -18,7 +18,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class ArmTrajectoryCommandTest
 {

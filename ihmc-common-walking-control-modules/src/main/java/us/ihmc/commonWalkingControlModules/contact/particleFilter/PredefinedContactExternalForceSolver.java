@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;

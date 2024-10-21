@@ -43,7 +43,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3Traject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class FrameSE3TrajectoryPointTest
 {

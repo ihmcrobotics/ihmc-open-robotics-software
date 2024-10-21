@@ -10,7 +10,6 @@ import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveActionDefinition>

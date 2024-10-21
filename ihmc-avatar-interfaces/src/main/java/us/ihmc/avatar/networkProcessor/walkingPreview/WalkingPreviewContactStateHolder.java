@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.GainCalculator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.wholeBodyControlCore.pidGains.GainCalculator;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.List;

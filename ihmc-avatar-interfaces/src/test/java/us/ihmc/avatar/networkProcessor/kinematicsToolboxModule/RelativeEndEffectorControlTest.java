@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobots.UpperBodyWithTwoManipulators;
@@ -48,9 +47,9 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -194,7 +193,7 @@ public class RelativeEndEffectorControlTest
       createControllerCore();
 
       // Set to the same values as in the KinematicsToolboxController
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      PIDSE3Gains gains = new PIDSE3Gains();
       gains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
       gains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
       gains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
@@ -334,7 +333,7 @@ public class RelativeEndEffectorControlTest
       createControllerCore();
 
       // Set to the same values as in the KinematicsToolboxController
-      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      PIDSE3Gains gains = new PIDSE3Gains();
       gains.setPositionProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
       gains.setPositionMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
       gains.setOrientationProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.

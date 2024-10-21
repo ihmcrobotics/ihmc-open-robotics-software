@@ -24,7 +24,7 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonToolsTest;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -204,7 +204,7 @@ public class ConvexPolygonToolsTest
          waitForButtonOrPause(testFrame);
       }
 
-      ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(combinedPolygon);
+      assertTrue(combinedPolygon.isClockwiseOrdered());
       ConvexPolygon2dTestHelpers.verifyPointsAreInside(combinedPolygon, points1, 0.0);
       ConvexPolygon2dTestHelpers.verifyPointsAreInside(combinedPolygon, points2, 0.0);
       ConvexPolygon2dTestHelpers.verifyPointsAreInside(combinedPolygon, pointsThatShouldBeInCombinedPolygon, 1e-14);
@@ -553,7 +553,7 @@ public class ConvexPolygonToolsTest
          assertFalse(convexPolygonTools.doPolygonsIntersect(polygonWithOnePoint, sparePolygon));
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLine) == null);
          assertFalse(polygonWithOnePoint.isPointInside(arbitraryPoint0));
-         assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithOnePoint));
+         assertFalse(EuclidGeometryMissingTools.isPolygonInside(sparePolygon, polygonWithOnePoint));
          assertTrue(polygonWithOnePoint.orthogonalProjectionCopy(arbitraryPoint0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.pointIsOnPerimeter(pointThatDefinesThePolygon));
          assertFalse(polygonWithOnePoint.pointIsOnPerimeter(arbitraryPoint0));
@@ -645,7 +645,7 @@ public class ConvexPolygonToolsTest
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, polygonWithTwoPoints.getVertex(0),
                                    polygonWithTwoPoints.getVertex(1));
          assertFalse(polygonWithTwoPoints.isPointInside(arbitraryPoint0));
-         assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithTwoPoints));
+         assertFalse(EuclidGeometryMissingTools.isPolygonInside(sparePolygon, polygonWithTwoPoints));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
          assertTrue(polygonWithTwoPoints.getCentroid().getX() == 0.5 * (pointThatDefinesThePolygon0.getX() + pointThatDefinesThePolygon1.getX()));
          assertTrue(polygonWithTwoPoints.getCentroid().getY() == 0.5 * (pointThatDefinesThePolygon0.getY() + pointThatDefinesThePolygon1.getY()));

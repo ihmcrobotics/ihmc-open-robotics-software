@@ -21,11 +21,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotEnd;
+import us.ihmc.commons.robotics.robotSide.RobotQuadrant;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.tools.MemoryTools;
 
 public class GroundPlaneEstimatorTest

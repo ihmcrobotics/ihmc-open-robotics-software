@@ -13,17 +13,17 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -256,7 +256,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
-         ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getSoleFrame();
+         ReferenceFrame footFrame = feetContactablePlaneBodies.get(foot).getContactFrame();
          footFrames.put(foot, footFrame);
 
          String footPrefix = foot.getName();
@@ -639,7 +639,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(estimatedRootJointAngularVelocity, rootJointVelocityIMUPart);
          rootJointVelocityKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
 
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForVelocityBreakFrequency.getValue(), estimatorDT);
+         double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForVelocityBreakFrequency.getValue(), estimatorDT);
          rootJointVelocity.interpolate(rootJointVelocityKinPart, rootJointVelocityIMUPart, alpha);
       }
 
@@ -666,7 +666,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist().getAngularPart(), rootJointPositionIMUPart);
          rootJointPositionKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
+         double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
          rootJointPosition.interpolate(rootJointPositionKinPart, rootJointPositionIMUPart, alpha);
       }
 

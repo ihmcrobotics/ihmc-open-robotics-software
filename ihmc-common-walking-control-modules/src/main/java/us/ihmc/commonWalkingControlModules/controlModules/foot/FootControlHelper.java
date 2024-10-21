@@ -13,8 +13,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -93,7 +93,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
       isCurrentCoPOnEdge = new YoBoolean(namePrefix + "IsCurrentCoPOnEdge", registry);
 
-      fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+      fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getContactFrame(), 0.0, 0.0, 1.0);
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
@@ -210,7 +210,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       if (normalContactVector != null)
          fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
       else
-         fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+         fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getContactFrame(), 0.0, 0.0, 1.0);
    }
 
    public FrameVector3D getFullyConstrainedNormalContactVector()

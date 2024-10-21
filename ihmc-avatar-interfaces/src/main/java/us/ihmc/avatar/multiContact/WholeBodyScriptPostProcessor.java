@@ -36,7 +36,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.partNames.RigidBodyName;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 /**
  * This class implement preliminary work for post-processing a pre-generated script defined in

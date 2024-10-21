@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -17,12 +17,11 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -246,12 +245,12 @@ public class OneStepCaptureRegionCalculator implements SCS2YoGraphicHolder
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(),
-                                                                                      footCentroid,
-                                                                                      copExtreme,
-                                                                                      predictedICP,
-                                                                                      kinematicExtreme,
-                                                                                      null);
+         int intersections = EuclidGeometryMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(),
+                                                                                          footCentroid,
+                                                                                          copExtreme,
+                                                                                          predictedICP,
+                                                                                          kinematicExtreme,
+                                                                                          null);
 
          // When the predicted ICP distance is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
          if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())

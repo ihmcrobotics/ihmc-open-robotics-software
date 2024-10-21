@@ -58,27 +58,25 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.core.StateTransitionCondition;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -563,7 +561,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
@@ -700,9 +698,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          // This happens on the first tick when the controller core has not yet run to update the center of pressure.
-         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
+         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getContactFrame())
          {
-            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          }
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();

@@ -25,8 +25,8 @@ import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.interaction.PointCollidable;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 /**

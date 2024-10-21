@@ -9,11 +9,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotQuadrant;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -123,7 +123,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void update()
    {
-      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
+      double thisFootZ = getPointInWorld(foot.getContactFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
 
       hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
@@ -132,7 +132,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
 
-      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
+      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getContactFrame());
       if (hasFootHitGroundFiltered())
       {
          footForce.set(0.0, 0.0, totalRobotWeight);
@@ -145,7 +145,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       double lowestZ = Double.MAX_VALUE;
       for (int i = 0; i < otherFeet.length; i++)
       {
-         double z = getPointInWorld(otherFeet[i].getSoleFrame()).getZ();
+         double z = getPointInWorld(otherFeet[i].getContactFrame()).getZ();
          if (z < lowestZ)
          {
             lowestZ = z;
@@ -190,7 +190,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public ReferenceFrame getMeasurementFrame()
    {
-      return foot.getSoleFrame();
+      return foot.getContactFrame();
    }
 
    @Override

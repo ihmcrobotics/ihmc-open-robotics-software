@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

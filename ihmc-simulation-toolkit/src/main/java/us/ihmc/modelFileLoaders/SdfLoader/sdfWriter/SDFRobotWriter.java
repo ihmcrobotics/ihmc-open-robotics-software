@@ -35,7 +35,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;

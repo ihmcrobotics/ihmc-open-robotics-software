@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.commons.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.List;
 

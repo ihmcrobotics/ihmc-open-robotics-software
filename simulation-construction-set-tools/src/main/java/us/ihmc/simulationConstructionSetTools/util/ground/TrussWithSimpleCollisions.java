@@ -3,9 +3,9 @@ package us.ihmc.simulationConstructionSetTools.util.ground;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 
 public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
@@ -18,8 +18,9 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	public TrussWithSimpleCollisions(double[] newPoint, double trussLength,
 			double trussSide, double courseAngleDeg, double heightOffset, AppearanceDefinition color)
 	{
-		this(new Box3D(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2 + heightOffset), courseAngleDeg, 0),
-				trussSide, trussLength, trussSide), color);
+		this(new Box3D(new RigidBodyTransform(new Quaternion(Math.toRadians(courseAngleDeg), 0.0, 0.0),
+		                                      new Vector3D(newPoint[0], newPoint[1], trussSide / 2.0 + heightOffset)),
+		               trussSide, trussLength, trussSide), color);
 	}
 //	// TODO Auto-generated constructor stub
 //	AppearanceDefinition overrideColor = YoAppearance.White();	//color;
@@ -30,7 +31,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 ////	////setupsloped box
 ////	setUpSlopedBox(double xCenter, double yCenter, double zCenter,
 ////			double xLength, double yLength, double zLength,
-////			double slopeRadians, double yawDegrees, AppearanceDefinition app) 
+////			double slopeRadians, double yawDegrees, AppearanceDefinition app)
 ////	Transform3D location = new Transform3D();
 ////	location.rotZ(Math.toRadians(yawDegrees));
 ////
@@ -75,7 +76,7 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	{
 		RigidBodyTransform transformCenterConventionToBottomConvention = new RigidBodyTransform(box.getPose());
 //		transformCenterConventionToBottomConvention = TransformTools.transformLocalZ(transformCenterConventionToBottomConvention, -box.getDimension(Direction.Z) / 2.0);
-		
+
 		double graphicSide=.291;
 		double graphicLength=1.524;
 		Vector3D vector = new Vector3D(box.getSizeX()/graphicSide, box.getSizeY()/graphicLength, box.getSizeZ()/graphicSide);

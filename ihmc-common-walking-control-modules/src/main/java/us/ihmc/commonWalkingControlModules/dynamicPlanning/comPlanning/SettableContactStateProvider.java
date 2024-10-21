@@ -6,9 +6,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.commons.time.TimeIntervalBasics;
+import us.ihmc.commons.time.TimeIntervalReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;

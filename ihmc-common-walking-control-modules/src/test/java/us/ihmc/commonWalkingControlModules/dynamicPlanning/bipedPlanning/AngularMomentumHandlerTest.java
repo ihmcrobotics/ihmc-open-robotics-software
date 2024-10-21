@@ -21,11 +21,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
+import us.ihmc.commons.trajectories.core.FramePolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.commons.trajectories.interfaces.FramePolynomial3DBasics;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

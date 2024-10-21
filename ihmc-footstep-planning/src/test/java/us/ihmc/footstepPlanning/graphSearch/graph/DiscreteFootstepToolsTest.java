@@ -5,17 +5,13 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class DiscreteFootstepToolsTest
 {

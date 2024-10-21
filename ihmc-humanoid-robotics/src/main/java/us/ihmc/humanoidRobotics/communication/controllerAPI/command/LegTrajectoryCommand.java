@@ -5,7 +5,7 @@ import java.util.Random;
 import controller_msgs.msg.dds.LegTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class LegTrajectoryCommand implements Command<LegTrajectoryCommand, LegTrajectoryMessage>, EpsilonComparable<LegTrajectoryCommand>
 {

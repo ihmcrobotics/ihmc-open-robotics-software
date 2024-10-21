@@ -14,9 +14,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.commons.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -120,8 +120,8 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       this.robotSide = robotSide;
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
-      soleFrame = contactableFoot.getSoleFrame();
-      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+      soleFrame = contactableFoot.getContactFrame();
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
       shrunkFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
       shrunkFootPolygonInWorld = new FrameConvexPolygon2D(defaultFootPolygon);
       controllerFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
@@ -201,7 +201,7 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
       lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
-      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getSoleFrame(), explorationParameters, registry);
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getContactFrame(), explorationParameters, registry);
 
       unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);

@@ -8,7 +8,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.commons.trajectories.interfaces.PolynomialBasics;
 
 /**
  * Similar to {@link MultiCubicSpline1DSolver}, this solver is more general in a few ways:

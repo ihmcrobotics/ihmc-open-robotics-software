@@ -2,15 +2,14 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -70,13 +69,13 @@ public class CenterOfPressureCommandCalculator
          for (RobotSide robotSide : RobotSide.values)
          {
             desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
+            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getContactFrame());
             if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0 && footSupportPolygonsInSoleFrame.get(robotSide).isPointInside(desiredCoPFootFrame))
             {
                // it is to the outside of the foot, so add the command
                centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
                centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
-               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getSoleFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getContactFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
                setCommand = true;
                break;
             }

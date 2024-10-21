@@ -6,7 +6,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.util.ArrayList;

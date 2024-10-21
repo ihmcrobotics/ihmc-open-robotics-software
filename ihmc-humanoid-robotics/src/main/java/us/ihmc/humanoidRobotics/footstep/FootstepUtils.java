@@ -11,9 +11,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 /**
  * @author Sylvain
@@ -35,7 +35,7 @@ public class FootstepUtils
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
-      FramePose3D footFramePose = new FramePose3D(endEffector.getSoleFrame());
+      FramePose3D footFramePose = new FramePose3D(endEffector.getContactFrame());
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
@@ -105,7 +105,7 @@ public class FootstepUtils
       FramePoint3D footCenter = new FramePoint3D();
       for (RobotSide side : RobotSide.values)
       {
-         footCenter.setToZero(bipedFeet.get(side).getSoleFrame());
+         footCenter.setToZero(bipedFeet.get(side).getContactFrame());
          footCenter.changeFrame(worldFrame);
          distances.set(side, footCenter.distanceSquared(destinationInWorld));
       }

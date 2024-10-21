@@ -26,7 +26,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterTy
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
