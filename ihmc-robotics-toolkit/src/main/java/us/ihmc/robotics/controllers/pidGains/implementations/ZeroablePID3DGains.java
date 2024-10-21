@@ -56,6 +56,12 @@ public class ZeroablePID3DGains implements PID3DGains, Settable<ZeroablePID3DGai
    }
 
    @Override
+   public double[] getDampingRatios()
+   {
+      return new double[3];
+   }
+
+   @Override
    public double getMaximumIntegralError()
    {
       return maxIntegralError;

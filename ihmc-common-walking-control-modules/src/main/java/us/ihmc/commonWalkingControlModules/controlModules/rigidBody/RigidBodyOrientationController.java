@@ -56,6 +56,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                          YoDouble yoTime,
                                          RigidBodyJointControlHelper jointControlHelper,
                                          boolean enableFunctionGenerators,
+                                         YoBoolean enableImpedanceControl,
                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
@@ -80,6 +81,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
+                                                                enableImpedanceControl,
                                                                 yoTime,
                                                                 registry);
 
@@ -87,6 +89,21 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       hybridModeActive = new YoBoolean(prefix + "HybridModeActive", registry);
 
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
+   }
+
+   public RigidBodyOrientationController(RigidBodyBasics bodyToControl,
+                                         RigidBodyBasics baseBody,
+                                         RigidBodyBasics elevator,
+                                         ReferenceFrame baseFrame,
+                                         YoDouble yoTime,
+                                         RigidBodyJointControlHelper jointControlHelper,
+                                         boolean enableFunctionGenerators,
+                                         boolean enableImpedanceControl,
+                                         YoRegistry parentRegistry)
+   {
+      this(bodyToControl, baseBody, elevator, baseFrame, yoTime, jointControlHelper, enableFunctionGenerators, new YoBoolean(bodyToControl.getName() + "EnableImpedanceControlOrientation", parentRegistry), parentRegistry);
+      YoBoolean enableImpedanceControlYoBoolean = (YoBoolean) parentRegistry.getVariable(bodyToControl.getName() + "EnableImpedanceControlOrientation");
+      enableImpedanceControlYoBoolean.set(enableImpedanceControl);
    }
 
    public void setGains(PID3DGainsReadOnly gains)

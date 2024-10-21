@@ -1,0 +1,31 @@
+#ifndef __controller_msgs__msg__PID3DGains__idl__
+#define __controller_msgs__msg__PID3DGains__idl__
+
+#include "controller_msgs/msg/./PIDGains_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * this represents the 3d gains for a PID controller
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PID3DGains_")
+      struct PID3DGains
+      {
+        controller_msgs::msg::dds::PIDGains gains_x;
+        controller_msgs::msg::dds::PIDGains gains_y;
+        controller_msgs::msg::dds::PIDGains gains_z;
+        double maximum_feedback;
+        double maximum_feedback_rate;
+        double maximum_integral_error;
+        double maximum_derivative_error;
+        double maximum_proportional_error;
+      };
+    };
+  };
+};
+
+#endif

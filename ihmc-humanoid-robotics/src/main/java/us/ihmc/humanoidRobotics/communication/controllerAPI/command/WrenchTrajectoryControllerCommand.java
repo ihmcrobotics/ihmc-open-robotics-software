@@ -26,7 +26,7 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    private long sequenceId;
    private ReferenceFrame dataFrame = ReferenceFrame.getWorldFrame();
    private final TDoubleArrayList trajectoryPointTimes = new TDoubleArrayList();
-   private final RecyclingArrayList<SpatialVector> trajectoryPointList = new RecyclingArrayList<>(16, SpatialVector.class);
+   private final RecyclingArrayList<SpatialVector> trajectoryPointList = new RecyclingArrayList<>(200, SpatialVector.class);
    private ReferenceFrame trajectoryFrame;
 
    private boolean useCustomControlFrame = false;

@@ -27,7 +27,7 @@ module controller_msgs
         /**
          * List of trajectory points (in taskpsace) to go through while executing the trajectory.
          */
-        sequence<controller_msgs::msg::dds::WrenchTrajectoryPointMessage, 50> wrench_trajectory_points;
+        sequence<controller_msgs::msg::dds::WrenchTrajectoryPointMessage, 200> wrench_trajectory_points;
         /**
          * Frame information for this message.
          */

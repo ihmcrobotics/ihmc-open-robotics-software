@@ -774,6 +774,24 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    }
 
    /**
+    * Retrieves and returns an impedance point feedback control frame {@code YoTranslationFrame} associated to the given
+    * end-effector, if it does not exist it is created.
+    *
+    * @param endEffector        the end-effector to which the control frame is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
+    * @return a unique {@code YoTranslationFrame} point feedback control frame associated with the given end-effector.
+    */
+   public YoTranslationFrame getOrCreateImpedancePointFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
+   {
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateImpedancePointFeedbackControlFrame(endEffector.getBodyFixedFrame(),
+                                                                                                               isRequiredVariable);
+   }
+
+   /**
     * Retrieves and returns an orientation feedback control frame {@code YoOrientationFrame} associated to the given
     * end-effector, if it does not exist it is created.
     *
@@ -1112,7 +1130,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionGains;
       }
 
-      public YoSE3OffsetFrame getOrCreateSpatialFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      public YoSE3OffsetFrame  getOrCreateSpatialFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (spatialFeedbackControlFrame == null)
             spatialFeedbackControlFrame = new YoSE3OffsetFrame(namePrefix + "Spatial" + controlFrameNameSuffix,
@@ -1123,6 +1141,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       }
 
       public YoTranslationFrame getOrCreatePointFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
+      {
+         if (pointFeedbackControlFrame == null)
+            pointFeedbackControlFrame = new YoTranslationFrame(namePrefix + "Point" + controlFrameNameSuffix,
+                                                               getOrCreateControlFrameTranslationOffset(parentFrame, isRequiredVariable),
+                                                               parentFrame);
+         return pointFeedbackControlFrame;
+      }
+
+      public YoTranslationFrame getOrCreateImpedancePointFeedbackControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (pointFeedbackControlFrame == null)
             pointFeedbackControlFrame = new YoTranslationFrame(namePrefix + "Point" + controlFrameNameSuffix,

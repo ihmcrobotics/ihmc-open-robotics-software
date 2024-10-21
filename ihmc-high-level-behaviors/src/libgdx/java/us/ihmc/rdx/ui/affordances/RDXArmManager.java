@@ -151,7 +151,7 @@ public class RDXArmManager
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
+           if (syncedRobot.getHandWrenchCalculators().get(side) == null)
                continue;
 
             // wrench expressed in wrist pitch body fixed-frame
@@ -166,8 +166,9 @@ public class RDXArmManager
                // Check if the desired hand pose changed and we need to run the solver again.
                // We only want to evaluate this when we are going to take action on it
                // Otherwise, we will not notice the desired changed while the solver was still solving
-               if (readyToSolve)
+              if (readyToSolve)
                {
+
                   desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
                }
             }

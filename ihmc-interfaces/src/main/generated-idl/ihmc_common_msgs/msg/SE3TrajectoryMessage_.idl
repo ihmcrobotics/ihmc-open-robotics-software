@@ -30,7 +30,7 @@ module ihmc_common_msgs
         /**
          * List of trajectory points (in taskpsace) to go through while executing the trajectory.
          */
-        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 50> taskspace_trajectory_points;
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 200> taskspace_trajectory_points;
         /**
          * The selection matrix for each axis of the angular part of this trajectory.
          */

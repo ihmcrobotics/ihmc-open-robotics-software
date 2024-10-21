@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers.pidGains;
 
 import java.util.Arrays;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.matrix.Matrix3D;
 
 /**
@@ -32,6 +33,14 @@ public interface PID3DGainsReadOnly
     * @return the integral PID gains as double array.
     */
    public abstract double[] getIntegralGains();
+
+   /**
+    * Returns the derivative damping ratio for all three dimensions. The returned
+    * array is of length three.
+    *
+    * @return the derivative damping ratio as double array.
+    */
+   public abstract double[] getDampingRatios();
 
    /**
     * Returns the maximum integral error allowed by the PID controller
@@ -79,6 +88,31 @@ public interface PID3DGainsReadOnly
    public default void getProportionalGainMatrix(Matrix3D proportialGainMatrixToPack)
    {
       setMatrixDiagonal(getProportionalGains(), proportialGainMatrixToPack);
+   }
+
+   /**
+    * Will pack the proportional stiffness matrix (6x6). The matrix will be a diagonal
+    * matrix with the diagonal elements set to the proportional stiffnesss.
+    *
+    * @param proportionalGainMatrixToPack the matrix in which the stiffnesss are stored. Modified.
+    */
+   public default void getFullProportionalGainMatrix(DMatrixRMaj proportionalGainMatrixToPack, int startIndex)
+   {
+      double[] proportionalGains = getProportionalGains();
+      proportionalGainMatrixToPack.reshape(6, 6);
+      proportionalGainMatrixToPack.zero();
+
+      for (int i = 0; i < 6; i++)
+      {
+         if (i >= startIndex && i < startIndex + proportionalGains.length)
+         {
+            proportionalGainMatrixToPack.set(i, i, proportionalGains[i - startIndex]);
+         }
+         else
+         {
+            proportionalGainMatrixToPack.set(i, i, 1.0);
+         }
+      }
    }
 
    /**

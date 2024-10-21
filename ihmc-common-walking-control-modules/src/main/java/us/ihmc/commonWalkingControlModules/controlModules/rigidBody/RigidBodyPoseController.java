@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -62,6 +63,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    private final RigidBodyOrientationControlHelper orientationHelper;
 
    private final YoBoolean hybridModeActive;
+   private final YoBoolean isImpedanceEnabled;
    private final RigidBodyJointControlHelper jointControlHelper;
 
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
@@ -74,6 +76,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                   YoDouble yoTime,
                                   RigidBodyJointControlHelper jointControlHelper,
                                   boolean enableFunctionGenerators,
+                                  YoBoolean enableImpedanceControl,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
@@ -87,6 +90,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       BooleanParameter useBaseFrameForControl = new BooleanParameter(prefix + "UseBaseFrameForControl", registry, false);
+
+
       positionHelper = new RigidBodyPositionControlHelper(warningPrefix,
                                                           bodyToControl,
                                                           baseBody,
@@ -96,6 +101,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                           useBaseFrameForControl,
                                                           usingWeightFromMessage,
                                                           enableFunctionGenerators,
+                                                          enableImpedanceControl,
                                                           yoTime,
                                                           registry,
                                                           graphicsListRegistry);
@@ -108,6 +114,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                 useBaseFrameForControl,
                                                                 usingWeightFromMessage,
                                                                 enableFunctionGenerators,
+                                                                enableImpedanceControl,
                                                                 yoTime,
                                                                 registry);
 
@@ -119,6 +126,9 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setSelectionMatrixToIdentity();
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
+
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -207,6 +217,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
                                                                orientationCommand.getControlFrameOrientation());
 
       feedbackControlCommand.setControlBaseFrame(positionCommand.getControlBaseFrame());
+
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
    }
 
    @Override
@@ -330,6 +342,33 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
+         return true;
+      }
+
+      clear();
+      positionHelper.clear();
+      orientationHelper.clear();
+      return false;
+   }
+
+   public boolean handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand command,
+                                                JointspaceTrajectoryCommand jointspaceCommand,
+                                                WrenchTrajectoryControllerCommand feedForwardCommand,
+                                                double[] initialJointPositions)
+   {
+      if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
+      {
+         hybridModeActive.set(true);
+         statusHelper.registerNewTrajectory(command);
+
+
+         positionHelper.getFeedForwardTrajectoryList().clear();
+         positionHelper.getFeedForwardTrajectoryTimes().clear();
+         for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
+         {
+            positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
+            positionHelper.getFeedForwardTrajectoryTimes().add(feedForwardCommand.getTrajectoryPointTime(i));
+         }
          return true;
       }
 

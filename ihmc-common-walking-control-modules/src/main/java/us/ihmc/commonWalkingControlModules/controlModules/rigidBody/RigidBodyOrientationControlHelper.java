@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -19,6 +21,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
@@ -31,6 +34,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -84,7 +88,11 @@ public class RigidBodyOrientationControlHelper
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
 
+   TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
+   RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
+
    private final BooleanProvider useBaseFrameForControl;
+   private final YoBoolean isImpedanceEnabled;
 
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
    private final FixedFrameQuaternionBasics controlFrameOrientation;
@@ -109,6 +117,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
+                                            YoBoolean enableImpedanceControl,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -131,6 +140,8 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -275,6 +286,11 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
       feedbackControlCommand.setGains(gains);
 
+      if (!feedForwardTrajectoryList.isEmpty())
+      {
+         feedForwardAcceleration.set(feedForwardTrajectoryList.get(trajectoryGenerator.getCurrentWaypointIndex()).getLinearPart());
+      }
+
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
       {
@@ -293,6 +309,7 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       return done;
    }

@@ -1,0 +1,41 @@
+#ifndef __controller_msgs__msg__SE3PIDGainsTrajectoryPointMessage__idl__
+#define __controller_msgs__msg__SE3PIDGainsTrajectoryPointMessage__idl__
+
+#include "controller_msgs/msg/./PID3DGains_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This class is used to change the PID gains over time.
+       * It holds the necessary information for one trajectory point.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SE3PIDGainsTrajectoryPointMessage_")
+      struct SE3PIDGainsTrajectoryPointMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+         */
+        double time;
+        /**
+         * Define the desired linear PID gains for the trajectory point.
+         */
+        controller_msgs::msg::dds::PID3DGains linear_gains;
+        /**
+         * Define the desired angular PID gains for the trajectory point.
+         */
+        controller_msgs::msg::dds::PID3DGains angular_gains;
+      };
+    };
+  };
+};
+
+#endif
