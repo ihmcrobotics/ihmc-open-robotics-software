@@ -32,14 +32,12 @@ public class ROS2DemandGraphNode
    public void addDemandChangedCallback(Consumer<Boolean> demandChangedCallback)
    {
       demandChangedCallbacks.add(demandChangedCallback);
-      for (ROS2DemandGraphNode dependent : dependents)
-         dependent.addDemandChangedCallback(this::checkIfDemandChanged);
    }
 
    private void checkIfDemandChanged(boolean ignored)
    {
       boolean isDemanded = isDemanded();
-      // if wasDemanded != isDemanded -> wasDemanded = isDemanded, trigger callbacks
+      // if demanded status changed, update wasDemanded to current status and trigger callbacks
       if (wasDemanded.compareAndSet(!isDemanded, isDemanded))
          for (Consumer<Boolean> demandChangedCallback : demandChangedCallbacks)
             demandChangedCallback.accept(isDemanded);
