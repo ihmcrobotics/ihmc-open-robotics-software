@@ -155,6 +155,7 @@ public class WalkingControllerState extends HighLevelControllerState
       }
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
+      // TODO This should be saved into some parameters which will be delivered to the highlevelHumanoidManager.
       controllerCoreCommandData.set(controllerCoreCommand);
       controllerCoreTimer.startMeasurement();
       controllerCore.compute(controllerCoreCommand);
