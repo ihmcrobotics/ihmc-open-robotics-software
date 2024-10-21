@@ -107,7 +107,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
       feedForwardTrajectoryCommand.set(resolver, message.getFeedforwardTaskspaceTrajectoryMessage());
-      pidGainsTrajectoryCommand.setFromMessage(message.getTaskspacePidGains());
+      pidGainsTrajectoryCommand.setFromMessage(message.getTaskspacePidGainsTrajectoryMessage());
    }
 
    @Override

@@ -49,7 +49,7 @@ public class ReferenceSpreadingStateHelper
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
-      collisionDetection = new CollisionDetection(15, 10, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(14.5, 10, fullRobotModel, registry);
       referenceSpreader = new ReferenceSpreader(filePath, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
@@ -149,7 +149,7 @@ public class ReferenceSpreadingStateHelper
          for (RobotSide robotSide : RobotSide.values())
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = blendImpactReference.getHandHybridTrajectoryMessage(robotSide);
-            //            LogTools.info("Message: " + handHybridTrajectoryMessage);
+//            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 

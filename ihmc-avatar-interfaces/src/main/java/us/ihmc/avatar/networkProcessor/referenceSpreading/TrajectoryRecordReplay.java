@@ -176,6 +176,7 @@ public class TrajectoryRecordReplay
    public void readCSV()
    {
       doneReplaying = false;
+      keyMatrix.clear();
       try
       {
          BufferedReader fileReader = new BufferedReader(new FileReader(filePath));

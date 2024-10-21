@@ -76,7 +76,7 @@ public class ReferenceSpreader
       this.postImpactReference = new TrajectoryRecordReplay(filePath+"_post.csv", 1, false);
       this.blendedImpactReference = new TrajectoryRecordReplay(filePath+"_blended.csv", 1, false);
       this.originalReference.importData(true);
-      this.keyMatrix = originalReference.getKeyMatrix();
+      this.keyMatrix = new ArrayList<>(originalReference.getKeyMatrix());
 
       this.collisionDetection = collisionDetection;
       this.excludeInterval = excludeInterval;
@@ -143,7 +143,7 @@ public class ReferenceSpreader
       String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
 
       originalReference.reset();
-      makeMap(originalReference.play(false), currentFrame);
+      originalReference.play(false);
 
       while (!originalReference.hasDoneReplay())
       {
@@ -209,7 +209,7 @@ public class ReferenceSpreader
       String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
 
       originalReference.reset();
-      makeMap(originalReference.play(false), currentFrame);
+      originalReference.play(false);
 
       while (!originalReference.hasDoneReplay())
       {
@@ -290,6 +290,7 @@ public class ReferenceSpreader
          if(currentFrame.get("time[sec]") >= impactTime && currentFrame.get("time[sec]") < impactTime + blendInterval)
          {
             blendFactor = (currentFrame.get("time[sec]") - impactTime) / blendInterval;
+
             for (RobotSide robotSide : RobotSide.values())
             {
                for (String jointName : JOINT_NAMES)
@@ -342,11 +343,13 @@ public class ReferenceSpreader
                                  preImpactValues[getKeyIndex("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
                                  + postImpactValues[getKeyIndex("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps())] * blendFactor);
             }
+            currentFrame.put("blendFactor", blendFactor);
             blendedImpactReference.record(currentFrame.values().stream().mapToDouble(Double::doubleValue).toArray());
          }
-         else if (currentFrame.get("time[sec]") >= impactTime)
+         else if (currentFrame.get("time[sec]") >= impactTime + blendInterval)
          {
-            blendedImpactReference.record(postImpactValues);
+            currentFrame.put("blendFactor", 1.0);
+            blendedImpactReference.record(currentFrame.values().stream().mapToDouble(Double::doubleValue).toArray());
          }
       }
       blendedImpactReference.saveRecordingMemory();
@@ -355,22 +358,24 @@ public class ReferenceSpreader
 
    public ReferenceSpreadingTrajectory getOriginalReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(originalReference, keyMatrix, robotModel, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(originalReference, new ArrayList<>(keyMatrix), robotModel, fullRobotModel, registry);
    }
 
    public ReferenceSpreadingTrajectory getPreImpactReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(preImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(preImpactReference, new ArrayList<>(keyMatrix), robotModel, fullRobotModel, registry);
    }
 
    public ReferenceSpreadingTrajectory getPostImpactReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(postImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
+      return new ReferenceSpreadingTrajectory(postImpactReference, new ArrayList<>(keyMatrix), robotModel, fullRobotModel, registry);
    }
 
    public ReferenceSpreadingTrajectory getBlendedReferenceTrajectory()
    {
-      return new ReferenceSpreadingTrajectory(blendedImpactReference, keyMatrix, robotModel, fullRobotModel, registry);
+      List<String> blendedKeyMatrix = new ArrayList<>(keyMatrix);
+      blendedKeyMatrix.add("blendingFactor");
+      return new ReferenceSpreadingTrajectory(blendedImpactReference, blendedKeyMatrix, robotModel, fullRobotModel, registry);
    }
 
    private int getKeyIndex(String key)

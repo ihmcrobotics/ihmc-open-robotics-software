@@ -663,7 +663,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled() && tempGainMatrix.containsNaN()){
+      if (isImpedanceEnabled()){
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
          sqrtProportionalGainMatrix.reshape(6,6);

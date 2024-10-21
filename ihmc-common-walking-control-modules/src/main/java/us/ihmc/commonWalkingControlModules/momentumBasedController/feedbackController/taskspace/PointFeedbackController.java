@@ -652,7 +652,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
-      if (isImpedanceEnabled() && tempGainMatrix.containsNaN()){
+      if (isImpedanceEnabled()){
          gains.getFullProportionalGainMatrix(tempMatrix, 3);
 
          sqrtProportionalGainMatrix.reshape(6,6);

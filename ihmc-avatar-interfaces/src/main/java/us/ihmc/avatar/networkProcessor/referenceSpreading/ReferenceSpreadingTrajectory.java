@@ -3,8 +3,8 @@ package us.ihmc.avatar.networkProcessor.referenceSpreading;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-//import controller_msgs.msg.dds.PIDGainsTrajectoryMessage;
-//import controller_msgs.msg.dds.PIDGainsTrajectoryPointMessage;
+import controller_msgs.msg.dds.SE3PIDGainsTrajectoryMessage;
+import controller_msgs.msg.dds.SE3PIDGainsTrajectoryPointMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
@@ -19,6 +19,8 @@ import geometry_msgs.msg.dds.Wrench;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -26,6 +28,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
@@ -73,9 +76,6 @@ public class ReferenceSpreadingTrajectory
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide)
    {
-
-      LogTools.info("Test: "+ robotModel.getWalkingControllerParameters());
-//      trajectoryPlayer.reset();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
       se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
       SE3TrajectoryPointMessage se3TrajectoryPointMessage;
@@ -102,16 +102,16 @@ public class ReferenceSpreadingTrajectory
       WrenchTrajectoryPointMessage wrenchTrajectoryPointMessage = new WrenchTrajectoryPointMessage();
       Wrench desiredFeedForwardWrench = new Wrench();
 
-//      PIDGainsTrajectoryMessage pidGainsTrajectoryMessage = new PIDGainsTrajectoryMessage();
-//      PIDGainsTrajectoryPointMessage pidGainsTrajectoryPointMessage = new PIDGainsTrajectoryPointMessage();
-//      PIDGains linearGains = robotModel.getWalkingControllerParameters().getLinearGains();
-//      PIDGains angularGains = robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains();
+      SE3PIDGainsTrajectoryMessage pidGainsTrajectoryMessage = new SE3PIDGainsTrajectoryMessage();
+      SE3PIDGainsTrajectoryPointMessage pidGainsTrajectoryPointMessage = new SE3PIDGainsTrajectoryPointMessage();
+      pidGainsTrajectoryPointMessage.getLinearGains().set(convertToPID3DGainsMessage(robotModel.getWalkingControllerParameters().getImpedanceHandPositionControlGains()));
+      pidGainsTrajectoryPointMessage.getAngularGains().set(convertToPID3DGainsMessage(robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains()));
 
-
-      HashMap<String, Double> currentFrame = new HashMap<>();
+      LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
       trajectoryPlayer.reset();
       makeMap(trajectoryPlayer.play(false), currentFrame);
       startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
+//      LogTools.info("CurrentFrame: " + currentFrame);
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
       int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
@@ -121,6 +121,7 @@ public class ReferenceSpreadingTrajectory
       while (!trajectoryPlayer.hasDoneReplay())
       {
          makeMap(trajectoryPlayer.play(false), currentFrame);
+//         LogTools.info(currentFrame);
          if (frameIndex % frameInterval == 0)
          {
             double currentTime = currentFrame.get("time[sec]");
@@ -173,6 +174,19 @@ public class ReferenceSpreadingTrajectory
             wrenchTrajectoryPointMessage.getWrench().set(desiredFeedForwardWrench);
             wrenchTrajectoryPointMessage.setSequenceId(frameIndex);
             wrenchTrajectoryMessage.getWrenchTrajectoryPoints().add().set(wrenchTrajectoryPointMessage);
+
+            if (currentFrame.get("blendingFactor") != null)
+            {
+               pidGainsTrajectoryPointMessage.getLinearGains().getGainsX().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.getAngularGains().getGainsX().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.getLinearGains().getGainsY().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.getAngularGains().getGainsY().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.getLinearGains().getGainsZ().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.getAngularGains().getGainsZ().setZeta(currentFrame.get("blendingFactor"));
+               pidGainsTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
+               pidGainsTrajectoryPointMessage.setSequenceId(frameIndex);
+               pidGainsTrajectoryMessage.getPidGainsTrajectoryPoints().add().set(pidGainsTrajectoryPointMessage);
+            }
          }
          frameIndex++;
       }
@@ -184,6 +198,8 @@ public class ReferenceSpreadingTrajectory
 
       handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
       handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
+      if (!pidGainsTrajectoryMessage.getPidGainsTrajectoryPoints().isEmpty())
+         handHybridTrajectoryMessage.getTaskspacePidGainsTrajectoryMessage().set(pidGainsTrajectoryMessage);
       return handHybridTrajectoryMessage;
    }
 
@@ -191,7 +207,7 @@ public class ReferenceSpreadingTrajectory
    {
       if (startTimeCSV == null)
       {
-         HashMap<String, Double> currentFrame = new HashMap<>();
+         LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
          trajectoryPlayer.reset();
          makeMap(trajectoryPlayer.play(false), currentFrame);
          startTimeCSV = currentFrame.get("time[sec]");
@@ -199,11 +215,30 @@ public class ReferenceSpreadingTrajectory
       return startTimeCSV;
    }
 
-   private void makeMap(double[] values, HashMap<String, Double> mapToPack)
+   private void makeMap(double[] values, LinkedHashMap<String, Double> mapToPack)
    {
       for (int i = 0; i < values.length; i++)
       {
          mapToPack.put(this.keyMatrix.get(i), values[i]);
       }
+   }
+
+   private static controller_msgs.msg.dds.PID3DGains convertToPID3DGainsMessage(us.ihmc.robotics.controllers.pidGains.PID3DGains controllerGains) {
+      controller_msgs.msg.dds.PID3DGains msgGains = new controller_msgs.msg.dds.PID3DGains();
+      msgGains.getGainsX().setKp(controllerGains.getProportionalGains()[0]);
+      msgGains.getGainsX().setKi(controllerGains.getIntegralGains()[0]);
+      msgGains.getGainsX().setKd(controllerGains.getDerivativeGains()[0]);
+      msgGains.getGainsY().setKp(controllerGains.getProportionalGains()[1]);
+      msgGains.getGainsY().setKi(controllerGains.getIntegralGains()[1]);
+      msgGains.getGainsY().setKd(controllerGains.getDerivativeGains()[1]);
+      msgGains.getGainsZ().setKp(controllerGains.getProportionalGains()[2]);
+      msgGains.getGainsZ().setKi(controllerGains.getIntegralGains()[2]);
+      msgGains.getGainsZ().setKd(controllerGains.getDerivativeGains()[2]);
+      msgGains.setMaximumIntegralError(controllerGains.getMaximumIntegralError());
+      msgGains.setMaximumFeedback(controllerGains.getMaximumFeedback());
+      msgGains.setMaximumFeedbackRate(controllerGains.getMaximumFeedbackRate());
+      msgGains.setMaximumDerivativeError(controllerGains.getMaximumDerivativeError());
+      msgGains.setMaximumProportionalError(controllerGains.getMaximumProportionalError());
+      return msgGains;
    }
 }
