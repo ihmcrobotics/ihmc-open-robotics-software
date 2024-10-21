@@ -7,6 +7,7 @@ import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -40,7 +41,8 @@ public class WaitingToLandState implements State
       this.controllerQueueMonitor = controllerQueueMonitor;
       this.statistics = statistics;
 
-      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(simpleRobotName);
+      controllerFootstepDataTopic = ControllerAPI.getTopic(controllerInputTopic, FootstepDataListMessage.class);
       ros2Helper.createPublisher(controllerFootstepDataTopic);
    }
 

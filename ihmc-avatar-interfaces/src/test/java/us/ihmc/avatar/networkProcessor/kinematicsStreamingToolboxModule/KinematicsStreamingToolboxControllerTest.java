@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -185,7 +184,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
-      ROS2Subscription<RobotConfigurationData> rcdSubscription = toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+      ROS2Subscription<RobotConfigurationData> rcdSubscription = toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                                                                                     s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
       cleanupTasks.add(rcdSubscription::remove);
 

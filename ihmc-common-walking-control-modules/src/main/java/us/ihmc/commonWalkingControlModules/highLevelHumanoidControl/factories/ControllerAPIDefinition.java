@@ -24,11 +24,15 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
@@ -98,7 +102,37 @@ public class ControllerAPIDefinition
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
 
-      controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
+      List<Class<? extends Packet<?>>> statusMessages  = new ArrayList<>();
+
+
+      // Statuses supported by bipedal walking controller {@link WalkingControllerState}
+      statusMessages.add(CapturabilityBasedStatus.class);
+      statusMessages.add(FootstepStatusMessage.class);
+      statusMessages.add(PlanOffsetStatus.class);
+      statusMessages.add(WalkingStatusMessage.class);
+      statusMessages.add(WalkingControllerFailureStatusMessage.class);
+      statusMessages.add(ManipulationAbortedStatus.class);
+      statusMessages.add(HighLevelStateChangeStatusMessage.class);
+      statusMessages.add(TextToSpeechPacket.class);
+      statusMessages.add(ControllerCrashNotificationPacket.class);
+      statusMessages.add(JointspaceTrajectoryStatusMessage.class);
+      statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
+      statusMessages.add(JointDesiredOutputMessage.class);
+      statusMessages.add(RobotDesiredConfigurationData.class);
+      statusMessages.add(FootstepQueueStatusMessage.class);
+      statusMessages.add(QueuedFootstepStatusMessage.class);
+      statusMessages.add(WrenchTrajectoryStatusMessage.class);
+      statusMessages.add(InvalidPacketNotificationPacket.class);
+      statusMessages.add(MessageCollectionNotification.class);
+
+      // Statuses supported by the kinematics toolbox
+      statusMessages.add(KinematicsToolboxOutputStatus.class);
+
+      // Statuses supported by multi-contact controller, not in this repo
+      statusMessages.add(MultiContactBalanceStatus.class);
+      statusMessages.add(MultiContactTrajectoryStatus.class);
+
+      controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()

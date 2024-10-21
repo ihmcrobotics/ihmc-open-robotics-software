@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -44,7 +45,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(RealtimeROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ros2Node.createSubscription(createTopicName(robotName).withTypeName(RobotConfigurationData.class), robotConfigurationDataListener);
+      ros2Node.createSubscription(ControllerAPI.getTopic(HumanoidControllerAPI.getOutputTopic(robotName), RobotConfigurationData.class), robotConfigurationDataListener);
    }
 
    /**
@@ -61,12 +62,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(ROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ros2Node.createSubscription(createTopicName(robotName).withTypeName(RobotConfigurationData.class), robotConfigurationDataListener);
-   }
-
-   private static ROS2Topic<?> createTopicName(String robotName)
-   {
-      return HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      ros2Node.createSubscription(ControllerAPI.getTopic(HumanoidControllerAPI.getOutputTopic(robotName), RobotConfigurationData.class), robotConfigurationDataListener);
    }
 
    private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)
@@ -161,8 +157,7 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      ROS2Topic topicName = createTopicName(robotName);
-      ros2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(RobotConfigurationData.class), new NewMessageListener<RobotConfigurationData>()
+      ros2Node.createSubscription(ControllerAPI.getTopic(HumanoidControllerAPI.getOutputTopic(robotName), RobotConfigurationData.class), new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
          private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();

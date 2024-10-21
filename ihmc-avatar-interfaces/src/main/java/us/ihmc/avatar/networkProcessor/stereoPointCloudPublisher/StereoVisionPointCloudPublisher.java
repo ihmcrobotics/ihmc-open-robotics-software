@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
@@ -18,7 +19,8 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -111,7 +113,8 @@ public class StereoVisionPointCloudPublisher
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                   s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
       pointcloudPublisher = ros2Node.createPublisher(topic)::publish;

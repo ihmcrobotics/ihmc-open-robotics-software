@@ -5,9 +5,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
@@ -20,8 +22,9 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    {
       if (realtimeROS2Node != null && robotName != null)
       {
-         poseErrorPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(PelvisPoseErrorPacket.class, robotName));
-         localizationPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getTopic(LocalizationPacket.class, robotName));
+         ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+         poseErrorPublisher = realtimeROS2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic, PelvisPoseErrorPacket.class));
+         localizationPublisher = realtimeROS2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic, LocalizationPacket.class));
       }
       else
       {

@@ -4,10 +4,12 @@ import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,8 +30,9 @@ public class ControllerFootstepQueueMonitor
    {
       this.referenceFrames = referenceFrames;
       this.statistics = statistics;
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(simpleRobotName);
+      ros2Helper.subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, FootstepQueueStatusMessage.class), this::footstepQueueStatusReceived);
+      ros2Helper.subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, FootstepStatusMessage.class), this::footstepStatusReceived);
    }
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)

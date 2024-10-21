@@ -6,8 +6,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -152,7 +153,8 @@ public class TerrainPerceptionProcessWithDriver
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class), s ->
       {
          LogTools.warn("Realsense focal length is 0.0, not publishing data");
       });

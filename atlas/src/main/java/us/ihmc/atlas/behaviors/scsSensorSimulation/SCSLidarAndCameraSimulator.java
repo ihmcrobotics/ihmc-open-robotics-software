@@ -10,7 +10,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
@@ -36,6 +37,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -73,7 +75,8 @@ public class SCSLidarAndCameraSimulator
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
-      robotConfigurationData = new ROS2Input<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
+      robotConfigurationData = new ROS2Input<>(ros2Node, ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
@@ -113,8 +116,6 @@ public class SCSLidarAndCameraSimulator
       // must create a joint and attach a CameraMount; make it another robot?
 
       // required for timestamp
-      ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
-                                                                                 StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
       ROS2PublisherBasics<VideoPacket> scsCameraPublisher = ros2Node.createPublisher(PerceptionAPI.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);

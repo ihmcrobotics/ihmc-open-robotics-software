@@ -14,8 +14,9 @@ import geometry_msgs.Pose;
 import geometry_msgs.Vector3;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,6 +25,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -61,7 +63,8 @@ public class TrackingCameraBridge
    {
       this.fullRobotModel = fullRobotModel;
 
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                   s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       stampedPosePacketPublisher = ros2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }
@@ -70,7 +73,8 @@ public class TrackingCameraBridge
    {
       this.fullRobotModel = fullRobotModel;
 
-      realtimeROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      realtimeROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       stampedPosePacketPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }

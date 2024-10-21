@@ -6,8 +6,9 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
@@ -28,6 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -78,7 +80,8 @@ public class DelayFixedPlanarRegionsSubscription
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
-      ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
+      ros2Node.createSubscription2(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                    rosClockCalculator::receivedRobotConfigurationData);
 
       ros2Node.createSubscription2(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
@@ -226,7 +229,8 @@ public class DelayFixedPlanarRegionsSubscription
       {
          if (enabled)
          {
-            robotConfigurationDataSubscriber = ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+            ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
+            robotConfigurationDataSubscriber = ros2Node.createSubscription2(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                                                             this::acceptRobotConfigurationData);
          }
          else

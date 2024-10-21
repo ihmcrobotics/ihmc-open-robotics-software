@@ -19,7 +19,6 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -201,7 +200,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
-      toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+      toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                          s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
 
       toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),

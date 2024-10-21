@@ -31,7 +31,6 @@ import java.util.function.Consumer;
  *    <li>{@link MissionControlAPI}</li>
  *    <li>{@link PerceptionAPI}</li>
  *    <li>{@link SakeHandAPI}</li>
- *    <li>{@link StateEstimatorAPI}</li>
  *    <li>{@link ToolboxAPIs}</li>
  * </ul>
  *
