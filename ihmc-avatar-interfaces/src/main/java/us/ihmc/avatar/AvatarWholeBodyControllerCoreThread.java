@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -159,7 +159,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
          {
             CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerCoreModel,
                                                                                                       forceSensorDataHolderForControllerCore,
-                                                                                                      yoGraphicsListRegistry,
+                                                                                                      null,
                                                                                                       registry);
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
@@ -177,38 +177,40 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       // Guess two separate thread generate in-defendant constructors.
 
       //first try to generate the controllerManager without using the controllerFactory.
-      //      HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
-      //                                                                                                                controllerCoreDT,
-      //                                                                                                                gravity,
-      //                                                                                                                kinematicsSimulation,
-      //                                                                                                                yoTime,
-      //                                                                                                                forceSensorDataHolderForControllerCore,
-      //                                                                                                                centerOfMassDataHolderForControllerCore,
-      //                                                                                                                wholeBodyControllerCoreOutput,
-      //                                                                                                                lowLevelControllerOutput,
-      //                                                                                                                controllerCoreOutPutDataHolder,
-      //                                                                                                                controllerCoreCommandDataHolder,
-      //                                                                                                                jointToIgnore);
+      HumanoidWholeBodyControllerCoreManager controllerCoreManager = new HumanoidWholeBodyControllerCoreManager(controllerCoreModel,
+                                                                                                                      controllerCoreDT,
+                                                                                                                      gravity,
+                                                                                                                      kinematicsSimulation,
+                                                                                                                      yoTime,
+                                                                                                                      forceSensorDataHolderForControllerCore,
+                                                                                                                      centerOfMassDataHolderForControllerCore,
+                                                                                                                      wholeBodyControllerCoreOutput,
+                                                                                                                      lowLevelControllerOutput,
+                                                                                                                      controllerCoreOutPutDataHolder,
+                                                                                                                      controllerCoreCommandDataHolder,
+                                                                                                                      controllerFactory.getWholeBodyControllerCoreFactory()
+                                                                                                                                       .getWholeBodyControllerCore(),
+                                                                                                                      jointsToIgnore);
 
       // new try using the controllerFactory to keep the same stateMachine structure of controllerThread and use it.
       // use the same constructor is not possible. The registry values can not be generated with the same name.
       // Generating new one can't be. When set the feet, contactableBodiesFactory should createFootContactableFeet, but this is cannot be called twice.
       // ControllerCoreFactory should be shared through the context.
       // If so, how the stateMachine is shared?
-      HumanoidHighLevelControllerManager controllerCoreManager = controllerFactory.getControllerCoreCalculator(controllerCoreModel,
-                                                                                                               controllerCoreDT,
-                                                                                                               gravity,
-                                                                                                               kinematicsSimulation,
-                                                                                                               yoTime,
-                                                                                                               yoGraphicsListRegistry,
-                                                                                                               sensorInformation,
-                                                                                                               forceSensorDataHolderForControllerCore,
-                                                                                                               centerOfMassDataHolderForControllerCore,
-                                                                                                               centerOfPressureDataHolderForEstimator,
-                                                                                                               wholeBodyControllerCoreOutput,
-                                                                                                               controllerCoreOutPutDataHolder,
-                                                                                                               controllerCoreCommandDataHolder,
-                                                                                                               jointsToIgnore);
+//      HumanoidHighLevelControllerManager controllerCoreManager = controllerFactory.getControllerCoreCalculator(controllerCoreModel,
+//                                                                                                               controllerCoreDT,
+//                                                                                                               gravity,
+//                                                                                                               kinematicsSimulation,
+//                                                                                                               yoTime,
+//                                                                                                               yoGraphicsListRegistry,
+//                                                                                                               sensorInformation,
+//                                                                                                               forceSensorDataHolderForControllerCore,
+//                                                                                                               centerOfMassDataHolderForControllerCore,
+//                                                                                                               centerOfPressureDataHolderForEstimator,
+//                                                                                                               wholeBodyControllerCoreOutput,
+//                                                                                                               controllerCoreOutPutDataHolder,
+//                                                                                                               controllerCoreCommandDataHolder,
+//                                                                                                               jointsToIgnore);
 
 //      scs2YoGraphicHolders.add(() -> controllerCoreManager.getSCS2YoGraphics());
 

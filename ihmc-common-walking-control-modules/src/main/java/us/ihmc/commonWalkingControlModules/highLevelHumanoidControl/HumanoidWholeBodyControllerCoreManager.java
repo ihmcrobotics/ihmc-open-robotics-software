@@ -1,16 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -25,7 +22,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HumanoidWholeBodyControllerCoreManager implements RobotController, SCS2YoGraphicHolder
@@ -37,9 +33,11 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private final JointDesiredOutputListBasics wholeBodyControllerCoreOutput;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
    private final JointBasics[] controlledJoint;
-   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
+//   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
    private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
    private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
+   private final WholeBodyControllerCore controllerCore;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
 
    // This constructor has similar role to the getController of @HighLevelHumanoidControllerFactory
@@ -55,43 +53,46 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
                                                  ControllerCoreOutPutDataHolder controllerCoreOutputDataHolder,
                                                  ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
+                                                 WholeBodyControllerCore controllerCore,
                                                  JointBasics... jointsToIgnore)
    {
-      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPositionInControllerCoreThread", registry);
-      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocityInControllerCoreThread", registry);
+//      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPositionInControllerCoreThread", registry);
+//      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocityInControllerCoreThread", registry);
+//
+      this.controllerCore = controllerCore;
+//
+//      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
+//      {
+//         final CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+//
+//         @Override
+//         public void updateState()
+//         {
+//            centerOfMassJacobian.reset();
+//         }
+//
+//         @Override
+//         public FramePoint3DReadOnly getCenterOfMassPosition()
+//         {
+//            usingEstimatorCoMPosition.set(centerOfMassDataHolderForControllerCore.hasCenterOfMassPosition());
+//            if (centerOfMassDataHolderForControllerCore.hasCenterOfMassPosition())
+//               return centerOfMassDataHolderForControllerCore.getCenterOfMassPosition();
+//            else
+//               return centerOfMassJacobian.getCenterOfMass();
+//         }
+//
+//         @Override
+//         public FrameVector3DReadOnly getCenterOfMassVelocity()
+//         {
+//            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForControllerCore.hasCenterOfMassVelocity());
+//            if (centerOfMassDataHolderForControllerCore.hasCenterOfMassVelocity())
+//               return centerOfMassDataHolderForControllerCore.getCenterOfMassVelocity();
+//            else
+//               return centerOfMassJacobian.getCenterOfMassVelocity();
+//         }
+//      };
 
-      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
-      {
-         final CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
-
-         @Override
-         public void updateState()
-         {
-            centerOfMassJacobian.reset();
-         }
-
-         @Override
-         public FramePoint3DReadOnly getCenterOfMassPosition()
-         {
-            usingEstimatorCoMPosition.set(centerOfMassDataHolderForControllerCore.hasCenterOfMassPosition());
-            if (centerOfMassDataHolderForControllerCore.hasCenterOfMassPosition())
-               return centerOfMassDataHolderForControllerCore.getCenterOfMassPosition();
-            else
-               return centerOfMassJacobian.getCenterOfMass();
-         }
-
-         @Override
-         public FrameVector3DReadOnly getCenterOfMassVelocity()
-         {
-            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForControllerCore.hasCenterOfMassVelocity());
-            if (centerOfMassDataHolderForControllerCore.hasCenterOfMassVelocity())
-               return centerOfMassDataHolderForControllerCore.getCenterOfMassVelocity();
-            else
-               return centerOfMassJacobian.getCenterOfMassVelocity();
-         }
-      };
-
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
+//      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
 
       this.lowLevelControllerOutput = lowLevelControllerOutput;
@@ -99,10 +100,13 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       this.wholeBodyControllerCoreOutput = wholeBodyControllerCoreOutput;
       this.controllerCoreOutPutDataHolder = controllerCoreOutputDataHolder;
       this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
-
-      controllerFactoryHelper = new HighLevelControllerFactoryHelper();
-      controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
+//
+//      controllerFactoryHelper = new HighLevelControllerFactoryHelper();
+//      controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controlledJoint = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+
+      controllerCoreCommand.setControllerCoreMode(controllerCoreCommandDataHolder.getControllerCoreMode());
+      controllerCoreCommand.set(controllerCoreCommandDataHolder);
 
       //      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
@@ -135,6 +139,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    @Override
    public void doControl()
    {
+//      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute(controllerCoreCommand);
       copyJointDesiredsToJoints();
    }
 

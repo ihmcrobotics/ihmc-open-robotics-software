@@ -104,8 +104,8 @@ public class CrossRobotCommandResolver
    {
       out.clear();
       out.set(in);
-      if(in.isReinitializationRequested())
-         out.requestReinitialization();
+//      if(in.isReinitializationRequested())
+//         out.requestReinitialization();
    }
 
    public void resolveControllerCoreOutputDataHolder(ControllerCoreOutPutDataHolder in, ControllerCoreOutPutDataHolder out)

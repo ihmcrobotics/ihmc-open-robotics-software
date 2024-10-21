@@ -341,7 +341,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
             return false;
          if(!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
             return false;
-         return controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder);
+         if(!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
+            return false;
+         return true;
       }
       else
       {
