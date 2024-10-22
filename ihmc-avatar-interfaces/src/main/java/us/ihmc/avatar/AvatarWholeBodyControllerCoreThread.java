@@ -161,6 +161,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                                       forceSensorDataHolderForControllerCore,
                                                                                                       null,
                                                                                                       registry);
+            // Shouldn't it be checked whether centerOfMassCalibrationTools has been added already?
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
          catch (Exception e)
@@ -188,8 +189,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                                                       lowLevelControllerOutput,
                                                                                                                       controllerCoreOutPutDataHolder,
                                                                                                                       controllerCoreCommandDataHolder,
-                                                                                                                      controllerFactory.getWholeBodyControllerCoreFactory()
-                                                                                                                                       .getWholeBodyControllerCore(),
+                                                                                                                      controllerFactory.getWholeBodyControllerCoreFactory(),
                                                                                                                       jointsToIgnore);
 
       // new try using the controllerFactory to keep the same stateMachine structure of controllerThread and use it.

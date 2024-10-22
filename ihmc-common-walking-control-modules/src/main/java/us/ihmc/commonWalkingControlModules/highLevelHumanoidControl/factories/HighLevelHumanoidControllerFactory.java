@@ -475,83 +475,83 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
-//      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-//      contactableBodiesFactory.setReferenceFrames(referenceFrames);
-//      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
-//      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
-//      contactableBodiesFactory.disposeFactory();
-//
-//      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
-//      for (RobotSide robotSide : RobotSide.values)
-//         contactablePlaneBodies.add(feet.get(robotSide));
-//      contactablePlaneBodies.addAll(additionalContacts);
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
+      contactableBodiesFactory.disposeFactory();
 
-//      double gravityZ = Math.abs(gravity);
-//      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
-//      double totalRobotWeight = totalMass * gravityZ;
-//
-//      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
-//                                                                               forceSensorDataHolder,
-//                                                                               fullRobotModel.getRootBody(),
-//                                                                               totalRobotWeight,
-//                                                                               kinematicsSimulation,
-//                                                                               yoGraphicsListRegistry,
-//                                                                               registry);
-//      SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
-//
-//      /////////////////////////////////////////////////////////////////////////////////////////////
-//      // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
-//      double omega0 = walkingControllerParameters.getOmega0();
-//      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
-//                                                                 centerOfMassStateProvider,
-//                                                                 referenceFrames,
-//                                                                 footSwitches,
-//                                                                 wristForceSensors,
-//                                                                 yoTime,
-//                                                                 gravityZ,
-//                                                                 omega0,
-//                                                                 feet,
-//                                                                 controlDT,
-//                                                                 kinematicsSimulation,
-//                                                                 updatables,
-//                                                                 contactablePlaneBodies,
-//                                                                 yoGraphicsListRegistry,
-//                                                                 jointsToIgnore);
-//      controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
-//      attachControllerFailureListeners(controllerFailureListenersToAttach);
-//      if (createQueuedControllerCommandGenerator)
-//         createQueuedControllerCommandGenerator(controllerCommands);
-//      if (createUserDesiredControllerCommandGenerator)
-//         createUserDesiredControllerCommandGenerator();
-//
-//      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
-//      if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
-//         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
-//
-//      if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
-//         controllerToolbox.setupMultiContactPostureAdjustmentProvider();
-//
-//      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
-//      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
-//      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
-//      double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-//      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
-//                                                                              defaultSwingTime,
-//                                                                              defaultInitialTransferTime,
-//                                                                              defaultFinalTransferTime,
-//                                                                              feet,
-//                                                                              statusMessageOutputManager,
-//                                                                              yoTime,
-//                                                                              yoGraphicsListRegistry,
-//                                                                              registry);
-//      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
-//
-//      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-//      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-//
-//      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
-//      FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
-//      commandInputManager.registerConversionHelper(commandConversionHelper);
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactablePlaneBodies.add(feet.get(robotSide));
+      contactablePlaneBodies.addAll(additionalContacts);
+
+      double gravityZ = Math.abs(gravity);
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalRobotWeight = totalMass * gravityZ;
+
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
+                                                                               forceSensorDataHolder,
+                                                                               fullRobotModel.getRootBody(),
+                                                                               totalRobotWeight,
+                                                                               kinematicsSimulation,
+                                                                               yoGraphicsListRegistry,
+                                                                               registry);
+      SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
+      double omega0 = walkingControllerParameters.getOmega0();
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                 centerOfMassStateProvider,
+                                                                 referenceFrames,
+                                                                 footSwitches,
+                                                                 wristForceSensors,
+                                                                 yoTime,
+                                                                 gravityZ,
+                                                                 omega0,
+                                                                 feet,
+                                                                 controlDT,
+                                                                 kinematicsSimulation,
+                                                                 updatables,
+                                                                 contactablePlaneBodies,
+                                                                 yoGraphicsListRegistry,
+                                                                 jointsToIgnore);
+      controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
+      attachControllerFailureListeners(controllerFailureListenersToAttach);
+      if (createQueuedControllerCommandGenerator)
+         createQueuedControllerCommandGenerator(controllerCommands);
+      if (createUserDesiredControllerCommandGenerator)
+         createUserDesiredControllerCommandGenerator();
+
+      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
+      if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
+         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
+
+      if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
+         controllerToolbox.setupMultiContactPostureAdjustmentProvider();
+
+      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
+      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
+      double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
+                                                                              defaultSwingTime,
+                                                                              defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime,
+                                                                              feet,
+                                                                              statusMessageOutputManager,
+                                                                              yoTime,
+                                                                              yoGraphicsListRegistry,
+                                                                              registry);
+      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
+
+      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
+      FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
+      commandInputManager.registerConversionHelper(commandConversionHelper);
 
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager,
                                                                                   statusMessageOutputManager,

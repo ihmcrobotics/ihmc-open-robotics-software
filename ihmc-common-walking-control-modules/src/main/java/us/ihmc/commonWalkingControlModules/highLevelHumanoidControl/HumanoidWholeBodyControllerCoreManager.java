@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -54,13 +55,13 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
                                                  ControllerCoreOutPutDataHolder controllerCoreOutputDataHolder,
                                                  ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
-                                                 WholeBodyControllerCore controllerCore,
+                                                 WholeBodyControllerCoreFactory controllerCoreFactory,
                                                  JointBasics... jointsToIgnore)
    {
 //      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPositionInControllerCoreThread", registry);
 //      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocityInControllerCoreThread", registry);
 //
-      this.controllerCore = controllerCore;
+      this.controllerCore = controllerCoreFactory.getOrCreateWholeBodyControllerCore();
 //
 //      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
 //      {
@@ -107,7 +108,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       controlledJoint = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
       controllerCoreCommand.setControllerCoreMode(controllerCoreCommandDataHolder.getControllerCoreMode());
-      controllerCoreCommand.set(controllerCoreCommandDataHolder);
+//      controllerCoreCommand.set(controllerCoreCommandDataHolder);
 
       //      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
@@ -140,6 +141,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    @Override
    public void doControl()
    {
+      controllerCoreCommand.set(controllerCoreCommandDataHolder);
+
       if(controllerCoreCommand.getControllerCoreMode() == null)
          controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -163,8 +166,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    {
       // TODO should replace the output of the WholeBodyControllerCore Outputs from the ControllerThread.
 
-      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutPutDataHolder.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder();
-
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
       //      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
@@ -176,5 +178,6 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       //         this.rootJointDesiredConfiguration.set(rootJointDesiredConfiguration);
       //      }
    }
+
 }
 
