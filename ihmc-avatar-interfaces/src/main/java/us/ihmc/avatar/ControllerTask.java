@@ -67,7 +67,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
-      controllerResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(controllerThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
    @Override

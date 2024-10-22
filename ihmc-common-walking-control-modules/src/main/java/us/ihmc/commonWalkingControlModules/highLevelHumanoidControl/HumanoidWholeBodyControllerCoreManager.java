@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
@@ -139,6 +140,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    @Override
    public void doControl()
    {
+      if(controllerCoreCommand.getControllerCoreMode() == null)
+         controllerCoreCommand.setControllerCoreMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       copyJointDesiredsToJoints();
