@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
@@ -35,15 +34,12 @@ import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.euclid.YoVector3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
@@ -51,8 +47,6 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.*;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
-
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class SpatialFeedbackController implements FeedbackControllerInterface
 {
@@ -791,6 +785,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj tempLinearMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempAngularMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj feedbacktermsMatrix = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
@@ -866,6 +861,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
 
+
          tempMatrix.set(inverseInertiaMatrix);
 
          CommonOps_DDRM.invert(tempMatrix);
@@ -874,15 +870,25 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
-         tempMatrix.reshape(3, 3);
-         CommonOps_DDRM.extract(tempDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
-         tempMatrix3D.set(tempMatrix);
-         tempMatrix3D.transform(linearFeedbackTermToPack);
+         feedbacktermsMatrix.set(0, 0, angularFeedbackTermToPack.getX());
+         feedbacktermsMatrix.set(1, 0, angularFeedbackTermToPack.getY());
+         feedbacktermsMatrix.set(2, 0, angularFeedbackTermToPack.getZ());
+         feedbacktermsMatrix.set(3, 0, linearFeedbackTermToPack.getX());
+         feedbacktermsMatrix.set(4, 0, linearFeedbackTermToPack.getY());
+         feedbacktermsMatrix.set(5, 0, linearFeedbackTermToPack.getZ());
+
+         tempMatrix.reshape(6,1);
+         CommonOps_DDRM.mult(tempDerivativeGainMatrix, feedbacktermsMatrix, tempMatrix);
+
+         linearFeedbackTermToPack.setX(tempMatrix.get(3, 0));
+         linearFeedbackTermToPack.setY(tempMatrix.get(4, 0));
+         linearFeedbackTermToPack.setZ(tempMatrix.get(5, 0));
+
+         angularFeedbackTermToPack.setX(tempMatrix.get(0, 0));
+         angularFeedbackTermToPack.setY(tempMatrix.get(1, 0));
+         angularFeedbackTermToPack.setZ(tempMatrix.get(2, 0));
+
          linearFeedbackTermToPack.scale(gains.getPositionGains().getDampingRatios()[0], gains.getPositionGains().getDampingRatios()[1], gains.getPositionGains().getDampingRatios()[2]);
-         
-         CommonOps_DDRM.extract(tempDerivativeGainMatrix, 0, 3,0, 3, tempMatrix, 0, 0);
-         tempMatrix3D.set(tempMatrix);
-         tempMatrix3D.transform(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(gains.getOrientationGains().getDampingRatios()[0], gains.getOrientationGains().getDampingRatios()[1], gains.getOrientationGains().getDampingRatios()[2]);
       }
       else
