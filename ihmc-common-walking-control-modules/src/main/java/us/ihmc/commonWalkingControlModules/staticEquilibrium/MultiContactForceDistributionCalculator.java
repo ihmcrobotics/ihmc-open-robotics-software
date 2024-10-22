@@ -103,6 +103,11 @@ public class MultiContactForceDistributionCalculator
       qpSolver.clear();
       qpSolver.resetActiveSet();
 
+      quadraticCost.reshape(Aeq_rho.getNumCols(), Aeq_rho.getNumCols());
+      CommonOps_DDRM.setIdentity(quadraticCost);
+
+      linearCost.reshape(Aeq_rho.getNumCols(), 1);
+
       qpSolver.setMaxNumberOfIterations(feasibilityMode ? 100 : 500);
       qpSolver.setConvergenceThreshold(feasibilityMode ? 1e-2 : 1e-9);
       qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, 0.0);
