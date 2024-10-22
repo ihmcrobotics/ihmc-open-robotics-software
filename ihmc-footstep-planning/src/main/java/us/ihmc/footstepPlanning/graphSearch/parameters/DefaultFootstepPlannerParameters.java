@@ -77,8 +77,10 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
    public static final DoubleStoredPropertyKey scaledFootPolygonPercentage = keys.addDoubleKey("Scaled foot polygon percentage");
    public static final DoubleStoredPropertyKey cliffHeightThreshold = keys.addDoubleKey("Cliff height threshold");
 
-
-   public DefaultFootstepPlannerParameters() // for tests and stuff that's probably not gonna save
+   /**
+    * These parameters are used for tests, please don't use on an actual robot, and please don't change these values without checking that all the tests pass
+    */
+   public DefaultFootstepPlannerParameters()
    {
       this(null);
    }

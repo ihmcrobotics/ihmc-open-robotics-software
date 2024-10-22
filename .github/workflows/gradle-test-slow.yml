@@ -115,3 +115,32 @@ jobs:
       subproject: 'simulation-construction-set-tools'
       test-category: 'gui-slow'
       requires-self-hosted: true
+
+  update-evergreen:
+    name: Force update on evergreen
+    runs-on: ubuntu-latest
+    needs: 
+      - atlas-allocation-slow
+      - atlas-allocation-slow-2
+      - atlas-controller-api-slow
+      - atlas-controller-api-slow-3
+      - atlas-controller-api-slow-4
+      - atlas-humanoid-behaviors-slow
+      - atlas-humanoid-flat-ground-slow-2
+      - atlas-humanoid-flat-ground-slow-3
+      - atlas-humanoid-flat-ground-slow-4
+      - atlas-humanoid-obstacle-slow
+      - atlas-humanoid-obstacle-slow-2
+      - atlas-humanoid-obstacle-slow-3
+      - atlas-humanoid-push-recovery-slow
+      - atlas-humanoid-rough-terrain-slow
+      - atlas-humanoid-stairs-slow
+      - ihmc-footstep-planning-slow
+      - ihmc-footstep-planning-slow-2
+      - ihmc-java-toolkit-gui-slow
+      - ihmc-path-planning-slow
+      - simulation-construction-set-tools-slow
+    if: always() # This ensures the job runs even if one of the dependent jobs fails
+    steps:
+      - name: Call API with curl
+        uses: ihmcrobotics/ihmc-actions/.github/actions/force-update-evergreen@main
