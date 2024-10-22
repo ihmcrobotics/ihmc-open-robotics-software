@@ -88,6 +88,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
       gains.setPositionDerivativeGains(Double.NaN);
       gains.setOrientationProportionalGains(2.0);
       gains.setOrientationDerivativeGains(Double.NaN);
+      gains.getPositionGains().setDampingRatios(1.0);
+      gains.getOrientationGains().setDampingRatios(1.0);
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(baseBody, endEffector);
       spatialFeedbackControlCommand.setGains(gains);
@@ -168,6 +170,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.getPositionGains().setProportialAndDerivativeGains(1.5, Double.NaN);
       gains.getOrientationGains().setProportialAndDerivativeGains(1.5, Double.NaN);
+      gains.getPositionGains().setDampingRatios(1);
+      gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -274,6 +278,8 @@ public final class ImpedanceSpatialFeedbackControllerTest
       DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
       gains.getPositionGains().setProportialAndDerivativeGains(1.5, Double.NaN);
       gains.getOrientationGains().setProportialAndDerivativeGains(1.5, Double.NaN);
+      gains.getPositionGains().setDampingRatios(1);
+      gains.getOrientationGains().setDampingRatios(1);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));

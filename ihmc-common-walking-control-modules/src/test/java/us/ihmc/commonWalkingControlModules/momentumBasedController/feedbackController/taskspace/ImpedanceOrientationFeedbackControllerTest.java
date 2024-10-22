@@ -95,6 +95,7 @@ public class ImpedanceOrientationFeedbackControllerTest
          orientationGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          orientationGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          orientationGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         orientationGains.setDampingRatios(1.0);
          orientationFeedbackControlCommand.setGains(orientationGains);
          spatialFeedbackControlCommand.setOrientationGains(orientationGains);
 

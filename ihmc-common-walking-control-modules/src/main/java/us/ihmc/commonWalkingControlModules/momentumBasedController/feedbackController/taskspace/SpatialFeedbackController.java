@@ -167,8 +167,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    YoFrameVector3D yoPositionFeedback;
    YoFrameVector3D yoOrientationFeedback;
-   YoFrameVector3D yoLinearAcceleration;
-   YoFrameVector3D yoAngularAcceleration;
 
    public SpatialFeedbackController(RigidBodyBasics endEffector,
                                     WholeBodyControlCoreToolbox ccToolbox,
@@ -225,8 +223,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", worldFrame, parentRegistry);
       yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", worldFrame, parentRegistry);
-      yoLinearAcceleration = new YoFrameVector3D(endEffector.getName() + "positionAcceleration", worldFrame, parentRegistry);
-      yoAngularAcceleration = new YoFrameVector3D(endEffector.getName() + "orientationAcceleration", worldFrame, parentRegistry);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled, true);
@@ -570,13 +566,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredAcceleration.setCommandId(currentCommandId);
 
       addCoriolisAcceleration(desiredLinearAcceleration);
-
-      desiredLinearAcceleration.changeFrame(worldFrame);
-      desiredAngularAcceleration.changeFrame(worldFrame);
-      yoLinearAcceleration.set(desiredLinearAcceleration);
-      yoAngularAcceleration.set(desiredAngularAcceleration);
-      desiredLinearAcceleration.changeFrame(controlFrame);
-      desiredAngularAcceleration.changeFrame(controlFrame);
 
       inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
    }

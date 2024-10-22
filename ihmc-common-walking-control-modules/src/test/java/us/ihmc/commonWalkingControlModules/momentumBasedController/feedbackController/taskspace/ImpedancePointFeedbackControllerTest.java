@@ -87,6 +87,7 @@ public final class ImpedancePointFeedbackControllerTest
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
+      gains.setDampingRatios(1.0);
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(baseBody, endEffector);
       pointFeedbackControlCommand.setGains(gains);
@@ -168,6 +169,7 @@ public final class ImpedancePointFeedbackControllerTest
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
+      gains.setDampingRatios(1.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -257,6 +259,7 @@ public final class ImpedancePointFeedbackControllerTest
       PID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(5.0);
       gains.setDerivativeGains(Double.NaN);
+      gains.setDampingRatios(1.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -394,6 +397,7 @@ public final class ImpedancePointFeedbackControllerTest
          positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         positionGains.setDampingRatios(1.0);
          pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 

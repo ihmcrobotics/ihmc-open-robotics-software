@@ -78,6 +78,12 @@ public class ReferenceSpreadingTrajectory
    {
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
       se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+//      se3TrajectoryMessage.getLinearWeightMatrix().setXWeight(1.0);
+//      se3TrajectoryMessage.getLinearWeightMatrix().setYWeight(1.0);
+//      se3TrajectoryMessage.getLinearWeightMatrix().setZWeight(1.0);
+//      se3TrajectoryMessage.getAngularWeightMatrix().setXWeight(1.0);
+//      se3TrajectoryMessage.getAngularWeightMatrix().setYWeight(1.0);
+//      se3TrajectoryMessage.getAngularWeightMatrix().setZWeight(1.0);
       SE3TrajectoryPointMessage se3TrajectoryPointMessage;
 
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
@@ -91,6 +97,7 @@ public class ReferenceSpreadingTrajectory
       {
          jointspaceTrajectoryMessage.getJointTrajectoryMessages().add().set(new OneDoFJointTrajectoryMessage());
          jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(JOINT_NAMES.indexOf(jointName)).setSequenceId(JOINT_NAMES.indexOf(jointName));
+//         jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(JOINT_NAMES.indexOf(jointName)).setWeight(0.01);
       }
 
       Point3D desiredPosition = new Point3D();
@@ -197,7 +204,8 @@ public class ReferenceSpreadingTrajectory
       handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
       handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-      handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
+//      handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
+
       if (!pidGainsTrajectoryMessage.getPidGainsTrajectoryPoints().isEmpty())
          handHybridTrajectoryMessage.getTaskspacePidGainsTrajectoryMessage().set(pidGainsTrajectoryMessage);
       return handHybridTrajectoryMessage;
