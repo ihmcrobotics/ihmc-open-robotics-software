@@ -1,7 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +26,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTestInterface
 {

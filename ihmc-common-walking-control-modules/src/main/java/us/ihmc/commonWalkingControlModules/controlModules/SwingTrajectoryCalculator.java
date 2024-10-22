@@ -492,14 +492,25 @@ public class SwingTrajectoryCalculator
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
          double remainingPitch = swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike() - initialOrientation.getPitch();
+         // if the foot is already pitched down sufficiently at the initial orientation, we don't need to add a midpoint, as it will maintain the desired pitch
+         // the whole time.
          if (remainingPitch > 0.0)
          {
             // compute the linear velocity to go from A to B, and then zero out the pitch velocity.
             tmpOrientation.difference(initialOrientation, finalOrientation);
             tmpOrientation.getRotationVector(tmpVector);
             tmpVector.scale(1.0 / swingDuration.getDoubleValue());
+
+            // add a lifting waypoint that has a smooth yaw, roll, and pitch, so that the foot doesn't aggressively start to pitch down in the initial phase
+            // of swing. This is useful to keep from stubbing the toe when trying to clear ground when the foot is initially pitched up.
+            double initialLiftFraction = swingTrajectoryParameters.getFractionOfSwingToPitchFootNormal();
+            tmpOrientation.interpolate(initialOrientation, finalOrientation, initialLiftFraction);
+            swingTrajectory.appendOrientationWaypoint(initialLiftFraction * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
+
+            // now zero the final pitch velocity out, because we want it to be stationary when the foot is pitched down.
             tmpVector.setY(0.0);
 
+            // interpolate so that the pitch at the fraction is the final pitch, but the yaw and roll are not.
             tmpOrientation.interpolate(initialOrientation, finalOrientation, swingTrajectoryParameters.getFractionOfSwingToPitchFootDown());
             tmpOrientation.setYawPitchRoll(tmpOrientation.getYaw(), swingTrajectoryParameters.getFootPitchAngleToAvoidHeelStrike(), tmpOrientation.getRoll());
 

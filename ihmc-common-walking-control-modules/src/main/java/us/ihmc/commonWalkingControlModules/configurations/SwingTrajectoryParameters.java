@@ -244,11 +244,20 @@ public abstract class SwingTrajectoryParameters
 
    /**
     * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()} is true, this specifies the fraction
+    * through swing to add a normal waypoint before adding a foot pitch waypoint, so that the toes can clear any obstacles
+    */
+   public double getFractionOfSwingToPitchFootNormal()
+   {
+      return Math.min(0.2, getFractionOfSwingToPitchFootDown() - 0.1);
+   }
+
+   /**
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()} is true, this specifies the fraction
     * through swing to add the additional foot pitch waypoint
     */
    public double getFractionOfSwingToPitchFootDown()
    {
-      return 0.4;
+      return 0.6;
    }
 
    /**

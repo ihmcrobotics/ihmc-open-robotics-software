@@ -175,6 +175,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       walkOverSlantedCinderBlockField(cinderBlockFieldEnvironment, footsteps);
    }
 
+   @Test
    public void testEastHillMountain()
    {
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
