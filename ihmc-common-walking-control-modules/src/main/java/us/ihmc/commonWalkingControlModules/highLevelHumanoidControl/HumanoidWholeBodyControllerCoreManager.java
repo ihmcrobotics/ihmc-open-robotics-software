@@ -139,8 +139,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    @Override
    public void doControl()
    {
-//      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute(controllerCoreCommand);
+      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute();
       copyJointDesiredsToJoints();
    }
 

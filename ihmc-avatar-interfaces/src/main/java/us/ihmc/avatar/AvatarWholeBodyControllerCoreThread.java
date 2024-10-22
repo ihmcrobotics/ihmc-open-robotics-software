@@ -278,7 +278,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       {
          throw new RuntimeException(e);
       }
-      //      wholeBodyControllerCoreThreadTimer.stopMeasurement();
+//            wholeBodyControllerCoreThreadTimer.stopMeasurement();
    }
 
    @Override

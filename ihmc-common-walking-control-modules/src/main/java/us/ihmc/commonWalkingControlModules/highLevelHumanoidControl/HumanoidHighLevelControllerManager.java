@@ -346,6 +346,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    }
    private void reportControllerCoreCommandDataForWholeBodyControllerCore()
    {
+      controllerCoreCommandDataHolder.setControllerCoreMode(stateMachine.getCurrentState().getControllerCoreCommandData().getControllerCoreMode());
       controllerCoreCommandDataHolder.setControllerCoreCommandDataHolder(stateMachine.getCurrentState().getControllerCoreCommandData());
    }
 
