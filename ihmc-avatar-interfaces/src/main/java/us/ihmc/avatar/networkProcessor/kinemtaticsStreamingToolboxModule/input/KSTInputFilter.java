@@ -108,7 +108,7 @@ public class KSTInputFilter
    {
       if (enableBBXFilter.getValue() && !boundingBox.isPointInside(input.getDesiredPose().getPosition()))
       {
-         LogTools.warn("Invalid rigid body input. Input outside bounding box");
+         LogTools.warn("Invalid rigid body input -  {}. Input outside bounding box", input.getEndEffector().getName());
          return false;
       }
 
