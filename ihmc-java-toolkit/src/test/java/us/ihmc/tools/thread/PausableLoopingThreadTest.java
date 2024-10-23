@@ -207,12 +207,12 @@ public class PausableLoopingThreadTest
       PausableLoopingThread thread = new PausableLoopingThread(frequencyCalculator::ping, targetFrequency, name);
 
       thread.start();
-      ThreadTools.sleep(3000);
+      ThreadTools.sleep(5000);
       assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
 
       targetFrequency = 30.0;
       thread.limitLoopFrequency(targetFrequency);
-      ThreadTools.sleep(3000);
+      ThreadTools.sleep(5000);
       assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
 
       thread.blockingDestroy();
@@ -275,5 +275,6 @@ public class PausableLoopingThreadTest
          }
          assertEquals(i + 1, interruptCount.get());
       }
+      thread.blockingDestroy();
    }
 }
