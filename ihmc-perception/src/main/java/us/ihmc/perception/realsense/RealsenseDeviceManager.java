@@ -27,7 +27,7 @@ public class RealsenseDeviceManager
    private final YoDouble numberOfDevices = new YoDouble("numberOfDevices", registry);
 
    private final rs2_context context;
-   private final rs2_device_list devices;
+   private rs2_device_list devices;
    private final rs2_error error = new rs2_error();
 
    public RealsenseDeviceManager()
@@ -43,9 +43,6 @@ public class RealsenseDeviceManager
       checkError();
 
       context = realsense2.rs2_create_context(realsense2.RS2_API_VERSION, error);
-      checkError();
-
-      devices = realsense2.rs2_query_devices(context, error);
       checkError();
 
       updateDeviceCount();
@@ -139,6 +136,10 @@ public class RealsenseDeviceManager
 
    private int updateDeviceCount()
    {
+      realsense2.rs2_delete_device_list(devices);
+      devices = realsense2.rs2_query_devices(context, error);
+      checkError();
+
       int rs2DeviceCount = realsense2.rs2_get_device_count(devices, error);
       checkError();
 
