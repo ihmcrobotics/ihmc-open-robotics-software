@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.EnumMap;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
@@ -15,6 +14,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.EnumMap;
 
 public class HighLevelControllerFactoryHelper
 {
@@ -29,6 +30,7 @@ public class HighLevelControllerFactoryHelper
    private JointDesiredOutputListBasics lowLevelControllerOutput;
    private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
+   private ControllerCoreOutputDataHolder controllerCoreOutputDataHolder;
 
    public void setLowLevelControllerOutput(JointDesiredOutputListBasics lowLevelControllerOutput)
    {
@@ -49,7 +51,7 @@ public class HighLevelControllerFactoryHelper
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-}
+   }
 
    public void setHighLevelControlManagerFactory(HighLevelControlManagerFactory managerFactory)
    {
@@ -79,6 +81,11 @@ public class HighLevelControllerFactoryHelper
    public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolder)
    {
       this.forceSensorDataHolder = forceSensorDataHolder;
+   }
+
+   public void setControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder controllerCoreOutputDataHolder)
+   {
+      this.controllerCoreOutputDataHolder = controllerCoreOutputDataHolder;
    }
 
    public EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> getControllerFactories()
@@ -135,4 +142,6 @@ public class HighLevelControllerFactoryHelper
    {
       return forceSensorDataHolder;
    }
+
+   public ControllerCoreOutputDataHolder getControllerCoreOutputDataHolder() {return controllerCoreOutputDataHolder;}
 }

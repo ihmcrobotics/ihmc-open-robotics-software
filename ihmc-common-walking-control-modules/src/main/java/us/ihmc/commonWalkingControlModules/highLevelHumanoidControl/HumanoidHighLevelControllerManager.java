@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -69,7 +69,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
-   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
+   private final ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder;
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
    private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
@@ -104,7 +104,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                              JointDesiredOutputListBasics lowLevelControllerOutput,
-                                             ControllerCoreOutPutDataHolder controllercoreOutputDataHolder,
+                                             ControllerCoreOutputDataHolder controllercoreOutputDataHolder,
                                              ControllerCoreCommandDataHolder controllerCoreCommandDataHolder)
    {
       this.commandInputManager = commandInputManager;
@@ -127,6 +127,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
+      controllerFactoryHelper.setControllerCoreOutputDataHolder(controllercoreOutputDataHolder);
 
       stateMachine = setUpStateMachine(initialControllerState,
                                        controllerStateFactories,
@@ -242,7 +243,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
       reportRobotDesiredConfigurationData();
-      reportControllerCoreOutputDataForWholeBodyControllerCore();
+//      reportControllerCoreOutputDataForWholeBodyControllerCore();
       reportControllerCoreCommandDataForWholeBodyControllerCore();
 
       if (inertialParameterManager != null)

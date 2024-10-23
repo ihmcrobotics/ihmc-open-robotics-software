@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
@@ -111,7 +111,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
    private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
-   private final OptionalFactoryField<ControllerCoreOutPutDataHolder> controllerCoreOutputDataHolderField = new OptionalFactoryField<>("wholeBodyControllerCoreDataHolder");
+   private final OptionalFactoryField<ControllerCoreOutputDataHolder> controllerCoreOutputDataHolderField = new OptionalFactoryField<>("wholeBodyControllerCoreDataHolder");
    private final OptionalFactoryField<ControllerCoreCommandDataHolder> controllerCoreCommandDataHolderField = new OptionalFactoryField<>("controllerCoreCommandDataHolder");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
 
@@ -608,10 +608,10 @@ public class AvatarEstimatorThreadFactory
          wbccDesiredJointDataHolderField.set(new LowLevelOneDoFJointDesiredDataHolder(getControllableOneDoFJoints()));
       return wbccDesiredJointDataHolderField.get();
    }
-   public ControllerCoreOutPutDataHolder getControllerCoreOutPutDataHolder()
+   public ControllerCoreOutputDataHolder getControllerCoreOutPutDataHolder()
    {
       if(!controllerCoreOutputDataHolderField.hasValue())
-         controllerCoreOutputDataHolderField.set(new ControllerCoreOutPutDataHolder(getControllableOneDoFJoints()));
+         controllerCoreOutputDataHolderField.set(new ControllerCoreOutputDataHolder(getControllableOneDoFJoints()));
       return controllerCoreOutputDataHolderField.get();
    }
    public ControllerCoreCommandDataHolder getControllerCoreCommandDataHolder()

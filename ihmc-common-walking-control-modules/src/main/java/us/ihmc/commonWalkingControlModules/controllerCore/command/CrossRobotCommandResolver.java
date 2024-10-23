@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -108,7 +108,7 @@ public class CrossRobotCommandResolver
 //         out.requestReinitialization();
    }
 
-   public void resolveControllerCoreOutputDataHolder(ControllerCoreOutPutDataHolder in, ControllerCoreOutPutDataHolder out)
+   public void resolveControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder in, ControllerCoreOutputDataHolder out)
    {
       resolveFrameVector3D(in.getLinearMomentum(), out.getLinearMomentum());
       resolveFrameVector3D(in.getAngularMomentum(), out.getAngularMomentum());

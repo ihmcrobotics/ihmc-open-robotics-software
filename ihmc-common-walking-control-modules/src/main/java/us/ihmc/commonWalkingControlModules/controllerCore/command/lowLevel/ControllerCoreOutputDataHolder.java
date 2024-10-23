@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
-public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadOnly
+public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadOnly
 {
    private boolean hasCenterOfPressure = false;
    private final CenterOfPressureDataHolder centerOfPressureDataHolder = new CenterOfPressureDataHolder();
@@ -42,7 +42,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
    private boolean hasJointDesiredOutputList = false;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   public ControllerCoreOutPutDataHolder(OneDoFJointBasics[] controlledOneDoFJoints)
+   public ControllerCoreOutputDataHolder(OneDoFJointBasics[] controlledOneDoFJoints)
    {
       jointDesiredOutputList = new JointDesiredOutputList(controlledOneDoFJoints);
       clear();
@@ -206,7 +206,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       return lowLevelOneDoFJointControllerCoreOutputDataHolder;
    }
 
-   public void set(ControllerCoreOutPutDataHolder other)
+   public void set(ControllerCoreOutputDataHolder other)
    {
       if (this.lowLevelOneDoFJointControllerCoreOutputDataHolder == null)
          throw new RuntimeException("You used the deprecated constructor set is not supported in that case. ");
@@ -242,7 +242,7 @@ public class ControllerCoreOutPutDataHolder implements ControllerCoreOutputReadO
       {
          return true;
       }
-      else if (obj instanceof ControllerCoreOutPutDataHolder other)
+      else if (obj instanceof ControllerCoreOutputDataHolder other)
       {
          if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
             return false;

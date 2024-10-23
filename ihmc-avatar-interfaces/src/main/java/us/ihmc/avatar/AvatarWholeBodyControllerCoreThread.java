@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -80,7 +80,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
-      ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
+      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerCoreFullRobotModel.getControllableOneDoFJoints());
       ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForWholeBodyControllerCore);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForWholeBodyControllerCore);
@@ -146,7 +146,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                           HumanoidRobotSensorInformation sensorInformation,
                                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                                          ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
+                                                                          ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
                                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                                           YoRegistry registry,
                                                                           boolean kinematicsSimulation,
@@ -185,7 +185,6 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarControllerThre
                                                                                                                       yoTime,
                                                                                                                       forceSensorDataHolderForControllerCore,
                                                                                                                       centerOfMassDataHolderForControllerCore,
-                                                                                                                      wholeBodyControllerCoreOutput,
                                                                                                                       lowLevelControllerOutput,
                                                                                                                       controllerCoreOutPutDataHolder,
                                                                                                                       controllerCoreCommandDataHolder,

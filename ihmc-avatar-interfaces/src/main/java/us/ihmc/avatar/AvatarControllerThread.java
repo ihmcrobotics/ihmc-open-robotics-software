@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
@@ -116,7 +116,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
-      ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
@@ -239,7 +239,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
-                                                            ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder,
+                                                            ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
                                                             ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,

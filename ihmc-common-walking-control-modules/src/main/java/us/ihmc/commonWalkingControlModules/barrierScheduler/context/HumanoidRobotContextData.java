@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutPutDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -85,7 +85,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    /**
     * The output of the wholebodyControllerCore. Set by the wholebodyControllerCore thread.
     */
-   private final ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder;
+   private final ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder;
 
    /**
     * The desired joint data to be set on the robot. Set by the controller.
@@ -108,7 +108,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
       sensorDataContext = new SensorDataContext();
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder();
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(null);
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(null);
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
@@ -121,7 +121,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
                                    SensorDataContext sensorDataContext,
                                    LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredOutputList,
                                    ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
-                                   ControllerCoreOutPutDataHolder controllerCoreOutPutDataHolder)
+                                   ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
@@ -145,7 +145,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(fullRobotModel.getControllableOneDoFJoints());
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
@@ -159,7 +159,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       sensorDataContext = new SensorDataContext(joints);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
-      controllerCoreOutPutDataHolder = new ControllerCoreOutPutDataHolder(joints.toArray(new OneDoFJointBasics[0]));
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
@@ -198,7 +198,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       return wholeBodyControllerCoreDesiredOutPutList;
    }
 
-   public ControllerCoreOutPutDataHolder getControllerCoreOutPutDataHolder()
+   public ControllerCoreOutputDataHolder getControllerCoreOutPutDataHolder()
    {
       return controllerCoreOutPutDataHolder;
    }

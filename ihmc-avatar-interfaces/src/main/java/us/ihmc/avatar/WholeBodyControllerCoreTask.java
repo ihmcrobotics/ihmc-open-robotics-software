@@ -67,6 +67,7 @@ public class WholeBodyControllerCoreTask extends HumanoidRobotControlTask
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
+
 //      masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
    }
 

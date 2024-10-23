@@ -161,6 +161,8 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCore.compute(controllerCoreCommand);
       controllerCoreTimer.stopMeasurement();
 
+      //  Is this just for  YoGraphic?
+      // The input as "controllerCore.getControllerCoreOutput" should be replaced with controllerCoreOutputDataHolder
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.computeAchievedCMP();
    }
