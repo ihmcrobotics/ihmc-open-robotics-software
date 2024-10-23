@@ -77,6 +77,9 @@ public class ZEDImageSensor extends ImageSensor
    {
       try
       {
+         if (sl_is_opened(cameraID))
+            sl_close_camera(cameraID);
+
          sl_create_camera(cameraID);
 
          // Set the initialization parameters
