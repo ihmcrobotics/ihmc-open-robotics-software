@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -30,7 +31,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -72,7 +72,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -109,7 +109,7 @@ public class PolygonWigglingTest
 
    private void checkThatWiggledInsideBestEffort(ConvexPolygon2D plane, double minDelta, ConvexPolygon2D foot)
    {
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
 
       for (int i = 0; i < foot.getNumberOfVertices(); i++)
       {
@@ -148,7 +148,7 @@ public class PolygonWigglingTest
       }
 
       checkThatWiggledInsideJustTheRightAmount(plane, wiggleParameters, foot);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
 
    }
 
@@ -226,7 +226,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -257,7 +257,7 @@ public class PolygonWigglingTest
          parameters.minYaw = -5.0;
          parameters.maxYaw = 5.0;
          ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
-         assertTrue(ConvexPolygon2dCalculator.isPolygonInside(plane, 1.0e-5, foot));
+         assertTrue(EuclidGeometryMissingTools.isPolygonInside(plane, 1.0e-5, foot));
 
          if (visualize)
          {
@@ -298,7 +298,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -371,7 +371,7 @@ public class PolygonWigglingTest
       assertTrue(footCentroid.getX() - initialFootCentroid.getX() >= parameters.minX);
       assertTrue(footCentroid.getY() - initialFootCentroid.getY() <= parameters.maxY);
       assertTrue(footCentroid.getY() - initialFootCentroid.getY() >= parameters.minY);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -406,7 +406,7 @@ public class PolygonWigglingTest
       assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() >= parameters.minX);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() <= parameters.maxY);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() >= parameters.minY);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -441,7 +441,7 @@ public class PolygonWigglingTest
       assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() >= parameters.minX);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() <= parameters.maxY);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() >= parameters.minY);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -476,7 +476,7 @@ public class PolygonWigglingTest
       assertTrue(foot.getCentroid().getX() - initialFoot.getCentroid().getX() >= parameters.minX);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() <= parameters.maxY);
       assertTrue(foot.getCentroid().getY() - initialFoot.getCentroid().getY() >= parameters.minY);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @Test
@@ -513,7 +513,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
 
       // expected:
       ArrayList<Point2D> expected = new ArrayList<>();
@@ -570,8 +570,8 @@ public class PolygonWigglingTest
          initialFoot.applyTransform(initialFootTransform, false);
 
          ConvexPolygon2D foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
-         assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
-         if (ConvexPolygon2dCalculator.isPolygonInside(initialFoot, 1.0e-5, plane))
+         assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane));
+         if (EuclidGeometryMissingTools.isPolygonInside(initialFoot, 1.0e-5, plane))
             assertTrue(initialFoot.epsilonEquals(foot, 1.0e-5));
 
          if (visualize)
@@ -637,7 +637,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane2));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane2));
    }
 
    @Test
@@ -683,7 +683,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane1));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, plane1));
    }
 
    @Test
@@ -815,7 +815,7 @@ public class PolygonWigglingTest
       }
 
       ConvexPolygon2D hullOfRegion = new ConvexPolygon2D(plane1, plane2);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, hullOfRegion));
+      assertTrue(EuclidGeometryMissingTools.isPolygonInside(foot, 1.0e-5, hullOfRegion));
    }
 
    @Test

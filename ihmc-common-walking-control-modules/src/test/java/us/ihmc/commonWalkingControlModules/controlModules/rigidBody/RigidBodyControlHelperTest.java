@@ -4,8 +4,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class RigidBodyControlHelperTest
 {
@@ -44,7 +42,7 @@ public class RigidBodyControlHelperTest
          ReferenceFrame c2_d = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("c2_d", c1_d, c2c1);
 
          // Assert that with no tracking error c2_d will match c2.
-         c1_d.setPoseAndUpdate(c1.getTransformToDesiredFrame(c1_d.getParent()));
+         c1_d.setTransformAndUpdate(c1.getTransformToDesiredFrame(c1_d.getParent()));
          EuclidCoreTestTools.assertEquals(c1.getTransformToWorldFrame(), c1_d.getTransformToWorldFrame(), epsilon);
          EuclidCoreTestTools.assertEquals(c2.getTransformToWorldFrame(), c2_d.getTransformToWorldFrame(), epsilon);
 

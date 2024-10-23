@@ -2,10 +2,9 @@ package us.ihmc.simulationConstructionSetTools.gui;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.Conversions;
-import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
+import us.ihmc.math.linearDynamicSystems.TransferFunction;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 import us.ihmc.simulationconstructionset.gui.HumanAssistedTestFrame;

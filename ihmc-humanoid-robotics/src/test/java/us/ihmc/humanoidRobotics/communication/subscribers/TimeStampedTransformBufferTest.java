@@ -1,19 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TimeStampedTransformBufferTest
 {
@@ -122,8 +120,6 @@ public class TimeStampedTransformBufferTest
       TimeStampedTransform3D toTest = new TimeStampedTransform3D();
       TimeStampedTransform3D expected = new TimeStampedTransform3D();
 
-      TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
-
       ArrayList<TimeStampedTransform3D> pelvisPosesRegistered = new ArrayList<>(bufferSize);
       long timeStamp = 0L;
       long expectedNewestTimeStamp = 0L;
@@ -151,7 +147,7 @@ public class TimeStampedTransformBufferTest
 
          for (long currentTimeStamp = previous.getTimeStamp(); currentTimeStamp <= next.getTimeStamp(); currentTimeStamp++)
          {
-            transformInterpolationCalculator.interpolate(previous, next, expected, currentTimeStamp);
+            TransformInterpolationCalculator.interpolate(previous, next, expected, currentTimeStamp);
             timeStampedPelvisPoseBuffer.findTransform(currentTimeStamp, toTest);
 
             assertTrue(expected.epsilonEquals(toTest, 1.0e-10));
@@ -168,8 +164,6 @@ public class TimeStampedTransformBufferTest
       TimeStampedTransformBuffer timeStampedPelvisPoseBuffer = new TimeStampedTransformBuffer(bufferSize);
       TimeStampedTransform3D toTest = new TimeStampedTransform3D();
       TimeStampedTransform3D expected = new TimeStampedTransform3D();
-
-      TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
 
       ArrayList<TimeStampedTransform3D> pelvisPosesRegistered = new ArrayList<>(bufferSize);
       long timeStamp = 0L;
@@ -206,7 +200,7 @@ public class TimeStampedTransformBufferTest
 
             for (long currentTimeStamp = previous.getTimeStamp(); currentTimeStamp <= next.getTimeStamp(); currentTimeStamp++)
             {
-               transformInterpolationCalculator.interpolate(previous, next, expected, currentTimeStamp);
+               TransformInterpolationCalculator.interpolate(previous, next, expected, currentTimeStamp);
                timeStampedPelvisPoseBuffer.findTransform(currentTimeStamp, toTest);
 
                assertTrue(expected.epsilonEquals(toTest, 1.0e-10));

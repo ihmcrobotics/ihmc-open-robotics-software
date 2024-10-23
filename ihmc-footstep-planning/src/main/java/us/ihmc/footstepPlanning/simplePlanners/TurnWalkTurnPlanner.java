@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.robotics.HeadingAngleTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,9 +14,9 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.euclid.referenceFrame.Pose2DReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +32,9 @@ public class TurnWalkTurnPlanner
    private final FramePose2D goalPose = new FramePose2D();
    private RobotSide initialStanceSide;
    private RobotSide lastStepSide;
-   private final Pose2dReferenceFrame robotStartFrame = new Pose2dReferenceFrame("RobotStartFrame", ReferenceFrame.getWorldFrame());
-   private final Pose2dReferenceFrame planStanceFootFrame = new Pose2dReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
-   private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame robotStartFrame = new Pose2DReferenceFrame("RobotStartFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame planStanceFootFrame = new Pose2DReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2DReferenceFrame turningFrame = new Pose2DReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
    private double groundHeight = 0.0;
 
    private final DefaultFootstepPlannerParametersReadOnly parameters;
@@ -102,7 +103,7 @@ public class TurnWalkTurnPlanner
       if (isGoalOutOfReach())
       {
          // turn
-         double headingTurnAngle = AngleTools.calculateHeading(robotStartPose, goalPoint, -robotStartPose.getYaw(), 0.0);
+         double headingTurnAngle = HeadingAngleTools.calculateHeading(robotStartPose, goalPoint, -robotStartPose.getYaw(), 0.0);
          double minTurn = AngleTools.computeAngleDifferenceMinusPiToPi(initialStanceFootPose.getYaw(), goalPose.getYaw());
          boolean walkingBackwards = Math.abs(headingTurnAngle) > Math.PI / 2.0 && Math.abs(minTurn) < Math.PI / 2.0;
          if (walkingBackwards)

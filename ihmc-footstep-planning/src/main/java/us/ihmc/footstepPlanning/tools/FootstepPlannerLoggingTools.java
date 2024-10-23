@@ -10,8 +10,8 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class FootstepPlannerLoggingTools
 {

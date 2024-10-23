@@ -36,11 +36,10 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.utilities.ros.RosMainNode;
 
 import java.nio.FloatBuffer;
@@ -231,7 +230,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
                footstepPlannerRequest.getStartFootPoses().put(RobotSide.RIGHT, new Pose3D(startFramePose));
                goalFramePose.setToZero(goalPoseGizmo.getPoseGizmo().getGizmoFrame());
                goalFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               LogTools.info(StringTools.tupleString(goalFramePose.getPosition()));
+               LogTools.info(goalFramePose.getPosition().toString());
                LogTools.info("Yaw: {}", goalFramePose.getOrientation().getYaw());
                goalFramePose.setToZero(goalPoseGizmo.getPoseGizmo().getGizmoFrame());
                goalFramePose.getPosition().setY(0.2);

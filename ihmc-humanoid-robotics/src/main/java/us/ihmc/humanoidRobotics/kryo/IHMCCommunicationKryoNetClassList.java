@@ -186,7 +186,7 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import visualization_msgs.msg.dds.ImageMarkerPubSubType;

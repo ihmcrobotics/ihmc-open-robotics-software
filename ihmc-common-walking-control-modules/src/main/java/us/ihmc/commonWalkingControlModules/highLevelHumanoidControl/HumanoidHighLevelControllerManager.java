@@ -26,27 +26,28 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachine.core.StateChangedListener;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransition;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.commons.stateMachine.core.StateChangedListener;
+import us.ihmc.commons.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.core.StateTransition;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListBasics;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.DesiredOutputMessaging;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -358,13 +359,13 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
          return;
       jointDesiredOutputBroadcastCounter = 0;
 
-      lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
+      DesiredOutputMessaging.copyToMessage(lowLevelControllerOutput, robotDesiredConfigurationData);
 
       HighLevelControllerState currentState = stateMachine.getCurrentState();
       if (currentState == null || currentState.getOutputForRootJoint() == null)
          return;
 
-      currentState.getOutputForRootJoint().copyToMessage(robotDesiredConfigurationData);
+      DesiredOutputMessaging.copyToMessage(currentState.getOutputForRootJoint(), robotDesiredConfigurationData);
 
       robotDesiredConfigurationData.setWallTime(System.nanoTime());
       // TODO use or remove joint name hash

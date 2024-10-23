@@ -21,6 +21,7 @@ mainDependencies {
    api("org.lz4:lz4-java:1.8.0")
 
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:ihmc-whole-body-control-core:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

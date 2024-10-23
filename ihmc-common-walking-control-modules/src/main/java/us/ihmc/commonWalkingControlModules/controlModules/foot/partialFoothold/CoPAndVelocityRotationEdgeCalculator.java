@@ -8,9 +8,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -21,7 +21,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 {
    private final RotationEdgeCalculator velocityEdgeCalculator;
 
-   private final AlphaFilteredYoFramePoint2d pointOfRotation;
+   private final AlphaFilteredYoFramePoint2D pointOfRotation;
    private final YoFrameVector2D axisOfRotation;
    private final FixedFrameLine2DBasics lineOfRotationInSole;
 
@@ -100,7 +100,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copHistoryBreakFrequency.getValue(), dt);
-      pointOfRotation = new AlphaFilteredYoFramePoint2d(namePrefix + "PointOfRotation", "", registry, alpha, soleFrame);
+      pointOfRotation = new AlphaFilteredYoFramePoint2D(namePrefix + "PointOfRotation", "", registry, alpha, soleFrame);
       axisOfRotation = new YoFrameVector2D(namePrefix + "AxisOfRotation", soleFrame, registry);
 
       lineOfRotationInSole = new YoFrameLine2D(pointOfRotation, axisOfRotation);

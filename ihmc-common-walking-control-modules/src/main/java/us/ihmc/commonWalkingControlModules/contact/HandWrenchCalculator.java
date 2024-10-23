@@ -11,11 +11,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;

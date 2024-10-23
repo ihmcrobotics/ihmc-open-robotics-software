@@ -23,10 +23,10 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Configuration;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -68,8 +68,8 @@ public class CentroidProjectionToeOffCalculatorTest
          contactableFeet.put(robotSide, contactableFoot);
 
          RigidBodyBasics foot = contactableFoot.getRigidBody();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
+         ReferenceFrame soleFrame = contactableFoot.getContactFrame();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2D();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
          yoPlaneContactState.setFullyConstrained();
@@ -105,7 +105,7 @@ public class CentroidProjectionToeOffCalculatorTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
       FramePoint3D exitCMP = new FramePoint3D();
-      exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
+      exitCMP.setToZero(contactableFeet.get(trailingSide).getContactFrame());
       exitCMP.setX(0.05);
 
       toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
@@ -122,8 +122,8 @@ public class CentroidProjectionToeOffCalculatorTest
       FramePoint3D exitCMP = new FramePoint3D();
       FramePoint2D desiredCMP = new FramePoint2D();
 
-      exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
-      desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
+      exitCMP.setToZero(contactableFeet.get(trailingSide).getContactFrame());
+      desiredCMP.setToZero(contactableFeet.get(trailingSide).getContactFrame());
 
       exitCMP.setX(0.05);
       desiredCMP.setX(0.05);
@@ -142,9 +142,9 @@ public class CentroidProjectionToeOffCalculatorTest
       FramePoint2D desiredCMP = new FramePoint2D();
       FramePoint2D toeOffPoint = new FramePoint2D();
 
-      exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
-      desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
-      toeOffPoint.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
+      exitCMP.setToZero(contactableFeet.get(trailingSide).getContactFrame());
+      desiredCMP.setToZero(contactableFeet.get(trailingSide).getContactFrame());
+      toeOffPoint.setToZero(contactableFeet.get(trailingSide).getContactFrame());
 
       exitCMP.setX(0.05);
       desiredCMP.setX(0.05);

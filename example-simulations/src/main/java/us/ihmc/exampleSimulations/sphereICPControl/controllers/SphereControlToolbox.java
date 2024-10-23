@@ -28,12 +28,11 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -64,7 +63,7 @@ public class SphereControlToolbox
    private final YoFramePoint3D desiredCMP = new YoFramePoint3D("desiredCMP", worldFrame, registry);
 
    private final YoFramePoint3D icp = new YoFramePoint3D("icp", worldFrame, registry);
-   private final FilteredVelocityYoFrameVector icpVelocity;
+   private final FilteredFiniteDifferenceYoFrameVector3D icpVelocity;
    private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
 
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
@@ -83,7 +82,6 @@ public class SphereControlToolbox
    private final RigidBodyBasics elevator;
    private final FullRobotModel fullRobotModel;
 
-   private final TwistCalculator twistCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
 
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
@@ -139,7 +137,7 @@ public class SphereControlToolbox
       setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       capturePointVelocityAlpha.set(0.5);
-      icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
+      icpVelocity = new FilteredFiniteDifferenceYoFrameVector3D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, icp);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -163,7 +161,7 @@ public class SphereControlToolbox
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2D())
          contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
@@ -189,7 +187,6 @@ public class SphereControlToolbox
          }
       });
 
-      twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
       icpOptimizationParameters = createICPOptimizationParameters();
@@ -230,8 +227,8 @@ public class SphereControlToolbox
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBodyBasics foot = contactableFoot.getRigidBody();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
+         ReferenceFrame soleFrame = contactableFoot.getContactFrame();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2D();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -241,8 +238,8 @@ public class SphereControlToolbox
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         soleZUpFrames.put(robotSide, new ZUpFrame(contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
-         soleFrames.put(robotSide, contactableFoot.getSoleFrame());
+         soleZUpFrames.put(robotSide, new ZUpFrame(contactableFoot.getContactFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleFrames.put(robotSide, contactableFoot.getContactFrame());
       }
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
@@ -286,11 +283,6 @@ public class SphereControlToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
-   }
-
-   public TwistCalculator getTwistCalculator()
-   {
-      return twistCalculator;
    }
 
    public CenterOfMassJacobian getCenterOfMassJacobian()
@@ -397,7 +389,6 @@ public class SphereControlToolbox
    {
       centerOfMassFrame.update();
 
-      twistCalculator.compute();
       centerOfMassJacobian.reset();
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       icpControlPolygons.updateUsingContactStates(contactStates);
@@ -425,7 +416,7 @@ public class SphereControlToolbox
       {
          if (contactStates.get(robotSide).inContact())
          {
-            FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getSoleFrame());
+            FramePose3D footPose = new FramePose3D(contactableFeet.get(robotSide).getContactFrame());
             footPose.changeFrame(worldFrame);
             currentFootPoses.get(robotSide).set(footPose);
          }
@@ -477,7 +468,7 @@ public class SphereControlToolbox
       }
 
       if (nextFootstep.getPredictedContactPoints() == null)
-         nextFootstep.setPredictedContactPoints(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
+         nextFootstep.setPredictedContactPoints(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2D());
 
       double polygonShrinkAmount = 0.005;
 
@@ -500,7 +491,7 @@ public class SphereControlToolbox
       }
 
       if (nextNextFootstep.getPredictedContactPoints() == null)
-         nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2D());
 
       tempFootstepPolygonForShrinking.setIncludingFrame(nextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
@@ -519,7 +510,7 @@ public class SphereControlToolbox
       }
 
       if (nextNextNextFootstep.getPredictedContactPoints() == null)
-         nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2D());
 
       tempFootstepPolygonForShrinking.setIncludingFrame(nextNextNextFootstep.getSoleReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(nextNextNextFootstep.getPredictedContactPoints()));
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);

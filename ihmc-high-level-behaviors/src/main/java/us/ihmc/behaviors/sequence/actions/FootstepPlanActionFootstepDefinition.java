@@ -8,8 +8,8 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SidedObject;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.behaviors.tools.SidedObject;
 import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionFootstepDefinition implements SidedObject

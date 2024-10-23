@@ -10,8 +10,8 @@ import org.ros.node.topic.Publisher;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import handle_msgs.HandleControl;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 public class ROSiRobotCommunicator extends AbstractNodeMain
 {

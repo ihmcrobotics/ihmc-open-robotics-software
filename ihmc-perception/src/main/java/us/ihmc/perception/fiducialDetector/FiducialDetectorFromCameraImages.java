@@ -25,6 +25,7 @@ import georegression.struct.se.Se3_F64;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,8 +35,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -139,8 +139,8 @@ public class FiducialDetectorFromCameraImages
          }
       };
 
-      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame,
-                                                                   transformFromReportedToFiducialFrame);
+      reportedFiducialReferenceFrame = new PoseReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame,
+                                                              transformFromReportedToFiducialFrame);
 
       if (yoGraphicsListRegistry == null)
       {

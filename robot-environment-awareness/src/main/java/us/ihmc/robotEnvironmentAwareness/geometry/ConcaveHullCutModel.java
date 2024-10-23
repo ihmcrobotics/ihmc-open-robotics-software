@@ -7,8 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
-import us.ihmc.tools.lists.CircularArrayList;
+import us.ihmc.euclid.referenceFrame.Pose2DReferenceFrame;
 
 import java.util.*;
 
@@ -23,7 +22,7 @@ public class ConcaveHullCutModel
                               Vector2DReadOnly upDirection,
                               Map<Integer, Point2D> intersections)
    {
-      Pose2dReferenceFrame cuttingLineFrame = new Pose2dReferenceFrame("cuttingLineFrame", ReferenceFrame.getWorldFrame());
+      Pose2DReferenceFrame cuttingLineFrame = new Pose2DReferenceFrame("cuttingLineFrame", ReferenceFrame.getWorldFrame());
       double angle = EuclidGeometryTools.angleFromFirstToSecondVector2D(0.0, 1.0, upDirection.getX(), upDirection.getY()); // angle from yUp
       cuttingLineFrame.setPoseAndUpdate(cuttingLine.getPoint(), angle);
 

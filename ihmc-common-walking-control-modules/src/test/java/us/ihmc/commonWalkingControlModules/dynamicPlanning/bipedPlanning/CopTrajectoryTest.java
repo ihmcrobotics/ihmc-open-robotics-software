@@ -8,9 +8,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +132,7 @@ public class CopTrajectoryTest
       for (RobotSide robotSide : RobotSide.values)
       {
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getLowerCaseName() + "SoleFrame", ReferenceFrame.getWorldFrame());
-         soleFrame.setPositionWithoutChecksAndUpdate(0.0, robotSide.negateIfRightSide(width), 0.0);
+         soleFrame.setPositionAndUpdate(0.0, robotSide.negateIfRightSide(width), 0.0);
          soleFrames.put(robotSide, soleFrame);
       }
       return soleFrames;

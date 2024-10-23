@@ -14,8 +14,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObjectBuilder;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.*;
-import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
+import static us.ihmc.commons.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
 {

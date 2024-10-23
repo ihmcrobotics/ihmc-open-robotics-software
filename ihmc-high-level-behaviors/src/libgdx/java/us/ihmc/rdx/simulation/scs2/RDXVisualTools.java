@@ -18,9 +18,9 @@ import us.ihmc.rdx.tools.RDXModelInstanceScaler;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
-import us.ihmc.rdx.visualizers.RDXPolynomial;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.commons.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.core.Polynomial3D;
+import us.ihmc.commons.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -233,15 +233,15 @@ public class RDXVisualTools
       }
    }
 
-   public static List<RDXPolynomial.Polynomial3DVariableHolder> createPolynomial3DList(List<PolynomialReadOnly> xPolynomial, List<PolynomialReadOnly> yPolynomial, List<PolynomialReadOnly> zPolynomial)
+   public static List<Polynomial3D> createPolynomial3DList(List<PolynomialReadOnly> xPolynomial, List<PolynomialReadOnly> yPolynomial, List<PolynomialReadOnly> zPolynomial)
    {
-      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = new ArrayList<>();
+      List<Polynomial3D> polynomials = new ArrayList<>();
       if (xPolynomial == null || yPolynomial == null || zPolynomial == null)
          return polynomials;
 
       for (int i = 0; i < xPolynomial.size(); i++)
       {
-         polynomials.add(new RDXPolynomial.Polynomial3DVariables(xPolynomial.get(i), yPolynomial.get(i), zPolynomial.get(i)));
+         polynomials.add(new Polynomial3D(new Polynomial(xPolynomial.get(i)), new Polynomial(yPolynomial.get(i)), new Polynomial(zPolynomial.get(i))));
       }
       return polynomials;
    }

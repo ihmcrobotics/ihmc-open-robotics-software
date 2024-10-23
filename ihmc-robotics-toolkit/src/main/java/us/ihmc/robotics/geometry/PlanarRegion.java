@@ -5,6 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -1614,7 +1615,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    {
       // Update Map Region Normal and Origin
       UnitVector3DReadOnly futureNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
-      Point3DReadOnly futureOrigin = GeometryTools.projectPointOntoPlane(plane, getPoint());
+      Point3DReadOnly futureOrigin = EuclidGeometryMissingTools.projectPointOntoPlane(plane, getPoint());
 
       Vector3D axis = new Vector3D();
       axis.cross(getNormal(), futureNormal);

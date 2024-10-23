@@ -25,6 +25,7 @@ mainDependencies {
    api("com.sun.xml.bind:jaxb-impl:4.0.5")
 
    api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-commons-utils:source")
    api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")

@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public enum HumanoidArmPose
 {

@@ -14,13 +14,13 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint2D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector2D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector2D;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -47,18 +47,18 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    private final YoDouble angularVelocityAlphaFilter;
    private final double controllerDt;
    /** Foot filtered angular velocity in the sole frame. The yaw rate is intentionally ignored. */
-   private final AlphaFilteredYoFrameVector2d footAngularVelocityFiltered;
+   private final AlphaFilteredYoFrameVector2D footAngularVelocityFiltered;
    /** Foot angular velocity around the estimated line of rotation. */
    private final YoDouble angularVelocityAroundLineOfRotation;
    /** Point located on the line of rotation. The measured center of pressure is used to compute it. */
 
    /** Alpha filter to filter the foot angular velocity. */
    private final YoDouble yoCenterOfRotationPositionAlphaFilter;
-   private final AlphaFilteredYoFramePoint2d centerOfRotationFiltered;
+   private final AlphaFilteredYoFramePoint2D centerOfRotationFiltered;
    /** Alpha filter to filter the linear velocity of the center of rotation. */
    private final YoDouble yoCenterOfRotationVelocityAlphaFilter;
    /** Filtered data of the center of rotation linear velocity. */
-   private final FilteredVelocityYoFrameVector2d centerOfRotationVelocityFiltered;
+   private final FilteredFiniteDifferenceYoFrameVector2D centerOfRotationVelocityFiltered;
    /**
     * Linear velocity of the center of rotation that is transverse (perpendicular) to the line of
     * rotation.
@@ -74,7 +74,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    /** Alpha filter used to filter the yaw rate of the line of rotation. */
    private final YoDouble lineOfRotationAngularVelocityAlphaFilter;
    /** Filtered yaw rate of the line of rotation. */
-   private final FilteredVelocityYoVariable lineOfRotationAngularVelocityFiltered;
+   private final FilteredFiniteDifferenceYoVariable lineOfRotationAngularVelocityFiltered;
    /** Amount that the foot drops or lifts around the axis of rotation */
    private final YoDouble footDropOrLift;
 
@@ -134,10 +134,10 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    {
       this.namePrefix = namePrefix;
       this.rotatingBody = rotatingFoot;
-      this.soleFrame = rotatingFoot.getSoleFrame();
+      this.soleFrame = rotatingFoot.getContactFrame();
       this.controllerDt = dt;
 
-      footPolygonInSoleFrame.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(rotatingFoot.getContactPoints2d()));
+      footPolygonInSoleFrame.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(rotatingFoot.getContactPoints2D()));
 
       String name = getClass().getSimpleName();
       YoRegistry registry = new YoRegistry(namePrefix + name);
@@ -152,32 +152,32 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       });
       double freq = angularVelocityFilterBreakFrequency.getDoubleValue();
       angularVelocityAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(freq, controllerDt));
-      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered",
+      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2D(namePrefix + "AngularVelocityFiltered",
                                                                      "",
                                                                      registry,
                                                                      angularVelocityAlphaFilter,
                                                                      soleFrame);
 
       yoCenterOfRotationPositionAlphaFilter = new YoDouble(namePrefix + "CoRPositionAlphaFilter", registry);
-      centerOfRotationFiltered = new AlphaFilteredYoFramePoint2d(namePrefix + "CoRFiltered", "", registry, yoCenterOfRotationPositionAlphaFilter, soleFrame);
+      centerOfRotationFiltered = new AlphaFilteredYoFramePoint2D(namePrefix + "CoRFiltered", "", registry, yoCenterOfRotationPositionAlphaFilter, soleFrame);
       yoCenterOfRotationVelocityAlphaFilter = new YoDouble(namePrefix + "CoRVelocityAlphaFilter", registry);
       centerOfRotationTransverseVelocity = new YoDouble(namePrefix + "CoRTransversalVelocity", registry);
-      centerOfRotationVelocityFiltered = new FilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity",
-                                                                             "",
-                                                                             yoCenterOfRotationVelocityAlphaFilter,
-                                                                             dt,
-                                                                             registry,
-                                                                             centerOfRotationFiltered);
+      centerOfRotationVelocityFiltered = new FilteredFiniteDifferenceYoFrameVector2D(namePrefix + "CoRVelocity",
+                                                                                     "",
+                                                                                     yoCenterOfRotationVelocityAlphaFilter,
+                                                                                     dt,
+                                                                                     registry,
+                                                                                     centerOfRotationFiltered);
 
       lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LoRPosition", worldFrame, registry);
       angleOfLineOfRotation = new YoDouble(namePrefix + "AngleOfLoR", registry);
       lineOfRotationAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LoRAngularVelocityAlphaFilter", registry);
-      lineOfRotationAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered",
-                                                                             "",
-                                                                             lineOfRotationAngularVelocityAlphaFilter,
-                                                                             angleOfLineOfRotation,
-                                                                             dt,
-                                                                             registry);
+      lineOfRotationAngularVelocityFiltered = new FilteredFiniteDifferenceYoVariable(namePrefix + "LoRAngularVelocityFiltered",
+                                                                                     "",
+                                                                                     lineOfRotationAngularVelocityAlphaFilter,
+                                                                                     angleOfLineOfRotation,
+                                                                                     dt,
+                                                                                     registry);
 
       angularVelocityAroundLineOfRotation = new YoDouble(namePrefix + "AngularVelocityAroundLoR", registry);
 

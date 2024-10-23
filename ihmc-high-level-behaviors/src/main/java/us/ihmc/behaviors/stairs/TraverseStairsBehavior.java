@@ -15,8 +15,8 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.commons.stateMachine.core.StateMachine;
+import us.ihmc.commons.stateMachine.factories.StateMachineFactory;
 import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

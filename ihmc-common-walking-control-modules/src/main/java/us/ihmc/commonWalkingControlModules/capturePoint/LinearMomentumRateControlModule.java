@@ -34,16 +34,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.commons.robotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.commons.parameters.ParameterVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector2D;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -76,7 +76,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final BooleanProvider allowMomentumRecoveryWeight;
    private final YoBoolean useRecoveryMomentumWeight;
    private final DoubleParameter maxMomentumRateWeightChangeRate;
-   private final RateLimitedYoFrameVector desiredLinearMomentumRateWeight;
+   private final RateLimitedYoFrameVector3D desiredLinearMomentumRateWeight;
 
    private final YoBoolean minimizingAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
 
@@ -139,7 +139,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
-   private final FilteredVelocityYoFrameVector2d capturePointVelocity;
+   private final FilteredFiniteDifferenceYoFrameVector2D capturePointVelocity;
    private final BooleanProvider useCenterOfPressureCommandOnly = new BooleanParameter("useCenterOfPressureCommandOnly", registry, false);
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
@@ -196,12 +196,12 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       maxMomentumRateWeightChangeRate = new DoubleParameter("maxMomentumRateWeightChangeRate", registry, 10.0);
       useRecoveryMomentumWeight = new YoBoolean("useRecoveryMomentumWeight", registry);
       useRecoveryMomentumWeight.set(false);
-      desiredLinearMomentumRateWeight = new RateLimitedYoFrameVector("desiredLinearMomentumRateWeight",
-                                                                     "",
-                                                                     registry,
-                                                                     maxMomentumRateWeightChangeRate,
-                                                                     controlDT,
-                                                                     worldFrame);
+      desiredLinearMomentumRateWeight = new RateLimitedYoFrameVector3D("desiredLinearMomentumRateWeight",
+                                                                       "",
+                                                                       registry,
+                                                                       maxMomentumRateWeightChangeRate,
+                                                                       controlDT,
+                                                                       worldFrame);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
@@ -215,7 +215,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
-      capturePointVelocity = new FilteredVelocityYoFrameVector2d("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
+      capturePointVelocity = new FilteredFiniteDifferenceYoFrameVector2D("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
 
       if (yoGraphicsListRegistry != null)
       {

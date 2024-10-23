@@ -18,7 +18,7 @@ import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.util.Random;

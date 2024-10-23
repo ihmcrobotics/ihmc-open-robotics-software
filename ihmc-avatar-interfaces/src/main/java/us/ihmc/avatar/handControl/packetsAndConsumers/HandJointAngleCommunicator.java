@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class HandJointAngleCommunicator
 {

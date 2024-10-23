@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -130,7 +130,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       isFootInContact = robotSide -> robotSide == supportSide;
       ContactableFoot contactableSwingFoot = controllerToolbox.getContactableFeet().get(getSwingSide());
       copCommand.setContactingRigidBody(contactableSwingFoot.getRigidBody());
-      copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
+      copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getContactFrame());
       swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
    }
 
@@ -167,7 +167,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          if (Double.isFinite(swingFootCoPWeight.getValue()))
          {
             copCommand.getWeight()
-                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getSoleFrame(),
+                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getContactFrame(),
                                          swingFootCoPWeight.getValue(),
                                          swingFootCoPWeight.getValue());
          }

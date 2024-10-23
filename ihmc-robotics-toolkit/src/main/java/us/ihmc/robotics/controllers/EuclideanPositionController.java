@@ -11,7 +11,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -36,7 +36,7 @@ public class EuclideanPositionController implements PositionController
    private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
    private final YoFrameVector3D feedbackLinearAction;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
+   private final RateLimitedYoFrameVector3D rateLimitedFeedbackLinearAction;
 
    private final double dt;
 
@@ -68,8 +68,8 @@ public class EuclideanPositionController implements PositionController
       integralTerm = new FrameVector3D(bodyFrame);
 
       feedbackLinearAction = new YoFrameVector3D(prefix + "FeedbackLinearAction", bodyFrame, registry);
-      rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
-                                                                     dt, feedbackLinearAction);
+      rateLimitedFeedbackLinearAction = new RateLimitedYoFrameVector3D(prefix + "RateLimitedFeedbackLinearAction", "", registry, gains.getYoMaximumFeedbackRate(),
+                                                                       dt, feedbackLinearAction);
 
       parentRegistry.addChild(registry);
    }

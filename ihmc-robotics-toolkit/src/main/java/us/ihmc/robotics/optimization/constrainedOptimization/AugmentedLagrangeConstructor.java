@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.mult.VectorVectorMult_DDRM;
-import us.ihmc.robotics.linearAlgebra.careSolvers.MatrixToolsLocal;
+import us.ihmc.math.linearAlgebra.careSolvers.MatrixToolsLocal;
 
 /**
  * Reference: Numerical Optimization by Jorge Nocedal, Stephen J. Write

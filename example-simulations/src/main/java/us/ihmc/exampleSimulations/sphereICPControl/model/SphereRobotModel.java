@@ -14,10 +14,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
-import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.mecano.MultiBodySystemMissingTools;
+import us.ihmc.commons.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 

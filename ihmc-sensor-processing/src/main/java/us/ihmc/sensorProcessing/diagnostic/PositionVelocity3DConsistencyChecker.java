@@ -1,12 +1,12 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
+import static us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D.createSimpleMovingAverageFilteredYoFrameVector;
 
 import java.util.EnumMap;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
-import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
+import us.ihmc.yoVariables.euclid.filters.SimpleMovingAverageFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -16,10 +16,10 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
 {
    private final YoRegistry registry;
 
-   private final FilteredVelocityYoFrameVector localVelocityFromFD;
+   private final FilteredFiniteDifferenceYoFrameVector3D localVelocityFromFD;
 
-   private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
-   private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
+   private final SimpleMovingAverageFilteredYoFrameVector3D localVelocityFiltered;
+   private final SimpleMovingAverageFilteredYoFrameVector3D filteredVelocityToCheck;
 
    private final EnumMap<Axis3D, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis3D.class);
 
@@ -30,8 +30,8 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    {
       registry = new YoRegistry(namePrefix + "PositionVelocity3DCheck");
       dummyAlpha = new YoDouble("dummyAlpha", registry);
-      localVelocityFromFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
-            position);
+      localVelocityFromFD = new FilteredFiniteDifferenceYoFrameVector3D(namePrefix, "referenceFD", dummyAlpha, updateDT, registry,
+                                                                        position);
       int windowSize = 10;
       localVelocityFiltered = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_referenceFiltered", windowSize, localVelocityFromFD, registry);
       filteredVelocityToCheck = createSimpleMovingAverageFilteredYoFrameVector(namePrefix, "_filtered", windowSize, angularVelocityToCheck, registry);

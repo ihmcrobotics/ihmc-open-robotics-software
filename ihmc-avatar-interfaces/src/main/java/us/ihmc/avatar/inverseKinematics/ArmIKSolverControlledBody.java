@@ -13,10 +13,10 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
@@ -31,7 +31,7 @@ public class ArmIKSolverControlledBody
    private final RigidBodyBasics workBody;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
-   private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+   private final PIDSE3Gains gains = new PIDSE3Gains();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    private final FramePose3D bodyControlDesiredPose = new FramePose3D();

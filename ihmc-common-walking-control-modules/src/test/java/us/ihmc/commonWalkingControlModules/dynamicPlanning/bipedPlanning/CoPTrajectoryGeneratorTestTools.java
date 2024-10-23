@@ -12,9 +12,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class CoPTrajectoryGeneratorTestTools
       for (RobotSide robotSide : RobotSide.values)
       {
          PoseReferenceFrame soleFrame = new PoseReferenceFrame(robotSide.getLowerCaseName() + "SoleFrame", ReferenceFrame.getWorldFrame());
-         soleFrame.setPositionWithoutChecksAndUpdate(0.0, robotSide.negateIfRightSide(0.1), 0.0);
+         soleFrame.setPositionAndUpdate(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          soleFrames.put(robotSide, soleFrame);
       }
       return soleFrames;

@@ -3,7 +3,7 @@ package us.ihmc.behaviors.buildingExploration.old;
 import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.commons.stateMachine.core.State;
 
 class BuildingExplorationBehaviorTeleopState implements State
 {

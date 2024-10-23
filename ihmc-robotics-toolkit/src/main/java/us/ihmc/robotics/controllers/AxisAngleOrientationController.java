@@ -13,8 +13,8 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -42,7 +42,7 @@ public class AxisAngleOrientationController
    private final Quaternion errorQuaternion = new Quaternion();
 
    private final YoFrameVector3D feedbackAngularAction;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAction;
+   private final RateLimitedYoFrameVector3D rateLimitedFeedbackAngularAction;
 
    private final double dt;
 
@@ -74,8 +74,8 @@ public class AxisAngleOrientationController
       integralTerm = new FrameVector3D(bodyFrame);
 
       feedbackAngularAction = new YoFrameVector3D(prefix + "FeedbackAngularAction", bodyFrame, registry);
-      rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "", registry,
-                                                                      gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
+      rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector3D(prefix + "RateLimitedFeedbackAngularAction", "", registry,
+                                                                        gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }

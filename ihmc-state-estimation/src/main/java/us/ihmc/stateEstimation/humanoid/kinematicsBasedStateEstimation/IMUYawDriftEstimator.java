@@ -11,10 +11,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.AngleTools;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -107,7 +108,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       yawDriftBreakFrequency = new DoubleParameter("yawDriftBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz());
       yawDriftRateBreakFrequency = new DoubleParameter("yawDriftRateBreakFrequency", registry, stateEstimatorParameters.getIMUYawDriftRateFilterFreqInHertz());
 
-      DoubleProvider alphaYawDrift = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(yawDriftRateBreakFrequency.getValue(), estimatorDT);
+      DoubleProvider alphaYawDrift = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(yawDriftRateBreakFrequency.getValue(), estimatorDT);
       estimatedYawDriftRate = new AlphaFilteredYoVariable("estimatedYawDriftRate", registry, alphaYawDrift);
 
       for (int i = 0; i < numberOfFeet; i++)
@@ -118,7 +119,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          GlitchFilteredYoBoolean isFootTrusted = new GlitchFilteredYoBoolean("is" + footNamePascalCase + "TrustedIMUDrift", registry, 0);
          areFeetTrusted.put(foot, isFootTrusted);
 
-         ReferenceFrame soleFrame = feet.get(foot).getSoleFrame();
+         ReferenceFrame soleFrame = feet.get(foot).getContactFrame();
          footSoleFrames.put(foot, soleFrame);
       }
 
@@ -352,7 +353,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       yawDrift /= numberOfFeet;
       estimatedYawDrift.set(yawDrift);
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(estimatedFilteredYawDrift.getDoubleValue(), estimatedYawDrift.getDoubleValue());
-      double alphaYawDrift = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(yawDriftBreakFrequency.getValue(), estimatorDT);
+      double alphaYawDrift = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(yawDriftBreakFrequency.getValue(), estimatorDT);
       estimatedFilteredYawDrift.set(AngleTools.trimAngleMinusPiToPi(alphaYawDrift * angleDifference + estimatedYawDrift.getDoubleValue()));
 
       if (!estimatedYawDriftPrevious.isNaN())

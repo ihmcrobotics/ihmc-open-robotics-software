@@ -1,8 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_PITCH;
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_ROLL;
-import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
+import static us.ihmc.commons.robotics.partNames.SpineJointName.SPINE_PITCH;
+import static us.ihmc.commons.robotics.partNames.SpineJointName.SPINE_ROLL;
+import static us.ihmc.commons.robotics.partNames.SpineJointName.SPINE_YAW;
 
 import java.util.ArrayList;
 import java.util.List;

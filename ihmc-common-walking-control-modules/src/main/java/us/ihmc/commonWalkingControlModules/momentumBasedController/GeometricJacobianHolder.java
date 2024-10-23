@@ -35,20 +35,6 @@ public class GeometricJacobianHolder
    /**
     * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
-    * @param ancestor
-    * @param descendant
-    * @param jacobianFrame
-    * @return
-    */
-   public int getOrCreateGeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
-   {
-      int numberOfJoints = ScrewTools.createJointPath(temporaryToStoreJointPath, ancestor, descendant);
-      return getOrCreateGeometricJacobian(temporaryToStoreJointPath, numberOfJoints, jacobianFrame);
-   }
-
-   /**
-    * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
-    * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * If the array of joints is empty, it returns -1.
     * @param joints
     * @param jacobianFrame

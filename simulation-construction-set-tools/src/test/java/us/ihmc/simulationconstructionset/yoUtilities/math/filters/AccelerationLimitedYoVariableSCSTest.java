@@ -6,12 +6,11 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.AccelerationLimitedYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.filters.AccelerationLimitedYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.simulationconstructionset.Robot;
@@ -33,8 +32,8 @@ public class AccelerationLimitedYoVariableSCSTest
 
    YoDouble raw;
    YoDouble alphaVariable;
-   FilteredVelocityYoVariable rawRate;
-   FilteredVelocityYoVariable rawAcceleration;
+   FilteredFiniteDifferenceYoVariable rawRate;
+   FilteredFiniteDifferenceYoVariable rawAcceleration;
 
    private static double amplitude = 1.0;
    private static double frequency = 1.0;
@@ -59,8 +58,8 @@ public class AccelerationLimitedYoVariableSCSTest
       raw = new YoDouble("raw", registry);
       alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(0.0); //set to zero to prevent smoothing of velocity
-      rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
-      rawAcceleration = new FilteredVelocityYoVariable("rawAcceleration", "", alphaVariable, rawRate, dt, registry);
+      rawRate = new FilteredFiniteDifferenceYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
+      rawAcceleration = new FilteredFiniteDifferenceYoVariable("rawAcceleration", "", alphaVariable, rawRate, dt, registry);
 
       if (VISUALIZE)
       {

@@ -8,7 +8,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.commons.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;

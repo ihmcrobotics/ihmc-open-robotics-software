@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsSt
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 
 public class AtlasSwingOverPlanarRegionsVisualizer
 {

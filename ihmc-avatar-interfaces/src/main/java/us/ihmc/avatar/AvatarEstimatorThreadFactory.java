@@ -27,13 +27,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.commons.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SegmentDependentList;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -63,7 +63,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.Kinematic
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -611,7 +611,8 @@ public class AvatarEstimatorThreadFactory
    public CenterOfPressureDataHolder getCenterOfPressureDataHolderFromController()
    {
       if (!centerOfPressureDataHolderFromControllerField.hasValue())
-         centerOfPressureDataHolderFromControllerField.set(new CenterOfPressureDataHolder(getEstimatorFullRobotModel()));
+         centerOfPressureDataHolderFromControllerField.set(new CenterOfPressureDataHolder(getEstimatorFullRobotModel().getFoot(RobotSide.LEFT),
+                                                                                          getEstimatorFullRobotModel().getFoot(RobotSide.RIGHT)));
       return centerOfPressureDataHolderFromControllerField.get();
    }
 

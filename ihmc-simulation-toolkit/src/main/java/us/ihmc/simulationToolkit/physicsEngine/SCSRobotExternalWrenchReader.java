@@ -13,7 +13,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.lists.RingBuffer;
+import us.ihmc.commons.lists.RingBuffer;
 import us.ihmc.robotics.physics.ExternalWrenchReader;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;

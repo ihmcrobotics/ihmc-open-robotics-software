@@ -4,21 +4,21 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -59,7 +59,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private final YoBoolean sendSteps = new YoBoolean(namePrefix + "Send", registry);
 
-   private List<FramePoint2D> contactFramePoints;
+   private List<? extends FramePoint2DReadOnly> contactFramePoints;
    private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);
    private Point2D contactPoint;
 
@@ -89,7 +89,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
       swingFoot = bipedFeet.get(swingSide);
 
-      ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
+      ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getContactFrame();
       desiredOffset = new FrameVector3D(stanceFootFrame);
       desiredPosition = new FramePoint3D(stanceFootFrame);
       desiredOrientation = new FrameQuaternion(stanceFootFrame);
@@ -192,7 +192,7 @@ public class UserDesiredFootstepDataMessageGenerator
       }
       else
       {
-         newStepReferenceFrame = bipedFeet.get(supportSide).getSoleFrame();
+         newStepReferenceFrame = bipedFeet.get(supportSide).getContactFrame();
       }
 
       // Footstep Position
@@ -222,9 +222,9 @@ public class UserDesiredFootstepDataMessageGenerator
       desiredFootstepCommand.setPose(desiredPosition, desiredOrientation);
 
       // set contact points
-      contactFramePoints = swingFoot.getContactPoints2d();
+      contactFramePoints = swingFoot.getContactPoints2D();
       contactPoints.clear();
-      for (FramePoint2D contactFramePoint : contactFramePoints)
+      for (FramePoint2DReadOnly contactFramePoint : contactFramePoints)
       {
          contactPoint = new Point2D(contactFramePoint);
 

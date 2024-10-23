@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.outputData;
 import java.util.HashMap;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 public class LowLevelStateList implements LowLevelStateListReadOnly
 {

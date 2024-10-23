@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * This interface is part of the API of {@link ContinuousStepGenerator}.

@@ -34,16 +34,16 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.commons.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -411,7 +411,7 @@ public class FeetManager implements SCS2YoGraphicHolder
       FootControlModule footControlModule = footControlModules.get(robotSide);
       if (footControlModule.isInFlatSupportState())
       {
-         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getContactFrame(), 0.0, 0.0, 1.0);
          footNormalContactVector.changeFrame(worldFrame);
       }
       else
@@ -427,7 +427,7 @@ public class FeetManager implements SCS2YoGraphicHolder
       if (useWorldSurfaceNormalWhenFullyConstrained.getValue())
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
-         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getContactFrame(), 0.0, 0.0, 1.0);
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)

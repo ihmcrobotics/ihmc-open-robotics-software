@@ -19,15 +19,17 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.robotics.math.filters.*;
-import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.yoVariables.filters.YoMatrix;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoMatrix;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -64,7 +66,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj wholeSystemTorques;
 
    private final DMatrixRMaj jointVelocitiesContainer;
-   private final FilteredVelocityYoVariable[] jointAccelerations;
+   private final FilteredFiniteDifferenceYoVariable[] jointAccelerations;
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final RigidBodyBasics[] regressorModelBodiesToProcess;
@@ -179,13 +181,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       residual = new YoMatrix("residual_", nDoFs, 1, measurementNames, registry);
 
       double dt = toolbox.getControlDT();
-      double defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt);
       accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
       accelerationCalculationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inertialEstimationParameters.getBreakFrequencyForAccelerationCalculation(), dt));
       jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
-      jointAccelerations = new FilteredVelocityYoVariable[nDoFs];
+      jointAccelerations = new FilteredFiniteDifferenceYoVariable[nDoFs];
       for (int i = 0; i < measurementNames.length; i++)
-         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + measurementNames[i], "", defaultAccelerationCalculationAlpha, dt, registry);
+         jointAccelerations[i] = new FilteredFiniteDifferenceYoVariable("jointAcceleration_" + measurementNames[i], "", accelerationCalculationAlpha, dt, registry);
 
       String[] estimateNames = inertialEstimationParameters.getEstimateNames();
       estimate = new YoMatrix("", nParameters, 1, estimateNames, null, registry);
@@ -248,7 +249,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       if (enableFilter.getValue())
       {
          updateFilterCovariances();
-         updateAccelerationCalculationFilterAlphas();
 
          updateContactJacobians();
          updateContactWrenches();
@@ -298,12 +298,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       filter.setProcessCovariance(covarianceHelper.getProcessCovariance());
       filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
-   }
-
-   private void updateAccelerationCalculationFilterAlphas()
-   {
-      for (FilteredVelocityYoVariable jointAcceleration : jointAccelerations)
-         jointAcceleration.setAlpha(accelerationCalculationAlpha.getValue());
    }
 
    private void updateWholeSystemTorques()

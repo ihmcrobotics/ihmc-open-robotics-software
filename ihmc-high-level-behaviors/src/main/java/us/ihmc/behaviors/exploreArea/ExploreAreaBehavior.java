@@ -10,8 +10,8 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.tools.Destroyable;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.*;

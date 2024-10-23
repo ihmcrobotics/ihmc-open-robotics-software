@@ -22,7 +22,7 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -315,8 +315,8 @@ public class RobotTransformOptimizer
 
       public void setControlFrameOffset(RigidBodyTransform controlFrameOffset)
       {
-         controlFrameA.setPoseAndUpdate(controlFrameOffset);
-         controlFrameB.setPoseAndUpdate(controlFrameOffset);
+         controlFrameA.setTransformAndUpdate(controlFrameOffset);
+         controlFrameB.setTransformAndUpdate(controlFrameOffset);
       }
 
       public ReferenceFrame getControlFrameA()

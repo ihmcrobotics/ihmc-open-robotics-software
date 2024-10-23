@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -9,12 +10,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -391,11 +390,11 @@ public class DynamicStateInspector
 
    double rayDistance(FrameLine2DReadOnly lineToIntersection, Point2DBasics intersectionToPack)
    {
-      boolean success = EuclidCoreMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
-                                                                                 errorDirection,
-                                                                                 lineToIntersection.getPoint(),
-                                                                                 lineToIntersection.getDirection(),
-                                                                                 intersectionToPack);
+      boolean success = EuclidGeometryMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
+                                                                                     errorDirection,
+                                                                                     lineToIntersection.getPoint(),
+                                                                                     lineToIntersection.getDirection(),
+                                                                                     intersectionToPack);
 
       if (success)
          return intersectionToPack.distance(currentICP);

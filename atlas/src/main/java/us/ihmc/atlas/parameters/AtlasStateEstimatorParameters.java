@@ -14,15 +14,14 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
-import us.ihmc.robotics.dataStructures.parameters.ParameterPolynomial;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.commons.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.commons.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.commons.robotics.partNames.LegJointName;
+import us.ihmc.commons.robotics.partNames.SpineJointName;
+import us.ihmc.commons.robotics.robotSide.RobotSide;
+import us.ihmc.commons.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -137,7 +136,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       {
          // This was obtained using LIDAR by observing the variation in the back z position error. It does not correct for a possible absolute position error.
          double[] coefficients = new double[] {0.00305, 1.04087};
-         PolynomialReadOnly backZPolynomial = new ParameterPolynomial("q_poly_back_bkz", coefficients, registry);
+         YoPolynomial backZPolynomial = new YoPolynomial("q_poly_back_bkz", coefficients, registry);
          sensorProcessing.addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(backZPolynomial,
                                                                                     false,
                                                                                     jointMap.getSpineJointName(SpineJointName.SPINE_YAW));

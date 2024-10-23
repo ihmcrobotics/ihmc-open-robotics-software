@@ -8,7 +8,7 @@ import org.bytedeco.librealsense2.rs2_device_list;
 import org.bytedeco.librealsense2.rs2_error;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

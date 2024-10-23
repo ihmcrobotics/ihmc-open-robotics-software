@@ -23,9 +23,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.commons.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
@@ -59,7 +59,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
    private final FramePoint3D measuredCoPInWorld = new FramePoint3D();
-   private final AlphaFilteredYoFramePoint measuredCoPFiltered;
+   private final AlphaFilteredYoFramePoint3D measuredCoPFiltered;
 
    private final YoFrameLineSegment2D lineSegmentOfRotation;
    private final YoFrameVector3D groundPlaneNormal;
@@ -80,15 +80,15 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      soleFrame = contactableFoot.getSoleFrame();
-      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+      soleFrame = contactableFoot.getContactFrame();
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
 
       angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
       angleThreshold = explorationParameters.getGeometricDetectionAngleThreshold();
       footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
 
       YoDouble copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
-      measuredCoPFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
+      measuredCoPFiltered = new AlphaFilteredYoFramePoint3D(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
 
       groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
       lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LineOfRotationGeometric", "", worldFrame, registry);
