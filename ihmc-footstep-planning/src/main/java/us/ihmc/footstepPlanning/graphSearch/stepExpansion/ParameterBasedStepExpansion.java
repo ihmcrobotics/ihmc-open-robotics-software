@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -20,6 +19,8 @@ import java.util.*;
 
 public class ParameterBasedStepExpansion implements FootstepExpansion
 {
+   private static final boolean SORT_FULL_EXPANSION = false;
+
    private final List<FootstepGraphNode> fullExpansion = new ArrayList<>();
    private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final IdealStepCalculatorInterface idealStepCalculator;
@@ -38,7 +39,9 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    private final TIntArrayList xyExpansionMask = new TIntArrayList();
    private final TIntArrayList yawExpansionMask = new TIntArrayList();
 
-   public ParameterBasedStepExpansion(DefaultFootstepPlannerParametersReadOnly parameters, IdealStepCalculatorInterface idealStepCalculator, SideDependentList<ConvexPolygon2D> footPolygons)
+   public ParameterBasedStepExpansion(DefaultFootstepPlannerParametersReadOnly parameters,
+                                      IdealStepCalculatorInterface idealStepCalculator,
+                                      SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.idealStepCalculator = idealStepCalculator;
@@ -76,12 +79,8 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             if (reachSquared > maxReachSquared)
                continue;
 
-            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaxStepReach();
-            double minYawAtFullExtension = parameters.getMinStepYaw();
-            double maxYawAtFullExtension = parameters.getMaxStepYaw();
-
-            double minYaw = InterpolationTools.linearInterpolate(parameters.getMinStepYaw(), minYawAtFullExtension, reachFraction);
-            double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaxStepYaw(), maxYawAtFullExtension, reachFraction);
+            double minYaw = parameters.getMinStepYaw();
+            double maxYaw = parameters.getMaxStepYaw();
 
             for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticePoint.gridSizeYaw)
             {
@@ -148,13 +147,16 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
          applyMask(fullExpansionToPack, nodeToExpand);
       }
 
-      // sorting is primarily a debug tool for checking proximity to ideal step - skip by default
+      // Sorting is primarily a debug tool for checking proximity to ideal step
+      if (SORT_FULL_EXPANSION)
+      {
+         if (idealStepCalculator != null)
+         {
+            idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
+            fullExpansionToPack.sort(idealStepProximityComparator);
+         }
+      }
 
-//      if (idealStepCalculator != null)
-//      {
-//         idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
-//         fullExpansionToPack.sort(idealStepProximityComparator);
-//      }
    }
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)
@@ -177,18 +179,6 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
                             });
    }
 
-   private static int computeMinYawDistance(List<FootstepGraphNode> listToFilter, DiscreteFootstep idealStep)
-   {
-      int minYawDistance = Integer.MAX_VALUE;
-      for (int i = 0; i < listToFilter.size(); i++)
-      {
-         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getSecondStep());
-         if (yawDistance < minYawDistance)
-            minYawDistance = yawDistance;
-      }
-      return minYawDistance;
-   }
-
    private static int computeMinXYManhattanDistance(List<FootstepGraphNode> listToFilter, DiscreteFootstep idealStep)
    {
       int minXYManhattanDistance = Integer.MAX_VALUE;
@@ -199,6 +189,18 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             minXYManhattanDistance = xyManhattanDistance;
       }
       return minXYManhattanDistance;
+   }
+
+   private static int computeMinYawDistance(List<FootstepGraphNode> listToFilter, DiscreteFootstep idealStep)
+   {
+      int minYawDistance = Integer.MAX_VALUE;
+      for (int i = 0; i < listToFilter.size(); i++)
+      {
+         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i).getSecondStep());
+         if (yawDistance < minYawDistance)
+            minYawDistance = yawDistance;
+      }
+      return minYawDistance;
    }
 
    static class IdealStepProximityComparator implements Comparator<FootstepGraphNode>
@@ -239,8 +241,8 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       footstepRotation.transform(footstepTranslation);
 
       return new DiscreteFootstep(step.getX() + footstepTranslation.getX(),
-                              step.getY() + footstepTranslation.getY(),
-                              stepYaw + step.getYaw(),
+                                  step.getY() + footstepTranslation.getY(),
+                                  stepYaw + step.getYaw(),
                                   step.getRobotSide().getOppositeSide());
    }
 }
