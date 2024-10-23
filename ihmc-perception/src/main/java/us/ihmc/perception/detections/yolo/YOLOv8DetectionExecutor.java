@@ -137,21 +137,19 @@ public class YOLOv8DetectionExecutor
 
    /**
     * Non-blocking call to run YOLO on the provided images
-    * @param colorImage BGR color image, used for YOLO detection
+    * @param colorImage RGB color image, used for YOLO detection
     * @param depthImage 16UC1 depth image, used to get points of detected objects
     */
    public void runYOLODetection(YOLOv8ObjectDetector yoloDetector, RawImage colorImage, RawImage depthImage)
    {
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
+         // Acquire the images
+         if (colorImage.get() == null || depthImage.get() == null)
+            return;
+
          yoloExecutorService.submit(() ->
          {
-            // Acquire the images
-            if (!colorImage.isAvailable() || !depthImage.isAvailable())
-               return;
-            colorImage.get();
-            depthImage.get();
-
             // Run YOLO to get results
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold, yoloMaskThreshold);
 
