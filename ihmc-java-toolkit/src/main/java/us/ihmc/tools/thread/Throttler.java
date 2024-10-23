@@ -17,7 +17,7 @@ import us.ihmc.commons.Conversions;
  * than the requested throttled frequency. We have put a mechanism in place
  * to handle poll frequencies near or lower than requested, but the result
  * will be jittery and inaccurate. In those cases, it is best to spin
- * up a separate thread. See {@link LoopingThread}.
+ * up a separate thread. See {@link PausableLoopingThread}.
  *
  * Throttler's {@link #waitAndRun} methods have a different nature. They
  * obviously cannot be called faster than the requested frequency. They

@@ -8,7 +8,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * @deprecated Use {@link LoopingThread} with a loop frequency limit set.
+ * @deprecated Use {@link PausableLoopingThread} with a loop frequency limit set.
  */
 @Deprecated
 public class RestartableThrottledThread

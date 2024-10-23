@@ -5,19 +5,18 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoopingThreadTest
+public class PausableLoopingThreadTest
 {
    private static final String name = "TestLoopingThread";
 
    @Test
-   public void testStartClose()
+   public void testStartDestroy()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
@@ -25,9 +24,9 @@ public class LoopingThreadTest
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
-      thread.close();
+      thread.destroy();
       try
       {
          Thread.sleep(1000);
@@ -37,13 +36,13 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
    public void testStartPauseStart()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
@@ -51,7 +50,7 @@ public class LoopingThreadTest
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
       thread.pause();
       try
@@ -63,13 +62,13 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
-      thread.close();
+      thread.destroy();
       try
       {
          Thread.sleep(1000);
@@ -79,13 +78,13 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
    public void testDoubleStart()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
@@ -93,13 +92,13 @@ public class LoopingThreadTest
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
-      thread.close();
+      thread.destroy();
       try
       {
          Thread.sleep(1000);
@@ -109,13 +108,13 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
-   public void testDoubleClose()
+   public void testDoubleDestroy()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
@@ -123,9 +122,9 @@ public class LoopingThreadTest
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
-      thread.close();
+      thread.destroy();
       try
       {
          Thread.sleep(1000);
@@ -135,9 +134,9 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
 
-      thread.close();
+      thread.destroy();
       try
       {
          Thread.sleep(1000);
@@ -147,27 +146,27 @@ public class LoopingThreadTest
          throw new RuntimeException(e);
       }
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
-   public void testCloseWithoutStart()
+   public void testDestroyWithoutStart()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
       }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
 
-      thread.close();
+      thread.blockingDestroy();
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
-   public void testBlockingClose()
+   public void testBlockingDestroy()
    {
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
@@ -175,50 +174,28 @@ public class LoopingThreadTest
 
       thread.start();
       assertTrue(thread.isLooping());
-      assertTrue(thread.isAlive());
+      assertTrue(thread.getInternalThread().isAlive());
 
-      thread.blockingClose();
+      thread.blockingDestroy();
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
    public void testRunOnce()
    {
       AtomicInteger runCounter = new AtomicInteger(0);
-      LoopingThread thread = new LoopingThread(() ->
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
          assert runCounter.incrementAndGet() == 1;
       }, name);
 
       thread.runOnce();
       ThreadTools.sleep(500);
-      thread.blockingClose();
+      thread.blockingDestroy();
       assertEquals(1, runCounter.get());
       assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
-   }
-
-   @Test
-   public void testOverride()
-   {
-      AtomicBoolean ranSuccessfully = new AtomicBoolean(false);
-
-      LoopingThread thread = new LoopingThread()
-      {
-         @Override
-         public void runInLoop()
-         {
-            ranSuccessfully.set(true);
-         }
-      };
-
-      thread.start();
-      ThreadTools.sleep(500);
-      thread.blockingClose();
-      assertTrue(ranSuccessfully.get());
-      assertFalse(thread.isLooping());
-      assertFalse(thread.isAlive());
+      assertFalse(thread.getInternalThread().isAlive());
    }
 
    @Test
@@ -227,7 +204,7 @@ public class LoopingThreadTest
       FrequencyCalculator frequencyCalculator = new FrequencyCalculator();
 
       double targetFrequency = 5.0;
-      LoopingThread thread = new LoopingThread(frequencyCalculator::ping, targetFrequency, name);
+      PausableLoopingThread thread = new PausableLoopingThread(frequencyCalculator::ping, targetFrequency, name);
 
       thread.start();
       ThreadTools.sleep(3000);
@@ -238,6 +215,65 @@ public class LoopingThreadTest
       ThreadTools.sleep(3000);
       assertEquals(targetFrequency, frequencyCalculator.getFrequency(), 0.1);
 
-      thread.blockingClose();
+      thread.blockingDestroy();
+   }
+
+   @Test
+   public void testInterrupt() throws InterruptedException
+   {
+      AtomicInteger interruptCount = new AtomicInteger(0);
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
+      {
+         try
+         {
+            Thread.sleep(10);
+         }
+         catch (InterruptedException interruptedException)
+         {
+            synchronized (interruptCount)
+            {
+               interruptCount.incrementAndGet();
+               interruptCount.notify();
+            }
+         }
+      }, name);
+
+      // Test during free spin
+      thread.start();
+      for (int i = 0; i < 100; ++i)
+      {
+         thread.getInternalThread().interrupt();
+         synchronized (interruptCount)
+         {
+            interruptCount.wait(500);
+         }
+         assertEquals(i + 1, interruptCount.get());
+      }
+
+      // Test during throttled looping
+      interruptCount.set(0);
+      thread.limitLoopFrequency(5.0);
+      for (int i = 0; i < 50; ++i)
+      {
+         thread.getInternalThread().interrupt();
+         synchronized (interruptCount)
+         {
+            interruptCount.wait(500);
+         }
+         assertEquals(i + 1, interruptCount.get());
+      }
+
+      // Test during pause
+      interruptCount.set(0);
+      thread.pause();
+      for (int i = 0; i < 100; ++i)
+      {
+         thread.getInternalThread().interrupt();
+         synchronized (interruptCount)
+         {
+            interruptCount.wait(500);
+         }
+         assertEquals(i + 1, interruptCount.get());
+      }
    }
 }
