@@ -682,8 +682,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
          feedbackTermToPack.setZ(tempMatrix.get(5, 0));
 
          feedbackTermToPack.scale(gains.getDampingRatios()[0], gains.getDampingRatios()[1], gains.getDampingRatios()[2]);
-
-         LogTools.info("Derivative terms: " + tempDerivativeGainMatrix);
       }
       tempGainMatrix.transform(feedbackTermToPack);
 

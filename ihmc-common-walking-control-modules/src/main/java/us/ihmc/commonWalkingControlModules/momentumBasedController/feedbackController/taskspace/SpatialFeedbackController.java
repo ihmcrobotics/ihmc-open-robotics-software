@@ -897,9 +897,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.setX(tempMatrix.get(0, 0));
          angularFeedbackTermToPack.setY(tempMatrix.get(1, 0));
          angularFeedbackTermToPack.setZ(tempMatrix.get(2, 0));
-
-         linearFeedbackTermToPack.scale(gains.getPositionGains().getDampingRatios()[0], gains.getPositionGains().getDampingRatios()[1], gains.getPositionGains().getDampingRatios()[2]);
-         angularFeedbackTermToPack.scale(gains.getOrientationGains().getDampingRatios()[0], gains.getOrientationGains().getDampingRatios()[1], gains.getOrientationGains().getDampingRatios()[2]);
       }
       else
       {
