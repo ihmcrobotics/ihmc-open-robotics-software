@@ -769,7 +769,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setKinematicChain(bodyBase, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 

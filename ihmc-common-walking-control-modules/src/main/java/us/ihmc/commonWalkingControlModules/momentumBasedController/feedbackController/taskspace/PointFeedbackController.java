@@ -610,6 +610,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj feedbacktermsMatrix = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
@@ -666,12 +667,23 @@ public class PointFeedbackController implements FeedbackControllerInterface
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
-         tempMatrix.reshape(3, 3);
-         CommonOps_DDRM.extract(tempDerivativeGainMatrix, 3, 6, 3, 6, tempMatrix, 0, 0);
-         tempGainMatrix.set(tempMatrix);
+         feedbacktermsMatrix.set(0, 0, 1);
+         feedbacktermsMatrix.set(1, 0, 1);
+         feedbacktermsMatrix.set(2, 0, 1);
+         feedbacktermsMatrix.set(3, 0, feedbackTermToPack.getX());
+         feedbacktermsMatrix.set(4, 0, feedbackTermToPack.getY());
+         feedbacktermsMatrix.set(5, 0, feedbackTermToPack.getZ());
 
-         System.out.println("Derivative Gain Matrix: ");
-         System.out.println(tempGainMatrix);
+         tempMatrix.reshape(6,1);
+         CommonOps_DDRM.mult(tempDerivativeGainMatrix, feedbacktermsMatrix, tempMatrix);
+
+         feedbackTermToPack.setX(tempMatrix.get(3, 0));
+         feedbackTermToPack.setY(tempMatrix.get(4, 0));
+         feedbackTermToPack.setZ(tempMatrix.get(5, 0));
+
+         feedbackTermToPack.scale(gains.getDampingRatios()[0], gains.getDampingRatios()[1], gains.getDampingRatios()[2]);
+
+         LogTools.info("Derivative terms: " + tempDerivativeGainMatrix);
       }
       tempGainMatrix.transform(feedbackTermToPack);
 
@@ -805,7 +817,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setKinematicChain(bodyBase, endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 
@@ -816,9 +828,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
-      CommonOps_DDRM.invert(massInverseMatrix);
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
       CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
+      CommonOps_DDRM.invert(subMassInverseMatrix);
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);

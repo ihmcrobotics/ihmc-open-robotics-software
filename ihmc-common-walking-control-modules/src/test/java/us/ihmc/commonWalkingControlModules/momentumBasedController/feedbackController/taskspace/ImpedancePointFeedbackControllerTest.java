@@ -85,11 +85,11 @@ public final class ImpedancePointFeedbackControllerTest
       FramePoint3D desiredPosition = EuclidFrameRandomTools.nextFramePoint3D(random, baseBody.getBodyFixedFrame());
       FrameVector3D zero = new FrameVector3D(desiredPosition.getReferenceFrame());
       PID3DGains gains = new DefaultPID3DGains();
-      gains.setProportionalGains(5.0);
+      gains.setProportionalGains(2.0);
       gains.setDerivativeGains(Double.NaN);
       gains.setDampingRatios(1.0);
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
-      pointFeedbackControlCommand.set(baseBody, endEffector);
+      pointFeedbackControlCommand.set(elevator, endEffector);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);

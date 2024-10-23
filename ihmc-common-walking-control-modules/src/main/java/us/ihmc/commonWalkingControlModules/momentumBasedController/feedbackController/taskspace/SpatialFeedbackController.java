@@ -132,6 +132,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoPID3DGains positionGains;
    protected final YoPID3DGains orientationGains;
    protected final Matrix3D tempGainMatrix = new Matrix3D();
+   protected final DMatrixRMaj dampingRatioMatrix = new DMatrixRMaj(6, 6);
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
@@ -381,6 +382,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      dampingRatioMatrix.set(0,0, gains.getOrientationGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(1,1, gains.getOrientationGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(2,2, gains.getOrientationGains().getDampingRatios()[2]);
+      dampingRatioMatrix.set(3,3, gains.getPositionGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(4,4, gains.getPositionGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(5,5, gains.getPositionGains().getDampingRatios()[2]);
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
@@ -860,15 +867,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          sqrtInertiaMatrix.reshape(6,6);
 
          MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
-
+//         LogTools.info("K_p^{1/2} = " + sqrtProportionalGainMatrix);
 
          tempMatrix.set(inverseInertiaMatrix);
 
          CommonOps_DDRM.invert(tempMatrix);
          MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
 
-         CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
-         CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
+         tempMatrix.reshape(6,6);
+         CommonOps_DDRM.mult(sqrtInertiaMatrix, dampingRatioMatrix, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
+         CommonOps_DDRM.mult(sqrtProportionalGainMatrix, dampingRatioMatrix, tempMatrix);
+         CommonOps_DDRM.multAdd(tempMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
 
          feedbacktermsMatrix.set(0, 0, angularFeedbackTermToPack.getX());
          feedbacktermsMatrix.set(1, 0, angularFeedbackTermToPack.getY());
@@ -1099,7 +1109,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    }
 
    private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj massInverseMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
 
    private void computeInverseInertiaMatrix()
@@ -1114,11 +1124,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
-      massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
-      massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
+      subMassMatrix.set(massMatrixCalculator.getMassMatrix());
+      subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
 
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
+      CommonOps_DDRM.extract(subMassMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
 
       CommonOps_DDRM.invert(subMassInverseMatrix);
 
