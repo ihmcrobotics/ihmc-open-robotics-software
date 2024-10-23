@@ -151,7 +151,7 @@ public class RDXVRKinematicsStreamingMode
 
    public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
    public static final Vector3D HAND_CONTACT_NORMAL_IN_WORLD = new Vector3D();
-   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.7; // 0.3;
+   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.4; // 0.3;
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
