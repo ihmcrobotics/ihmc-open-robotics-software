@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
 
-public class ZEDImageGrabber implements ImageSensorGrabber
+public class ZEDImageSensor extends ImageSensor
 {
    static
    {
@@ -57,7 +57,7 @@ public class ZEDImageGrabber implements ImageSensorGrabber
    private final SL_InitParameters zedInitParameters = new SL_InitParameters();
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   public ZEDImageGrabber(int cameraID, ZEDModelData zedModel, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
       this.cameraID = cameraID;
       this.zedModel = zedModel;
@@ -73,7 +73,7 @@ public class ZEDImageGrabber implements ImageSensorGrabber
    }
 
    @Override
-   public boolean startSensor()
+   protected boolean startSensor()
    {
       try
       {
@@ -151,13 +151,13 @@ public class ZEDImageGrabber implements ImageSensorGrabber
    }
 
    @Override
-   public boolean isRunning()
+   public boolean isSensorRunning()
    {
       return sl_is_opened(cameraID) && !lastGrabFailed;
    }
 
    @Override
-   public synchronized boolean grab()
+   protected boolean grab()
    {
       // Update the sensor pose
       ReferenceFrame sensorFrame = sensorFrameSupplier.get();
@@ -238,9 +238,10 @@ public class ZEDImageGrabber implements ImageSensorGrabber
    }
 
    @Override
-   public synchronized void close()
+   public void close()
    {
       System.out.println("Closing " + getClass().getSimpleName());
+      super.close();
 
       for (Pointer slMat : slMatPointers)
       {

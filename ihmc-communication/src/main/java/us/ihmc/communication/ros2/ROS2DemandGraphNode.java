@@ -8,8 +8,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class ROS2DemandGraphNode
+public class ROS2DemandGraphNode implements Supplier<Boolean>
 {
    private final ArrayList<ROS2DemandGraphNode> dependents = new ArrayList<>();
    private final ROS2HeartbeatMonitor nodeHeartbeatMonitor;
@@ -55,6 +56,12 @@ public class ROS2DemandGraphNode
       }
 
       return false;
+   }
+
+   @Override
+   public Boolean get()
+   {
+      return isDemanded();
    }
 
    public void destroy()
