@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * A thread that executes code in a loop.
  * Optionally, you may set a limit to the loop frequency.
  * This thread does not finish running until {@link #destroy()} or {@link #blockingDestroy()} is called.
- * Once started, make sure to close this thread.
+ * Once started, make sure to destroy this thread.
  */
 public class PausableLoopingThread
 {
