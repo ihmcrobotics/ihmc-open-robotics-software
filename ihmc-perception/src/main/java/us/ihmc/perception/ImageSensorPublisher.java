@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.SRTStreamStatus;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.cuda.CUDACompressionTools;
@@ -16,7 +17,7 @@ import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensors.ImageSensorGrabber;
+import us.ihmc.sensors.ImageSensor;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,11 +26,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
 import static us.ihmc.perception.imageMessage.CompressionType.ZSTD_NVJPEG_HYBRID;
 
-public class ImageSensorPublisher implements Runnable, AutoCloseable
+public class ImageSensorPublisher implements AutoCloseable
 {
    private final Map<Integer, ROS2Topic<? extends Packet<?>>> imageKeyToTopicMap;
 
-   private final ImageSensorGrabber imageGrabber;
+   private final ImageSensor imageSensor;
 
    private final CUDACompressionTools compressionTools;
    private final CUDAJPEGProcessor jpegProcessor;
@@ -38,11 +39,13 @@ public class ImageSensorPublisher implements Runnable, AutoCloseable
    private final ROS2Helper ros2Helper;
    private final ImageMessage imageMessage;
 
+   private final Thread publishThread;
+   private volatile boolean running = true;
    private final AtomicBoolean isSending = new AtomicBoolean(false);
    
-   public ImageSensorPublisher(ROS2Node ros2Node, ImageSensorGrabber imageGrabber, Map<Integer, ROS2Topic<? extends Packet<?>>> imageKeyToTopicMap)
+   public ImageSensorPublisher(ROS2Node ros2Node, ImageSensor imageSensor, Map<Integer, ROS2Topic<? extends Packet<?>>> imageKeyToTopicMap)
    {
-      this.imageGrabber = imageGrabber;
+      this.imageSensor = imageSensor;
       this.imageKeyToTopicMap = imageKeyToTopicMap;
 
       compressionTools = new CUDACompressionTools();
@@ -51,28 +54,38 @@ public class ImageSensorPublisher implements Runnable, AutoCloseable
 
       ros2Helper = new ROS2Helper(ros2Node);
       imageMessage = new ImageMessage();
+
+      publishThread = ThreadTools.startAsDaemon(this::run, imageSensor.getSensorName() + "Publisher");
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
-   @Override
    public void run()
    {
-      if (!isSending.compareAndSet(false, true))
-         return;
-
-      for (Entry<Integer, ROS2Topic<? extends Packet<?>>> imageEntry : imageKeyToTopicMap.entrySet())
+      while (running)
       {
-         int imageKey = imageEntry.getKey();
-         ROS2Topic<? extends Packet<?>> imageTopic = imageEntry.getValue();
+         try
+         {
+            imageSensor.waitForGrab();
 
-         RawImage imageToPublish = imageGrabber.getImage(imageKey);
-         if (imageTopic.getType().equals(ImageMessage.class))
-            publishAsImageMessage(imageToPublish, (ROS2Topic<ImageMessage>) imageTopic);
-         else if (imageTopic.getType().equals(SRTStreamStatus.class))
-            sensorStreamer.sendFrame((ROS2Topic<SRTStreamStatus>) imageTopic, imageToPublish);
-         imageToPublish.release();
+            if (!isSending.compareAndSet(false, true))
+               continue;
+
+            for (Entry<Integer, ROS2Topic<? extends Packet<?>>> imageEntry : imageKeyToTopicMap.entrySet())
+            {
+               int imageKey = imageEntry.getKey();
+               ROS2Topic<? extends Packet<?>> imageTopic = imageEntry.getValue();
+
+               RawImage imageToPublish = imageSensor.getImage(imageKey);
+               if (imageTopic.getType().equals(ImageMessage.class))
+                  publishAsImageMessage(imageToPublish, (ROS2Topic<ImageMessage>) imageTopic);
+               else if (imageTopic.getType().equals(SRTStreamStatus.class))
+                  sensorStreamer.sendFrame((ROS2Topic<SRTStreamStatus>) imageTopic, imageToPublish);
+               imageToPublish.release();
+            }
+            isSending.set(false);
+         }
+         catch (InterruptedException ignored) {}
       }
-      isSending.set(false);
    }
 
    private void publishAsImageMessage(RawImage imageToPublish, ROS2Topic<ImageMessage> imageTopic)
@@ -114,15 +127,19 @@ public class ImageSensorPublisher implements Runnable, AutoCloseable
             throw new NotImplementedException("Tomasz has not implemented the compression method for this pixel format yet.");
       }
 
-      PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageGrabber.getCameraModel(), imageMessage);
+      PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageSensor.getCameraModel(), imageMessage);
 
       ros2Helper.publish(imageTopic, imageMessage);
    }
 
    @Override
-   public void close()
+   public void close() throws InterruptedException
    {
       System.out.println("Closing " + getClass().getSimpleName());
+      running = false;
+      publishThread.interrupt();
+      publishThread.join();
+
       compressionTools.destroy();
       jpegProcessor.destroy();
       sensorStreamer.destroy();

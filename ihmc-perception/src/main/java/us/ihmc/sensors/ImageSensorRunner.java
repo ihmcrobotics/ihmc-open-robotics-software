@@ -1,16 +1,24 @@
 package us.ihmc.sensors;
 
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.RestartableThread;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.function.BooleanSupplier;
 
 public class ImageSensorRunner implements AutoCloseable
 {
+   private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
+
    private final ImageSensorGrabber imageGrabber;
    private final RestartableThread sensorThread;
 
-   private final Set<Runnable> postGrabRunnables = new HashSet<>();
+   private final Executor algorithmExecutor = Executors.newCachedThreadPool();
+   private final Map<Runnable, BooleanSupplier> postGrabAlgorithms = new HashMap<>();
 
    public ImageSensorRunner(ImageSensorGrabber imageGrabber)
    {
@@ -18,10 +26,15 @@ public class ImageSensorRunner implements AutoCloseable
 
       sensorThread = new RestartableThread(imageGrabber.getSensorName() + "Runner", this::run);
    }
-   
-   public void addPostGrabRunnable(Runnable runnable)
+
+   public void addPostGrabAlgorithm(Runnable algorithm)
    {
-      postGrabRunnables.add(runnable);
+      addPostGrabAlgorithm(algorithm, () -> true);
+   }
+   
+   public void addPostGrabAlgorithm(Runnable algorithm, BooleanSupplier runAlgorithm)
+   {
+      postGrabAlgorithms.put(algorithm, runAlgorithm);
    }
 
    public ImageSensorGrabber getImageGrabber()
@@ -29,18 +42,9 @@ public class ImageSensorRunner implements AutoCloseable
       return imageGrabber;
    }
 
-   public synchronized boolean start()
+   public synchronized void start()
    {
-      if (isRunning())
-         return true;
-
-      if (!imageGrabber.isRunning())
-         imageGrabber.startSensor();
-
-      if (imageGrabber.isRunning())
-         sensorThread.start();
-
-      return isRunning();
+      sensorThread.start();
    }
 
    public synchronized void stop()
@@ -61,15 +65,22 @@ public class ImageSensorRunner implements AutoCloseable
 
    private void run()
    {
-      // Grab the images
-      if (!imageGrabber.grab())
-      {
-         stop();
+      // If the sensor is not running, try to start the sensor
+      if (!imageGrabber.isRunning() && !imageGrabber.startSensor())
+      {  // if sensor failed to start, sleep a bit and retry
+         MissingThreadTools.sleep(SECONDS_BETWEEN_RETRIES);
          return;
       }
 
+      // Grab the images
+      if (!imageGrabber.grab())
+         return; // Grab failed, return
+
       // Run the algorithms after the grab
-      for (Runnable runnable : postGrabRunnables)
-         runnable.run();
+      for (Entry<Runnable, BooleanSupplier> algorithmEntry : postGrabAlgorithms.entrySet())
+      {
+         if (algorithmEntry.getValue().getAsBoolean())
+            algorithmExecutor.execute(algorithmEntry.getKey());
+      }
    }
 }
