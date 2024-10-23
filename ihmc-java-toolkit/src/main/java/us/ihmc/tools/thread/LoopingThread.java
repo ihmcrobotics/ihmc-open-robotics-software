@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -15,54 +16,58 @@ import java.util.concurrent.atomic.AtomicReference;
 public class LoopingThread extends Thread
 {
    private final Runnable target;
-   private Throttler throttler;
+   private final Throttler throttler = new Throttler();
+   private volatile double loopPeriodLimit = -1.0;
    private final AtomicReference<RunCommand> runCommand = new AtomicReference<>(RunCommand.INITIALIZE);
 
    public LoopingThread() {
-      super();
-      target = null;
+      this(-1.0);
    }
 
    public LoopingThread(double loopFrequencyLimit)
    {
-      this();
+      super();
+      target = null;
       limitLoopFrequency(loopFrequencyLimit);
-   }
-
-   public LoopingThread(Runnable target, String name)
-   {
-      super(target, name);
-      this.target = target;
    }
 
    public LoopingThread(double loopFrequencyLimit, String name) {
       this(null, loopFrequencyLimit, name);
    }
 
+   public LoopingThread(Runnable target, String name)
+   {
+      this(target, -1.0, name);
+   }
+
    public LoopingThread(Runnable target, double loopFrequencyLimit, String name)
    {
-      this(target, name);
+      super(target, name);
+      this.target = target;
       limitLoopFrequency(loopFrequencyLimit);
    }
 
    public LoopingThread(RunnableThatThrows targetThatThrows, ExceptionHandler exceptionHandler, String name)
    {
-      super(() -> ExceptionTools.handle(targetThatThrows, exceptionHandler), name);
-      target = () -> ExceptionTools.handle(targetThatThrows, exceptionHandler);
+      this(targetThatThrows, exceptionHandler, -1.0, name);
    }
 
    public LoopingThread(RunnableThatThrows targetThatThrows, ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
    {
-      this(targetThatThrows, exceptionHandler, name);
+      super(() -> ExceptionTools.handle(targetThatThrows, exceptionHandler), name);
+      target = () -> ExceptionTools.handle(targetThatThrows, exceptionHandler);
       limitLoopFrequency(loopFrequencyLimit);
    }
 
+   /**
+    * Limit the frequency of the execution loop.
+    * To un-limit the loop frequency, pass in a number less than or equal to 0.0.
+    * @param frequencyLimit The limit for the loop frequency.
+    *                       If zero or negative, the loop's frequency is not limited.
+    */
    public void limitLoopFrequency(double frequencyLimit)
    {
-      if (throttler == null)
-         throttler = new Throttler();
-
-      throttler.setFrequency(frequencyLimit);
+      loopPeriodLimit = Conversions.hertzToSeconds(frequencyLimit);
    }
 
    /**
@@ -169,8 +174,8 @@ public class LoopingThread extends Thread
                pause(); // Set the run command to pause after this loop
          }
 
-         if (throttler != null)
-            throttler.waitAndRun();
+         if (loopPeriodLimit > 0.0)
+            throttler.waitAndRun(loopPeriodLimit);
 
          runInLoop();
       }
