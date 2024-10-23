@@ -25,6 +25,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -840,12 +841,12 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Contact normal is hard-coded - HARDWARE
-//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          // Contact normal is hard-coded - SIMULATION
-         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
+//         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 
