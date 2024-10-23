@@ -217,6 +217,7 @@ public class CrossRobotCommandResolver
    public void resolveHumanoidRobotContextDataWholeBodyControllerCore(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
       out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
 
