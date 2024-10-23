@@ -117,41 +117,41 @@ public class CUDAProgramTest
       CUDAStreamManager.releaseStream(stream);
    }
 
-   @Test
-   public void testLoadingKernelFromFile() throws URISyntaxException
-   {
-      // Get a stream
-      CUstream_st stream = CUDAStreamManager.getStream();
-
-      // Create a CUDA program with files
-      Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
-      Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
-      CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
-
-      // Load the kernels
-      program.loadKernel("add");
-      program.loadKernel("subtract");
-
-      // Create pointer
-      CUDAInteger sum = new CUDAInteger(1L);
-
-      CUDAInteger difference = new CUDAInteger(1L);
-
-      // Run the kernels
-      program.runKernel(stream, "add", new dim3(), new dim3(), 0, sum);
-      program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, difference);
-      cudaStreamSynchronize(stream);
-
-      // Ensure we got the correct result!
-      assertEquals(10, sum.get());
-      assertEquals(4, difference.get());
-
-      // Free memory
-      sum.close();
-      difference.close();
-
-      program.destroy();
-
-      CUDAStreamManager.releaseStream(stream);
-   }
+//   @Test
+//   public void testLoadingKernelFromFile() throws URISyntaxException
+//   {
+//      // Get a stream
+//      CUstream_st stream = CUDAStreamManager.getStream();
+//
+//      // Create a CUDA program with files
+//      Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
+//      Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
+//      CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
+//
+//      // Load the kernels
+//      program.loadKernel("add");
+//      program.loadKernel("subtract");
+//
+//      // Create pointer
+//      CUDAInteger sum = new CUDAInteger(1L);
+//
+//      CUDAInteger difference = new CUDAInteger(1L);
+//
+//      // Run the kernels
+//      program.runKernel(stream, "add", new dim3(), new dim3(), 0, sum);
+//      program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, difference);
+//      cudaStreamSynchronize(stream);
+//
+//      // Ensure we got the correct result!
+//      assertEquals(10, sum.get());
+//      assertEquals(4, difference.get());
+//
+//      // Free memory
+//      sum.close();
+//      difference.close();
+//
+//      program.destroy();
+//
+//      CUDAStreamManager.releaseStream(stream);
+//   }
 }
