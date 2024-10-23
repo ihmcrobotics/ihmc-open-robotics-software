@@ -1,5 +1,8 @@
 package us.ihmc.communication.configuration;
 
+import org.apache.commons.lang3.StringUtils;
+import us.ihmc.log.LogTools;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,10 +11,6 @@ import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Properties;
-
-import org.apache.commons.lang3.StringUtils;
-
-import us.ihmc.log.LogTools;
 
 public class NetworkParameters
 {
@@ -179,5 +178,10 @@ public class NetworkParameters
    public static boolean hasKey(NetworkParameterKeys key)
    {
       return getInstance().parameters.containsKey(key);
+   }
+
+   public static synchronized void reload()
+   {
+      instance = null;
    }
 }

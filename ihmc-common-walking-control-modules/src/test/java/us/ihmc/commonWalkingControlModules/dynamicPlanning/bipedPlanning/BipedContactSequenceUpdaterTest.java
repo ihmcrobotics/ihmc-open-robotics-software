@@ -48,8 +48,8 @@ public class BipedContactSequenceUpdaterTest
       BipedContactSequenceUpdater contactSequenceUpdater = new BipedContactSequenceUpdater(soleFrames, null, null);
 
       List<RobotSide> currentFeetInContact = new ArrayList<>();
-      for (RobotSide quadrant : RobotSide.values)
-         currentFeetInContact.add(quadrant);
+      for (RobotSide side : RobotSide.values)
+         currentFeetInContact.add(side);
 
       List<BipedTimedStep> stepList = new ArrayList<>();
 
@@ -80,8 +80,8 @@ public class BipedContactSequenceUpdaterTest
       BipedContactSequenceUpdater contactSequenceUpdater = new BipedContactSequenceUpdater(soleFrames, null, null);
 
       List<RobotSide> currentFeetInContact = new ArrayList<>();
-      for (RobotSide quadrant : RobotSide.values)
-         currentFeetInContact.add(quadrant);
+      for (RobotSide side : RobotSide.values)
+         currentFeetInContact.add(side);
 
       BipedTimedStep step = new BipedTimedStep();
       Point3D leftFootFirstStep = new Point3D(stepLength, nominalWidth / 2.0, 0.0);
@@ -180,8 +180,8 @@ public class BipedContactSequenceUpdaterTest
       BipedContactSequenceUpdater contactSequenceUpdater = new BipedContactSequenceUpdater(soleFrames, null, null);
 
       List<RobotSide> currentFeetInContact = new ArrayList<>();
-      for (RobotSide quadrant : RobotSide.values)
-         currentFeetInContact.add(quadrant);
+      for (RobotSide side : RobotSide.values)
+         currentFeetInContact.add(side);
 
       Point3D leftFootFirstStep = new Point3D(stepLength, nominalWidth / 2.0, 0.0);
 
@@ -275,8 +275,8 @@ public class BipedContactSequenceUpdaterTest
       BipedContactSequenceUpdater contactSequenceUpdater = new BipedContactSequenceUpdater(soleFrames, null, null);
 
       List<RobotSide> currentFeetInContact = new ArrayList<>();
-      for (RobotSide quadrant : RobotSide.values)
-         currentFeetInContact.add(quadrant);
+      for (RobotSide side : RobotSide.values)
+         currentFeetInContact.add(side);
 
       Point3D leftFootFirstStep = new Point3D(stepLength, nominalWidth / 2.0, 0.0);
 

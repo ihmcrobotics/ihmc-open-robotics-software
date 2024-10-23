@@ -3,6 +3,7 @@ package us.ihmc.perception.cuda;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.junit.jupiter.api.Test;
 import us.ihmc.perception.cuda.dataTypes.CUDAInteger;
@@ -13,6 +14,7 @@ import java.util.Objects;
 
 import static org.bytedeco.cuda.global.cudart.add;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static org.bytedeco.cuda.global.cudart.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CUDAProgramTest

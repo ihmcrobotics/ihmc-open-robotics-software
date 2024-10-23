@@ -17,11 +17,18 @@ sudo apt-get update
 sudo apt-get -y install cuda-toolkit-12-6
 ```
 
-To install the appropriate NVIDIA driver:
+To install the NVIDIA driver for 20 series graphics cards and up:
 
 ```shell
 sudo apt-get install -y nvidia-open
 ```
+
+For older NVIDIA graphics cards: 
+
+```shell
+sudo apt-get install -y cuda-drivers
+```
+
 
 ### nvCOMP
 

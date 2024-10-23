@@ -1,28 +1,37 @@
 package us.ihmc.avatar.slamTools;
 
+import java.io.File;
+import java.net.URL;
+
 public enum DriftCase
 {
    MultiplePlanes, BigZDrift, YDrift, YawDrift, YDriftSmallOverlap, RollDrift, HugeDrift;
 
    public String getFilePath()
    {
-      String filePath = System.getProperty("user.dir") + "\\";
-      switch (this)
+      URL pointCloudDataDirectory = DriftCase.class.getResource("PointCloudData");
+
+      if (pointCloudDataDirectory != null)
       {
-         case MultiplePlanes:
-            return filePath + "PointCloudData\\DriftCase\\MultiplePlanes\\";
-         case BigZDrift:
-            return filePath + "PointCloudData\\DriftCase\\BigZDrift\\";
-         case YDrift:
-            return filePath + "PointCloudData\\DriftCase\\YDrift\\";
-         case YawDrift:
-            return filePath + "PointCloudData\\DriftCase\\YawDrift\\";
-         case YDriftSmallOverlap:
-            return filePath + "PointCloudData\\DriftCase\\YDriftSmallOverlap\\";
-         case RollDrift:
-            return filePath + "PointCloudData\\DriftCase\\RollDrift\\";
-         case HugeDrift:
-            return filePath + "PointCloudData\\DriftCase\\HugeDrift\\";
+         String directoryPath = pointCloudDataDirectory.getPath();
+         String separator = File.separator;
+         switch (this)
+         {
+            case MultiplePlanes:
+               return directoryPath + separator + "DriftCase" + separator + "MultiplePlanes" + separator;
+            case BigZDrift:
+               return directoryPath + separator + "DriftCase" + separator + "BigZDrift" + separator;
+            case YDrift:
+               return directoryPath + separator + "DriftCase" + separator + "YDrift" + separator;
+            case YawDrift:
+               return directoryPath + separator + "DriftCase" + separator + "YawDrift" + separator;
+            case YDriftSmallOverlap:
+               return directoryPath + separator + "DriftCase" + separator + "YDriftSmallOverlap" + separator;
+            case RollDrift:
+               return directoryPath + separator + "DriftCase" + separator + "RollDrift" + separator;
+            case HugeDrift:
+               return directoryPath + separator + "DriftCase" + separator + "HugeDrift" + separator;
+         }
       }
       return "";
    }

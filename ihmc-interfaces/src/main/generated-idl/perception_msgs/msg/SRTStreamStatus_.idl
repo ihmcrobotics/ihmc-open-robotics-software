@@ -1,0 +1,42 @@
+#ifndef __perception_msgs__msg__SRTStreamStatus__idl__
+#define __perception_msgs__msg__SRTStreamStatus__idl__
+
+#include "perception_msgs/msg/./VideoFrameExtraData_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SRTStreamStatus_")
+      struct SRTStreamStatus
+      {
+        /**
+         * Connection information
+         */
+        string streamer_address;
+        unsigned short streamer_port;
+        boolean is_streaming;
+        float expected_publish_frequency;
+        /**
+         * Camera intrinsics
+         */
+        unsigned short image_width;
+        unsigned short image_height;
+        float fx;
+        float fy;
+        float cx;
+        float cy;
+        float depth_discretization;
+        /**
+         * Some codecs cannot accept extra data, so it's sent through this message instead
+         */
+        perception_msgs::msg::dds::VideoFrameExtraData frame_extra_data;
+        boolean contains_extra_data;
+      };
+    };
+  };
+};
+
+#endif
