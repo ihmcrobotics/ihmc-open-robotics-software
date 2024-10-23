@@ -1,16 +1,24 @@
 package us.ihmc.behaviors.activeMapping;
 
+import boofcv.gui.d3.Orientation3D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidGeometryMissingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -29,6 +37,93 @@ public class ContinuousPlannerTools
       middleDistanceBetweenGoalPoses.interpolate(leftGoalPose.getPosition(), rightGoalPose.getPosition(), 0.5);
 
       return middleDistanceBetweenGoalPoses.distanceXY(robotPositionInWorld);
+   }
+
+   public static SideDependentList<FramePose3D> setRandomizedBackwardsGoal(FramePose3D walkingStartPose,
+                                                                           SideDependentList<FramePose3D> stancePose,
+                                                                           float xDistance,
+                                                                           float xRandomMargin,
+                                                                           float zDistance,
+                                                                           float nominalStanceWidth)
+   {
+      float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
+
+      FramePose3D stanceMidPose = new FramePose3D();
+      stanceMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
+
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         goalPose.put(side, new FramePose3D());
+         RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
+         RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
+
+         stanceToWalkingFrameTransform.set(stanceMidPose);
+         worldToWalkingFrameTransform.set(walkingStartPose);
+         worldToWalkingFrameTransform.invert();
+         stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
+
+         double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
+         goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
+         goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
+         goalPose.get(side).appendTranslation( - (xWalkDistance + xDistance + offsetX), 0, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
+      }
+
+      // These are done after because of the ( - ) or ( + ) for the nominal stance
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
+
+      return goalPose;
+   }
+
+   public static SideDependentList<FramePose3D> setGoalPoseBasedOnLateralJoystickValue(ReferenceFrame referenceFrame,
+                                                                                       SideDependentList<FramePose3D> stancePose,
+                                                                                       double lateralValueInRadians,
+                                                                                       float xDistance,
+                                                                                       float zDistance,
+                                                                                       float nominalStanceWidth)
+   {
+      // Get the robot's current rotation (yaw) and translation (position) from the reference frame
+      RigidBodyTransform currentRobotLocation = new RigidBodyTransform();
+      currentRobotLocation.getRotation().set(referenceFrame.getTransformToWorldFrame().getRotation());
+      currentRobotLocation.getTranslation().set(referenceFrame.getTransformToWorldFrame().getTranslation());
+
+      // Extract rotation (yaw) from the reference frame's transform
+      double robotYaw = currentRobotLocation.getRotation().getYaw();
+
+      // Extract the robot's current position from the reference frame's transform
+      Point3D robotLocation = new Point3D();
+      robotLocation.set(currentRobotLocation.getTranslation());
+
+      // Compute the yaw for the goal by adding the lateralValueInRadians (1 radian to the right)
+      double goalYaw = robotYaw + lateralValueInRadians;
+
+      // Goal pose list for both sides
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
+
+      // Iterate over robot sides
+      for (RobotSide side : RobotSide.values)
+      {
+         // Create a new goal pose for each side
+         goalPose.put(side, new FramePose3D());
+
+         // Calculate the goal position relative to the robot's location, keeping a fixed radius
+         double goalX = robotLocation.getX() + xDistance * Math.cos(goalYaw);
+         double goalY = robotLocation.getY() + xDistance * Math.sin(goalYaw);
+         double goalZ = robotLocation.getZ() + zDistance; // Adjust for height if necessary
+
+         // Set the goal position in the pose
+         goalPose.get(side).getPosition().set(goalX, goalY, goalZ);
+
+         // Set the orientation so that the yaw matches the robot's facing direction plus the offset
+         goalPose.get(side).getOrientation().setToYawOrientation(goalYaw);
+      }
+
+      // Adjust for nominal stance width (side-to-side foot distance)
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0, 0.0);
+
+      return goalPose;
    }
 
    public static SideDependentList<FramePose3D> setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,

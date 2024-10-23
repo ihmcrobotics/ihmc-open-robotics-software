@@ -206,7 +206,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       remotePropertySets.setPropertyChanged();
 
-      // When running on the process we don't want to create the parameters locally, this gets done on the remote side
+      // When running on the process, we don't want to create the parameters locally, this gets done on the remote side
       if (runningLocally)
       {
          ros2PropertySetGroup.update();
@@ -307,20 +307,26 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
+      boolean walkBackward = false;
+      boolean usingController = false;
 
       if (currentJoystickControllerConnected)
       {
-         walkingEnabled |= currentController.getButton(currentController.getMapping().buttonR1);
+         usingController = true;
+         walkingEnabled |= currentController.getButton(currentController.getMapping().buttonA);
          forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
          lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
          turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
+         walkBackward = currentController.getButton(currentController.getMapping().buttonB);
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the checkbox is checked
+      // We publish this all the time to prevent any of the values from staying true all the time
       if (continuousHikingParameters.getEnableContinuousHiking())
       {
+         commandMessage.setUsingController(usingController);
          commandMessage.setEnableContinuousWalking(walkingEnabled);
-         commandMessage.setPublishToController(ImGui.getIO().getKeyAlt());
+         commandMessage.setWalkBackwards(walkBackward);
          commandMessage.setForwardValue(forwardJoystickValue);
          commandMessage.setLateralValue(lateralJoystickValue);
          commandMessage.setTurningValue(turningJoystickValue);

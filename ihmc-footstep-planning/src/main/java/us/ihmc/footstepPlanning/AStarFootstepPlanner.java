@@ -72,7 +72,7 @@ public class AStarFootstepPlanner
    private final SwingPlanningModule swingPlanningModule;
 
    /** Called each iteration. Should be very lightweight, mainly used for variable copying for the logger */
-   private List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
+   private final List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
    /** Called at the status publish frequency. Post-processes the plan and publishes it */
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
 
@@ -302,13 +302,10 @@ public class AStarFootstepPlanner
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
-      if (!request.getAssumeFlatGround())
-      {
-         swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
-                                                   outputToPack.getFootstepPlan(),
-                                                   request.getStartFootPoses(),
-                                                   request.getSwingPlannerType());
-      }
+      swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
+                                                outputToPack.getFootstepPlan(),
+                                                request.getStartFootPoses(),
+                                                request.getSwingPlannerType());
 
       outputToPack.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.totalElapsed() - planningStartTime);
       outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());

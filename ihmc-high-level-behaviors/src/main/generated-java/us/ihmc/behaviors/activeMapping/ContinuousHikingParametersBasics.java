@@ -38,6 +38,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
+   default void setGoalPoseBackwardDistance(double goalPoseBackwardDistance)
+   {
+      set(ContinuousHikingParameters.goalPoseBackwardDistance, goalPoseBackwardDistance);
+   }
+
    default void setSwingTime(double swingTime)
    {
       set(ContinuousHikingParameters.swingTime, swingTime);
@@ -48,9 +53,9 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.transferTime, transferTime);
    }
 
-   default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
+   default void setPlanningTimeoutAsAFractionOfTheStepDuration(double planningTimeoutAsAFractionOfTheStepDuration)
    {
-      set(ContinuousHikingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
+      set(ContinuousHikingParameters.planningTimeoutAsAFractionOfTheStepDuration, planningTimeoutAsAFractionOfTheStepDuration);
    }
 
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)

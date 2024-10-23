@@ -117,8 +117,9 @@ public class ContinuousPlannerSchedulingTask
                                                                                                                                     continuousHikingParameters);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
 
-      //NOTE: The transitions for the state machine are checked in order they are added. And once one condition is true the other's don't get checked.
-      // In order to be able to always stop the state machine we add the stop conditions first
+      //NOTE: The transitions for the state machine are checked in the order they are added.
+      // And once one condition is true the other's don't get checked.
+      // In order to be able to always stop the state machine we add the stop condition first
 
       // From any given state we can go back to DO_NOTHING and stop ContinuousHiking
       stateMachineFactory.addTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.DO_NOTHING, stopContinuousHikingTransitionCondition);

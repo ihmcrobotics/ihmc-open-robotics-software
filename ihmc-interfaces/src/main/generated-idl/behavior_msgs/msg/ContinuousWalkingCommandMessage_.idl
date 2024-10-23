@@ -12,17 +12,17 @@ module behavior_msgs
       struct ContinuousWalkingCommandMessage
       {
         /**
-         * flag to enable/disable publishing to controller
-         */
-        boolean publish_to_controller;
-        /**
          * flag to enable/disable continuous walking state machine
          */
         boolean enable_continuous_walking;
         /**
-         * number of steps to send to controller
+         * flag to walk backwards
          */
-        unsigned short number_of_steps_to_send;
+        boolean walk_backwards;
+        /**
+         * flag to determine if we are using a controller or not
+         */
+        boolean using_controller;
         /**
          * forward joystick value
          */

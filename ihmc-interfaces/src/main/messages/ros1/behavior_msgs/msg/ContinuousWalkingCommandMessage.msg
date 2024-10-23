@@ -1,12 +1,12 @@
 
-# flag to enable/disable publishing to controller
-bool publish_to_controller
-
 # flag to enable/disable continuous walking state machine
 bool enable_continuous_walking
 
-# number of steps to send to controller
-uint16 number_of_steps_to_send
+# flag to walk backwards
+bool walk_backwards
+
+# flag to determine if we are using a controller or not
+bool using_controller
 
 # forward joystick value
 float64 forward_value
