@@ -70,6 +70,11 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       logger.fromMessage(message.getRecentLogMessages());
    }
 
+   public void drawToSVG()
+   {
+      new BehaviorTreeSVGWriter(this);
+   }
+
    @Override
    public void destroy()
    {
