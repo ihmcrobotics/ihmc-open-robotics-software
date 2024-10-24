@@ -217,15 +217,18 @@ public class SRTVideoStreamer
          interruptCallback.interrupt();
       }
 
+      if (encoder != null)
+      {
+         encoder.flush(this::writeToCallers);
+         encoder.destroy();
+      }
+
       Iterator<SRTStreamWriter> callerIterator = callers.iterator();
       while (callerIterator.hasNext())
       {
          callerIterator.next().destroy();
          callerIterator.remove();
       }
-
-      if (encoder != null)
-         encoder.destroy();
 
       interruptCallback.close();
    }
