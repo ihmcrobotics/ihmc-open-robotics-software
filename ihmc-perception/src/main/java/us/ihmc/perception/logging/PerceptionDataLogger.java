@@ -9,10 +9,8 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.*;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,6 +24,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -262,7 +261,8 @@ public class PerceptionDataLogger
       // Add callback for Robot Configuration Data
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
-         var robotConfigurationDataSubscription = ros2Helper.subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(simpleRobotName));
+         ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(simpleRobotName);
+         var robotConfigurationDataSubscription = ros2Helper.subscribe(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
          runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
       }

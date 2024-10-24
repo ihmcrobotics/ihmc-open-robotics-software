@@ -2,6 +2,8 @@ package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -10,11 +12,11 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
 
 /**
@@ -40,11 +42,12 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      footstepDataListSubscriber = ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, robotName),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      footstepDataListSubscriber = ros2Node.createSubscription2(ControllerAPI.getTopic(controllerOutputTopic, FootstepDataListMessage.class),
                                                                 this::interceptFootstepDataListMessage);
-      footstepStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, robotName),
+      footstepStatusSubscriber = ros2Node.createSubscription2(ControllerAPI.getTopic(controllerOutputTopic, FootstepStatusMessage.class),
                                                               this::acceptFootstepStatusMessage);
-      footstepQueueStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepQueueStatusMessage.class, robotName),
+      footstepQueueStatusSubscriber = ros2Node.createSubscription2(ControllerAPI.getTopic(controllerOutputTopic, FootstepQueueStatusMessage.class),
                                                                    this::acceptFootstepQueueStatusMessage);
    }
 

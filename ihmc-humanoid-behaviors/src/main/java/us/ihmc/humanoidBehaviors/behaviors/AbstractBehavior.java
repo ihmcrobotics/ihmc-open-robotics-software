@@ -108,8 +108,8 @@ public abstract class AbstractBehavior implements RobotController
       kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
       kinematicsPlanningToolboxOutputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerInputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
-      controllerOutputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       behaviorInputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withInput();
       behaviorOutputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 

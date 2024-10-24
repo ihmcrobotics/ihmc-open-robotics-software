@@ -13,7 +13,7 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
@@ -66,10 +66,14 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    private FootstepPlanningModule footstepPlanner;
    private RobotLowLevelMessenger lowLevelMessenger;
 
+   private final ROS2Topic<?> controllerOutputTopic;
+
    public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       this.robotModel = robotModel;
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+
+      this.controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
    }
 
    public ROS2ControllerHelper getControllerHelper()
@@ -197,19 +201,19 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    @Override
    public <T> ROS2Input<T> subscribeToController(Class<T> messageClass)
    {
-      return subscribe(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()));
+      return subscribe(ControllerAPI.getTopic(controllerOutputTopic, messageClass));
    }
 
    // TODO: Move to remote robot interface?
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
-      subscribeViaCallback(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+      subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, messageClass), callback);
    }
 
    @Override
    public ROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -245,7 +249,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
    {
-      subscribeViaCallback(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+      subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class), callback);
    }
 
    @Override

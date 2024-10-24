@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -50,15 +51,19 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null, PlanningMode.FAST_HIKING);
       this.continuousPlanningParameters = continuousPlanningParameters;
       this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
-      this.controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
       continuousPlanner = new ContinuousPlannerForPlanarRegions(referenceFrames);
       publisherMap = new ROS2PublisherMap(ros2Node);
-      publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
       //ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
+
+      this.controllerFootstepDataTopic = ControllerAPI.getTopic(controllerInputTopic, FootstepDataListMessage.class);
+      ros2Helper.subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, WalkingStatusMessage.class), this::walkingStatusReceived);
+
+      publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
       executorService.scheduleAtFixedRate(this::generalUpdate, 0, UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);

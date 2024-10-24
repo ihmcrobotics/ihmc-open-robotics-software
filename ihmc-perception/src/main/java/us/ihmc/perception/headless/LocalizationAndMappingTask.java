@@ -8,6 +8,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -116,13 +117,14 @@ public class LocalizationAndMappingTask
       slamOutputRegionsPublisher = ros2Node.createPublisher(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(simpleRobotName);
+      ros2Helper.subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, WalkingControllerFailureStatusMessage.class), message ->
       {
          LogTools.warn("Resetting Map (Walking Failure Detected)");
          setEnableLiveMode(false);
       });
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
+      ros2Helper.subscribeViaCallback(ControllerAPI.getTopic(controllerOutputTopic, HighLevelStateMessage.class), highLevelState::set);
 
       updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
    }

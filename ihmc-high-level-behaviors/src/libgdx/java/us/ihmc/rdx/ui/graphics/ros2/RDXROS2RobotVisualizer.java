@@ -5,13 +5,14 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,6 +34,7 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableZED2i;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +81,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
                                  ROS2SyncedRobotModel syncedRobot,
                                  Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier)
    {
-      super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer", StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+      super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer",
+            ControllerAPI.getTopic(HumanoidControllerAPI.getOutputTopic(syncedRobot.getRobotModel().getSimpleRobotName()), RobotConfigurationData.class));
       this.baseUI = baseUI;
       this.ros2 = ros2;
       this.syncedRobot = syncedRobot;
@@ -151,7 +154,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
                                                                     PerceptionAPI.EXPERIMENTAL_CAMERA_TO_PARENT_TUNING,
                                                                     syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
 
-      ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
+      ROS2Topic<?> controllereOutputTopic = HumanoidControllerAPI.getOutputTopic(syncedRobot.getRobotModel().getSimpleRobotName());
+      ros2.subscribeViaVolatileCallback(ControllerAPI.getTopic(controllereOutputTopic, FootstepStatusMessage.class), footstepStatusMessage ->
       {
          if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
             completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));

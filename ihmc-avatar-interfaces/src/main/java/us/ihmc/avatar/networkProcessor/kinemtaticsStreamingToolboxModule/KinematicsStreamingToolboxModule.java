@@ -18,7 +18,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -118,12 +117,15 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName));
-      streamingMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName));
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+
+      trajectoryMessagePublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic, WholeBodyTrajectoryMessage.class));
+      streamingMessagePublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic, WholeBodyStreamingMessage.class));
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class), s ->
       {
          s.takeNextData(robotConfigurationData, null);
          robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
@@ -131,7 +133,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class), s ->
       {
          if (controller != null)
          {

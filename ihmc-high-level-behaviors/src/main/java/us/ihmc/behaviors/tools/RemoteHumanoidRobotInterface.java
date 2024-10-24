@@ -12,6 +12,7 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.*;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -43,6 +44,8 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
+import javax.naming.ldap.Control;
+
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
 public class RemoteHumanoidRobotInterface
 {
@@ -61,7 +64,8 @@ public class RemoteHumanoidRobotInterface
 
    private final ROS2SyncedRobotModel syncedRobot;
 
-   private final ROS2Topic<?> topicName;
+   private final ROS2Topic<?> inputTopic;
+   private final ROS2Topic<?> outputTopic;
 
    public RemoteHumanoidRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
@@ -69,19 +73,20 @@ public class RemoteHumanoidRobotInterface
       this.robotModel = robotModel;
       robotName = robotModel.getSimpleRobotName();
       jointMap = robotModel.getJointMap();
-      topicName = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName);
+      inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
       
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatus);
-      ros2Node.createSubscription2(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotName), footstepStatusMessage::set);
+      ros2Node.createSubscription2(ControllerAPI.getTopic(outputTopic, WalkingStatusMessage.class), this::acceptWalkingStatus);
+      ros2Node.createSubscription2(ControllerAPI.getTopic(outputTopic, FootstepStatusMessage.class), footstepStatusMessage::set);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerStateInput = new ROS2Input<>(ros2Node, HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), initialState, this::acceptStatusChange);
-      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName));
+      controllerStateInput = new ROS2Input<>(ros2Node, ControllerAPI.getTopic(outputTopic, HighLevelStateChangeStatusMessage.class), initialState, this::acceptStatusChange);
+      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, ControllerAPI.getTopic(outputTopic, CapturabilityBasedStatus.class));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
    }
@@ -115,7 +120,7 @@ public class RemoteHumanoidRobotInterface
 
    public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      return new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), consumer);
+      return new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, outputTopic, consumer);
    }
 
    public FootstepStatusMessage getLatestFootstepStatusMessage()
@@ -313,7 +318,7 @@ public class RemoteHumanoidRobotInterface
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
-      publisherMap.publish(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName), stampedPosePacket);
+      publisherMap.publish(ControllerAPI.getTopic(inputTopic, StampedPosePacket.class), stampedPosePacket);
    }
 
    public void pauseWalking()

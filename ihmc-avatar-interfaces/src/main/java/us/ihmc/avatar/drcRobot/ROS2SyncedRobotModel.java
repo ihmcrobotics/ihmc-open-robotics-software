@@ -5,13 +5,14 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 
@@ -31,8 +32,9 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    {
       super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
 
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
-                                                    StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                    ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                                     robotConfigurationData,
                                                     message ->
                                                     {
@@ -42,12 +44,12 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       robotConfigurationDataInput.addCallback(message -> resetDataReceptionTimer());
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node,
                                                       CapturabilityBasedStatus.class,
-                                                      HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotModel.getSimpleRobotName()));
+                                                      ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class));
 
       for (RobotSide robotSide : RobotSide.values)
       {
          handJointAnglePacketInputs.set(robotSide, new ROS2Input<>(ros2Node,
-                                                                   StateEstimatorAPI.getHandJointAnglesTopic(robotModel.getSimpleRobotName()),
+                                                                   ControllerAPI.getTopic(controllerOutputTopic, HandJointAnglePacket.class),
                                                                    null,
                                                                    message -> robotSide.toByte() == message.getRobotSide()));
          sakeHandStatus.put(robotSide, new ROS2SakeHandStatus(ros2Node, robotModel.getSimpleRobotName(), robotSide));

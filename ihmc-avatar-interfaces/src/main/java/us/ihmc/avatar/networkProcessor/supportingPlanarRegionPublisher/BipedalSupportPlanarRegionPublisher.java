@@ -12,7 +12,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -59,9 +59,10 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
       ros2Node = realtimeROS2Node;
 
-      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName),
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
                                   subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+      ros2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, RobotConfigurationData.class),
                                   subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ros2Node.createPublisher(PerceptionAPI.BIPEDAL_SUPPORT_REGIONS);
       ros2Node.createSubscription(getTopic(robotName), subscriber -> latestParametersMessage.set(subscriber.takeNextData()));

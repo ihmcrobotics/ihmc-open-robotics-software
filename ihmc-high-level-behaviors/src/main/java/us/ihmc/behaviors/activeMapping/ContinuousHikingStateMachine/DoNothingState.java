@@ -3,10 +3,12 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Topic;
 
 public class DoNothingState implements State
 {
@@ -25,7 +27,8 @@ public class DoNothingState implements State
       this.continuousPlanner = continuousPlanner;
       this.debugger = debugger;
 
-      pauseWalkingPublisher = ros2Helper.getROS2NodeInterface().createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(simpleRobotName);
+      pauseWalkingPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ControllerAPI.getTopic(controllerInputTopic, PauseWalkingMessage.class));
    }
 
    @Override

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -25,6 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
+import javax.naming.ldap.Control;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,8 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    private final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_simulation_test_helper");
-
+   private final ROS2Topic<?> controllerInputTopic;
+   private final ROS2Topic<?> controllerOutputTopic;
    @SuppressWarnings("rawtypes")
    private final Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers = new HashMap<>();
 
@@ -77,15 +80,20 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       setRobotModel(robotModel);
       setCommonAvatarEnvrionmentInterface(environment);
 
+      controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
+      controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName());
+
       setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_simulation"));
 
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
       String robotName = this.robotModel.get().getSimpleRobotName();
+      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
          Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
-         defaultControllerPublishers.put(messageClass, ros2Node.createPublisher(HumanoidControllerAPI.getTopic(messageClass, robotName)));
+         defaultControllerPublishers.put(messageClass, ros2Node.createPublisher(ControllerAPI.getTopic(inputTopic, messageClass)));
       }
 
       List<Class<? extends Command<?, ?>>> stepGeneratorSupportedCommands = StepGeneratorAPIDefinition.getStepGeneratorSupportedCommands();
@@ -97,13 +105,14 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       }
 
       defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class,
-                                      ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName)));
+                                      ros2Node.createPublisher(ControllerAPI.getTopic(inputTopic, WholeBodyTrajectoryMessage.class)));
       defaultControllerPublishers.put(WholeBodyStreamingMessage.class,
-                                      ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName)));
-      defaultControllerPublishers.put(MessageCollection.class, ros2Node.createPublisher(HumanoidControllerAPI.getTopic(MessageCollection.class, robotName)));
+                                      ros2Node.createPublisher(ControllerAPI.getTopic(inputTopic, WholeBodyStreamingMessage.class)));
+      defaultControllerPublishers.put(MessageCollection.class, ros2Node.createPublisher(ControllerAPI.getTopic(inputTopic, MessageCollection.class)));
 
+      // TODO see if this can be replaced with {@link ControllerAPI#getTopic()}
       defaultControllerPublishers.put(ValkyrieHandFingerTrajectoryMessage.class,
-                                      createPublisher(ValkyrieHandFingerTrajectoryMessage.class, HumanoidControllerAPI.getInputTopic(robotName)));
+                                      createPublisher(ValkyrieHandFingerTrajectoryMessage.class, inputTopic));
    }
 
    public SCS2AvatarTestingSimulation createAvatarTestingSimulation()
@@ -167,7 +176,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, HumanoidControllerAPI.getTopic(messageType, robotModel.get().getSimpleRobotName()), consumer);
+      createSubscriber(messageType, ControllerAPI.getTopic(controllerOutputTopic, messageType), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)
