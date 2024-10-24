@@ -9,16 +9,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import boofcv.abst.fiducial.SquareBinary_to_FiducialDetector;
-import boofcv.alg.distort.pinhole.LensDistortionPinhole;
-import boofcv.factory.fiducial.ConfigFiducialBinary;
-import boofcv.factory.fiducial.FactoryFiducial;
-import boofcv.factory.filter.binary.ConfigThreshold;
-import boofcv.factory.filter.binary.ThresholdType;
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.calib.CameraPinhole;
-import boofcv.struct.image.GrayF32;
-import boofcv.struct.image.ImageType;
 import perception_msgs.msg.dds.DetectedFiducialPacket;
 import perception_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
@@ -41,6 +31,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+@Deprecated
 public class FiducialDetectorToolboxController extends ToolboxController
 {
    private static final RescaleOp imageRescalingForSim = new RescaleOp(3.5f, 35, null);
@@ -65,7 +56,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame;
 
-   private final SquareBinary_to_FiducialDetector<GrayF32> detector;
+   private final Object detector;
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -85,9 +76,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
       imageRescalingOperation = target == RobotTarget.REAL_ROBOT ? imageRescalingForRealRobot : imageRescalingForSim;
 
       inProcessingThread.set(false);
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),
-                                              GrayF32.class);
+      detector = new Object();
 
       cameraReferenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(prefix + "CameraReferenceFrame",
                                                                                              ReferenceFrame.getWorldFrame(),
@@ -148,9 +137,9 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private void detect(BufferedImage bufferedImage,
                        Point3DReadOnly cameraPositionInWorld,
                        QuaternionReadOnly cameraOrientationInWorldXForward,
-                       CameraPinhole intrinsicParameters)
+                       Object intrinsicParameters)
    {
-      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
+//      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
 
       imageRescalingOperation.filter(bufferedImage, bufferedImage); // Source and destination are the same.
 
@@ -181,50 +170,50 @@ public class FiducialDetectorToolboxController extends ToolboxController
       cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
       cameraPose.getPosition().set(cameraPositionInWorld);
 
-      GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
+//      GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
       if (DEBUG)
       {
-         image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
+//         image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
          frame.pack();
          frame.repaint();
       }
 
-      detector.detect(grayImage);
+//      detector.detect(grayImage);
 
-      for (int i = 0; i < detector.totalFound(); i++)
-      {
-         detector.getFiducialToCamera(i, fiducialToCamera);
-
-         fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-
-         reportedFiducialPoseInWorldFrame.setReferenceFrame(detectorReferenceFrame);
-         reportedFiducialPoseInWorldFrame.getOrientation().set(fiducialRotationMatrix);
-         reportedFiducialPoseInWorldFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
-         reportedFiducialPoseInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-
-         detector.getBounds(i, bounds);
-
-         DetectedFiducialPacket packet = new DetectedFiducialPacket();
-         packet.fiducial_id_ = detector.getId(i);
-         for (int j = 0; j < bounds.size(); j++)
-         {
-            packet.getBounds().add().set(bounds.get(j).getX(), bounds.get(j).getY(), 0.0);
-         }
-
-         Pose3D pose = new Pose3D(reportedFiducialPoseInWorldFrame.getPosition(), reportedFiducialPoseInWorldFrame.getOrientation());
-
-         if (!statusTimer.isRunning(5.0))
-         {
-            LogTools.info("Found fiducial: id: {} pose: {}", packet.getFiducialId(), pose);
-            statusTimer.reset();
-         }
-
-         packet.fiducial_transform_to_world_ = pose;
-
-         reportMessage(packet);
-      }
+//      for (int i = 0; i < detector.totalFound(); i++)
+//      {
+//         detector.getFiducialToCamera(i, fiducialToCamera);
+//
+//         fiducialRotationMatrix.set(fiducialToCamera.getR().data);
+//
+//         reportedFiducialPoseInWorldFrame.setReferenceFrame(detectorReferenceFrame);
+//         reportedFiducialPoseInWorldFrame.getOrientation().set(fiducialRotationMatrix);
+//         reportedFiducialPoseInWorldFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+//         reportedFiducialPoseInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
+//
+//
+//         detector.getBounds(i, bounds);
+//
+//         DetectedFiducialPacket packet = new DetectedFiducialPacket();
+//         packet.fiducial_id_ = detector.getId(i);
+//         for (int j = 0; j < bounds.size(); j++)
+//         {
+//            packet.getBounds().add().set(bounds.get(j).getX(), bounds.get(j).getY(), 0.0);
+//         }
+//
+//         Pose3D pose = new Pose3D(reportedFiducialPoseInWorldFrame.getPosition(), reportedFiducialPoseInWorldFrame.getOrientation());
+//
+//         if (!statusTimer.isRunning(5.0))
+//         {
+//            LogTools.info("Found fiducial: id: {} pose: {}", packet.getFiducialId(), pose);
+//            statusTimer.reset();
+//         }
+//
+//         packet.fiducial_transform_to_world_ = pose;
+//
+//         reportMessage(packet);
+//      }
    }
 
    @Override

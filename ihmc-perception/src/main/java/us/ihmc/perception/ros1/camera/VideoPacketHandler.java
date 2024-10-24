@@ -1,6 +1,5 @@
 package us.ihmc.perception.ros1.camera;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -16,6 +15,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
+@Deprecated
 public class VideoPacketHandler implements CompressedVideoHandler
 {
    private final ROS2PublisherBasics<VideoPacket> publisher;
@@ -54,7 +54,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
                        long timeStamp,
                        Point3DReadOnly position,
                        QuaternionReadOnly orientation,
-                       CameraPinholeBrown intrinsicParameters)
+                       Object intrinsicParameters)
    {
       LogTools.debug(() ->
       {

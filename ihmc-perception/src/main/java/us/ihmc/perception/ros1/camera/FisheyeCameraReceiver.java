@@ -3,7 +3,6 @@ package us.ihmc.perception.ros1.camera;
 import java.awt.image.BufferedImage;
 import java.util.function.LongUnaryOperator;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -22,6 +21,7 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
+@Deprecated
 public class FisheyeCameraReceiver extends CameraDataReceiver
 {
    private static final boolean DEBUG = false;
@@ -47,12 +47,12 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
          {
-            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
-            if (DEBUG)
-            {
-               PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
-            }
-            updateImage(VideoSource.getFisheyeSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
+//            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
+//            if (DEBUG)
+//            {
+//               PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
+//            }
+//            updateImage(VideoSource.getFisheyeSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
 
          }
       };
@@ -60,6 +60,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
    }
 
+   @Deprecated
    private static class CompressedFisheyeHandler implements CompressedVideoHandler
    {
       private final ROS2PublisherBasics<FisheyePacket> publisher;
@@ -71,7 +72,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          CameraPinholeBrown intrinsicParameters)
+                          Object intrinsicParameters)
       {
          if (DEBUG)
          {

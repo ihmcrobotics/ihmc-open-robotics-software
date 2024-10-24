@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.producers;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoSource;
@@ -11,6 +10,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 
+@Deprecated
 public class RawVideoDataServer implements VideoDataServer
 {
    protected final ObjectCommunicator objectCommunicator;
@@ -21,7 +21,7 @@ public class RawVideoDataServer implements VideoDataServer
    }
    
    @Override
-   public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
+   public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, Object intrinsicParameters)
    {
       LocalVideoPacket videoPacket = HumanoidMessageTools.createLocalVideoPacket(timeStamp, bufferedImage, intrinsicParameters);
       objectCommunicator.consumeObject(videoPacket);

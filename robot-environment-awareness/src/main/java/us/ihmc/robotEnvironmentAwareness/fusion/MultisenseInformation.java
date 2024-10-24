@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import boofcv.struct.calib.CameraPinholeBrown;
-
+@Deprecated
 public enum MultisenseInformation
 {
    CART, ATLAS;
@@ -18,25 +17,27 @@ public enum MultisenseInformation
       return null;
    }
 
-   public CameraPinholeBrown getIntrinsicParameters()
+   @Deprecated
+   public Object getIntrinsicParameters()
    {
-      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-      switch (this)
-      {
-      case CART:
-         intrinsicParameters.setFx(566.8350830078125);
-         intrinsicParameters.setFy(566.8350830078125);
-         intrinsicParameters.setCx(505.5);
-         intrinsicParameters.setCy(260.5);
-         break;
-      case ATLAS:
-         intrinsicParameters.setFx(584.234619140625);
-         intrinsicParameters.setFy(584.234619140625);
-         intrinsicParameters.setCx(512.0);
-         intrinsicParameters.setCy(272.0);
-         break;
-      }
-      return intrinsicParameters;
+//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+//      switch (this)
+//      {
+//      case CART:
+//         intrinsicParameters.setFx(566.8350830078125);
+//         intrinsicParameters.setFy(566.8350830078125);
+//         intrinsicParameters.setCx(505.5);
+//         intrinsicParameters.setCy(260.5);
+//         break;
+//      case ATLAS:
+//         intrinsicParameters.setFx(584.234619140625);
+//         intrinsicParameters.setFy(584.234619140625);
+//         intrinsicParameters.setCx(512.0);
+//         intrinsicParameters.setCy(272.0);
+//         break;
+//      }
+//      return intrinsicParameters;
+      return new Object();
    }
 
    public int[] getProjectionOffset()
