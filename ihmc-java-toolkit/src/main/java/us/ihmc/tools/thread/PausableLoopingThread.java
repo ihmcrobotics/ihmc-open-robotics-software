@@ -18,7 +18,7 @@ public class PausableLoopingThread
 {
    private enum RunCommand
    {
-      LOOP, PAUSE, RUN_ONCE, FINALIZE
+      PAUSE, LOOP, RUN_ONCE, FINALIZE
    }
 
    private final AtomicReference<RunCommand> runCommand = new AtomicReference<>(RunCommand.PAUSE);
