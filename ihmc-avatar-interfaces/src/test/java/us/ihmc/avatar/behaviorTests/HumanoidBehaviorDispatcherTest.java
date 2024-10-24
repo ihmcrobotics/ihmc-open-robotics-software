@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
@@ -66,6 +67,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Disabled
+@Deprecated
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

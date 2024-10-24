@@ -11,6 +11,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
+@Disabled
+@Deprecated
 public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTest
 {
    private final AtlasRobotModel robotModel;

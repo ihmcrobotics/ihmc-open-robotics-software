@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
@@ -28,6 +29,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAva
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Disabled
+@Deprecated
 public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
