@@ -825,6 +825,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
+      massMatrixCalculator.reset();
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
       CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);

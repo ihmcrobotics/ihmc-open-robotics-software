@@ -478,6 +478,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FrameVector3D angularDerivativeFeedback = new FrameVector3D();
    protected final FrameVector3D angularIntegralFeedback = new FrameVector3D();
 
+   protected final DMatrixRMaj tempFeedbackMatrix = new DMatrixRMaj(6, 1);
+
    private final Matrix3D inverseInertiaMatrix3D = new Matrix3D();
 
    @Override
@@ -502,17 +504,35 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (isImpedanceEnabled())
       {
-         inverseInertiaTempMatrix.reshape(3,3);
-         //      Point so extract the 3x3 matrix from the 6x6 matrix (Lower right 3x3 matrix)
-         CommonOps_DDRM.extract(inverseInertiaMatrix, 3, 6, 3, 6, inverseInertiaTempMatrix, 0, 0);
-         inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
-         inverseInertiaMatrix3D.transform(linearProportionalFeedback);
-         inverseInertiaMatrix3D.transform(linearDerivativeFeedback);
+         tempMatrix.reshape(6, 1);
 
-         CommonOps_DDRM.extract(inverseInertiaMatrix, 0, 3, 0, 3, inverseInertiaTempMatrix, 0, 0);
-         inverseInertiaMatrix3D.set(inverseInertiaTempMatrix);
-         inverseInertiaMatrix3D.transform(angularProportionalFeedback);
-         inverseInertiaMatrix3D.transform(angularDerivativeFeedback);
+         tempFeedbackMatrix.set(0, 0, angularProportionalFeedback.getX());
+         tempFeedbackMatrix.set(1, 0, angularProportionalFeedback.getY());
+         tempFeedbackMatrix.set(2, 0, angularProportionalFeedback.getZ());
+         tempFeedbackMatrix.set(3, 0, linearProportionalFeedback.getX());
+         tempFeedbackMatrix.set(4, 0, linearProportionalFeedback.getY());
+         tempFeedbackMatrix.set(5, 0, linearProportionalFeedback.getZ());
+         CommonOps_DDRM.mult(inverseInertiaMatrix, tempFeedbackMatrix, tempMatrix);
+         angularProportionalFeedback.setX(tempMatrix.get(0, 0));
+         angularProportionalFeedback.setY(tempMatrix.get(1, 0));
+         angularProportionalFeedback.setZ(tempMatrix.get(2, 0));
+         linearProportionalFeedback.setX(tempMatrix.get(3, 0));
+         linearProportionalFeedback.setY(tempMatrix.get(4, 0));
+         linearProportionalFeedback.setZ(tempMatrix.get(5, 0));
+
+         tempFeedbackMatrix.set(0, 0, angularDerivativeFeedback.getX());
+         tempFeedbackMatrix.set(1, 0, angularDerivativeFeedback.getY());
+         tempFeedbackMatrix.set(2, 0, angularDerivativeFeedback.getZ());
+         tempFeedbackMatrix.set(3, 0, linearDerivativeFeedback.getX());
+         tempFeedbackMatrix.set(4, 0, linearDerivativeFeedback.getY());
+         tempFeedbackMatrix.set(5, 0, linearDerivativeFeedback.getZ());
+         CommonOps_DDRM.mult(inverseInertiaMatrix, tempFeedbackMatrix, tempMatrix);
+         angularDerivativeFeedback.setX(tempMatrix.get(0, 0));
+         angularDerivativeFeedback.setY(tempMatrix.get(1, 0));
+         angularDerivativeFeedback.setZ(tempMatrix.get(2, 0));
+         linearDerivativeFeedback.setX(tempMatrix.get(3, 0));
+         linearDerivativeFeedback.setY(tempMatrix.get(4, 0));
+         linearDerivativeFeedback.setZ(tempMatrix.get(5, 0));
       }
 
       desiredLinearAcceleration.setIncludingFrame(linearProportionalFeedback);
@@ -872,6 +892,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          tempMatrix.set(inverseInertiaMatrix);
 
          CommonOps_DDRM.invert(tempMatrix);
+         LogTools.info("InertiaMatrix = " + tempMatrix);
          MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
 
          tempMatrix.reshape(6,6);
@@ -1122,6 +1143,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
       subMassMatrix.set(massMatrixCalculator.getMassMatrix());
+      massMatrixCalculator.reset();
       subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
 
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));

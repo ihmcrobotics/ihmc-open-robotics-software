@@ -779,6 +779,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
       massInverseMatrix.set(massMatrixCalculator.getMassMatrix());
+      massMatrixCalculator.reset();
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       CommonOps_DDRM.invert(massInverseMatrix);
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
