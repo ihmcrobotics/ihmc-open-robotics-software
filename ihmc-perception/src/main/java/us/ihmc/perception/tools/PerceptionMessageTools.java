@@ -181,16 +181,14 @@ public class PerceptionMessageTools
    public static void packImageMessage(RawImage originalImage,
                                        BytePointer compressedData,
                                        CompressionType compressionType,
-                                       CameraModel cameraModel,
                                        ImageMessage imageMessageToPack)
    {
-      packImageMessage(originalImage, compressedData, compressionType, cameraModel, null, null, imageMessageToPack);
+      packImageMessage(originalImage, compressedData, compressionType, null, null, imageMessageToPack);
    }
 
    public static void packImageMessage(RawImage originalImage,
                                        BytePointer compressedData,
                                        CompressionType compressionType,
-                                       CameraModel cameraModel,
                                        @Nullable ByteBuffer ousterBeamAltitudeAngles,
                                        @Nullable ByteBuffer ousterBeamAzimuthAngles,
                                        ImageMessage imageMessageToPack)
@@ -198,7 +196,6 @@ public class PerceptionMessageTools
       originalImage.packImageMessageMetaData(imageMessageToPack);
       packImageMessageData(imageMessageToPack, compressedData);
       imageMessageToPack.setCompressionType(compressionType.toByte());
-      imageMessageToPack.setCameraModel(cameraModel.toByte());
       if (ousterBeamAltitudeAngles != null)
          MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
       if (ousterBeamAzimuthAngles != null)

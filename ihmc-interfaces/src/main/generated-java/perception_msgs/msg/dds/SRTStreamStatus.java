@@ -26,6 +26,10 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
    public float cy_;
    public float depth_discretization_;
    /**
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+            */
+   public byte camera_model_;
+   /**
             * Some codecs cannot accept extra data, so it's sent through this message instead
             */
    public perception_msgs.msg.dds.VideoFrameExtraData frame_extra_data_;
@@ -67,6 +71,8 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       cy_ = other.cy_;
 
       depth_discretization_ = other.depth_discretization_;
+
+      camera_model_ = other.camera_model_;
 
       perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.staticCopy(other.frame_extra_data_, frame_extra_data_);
       contains_extra_data_ = other.contains_extra_data_;
@@ -193,6 +199,21 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       return depth_discretization_;
    }
 
+   /**
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+            */
+   public void setCameraModel(byte camera_model)
+   {
+      camera_model_ = camera_model;
+   }
+   /**
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+            */
+   public byte getCameraModel()
+   {
+      return camera_model_;
+   }
+
 
    /**
             * Some codecs cannot accept extra data, so it's sent through this message instead
@@ -251,6 +272,8 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_discretization_, other.depth_discretization_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.camera_model_, other.camera_model_, epsilon)) return false;
+
       if (!this.frame_extra_data_.epsilonEquals(other.frame_extra_data_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.contains_extra_data_, other.contains_extra_data_, epsilon)) return false;
 
@@ -289,6 +312,8 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
 
       if(this.depth_discretization_ != otherMyClass.depth_discretization_) return false;
 
+      if(this.camera_model_ != otherMyClass.camera_model_) return false;
+
       if (!this.frame_extra_data_.equals(otherMyClass.frame_extra_data_)) return false;
       if(this.contains_extra_data_ != otherMyClass.contains_extra_data_) return false;
 
@@ -324,6 +349,8 @@ public class SRTStreamStatus extends Packet<SRTStreamStatus> implements Settable
       builder.append(this.cy_);      builder.append(", ");
       builder.append("depth_discretization=");
       builder.append(this.depth_discretization_);      builder.append(", ");
+      builder.append("camera_model=");
+      builder.append(this.camera_model_);      builder.append(", ");
       builder.append("frame_extra_data=");
       builder.append(this.frame_extra_data_);      builder.append(", ");
       builder.append("contains_extra_data=");

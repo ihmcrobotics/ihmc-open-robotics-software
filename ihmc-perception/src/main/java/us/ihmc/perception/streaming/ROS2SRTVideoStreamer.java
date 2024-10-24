@@ -143,6 +143,7 @@ public class ROS2SRTVideoStreamer
       statusMessage.setFy(frame.getFocalLengthY());
       statusMessage.setCx(frame.getPrincipalPointX());
       statusMessage.setCy(frame.getPrincipalPointY());
+      statusMessage.setCameraModel(frame.getCameraModel().toByte());
       statusMessage.setDepthDiscretization(frame.getDepthDiscretization());
       statusMessagePublisher.publish(statusMessage);
 

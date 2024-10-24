@@ -53,6 +53,7 @@ public class RawImage
    private GpuMat gpuImageMat = null;
    private final PixelFormat pixelFormat;
    private final CameraIntrinsics cameraIntrinsics;
+   private final CameraModel cameraModel;
    private final float depthDiscretization;
    private final long sequenceNumber;
    private final Instant acquisitionTime;
@@ -64,6 +65,7 @@ public class RawImage
                    @Nullable GpuMat gpuImageMat,
                    PixelFormat pixelFormat,
                    CameraIntrinsics cameraIntrinsics,
+                   CameraModel cameraModel,
                    FixedFramePose3DBasics sensorPose,
                    Instant acquisitionTime,
                    long sequenceNumber,
@@ -76,6 +78,7 @@ public class RawImage
       this.gpuImageMat = gpuImageMat;
       this.pixelFormat = pixelFormat;
       this.cameraIntrinsics = cameraIntrinsics;
+      this.cameraModel = cameraModel;
       this.sensorPose = sensorPose;
       this.acquisitionTime = acquisitionTime;
       this.sequenceNumber = sequenceNumber;
@@ -90,6 +93,7 @@ public class RawImage
          this.gpuImageMat = other.gpuImageMat.clone();
       this.pixelFormat = other.pixelFormat;
       this.cameraIntrinsics = other.cameraIntrinsics;
+      this.cameraModel = other.cameraModel;
       this.sensorPose = other.sensorPose;
       this.acquisitionTime = other.acquisitionTime;
       this.sequenceNumber = other.sequenceNumber;
@@ -102,10 +106,20 @@ public class RawImage
                                              Instant acquisitionTime,
                                              long sequenceNumber)
    {
+      return createWithBGRImage(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorPose, acquisitionTime, sequenceNumber);
+   }
+
+   public static RawImage createWithBGRImage(Pointer matPointer,
+                                             CameraIntrinsics cameraIntrinsics,
+                                             CameraModel cameraModel,
+                                             FixedFramePose3DBasics sensorPose,
+                                             Instant acquisitionTime,
+                                             long sequenceNumber)
+   {
       if (matPointer instanceof Mat cpuImage)
-         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(cpuImage, null, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
       else if (matPointer instanceof GpuMat gpuImage)
-         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
+         return new RawImage(null, gpuImage, PixelFormat.BGR8, cameraIntrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, -1.0f);
 
       throw new IllegalArgumentException("The pointer passed in was neither a Mat nor GpuMat");
    }
@@ -117,10 +131,37 @@ public class RawImage
                                                long sequenceNumber,
                                                float depthDiscretization)
    {
+      return createWith16BitDepth(matPointer, cameraIntrinsics, CameraModel.PINHOLE, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+   }
+
+   public static RawImage createWith16BitDepth(Pointer matPointer,
+                                               CameraIntrinsics cameraIntrinsics,
+                                               CameraModel cameraModel,
+                                               FixedFramePose3DBasics sensorPose,
+                                               Instant acquisitionTime,
+                                               long sequenceNumber,
+                                               float depthDiscretization)
+   {
       if (matPointer instanceof Mat cpuImage)
-         return new RawImage(cpuImage, null, PixelFormat.GRAY16, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+         return new RawImage(cpuImage,
+                             null,
+                             PixelFormat.GRAY16,
+                             cameraIntrinsics,
+                             cameraModel,
+                             sensorPose,
+                             acquisitionTime,
+                             sequenceNumber,
+                             depthDiscretization);
       else if (matPointer instanceof GpuMat gpuImage)
-         return new RawImage(null, gpuImage, PixelFormat.GRAY16, cameraIntrinsics, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+         return new RawImage(null,
+                             gpuImage,
+                             PixelFormat.GRAY16,
+                             cameraIntrinsics,
+                             cameraModel,
+                             sensorPose,
+                             acquisitionTime,
+                             sequenceNumber,
+                             depthDiscretization);
 
       throw new IllegalArgumentException("The pointer passed in was neither a Mat nor GpuMat");
    }
@@ -140,6 +181,7 @@ public class RawImage
                           null,
                           this.pixelFormat,
                           this.cameraIntrinsics,
+                          this.cameraModel,
                           this.sensorPose,
                           this.acquisitionTime,
                           this.sequenceNumber,
@@ -161,6 +203,7 @@ public class RawImage
                           newGpuImageMat,
                           this.pixelFormat,
                           this.cameraIntrinsics,
+                          this.cameraModel,
                           this.sensorPose,
                           this.acquisitionTime,
                           this.sequenceNumber,
@@ -227,6 +270,11 @@ public class RawImage
    public CameraIntrinsics getIntrinsicsCopy()
    {
       return new CameraIntrinsics(cameraIntrinsics);
+   }
+
+   public CameraModel getCameraModel()
+   {
+      return cameraModel;
    }
 
    public PixelFormat getPixelFormat()
@@ -317,14 +365,13 @@ public class RawImage
     * Packs the {@link ImageMessage} with the {@link RawImage} metadata,
     * EXCEPT:
     * <ul>
-    * <li> the CameraModel, </li>
-    * <li> the CompressionType, </li>
-    * <li> the ouster beam altitude angles, </li>
-    * <li> the ouster beam azimuth angles, and </li>
-    * <li> the compressed data </li>
+    * <li> the compressed data, </li>
+    * <li> the {@link CompressionType}, </li>
+    * <li> the ouster beam altitude angles, and </li>
+    * <li> the ouster beam azimuth angles </li>
     * </ul>
     * To pack everything, use this instead:
-    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, CameraModel, ImageMessage)}
+    * {@link us.ihmc.perception.tools.PerceptionMessageTools#packImageMessage(RawImage, BytePointer, CompressionType, ImageMessage)}
     * @param messageToPack The message to pack
     */
    public void packImageMessageMetaData(ImageMessage messageToPack)
@@ -336,6 +383,7 @@ public class RawImage
       messageToPack.setFocalLengthYPixels(getFocalLengthY());
       messageToPack.setPrincipalPointXPixels(getPrincipalPointX());
       messageToPack.setPrincipalPointYPixels(getPrincipalPointY());
+      messageToPack.setCameraModel(getCameraModel().toByte());
       messageToPack.setDepthDiscretization(getDepthDiscretization());
       messageToPack.setSequenceNumber(getSequenceNumber());
       MessageTools.toMessage(getAcquisitionTime(), messageToPack.getAcquisitionTime());
