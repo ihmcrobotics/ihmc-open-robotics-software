@@ -94,6 +94,11 @@ mainDependencies {
 
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:robot-environment-awareness:source")
+
+   // Previously used for HeightMapAutoencoder and FootstepPredictor
+   // This is a very large dependency, only uncomment for testing purposes
+   // api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   // api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
 }
 
 testDependencies {

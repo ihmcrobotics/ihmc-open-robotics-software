@@ -31,7 +31,10 @@ public class HeightMapAutoencoder
    private static final int IMAGE_WIDTH = 201;
 
    private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
-   // TODO: We should use pytorch/opencv instead of ONNX. ONNX is a huge dependency we don't use anywhere else and we already have opencv and heavily use that.
+   // TODO: We should use opencv to load this onnx model or perhaps use pytorch with opencv
+   // To readd the Microsoft onnx dependency, add this to the main gradle dependencies:
+   //    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   //    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
    private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "height_map_autoencoder.onnx");
 
    // the following fields are used for model loading and inference using the ONNX runtime library and PyTorch trained model stored as .onnx file

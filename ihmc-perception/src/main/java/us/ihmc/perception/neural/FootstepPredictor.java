@@ -33,7 +33,10 @@ public class FootstepPredictor
    private static final int IMAGE_INPUT_HEIGHT = 201;
    private static final int IMAGE_INPUT_WIDTH = 201;
 
-   // TODO: We should use pytorch/opencv instead of ONNX. ONNX is a huge dependency we don't use anywhere else and we already have opencv and heavily use that.
+   // TODO: We should use opencv to load this onnx model or perhaps use pytorch with opencv
+   // To readd the Microsoft onnx dependency, add this to the main gradle dependencies:
+   //    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   //    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
    private String onnxFilePath = IHMCCommonPaths.USER_HOME_DIRECTORY.resolve("Downloads/Model_Weights/footstep_predictor_4.onnx").toString();
 
 //   private OrtEnvironment environment = OrtEnvironment.getEnvironment();
