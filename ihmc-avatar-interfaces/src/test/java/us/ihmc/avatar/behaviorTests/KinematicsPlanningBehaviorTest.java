@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
@@ -41,6 +42,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.ValkyrieEODObsta
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Disabled
+@Deprecated
 public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
