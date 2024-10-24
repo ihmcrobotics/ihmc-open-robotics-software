@@ -38,6 +38,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
+   private final MovingReferenceFrame headFrame;
    private final MovingReferenceFrame chestFrame;
    private final MovingReferenceFrame pelvisFrame;
    private final MovingZUpFrame pelvisZUpFrame;
@@ -61,7 +62,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
-   private SideDependentList<ReferenceFrame> situationalAwarenessCameraFrame = new SideDependentList<>();
+   private SideDependentList<ReferenceFrame> stereoCameraFrame = new SideDependentList<>();
    private ReferenceFrame experimentalCameraFrame;
    private ReferenceFrame ousterLidarFrame;
    private ZUpFrame steppingCameraZUpFrame;
@@ -118,6 +119,15 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       else
       {
          chestFrame = null;
+      }
+
+      if (fullRobotModel.getHead() != null)
+      {
+         headFrame = fullRobotModel.getHead().getParentJoint().getFrameAfterJoint();
+      }
+      else
+      {
+         headFrame = null;
       }
 
       ReferenceFrame modelStationaryFrame = fullRobotModel.getModelStationaryFrame();
@@ -246,8 +256,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
          objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
-         situationalAwarenessCameraFrame.set(RobotSide.LEFT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.LEFT, this));
-         situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
+         stereoCameraFrame.set(RobotSide.LEFT, sensorInformation.getStereoCameraFrame(RobotSide.LEFT, this));
+         stereoCameraFrame.set(RobotSide.RIGHT, sensorInformation.getStereoCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
          steppingCameraZUpFrame = new ZUpFrame(steppingCameraFrame, "steppingCameraZUp");
@@ -311,6 +321,15 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public MovingReferenceFrame getChestFrame()
    {
       return chestFrame;
+   }
+
+   /**
+    * Return the ReferenceFrame located after the parent joint of the head.
+    */
+   @Override
+   public MovingReferenceFrame getHeadFrame()
+   {
+      return headFrame;
    }
 
    @Override
@@ -420,7 +439,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          objectDetectionCameraFrame.update();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame frame = situationalAwarenessCameraFrame.get(robotSide);
+         ReferenceFrame frame = stereoCameraFrame.get(robotSide);
          if (frame != null)
             frame.update();
       }
@@ -513,9 +532,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return objectDetectionCameraFrame;
    }
 
-   public ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side)
+   public ReferenceFrame getStereoCameraFrame(RobotSide side)
    {
-      return situationalAwarenessCameraFrame.get(side);
+      return stereoCameraFrame.get(side);
+   }
+
+   public ReferenceFrame getStereoCameraFrame()
+   {
+      return stereoCameraFrame.get(RobotSide.LEFT);
    }
 
    public ReferenceFrame getExperimentalCameraFrame()
