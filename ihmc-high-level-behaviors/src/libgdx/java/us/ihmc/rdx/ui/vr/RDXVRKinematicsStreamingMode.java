@@ -230,28 +230,7 @@ public class RDXVRKinematicsStreamingMode
 
          if (robotModel != null)
          {
-            // reduce limit for elbow to avoid singularity
-            Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
-            Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               OneDoFJointBasics elbowJoint = syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
-               double upperLimit = elbowJoint.getJointLimitUpper();
-               double lowerLimit = elbowJoint.getJointLimitLower();
-               double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
-               if (fullyExtendedLimit > 0)
-               {
-                  fullyExtendedLimit = -0.10;
-                  jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-               }
-               else
-               {
-                  fullyExtendedLimit = 0.10;
-                  jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
-               }
-            }
-            parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
-            parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
+            reduceElbowJointLimits(parameters, robotModel);
             parameters.setInitialConfigurationMap(createInitialConfiguration(robotModel));
          }
 
@@ -286,6 +265,33 @@ public class RDXVRKinematicsStreamingMode
 
       return initialConfigurationMap;
    }
+
+   private void reduceElbowJointLimits(KinematicsStreamingToolboxParameters parameters, DRCRobotModel robotModel)
+   {
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      // reduce limit for elbow to avoid singularity
+      Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
+      Map<String, Double> jointLowerLimits = new LinkedHashMap<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         OneDoFJointBasics elbowJoint = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH);
+         double upperLimit = elbowJoint.getJointLimitUpper();
+         double lowerLimit = elbowJoint.getJointLimitLower();
+         double fullyExtendedLimit = Math.abs(upperLimit) < Math.abs(lowerLimit) ? upperLimit : lowerLimit;
+         if (fullyExtendedLimit > 0)
+         {
+            fullyExtendedLimit = -0.10;
+            jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
+         }
+         else
+         {
+            fullyExtendedLimit = 0.10;
+            jointLowerLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), fullyExtendedLimit);
+         }
+      }
+      parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
+      parameters.setJointCustomPositionLowerLimits(jointLowerLimits);
+}
 
    public void processVRInput()
    {
