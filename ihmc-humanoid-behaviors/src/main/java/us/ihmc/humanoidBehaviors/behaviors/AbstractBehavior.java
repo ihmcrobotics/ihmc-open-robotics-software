@@ -71,7 +71,6 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final ROS2Topic controllerInputTopic, controllerOutputTopic;
    protected final ROS2Topic behaviorInputTopic, behaviorOutputTopic;
 
    protected final ROS2Topic footstepPlannerInputTopic, footstepPlannerOutputTopic;
@@ -108,8 +107,6 @@ public abstract class AbstractBehavior implements RobotController
       kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
       kinematicsPlanningToolboxOutputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerInputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
-      controllerOutputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
       behaviorInputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withInput();
       behaviorOutputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
@@ -124,7 +121,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, controllerInputTopic);
+      return createPublisher(messageType, HumanoidControllerAPI.getTopic(messageType, robotName));
    }
 
    public <T> ROS2PublisherBasics<T> createBehaviorOutputPublisher(Class<T> messageType)
@@ -154,7 +151,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, controllerOutputTopic, consumer);
+      createSubscriber(messageType, HumanoidControllerAPI.getTopic(messageType, robotName), consumer);
    }
 
    public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
@@ -165,6 +162,11 @@ public abstract class AbstractBehavior implements RobotController
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
       ros2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(messageType), s -> consumer.consumeObject(s.takeNextData()));
+   }
+
+   public <T> void createSubscriber(ROS2Topic<T> topic, ObjectConsumer<T> consumer)
+   {
+      ros2Node.createSubscription(topic, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
