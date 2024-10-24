@@ -228,7 +228,7 @@ public class RDXVRKinematicsStreamingMode
          parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
          parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
 
-         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
+         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(true);
 
          if (robotModel != null)
          {
