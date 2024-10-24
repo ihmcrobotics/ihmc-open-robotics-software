@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
@@ -122,6 +123,7 @@ public class BlackflyImageRetriever
                      distortedImage.release();
                   distortedImage = RawImage.createWithBGRImage(sourceImageBGR.clone(),
                                                                ousterFisheyeColorCameraIntrinsics,
+                                                               CameraModel.EQUIDISTANT_FISHEYE,
                                                                cameraPose,
                                                                acquisitionTime,
                                                                sequenceNumber++);

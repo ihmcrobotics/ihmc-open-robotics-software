@@ -30,6 +30,10 @@ module perception_msgs
         float cy;
         float depth_discretization;
         /**
+         * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+         */
+        octet camera_model;
+        /**
          * Some codecs cannot accept extra data, so it's sent through this message instead
          */
         perception_msgs::msg::dds::VideoFrameExtraData frame_extra_data;

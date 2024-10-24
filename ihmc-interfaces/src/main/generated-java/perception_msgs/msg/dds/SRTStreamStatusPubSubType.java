@@ -15,7 +15,7 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fbe64bd6dd9310f28cb915592e0be7a9e9b834d2e978cf7e6fdbf749eff8ed62";
+   		return "054b32120fac6639df4efd7a3e4edef5b01bf2ab0aa7d24c03c47805e73476e2";
    }
    
    @Override
@@ -73,6 +73,8 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -122,6 +124,9 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.getCdrSerializedSize(data.getFrameExtraData(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -157,6 +162,8 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       cdr.write_type_5(data.getDepthDiscretization());
 
+      cdr.write_type_9(data.getCameraModel());
+
       perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.write(data.getFrameExtraData(), cdr);
       cdr.write_type_7(data.getContainsExtraData());
 
@@ -185,6 +192,8 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       	
       data.setDepthDiscretization(cdr.read_type_5());
       	
+      data.setCameraModel(cdr.read_type_9());
+      	
       perception_msgs.msg.dds.VideoFrameExtraDataPubSubType.read(data.getFrameExtraData(), cdr);	
       data.setContainsExtraData(cdr.read_type_7());
       	
@@ -205,6 +214,7 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.write_type_5("cx", data.getCx());
       ser.write_type_5("cy", data.getCy());
       ser.write_type_5("depth_discretization", data.getDepthDiscretization());
+      ser.write_type_9("camera_model", data.getCameraModel());
       ser.write_type_a("frame_extra_data", new perception_msgs.msg.dds.VideoFrameExtraDataPubSubType(), data.getFrameExtraData());
 
       ser.write_type_7("contains_extra_data", data.getContainsExtraData());
@@ -224,6 +234,7 @@ public class SRTStreamStatusPubSubType implements us.ihmc.pubsub.TopicDataType<p
       data.setCx(ser.read_type_5("cx"));
       data.setCy(ser.read_type_5("cy"));
       data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
+      data.setCameraModel(ser.read_type_9("camera_model"));
       ser.read_type_a("frame_extra_data", new perception_msgs.msg.dds.VideoFrameExtraDataPubSubType(), data.getFrameExtraData());
 
       data.setContainsExtraData(ser.read_type_7("contains_extra_data"));

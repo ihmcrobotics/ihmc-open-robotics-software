@@ -23,6 +23,9 @@ float32 cy
 
 float32 depth_discretization
 
+# Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+uint8 camera_model
+
 # Some codecs cannot accept extra data, so it's sent through this message instead
 perception_msgs/VideoFrameExtraData frame_extra_data
 
