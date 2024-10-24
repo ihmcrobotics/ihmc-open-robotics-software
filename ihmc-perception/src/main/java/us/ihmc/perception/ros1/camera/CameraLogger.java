@@ -8,9 +8,6 @@ import java.io.PrintStream;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import boofcv.io.UtilIO;
-import boofcv.io.image.UtilImageIO;
-import boofcv.struct.calib.CameraPinholeBrown;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.so.Quaternion_F64;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
  * Grabs camera images, camera location, and intrinsic parameters and saves them to a log file
  */
 // TODO grab camera to world transform
+@Deprecated
 public class CameraLogger
 {
 
@@ -66,12 +64,12 @@ public class CameraLogger
       logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, quad.x, quad.y, quad.z, quad.w, T.getX(), T.getY(), T.getZ());
       logPose.flush();
 
-      UtilImageIO.saveImage(image, String.format("%s/image%06d.png", outputDir.getAbsolutePath(), tick));
+//      UtilImageIO.saveImage(image, String.format("%s/image%06d.png", outputDir.getAbsolutePath(), tick));
       tick++;
    }
 
-   public void log( CameraPinholeBrown parameters )
+   public void log( Object parameters )
    {
-      UtilIO.save(parameters, outputDir.getAbsolutePath() + "/intrinsic.xml");
+//      UtilIO.save(parameters, outputDir.getAbsolutePath() + "/intrinsic.xml");
    }
 }

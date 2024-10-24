@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.yuv.JPEGEncoder;
@@ -15,6 +14,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
+@Deprecated
 public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 {
    private static final Object hackyLockBecauseJPEGEncoderIsNotThreadsafe = new Object();
@@ -45,7 +45,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition,
-                       QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
+                       QuaternionReadOnly cameraOrientation, Object intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled || bufferedImage == null)
          return;

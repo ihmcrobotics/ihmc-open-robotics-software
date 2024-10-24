@@ -19,7 +19,6 @@ import java.nio.ByteOrder;
 
 import javax.imageio.ImageIO;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.node.NodeConfiguration;
 
@@ -156,18 +155,10 @@ public class RosTools
       return originalByteBuffer.slice();
    }
 
-   public static CameraPinholeBrown cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)
+   @Deprecated
+   public static Object cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)
    {
-      CameraPinholeBrown cameraPinholeBrown = new CameraPinholeBrown();
-      double[] P = cameraInfo.getP();
-      cameraPinholeBrown.fx = P[0];
-      cameraPinholeBrown.skew = P[1];
-      cameraPinholeBrown.cx = P[2];
-      cameraPinholeBrown.fy = P[5];
-      cameraPinholeBrown.cy = P[6];
-      cameraPinholeBrown.width = cameraInfo.getWidth();
-      cameraPinholeBrown.height = cameraInfo.getHeight();
-      return cameraPinholeBrown;
+      return new Object();
    }
 
    public static NodeConfiguration createNodeConfiguration(URI master)

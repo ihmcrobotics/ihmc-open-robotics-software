@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -93,7 +92,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final Matrix4 gdxTransform = new Matrix4();
    private final RDXLowLevelDepthSensorSimulator depthSensorSimulator;
    private final LongSupplier timestampSupplier;
-   private final CameraPinholeBrown depthCameraIntrinsics;
+   private final CameraIntrinsics depthCameraIntrinsics;
    private final int imageWidth;
    private final int imageHeight;
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
@@ -208,7 +207,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       if (debugCoordinateFrame.get())
          coordinateFrame = RDXModelBuilder.createCoordinateFrameInstance(0.2);
 
-      depthCameraIntrinsics = new CameraPinholeBrown();
+      depthCameraIntrinsics = new CameraIntrinsics();
       updateCameraPinholeBrown();
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
@@ -382,7 +381,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    {
       depthCameraIntrinsics.setFx(depthSensorSimulator.getFocalLengthPixels().get());
       depthCameraIntrinsics.setFy(depthSensorSimulator.getFocalLengthPixels().get());
-      depthCameraIntrinsics.setSkew(0.0);
+//      depthCameraIntrinsics.setSkew(0.0);
       depthCameraIntrinsics.setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
       depthCameraIntrinsics.setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
    }
@@ -751,7 +750,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       return depthSensorSimulator;
    }
 
-   public CameraPinholeBrown getDepthCameraIntrinsics()
+   public CameraIntrinsics getDepthCameraIntrinsics()
    {
       return depthCameraIntrinsics;
    }

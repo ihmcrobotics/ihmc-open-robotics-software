@@ -12,7 +12,6 @@ import org.ejml.data.DMatrixRMaj;
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusArrayPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusPubSubType;
-import boofcv.struct.calib.CameraPinholeBrown;
 import builtin_interfaces.msg.dds.DurationPubSubType;
 import builtin_interfaces.msg.dds.TimePubSubType;
 import controller_msgs.msg.dds.*;
@@ -758,7 +757,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BDIBehaviorStatusPacket.class);
 
       // Camera information related
-      registerPacketField(CameraPinholeBrown.class);
+//      registerPacketField(CameraPinholeBrown.class);
 
       registerPacketClass(FisheyePacket.class);
 

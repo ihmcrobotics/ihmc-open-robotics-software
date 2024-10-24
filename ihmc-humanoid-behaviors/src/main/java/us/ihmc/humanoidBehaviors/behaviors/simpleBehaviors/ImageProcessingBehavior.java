@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.net.ConnectionStateListener;
@@ -15,6 +14,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ros2.ROS2Node;
 
+@Deprecated
 public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavior
 {
    private final CompressedVideoDataServer videoDataServer;
@@ -28,11 +28,11 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    }
 
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack,
-                                           CameraPinholeBrown intrinsicParametersToPack);
+                                           Object intrinsicParametersToPack);
 
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition,
-                       QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
+                       QuaternionReadOnly cameraOrientation, Object intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
@@ -50,7 +50,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          CameraPinholeBrown intrinsicParameters)
+                          Object intrinsicParameters)
       {
          publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       }

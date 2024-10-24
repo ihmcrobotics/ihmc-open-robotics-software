@@ -10,8 +10,6 @@ import javax.swing.SwingUtilities;
 
 import org.opencv.core.Scalar;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -19,6 +17,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
+@Deprecated
 public class MultiSenseBlobDetectionTestModule
 {
    private final PacketCommunicator packetCommunicator = PacketCommunicator
@@ -66,17 +65,17 @@ public class MultiSenseBlobDetectionTestModule
             while (latestBufferedImage == null)
                ThreadTools.sleep(10);
 
-            ImagePanel imagePanel = ShowImages.showWindow(latestBufferedImage, "Circle Detector");
-            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
+//            ImagePanel imagePanel = ShowImages.showWindow(latestBufferedImage, "Circle Detector");
+//            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(imagePanel);
 
             Scalar circleColor = new Scalar(160, 0, 0);
 
             while (true)
             {
-               if (!frame.isVisible())
-               {
-                  break;
-               }
+//               if (!frame.isVisible())
+//               {
+//                  break;
+//               }
 
 //               openCVColoredCircularBlobDetector.updateFromBufferedImage(latestBufferedImage);
 //

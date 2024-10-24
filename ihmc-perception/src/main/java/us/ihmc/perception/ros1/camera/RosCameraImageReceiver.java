@@ -1,6 +1,5 @@
 package us.ihmc.perception.ros1.camera;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -10,6 +9,7 @@ import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 
 import java.awt.image.BufferedImage;
 
+@Deprecated
 public class RosCameraImageReceiver extends RosCameraReceiver
 {
    public RosCameraImageReceiver(AvatarRobotCameraParameters cameraParameters, RosMainNode rosMainNode, CameraLogger logger, CameraDataReceiver cameraDataReceiver)
@@ -30,13 +30,13 @@ public class RosCameraImageReceiver extends RosCameraReceiver
             {
                logger.log(image, timeStamp);
             }
-            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
+//            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
             if (DEBUG)
             {
                PrintTools.debug(this, "Sending intrinsicParameters");
-               intrinsicParameters.print();
+//               intrinsicParameters.print();
             }
-            cameraDataReceiver.updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
+//            cameraDataReceiver.updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), image, timeStamp, intrinsicParameters);
          }
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriber);
