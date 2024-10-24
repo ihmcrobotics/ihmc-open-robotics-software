@@ -7,6 +7,10 @@ import us.ihmc.commons.exception.ExceptionTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @deprecated Use {@link PausableLoopingThread} instead.
+ */
+@Deprecated
 public class RestartableThread
 {
    private final String name;
