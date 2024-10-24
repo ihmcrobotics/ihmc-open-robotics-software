@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCuda;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -29,7 +30,7 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
-   private final RapidHeightMapExtractor rapidHeightMapExtractor;
+   private final RapidHeightMapExtractorCuda rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
    private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
@@ -46,7 +47,8 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 ROS2PublishSubscribeAPI ros2)
    {
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrame, rightFootSoleFrame);
+
+      rapidHeightMapExtractor = new RapidHeightMapExtractorCuda(leftFootSoleFrame, rightFootSoleFrame);
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
       heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
@@ -111,7 +113,7 @@ public class RapidHeightMapManager
                                              (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
-      RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, temp);
+//      RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, temp);
       return temp;
    }
 
