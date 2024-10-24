@@ -31,6 +31,19 @@ public abstract class ImageSensor implements AutoCloseable
     */
    protected abstract boolean grab();
 
+   /**
+    * <p>
+    * Get the latest image grabbed by the sensor, specifying the image to get using its key.
+    * </p>
+    * <p>
+    * This method should either return a new {@link RawImage}, such that the reference count = 1,
+    * or increment the reference count of the returned image by calling {@link RawImage#get()}.
+    * It is the caller's responsibility to call {@link RawImage#release()} after calling this method.
+    * </p>
+    * @param imageKey Key of the image to get.
+    * @return A {@link RawImage} with an incremented reference count.
+    * The caller must call {@link RawImage#release()}.
+    */
    public abstract RawImage getImage(int imageKey);
 
    public abstract String getSensorName();

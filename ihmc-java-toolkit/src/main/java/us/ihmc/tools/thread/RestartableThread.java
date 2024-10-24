@@ -90,6 +90,12 @@ public class RestartableThread
          ExceptionTools.handle((RunnableThatThrows) thread::join, exceptionHandler);
    }
 
+   public void interrupt()
+   {
+      if (thread != null)
+         thread.interrupt();
+   }
+
    public boolean isRunning()
    {
       return running.get();

@@ -1,6 +1,5 @@
 package us.ihmc.perception.detections.yolo;
 
-import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
