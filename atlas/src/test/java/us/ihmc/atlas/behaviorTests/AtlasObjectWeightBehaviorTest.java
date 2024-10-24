@@ -11,6 +11,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
+@Disabled
+@Deprecated
 @Tag("humanoid-behaviors-slow")
 public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
 {

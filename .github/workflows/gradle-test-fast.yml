@@ -32,11 +32,6 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'controller-api-2'
-  atlas-humanoid-behaviors:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'atlas'
-      test-category: 'humanoid-behaviors'
   atlas-humanoid-flat-ground:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:

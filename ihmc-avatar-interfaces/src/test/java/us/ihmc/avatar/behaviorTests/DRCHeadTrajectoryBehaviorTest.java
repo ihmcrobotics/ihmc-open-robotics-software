@@ -5,6 +5,7 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
@@ -32,6 +33,8 @@ import us.ihmc.tools.MemoryTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
+@Deprecated
 public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

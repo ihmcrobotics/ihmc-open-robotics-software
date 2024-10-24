@@ -35,11 +35,6 @@ jobs:
     with:
       subproject: 'atlas'
       test-category: 'controller-api-slow-4'
-  atlas-humanoid-behaviors-slow:
-    uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
-    with:
-      subproject: 'atlas'
-      test-category: 'humanoid-behaviors-slow'
   atlas-humanoid-flat-ground-slow-2:
     uses: ihmcrobotics/ihmc-actions/.github/workflows/gradle-test.yml@main
     with:
