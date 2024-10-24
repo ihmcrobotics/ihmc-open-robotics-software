@@ -245,6 +245,16 @@ public class RawImage
       return depthDiscretization;
    }
 
+   /**
+    * <p>
+    * Get the image's {@link Mat}.
+    * </p>
+    * <p>
+    * If this image only has a {@link GpuMat}, a new {@link Mat} will be created
+    * and the image data will be downloaded from the device (GPU).
+    * </p>
+    * @return The {@link Mat} containing the image data.
+    */
    public Mat getCpuImageMat()
    {
       if (cpuImageMat == null && !gpuImageMat.isNull())
@@ -256,6 +266,16 @@ public class RawImage
       return cpuImageMat;
    }
 
+   /**
+    * <p>
+    * Get the image's {@link GpuMat}.
+    * </p>
+    * <p>
+    * If this image only has a {@link Mat}, a new {@link GpuMat} will be created
+    * and the image data will be uploaded to the device (GPU).
+    * </p>
+    * @return The {@link GpuMat} containing the image data.
+    */
    public GpuMat getGpuImageMat()
    {
       if (gpuImageMat == null)
@@ -267,11 +287,31 @@ public class RawImage
       return gpuImageMat;
    }
 
+   /**
+    * <p>
+    * Get the pointer to the image data.
+    * </p>
+    * <p>
+    * Same as calling {@code getCpuImageMat().data()}. As such, if this image does not have a {@link Mat},
+    * a new {@link Mat} will be created and the image data will be downloaded from the device (GPU).
+    * </p>
+    * @return The pointer to the image data.
+    */
    public BytePointer getDataPointer()
    {
       return getCpuImageMat().data();
    }
 
+   /**
+    * <p>
+    * Get the CUDA pointer to the image data.
+    * </p>
+    * <p>
+    * Same as calling {@code getGpuImageMat().data()}. As such, if this image does not have a {@link GpuMat},
+    * a new {@link GpuMat} will be created and the image data will be uploaded to the device (GPU).
+    * </p>
+    * @return The CUDA pointer to the image data.
+    */
    public BytePointer getCUDADataPointer()
    {
       return getGpuImageMat().data();
