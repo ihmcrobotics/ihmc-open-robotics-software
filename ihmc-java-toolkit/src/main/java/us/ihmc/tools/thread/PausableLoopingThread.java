@@ -6,29 +6,56 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 /**
  * A thread that executes code in a loop.
  * Optionally, you may set a limit to the loop frequency.
  * This thread does not finish running until {@link #destroy()} or {@link #blockingDestroy()} is called.
  * Once started, make sure to destroy this thread.
  */
-public class PausableLoopingThread
+// TODO: Update and finish comments
+public class PausableLoopingThread extends Thread
 {
-   private enum RunCommand
-   {
-      PAUSE, LOOP, RUN_ONCE, FINALIZE
-   }
-
-   private final AtomicReference<RunCommand> runCommand = new AtomicReference<>(RunCommand.PAUSE);
+   private static final int PAUSE = 0;
+   private static final int LOOP_INDEFINITELY = -1;
 
    private final RunnableThatThrows runnableThatThrows;
    private final ExceptionHandler exceptionHandler;
 
-   private final Thread loopThread;
+   /*
+    * Counter for number of time to run the loop.
+    * The counter is decremented each time the loop runs.
+    * 0 = pause (don't run until counter value is changed).
+    * -1 = loop indefinitely (keep looping until told otherwise).
+    */
+   private volatile int remainingRunCounter = 0;
+   private final Object runLock = new Object();
+
+   /*
+    * Indicates whether this object is destroyed.
+    * The loop will come to a finish when isDestroyed == true.
+    * Does not equal to Thread.isAlive(), as the thread may take
+    * some time to finish executing after isDestroyed becomes true.
+    */
+   private volatile boolean isDestroyed = false;
+
+   /* Throttler for optionally set loop period/frequency limit */
    private final Throttler throttler = new Throttler();
    private volatile double loopPeriodLowerLimit = -1.0;
+
+   public PausableLoopingThread(String name)
+   {
+      this(-1.0, name);
+   }
+
+   public PausableLoopingThread(double loopFrequencyLimit, String name)
+   {
+      this(DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, loopFrequencyLimit, name);
+   }
+
+   public PausableLoopingThread(ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
+   {
+      this(null, exceptionHandler, loopFrequencyLimit, name);
+   }
 
    public PausableLoopingThread(RunnableThatThrows runnableThatThrows, String name)
    {
@@ -47,11 +74,11 @@ public class PausableLoopingThread
 
    public PausableLoopingThread(RunnableThatThrows runnableThatThrows, ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
    {
+      super(name);
+      super.start();
       this.runnableThatThrows = runnableThatThrows;
       this.exceptionHandler = exceptionHandler;
       limitLoopFrequency(loopFrequencyLimit);
-      loopThread = new Thread(this::loop, name);
-      loopThread.start();
    }
 
    /**
@@ -68,25 +95,19 @@ public class PausableLoopingThread
    /**
     * Starts executing the passed in {@link RunnableThatThrows} in a loop.
     */
+   @Override
    public void start()
    {
-      synchronized (runCommand)
-      {
-         runCommand.set(RunCommand.LOOP);
-         runCommand.notify();
-      }
+      setNumberOfRuns(LOOP_INDEFINITELY);
    }
 
    /**
-    * Signal the thread to execute the passed in {@link RunnableThatThrows} method once, then pause.
+    * Signal the thread to execute the loop once, then pause.
+    * The number of remaining runs is overridden to 1, regardless of its previous value.
     */
    public void runOnce()
    {
-      synchronized (runCommand)
-      {
-         runCommand.set(RunCommand.RUN_ONCE);
-         runCommand.notify();
-      }
+      setNumberOfRuns(1);
    }
 
    /**
@@ -94,7 +115,32 @@ public class PausableLoopingThread
     */
    public void pause()
    {
-      runCommand.set(RunCommand.PAUSE);
+      setNumberOfRuns(PAUSE);
+   }
+
+   public void setNumberOfRuns(int numberOfTimesToRun)
+   {
+      synchronized (runLock)
+      {
+         remainingRunCounter = numberOfTimesToRun;
+         runLock.notify();
+      }
+   }
+
+   public int getRemainingRuns()
+   {
+      return remainingRunCounter;
+   }
+
+   public boolean isDestroyed()
+   {
+      return isDestroyed;
+   }
+
+   public boolean isLooping()
+   {
+      int remainingRuns = getRemainingRuns();
+      return !isDestroyed && (remainingRuns > 0 || remainingRuns == LOOP_INDEFINITELY);
    }
 
    /**
@@ -104,78 +150,93 @@ public class PausableLoopingThread
     */
    public void destroy()
    {
-      synchronized (runCommand)
+      synchronized (runLock)
       {
-         runCommand.set(RunCommand.FINALIZE);
-         runCommand.notify();
+         isDestroyed = true;
+         runLock.notify();
       }
    }
 
    /**
     * Signals the thread to stop once the passed in {@link RunnableThatThrows}
     * finishes executing and waits until the thread exits.
-    * Same as calling {@link #destroy()} then joining.
+    * Same as calling {@link #destroy()} then {@link #join()}.
+    * InterruptedExceptions are ignored. To handle interrupted exceptions,
+    * call {@link #destroy()} then {@link #join()} manually.
     */
    public void blockingDestroy()
    {
       destroy();
       try
       {
-         loopThread.join();
+         join();
       }
       catch (InterruptedException ignored) {}
    }
 
-   private void loop()
-   {  // Run while the thread is not finalizing
-      while (runCommand.get() != RunCommand.FINALIZE)
-      {
-         try
-         {
-            synchronized (runCommand)
-            {
-               RunCommand currentCommand = runCommand.get();
-               if (currentCommand == RunCommand.PAUSE)
-               {  // Currently paused
-                  runCommand.wait();
-                  continue;
-               }
-               else if (currentCommand == RunCommand.RUN_ONCE)
-                  pause(); // Set the run command to pause after this loop
-            }
-
-            if (loopPeriodLowerLimit > 0.0)
-               throttler.waitAndRun(loopPeriodLowerLimit);
-         }
-         catch (InterruptedException interrupted)
-         {  // Maintain interrupted status so that runInLoop can handle it
-            loopThread.interrupt();
-         }
-
-         ExceptionTools.handle(runnableThatThrows, exceptionHandler);
-      }
-   }
-
-   public boolean isLooping()
+   /**
+    * TODO: Finish this comment
+    * @throws Throwable
+    */
+   protected void runInLoop() throws Throwable
    {
-      return runCommand.get() == RunCommand.LOOP;
+      if (runnableThatThrows != null)
+         runnableThatThrows.run();
    }
 
    /**
     * <p>
-    * Although this class represents a thread, it does not extend {@link Thread}.
-    * Instead, it contains an internal {@link Thread} that runs the thread
-    * represented by this class.
-    * Use this method to access the {@link Thread}` running the loop.
+    * The {@link Thread#run()} method, overridden to run in a loop.
+    * To extend this class {@link Thread} style, override {@link #runInLoop()} instead.
     * </p>
     * <p>
-    * Interrupting the internal thread will relay the interrupt to the passed in {@link RunnableThatThrows}.
+    * DO NOT CALL THIS METHOD. Well, you can, but why would you?
+    * You are using a thread to run things asynchronously, but calling this would run the loop synchronously.
+    * Why would you want that?
     * </p>
-    *
-    * @return The internal {@link Thread} running the loop.
+    * <p>
+    * This method is a necessary evil committed for this class to extend Thread.
+    * </p>
     */
-   public Thread getInternalThread()
+   @Override
+   public final void run()
    {
-      return loopThread;
+      // Run while the thread is not finalizing
+      while (!isDestroyed)
+      {
+         try
+         {
+            synchronized (runLock)
+            {  // No more runs remaining -> wait until something changes
+               if (remainingRunCounter == 0)
+               {
+                  runLock.wait();
+                  continue;
+               }
+
+               // Decrement the counter for the run that's about to occur
+               if (remainingRunCounter > 0)
+                  remainingRunCounter--;
+            }
+
+            // If a period/frequency limit was set, wait until loop can run.
+            if (loopPeriodLowerLimit > 0.0)
+            {
+               /*
+                * This guy must not swallow interrupts.
+                * As of writing this comment, LockSupport.parkNanos() is used internally to block.
+                * Although the throttler will block until the period has elapsed, the thread
+                * remain interrupted.
+                */
+               throttler.waitAndRun(loopPeriodLowerLimit);
+            }
+         }
+         catch (InterruptedException interrupted)
+         {  // Maintain interrupted status so that runInLoop can handle it
+            interrupt();
+         }
+
+         ExceptionTools.handle(this::runInLoop, exceptionHandler);
+      }
    }
 }
