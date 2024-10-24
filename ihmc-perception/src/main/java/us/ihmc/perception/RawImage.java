@@ -267,6 +267,16 @@ public class RawImage
       return gpuImageMat;
    }
 
+   public BytePointer getDataPointer()
+   {
+      return getCpuImageMat().data();
+   }
+
+   public BytePointer getCUDADataPointer()
+   {
+      return getGpuImageMat().data();
+   }
+
    public CameraIntrinsics getIntrinsicsCopy()
    {
       return new CameraIntrinsics(cameraIntrinsics);

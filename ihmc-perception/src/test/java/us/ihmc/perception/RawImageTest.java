@@ -104,7 +104,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(mat8UC1);
          RawImage replacedImage = originalImage.replaceImage(gpuMat8UC1);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
@@ -119,7 +119,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(gpuMat8UC1);
          RawImage replacedImage = originalImage.replaceImage(mat8UC1);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
@@ -135,7 +135,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(mat8UC1);
          RawImage replacedImage = originalImage.replaceImage(mat8UC3);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
