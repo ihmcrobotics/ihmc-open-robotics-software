@@ -19,15 +19,15 @@ public class ControllerFootstepQueueMonitor
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
 
    private final HumanoidReferenceFrames referenceFrames;
-   private final ContinuousPlannerStatistics statistics;
+   private final ContinuousHikingLogger continuousHikingLogger;
 
    public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
                                          String simpleRobotName,
                                          HumanoidReferenceFrames referenceFrames,
-                                         ContinuousPlannerStatistics statistics)
+                                         ContinuousHikingLogger continuousHikingLogger)
    {
       this.referenceFrames = referenceFrames;
-      this.statistics = statistics;
+      this.continuousHikingLogger = continuousHikingLogger;
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
    }
@@ -39,34 +39,21 @@ public class ControllerFootstepQueueMonitor
       {
          String message = String.format("Latest Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
          LogTools.info(message);
-         statistics.appendString(message);
+         continuousHikingLogger.appendString(message);
       }
 
       // For the statistics set the that controller queue size before getting the new one
-      statistics.setLastFootstepQueueLength(controllerQueueSize);
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
    private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
    {
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
+      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
-         statistics.endStepTime();
-         statistics.startStepTime();
-      }
-      else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-      {
-         // TODO: Use the transfer time (starting now) to start planning (if WAITING_TO_LAND then plan again)
-         statistics.setLastFootstepQueueLength(controllerQueueSize);
-         statistics.incrementTotalStepsCompleted();
-
          double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
                                           .getTransformToDesiredFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT))
                                           .getTranslation()
                                           .norm();
-         statistics.setLastLengthCompleted((float) distance);
-
-         statistics.logToFile(true, false);
       }
 
       this.footstepStatusMessage.set(footstepStatusMessage);

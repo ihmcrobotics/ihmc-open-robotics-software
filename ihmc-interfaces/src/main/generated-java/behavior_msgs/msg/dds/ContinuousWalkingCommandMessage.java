@@ -9,17 +9,13 @@ import us.ihmc.pubsub.TopicDataType;
 public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCommandMessage> implements Settable<ContinuousWalkingCommandMessage>, EpsilonComparable<ContinuousWalkingCommandMessage>
 {
    /**
-            * flag to enable/disable continuous walking state machine
+            * flag to enable/disable continuous hiking state machine with keyboard
             */
-   public boolean enable_continuous_walking_;
+   public boolean enable_continuous_hiking_with_keyboard_;
    /**
-            * flag to walk backwards
+            * flag to enable/disable continuous hiking state machine with joystick controller
             */
-   public boolean walk_backwards_;
-   /**
-            * flag to determine if we are using a controller or not
-            */
-   public boolean using_controller_;
+   public boolean enable_continuous_hiking_with_joystick_controller_;
    /**
             * forward joystick value
             */
@@ -65,11 +61,9 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
    public void set(ContinuousWalkingCommandMessage other)
    {
-      enable_continuous_walking_ = other.enable_continuous_walking_;
+      enable_continuous_hiking_with_keyboard_ = other.enable_continuous_hiking_with_keyboard_;
 
-      walk_backwards_ = other.walk_backwards_;
-
-      using_controller_ = other.using_controller_;
+      enable_continuous_hiking_with_joystick_controller_ = other.enable_continuous_hiking_with_joystick_controller_;
 
       forward_value_ = other.forward_value_;
 
@@ -90,48 +84,33 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
    }
 
    /**
-            * flag to enable/disable continuous walking state machine
+            * flag to enable/disable continuous hiking state machine with keyboard
             */
-   public void setEnableContinuousWalking(boolean enable_continuous_walking)
+   public void setEnableContinuousHikingWithKeyboard(boolean enable_continuous_hiking_with_keyboard)
    {
-      enable_continuous_walking_ = enable_continuous_walking;
+      enable_continuous_hiking_with_keyboard_ = enable_continuous_hiking_with_keyboard;
    }
    /**
-            * flag to enable/disable continuous walking state machine
+            * flag to enable/disable continuous hiking state machine with keyboard
             */
-   public boolean getEnableContinuousWalking()
+   public boolean getEnableContinuousHikingWithKeyboard()
    {
-      return enable_continuous_walking_;
-   }
-
-   /**
-            * flag to walk backwards
-            */
-   public void setWalkBackwards(boolean walk_backwards)
-   {
-      walk_backwards_ = walk_backwards;
-   }
-   /**
-            * flag to walk backwards
-            */
-   public boolean getWalkBackwards()
-   {
-      return walk_backwards_;
+      return enable_continuous_hiking_with_keyboard_;
    }
 
    /**
-            * flag to determine if we are using a controller or not
+            * flag to enable/disable continuous hiking state machine with joystick controller
             */
-   public void setUsingController(boolean using_controller)
+   public void setEnableContinuousHikingWithJoystickController(boolean enable_continuous_hiking_with_joystick_controller)
    {
-      using_controller_ = using_controller;
+      enable_continuous_hiking_with_joystick_controller_ = enable_continuous_hiking_with_joystick_controller;
    }
    /**
-            * flag to determine if we are using a controller or not
+            * flag to enable/disable continuous hiking state machine with joystick controller
             */
-   public boolean getUsingController()
+   public boolean getEnableContinuousHikingWithJoystickController()
    {
-      return using_controller_;
+      return enable_continuous_hiking_with_joystick_controller_;
    }
 
    /**
@@ -272,11 +251,9 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_continuous_walking_, other.enable_continuous_walking_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_continuous_hiking_with_keyboard_, other.enable_continuous_hiking_with_keyboard_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walk_backwards_, other.walk_backwards_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.using_controller_, other.using_controller_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_continuous_hiking_with_joystick_controller_, other.enable_continuous_hiking_with_joystick_controller_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_value_, other.forward_value_, epsilon)) return false;
 
@@ -307,11 +284,9 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       ContinuousWalkingCommandMessage otherMyClass = (ContinuousWalkingCommandMessage) other;
 
-      if(this.enable_continuous_walking_ != otherMyClass.enable_continuous_walking_) return false;
+      if(this.enable_continuous_hiking_with_keyboard_ != otherMyClass.enable_continuous_hiking_with_keyboard_) return false;
 
-      if(this.walk_backwards_ != otherMyClass.walk_backwards_) return false;
-
-      if(this.using_controller_ != otherMyClass.using_controller_) return false;
+      if(this.enable_continuous_hiking_with_joystick_controller_ != otherMyClass.enable_continuous_hiking_with_joystick_controller_) return false;
 
       if(this.forward_value_ != otherMyClass.forward_value_) return false;
 
@@ -339,12 +314,10 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       StringBuilder builder = new StringBuilder();
 
       builder.append("ContinuousWalkingCommandMessage {");
-      builder.append("enable_continuous_walking=");
-      builder.append(this.enable_continuous_walking_);      builder.append(", ");
-      builder.append("walk_backwards=");
-      builder.append(this.walk_backwards_);      builder.append(", ");
-      builder.append("using_controller=");
-      builder.append(this.using_controller_);      builder.append(", ");
+      builder.append("enable_continuous_hiking_with_keyboard=");
+      builder.append(this.enable_continuous_hiking_with_keyboard_);      builder.append(", ");
+      builder.append("enable_continuous_hiking_with_joystick_controller=");
+      builder.append(this.enable_continuous_hiking_with_joystick_controller_);      builder.append(", ");
       builder.append("forward_value=");
       builder.append(this.forward_value_);      builder.append(", ");
       builder.append("lateral_value=");

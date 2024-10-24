@@ -300,33 +300,31 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    private void publishInputCommandMessage()
    {
-      Controller currentController = Controllers.getCurrent();
-      boolean currentJoystickControllerConnected = currentController != null;
+      // Check to see if a controller is plugged into the computer
+      Controller joystickController = Controllers.getCurrent();
+      boolean controllerConnected = joystickController.isConnected();
 
-      boolean walkingEnabled = ImGui.getIO().getKeyCtrl();
-      double forwardJoystickValue = 0.0;
+      // Setup a bunch of variables to be published in the message
+      boolean walkWithKeyboard = ImGui.getIO().getKeyCtrl();
+      boolean walkWithController = false;
       double lateralJoystickValue = 0.0;
+      double forwardJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
-      boolean walkBackward = false;
-      boolean usingController = false;
 
-      if (currentJoystickControllerConnected)
+      if (controllerConnected)
       {
-         usingController = true;
-         walkingEnabled |= currentController.getButton(currentController.getMapping().buttonA);
-         forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
-         lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
-         turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
-         walkBackward = currentController.getButton(currentController.getMapping().buttonB);
+         walkWithController = joystickController.getButton(joystickController.getMapping().buttonA);
+         forwardJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftY);
+         lateralJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftX);
+         turningJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisRightX);
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the checkbox is checked
       // We publish this all the time to prevent any of the values from staying true all the time
       if (continuousHikingParameters.getEnableContinuousHiking())
       {
-         commandMessage.setUsingController(usingController);
-         commandMessage.setEnableContinuousWalking(walkingEnabled);
-         commandMessage.setWalkBackwards(walkBackward);
+         commandMessage.setEnableContinuousHikingWithKeyboard(walkWithKeyboard);
+         commandMessage.setEnableContinuousHikingWithJoystickController(walkWithController);
          commandMessage.setForwardValue(forwardJoystickValue);
          commandMessage.setLateralValue(lateralJoystickValue);
          commandMessage.setTurningValue(turningJoystickValue);

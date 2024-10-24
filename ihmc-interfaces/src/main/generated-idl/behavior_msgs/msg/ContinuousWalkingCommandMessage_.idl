@@ -12,17 +12,13 @@ module behavior_msgs
       struct ContinuousWalkingCommandMessage
       {
         /**
-         * flag to enable/disable continuous walking state machine
+         * flag to enable/disable continuous hiking state machine with keyboard
          */
-        boolean enable_continuous_walking;
+        boolean enable_continuous_hiking_with_keyboard;
         /**
-         * flag to walk backwards
+         * flag to enable/disable continuous hiking state machine with joystick controller
          */
-        boolean walk_backwards;
-        /**
-         * flag to determine if we are using a controller or not
-         */
-        boolean using_controller;
+        boolean enable_continuous_hiking_with_joystick_controller;
         /**
          * forward joystick value
          */

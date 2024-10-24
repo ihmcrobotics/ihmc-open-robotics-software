@@ -1,11 +1,8 @@
-# flag to enable/disable continuous walking state machine
-bool enable_continuous_walking
+# flag to enable/disable continuous hiking state machine with keyboard
+bool enable_continuous_hiking_with_keyboard
 
-# flag to walk backwards
-bool walk_backwards
-
-# flag to determine if we are using a controller or not
-bool using_controller
+# flag to enable/disable continuous hiking state machine with joystick controller
+bool enable_continuous_hiking_with_joystick_controller
 
 # forward joystick value
 float64 forward_value

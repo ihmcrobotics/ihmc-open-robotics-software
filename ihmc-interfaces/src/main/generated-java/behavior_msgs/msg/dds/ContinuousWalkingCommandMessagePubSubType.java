@@ -15,7 +15,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4407b4b0a5ac8af0f8f235b7aaa6cabc8361b58df84d4ca7bb2af306c07a6eb2";
+   		return "8ab35374b15b8d54fab6bc5de9cb813684cd6641c734e8e7cab662203c31c81a";
    }
    
    @Override
@@ -56,8 +56,6 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -86,9 +84,6 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    public final static int getCdrSerializedSize(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -126,11 +121,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getEnableContinuousWalking());
+      cdr.write_type_7(data.getEnableContinuousHikingWithKeyboard());
 
-      cdr.write_type_7(data.getWalkBackwards());
-
-      cdr.write_type_7(data.getUsingController());
+      cdr.write_type_7(data.getEnableContinuousHikingWithJoystickController());
 
       cdr.write_type_6(data.getForwardValue());
 
@@ -152,11 +145,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setEnableContinuousWalking(cdr.read_type_7());
+      data.setEnableContinuousHikingWithKeyboard(cdr.read_type_7());
       	
-      data.setWalkBackwards(cdr.read_type_7());
-      	
-      data.setUsingController(cdr.read_type_7());
+      data.setEnableContinuousHikingWithJoystickController(cdr.read_type_7());
       	
       data.setForwardValue(cdr.read_type_6());
       	
@@ -180,9 +171,8 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("enable_continuous_walking", data.getEnableContinuousWalking());
-      ser.write_type_7("walk_backwards", data.getWalkBackwards());
-      ser.write_type_7("using_controller", data.getUsingController());
+      ser.write_type_7("enable_continuous_hiking_with_keyboard", data.getEnableContinuousHikingWithKeyboard());
+      ser.write_type_7("enable_continuous_hiking_with_joystick_controller", data.getEnableContinuousHikingWithJoystickController());
       ser.write_type_6("forward_value", data.getForwardValue());
       ser.write_type_6("lateral_value", data.getLateralValue());
       ser.write_type_6("turning_value", data.getTurningValue());
@@ -196,9 +186,8 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data)
    {
-      data.setEnableContinuousWalking(ser.read_type_7("enable_continuous_walking"));
-      data.setWalkBackwards(ser.read_type_7("walk_backwards"));
-      data.setUsingController(ser.read_type_7("using_controller"));
+      data.setEnableContinuousHikingWithKeyboard(ser.read_type_7("enable_continuous_hiking_with_keyboard"));
+      data.setEnableContinuousHikingWithJoystickController(ser.read_type_7("enable_continuous_hiking_with_joystick_controller"));
       data.setForwardValue(ser.read_type_6("forward_value"));
       data.setLateralValue(ser.read_type_6("lateral_value"));
       data.setTurningValue(ser.read_type_6("turning_value"));
