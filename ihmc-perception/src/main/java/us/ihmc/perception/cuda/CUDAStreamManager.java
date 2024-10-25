@@ -21,45 +21,54 @@ public class CUDAStreamManager
    // TODO: Find way to get value of CUDA_DEVICE_MAX_CONNECTIONS variable
    public static final int MAX_CUDA_STREAMS = 8;
 
-   private static final List<ReferencedCUDAStream> streams = new ArrayList<>(MAX_CUDA_STREAMS);
-   private static int streamsGotten = 0;
+   // Singleton internal CUDAStreamManager
+   private static final CUDAStreamManagerInternal INTERNAL = new CUDAStreamManagerInternal();
 
    public static synchronized CUstream_st getStream()
    {
-      if (!hasCUDADevice())
-         return null;
-
-      if (streams.size() < MAX_CUDA_STREAMS)
-      {
-         ReferencedCUDAStream stream = new ReferencedCUDAStream();
-         streams.add(stream);
-      }
-
-      return streams.get(streamsGotten++ % streams.size()).get();
+      return INTERNAL.getStream();
    }
 
-   @SuppressWarnings("SuspiciousMethodCalls")
    public static synchronized void releaseStream(CUstream_st stream)
    {
-      int index = streams.indexOf(stream);
-      if (index < 0)
-         throw new IllegalArgumentException("Attempting to release an independent stream not managed by " + CUDAStreamManager.class.getSimpleName());
-
-      if (streams.get(index).release())
-         streams.remove(index);
+      INTERNAL.releaseStream(stream);
    }
 
-   /* package-private */ static synchronized int getNumberOfActiveStreams()
+   // package-private form of CUDAStreamManager for non-singleton testing purposes
+   static class CUDAStreamManagerInternal
    {
-      return streams.size();
-   }
+      private final List<ReferencedCUDAStream> streams = new ArrayList<>(MAX_CUDA_STREAMS);
+      private int streamsGotten = 0;
 
-   /* package-private */ static synchronized void reset()
-   {
-      while (!streams.isEmpty())
-         streams.remove(0).release();
+      synchronized CUstream_st getStream()
+      {
+         if (!hasCUDADevice())
+            return null;
 
-      streamsGotten = 0;
+         if (streams.size() < MAX_CUDA_STREAMS)
+         {
+            ReferencedCUDAStream stream = new ReferencedCUDAStream();
+            streams.add(stream);
+         }
+
+         return streams.get(streamsGotten++ % streams.size()).get();
+      }
+
+      @SuppressWarnings({"SuspiciousMethodCalls", "resource"})
+      synchronized void releaseStream(CUstream_st stream)
+      {
+         int index = streams.indexOf(stream);
+         if (index < 0)
+            throw new IllegalArgumentException("Attempting to release an independent stream not managed by " + CUDAStreamManager.class.getSimpleName());
+
+         if (streams.get(index).release())
+            streams.remove(index);
+      }
+
+      synchronized int getNumberOfActiveStreams()
+      {
+         return streams.size();
+      }
    }
 
    private static class ReferencedCUDAStream extends CUstream_st

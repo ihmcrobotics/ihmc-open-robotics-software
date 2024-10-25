@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.cuda.CUDAStreamManager.CUDAStreamManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,45 +18,43 @@ public class CUDAStreamManagerTest
 {
    private static boolean cudaWarningPrinted = false;
 
-   @BeforeEach
-   public void resetStreamManager()
-   {
-      CUDAStreamManager.reset();
-   }
-
    @Test
    public void testCreateAndRelease()
    {
+      CUDAStreamManagerInternal cudaStreamManager = new CUDAStreamManagerInternal();
+
       List<CUstream_st> streams = new ArrayList<>();
       for (int i = 0; i < CUDAStreamManager.MAX_CUDA_STREAMS; ++i)
       {
-         CUstream_st stream = CUDAStreamManager.getStream();
+         CUstream_st stream = cudaStreamManager.getStream();
          assertNotNull(stream);
          streams.add(stream);
       }
 
-      assertEquals(CUDAStreamManager.MAX_CUDA_STREAMS, CUDAStreamManager.getNumberOfActiveStreams());
+      assertEquals(CUDAStreamManager.MAX_CUDA_STREAMS, cudaStreamManager.getNumberOfActiveStreams());
 
       for (int i = 0; i < CUDAStreamManager.MAX_CUDA_STREAMS; ++i)
       {
-         CUstream_st stream = CUDAStreamManager.getStream();
+         CUstream_st stream = cudaStreamManager.getStream();
          assertEquals(streams.get(i), stream);
          streams.add(stream);
       }
 
-      assertEquals(CUDAStreamManager.MAX_CUDA_STREAMS, CUDAStreamManager.getNumberOfActiveStreams());
+      assertEquals(CUDAStreamManager.MAX_CUDA_STREAMS, cudaStreamManager.getNumberOfActiveStreams());
 
       for (CUstream_st stream : streams)
       {
-         assertDoesNotThrow(() -> CUDAStreamManager.releaseStream(stream));
+         assertDoesNotThrow(() -> cudaStreamManager.releaseStream(stream));
       }
 
-      assertEquals(0, CUDAStreamManager.getNumberOfActiveStreams());
+      assertEquals(0, cudaStreamManager.getNumberOfActiveStreams());
    }
 
    @Test
    public void testConcurrency() throws InterruptedException
    {
+      CUDAStreamManagerInternal cudaStreamManager = new CUDAStreamManagerInternal();
+
       Random random = new Random(0L);
       AtomicBoolean exceptionThrown = new AtomicBoolean(false);
 
@@ -69,9 +68,9 @@ public class CUDAStreamManagerTest
             try
             {
                ThreadTools.sleep(random.nextLong(10L));
-               CUstream_st stream = CUDAStreamManager.getStream();
+               CUstream_st stream = cudaStreamManager.getStream();
                ThreadTools.sleep(random.nextLong(10L));
-               CUDAStreamManager.releaseStream(stream);
+               cudaStreamManager.releaseStream(stream);
             }
             catch (UnsatisfiedLinkError error)
             {
@@ -96,6 +95,6 @@ public class CUDAStreamManagerTest
          thread.join();
 
       assertFalse(exceptionThrown.get());
-      assertEquals(0, CUDAStreamManager.getNumberOfActiveStreams());
+      assertEquals(0, cudaStreamManager.getNumberOfActiveStreams());
    }
 }
