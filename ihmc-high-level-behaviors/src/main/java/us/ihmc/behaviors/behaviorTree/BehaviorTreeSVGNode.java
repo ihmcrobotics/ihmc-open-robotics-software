@@ -27,7 +27,6 @@ public class BehaviorTreeSVGNode
    public BehaviorTreeSVGNode(SVGGraphics2D svgGraphics2D,
                               BehaviorTreeNodeState<?> node,
                               BehaviorTreeSVGNode nodeToExecuteAfter,
-                              BehaviorTreeSVGNode actionSequenceNode,
                               int index,
                               int originX,
                               int originY)
@@ -35,10 +34,14 @@ public class BehaviorTreeSVGNode
       this.svgGraphics2D = svgGraphics2D;
       this.node = node;
 
-      treeViewX = originX + 20 * BehaviorTreeTools.getNodeDepth(node);
+      int nodeDepth = BehaviorTreeTools.getNodeDepth(node);
+      int childIndex = BehaviorTreeTools.getChildIndex(node);
+      treeViewX = originX + 20 * nodeDepth;
       treeViewY = originY + 30 * index;
+
+      int timeBarHeight = 5;
       timeViewX = originX;
-      timeViewY = treeViewY + 500;
+      timeViewY = originY + timeBarHeight * index + 1500;
 
       if (node instanceof ActionNodeState)
       {
@@ -67,16 +70,25 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 10));
       svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), treeViewX, treeViewY);
 
+      if (nodeDepth > 1)
+      {
+         int lineX = treeViewX - 15;
+         int lineY = treeViewY - 15;
+         svgGraphics2D.drawLine(lineX, lineY, lineX, lineY - (childIndex == 0 ? 11 : 30));
+
+         svgGraphics2D.drawLine(lineX, lineY, lineX + 8, lineY);
+      }
+
+      svgGraphics2D.setColor(color);
+      svgGraphics2D.setStroke(new BasicStroke(0.5f));
+      svgGraphics2D.fillRect(timeViewX, timeViewY, 200, timeBarHeight);
+
 //      svgGraphics2D.setColor(color);
 //      svgGraphics2D.setStroke(new BasicStroke(0.5f));
 //      svgGraphics2D.fillRect(x, y, 200, 30);
 //      svgGraphics2D.setColor(Color.GRAY);
 //      svgGraphics2D.setStroke(new BasicStroke(0.25f));
 
-
-
-//      x = originX + 80;
-//      y = originY + 30;
    }
 
    public int getTimeViewX()
