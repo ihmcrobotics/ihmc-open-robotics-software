@@ -2,6 +2,7 @@ package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -9,10 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Add tests for running N times
 public class PausableLoopingThreadTest
 {
-   private static final String name = "TestLoopingThread";
+   private static final String NAME = "TestLoopingThread";
 
    @Test
    public void testStartDestroy()
@@ -21,7 +21,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.start();
       assertTrue(thread.isLooping());
@@ -47,7 +47,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.start();
       assertTrue(thread.isLooping());
@@ -89,7 +89,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.start();
       assertTrue(thread.isLooping());
@@ -119,7 +119,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.start();
       assertTrue(thread.isLooping());
@@ -157,7 +157,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.blockingDestroy();
       assertFalse(thread.isLooping());
@@ -171,7 +171,7 @@ public class PausableLoopingThreadTest
       {
          System.out.println("Test Thread Running");
          Thread.sleep(500);
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, name);
+      }, NAME);
 
       thread.start();
       assertTrue(thread.isLooping());
@@ -183,20 +183,66 @@ public class PausableLoopingThreadTest
    }
 
    @Test
-   public void testRunOnce()
+   public void testLoopOnce()
    {
-      AtomicInteger runCounter = new AtomicInteger(0);
+      AtomicInteger loopCounter = new AtomicInteger(0);
       PausableLoopingThread thread = new PausableLoopingThread(() ->
       {
-         assert runCounter.incrementAndGet() == 1;
-      }, name);
+         assert loopCounter.incrementAndGet() == 1;
+      }, NAME);
 
-      thread.runOnce();
+      thread.loopOnce();
       ThreadTools.sleep(500);
       thread.blockingDestroy();
-      assertEquals(1, runCounter.get());
+      assertEquals(1, loopCounter.get());
       assertFalse(thread.isLooping());
       assertFalse(thread.isAlive());
+   }
+
+   @Test
+   public void testLoopNIterations()
+   {
+      AtomicInteger loopCounter = new AtomicInteger(0);
+      Notification loopedNotification = new Notification();
+      Notification loopAssertedNotification = new Notification();
+
+      PausableLoopingThread thread = new PausableLoopingThread(() ->
+      {
+         loopCounter.set(loopCounter.get() + 1);
+         loopedNotification.set();
+         loopAssertedNotification.blockingPoll();
+      }, NAME);
+
+      for (int targetLoops = 1; targetLoops < 25; ++targetLoops)
+      {
+         loopCounter.set(0);
+         thread.loopNIterations(targetLoops);
+         for (int i = 0; i < targetLoops; ++i)
+         {
+            loopedNotification.blockingPoll();
+            assertEquals(i + 1, loopCounter.get());
+            loopAssertedNotification.set();
+         }
+      }
+   }
+
+   @Test
+   public void testAddIterations()
+   {
+      AtomicInteger loopCounter = new AtomicInteger(0);
+      PausableLoopingThread thread = new PausableLoopingThread(loopCounter::getAndIncrement, NAME);
+
+      int add = 20;
+      int subtract = -10;
+      int increment = 1;
+      int total = add + subtract + increment;
+
+      thread.addIterations(add);
+      thread.addIterations(subtract);
+      thread.incrementIterations();
+      ThreadTools.sleep(500);
+      thread.blockingDestroy();
+      assertEquals(total, loopCounter.get());
    }
 
    @Test
@@ -205,7 +251,7 @@ public class PausableLoopingThreadTest
       FrequencyCalculator frequencyCalculator = new FrequencyCalculator();
 
       double targetFrequency = 5.0;
-      PausableLoopingThread thread = new PausableLoopingThread(frequencyCalculator::ping, targetFrequency, name);
+      PausableLoopingThread thread = new PausableLoopingThread(frequencyCalculator::ping, targetFrequency, NAME);
 
       thread.start();
       ThreadTools.sleep(5000);
@@ -237,7 +283,7 @@ public class PausableLoopingThreadTest
                interruptCount.notify();
             }
          }
-      }, name);
+      }, NAME);
 
       // Test during free spin
       thread.start();
@@ -277,5 +323,25 @@ public class PausableLoopingThreadTest
          assertEquals(i + 1, interruptCount.get());
       }
       thread.blockingDestroy();
+   }
+
+   @Test
+   public void testOverride()
+   {
+      AtomicInteger loopCounter = new AtomicInteger(0);
+      PausableLoopingThread thread = new PausableLoopingThread(NAME)
+      {
+         @Override
+         protected void runInLoop()
+         {
+            loopCounter.set(loopCounter.get() + 1);
+         }
+      };
+
+      int targetLoops = 15;
+      thread.loopNIterations(targetLoops);
+      ThreadTools.sleep(500);
+      thread.blockingDestroy();
+      assertEquals(targetLoops, loopCounter.get());
    }
 }
