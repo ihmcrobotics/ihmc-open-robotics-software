@@ -10,11 +10,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class HandTransformTools
 {
    public static RigidBodyTransformReadOnly getHandGraphicToControlFrameTransform(FullHumanoidRobotModel fullRobotModel,
-                                                                                  UIParameters uiParameters,
+                                                                                  RigidBodyTransformReadOnly graphicToHandFrameTransform,
                                                                                   RobotSide side)
    {
-      RigidBodyTransform graphicToHandFrameTransform = uiParameters.getHandGraphicToHandFrameTransform(side);
-
       ReferenceFrame handFrame = fullRobotModel.getHand(side).getParentJoint().getFrameAfterJoint();
       ReferenceFrame controlFrame = fullRobotModel.getHandControlFrame(side);
 

@@ -1,12 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -15,16 +17,17 @@ import java.util.List;
 public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInterface
 {
    private final IdealStepCalculator nominalIdealStepCalculator;
-   private FootstepPlan referenceFootstepPlan;
-   private DirectedGraph<FootstepGraphNode> footstepGraph;
-   private DiscreteFootstep nominalIdealStep;
    private final YoBoolean stepSideIncorrect;
-
    // This will be used to query what reference alpha to use.
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final YoBoolean usingReferenceStep;
+   private FootstepPlan referenceFootstepPlan;
+   private DirectedGraph<FootstepGraphNode> footstepGraph;
+   private DiscreteFootstep nominalIdealStep;
 
-   public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
+   public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
+                                            IdealStepCalculator nominalIdealStepCalculator,
+                                            YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
       stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
@@ -57,18 +60,21 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
          throw new RuntimeException("Invalid side on reference plan");
       }
 
-      FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
-      return new DiscreteFootstep(referenceFootstepPose.getX(), referenceFootstepPose.getY(), referenceFootstepPose.getYaw(), referenceFootstep.getRobotSide());
+      double nominalIdealStepX = nominalIdealStep.getX();
+      double nominalIdealStepY = nominalIdealStep.getY();
+      double nominalIdealStepYaw = nominalIdealStep.getYaw();
+      double interpolatedYaw = AngleTools.interpolateAngle(nominalIdealStepYaw, referenceFootstep.getFootstepPose().getYaw(), referenceAlpha);
+
+      Pose2D nominalStepPose = new Pose2D(nominalIdealStep.getX(), nominalIdealStep.getY(), nominalIdealStep.getYaw());
+      Pose2D referenceStepPose = new Pose2D(referenceFootstep.getFootstepPose());
+      Pose2D interpolatedPose = new Pose2D(nominalStepPose);
+      interpolatedPose.interpolate(referenceStepPose, referenceAlpha);
+      return new DiscreteFootstep(interpolatedPose.getX(), interpolatedPose.getY(), interpolatedPose.getYaw(), referenceFootstep.getRobotSide());
    }
 
    public void setReferenceFootstepPlan(FootstepPlan referenceFootstepPlan)
    {
       this.referenceFootstepPlan = referenceFootstepPlan;
-   }
-
-   public void clearReferencePlan()
-   {
-      referenceFootstepPlan = null;
    }
 
    public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)

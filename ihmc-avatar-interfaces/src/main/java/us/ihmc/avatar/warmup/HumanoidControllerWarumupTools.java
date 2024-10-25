@@ -5,12 +5,14 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.HandLoadBearingMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -138,5 +140,26 @@ public class HumanoidControllerWarumupTools
          jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.4, angle2, 0.0));
       }
       return message;
+   }
+
+   public static HandLoadBearingMessage createHandLoadBearingMessage(FullHumanoidRobotModel fullRobotModel, RobotSide side, boolean load)
+   {
+      HandLoadBearingMessage handLoadBearingMessage = new HandLoadBearingMessage();
+      handLoadBearingMessage.setRobotSide(side.toByte());
+      handLoadBearingMessage.setLoad(load);
+
+      if (load)
+      {
+         handLoadBearingMessage.setCoefficientOfFriction(0.4);
+
+         FramePoint3D handControlPoint = new FramePoint3D(fullRobotModel.getHandControlFrame(side));
+         handControlPoint.changeFrame(fullRobotModel.getHand(side).getBodyFixedFrame());
+         handLoadBearingMessage.getContactPointInBodyFrame().set(handControlPoint);
+
+         // random surface normal along xy plane
+         handLoadBearingMessage.getContactNormalInWorld().set(0.5, 0.5, 0.0);
+      }
+
+      return handLoadBearingMessage;
    }
 }

@@ -901,4 +901,9 @@ public abstract class WalkingControllerParameters
    {
       return null;
    }
+
+   public boolean createMultiContactPostureAdjustmentCalculator()
+   {
+      return false;
+   }
 }

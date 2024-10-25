@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -85,6 +86,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final MovingReferenceFrame pelvisFrame;
    private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
+   private final WholeBodyPostureAdjustmentProvider postureAdjustmentProvider;
 
    private final FramePoint3D statusDesiredPosition = new FramePoint3D();
    private final FramePoint3D statusActualPosition = new FramePoint3D();
@@ -104,6 +106,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMassStateProvider = controllerToolbox;
       pelvisFrame = referenceFrames.getPelvisFrame();
+      postureAdjustmentProvider = controllerToolbox.getPostureAdjustmentProvider();
 
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
@@ -378,6 +381,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          fallActivationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
          zddFeedForward = EuclidCoreTools.interpolate(zddFeedForward, -fallAccelerationMagnitude.getValue(), fallActivationRatio.getValue());
          gainScaleFactor = 1.0 - fallActivationRatio.getValue();
+      }
+
+      if (postureAdjustmentProvider.isEnabled())
+      {
+         zDesired += postureAdjustmentProvider.getFloatingBasePositionOffsetZ();
+         zdDesired += postureAdjustmentProvider.getFloatingBaseVelocityOffsetZ();
+         zddFeedForward += postureAdjustmentProvider.getFloatingBaseAccelerationOffsetZ();
       }
 
       desiredPosition.set(0.0, 0.0, zDesired);

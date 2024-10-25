@@ -15,7 +15,7 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-perception:source")
-   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
 }
 

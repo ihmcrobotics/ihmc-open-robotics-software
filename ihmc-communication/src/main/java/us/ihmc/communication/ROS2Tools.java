@@ -1,14 +1,21 @@
 package us.ihmc.communication;
 
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -23,7 +30,6 @@ import java.util.function.Consumer;
  *    <li>{@link HumanoidControllerAPI}</li>
  *    <li>{@link MissionControlAPI}</li>
  *    <li>{@link PerceptionAPI}</li>
- *    <li>{@link QuadrupedAPI}</li>
  *    <li>{@link SakeHandAPI}</li>
  *    <li>{@link StateEstimatorAPI}</li>
  *    <li>{@link ToolboxAPIs}</li>
@@ -89,7 +95,18 @@ public final class ROS2Tools
     */
    public static ROS2Node createLoopbackROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), InetAddress.getLoopbackAddress());
+      InetAddress loopbackAddress = InetAddress.getLoopbackAddress();
+      if (FACTORY.getAddressRestriction().length != 0 && !Arrays.asList(FACTORY.getAddressRestriction()).contains(loopbackAddress))
+      {
+         LogTools.warn("""
+                       You are creating a loopback ROS2 node, but your RTPSSubnet restriction does not allow the loopback address.
+                       For this node to communicate with other nodes, you can add {}/8 to the network parameters file.
+                       (Currently allowed addresses: {})""",
+                       loopbackAddress.getHostAddress(),
+                       FACTORY.getAddressRestriction());
+      }
+
+      return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), loopbackAddress);
    }
 
    /**

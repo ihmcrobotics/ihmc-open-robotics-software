@@ -63,7 +63,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       ReferenceFrame syncedControlFrame = fullRobotModel.getHandControlFrame(side);
 
       RigidBodyTransformReadOnly linkToControlFrameTransform = HandTransformTools.getHandLinkToControlFrameTransform(fullRobotModel, side);
-      RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getUIParameters(), side);
+      RigidBodyTransformReadOnly graphicToControlFrameTransform = HandTransformTools.getHandGraphicToControlFrameTransform(fullRobotModel, robotModel.getHandGraphicToHandFrameTransform(side), side);
 
       super.create(robotCollidable, syncedControlFrame, graphicToControlFrameTransform, linkToControlFrameTransform, modelFileName, baseUI.getPrimary3DPanel());
 

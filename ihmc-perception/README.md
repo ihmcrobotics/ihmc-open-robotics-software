@@ -17,11 +17,18 @@ sudo apt-get update
 sudo apt-get -y install cuda-toolkit-12-6
 ```
 
-To install the appropriate NVIDIA driver:
+To install the NVIDIA driver for 20 series graphics cards and up:
 
 ```shell
 sudo apt-get install -y nvidia-open
 ```
+
+For older NVIDIA graphics cards: 
+
+```shell
+sudo apt-get install -y cuda-drivers
+```
+
 
 ### nvCOMP
 
@@ -37,13 +44,13 @@ rm -f nvcomp_3.0.5_x86_64_12.x.tgz
 
 ```shell
 cd ~/Downloads
-wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.1/ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
-chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
-./ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
+wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
+chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
+./ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
 
 # Follow the ZED SDK installer prompts
 
-rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.1.3.zstd.run
+rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
 ```
 
 ## Windows (x86_64)
@@ -85,7 +92,7 @@ rmdir /s /q nvcomp
 
 ```shell
 cd %USERPROFILE%\Downloads
-curl -o ZED_SDK_Installer.exe -L https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.1/ZED_SDK_Windows_cuda12.1_v4.1.3.exe
+curl -o ZED_SDK_Installer.exe -L https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Windows_cuda12.1_v4.2.1.exe
 ZED_SDK_Installer .exe -s
 
 :: Follow the ZED SDK installer prompts

@@ -6,7 +6,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.tools.thread.Throttler;
 
@@ -105,12 +105,12 @@ public class FFMPEGVideoPlaybackManager
 
    public double calculateTimeBaseSeconds()
    {
-      return FFMPEGTools.rationalToFloatingPoint(file.getTimeBase());
+      return FFmpegTools.rationalToFloatingPoint(file.getTimeBase());
    }
 
    public double calculateAverageFramerateHz()
    {
-      return FFMPEGTools.rationalToFloatingPoint(file.getAverageFramerate());
+      return FFmpegTools.rationalToFloatingPoint(file.getAverageFramerate());
    }
 
    public double calculateVideoFramePeriod()

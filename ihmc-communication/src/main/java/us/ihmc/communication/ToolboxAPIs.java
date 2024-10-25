@@ -6,7 +6,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 public final class ToolboxAPIs
 {
-   public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
    public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "toolbox/footstep_postprocessing";
    public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/ik_planning";
@@ -19,7 +18,6 @@ public final class ToolboxAPIs
    public static final String DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME = "/toolbox/directional_control";
    public static final String RFERENCE_SPREADING_TOOLBOX_MODULE_NAME = "toolbox/reference_spreading";
 
-   public static final ROS2Topic<?> CONTINUOUS_PLANNING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FOOTSTEP_POSTPROCESSING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> KINEMATICS_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(KINEMATICS_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> KINEMATICS_PLANNING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);

@@ -104,7 +104,6 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
    @Test
    public void testOutwardPushInSwing()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       // setup all parameters

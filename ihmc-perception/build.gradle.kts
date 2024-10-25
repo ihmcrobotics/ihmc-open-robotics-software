@@ -70,7 +70,7 @@ mainDependencies {
    api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64") {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
-   api("us.ihmc:zed-java-api:4.1.4") {
+   api("us.ihmc:zed-java-api:4.2.0_1") {
       exclude(group = "org.bytedeco")
    }
    val hdf5Version = "1.14.1-1.5.9"
@@ -92,7 +92,7 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:robot-environment-awareness:source")
 
    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")

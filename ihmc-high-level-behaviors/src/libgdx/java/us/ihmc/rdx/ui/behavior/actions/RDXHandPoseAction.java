@@ -230,7 +230,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       for (RobotSide side : RobotSide.values)
       {
          handGraphicToControlFrameTransforms.put(side, HandTransformTools.getHandGraphicToControlFrameTransform(syncedFullRobotModel,
-                                                                                                                robotModel.getUIParameters(),
+                                                                                                                robotModel.getHandGraphicToHandFrameTransform(side),
                                                                                                                 side));
          String handBodyName = syncedFullRobotModel.getHand(side).getName();
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(handBodyName));
