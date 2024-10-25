@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
@@ -50,6 +51,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final KinematicsSimulationVirtualGroundReactionManager kinematicsSimulationVirtualGroundReactionManager;
    private final ControllerCoreCommand controllerCoreCommandData;
+   private final ControllerCoreOutput controllerCoreOutputFromControllerCoreThread;
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -57,7 +59,8 @@ public class WalkingControllerState extends HighLevelControllerState
                                  WholeBodyControllerCoreFactory controllerCoreFactory,
                                  HighLevelHumanoidControllerToolbox controllerToolbox,
                                  HighLevelControllerParameters highLevelControllerParameters,
-                                 WalkingControllerParameters walkingControllerParameters)
+                                 WalkingControllerParameters walkingControllerParameters,
+                                 ControllerCoreOutputDataHolder controllerCoreOutputDataHolder)
    {
       super(controllerState,
             highLevelControllerParameters,
@@ -75,6 +78,7 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCoreFactory.setFeedbackControllerTemplate(managerFactory.createFeedbackControlTemplate());
       controllerCore = controllerCoreFactory.getOrCreateWholeBodyControllerCore();
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
+      this.controllerCoreOutputFromControllerCoreThread = controllerCoreOutputDataHolder.getControllerCoreOutput();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
@@ -163,7 +167,8 @@ public class WalkingControllerState extends HighLevelControllerState
 
       //  Is this just for  YoGraphic?
       // The input as "controllerCore.getControllerCoreOutput" should be replaced with controllerCoreOutputDataHolder
-      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+//      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.setInputFromControllerCore(controllerCoreOutputFromControllerCoreThread);
       linearMomentumRateControlModule.computeAchievedCMP();
    }
 
@@ -188,7 +193,8 @@ public class WalkingControllerState extends HighLevelControllerState
    @Override
    public ControllerCoreOutput getControllerCoreOutput()
    {
-      return controllerCore.getControllerCoreOutput();
+//      return controllerCore.getControllerCoreOutput();
+      return controllerCoreOutputFromControllerCoreThread;
    }
 
    @Override
@@ -234,4 +240,5 @@ public class WalkingControllerState extends HighLevelControllerState
          return null;
       return group;
    }
+
 }

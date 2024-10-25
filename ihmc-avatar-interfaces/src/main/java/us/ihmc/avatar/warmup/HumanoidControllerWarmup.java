@@ -1,10 +1,6 @@
 package us.ihmc.avatar.warmup;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -55,6 +51,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class HumanoidControllerWarmup
 {
@@ -315,7 +314,8 @@ public abstract class HumanoidControllerWarmup
                                                           controllerCoreFactory,
                                                           controllerToolbox,
                                                           robotModel.getHighLevelControllerParameters(),
-                                                          robotModel.getWalkingControllerParameters());
+                                                          robotModel.getWalkingControllerParameters(),
+                                                          null);
    }
 
    @SuppressWarnings("unchecked")

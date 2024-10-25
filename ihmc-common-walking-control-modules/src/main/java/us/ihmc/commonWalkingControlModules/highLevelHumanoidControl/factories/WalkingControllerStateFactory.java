@@ -20,7 +20,8 @@ public class WalkingControllerStateFactory implements HighLevelControllerStateFa
                                                              controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                             controllerFactoryHelper.getWalkingControllerParameters());
+                                                             controllerFactoryHelper.getWalkingControllerParameters(),
+                                                             controllerFactoryHelper.getControllerCoreOutputDataHolder());
       }
 
       return walkingControllerState;

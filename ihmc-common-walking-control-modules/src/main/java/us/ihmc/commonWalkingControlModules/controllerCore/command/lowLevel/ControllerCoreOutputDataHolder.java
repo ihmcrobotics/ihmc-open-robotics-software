@@ -175,8 +175,6 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
       return rootJointDesiredConfigurationData;
    }
 
-
-
    public void setLowLevelOneDoFJointControllerCoreOutputDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointControllerCoreOutputDataHolder)
    {
       hasLowLevelOneDoFJointControllerCoreOutputDataHolder = true;
@@ -188,6 +186,7 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
       hasJointDesiredOutputList = true;
       this.jointDesiredOutputList.overwriteWith(jointDesiredOutputList);
    }
+
    @Override
    public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
    {
@@ -204,6 +203,79 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
    public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder()
    {
       return lowLevelOneDoFJointControllerCoreOutputDataHolder;
+   }
+
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      ControllerCoreOutput controllerCoreOutput = new ControllerCoreOutput();
+
+      controllerCoreOutput.setAngularMomentum(getAngularMomentum());
+      controllerCoreOutput.setAngularMomentumRate(getAngularMomentumRate());
+      controllerCoreOutput.setLinearMomentum(getLinearMomentum());
+      controllerCoreOutput.setLinearMomentumRate(getLinearMomentumRate());
+
+      controllerCoreOutput.setCenterOfPressureData(getDesiredCenterOfPressureDataHolder());
+      controllerCoreOutput.setDesiredExternalWrenchData(getDesiredExternalWrenchHolder());
+      controllerCoreOutput.setLowLevelOneDoFJointDesiredDataHolder(getLowLevelOneDoFJointDesiredDataHolder());
+      controllerCoreOutput.setRootJointDesiredConfigurationData(getRootJointDesiredConfigurationData());
+
+      return controllerCoreOutput;
+   }
+
+   public ControllerCoreOutputReadOnly getOutputForHighLevelController()
+   {
+      ControllerCoreOutputReadOnly controllerCoreOutput = new ControllerCoreOutputReadOnly()
+      {
+         @Override
+         public void getDesiredCenterOfPressure(FramePoint2DBasics copToPack, RigidBodyBasics rigidBody)
+         {
+            centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
+         }
+
+         @Override
+         public boolean getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody)
+         {
+            return desiredExternalWrenchHolder.getDesiredExternalWrench(desiredExternalWrenchToPack, rigidBody);
+         }
+
+         @Override
+         public FrameVector3DReadOnly getLinearMomentum()
+         {
+            return linearMomentum;
+         }
+
+         @Override
+         public FrameVector3DReadOnly getAngularMomentum()
+         {
+            return angularMomentum;
+         }
+
+         @Override
+         public FrameVector3DReadOnly getLinearMomentumRate()
+         {
+            return linearMomentumRate;
+         }
+
+         @Override
+         public FrameVector3DReadOnly getAngularMomentumRate()
+         {
+            return angularMomentumRate;
+         }
+
+         @Override
+         public RootJointDesiredConfigurationDataReadOnly getRootJointDesiredConfigurationData()
+         {
+            return rootJointDesiredConfigurationData;
+         }
+
+         @Override
+         public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+         {
+            return jointDesiredOutputList;
+         }
+      };
+
+      return controllerCoreOutput;
    }
 
    public void set(ControllerCoreOutputDataHolder other)
@@ -258,11 +330,9 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
             return false;
          if (!rootJointDesiredConfigurationData.equals(other.rootJointDesiredConfigurationData))
             return false;
-         if( !lowLevelOneDoFJointControllerCoreOutputDataHolder.equals(other.lowLevelOneDoFJointControllerCoreOutputDataHolder))
+         if (!lowLevelOneDoFJointControllerCoreOutputDataHolder.equals(other.lowLevelOneDoFJointControllerCoreOutputDataHolder))
             return false;
-         if(!jointDesiredOutputList.equals(other.jointDesiredOutputList))
-            return false;
-         return true;
+         return jointDesiredOutputList.equals(other.jointDesiredOutputList);
       }
       else
       {
