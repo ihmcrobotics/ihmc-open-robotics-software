@@ -611,7 +611,7 @@ public class RDXVRKinematicsStreamingMode
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(70));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
 
       toolboxInputMessage.getInputs().add().set(message);

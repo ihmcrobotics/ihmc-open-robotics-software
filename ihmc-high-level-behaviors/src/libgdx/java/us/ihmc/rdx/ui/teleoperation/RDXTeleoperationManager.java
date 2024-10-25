@@ -441,16 +441,16 @@ public class RDXTeleoperationManager extends RDXPanel
 
    private void calculateVRPick(RDXVRContext vrContext)
    {
-      if (interactablesEnabled.get())
-      {
-         locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
-
-         if (interactablesAvailable && showContactCollisionMeshes.get())
-            contactCollisionModel.calculateVRPick(vrContext);
-
-         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-            robotPartInteractable.calculateVRPick(vrContext);
-      }
+//      if (interactablesEnabled.get())
+//      {
+//         locomotionManager.calculateWalkPathControlRingVRPick(vrContext);
+//
+//         if (interactablesAvailable && showContactCollisionMeshes.get())
+//            contactCollisionModel.calculateVRPick(vrContext);
+//
+//         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+//            robotPartInteractable.calculateVRPick(vrContext);
+//      }
    }
 
    private void processVRInput(RDXVRContext vrContext)
