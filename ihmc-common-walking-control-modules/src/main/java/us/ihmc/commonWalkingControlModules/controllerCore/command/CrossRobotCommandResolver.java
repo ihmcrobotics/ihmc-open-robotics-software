@@ -97,6 +97,7 @@ public class CrossRobotCommandResolver
 
    /**
     * Resolve command for controllerCoreCommand.
+    *
     * @param in
     * @param out
     */
@@ -104,23 +105,14 @@ public class CrossRobotCommandResolver
    {
       out.clear();
       out.set(in);
-//      if(in.isReinitializationRequested())
-//         out.requestReinitialization();
+      //      if(in.isReinitializationRequested())
+      //         out.requestReinitialization();
    }
 
    public void resolveControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder in, ControllerCoreOutputDataHolder out)
    {
-      resolveFrameVector3D(in.getLinearMomentum(), out.getLinearMomentum());
-      resolveFrameVector3D(in.getAngularMomentum(), out.getAngularMomentum());
-      resolveFrameVector3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
-      resolveFrameVector3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
-      resolveCenterOfPressureDataHolder(in.getDesiredCenterOfPressureDataHolder(), out.getDesiredCenterOfPressureDataHolder());
-      resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchHolder(), out.getDesiredExternalWrenchHolder());
-      out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder(),
-                                                  out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreDesiredDataHolder(), out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
 
+      out.setControllerCoreOutputDataHolder(in);
    }
 
    public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
@@ -183,6 +175,7 @@ public class CrossRobotCommandResolver
       resolveHumanoidRobotContextDataScheduler(in, out);
       resolveHumanoidRobotContextDataController(in, out);
       resolveHumanoidRobotContextDataEstimator(in, out);
+      resolveHumanoidRobotContextDataWholeBodyControllerCore(in, out);
       resolveHumanoidRobotContextDataPerception(in, out);
    }
 
@@ -203,31 +196,17 @@ public class CrossRobotCommandResolver
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
-      //      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
       resolveControllerCoreCommandDataHolder(in.getControllerCoreCommandDataHolder(), out.getControllerCoreCommandDataHolder());
       out.setControllerRan(in.getControllerRan());
    }
 
    /**
     * Resolves only the part of the context data that is updated by the wholeBodyControllerCore thread
-    * //TODO This should be removed after checking resolveHumanoidRobotContextDataWholeBodyControllerCoreFull works well.
-    * TODO The resolveHumaonidRobotContextDataWholeBodyControllerCoreFull will replace with this.
+    * This resolves the ControllerCoreOutput and desiredJointOutput
     */
    public void resolveHumanoidRobotContextDataWholeBodyControllerCore(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
-      resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
-      out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
-   }
-
-   /**
-    * Resolves only the part of the context data that is updated by the wholeBodyControllerCore Thread
-    * //TODO after checking the feasibility of using this, the resolveHumanoidRobotContextDataWholeBodyControllerCore will be deleted.
-    * TODO dAnd then,this name is changed to exclude Full in the end.
-    */
-   public void resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(HumanoidRobotContextData in, HumanoidRobotContextData out)
-   {
       resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
       out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
@@ -312,6 +291,7 @@ public class CrossRobotCommandResolver
       out.clear();
       resolveFeedbackControlCommandListInternal(in, out);
    }
+
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
       out.setCommandId(in.getCommandId());

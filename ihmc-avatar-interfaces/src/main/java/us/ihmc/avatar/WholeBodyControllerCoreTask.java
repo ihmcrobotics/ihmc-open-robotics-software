@@ -67,8 +67,6 @@ public class WholeBodyControllerCoreTask extends HumanoidRobotControlTask
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
-
-//      masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
    }
 
    @Override
@@ -77,12 +75,17 @@ public class WholeBodyControllerCoreTask extends HumanoidRobotControlTask
       wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
       wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
       wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataController(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
    }
 
    @Override
-   public void addCallbackPostTask(Runnable runnable) {postWholeBodyControllerCoreCallbacks.add(runnable); }
+   public void addCallbackPostTask(Runnable runnable)
+   {
+      postWholeBodyControllerCoreCallbacks.add(runnable);
+   }
 
    @Override
-   public void addRunnableOnSchedulerThread(Runnable runnable) { schedulerThreadRunnables.add(runnable); }
+   public void addRunnableOnSchedulerThread(Runnable runnable)
+   {
+      schedulerThreadRunnables.add(runnable);
+   }
 }

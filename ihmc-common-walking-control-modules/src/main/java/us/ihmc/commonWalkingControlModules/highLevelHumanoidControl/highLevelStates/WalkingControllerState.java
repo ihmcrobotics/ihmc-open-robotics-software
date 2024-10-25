@@ -166,8 +166,6 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCoreTimer.stopMeasurement();
 
       //  Is this just for  YoGraphic?
-      // The input as "controllerCore.getControllerCoreOutput" should be replaced with controllerCoreOutputDataHolder
-//      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCoreOutputFromControllerCoreThread);
       linearMomentumRateControlModule.computeAchievedCMP();
    }
@@ -193,7 +191,6 @@ public class WalkingControllerState extends HighLevelControllerState
    @Override
    public ControllerCoreOutput getControllerCoreOutput()
    {
-//      return controllerCore.getControllerCoreOutput();
       return controllerCoreOutputFromControllerCoreThread;
    }
 
@@ -240,5 +237,4 @@ public class WalkingControllerState extends HighLevelControllerState
          return null;
       return group;
    }
-
 }

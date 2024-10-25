@@ -86,6 +86,20 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
       setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
       setJointDesiredOutputList(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
    }
+   public void setControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder controllerCoreOutput)
+   {
+      setDesiredCenterOfPressureDataHolder(controllerCoreOutput.getDesiredCenterOfPressureDataHolder());
+      desiredExternalWrenchHolder = controllerCoreOutput.getDesiredExternalWrenchHolder();
+
+      setAngularMomentum(controllerCoreOutput.getAngularMomentum());
+      setAngularMomentumRate(controllerCoreOutput.getAngularMomentumRate());
+
+      setLinearMomentum(controllerCoreOutput.getLinearMomentum());
+      setLinearMomentumRate(controllerCoreOutput.getLinearMomentumRate());
+      setRootJointDesiredConfigurationData(controllerCoreOutput.getRootJointDesiredConfigurationData());
+      setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+      setJointDesiredOutputList(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
+   }
 
    public void setDesiredCenterOfPressureDataHolder(CenterOfPressureDataHolder centerOfPressureDataHolder)
    {
