@@ -89,4 +89,9 @@ public class BehaviorTreeTools
       }
       return depth;
    }
+
+   public static int getChildIndex(BehaviorTreeNodeState<?> node)
+   {
+      return node.isRootNode() ? 0 : node.getParent().getChildren().indexOf(node);
+   }
 }
