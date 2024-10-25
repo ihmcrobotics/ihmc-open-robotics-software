@@ -18,6 +18,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+/**
+ * This class is meant to provide a way to log print statements to a file.
+ * It's used throughout the Continuous Hiking process to help with debugging.
+ * By logging to a file often the details of the process, we can attempt to determine how things are going wrong.
+ * Writing unit tests for a UI is tricky and when this class was written, a testing structure didn't exist, so this was the next best option
+ */
 public class ContinuousHikingLogger
 {
    private static final int NUMBER_OF_LOGS_TO_KEEP = 100;
