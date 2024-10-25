@@ -302,7 +302,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       // Check to see if a controller is plugged into the computer
       Controller joystickController = Controllers.getCurrent();
-      boolean controllerConnected = joystickController.isConnected();
+      // Here we check against null rather then .isConnected() because if the controller is unplugged that method won't work
+      boolean controllerConnected = joystickController != null;
 
       // Setup a bunch of variables to be published in the message
       boolean walkWithKeyboard = ImGui.getIO().getKeyCtrl();
