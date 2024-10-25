@@ -30,7 +30,7 @@ libgdxDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("mission-control"))
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
-   api("us.ihmc:ihmc-graphics-libgdx:source")
+   api("us.ihmc:rdx:1.0.0")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
@@ -38,7 +38,6 @@ libgdxDependencies {
 
 testDependencies {
    api(ihmc.sourceSetProject("libgdx"))
-   api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("us.ihmc:scs2-examples:17-0.27.3")
    api("us.ihmc:scs2-bullet-simulation-test:17-0.27.3")

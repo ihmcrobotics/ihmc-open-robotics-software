@@ -38,7 +38,7 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
    private final FootstepPlanningModuleProcess footstepPlanningModuleProcess;
    private final MapSenseHeadlessProcess mapsenseHeadlessProcess;
    private final ObjectDetectionProcess objectDetectionProcess;
-   private final LidarREAProcess lidarREAProcess;
+//   private final LidarREAProcess lidarREAProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public RDXProcessManagerPanel(Pose3DReadOnly startingPose)
@@ -61,13 +61,13 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
       objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getROS2Mode, this::getRobotTarget);
-      lidarREAProcess = new LidarREAProcess();
+//      lidarREAProcess = new LidarREAProcess();
 
       processes.add(behaviorManagerProcess);
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
       processes.add(objectDetectionProcess);
-      processes.add(lidarREAProcess);
+//      processes.add(lidarREAProcess);
    }
 
    private PubSubImplementation getROS2Mode()
@@ -121,7 +121,7 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       mapsenseHeadlessProcess.destroy();
       footstepPlanningModuleProcess.destroy();
       objectDetectionProcess.destroy();
-      lidarREAProcess.destroy();
+//      lidarREAProcess.destroy();
 
       // destroy em all just in case
       for (RestartableProcess process : processes)
