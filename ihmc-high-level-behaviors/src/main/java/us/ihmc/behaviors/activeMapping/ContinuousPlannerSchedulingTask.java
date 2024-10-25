@@ -139,8 +139,9 @@ public class ContinuousPlannerSchedulingTask
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
-                                                     LogTools.warn("STATE CHANGED: ( " + from + " -> " + to + " )");
-//                                                     continuousHikingLogger.appendString();
+                                                     String message ="STATE CHANGED: (" + from +  " -> "  + to + ")";
+                                                     LogTools.warn(message);
+                                                     continuousHikingLogger.appendString(message);
                                                   });
       stateMachineFactory.addStateChangedListener((from, to) -> planningMode = debugger.getPlanningMode());
       stateMachineFactory.addStateChangedListener((from, to) -> continuousHikingLogger.logToFile(true, false));

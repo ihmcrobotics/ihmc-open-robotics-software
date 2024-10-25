@@ -104,6 +104,7 @@ public class ReadyToPlanState implements State
       // Set up the imminent stance and goal poses in which to plan from
       continuousPlanner.setImminentStanceToPlanFrom();
       SideDependentList<FramePose3D> goalPoses = getGoalPosesBasedOnPlanningMode();
+      continuousHikingLogger.appendString("Goal Poses: \n" + goalPoses.toString());
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), goalPoses);
 
       // Plan to the goal and log the plan
@@ -123,6 +124,8 @@ public class ReadyToPlanState implements State
          FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(continuousPlanner.getLatestFootstepPlan(),
                                                                                                        continuousHikingParameters.getSwingTime(),
                                                                                                        continuousHikingParameters.getTransferTime());
+
+         continuousHikingLogger.appendString("FootstepDataListMessage that got published: \n " + message.toString());
          debugger.publishPlannedFootsteps(message);
       }
    }
