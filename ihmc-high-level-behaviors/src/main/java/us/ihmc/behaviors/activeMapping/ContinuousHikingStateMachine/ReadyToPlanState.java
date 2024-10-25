@@ -145,6 +145,8 @@ public class ReadyToPlanState implements State
 
    public SideDependentList<FramePose3D> getGoalPosesBasedOnPlanningMode()
    {
+      String message = commandMessage.get().toString();
+      continuousHikingLogger.appendString("Command Message that was published: \n" + message);
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
       switch (this.planningMode)
