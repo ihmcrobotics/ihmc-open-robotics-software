@@ -6,7 +6,6 @@
   "Number of steps to send" : 3,
   "Goal pose forward distance" : 1.6,
   "Goal pose up distance" : 0.8,
-  "Goal pose backward distance" : 0.4,
   "Swing time" : 0.95,
   "Transfer time" : 0.6,
   "Planning timeout as a fraction of the step duration" : 0.3,

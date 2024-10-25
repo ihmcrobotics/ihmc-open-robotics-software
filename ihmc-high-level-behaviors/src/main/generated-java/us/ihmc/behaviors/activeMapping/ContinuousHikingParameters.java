@@ -24,7 +24,6 @@ public class ContinuousHikingParameters extends StoredPropertySet implements Con
    public static final IntegerStoredPropertyKey numberOfStepsToSend = keys.addIntegerKey("Number of steps to send");
    public static final DoubleStoredPropertyKey goalPoseForwardDistance = keys.addDoubleKey("Goal pose forward distance");
    public static final DoubleStoredPropertyKey goalPoseUpDistance = keys.addDoubleKey("Goal pose up distance");
-   public static final DoubleStoredPropertyKey goalPoseBackwardDistance = keys.addDoubleKey("Goal pose backward distance");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
    public static final DoubleStoredPropertyKey planningTimeoutAsAFractionOfTheStepDuration = keys.addDoubleKey("Planning timeout as a fraction of the step duration");
