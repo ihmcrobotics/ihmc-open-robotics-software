@@ -67,11 +67,12 @@ public class SwingPlanningModule
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
    {
-      swingTrajectories.clear();
       if (heightMapData == null || heightMapData.isEmpty())
       {
          return;
       }
+
+      swingTrajectories.clear();
 
       if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
       {
