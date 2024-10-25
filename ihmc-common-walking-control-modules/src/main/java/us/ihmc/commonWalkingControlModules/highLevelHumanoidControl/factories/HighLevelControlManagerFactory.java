@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import com.esotericsoftware.minlog.Log;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -44,6 +45,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Collection;
@@ -237,6 +239,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       // Gains
       PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
       PID3DGainsReadOnly taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
+      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(bodyName + "_Impedance");
+      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(bodyName + "_Impedance");
 
       // Weights
       Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
@@ -252,12 +256,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
-      boolean enableImpedanceControl = walkingControllerParameters.enableImpedanceControl(bodyName);
 
-      if (enableImpedanceControl){
-         taskspacePositionGains = walkingControllerParameters.getImpedanceHandPositionControlGains();
-         taskspaceOrientationGains = walkingControllerParameters.getImpedanceHandOrientationControlGains();
-      }
+      YoBoolean isImpedanceEnabled = new YoBoolean(bodyName + "-EnableImpedanceControl", registry);
+      isImpedanceEnabled.set(walkingControllerParameters.enableImpedanceControl(bodyName));
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
@@ -270,11 +271,13 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceLinearWeight,
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
+                                                                    taskspaceOrientationImpedanceGains,
+                                                                    taskspacePositionImpedanceGains,
                                                                     contactableBody,
                                                                     loadBearingParameters,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
-                                                                    enableImpedanceControl,
+                                                                    isImpedanceEnabled,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
                                                                     yoTime,

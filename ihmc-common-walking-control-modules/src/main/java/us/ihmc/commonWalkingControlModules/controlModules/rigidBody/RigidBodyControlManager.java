@@ -58,7 +58,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final String bodyName;
    private final RigidBodyBasics bodyToControl;
    private final YoRegistry registry;
-   private final YoBoolean isImpedanceEnabled;
 
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
@@ -92,11 +91,13 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   Vector3DReadOnly taskspaceLinearWeight,
                                   PID3DGainsReadOnly taskspaceOrientationGains,
                                   PID3DGainsReadOnly taskspacePositionGains,
+                                  PID3DGainsReadOnly taskspaceOrientationImpedanceGains,
+                                  PID3DGainsReadOnly taskspacePositionImpedanceGains,
                                   ContactablePlaneBody contactableBody,
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
-                                  boolean enableImpedanceControl,
+                                  YoBoolean isImpedanceEnabled,
                                   double nominalRhoWeight,
                                   WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   YoDouble yoTime,
@@ -108,8 +109,6 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
-      this.isImpedanceEnabled = new YoBoolean(namePrefix + "-EnableImpedanceControl", registry);
-      this.isImpedanceEnabled.set(enableImpedanceControl);
 
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       stateSwitched = new YoBoolean(namePrefix + "StateSwitched", registry);
@@ -133,7 +132,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                                    yoTime,
                                                                                                    jointControlHelper,
                                                                                                    enableFunctionGenerators,
-                                                                                                   this.isImpedanceEnabled,
+                                                                                                   isImpedanceEnabled,
                                                                                                    parentRegistry);
          if (taskspaceOrientationGains == null)
          {
@@ -142,7 +141,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspaceOrientationGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + this.isImpedanceEnabled + ")");
+         LogTools.info("Creating manager for " + bodyName + " with orientation controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else if (taskspaceAngularWeight == null && taskspaceLinearWeight != null)
       {
@@ -153,7 +152,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                              baseFrame,
                                                                                              yoTime,
                                                                                              enableFunctionGenerators,
-                                                                                             this.isImpedanceEnabled,
+                                                                                             isImpedanceEnabled,
                                                                                              parentRegistry,
                                                                                              graphicsListRegistry);
          if (taskspacePositionGains == null)
@@ -163,7 +162,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          taskspaceControlState.setGains(taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceLinearWeight);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with position controller. (Impedance enabled: " + enableImpedanceControl + ")");
+         LogTools.info("Creating manager for " + bodyName + " with position controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else if (taskspaceAngularWeight != null && taskspaceLinearWeight != null)
       {
@@ -175,7 +174,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                                      yoTime,
                                                                                      jointControlHelper,
                                                                                      enableFunctionGenerators,
-                                                                                     this.isImpedanceEnabled,
+                                                                                     isImpedanceEnabled,
                                                                                      graphicsListRegistry,
                                                                                      registry);
          if (taskspaceOrientationGains == null || taskspacePositionGains == null)
@@ -186,8 +185,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          }
          taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
          taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
+         if (taskspaceOrientationImpedanceGains != null && taskspacePositionImpedanceGains != null)
+            taskspaceControlState.setImpedanceGains(taskspaceOrientationImpedanceGains, taskspacePositionImpedanceGains);
          this.taskspaceControlState = taskspaceControlState;
-         LogTools.info("Creating manager for " + bodyName + " with pose controller. (Impedance enabled: " + enableImpedanceControl + ")");
+         LogTools.info("Creating manager for " + bodyName + " with pose controller. (Impedance enabled: " + isImpedanceEnabled.getValue() + ")");
       }
       else
       {

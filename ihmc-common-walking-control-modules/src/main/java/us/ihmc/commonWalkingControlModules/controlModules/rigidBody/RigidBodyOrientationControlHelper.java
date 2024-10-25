@@ -86,6 +86,7 @@ public class RigidBodyOrientationControlHelper
 
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
+   private PID3DGainsReadOnly impedanceGains;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
@@ -177,9 +178,19 @@ public class RigidBodyOrientationControlHelper
       this.gains = gains;
    }
 
+   public void setImpedanceGains(PID3DGainsReadOnly impedanceGains)
+   {
+      this.impedanceGains = impedanceGains;
+   }
+
    public PID3DGainsReadOnly getGains()
    {
       return gains;
+   }
+
+   public PID3DGainsReadOnly getImpedanceGains()
+   {
+      return impedanceGains;
    }
 
    public void setWeights(Vector3DReadOnly weights)
@@ -297,6 +308,23 @@ public class RigidBodyOrientationControlHelper
          gains = gainsTrajectoryPoints.get(
                gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
                                       .getAngular();
+         feedbackControlCommand.setGains(gains);
+      }
+      else if (!isImpedanceEnabled.getBooleanValue())
+      {
+         feedbackControlCommand.setGains(gains);
+      }
+      else
+      {
+         if (impedanceGains != null)
+         {
+            feedbackControlCommand.setGains(impedanceGains);
+         }
+         else
+         {
+            isImpedanceEnabled.set(false);
+            LogTools.warn(warningPrefix + "Impedance gains are not set, impedance control is disabled.");
+         }
       }
 
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -304,7 +332,7 @@ public class RigidBodyOrientationControlHelper
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
 
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
-      feedbackControlCommand.setGains(gains);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
 
       // This will improve the tracking with respect to moving trajectory frames.
@@ -325,7 +353,6 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
-      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       return done;
    }
