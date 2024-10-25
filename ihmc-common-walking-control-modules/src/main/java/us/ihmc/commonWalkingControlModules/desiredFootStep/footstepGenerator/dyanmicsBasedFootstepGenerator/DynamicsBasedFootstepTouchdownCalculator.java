@@ -1,0 +1,579 @@
+package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator;
+
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+public class DynamicsBasedFootstepTouchdownCalculator
+{
+   private final MovingReferenceFrame centerOfMassControlZUpFrame;
+
+   private final FrameVector3DReadOnly centerOfMassVelocity;
+
+   private final FrameVector3DReadOnly centroidalAngularMomentum;
+
+   private final YoBoolean isInitialStanceValid;
+
+   // This is the stance foot at the beginning of the contact sequence. This is only used if the controller is using the TD;LO controller.
+   private final YoFramePoint3D stanceFootPositionAtBeginningOfState;
+
+   // This is the desired touchdown position using the capture point, assuming no stance width and walking in place.
+   private final YoFramePoint2D desiredALIPTouchdownPositionWithoutDS;
+   private final YoFramePoint2D desiredALIPTouchdownPositionWithDS;
+
+   // This is the desired touchdown position using the capture point, assuming no stance width and walking in place.
+   private final YoFrameVector2D predictedALIPVelocityAtTouchdownWithoutDS;
+   private final YoFrameVector2D predictedALIPVelocityAtTouchdownWithDS;
+   private final YoFrameVector2D predictedVelocityAtTouchdown;
+
+   // This is the desired touchdown position to be used by the robot
+   private final YoFramePoint3D desiredTouchdownPosition;
+   private final YoFramePoint2D desiredStanceAtTouchdown;
+   private final FramePoint2D desiredTouchdownPosition2D;
+
+   // This is the desired lateral offset from the touchdown location returned by the TD;LO and capture point laws to achieve stable walking at the desired
+   // nominal width.
+   private final YoDouble touchdownPositionOffsetForDesiredStanceWidth;
+   // This is the desired lateral offset in the X and Y directions of the touchdown position to achieve walking at a desired speed.
+   private final YoFrameVector2D touchdownPositionOffsetForDesiredSpeed;
+
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
+   private final Vector2DReadOnly desiredVelocityProvider;
+   private final FastWalkingParameters fastWalkingParameters;
+   private final YoFastWalkingConstantParametersForStep fastWalkingParametersForStep;
+
+   // Temp value used for calculation
+   private final FrameVector2D tempVector = new FrameVector2D();
+
+   // Gains for Capture Point controllers
+   private final YoDouble capturePointTimeConstantX;
+   private final YoDouble capturePointTimeConstantY;
+   private final YoDouble capturePointTimeConstantXWithoutDS;
+   private final YoDouble capturePointTimeConstantYWithoutDS;
+
+   // Poles for the Capture Point Controllers
+   private final YoDouble capturePointPole;
+
+   // Natural frequency of system
+   // TODO make sure these are updating
+   private final YoDouble omegaX;
+   private final YoDouble omegaY;
+
+   private final YoDouble desiredCoMHeight;
+   private final YoDouble swingDuration;
+
+   private final YoDouble timeToReachGoal;
+   private final RobotSide robotSide;
+
+   private final double mass;
+   private final double gravity;
+
+   public DynamicsBasedFootstepTouchdownCalculator(RobotSide robotSide,
+                                                   MovingReferenceFrame centerOfMassControlZUpFrame,
+                                                   FrameVector3DReadOnly centerOfMassVelocity,
+                                                   FrameVector3DReadOnly centroidalAngularMomentum,
+                                                   HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                   FastWalkingParameters fastWalkingParameters,
+                                                   YoFastWalkingConstantParametersForStep fastWalkingParametersForStep,
+                                                   Vector2DReadOnly desiredVelocityProvider,
+                                                   YoRegistry parentRegistry)
+   {
+      this.robotSide = robotSide;
+      this.centerOfMassControlZUpFrame = centerOfMassControlZUpFrame;
+      this.centerOfMassVelocity = centerOfMassVelocity;
+      this.centroidalAngularMomentum = centroidalAngularMomentum;
+      this.controllerToolbox = controllerToolbox;
+      this.fastWalkingParameters = fastWalkingParameters;
+      this.fastWalkingParametersForStep = fastWalkingParametersForStep;
+      this.desiredVelocityProvider = desiredVelocityProvider;
+      soleFrames = controllerToolbox.getFullRobotModel().getSoleFrames();
+      mass = controllerToolbox.getTotalMass();
+      gravity = controllerToolbox.getGravityZ();
+
+      YoRegistry registry = new YoRegistry(robotSide.getCamelCaseName() + getClass().getSimpleName());
+
+      String prefix = robotSide.getCamelCaseName() + "TouchdownCalculator";
+
+      timeToReachGoal = new YoDouble(prefix + "TimeToReachGoal", registry);
+
+      isInitialStanceValid = new YoBoolean(prefix + "IsInitialStancePositionValid", registry);
+      stanceFootPositionAtBeginningOfState = new YoFramePoint3D(prefix + "StanceFootPositionAtBeginningOfState",
+                                                                centerOfMassControlZUpFrame,
+                                                                registry);
+
+      // Predicted CoM velocity as computed by each different touchdown calculator
+      predictedALIPVelocityAtTouchdownWithoutDS = new YoFrameVector2D(prefix + "PredictedALIPVelocityAtTouchdownWithoutDS", centerOfMassControlZUpFrame, registry);
+      predictedALIPVelocityAtTouchdownWithDS = new YoFrameVector2D(prefix + "PredictedALIPVelocityAtTouchdownWithDS", centerOfMassControlZUpFrame, registry);
+
+      // Desired touchdown position as computed by each different touchdown calculator
+      desiredALIPTouchdownPositionWithoutDS = new YoFramePoint2D(prefix + "DesiredALIPTouchdownPositionWithoutDS", centerOfMassControlZUpFrame, registry);
+      desiredALIPTouchdownPositionWithDS = new YoFramePoint2D(prefix + "DesiredALIPTouchdownPositionWithDS", centerOfMassControlZUpFrame, registry);
+
+      // Final touchdown position and predicted velocity. These are populated by the touchdown calculator currently in use
+      desiredTouchdownPosition = new YoFramePoint3D(prefix + "DesiredTouchdownPosition", centerOfMassControlZUpFrame, registry);
+      desiredTouchdownPosition2D = new FramePoint2D(centerOfMassControlZUpFrame);
+      predictedVelocityAtTouchdown = new YoFrameVector2D(prefix + "PredictedVelocityAtTouchdown", centerOfMassControlZUpFrame, registry);
+      desiredStanceAtTouchdown = new YoFramePoint2D(prefix + "DesiredStanceAtTouchdown", centerOfMassControlZUpFrame, registry);
+
+      // Step position offsets for desired walking speed and stance width
+      touchdownPositionOffsetForDesiredStanceWidth = new YoDouble(prefix + "TouchdownPositionOffsetForDesiredStanceWidth", registry);
+      touchdownPositionOffsetForDesiredSpeed = new YoFrameVector2D(prefix + "TouchdownPositionOffsetForDesiredSpeed",
+                                                                   centerOfMassControlZUpFrame,
+                                                                   registry);
+
+      capturePointTimeConstantX = new YoDouble(prefix + "CapturePointTimeConstantX", registry);
+      capturePointTimeConstantY = new YoDouble(prefix + "CapturePointTimeConstantY", registry);
+      capturePointTimeConstantXWithoutDS = new YoDouble(prefix + "CapturePointTimeConstantXWithoutDS", registry);
+      capturePointTimeConstantYWithoutDS = new YoDouble(prefix + "CapturePointTimeConstantYWithoutDS", registry);
+
+      omegaX = controllerToolbox.getOmega0Provider();
+      omegaY = controllerToolbox.getOmega0Provider();
+
+      capturePointPole = fastWalkingParametersForStep.getCapturePointPole();
+
+      desiredCoMHeight = fastWalkingParametersForStep.getDesiredCoMHeight();
+      swingDuration = fastWalkingParametersForStep.getSwingDuration();
+
+      omegaX.addListener(v -> computeCapturePointTimeConstant());
+      omegaY.addListener(v -> computeCapturePointTimeConstant());
+      capturePointPole.addListener(v -> computeCapturePointTimeConstant());
+
+      desiredCoMHeight.addListener(v -> computeCapturePointTimeConstant());
+      swingDuration.addListener(v -> computeCapturePointTimeConstant());
+      fastWalkingParametersForStep.getDoubleSupportFraction().addListener(v -> computeCapturePointTimeConstant());
+
+      computeCapturePointTimeConstant();
+
+      parentRegistry.addChild(registry);
+   }
+
+   public void reset()
+   {
+      desiredALIPTouchdownPositionWithoutDS.setToNaN();
+      desiredALIPTouchdownPositionWithDS.setToNaN();
+      desiredTouchdownPosition.setToNaN();
+      desiredStanceAtTouchdown.setToNaN();
+
+      isInitialStanceValid.set(false);
+   }
+
+   public void initializeForContactChange(RobotSide supportSide)
+   {
+      isInitialStanceValid.set(true);
+      stanceFootPositionAtBeginningOfState.setFromReferenceFrame(soleFrames.get(supportSide));
+   }
+
+   public void computeDesiredTouchdownPosition(RobotSide supportSide, double timeToReachGoal, FramePoint2DReadOnly pendulumBase, FramePoint2DReadOnly netPendulumBase, boolean leavingDoubleSupport)
+   {
+      if (pendulumBase != null)
+         pendulumBase.checkReferenceFrameMatch(centerOfMassControlZUpFrame);
+
+      this.timeToReachGoal.set(timeToReachGoal);
+
+      // compute all the touchdown positions and their offset values
+      computeDesiredALIPTouchdownPosition(timeToReachGoal, pendulumBase);
+      computeDesiredALIPTouchdownPositionWithDS(timeToReachGoal, pendulumBase, netPendulumBase);
+
+      computeDesiredStancePositionAtEndOfState(supportSide, timeToReachGoal, pendulumBase);
+
+      desiredTouchdownPosition2D.set(desiredALIPTouchdownPositionWithDS);
+      predictedVelocityAtTouchdown.set(predictedALIPVelocityAtTouchdownWithDS);
+
+      // compute offsets for desired walking speed and stance width
+      computeDesiredTouchdownOffsetForVelocity(supportSide);
+      computeDesiredTouchdownOffsetForStanceWidth(supportSide);
+
+      // offset the touchdown position based on the desired velocity
+      desiredTouchdownPosition2D.add(touchdownPositionOffsetForDesiredSpeed.getX(), touchdownPositionOffsetForDesiredSpeed.getY());
+
+      // offset the touchdown position based on the stance width
+      desiredTouchdownPosition2D.addY(touchdownPositionOffsetForDesiredStanceWidth.getValue());
+
+      // add extra offsets for fixing drifting
+      desiredTouchdownPosition2D.addX(fastWalkingParameters.getFixedForwardOffset());
+      desiredTouchdownPosition2D.addY(supportSide.negateIfLeftSide(fastWalkingParameters.getFixedWidthOffset()));
+
+      // determine touchdown z position from x position, y position, and ground plane
+      FastWalkingGroundPlaneEstimator groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+      desiredTouchdownPosition.setMatchingFrame(groundPlaneEstimator.getGroundPosition(desiredTouchdownPosition2D));
+   }
+
+   public FramePoint2DReadOnly getStancePositionAtTouchdown()
+   {
+      return desiredStanceAtTouchdown;
+   }
+
+   public FramePoint3DReadOnly getDesiredTouchdownPosition()
+   {
+      return desiredTouchdownPosition;
+   }
+
+   public FrameVector2DReadOnly getPredictedVelocityAtTouchdown()
+   {
+      return predictedVelocityAtTouchdown;
+   }
+
+   private final FrameVector2D angularMomentum = new FrameVector2D();
+
+   private void computeDesiredStancePositionAtEndOfState(RobotSide supportSide, double timeToReachGoal, FramePoint2DReadOnly pendulumBase)
+   {
+
+      // compute the current center of mass velocity
+      tempVector.setIncludingFrame(centerOfMassVelocity);
+      tempVector.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+      tempVector.scale(1.0 / omegaX.getDoubleValue(), 1.0 / omegaY.getDoubleValue());
+
+      angularMomentum.setIncludingFrame(centroidalAngularMomentum);
+      angularMomentum.changeFrame(centerOfMassControlZUpFrame);
+
+      // the capture point touchdown position is just the capture point. Which is the scaled velocity based on the time constant.
+      if (pendulumBase != null && Double.isFinite(timeToReachGoal))
+      {
+         double omegaTX = omegaX.getDoubleValue() * timeToReachGoal;
+         double omegaTY = omegaY.getDoubleValue() * timeToReachGoal;
+         double coshX = Math.cosh(omegaTX);
+         double sinhX = Math.sinh(omegaTX);
+         double coshY = Math.cosh(omegaTY);
+         double sinhY = Math.sinh(omegaTY);
+         double heightX = gravity / (omegaX.getDoubleValue() * omegaX.getDoubleValue());
+         double heightY = gravity / (omegaY.getDoubleValue() * omegaY.getDoubleValue());
+         double mhXW = mass * heightX * omegaX.getValue();
+         double mhYW = mass * heightY * omegaY.getValue();
+
+         desiredStanceAtTouchdown.set(sinhX * tempVector.getX(), sinhY * tempVector.getY());
+         desiredStanceAtTouchdown.add(sinhX / mhXW * angularMomentum.getY(), -sinhY / mhYW * angularMomentum.getX());
+         desiredStanceAtTouchdown.add(-coshX * pendulumBase.getX(), -coshY * pendulumBase.getY());
+         desiredStanceAtTouchdown.negate();
+      }
+      else
+      {
+         desiredStanceAtTouchdown.set(estimates.getFootPosition(supportSide));
+      }
+   }
+
+   private void computeDesiredALIPTouchdownPosition(double timeToReachGoal, FramePoint2DReadOnly pendulumBase)
+   {
+
+      // compute the current center of mass velocity
+      tempVector.setIncludingFrame(centerOfMassVelocity);
+      tempVector.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+
+      angularMomentum.setIncludingFrame(centroidalAngularMomentum);
+      angularMomentum.changeFrame(centerOfMassControlZUpFrame);
+
+      // the capture point touchdown position is just the capture point. Which is the scaled velocity based on the time constant.
+      if (pendulumBase != null && Double.isFinite(timeToReachGoal))
+      {
+         double omegaTX = omegaX.getDoubleValue() * timeToReachGoal;
+         double omegaTY = omegaY.getDoubleValue() * timeToReachGoal;
+         double coshX = Math.cosh(omegaTX);
+         double coshY = Math.cosh(omegaTY);
+         double heightX = gravity / (omegaX.getDoubleValue() * omegaX.getDoubleValue());
+         double heightY = gravity / (omegaY.getDoubleValue() * omegaY.getDoubleValue());
+         double mhX = mass * heightX;
+         double mhY = mass * heightY;
+
+         predictedALIPVelocityAtTouchdownWithoutDS.set(coshX * tempVector.getX(), coshY * tempVector.getY());
+         predictedALIPVelocityAtTouchdownWithoutDS.add(coshX / mhX * angularMomentum.getY(), -coshY / mhY * angularMomentum.getX());
+         predictedALIPVelocityAtTouchdownWithoutDS.add(-omegaX.getDoubleValue() * Math.sinh(omegaTX) * pendulumBase.getX(),
+                                                       -omegaY.getDoubleValue() * Math.sinh(omegaTY) * pendulumBase.getY());
+      }
+      else
+      {
+         double heightX = gravity / (omegaX.getDoubleValue() * omegaX.getDoubleValue());
+         double heightY = gravity / (omegaY.getDoubleValue() * omegaY.getDoubleValue());
+         double mhX = mass * heightX;
+         double mhY = mass * heightY;
+
+         predictedALIPVelocityAtTouchdownWithoutDS.set(tempVector);
+         predictedALIPVelocityAtTouchdownWithoutDS.addX(angularMomentum.getY()/ mhX);
+         predictedALIPVelocityAtTouchdownWithoutDS.addY(-angularMomentum.getX() / mhY);
+      }
+
+      desiredALIPTouchdownPositionWithoutDS.set(capturePointTimeConstantXWithoutDS.getDoubleValue() * predictedALIPVelocityAtTouchdownWithoutDS.getX(),
+                                                capturePointTimeConstantYWithoutDS.getDoubleValue() * predictedALIPVelocityAtTouchdownWithoutDS.getY());
+   }
+
+   private void computeDesiredALIPTouchdownPositionWithDS(double timeToReachGoal, FramePoint2DReadOnly pendulumBase, FramePoint2DReadOnly netPendulumBase)
+   {
+
+      // Get CoM velocity and change frame to CoM control frame
+      tempVector.setIncludingFrame(centerOfMassVelocity);
+      tempVector.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+
+      // Get CoM angular momentum and change frame to CoM control frame
+      angularMomentum.setIncludingFrame(centroidalAngularMomentum);
+      angularMomentum.changeFrame(centerOfMassControlZUpFrame);
+
+      // The capture point touchdown position is just the capture point. Which is the scaled velocity based on the time constant
+      if (pendulumBase != null && netPendulumBase != null && Double.isFinite(timeToReachGoal))
+      {
+         double heightX = gravity / (omegaX.getDoubleValue() * omegaX.getDoubleValue());
+         double heightY = gravity / (omegaY.getDoubleValue() * omegaY.getDoubleValue());
+         double mhX = mass * heightX;
+         double mhY = mass * heightY;
+         double doubleSupportDuration = fastWalkingParametersForStep.getSwingDuration().getDoubleValue() * fastWalkingParametersForStep.getDoubleSupportFraction().getDoubleValue();
+         double B2X;
+         double B2Y;
+         double C2X;
+         double C2Y;
+
+         // Prediction horizons to project/predict state at end of single and double support
+         double singleSupportHorizon;
+         double doubleSupportHorizon;
+         if (controllerToolbox.getCommonVariables().isInDoubleSupport())
+         {
+            singleSupportHorizon = 0.0;
+            doubleSupportHorizon = timeToReachGoal;
+         }
+         else
+         {
+            singleSupportHorizon = timeToReachGoal - doubleSupportDuration;
+            doubleSupportHorizon = doubleSupportDuration;
+         }
+
+         double coshXSingleSupport = Math.cosh(omegaX.getDoubleValue() * singleSupportHorizon);
+         double sinhXSingleSupport = Math.sinh(omegaX.getDoubleValue() * singleSupportHorizon);
+         double coshYSingleSupport = Math.cosh(omegaY.getDoubleValue() * singleSupportHorizon);
+         double sinhYSingleSupport = Math.sinh(omegaY.getDoubleValue() * singleSupportHorizon);
+
+         double coshXDoubleSupport = Math.cosh(omegaX.getDoubleValue() * doubleSupportHorizon);
+         double sinhXDoubleSupport = Math.sinh(omegaX.getDoubleValue() * doubleSupportHorizon);
+         double coshYDoubleSupport = Math.cosh(omegaY.getDoubleValue() * doubleSupportHorizon);
+         double sinhYDoubleSupport = Math.sinh(omegaY.getDoubleValue() * doubleSupportHorizon);
+
+         // Current state variables
+         double comPositionX = -pendulumBase.getX();
+         double comPositionY = -pendulumBase.getY();
+         double comVelocityX = tempVector.getX();
+         double comVelocityY = tempVector.getY();
+         double Ly = mhX *  comVelocityX + angularMomentum.getY();
+         double Lx = -mhY *  comVelocityY + angularMomentum.getX();
+
+         // State variables at end of single support
+         double comXAtEndOfSingleSupport = comPositionX * coshXSingleSupport + Ly * sinhXSingleSupport / (omegaX.getDoubleValue() * mhX);
+         double LyAtEndOfSingleSupport = comPositionX * mhX * omegaX.getDoubleValue() * sinhXSingleSupport + Ly * coshXSingleSupport;
+
+         double comYAtEndOfSingleSupport = comPositionY * coshYSingleSupport - Lx * sinhYSingleSupport / (omegaY.getDoubleValue() * mhY);
+         double LxAtEndOfSingleSupport = -comPositionY * mhY * omegaY.getDoubleValue() * sinhYSingleSupport + Lx * coshYSingleSupport;
+
+         // Arbitrary constant resulting from double support dynamics
+         if (doubleSupportDuration > 0)
+         {
+            B2X = mhX * (1-coshXDoubleSupport)/doubleSupportDuration;
+            B2Y = -mhY * (1-coshYDoubleSupport)/doubleSupportDuration;
+            C2X = -mhX * omegaX.getDoubleValue()*sinhXDoubleSupport;
+            C2Y = mhY * omegaY.getDoubleValue()*sinhYDoubleSupport;
+         }
+         else
+         {
+            B2X = 0.0;
+            B2Y = 0.0;
+            C2X = 0.0;
+            C2Y = 0.0;
+         }
+
+         // More arbitrary constants
+         double DX = 1.0 / (1.0 - B2X * capturePointTimeConstantX.getDoubleValue() / mhX);
+         double DY = 1.0 / (1.0 + B2Y * capturePointTimeConstantY.getDoubleValue() / mhY);
+         double EX = C2X * netPendulumBase.getX() / mhX;
+         double EY = -C2Y * netPendulumBase.getY() / mhY;
+
+         double xDotAtEndOfDoubleSupport = DX * (comXAtEndOfSingleSupport * omegaX.getDoubleValue() * sinhXDoubleSupport + LyAtEndOfSingleSupport * coshXDoubleSupport / mhX + EX);
+         double yDotAtEndOfDoubleSupport = DY * (comYAtEndOfSingleSupport * omegaY.getDoubleValue() * sinhYDoubleSupport - LxAtEndOfSingleSupport * coshYDoubleSupport / mhY + EY);
+
+         predictedALIPVelocityAtTouchdownWithDS.setX(xDotAtEndOfDoubleSupport);
+         predictedALIPVelocityAtTouchdownWithDS.setY(yDotAtEndOfDoubleSupport);
+      }
+      else
+      {
+         double heightX = gravity / (omegaX.getDoubleValue() * omegaX.getDoubleValue());
+         double heightY = gravity / (omegaY.getDoubleValue() * omegaY.getDoubleValue());
+         double mhX = mass * heightX;
+         double mhY = mass * heightY;
+
+         predictedALIPVelocityAtTouchdownWithDS.set(tempVector);
+         predictedALIPVelocityAtTouchdownWithDS.addX(angularMomentum.getY() / mhX);
+         predictedALIPVelocityAtTouchdownWithDS.addY(-angularMomentum.getX() / mhY);
+      }
+
+      desiredALIPTouchdownPositionWithDS.set(capturePointTimeConstantX.getDoubleValue() * predictedALIPVelocityAtTouchdownWithDS.getX(),
+                                             capturePointTimeConstantY.getDoubleValue() * predictedALIPVelocityAtTouchdownWithDS.getY());
+   }
+
+   private void computeDesiredTouchdownOffsetForStanceWidth(RobotSide supportSide)
+   {
+      // this is the desired offset distance to make the robot stably walk in place.
+      touchdownPositionOffsetForDesiredStanceWidth.set(computeDesiredTouchdownOffsetForStanceWidth(fastWalkingParameters,
+                                                                                                   fastWalkingParametersForStep,
+                                                                                                   supportSide,
+                                                                                                   1/capturePointTimeConstantY.getDoubleValue()));
+   }
+
+   private void computeDesiredTouchdownOffsetForVelocity(RobotSide supportSide)
+   {
+      // this is the desired offset distance to make the robot stably walk at the desired velocity
+      computeDesiredTouchdownOffsetForVelocity(fastWalkingParametersForStep,
+                                               supportSide,
+                                               1/capturePointTimeConstantX.getDoubleValue(),
+                                               1/capturePointTimeConstantY.getDoubleValue(),
+                                               desiredVelocityProvider,
+                                               touchdownPositionOffsetForDesiredSpeed);
+   }
+
+   private void computeCapturePointTimeConstant()
+   {
+      double omegaX = this.omegaX.getDoubleValue();
+      double omegaY = this.omegaY.getDoubleValue();
+      double heightX = gravity / (omegaX * omegaX);
+      double heightY = gravity / (omegaY * omegaY);
+      double m = mass;
+      double lambda = capturePointPole.getDoubleValue();
+      double singleSupportDuration = fastWalkingParametersForStep.getSwingDuration().getDoubleValue();
+      double doubleSupportDuration = singleSupportDuration * fastWalkingParametersForStep.getDoubleSupportFraction().getDoubleValue();
+
+      double coshXDS = Math.cosh(omegaX * doubleSupportDuration);
+      double coshYDS = Math.cosh(omegaY * doubleSupportDuration);
+      double sinhXDS = Math.sinh(omegaX * doubleSupportDuration);
+      double sinhYDS = Math.sinh(omegaY * doubleSupportDuration);
+      double coshXSS = Math.cosh(omegaX * singleSupportDuration);
+      double coshYSS = Math.cosh(omegaY * singleSupportDuration);
+      double sinhXSS = Math.sinh(omegaX * singleSupportDuration);
+      double sinhYSS = Math.sinh(omegaY * singleSupportDuration);
+
+      double timeConstantXWithDS;
+      double timeConstantYWithDS;
+      double timeConstantXNoDS = (coshXSS - lambda) / (omegaX * sinhXSS);
+      double timeConstantYNoDS = (coshYSS - lambda) / (omegaY * sinhYSS);
+      capturePointTimeConstantXWithoutDS.set(timeConstantXNoDS);
+      capturePointTimeConstantYWithoutDS.set(timeConstantYNoDS);
+
+      if (fastWalkingParameters.getFastWalkingGaitParameters().getTouchdownCalculatorTypeToUse() == TouchdownType.ALIP_DS && doubleSupportDuration > 0)
+      {
+         timeConstantXWithDS = (doubleSupportDuration * (coshXDS * coshXSS - lambda + sinhXDS * sinhXSS)) /
+                               (coshXDS * lambda - lambda + doubleSupportDuration * coshXDS * omegaX * sinhXSS + doubleSupportDuration * coshXSS * omegaX * sinhXDS);
+
+         timeConstantYWithDS = (doubleSupportDuration * (coshYDS * coshYSS - lambda + sinhYDS * sinhYSS)) /
+                               (coshYDS * lambda - lambda + doubleSupportDuration * coshYDS * omegaY * sinhYSS + doubleSupportDuration * coshYSS * omegaY * sinhYDS);
+
+         capturePointTimeConstantX.set(timeConstantXWithDS);
+         capturePointTimeConstantY.set(timeConstantYWithDS);
+      }
+      else
+      {
+         capturePointTimeConstantX.set(timeConstantXNoDS);
+         capturePointTimeConstantY.set(timeConstantYNoDS);
+      }
+   }
+
+   public static double computeDesiredTouchdownOffsetForStanceWidth(FastWalkingParameters fastWalkingParameters,
+                                                                    YoFastWalkingConstantParametersForStep fastWalkingParametersForStep,
+                                                                    RobotSide supportSide,
+                                                                    double omega)
+   {
+      double swingDuration = fastWalkingParametersForStep.getSwingDuration().getDoubleValue();
+      double doubleSupportDuration = fastWalkingParametersForStep.getDoubleSupportFraction().getDoubleValue() * swingDuration;
+
+      return computeDesiredTouchdownOffsetForStanceWidth(fastWalkingParameters, swingDuration, doubleSupportDuration, supportSide, omega);
+   }
+
+   public static double computeDesiredTouchdownOffsetForStanceWidth(FastWalkingParameters fastWalkingParameters,
+                                                                    double swingDuration,
+                                                                    double doubleSupportDuration,
+                                                                    RobotSide supportSide,
+                                                                    double omega)
+   {
+      double widthMultiplier = 1.0;
+      if (doubleSupportDuration > 0.0)
+      {
+         widthMultiplier += (Math.exp(omega * doubleSupportDuration) - 1.0) / (omega * doubleSupportDuration) - 1.0;
+      }
+      // this is the desired offset distance to make the robot stably walk in place at our desired step width
+      double stepWidthOffset = widthMultiplier * fastWalkingParameters.getStanceWidth() / (1.0 + Math.exp(omega * (swingDuration + doubleSupportDuration)));
+      return supportSide.negateIfLeftSide(stepWidthOffset);
+   }
+
+   public static void computeDesiredTouchdownOffsetForVelocity(YoFastWalkingConstantParametersForStep fastWalkingParametersForStep,
+                                                               RobotSide supportSide,
+                                                               double omegaX,
+                                                               double omegaY,
+                                                               Vector2DReadOnly desiredVelocity,
+                                                               FixedFrameVector2DBasics touchdownPositionOffsetToPack)
+   {
+      double swingDuration = fastWalkingParametersForStep.getSwingDuration().getDoubleValue();
+      double doubleSupportDuration = fastWalkingParametersForStep.getDoubleSupportFraction().getDoubleValue() * swingDuration;
+
+      computeDesiredTouchdownOffsetForVelocity(swingDuration,
+                                               doubleSupportDuration,
+                                               supportSide,
+                                               omegaX,
+                                               omegaY,
+                                               desiredVelocity,
+                                               touchdownPositionOffsetToPack);
+   }
+
+   public static void computeDesiredTouchdownOffsetForVelocity(double swingDuration,
+                                                               double doubleSupportDuration,
+                                                               RobotSide supportSide,
+                                                               double omegaX,
+                                                               double omegaY,
+                                                               Vector2DReadOnly desiredVelocity,
+                                                               FixedFrameVector2DBasics touchdownPositionOffsetToPack)
+   {
+      // this is the desired offset distance to make the robot stably walk at the desired velocity
+
+      double forwardOffset = computeForwardTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, omegaX, desiredVelocity.getX());
+
+      double lateralOffset = computeLateralTouchdownOffsetForVelocity(swingDuration, doubleSupportDuration, supportSide, omegaY, desiredVelocity.getY());
+
+      touchdownPositionOffsetToPack.set(forwardOffset, lateralOffset);
+   }
+
+   private static double computeForwardTouchdownOffsetForVelocity(double swingDuration, double doubleSupportDuration, double omega, double desiredVelocity)
+   {
+      double stepDuration = doubleSupportDuration + swingDuration;
+      double exponential = Math.exp(omega * stepDuration);
+      double forwardMultiplier = 1.0;
+      if (doubleSupportDuration > 0.0)
+      {
+         forwardMultiplier += (Math.exp(omega * doubleSupportDuration) - 1.0) / (omega * doubleSupportDuration) - 1.0;
+      }
+
+      return -forwardMultiplier * desiredVelocity * stepDuration / (exponential - 1.0);
+   }
+
+   private static double computeLateralTouchdownOffsetForVelocity(double swingDuration,
+                                                                  double doubleSupportDuration,
+                                                                  RobotSide supportSide,
+                                                                  double omega,
+                                                                  double desiredVelocity)
+   {
+      double stepDuration = doubleSupportDuration + swingDuration;
+      double exponential = Math.exp(omega * stepDuration);
+
+      double lateralOffset = 0.0;
+      if (desiredVelocity > 0.0 && supportSide == RobotSide.LEFT)
+      {
+         lateralOffset = -(desiredVelocity * 2.0 * swingDuration) / (exponential - 1.0);
+      }
+      else if (desiredVelocity < 0.0 && supportSide == RobotSide.RIGHT)
+      {
+         lateralOffset = -(desiredVelocity * 2.0 * swingDuration) / (exponential - 1.0);
+      }
+
+      return lateralOffset;
+   }
+}
