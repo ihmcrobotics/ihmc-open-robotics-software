@@ -63,8 +63,10 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.setColor(color);
       svgGraphics2D.setStroke(new BasicStroke(0.5f));
 
+      boolean drawBoxes = false;
       int colorBoxSize = 15;
-      svgGraphics2D.fillRect(treeViewX, treeViewY - 7, colorBoxSize, colorBoxSize);
+      if (drawBoxes)
+         svgGraphics2D.fillRect(treeViewX, treeViewY - 7, colorBoxSize, colorBoxSize);
 //      svgGraphics2D.setColor(Color.GRAY);
 //      svgGraphics2D.setStroke(new BasicStroke(0.25f));
 //      drawRect(x, y, 12, 10);
@@ -75,7 +77,7 @@ public class BehaviorTreeSVGNode
 //      svgGraphics2D.drawString(indexString, x + 4 * (2 - indexString.length()), y);
 //      x += 14;
 //      y += 4;
-      int colorBoxSpaceX = colorBoxSize + 5;
+      int colorBoxSpaceX = drawBoxes ? colorBoxSize + 5 : 0;
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 12));
       svgGraphics2D.drawString("%s".formatted(filterName(node)), treeViewX + colorBoxSpaceX, treeViewY);
