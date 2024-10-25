@@ -108,8 +108,8 @@ public class BehaviorTreeSVGWriter
          if (child instanceof ActionSequenceState)
             actionSequenceSVGNode = svgNode;
 
-         x += svgNode.getWidth();
-         y += svgNode.getHeight();
+//         x += svgNode.getWidth();
+//         y += svgNode.getHeight();
 
          ++i;
       });

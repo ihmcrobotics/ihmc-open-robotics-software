@@ -19,10 +19,10 @@ public class BehaviorTreeSVGNode
    private final SVGGraphics2D svgGraphics2D;
    private final BehaviorTreeNodeState<?> node;
    private final Color color;
-   private int originX;
-   private int originY;
-   private int x;
-   private int y;
+   private int treeViewX;
+   private int treeViewY;
+   private int timeViewX;
+   private int timeViewY;
 
    public BehaviorTreeSVGNode(SVGGraphics2D svgGraphics2D,
                               BehaviorTreeNodeState<?> node,
@@ -34,51 +34,69 @@ public class BehaviorTreeSVGNode
    {
       this.svgGraphics2D = svgGraphics2D;
       this.node = node;
-      this.originX = originX;
-      this.originY = originY;
 
-      if (node instanceof ActionNodeState actionNode)
+      treeViewX = originX + 20 * BehaviorTreeTools.getNodeDepth(node);
+      treeViewY = originY + 30 * index;
+      timeViewX = originX;
+      timeViewY = treeViewY + 500;
+
+      if (node instanceof ActionNodeState)
       {
-         originX = nodeToExecuteAfter.x;
+         timeViewX = nodeToExecuteAfter.getTimeViewX();
       }
 
-      x = originX;
-      y = originY;
-
       color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256), 100);
-      svgGraphics2D.setColor(color);
-      svgGraphics2D.setStroke(new BasicStroke(0.5f));
-      svgGraphics2D.fillRect(x, y, 200, 30);
-      svgGraphics2D.setColor(Color.GRAY);
-      svgGraphics2D.setStroke(new BasicStroke(0.25f));
-      drawRect(x, y, 12, 10);
-      x += 2;
-      y += 8;
-      svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 8));
-      String indexString = "%d".formatted(index);
-      svgGraphics2D.drawString(indexString, x + 4 * (2 - indexString.length()), y);
-      x += 14;
-      y += 4;
+//      svgGraphics2D.setColor(color);
+//      svgGraphics2D.setStroke(new BasicStroke(0.5f));
+//      svgGraphics2D.fillRect(x, y, 200, 30);
+//      svgGraphics2D.setColor(Color.GRAY);
+//      svgGraphics2D.setStroke(new BasicStroke(0.25f));
+//      drawRect(x, y, 12, 10);
+//      x += 2;
+//      y += 8;
+//      svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 8));
+//      String indexString = "%d".formatted(index);
+//      svgGraphics2D.drawString(indexString, x + 4 * (2 - indexString.length()), y);
+//      x += 14;
+//      y += 4;
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 12));
-      svgGraphics2D.drawString("%s".formatted(filterName(node)), x, y);
-      y += 13;
+      svgGraphics2D.drawString("%s".formatted(filterName(node)), treeViewX, treeViewY);
+      treeViewY += 13;
       svgGraphics2D.setColor(Color.GRAY);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 10));
-      svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), x, y);
+      svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), treeViewX, treeViewY);
 
-      x = originX + 80;
-      y = originY + 30;
+//      svgGraphics2D.setColor(color);
+//      svgGraphics2D.setStroke(new BasicStroke(0.5f));
+//      svgGraphics2D.fillRect(x, y, 200, 30);
+//      svgGraphics2D.setColor(Color.GRAY);
+//      svgGraphics2D.setStroke(new BasicStroke(0.25f));
+
+
+
+//      x = originX + 80;
+//      y = originY + 30;
    }
 
-   public int getHeight()
+   public int getTimeViewX()
    {
-      return y - originY;
+      return timeViewX;
    }
 
-   public int getWidth()
+   public int getTimeViewY()
    {
-      return x - originX;
+      return timeViewY;
+   }
+
+   public int getTreeViewX()
+   {
+      return treeViewX;
+   }
+
+   public int getTreeViewY()
+   {
+      return treeViewY;
    }
 
    public BehaviorTreeNodeState<?> getNode()
