@@ -161,9 +161,6 @@ public class WalkingControllerState extends HighLevelControllerState
 
       // TODO This should be saved into some parameters which will be delivered to the highlevelHumanoidManager.
       controllerCoreCommandData.set(controllerCoreCommand);
-      controllerCoreTimer.startMeasurement();
-      controllerCore.compute(controllerCoreCommand);
-      controllerCoreTimer.stopMeasurement();
 
       //  Is this just for  YoGraphic?
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCoreOutputFromControllerCoreThread);

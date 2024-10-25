@@ -86,6 +86,7 @@ public class ControllerCoreOutputDataHolder implements ControllerCoreOutputReadO
       setLowLevelOneDoFJointControllerCoreOutputDataHolder(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
       setJointDesiredOutputList(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
    }
+
    public void setControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder controllerCoreOutput)
    {
       setDesiredCenterOfPressureDataHolder(controllerCoreOutput.getDesiredCenterOfPressureDataHolder());

@@ -213,6 +213,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public void set(ControllerCoreCommand other)
    {
       set((ControllerCoreCommandInterface) other);
+      other.clear();
    }
 
    /**

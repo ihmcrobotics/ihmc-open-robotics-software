@@ -157,6 +157,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private void reportControllerCoreOutputDataHolderForController()
    {
       controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(controllerCore.getControllerCoreOutput());
+      controllerCoreOutPutDataHolder.setRootJointDesiredConfigurationData(controllerCore.getOutputForRootJoint());
    }
 }
 
