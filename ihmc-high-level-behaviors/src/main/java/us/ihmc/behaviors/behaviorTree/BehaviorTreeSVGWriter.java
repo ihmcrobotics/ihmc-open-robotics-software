@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import org.jfree.svg.SVGGraphics2D;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.log.LogTools;
 
+import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,9 +18,10 @@ public class BehaviorTreeSVGWriter
    private int i = 0;
    private int x = 100;
    private int y = 100;
-   private int actionSequenceIndex = 0;
-   private int actionSequenceX = x;
-   private int actionSequenceY = y;
+   private BehaviorTreeSVGNode actionSequenceSVGNode;
+//   private int actionSequenceIndex = 0;
+//   private int actionSequenceX = x;
+//   private int actionSequenceY = y;
    private final ArrayList<BehaviorTreeSVGNode> svgNodes = new ArrayList<>();
 
    public BehaviorTreeSVGWriter(BehaviorTreeNodeState node)
@@ -28,26 +32,84 @@ public class BehaviorTreeSVGWriter
 
       BehaviorTreeTools.runForSubtreeNodes(node, child ->
       {
-         if (child instanceof ActionSequenceState)
+//         if (child instanceof ActionSequenceState actionSequenceState)
+//         {
+//            actionSequenceIndex = i;
+//            actionSequenceX = x;
+//            actionSequenceY = y;
+//         }
+
+//         String[] firstNodesInSection = { "Set static for approach",
+//                                          "Set static for grasp",
+//                                          "Pull door screw primitive",
+//                                          "Left arm against panel"};
+//         String[] sectionNames = { "Approach",
+//                                   "Turn handle",
+//                                   "Open door",
+//                                   "Walk through"};
+//
+//         boolean isFirstNodeInSection = false;
+//         int j = 0;
+//         for (; j < firstNodesInSection.length; j++)
+//         {
+//            isFirstNodeInSection = child.getDefinition().getName().equals(firstNodesInSection[j]);
+//            if (isFirstNodeInSection)
+//               break;
+//         }
+
+//         if ((svgNodes.size() - (actionSequenceIndex + 1)) % 12 == 0)
+//         if (isFirstNodeInSection)
+//            y = actionSequenceY + 30;
+//
+//         if (isFirstNodeInSection)
+//         {
+//            x += 16;
+//            y += 12;
+//            svgGraphics2D.setColor(Color.BLACK);
+//            svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 12));
+//            svgGraphics2D.drawString(sectionNames[j - 1], x, y);
+//            y += 18;
+//            x -= 16;
+//         }
+
+         BehaviorTreeSVGNode nodeToExecuteAfter = null;
+         if (child instanceof ActionNodeState actionNode)
          {
-            actionSequenceIndex = i;
-            actionSequenceX = x;
-            actionSequenceY = y;
+            if (actionNode.getDefinition() instanceof ActionNodeDefinition actionNodeDefinition)
+            {
+               if (actionNodeDefinition.getExecuteAfterPrevious().getValue())
+               {
+                  nodeToExecuteAfter = svgNodes.get(svgNodes.size() - 1);
+               }
+               else if (actionNodeDefinition.getExecuteAfterBeginning().getValue())
+               {
+                  nodeToExecuteAfter = actionSequenceSVGNode;
+               }
+               else
+               {
+                  long afterID = actionNodeDefinition.getExecuteAfterNodeID().getValue();
+                  for (BehaviorTreeSVGNode otherNode : svgNodes)
+                  {
+                     if (otherNode.getNode() instanceof ActionNodeState existingActionNode)
+                     {
+                        if (existingActionNode.getID() == afterID)
+                        {
+                           nodeToExecuteAfter = otherNode;
+                        }
+                     }
+                  }
+               }
+            }
          }
 
-         if (child.getDefinition().getName().equals("Set static for approach"))
-         {
-
-         }
-
-
-         BehaviorTreeSVGNode svgNode = new BehaviorTreeSVGNode(svgGraphics2D, child, svgNodes, i, x, y);
+         BehaviorTreeSVGNode svgNode = new BehaviorTreeSVGNode(svgGraphics2D, child, nodeToExecuteAfter, actionSequenceSVGNode, i, x, y);
          svgNodes.add(svgNode);
 
-         y += svgNode.getHeight();
+         if (child instanceof ActionSequenceState)
+            actionSequenceSVGNode = svgNode;
 
-         if ((svgNodes.size() - (actionSequenceIndex + 1)) % 12 == 0)
-            y = actionSequenceY + 30;
+         x += svgNode.getWidth();
+         y += svgNode.getHeight();
 
          ++i;
       });

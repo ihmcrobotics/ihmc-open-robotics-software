@@ -3,10 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import org.apache.commons.lang.WordUtils;
 import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
@@ -15,13 +13,12 @@ import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 
 import java.awt.*;
-import java.util.ArrayList;
 
 public class BehaviorTreeSVGNode
 {
    private final SVGGraphics2D svgGraphics2D;
    private final BehaviorTreeNodeState<?> node;
-   private final ArrayList<BehaviorTreeSVGNode> allNodes;
+   private final Color color;
    private int originX;
    private int originY;
    private int x;
@@ -29,60 +26,27 @@ public class BehaviorTreeSVGNode
 
    public BehaviorTreeSVGNode(SVGGraphics2D svgGraphics2D,
                               BehaviorTreeNodeState<?> node,
-                              ArrayList<BehaviorTreeSVGNode> allNodes,
+                              BehaviorTreeSVGNode nodeToExecuteAfter,
+                              BehaviorTreeSVGNode actionSequenceNode,
                               int index,
                               int originX,
                               int originY)
    {
       this.svgGraphics2D = svgGraphics2D;
       this.node = node;
-      this.allNodes = allNodes;
       this.originX = originX;
       this.originY = originY;
 
-      BehaviorTreeSVGNode actionSequenceNode = null;
-      for (BehaviorTreeSVGNode allNode : allNodes)
-      {
-         if (allNode.node instanceof ActionSequenceState)
-         {
-            actionSequenceNode = allNode;
-         }
-      }
-
       if (node instanceof ActionNodeState actionNode)
       {
-         if (actionNode.getDefinition() instanceof ActionNodeDefinition actionNodeDefinition)
-         {
-            if (actionNodeDefinition.getExecuteAfterPrevious().getValue())
-            {
-               originX = allNodes.get(allNodes.size() - 1).x;
-            }
-            else if (actionSequenceNode != null && actionNodeDefinition.getExecuteAfterBeginning().getValue())
-            {
-               originX = actionSequenceNode.x;
-            }
-            else
-            {
-               long afterID = actionNodeDefinition.getExecuteAfterNodeID().getValue();
-               for (BehaviorTreeSVGNode otherNode : allNodes)
-               {
-                  if (otherNode.node instanceof ActionNodeState existingActionNode)
-                  {
-                     if (existingActionNode.getID() == afterID)
-                     {
-                        originX = otherNode.x;
-                     }
-                  }
-               }
-            }
-         }
+         originX = nodeToExecuteAfter.x;
       }
-
 
       x = originX;
       y = originY;
 
-      svgGraphics2D.setColor(new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256), 100));
+      color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256), 100);
+      svgGraphics2D.setColor(color);
       svgGraphics2D.setStroke(new BasicStroke(0.5f));
       svgGraphics2D.fillRect(x, y, 200, 30);
       svgGraphics2D.setColor(Color.GRAY);
@@ -115,6 +79,11 @@ public class BehaviorTreeSVGNode
    public int getWidth()
    {
       return x - originX;
+   }
+
+   public BehaviorTreeNodeState<?> getNode()
+   {
+      return node;
    }
 
    private void drawRect(int x, int y, int width, int height)
