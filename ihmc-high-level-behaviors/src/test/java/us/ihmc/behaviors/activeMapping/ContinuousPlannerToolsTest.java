@@ -51,8 +51,8 @@ public class ContinuousPlannerToolsTest
       SideDependentList<FramePose3D> goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
                                                                                                        stancePose,
                                                                                                        (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                                       X_RANDOM_MARGIN,
                                                                                                        (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                                       X_RANDOM_MARGIN,
                                                                                                        NOMINAL_STANCE_WIDTH);
 
       // These are the maximum and minimum values where the goal pose should be able to exist

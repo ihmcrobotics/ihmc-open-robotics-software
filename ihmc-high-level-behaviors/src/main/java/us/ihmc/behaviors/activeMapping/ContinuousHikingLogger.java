@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 public class ContinuousHikingLogger
 {
    private static final int NUMBER_OF_LOGS_TO_KEEP = 100;
-   private static final boolean DEBUG = false;
    private File file;
 
    private static final String CONTINUOUS_HIKING_FILE_SUFFIX = "ContinuousHikingLog.txt";
@@ -82,8 +81,6 @@ public class ContinuousHikingLogger
       builder.append("\n");
 
       builder.append("]\n");
-      if (DEBUG)
-         LogTools.warn("Additional String: {}", additionalString.toString());
       builder.append(additionalString.toString()).append("\n");
 
       return builder.toString();

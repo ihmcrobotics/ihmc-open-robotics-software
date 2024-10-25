@@ -84,16 +84,9 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
 
             for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticePoint.gridSizeYaw)
             {
-               double distance = DiscreteFootstepTools.computeDistanceBetweenFootPolygons(new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT),
-                                                                                          new DiscreteFootstep(x, y, yaw, RobotSide.LEFT),
-                                                                                          footPolygons);
-
-               if (distance >= parameters.getMinClearanceFromStance())
-               {
-                  xOffsets.add(x);
-                  yOffsets.add(y);
-                  yawOffsets.add(yaw);
-               }
+               xOffsets.add(x);
+               yOffsets.add(y);
+               yawOffsets.add(yaw);
             }
          }
       }
@@ -156,7 +149,6 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             fullExpansionToPack.sort(idealStepProximityComparator);
          }
       }
-
    }
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)

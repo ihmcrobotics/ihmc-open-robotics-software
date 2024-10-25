@@ -158,8 +158,8 @@ public class ReadyToPlanState implements State
                goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
                                                                                  continuousPlanner.getStartStancePose(),
                                                                                  (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                 X_RANDOM_MARGIN,
                                                                                  (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                 X_RANDOM_MARGIN,
                                                                                  NOMINAL_STANCE_WIDTH);
             }
             else if (commandMessage.get().getEnableContinuousHikingWithJoystickController())
@@ -170,20 +170,21 @@ public class ReadyToPlanState implements State
                   goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
                                                                                     continuousPlanner.getStartStancePose(),
                                                                                     (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                    X_RANDOM_MARGIN,
                                                                                     (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                    X_RANDOM_MARGIN,
                                                                                     NOMINAL_STANCE_WIDTH);
                }
                else
                {
                   goalPoses = ContinuousPlannerTools.setGoalPoseBasedOnLateralJoystickValue(referenceFrames.getPelvisZUpFrame(),
+                                                                                            referenceFrames.getMidFeetZUpFrame(),
                                                                                             commandMessage.get().getLateralValue(),
                                                                                             (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                                             (float) continuousHikingParameters.getGoalPoseUpDistance(),
                                                                                             NOMINAL_STANCE_WIDTH);
 
-                  // We update this pose because that way when we start walking straight forward again its from the point where we are currently
-                  // and not the point from which we were at before we started turning
+                  // We update this pose because when we start walking straight forward again, it's from the point where we are currently
+                  // And not the point from which we were at before we started turning
                   FramePose3D stanceMidPose = new FramePose3D();
                   stanceMidPose.interpolate(continuousPlanner.getStartStancePose().get(RobotSide.LEFT),
                                             continuousPlanner.getStartStancePose().get(RobotSide.RIGHT),
