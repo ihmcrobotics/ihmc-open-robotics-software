@@ -10,9 +10,13 @@ public abstract class ImageSensor implements AutoCloseable
 {
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
-   private RestartableThread grabThread;
-
+   private final RestartableThread grabThread;
    private final Object grabNotification = new Object();
+
+   public ImageSensor()
+   {
+      grabThread = new RestartableThread(getSensorName() + "GrabThread", this::grabAndNotify);
+   }
 
    /**
     * Initializes and starts the sensor.
@@ -57,9 +61,6 @@ public abstract class ImageSensor implements AutoCloseable
    {
       if (run)
       {
-         if (grabThread == null)
-            grabThread = new RestartableThread(getSensorName() + "GrabThread", this::grabAndNotify);
-
          grabThread.start();
       }
       else if (grabThread != null)
@@ -88,8 +89,7 @@ public abstract class ImageSensor implements AutoCloseable
    @Override
    public void close()
    {
-      if (grabThread != null)
-         grabThread.blockingStop();
+      grabThread.blockingStop();
    }
 
    private void grabAndNotify()
