@@ -6,16 +6,25 @@ import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 
 import java.awt.*;
+import java.util.Random;
 
 public class BehaviorTreeSVGNode
 {
+   private static final Random random = new Random(0L);
+
    private final SVGGraphics2D svgGraphics2D;
    private final BehaviorTreeNodeState<?> node;
    private final Color color;
@@ -34,24 +43,28 @@ public class BehaviorTreeSVGNode
       this.svgGraphics2D = svgGraphics2D;
       this.node = node;
 
+      color = new Color((int) (random.nextDouble() * 256), (int) (random.nextDouble() * 256), (int) (random.nextDouble() * 256), 100);
+
       int nodeDepth = BehaviorTreeTools.getNodeDepth(node);
       int childIndex = BehaviorTreeTools.getChildIndex(node);
       treeViewX = originX + 20 * nodeDepth;
       treeViewY = originY + 30 * index;
 
       int timeBarHeight = 5;
-      timeViewX = originX;
-      timeViewY = originY + timeBarHeight * index + 1500;
+      timeViewX = treeViewX;
+      timeViewY = originY + timeBarHeight * index + 1100;
 
       if (node instanceof ActionNodeState)
       {
          timeViewX = nodeToExecuteAfter.getTimeViewX();
       }
 
-      color = new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256), 100);
-//      svgGraphics2D.setColor(color);
-//      svgGraphics2D.setStroke(new BasicStroke(0.5f));
-//      svgGraphics2D.fillRect(x, y, 200, 30);
+
+      svgGraphics2D.setColor(color);
+      svgGraphics2D.setStroke(new BasicStroke(0.5f));
+
+      int colorBoxSize = 15;
+      svgGraphics2D.fillRect(treeViewX, treeViewY - 7, colorBoxSize, colorBoxSize);
 //      svgGraphics2D.setColor(Color.GRAY);
 //      svgGraphics2D.setStroke(new BasicStroke(0.25f));
 //      drawRect(x, y, 12, 10);
@@ -62,13 +75,14 @@ public class BehaviorTreeSVGNode
 //      svgGraphics2D.drawString(indexString, x + 4 * (2 - indexString.length()), y);
 //      x += 14;
 //      y += 4;
+      int colorBoxSpaceX = colorBoxSize + 5;
       svgGraphics2D.setColor(Color.BLACK);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 12));
-      svgGraphics2D.drawString("%s".formatted(filterName(node)), treeViewX, treeViewY);
+      svgGraphics2D.drawString("%s".formatted(filterName(node)), treeViewX + colorBoxSpaceX, treeViewY);
       treeViewY += 13;
       svgGraphics2D.setColor(Color.GRAY);
       svgGraphics2D.setFont(new Font("Arial", Font.PLAIN, 10));
-      svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), treeViewX, treeViewY);
+      svgGraphics2D.drawString("%s".formatted(getTypeName(node.getDefinition())), treeViewX + colorBoxSpaceX, treeViewY);
 
       if (nodeDepth > 1)
       {
@@ -82,6 +96,36 @@ public class BehaviorTreeSVGNode
       svgGraphics2D.setColor(color);
       svgGraphics2D.setStroke(new BasicStroke(0.5f));
       svgGraphics2D.fillRect(timeViewX, timeViewY, 200, timeBarHeight);
+
+      double secondsToPixels = 15.0;
+      double duration = 0.0f;
+      if (node instanceof WaitDurationActionState action)
+      {
+         duration = action.getDefinition().getWaitDuration();
+      }
+      else if (node instanceof HandPoseActionState action)
+      {
+         duration = action.getDefinition().getTrajectoryDuration();
+      }
+      else if (node instanceof ChestOrientationActionState action)
+      {
+         duration = action.getDefinition().getTrajectoryDuration();
+      }
+      else if (node instanceof FootstepPlanActionState action)
+      {
+         duration = 10.0; // TODO
+      }
+      else if (node instanceof SakeHandCommandActionState action)
+      {
+         duration = 0.5; // TODO
+      }
+      else if (node instanceof ScrewPrimitiveActionState action)
+      {
+         duration = 2.0; // TODO
+      }
+
+
+      timeViewX += (int) Math.round(duration * secondsToPixels);
 
 //      svgGraphics2D.setColor(color);
 //      svgGraphics2D.setStroke(new BasicStroke(0.5f));
