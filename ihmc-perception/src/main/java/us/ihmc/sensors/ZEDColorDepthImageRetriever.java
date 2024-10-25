@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
@@ -201,14 +200,11 @@ public class ZEDColorDepthImageRetriever
          if (colorImages.get(side) != null)
             colorImages.get(side).release();
          colorImages.put(side,
-                         new RawImage(null,
-                                      colorGpuMats.get(side).clone(),
-                                      PixelFormat.BGR8,
-                                      cameraIntrinsics.get(side),
-                                      cameraFramePoses.get(side),
-                                      colorImageAcquisitionTime.get(),
-                                      grabSequenceNumber,
-                                      MILLIMETER_TO_METERS));
+                         RawImage.createWithBGRImage(colorGpuMats.get(side).clone(),
+                                                     cameraIntrinsics.get(side),
+                                                     cameraFramePoses.get(side),
+                                                     colorImageAcquisitionTime.get(),
+                                                     grabSequenceNumber));
 
 
          newColorImagesAvailable.get(side).signal();
@@ -243,14 +239,12 @@ public class ZEDColorDepthImageRetriever
       {
          if (depthImage != null)
             depthImage.release();
-         depthImage = new RawImage(null,
-                                   depthGpuMat.clone(),
-                                   PixelFormat.GRAY16,
-                                   cameraIntrinsics.get(RobotSide.LEFT),
-                                   cameraFramePoses.get(RobotSide.LEFT),
-                                   depthImageAcquisitionTime.get(),
-                                   grabSequenceNumber,
-                                   MILLIMETER_TO_METERS);
+         depthImage = RawImage.createWith16BitDepth(depthGpuMat.clone(),
+                                                    cameraIntrinsics.get(RobotSide.LEFT),
+                                                    cameraFramePoses.get(RobotSide.LEFT),
+                                                    depthImageAcquisitionTime.get(),
+                                                    grabSequenceNumber,
+                                                    MILLIMETER_TO_METERS);
 
          newDepthImageAvailable.signal();
       }
