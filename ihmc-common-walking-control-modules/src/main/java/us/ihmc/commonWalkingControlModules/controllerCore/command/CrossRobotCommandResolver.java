@@ -5,39 +5,15 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
@@ -119,17 +95,32 @@ public class CrossRobotCommandResolver
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolder(), out.getLowLevelOneDoFJointDesiredDataHolder());
    }
 
-   public void resolveControllerCoreOutput(ControllerCoreOutput in, ControllerCoreOutput out)
+   /**
+    * Resolve command for controllerCoreCommand.
+    * @param in
+    * @param out
+    */
+   public void resolveControllerCoreCommandDataHolder(ControllerCoreCommandDataHolder in, ControllerCoreCommandDataHolder out)
    {
-      resolveFrameTuple3D(in.getLinearMomentum(), out.getLinearMomentum());
-      resolveFrameTuple3D(in.getAngularMomentum(), out.getAngularMomentum());
-      resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
-      resolveFrameTuple3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
-      resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
-      resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchData(), out.getDesiredExternalWrenchData());
+      out.clear();
+      out.set(in);
+//      if(in.isReinitializationRequested())
+//         out.requestReinitialization();
+   }
+
+   public void resolveControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder in, ControllerCoreOutputDataHolder out)
+   {
+      resolveFrameVector3D(in.getLinearMomentum(), out.getLinearMomentum());
+      resolveFrameVector3D(in.getAngularMomentum(), out.getAngularMomentum());
+      resolveFrameVector3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
+      resolveFrameVector3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
+      resolveCenterOfPressureDataHolder(in.getDesiredCenterOfPressureDataHolder(), out.getDesiredCenterOfPressureDataHolder());
+      resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchHolder(), out.getDesiredExternalWrenchHolder());
       out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(),
-                                                  out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder(),
+                                                  out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointControllerCoreDesiredDataHolder(), out.getLowLevelOneDoFJointControllerCoreOutPutDesiredDataHolder());
+
    }
 
    public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
@@ -212,8 +203,33 @@ public class CrossRobotCommandResolver
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      //      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
+      resolveControllerCoreCommandDataHolder(in.getControllerCoreCommandDataHolder(), out.getControllerCoreCommandDataHolder());
       out.setControllerRan(in.getControllerRan());
+   }
+
+   /**
+    * Resolves only the part of the context data that is updated by the wholeBodyControllerCore thread
+    * //TODO This should be removed after checking resolveHumanoidRobotContextDataWholeBodyControllerCoreFull works well.
+    * TODO The resolveHumaonidRobotContextDataWholeBodyControllerCoreFull will replace with this.
+    */
+   public void resolveHumanoidRobotContextDataWholeBodyControllerCore(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
+      out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
+   }
+
+   /**
+    * Resolves only the part of the context data that is updated by the wholeBodyControllerCore Thread
+    * //TODO after checking the feasibility of using this, the resolveHumanoidRobotContextDataWholeBodyControllerCore will be deleted.
+    * TODO dAnd then,this name is changed to exclude Full in the end.
+    */
+   public void resolveHumanoidRobotContextDataWholeBodyControllerCoreFull(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
+      out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
 
    /**
@@ -296,7 +312,6 @@ public class CrossRobotCommandResolver
       out.clear();
       resolveFeedbackControlCommandListInternal(in, out);
    }
-
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
       out.setCommandId(in.getCommandId());
@@ -985,6 +1000,11 @@ public class CrossRobotCommandResolver
    {
       resolveWeightMatrix3D(in.getAngularPart(), out.getAngularPart());
       resolveWeightMatrix3D(in.getLinearPart(), out.getLinearPart());
+   }
+
+   public void resolveFrameVector3D(FrameVector3DReadOnly in, FrameVector3D out)
+   {
+      out.setIncludingFrame(in);
    }
 
    public void resolveFrameTuple2D(FrameTuple2DReadOnly in, FrameTuple2DBasics out)

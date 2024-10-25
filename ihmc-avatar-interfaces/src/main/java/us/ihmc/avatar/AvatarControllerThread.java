@@ -1,10 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Supplier;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -12,6 +7,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
@@ -20,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -34,6 +30,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -55,6 +52,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class AvatarControllerThread implements AvatarControllerThreadInterface
 {
@@ -87,6 +89,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    private final ExecutionTimer controllerThreadTimer;
+   private final boolean wbccThreadRun;
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
@@ -97,9 +100,11 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
                                  double gravity,
-                                 boolean kinematicsSimulation)
+                                 boolean kinematicsSimulation,
+                                 boolean wbccThreadRun)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
+      this.wbccThreadRun = wbccThreadRun;
       if (robotInitialSetup != null)
       {
          robotInitialSetup.initializeFullRobotModel(controllerFullRobotModel);
@@ -110,13 +115,19 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      ControllerCoreCommandDataHolder controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setWBCCJointDesiredOutputList(wholeBodyControllerCoreDesiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
+      contextDataFactory.setControllerCoreOutputDataHolder(controllerCoreOutPutDataHolder);
+      contextDataFactory.setControllerCoreCommandDataHolder(controllerCoreCommandDataHolder);
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
@@ -149,7 +160,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   centerOfMassDataHolderForController,
                                                   centerOfPressureDataHolderForEstimator,
                                                   sensorInformation,
-                                                  desiredJointDataHolder,
+                                                  wholeBodyControllerCoreDesiredJointDataHolder,
+                                                  controllerCoreOutPutDataHolder,
+                                                  controllerCoreCommandDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
                                                   kinematicsSimulation,
@@ -161,12 +174,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
-      if (outputProcessor != null)
-      {
-         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
-         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
-         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
-      }
+      //TODO looks like should be moved to "new" thread
+//      if (outputProcessor != null)
+//      {
+//         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
+//         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+//         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
+//      }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
@@ -224,7 +238,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
-                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                            ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
+                                                            ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
                                                             boolean kinematicsSimulation,
@@ -256,7 +272,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                                                            forceSensorDataHolderForController,
                                                                                            centerOfMassDataHolderForController,
                                                                                            centerOfPressureDataHolderForEstimator,
-                                                                                           lowLevelControllerOutput,
+                                                                                           wholeBodyControllerCoreOutput,
+                                                                                           controllerCoreOutPutDataHolder,
+                                                                                           controllerCoreCommandDataHolder,
                                                                                            jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
@@ -301,13 +319,20 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+      humanoidRobotContextData.setWholeBodyControllerCoreRan(false);
 
-      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      //TODO this should be removed.
+      // New Thread (WBCCThread) will replace this action
+      // in the EsitmatorThread, the initialize method clear the jointDesiredOutputList. So, let it be here.
 
-      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+//      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+      LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreOutPutList = humanoidRobotContextData.getWholeBodyControllerCoreDesiredOutPutList();
+
+      for (int i = 0; i < wholeBodyControllerCoreOutPutList.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+         wholeBodyControllerCoreOutPutList.getJointDesiredOutput(i).clear();
       }
+
    }
 
    @Override

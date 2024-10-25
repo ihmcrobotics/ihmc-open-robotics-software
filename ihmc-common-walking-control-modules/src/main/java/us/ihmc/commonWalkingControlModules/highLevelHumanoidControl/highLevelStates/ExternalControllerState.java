@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.ExternalControlCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.external.WholeBodyConfigurationManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -34,7 +37,9 @@ public class ExternalControllerState extends HighLevelControllerState
                                   StatusMessageOutputManager statusOutputManager,
                                   HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      super("externalController", HighLevelControllerName.EXTERNAL, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
+      super("externalController",
+            HighLevelControllerName.EXTERNAL,
+            MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -54,6 +59,24 @@ public class ExternalControllerState extends HighLevelControllerState
    }
 
    @Override
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return null;
+   }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore getControllerCore()
+   {
+      return null;
+   }
+
+   @Override
    public void onEntry()
    {
       commandInputManager.clearAllCommands();
@@ -70,7 +93,6 @@ public class ExternalControllerState extends HighLevelControllerState
 
       statusOutputManager.reportStatusMessage(updateAndReturnCapturabilityBasedStatus());
    }
-
 
    @Override
    public void onExit(double timeInState)

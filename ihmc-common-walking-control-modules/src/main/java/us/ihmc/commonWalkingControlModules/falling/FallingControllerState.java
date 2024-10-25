@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.falling;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
@@ -17,9 +20,12 @@ public class FallingControllerState extends HighLevelControllerState
    private static final HighLevelControllerName controllerState = HighLevelControllerName.FALLING_STATE;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public FallingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
+   public FallingControllerState(CommandInputManager commandInputManager,
+                                 StatusMessageOutputManager statusOutputManager,
+                                 HighLevelControlManagerFactory managerFactory,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters,
+                                 WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState, highLevelControllerParameters, controllerToolbox.getControlledOneDoFJoints());
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
@@ -57,5 +63,23 @@ public class FallingControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   @Override
+   public ControllerCoreOutput getControllerCoreOutput()
+   {
+      return null;
+   }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommandData()
+   {
+      return null;
+   }
+
+   @Override
+   public WholeBodyControllerCore   getControllerCore()
+   {
+      return null;
    }
 }

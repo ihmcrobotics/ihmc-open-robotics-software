@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -67,6 +70,9 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    }
 
    public abstract JointDesiredOutputListReadOnly getOutputForLowLevelController();
+   public abstract ControllerCoreOutput getControllerCoreOutput();
+   public abstract ControllerCoreCommand getControllerCoreCommandData();
+   public abstract WholeBodyControllerCore getControllerCore();
 
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {

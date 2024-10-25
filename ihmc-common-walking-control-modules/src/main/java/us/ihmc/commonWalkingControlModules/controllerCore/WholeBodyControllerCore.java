@@ -1,17 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataBasics;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -46,7 +37,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    private final RootJointDesiredConfigurationDataBasics rootJointDesiredConfigurationData;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   private OneDoFJointBasics[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreFeedbackControlTimer = new ExecutionTimer("controllerCoreFeedbackControlTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmissionTimer = new ExecutionTimer("controllerCoreSubmissionTimer", 1.0, registry);
@@ -225,7 +216,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    public void compute()
    {
       controllerCoreComputeTimer.startMeasurement();
-
+      // TODO This will be moved to the WholeBodyControllCoreThread
       computeFeedbackControllers();
 
       switch (currentMode.getEnumValue())
@@ -251,6 +242,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    }
 
    // TODO Clean me up once compute() and submitControllerCoreCommand(ControllerCoreCommandInterface) have been removed.
+   // TODO This should be called from the wholeBodyControllerCoreThread.
    public void compute(ControllerCoreCommandInterface controllerCoreCommand)
    {
       submitControllerCoreCommand(controllerCoreCommand);

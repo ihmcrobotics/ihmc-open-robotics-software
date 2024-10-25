@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import java.util.Arrays;
-import java.util.List;
-
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -13,6 +12,9 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -60,7 +62,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * context. Set by the controller.
     */
    private boolean controllerRan = false;
-
+   /**
+    * Serves to inform the controller and estimator that the wholeBodyControllerCore ran and populated the desired values in
+    * this context. Set by the wholeBodyControllerCore
+    */
+   private boolean wholeBodyControllerCoreRan = false;
    /**
     * Serves to inform the estimator and controller that the perception ran. Set by the perception.
     */
@@ -77,9 +83,20 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    /**
+    * The output of the wholebodyControllerCore. Set by the wholebodyControllerCore thread.
+    */
+   private final ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder;
+
+   /**
     * The desired joint data to be set on the robot. Set by the controller.
     */
    private final LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
+   /**
+    * The output joint data from the WBCC. set by the WholeBodyController.
+    * TODO This will be deleted after finishing moving WBCC from controllerThread to WBCCThread.
+    */
+   private final LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredOutPutList;
+   private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
 
    public HumanoidRobotContextData()
    {
@@ -90,6 +107,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
       sensorDataContext = new SensorDataContext();
+      wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder();
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(null);
+      controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
@@ -98,7 +118,10 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
                                    CenterOfPressureDataHolder centerOfPressureDataHolder,
                                    RobotMotionStatusHolder robotMotionStatusHolder,
                                    LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
-                                   SensorDataContext sensorDataContext)
+                                   SensorDataContext sensorDataContext,
+                                   LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredOutputList,
+                                   ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
+                                   ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
@@ -107,6 +130,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.sensorDataContext = sensorDataContext;
+      this.wholeBodyControllerCoreDesiredOutPutList = wbccJointDesiredOutputList;
+      this.controllerCoreOutPutDataHolder = controllerCoreOutPutDataHolder;
+      this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
    }
 
    public HumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel)
@@ -118,6 +144,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
+      wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
    public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
@@ -129,6 +158,9 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       sensorDataContext = new SensorDataContext(joints);
+      wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
+      controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(joints.toArray(new OneDoFJointBasics[0]));
+      controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
@@ -161,10 +193,26 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       return jointDesiredOutputList;
    }
 
+   public LowLevelOneDoFJointDesiredDataHolder getWholeBodyControllerCoreDesiredOutPutList()
+   {
+      return wholeBodyControllerCoreDesiredOutPutList;
+   }
+
+   public ControllerCoreOutputDataHolder getControllerCoreOutPutDataHolder()
+   {
+      return controllerCoreOutPutDataHolder;
+   }
+
    public SensorDataContext getSensorDataContext()
    {
       return sensorDataContext;
    }
+
+   public ControllerCoreCommandDataHolder getControllerCoreCommandDataHolder()
+   {
+      return controllerCoreCommandDataHolder;
+   }
+
 
    @Override
    public void set(HumanoidRobotContextData other)
@@ -180,13 +228,18 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       controllerRan = src.controllerRan;
       estimatorRan = src.estimatorRan;
       perceptionRan = src.perceptionRan;
+      wholeBodyControllerCoreRan = src.wholeBodyControllerCoreRan;
       processedJointData.set(src.processedJointData);
       forceSensorDataHolder.set(src.forceSensorDataHolder);
       centerOfMassDataHolder.set(src.centerOfMassDataHolder);
       centerOfPressureDataHolder.set(src.centerOfPressureDataHolder);
       robotMotionStatusHolder.set(src.robotMotionStatusHolder);
       jointDesiredOutputList.set(src.jointDesiredOutputList);
+      wholeBodyControllerCoreDesiredOutPutList.set(src.wholeBodyControllerCoreDesiredOutPutList);
       sensorDataContext.set(src.sensorDataContext);
+      controllerCoreOutPutDataHolder.set(src.controllerCoreOutPutDataHolder);
+      controllerCoreCommandDataHolder.setControllerCoreMode(src.controllerCoreCommandDataHolder.getControllerCoreMode());
+      controllerCoreCommandDataHolder.set(src.controllerCoreCommandDataHolder);
    }
 
    public long getTimestamp()
@@ -218,12 +271,22 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       return controllerRan;
    }
-   
+
+   public boolean getWholeBodyControllerCoreRan()
+   {
+      return wholeBodyControllerCoreRan;
+   }
+
+   public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
+   {
+      this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
+   }
+
    public void setPerceptionRan(boolean perceptionRan)
    {
       this.perceptionRan = perceptionRan;
    }
-   
+
    public boolean getPerceptionRan()
    {
       return perceptionRan;
@@ -246,9 +309,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       {
          return true;
       }
-      else if (obj instanceof HumanoidRobotContextData)
+      else if (obj instanceof HumanoidRobotContextData other)
       {
-         HumanoidRobotContextData other = (HumanoidRobotContextData) obj;
          if (timestamp != other.timestamp)
             return false;
          if (schedulerTick != other.schedulerTick)
@@ -258,6 +320,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
          if (estimatorRan ^ other.estimatorRan)
             return false;
          if (perceptionRan ^ other.perceptionRan)
+            return false;
+         if (wholeBodyControllerCoreRan ^ other.wholeBodyControllerCoreRan)
             return false;
          if (!processedJointData.equals(other.processedJointData))
             return false;
@@ -272,6 +336,12 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
          if (!jointDesiredOutputList.equals(other.jointDesiredOutputList))
             return false;
          if (!sensorDataContext.equals(other.sensorDataContext))
+            return false;
+         if (!wholeBodyControllerCoreDesiredOutPutList.equals(other.wholeBodyControllerCoreDesiredOutPutList))
+            return false;
+         if(!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
+            return false;
+         if(!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
             return false;
          return true;
       }

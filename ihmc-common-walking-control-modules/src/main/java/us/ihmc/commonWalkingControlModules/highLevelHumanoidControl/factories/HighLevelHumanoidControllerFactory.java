@@ -1,11 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
@@ -15,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationPara
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -55,11 +51,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -74,6 +66,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
@@ -371,7 +369,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     */
@@ -384,7 +382,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
@@ -425,17 +423,173 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return requestedHighLevelControllerState;
    }
 
+   public HumanoidHighLevelControllerManager getControllerCoreCalculator(FullHumanoidRobotModel fullRobotModel,
+                                                                         double controlDT,
+                                                                         double gravity,
+                                                                         boolean kinematicsSimulation,
+                                                                         // For fast non-physics preview simulations
+                                                                         YoDouble yoTime,
+                                                                         YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                                         HumanoidRobotSensorInformation sensorInformation,
+                                                                         ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                         CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
+                                                                         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                                         JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                                         ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
+                                                                         ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
+                                                                         JointBasics... jointsToIgnore)
+   {
+      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPositionInControllerCore", registry);
+      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocityInControllerCore", registry);
+
+      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
+      {
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+
+         @Override
+         public void updateState()
+         {
+            centerOfMassJacobian.reset();
+         }
+
+         @Override
+         public FramePoint3DReadOnly getCenterOfMassPosition()
+         {
+            usingEstimatorCoMPosition.set(centerOfMassDataHolderForController.hasCenterOfMassPosition());
+            if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
+               return centerOfMassDataHolderForController.getCenterOfMassPosition();
+            else
+               return centerOfMassJacobian.getCenterOfMass();
+         }
+
+         @Override
+         public FrameVector3DReadOnly getCenterOfMassVelocity()
+         {
+            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForController.hasCenterOfMassVelocity());
+            if (centerOfMassDataHolderForController.hasCenterOfMassVelocity())
+               return centerOfMassDataHolderForController.getCenterOfMassVelocity();
+            else
+               return centerOfMassJacobian.getCenterOfMassVelocity();
+         }
+      };
+
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
+
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
+      contactableBodiesFactory.disposeFactory();
+
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactablePlaneBodies.add(feet.get(robotSide));
+      contactablePlaneBodies.addAll(additionalContacts);
+
+      double gravityZ = Math.abs(gravity);
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalRobotWeight = totalMass * gravityZ;
+
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
+                                                                               forceSensorDataHolder,
+                                                                               fullRobotModel.getRootBody(),
+                                                                               totalRobotWeight,
+                                                                               kinematicsSimulation,
+                                                                               yoGraphicsListRegistry,
+                                                                               registry);
+      SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
+      double omega0 = walkingControllerParameters.getOmega0();
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                 centerOfMassStateProvider,
+                                                                 referenceFrames,
+                                                                 footSwitches,
+                                                                 wristForceSensors,
+                                                                 yoTime,
+                                                                 gravityZ,
+                                                                 omega0,
+                                                                 feet,
+                                                                 controlDT,
+                                                                 kinematicsSimulation,
+                                                                 updatables,
+                                                                 contactablePlaneBodies,
+                                                                 yoGraphicsListRegistry,
+                                                                 jointsToIgnore);
+      controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
+      attachControllerFailureListeners(controllerFailureListenersToAttach);
+      if (createQueuedControllerCommandGenerator)
+         createQueuedControllerCommandGenerator(controllerCommands);
+      if (createUserDesiredControllerCommandGenerator)
+         createUserDesiredControllerCommandGenerator();
+
+      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
+      if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
+         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
+
+      if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
+         controllerToolbox.setupMultiContactPostureAdjustmentProvider();
+
+      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
+      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
+      double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
+                                                                              defaultSwingTime,
+                                                                              defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime,
+                                                                              feet,
+                                                                              statusMessageOutputManager,
+                                                                              yoTime,
+                                                                              yoGraphicsListRegistry,
+                                                                              registry);
+      controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
+
+      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
+      FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
+      commandInputManager.registerConversionHelper(commandConversionHelper);
+
+      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager,
+                                                                                  statusMessageOutputManager,
+                                                                                  initialControllerState,
+                                                                                  highLevelControllerParameters,
+                                                                                  walkingControllerParameters,
+                                                                                  requestedHighLevelControllerState,
+                                                                                  controllerFactoriesMap,
+                                                                                  stateTransitionFactories,
+                                                                                  pluginFactories,
+                                                                                  managerFactory,
+                                                                                  controllerCoreFactory,
+                                                                                  controllerToolbox,
+                                                                                  centerOfPressureDataHolderForEstimator,
+                                                                                  forceSensorDataHolder,
+                                                                                  wholeBodyControllerCoreOutput,
+                                                                                  controllerCoreOutPutDataHolder,
+                                                                                  controllerCoreCommandDataHolder);
+      humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
+      humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+//      for (RobotSide robotSide : RobotSide.values)
+//         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
+      return humanoidHighLevelControllerManager;
+   }
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
-                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
+                                                           boolean kinematicsSimulation,
+                                                           // For fast non-physics preview simulations
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                           ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
+                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                            JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
@@ -566,7 +720,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
+                                                                                  wholeBodyControllerCoreOutput,
+                                                                                  controllerCoreOutPutDataHolder,
+                                                                                  controllerCoreCommandDataHolder);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
@@ -747,5 +903,4 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       else
          isListeningToHighLevelStatePackets = isListening;
    }
-
 }

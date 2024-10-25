@@ -14,12 +14,14 @@ public class WalkingControllerStateFactory implements HighLevelControllerStateFa
    {
       if (walkingControllerState == null)
       {
-         walkingControllerState = new WalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
+         walkingControllerState = new WalkingControllerState(controllerFactoryHelper.getCommandInputManager(),
+                                                             controllerFactoryHelper.getStatusMessageOutputManager(),
                                                              controllerFactoryHelper.getManagerFactory(),
                                                              controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
                                                              controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                             controllerFactoryHelper.getWalkingControllerParameters());
+                                                             controllerFactoryHelper.getWalkingControllerParameters(),
+                                                             controllerFactoryHelper.getControllerCoreOutputDataHolder());
       }
 
       return walkingControllerState;
