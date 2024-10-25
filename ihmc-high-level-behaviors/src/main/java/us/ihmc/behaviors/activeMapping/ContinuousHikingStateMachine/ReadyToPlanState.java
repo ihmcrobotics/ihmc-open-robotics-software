@@ -147,10 +147,6 @@ public class ReadyToPlanState implements State
    {
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
-      // Update the current robot location
-      Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
-      robotLocation.set(robotLocationVector);
-
       switch (this.planningMode)
       {
          case FAST_HIKING ->
@@ -202,6 +198,10 @@ public class ReadyToPlanState implements State
          {
             // Set the goalPoses here so that we return a good value regardless of what happens next
             goalPoses = walkToGoalWayPointPoses.get(0);
+
+            // Update the current robot location
+            Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
+            robotLocation.set(robotLocationVector);
 
             double distanceToGoalPose = ContinuousPlannerTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
 
