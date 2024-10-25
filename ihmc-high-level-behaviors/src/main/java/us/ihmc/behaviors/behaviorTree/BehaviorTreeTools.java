@@ -78,4 +78,15 @@ public class BehaviorTreeTools
       });
       return actionDefinitions;
    }
+
+   public static int getNodeDepth(BehaviorTreeNodeState<?> node)
+   {
+      int depth = 0;
+      while (!node.isRootNode())
+      {
+         ++depth;
+         node = node.getParent();
+      }
+      return depth;
+   }
 }
