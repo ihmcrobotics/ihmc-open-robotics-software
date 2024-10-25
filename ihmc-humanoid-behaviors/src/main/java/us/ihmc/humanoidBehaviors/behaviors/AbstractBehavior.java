@@ -137,13 +137,17 @@ public abstract class AbstractBehavior implements RobotController
    @SuppressWarnings("unchecked")
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      ROS2Topic<T> typedNamedTopic = topicName.withTypeName(messageType);
-      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(typedNamedTopic);
+      return createPublisher(topicName.withTypeName(messageType));
+   }
+
+   public <T> ROS2PublisherBasics<T> createPublisher(ROS2Topic<T> topic)
+   {
+      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(topic);
 
       if (publisher == null) // !containsKey
       {
-         publisher = ros2Node.createPublisher(messageType, typedNamedTopic.getName(), typedNamedTopic.getQoS());
-         publishers.put(typedNamedTopic, publisher);
+         publisher = ros2Node.createPublisher(topic);
+         publishers.put(topic, publisher);
       }
 
       return publisher;

@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
+import us.ihmc.communication.OldHandAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
@@ -129,7 +129,8 @@ public class SimulatedRobotiqHandsController implements RobotController
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (realtimeROS2Node != null)
             {
-               realtimeROS2Node.createSubscription(inputTopic.withTypeName(HandDesiredConfigurationMessage.class), handDesiredConfigurationSubscriber);
+               String robotName = inputTopic.getName().split("/")[2];
+               realtimeROS2Node.createSubscription(OldHandAPI.getHandDesiredConfigurationTopic(robotName), handDesiredConfigurationSubscriber);
             }
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide,
