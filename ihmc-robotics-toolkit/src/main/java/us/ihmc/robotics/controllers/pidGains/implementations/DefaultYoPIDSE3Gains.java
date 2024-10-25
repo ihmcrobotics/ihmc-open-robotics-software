@@ -104,4 +104,10 @@ public class DefaultYoPIDSE3Gains implements YoPIDSE3Gains
    {
       return orientationGains;
    }
+
+   @Override
+   public String toString()
+   {
+      return "Position: " + getPositionGains().toString() + "; Orientation: " + getOrientationGains().toString();
+   }
 }

@@ -93,6 +93,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
+   private PID3DGainsReadOnly impedanceGains;
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -197,9 +198,19 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       this.gains = gains;
    }
 
+   public void setImpedanceGains(PID3DGainsReadOnly impedanceGains)
+   {
+      this.impedanceGains = impedanceGains;
+   }
+
    public PID3DGainsReadOnly getGains()
    {
       return gains;
+   }
+
+   public PID3DGainsReadOnly getImpedanceGains()
+   {
+      return impedanceGains;
    }
 
    public void setWeights(Vector3DReadOnly weights)
@@ -349,8 +360,25 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       if (!gainsTrajectoryPoints.isEmpty())
       {
          gains = gainsTrajectoryPoints.get(
-                  gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
-                                      .getLinear();
+                                            gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+                                      .getAngular();
+         feedbackControlCommand.setGains(gains);
+      }
+      else if (!isImpedanceEnabled.getBooleanValue())
+      {
+         feedbackControlCommand.setGains(gains);
+      }
+      else
+      {
+         if (impedanceGains != null)
+         {
+            feedbackControlCommand.setGains(impedanceGains);
+         }
+         else
+         {
+            isImpedanceEnabled.set(false);
+            LogTools.warn(warningPrefix + "Impedance gains are not set, impedance control is disabled.");
+         }
       }
 
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -358,7 +386,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
 
       feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, feedForwardAcceleration);
-      feedbackControlCommand.setGains(gains);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
@@ -378,7 +406,6 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       feedbackControlCommand.setWeightMatrix(weightMatrix);
       feedbackControlCommand.setSelectionMatrix(selectionMatrix);
-      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       if (yoCurrentPosition != null && yoDesiredPosition != null)
       {

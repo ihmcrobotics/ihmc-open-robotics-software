@@ -164,6 +164,22 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       return positionHelper.getGains();
    }
 
+   public void setImpedanceGains(PID3DGainsReadOnly orientationGains, PID3DGainsReadOnly positionGains)
+   {
+      positionHelper.setImpedanceGains(positionGains);
+      orientationHelper.setImpedanceGains(orientationGains);
+   }
+
+   public PID3DGainsReadOnly getOrientationImpedanceGains()
+   {
+      return orientationHelper.getImpedanceGains();
+   }
+
+   public PID3DGainsReadOnly getPositionImpedanceGains()
+   {
+      return positionHelper.getImpedanceGains();
+   }
+
    @Override
    public void doAction(double timeInState)
    {

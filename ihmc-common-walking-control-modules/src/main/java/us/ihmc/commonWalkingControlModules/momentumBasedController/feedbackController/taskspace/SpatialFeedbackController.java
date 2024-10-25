@@ -431,6 +431,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoFeedForwardWrench.checkReferenceFrameMatch(yoDesiredPose);
          yoFeedForwardWrench.setCommandId(currentCommandId);
       }
+
+      if (command.getEndEffector().getName().contains("GRIPPER"))
+      {
+         LogTools.info("Impedance enabled: " + isImpedanceEnabled + "\n"
+                       +"Gains: " + gains);
+      }
    }
 
    @Override
