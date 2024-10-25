@@ -179,7 +179,6 @@ public class ReadyToPlanState implements State
                else
                {
                   goalPoses = ContinuousPlannerTools.setGoalPoseBasedOnLateralJoystickValue(referenceFrames.getPelvisZUpFrame(),
-                                                                                            continuousPlanner.getStartStancePose(),
                                                                                             commandMessage.get().getLateralValue(),
                                                                                             (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                                             (float) continuousHikingParameters.getGoalPoseUpDistance(),

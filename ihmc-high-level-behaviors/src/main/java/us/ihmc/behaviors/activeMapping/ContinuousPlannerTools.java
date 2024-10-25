@@ -32,50 +32,51 @@ public class ContinuousPlannerTools
       return middleDistanceBetweenGoalPoses.distanceXY(robotPositionInWorld);
    }
 
+   /**
+    * This method takes in a reference frame on the robot
+    * and computes a desired goal that's rotated around the reference frame by the lateral value in radians.
+    * And the goal is shifted forward by the x distance provided.
+    * @param referenceFrame is the current location of the robot
+    * @param lateralValueInRadians in the value the goal will be rotated (in radians)
+    * @param xDistance the distance away from the robot the goal will be placed in the X-axis (in meters)
+    * @param zDistance the distance away from the robot the goal win be placed in the Z-axis (in meters)
+    * @param nominalStanceWidth is the default width we want the feet to be apart when we set the goal poses
+    * @return the goal poses in which to attempt to plan towards.
+    */
    public static SideDependentList<FramePose3D> setGoalPoseBasedOnLateralJoystickValue(ReferenceFrame referenceFrame,
-                                                                                       SideDependentList<FramePose3D> stancePose,
                                                                                        double lateralValueInRadians,
                                                                                        float xDistance,
                                                                                        float zDistance,
                                                                                        float nominalStanceWidth)
    {
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
+
       // Get the robot's current rotation (yaw) and translation (position) from the reference frame
       RigidBodyTransform currentRobotLocation = new RigidBodyTransform();
       currentRobotLocation.getRotation().set(referenceFrame.getTransformToWorldFrame().getRotation());
       currentRobotLocation.getTranslation().set(referenceFrame.getTransformToWorldFrame().getTranslation());
 
-      // Extract rotation (yaw) from the reference frame's transform
-      double robotYaw = currentRobotLocation.getRotation().getYaw();
-
-      // Extract the robot's current position from the reference frame's transform
       Point3D robotLocation = new Point3D();
       robotLocation.set(currentRobotLocation.getTranslation());
 
-      // Compute the yaw for the goal by adding the lateralValueInRadians (1 radian to the right)
+      // This sets the goal yaw to be based on the current direction the robot is facing
+      double robotYaw = currentRobotLocation.getRotation().getYaw();
       double goalYaw = robotYaw + lateralValueInRadians;
 
-      // Goal pose list for both sides
-      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
-
-      // Iterate over robot sides
       for (RobotSide side : RobotSide.values)
       {
-         // Create a new goal pose for each side
          goalPose.put(side, new FramePose3D());
 
          // Calculate the goal position relative to the robot's location, keeping a fixed radius
          double goalX = robotLocation.getX() + xDistance * Math.cos(goalYaw);
          double goalY = robotLocation.getY() + xDistance * Math.sin(goalYaw);
-         double goalZ = robotLocation.getZ() + zDistance; // Adjust for height if necessary
+         double goalZ = robotLocation.getZ() + zDistance;
 
-         // Set the goal position in the pose
          goalPose.get(side).getPosition().set(goalX, goalY, goalZ);
-
-         // Set the orientation so that the yaw matches the robot's facing direction plus the offset
          goalPose.get(side).getOrientation().setToYawOrientation(goalYaw);
       }
 
-      // Adjust for nominal stance width (side-to-side foot distance)
+      // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance
       goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0, 0.0);
       goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0, 0.0);
 
@@ -112,7 +113,7 @@ public class ContinuousPlannerTools
          goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
-      // These are done after because of the ( - ) or ( + ) for the nominal stance
+      // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance
       goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
       goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
 
