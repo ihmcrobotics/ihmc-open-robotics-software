@@ -109,9 +109,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
-      createSubscriber(KinematicsToolboxOutputStatus.class, kinematicsToolboxOutputTopic, kinematicsToolboxOutputQueue::put);
+      createSubscriberFromController(KinematicsToolboxOutputStatus.class, kinematicsToolboxOutputQueue::put);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsToolboxInputTopic);
-      kinematicsToolboxRigidBodyPublisher = createPublisher(KinematicsToolboxRigidBodyMessage.class, kinematicsToolboxInputTopic);
+      kinematicsToolboxRigidBodyPublisher = createPublisherForController(KinematicsToolboxRigidBodyMessage.class);
       wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
 
       clear();
