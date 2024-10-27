@@ -7,14 +7,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.*;
-import static us.ihmc.convexOptimization.linearProgram.LinearProgramSolver.computeSensitivity;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.CoM_DIMENSIONS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
 public class ContactPointConstraintMatrixVariation
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final WholeBodyContactState wholeBodyContactState;
-   private final CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule;
+   private final StabilityMarginOptimizationModule stabilityMarginOptimizationModule;
 
    private final DMatrixRMaj equalityConstraintVariation = new DMatrixRMaj(0);
    private final DMatrixRMaj inequalityConstraintVariation = new DMatrixRMaj(0);
@@ -22,7 +23,7 @@ public class ContactPointConstraintMatrixVariation
 
    public ContactPointConstraintMatrixVariation(FullHumanoidRobotModel fullRobotModel,
                                                 WholeBodyContactState wholeBodyContactState,
-                                                CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule)
+                                                StabilityMarginOptimizationModule stabilityMarginOptimizationModule)
    {
       this.fullRobotModel = fullRobotModel;
       this.wholeBodyContactState = wholeBodyContactState;

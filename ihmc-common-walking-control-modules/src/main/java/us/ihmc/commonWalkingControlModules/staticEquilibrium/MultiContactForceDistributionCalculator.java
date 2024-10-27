@@ -7,15 +7,16 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.matrixlib.MatrixTools;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.*;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
 /**
- * Static whole-body force distribution calculator using the constraints from {@link CenterOfMassStabilityMarginOptimizationModule},
+ * Static whole-body force distribution calculator using the constraints from {@link StabilityMarginOptimizationModule},
  * but instead of varying CoM position and solving with an LP, it keeps the CoM fixed and solves with a QP.
  */
 public class MultiContactForceDistributionCalculator
 {
-   private final CenterOfMassStabilityMarginOptimizationModule comOptimizationModule;
+   private final StabilityMarginOptimizationModule comOptimizationModule;
    private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
    private final double mg;
 

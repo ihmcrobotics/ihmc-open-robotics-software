@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedCoMMarginCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -26,7 +26,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
@@ -60,7 +59,7 @@ public class KinematicsToolboxMultiContactManager
    /* Region managers and sensitivity calculator */
    private final TObjectIntHashMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
    private final WholeBodyContactState wholeBodyContactState;
-   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
+   private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final SensitivityBasedCoMMarginCalculator postureOptimizer;
    private final FullHumanoidRobotModel fullRobotModel;
    private final PDGains jointspaceGains = new PDGains();
@@ -152,7 +151,7 @@ public class KinematicsToolboxMultiContactManager
    //       q_priv_offset = calculated by the posture adjustment calculator
 
    public KinematicsToolboxMultiContactManager(WholeBodyContactState wholeBodyContactState,
-                                               CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator,
+                                               StabilityMarginRegionCalculator multiContactRegionCalculator,
                                                FullHumanoidRobotModel fullRobotModel,
                                                ReferenceFrame centerOfMassFrame,
                                                double updateDT,
@@ -199,9 +198,9 @@ public class KinematicsToolboxMultiContactManager
 
       activationAlpha = new RateLimitedYoVariable("activationAlpha", registry, 0.4, updateDT);
 
-      double defaultPostureSensitivityThreshold = 0.04;
-      double defaultStabilityMarginThresholdLow = 0.13; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
-      double defaultStabilityMarginThresholdHigh = 0.18; // 0.12;
+      double defaultPostureSensitivityThreshold = 0.0; // 0.04;
+      double defaultStabilityMarginThresholdLow = 0.3; // 0.13; // should be higher than 5cm, which is the IK solver's threshold to keep the CoM safe
+      double defaultStabilityMarginThresholdHigh = 0.4; // 0.18; // 0.12;
 
       postureSensitivityThreshold.set(defaultPostureSensitivityThreshold);
       stabilityMarginThresholdLow.set(defaultStabilityMarginThresholdLow);
@@ -273,11 +272,11 @@ public class KinematicsToolboxMultiContactManager
 
          this.isPostureSensitivityHigh.update(isPostureSensitivityHigh);
 
-         if (multiContactRegionCalculator.getCenterOfMassStabilityMargin() < stabilityMarginThresholdLow.getValue())
+         if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdLow.getValue())
          {
             stabilityMarginLevel.set(StabilityMarginLevel.LOW);
          }
-         else if (multiContactRegionCalculator.getCenterOfMassStabilityMargin() < stabilityMarginThresholdHigh.getValue())
+         else if (multiContactRegionCalculator.getStabilityMargin() < stabilityMarginThresholdHigh.getValue())
          {
             stabilityMarginLevel.set(StabilityMarginLevel.MEDIUM);
          }

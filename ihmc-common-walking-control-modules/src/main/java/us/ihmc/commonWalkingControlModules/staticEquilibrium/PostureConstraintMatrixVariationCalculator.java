@@ -4,7 +4,6 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -15,15 +14,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PostureConstraintMatrixVariationCalculator
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final JointBasics[] controlledJoints;
    private final WholeBodyContactState wholeBodyContactState;
-   private final CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule;
+   private final StabilityMarginOptimizationModule stabilityMarginOptimizationModule;
 
    private final RobotJointVelocityAccelerationIntegrator integrator;
    private final double integrationDT;
@@ -44,7 +41,7 @@ public class PostureConstraintMatrixVariationCalculator
 
    public PostureConstraintMatrixVariationCalculator(FullHumanoidRobotModel fullRobotModel,
                                                      WholeBodyContactState wholeBodyContactState,
-                                                     CenterOfMassStabilityMarginOptimizationModule stabilityMarginOptimizationModule,
+                                                     StabilityMarginOptimizationModule stabilityMarginOptimizationModule,
                                                      double integrationDT,
                                                      YoRegistry registry)
    {

@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator.*;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator.*;
 import static us.ihmc.convexOptimization.linearProgram.LinearProgramSolver.computeSensitivity;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TEN_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfIntersectionBetweenTwoLine2Ds;
@@ -53,7 +53,7 @@ public class SensitivityBasedCoMMarginCalculator
    private final YoDouble yoRandomSampleSensitivity = new YoDouble("randomSampleSensitivity", randomSampleRegistry);
 
    private final WholeBodyContactNullspaceCalculator nullspaceCalculator;
-   private final CenterOfMassStabilityMarginRegionCalculator stabilityMarginRegionCalculator;
+   private final StabilityMarginRegionCalculator stabilityMarginRegionCalculator;
    private final PostureConstraintMatrixVariationCalculator postureConstraintVariationCalculator;
    private final ContactPointConstraintMatrixVariation contactPointConstraintMatrixVariation;
 
@@ -98,7 +98,7 @@ public class SensitivityBasedCoMMarginCalculator
    public SensitivityBasedCoMMarginCalculator(ReferenceFrame centerOfMassFrame,
                                               FullHumanoidRobotModel fullRobotModel,
                                               WholeBodyContactState wholeBodyContactState,
-                                              CenterOfMassStabilityMarginRegionCalculator stabilityMarginRegionCalculator,
+                                              StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
                                               YoRegistry parentRegistry)
    {
       JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);

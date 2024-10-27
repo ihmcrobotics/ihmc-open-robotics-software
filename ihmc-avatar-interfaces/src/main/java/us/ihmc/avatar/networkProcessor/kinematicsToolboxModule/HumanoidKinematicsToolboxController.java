@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionDebug;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -17,12 +16,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -39,7 +37,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -204,7 +201,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
 
    private final ExecutionTimer multiContactRegionLPSolveTimer = new ExecutionTimer("multiContactRegionLPSolveTimer", registry);
-   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
+   private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
@@ -291,7 +288,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
-      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator(desiredFullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("", desiredFullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
       multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState, multiContactRegionCalculator, desiredFullRobotModel, desiredReferenceFrames.getCenterOfMassFrame(), updateDT, registry);
@@ -650,7 +647,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
       {
 //         LogTools.info("reporting s.r. debug status");
-         supportRegionDebug.setCenterOfMassStabilityMargin(multiContactRegionCalculator.getCenterOfMassStabilityMargin());
+         supportRegionDebug.setCenterOfMassStabilityMargin(multiContactRegionCalculator.getStabilityMargin());
 
          supportRegionDebug.getMultiContactFeasibleComRegion().clear();
          for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)

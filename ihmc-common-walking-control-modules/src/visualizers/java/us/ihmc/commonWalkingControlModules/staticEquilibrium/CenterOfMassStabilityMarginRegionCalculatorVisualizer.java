@@ -34,7 +34,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
       scs2.start(true, true, false);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      CenterOfMassStabilityMarginRegionCalculator calculator = new CenterOfMassStabilityMarginRegionCalculator("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
+      StabilityMarginRegionCalculator calculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
       calculator.updateContactState(input);
 
       List<YoGraphicDefinition> graphicDefinitions = YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry);
@@ -45,7 +45,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
       calculator.performFullRegionUpdate();
       scs2.simulateNow(1);
 
-      ConvexPolygon2DReadOnly supportRegion0 = calculator.getFeasibleCoMRegion();
+      ConvexPolygon2DReadOnly supportRegion0 = calculator.getFeasibleRegion();
       for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)
       {
          System.out.println("\t" + supportRegion0.getVertex(i));
@@ -81,7 +81,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
       {
          double renderedHeight = 0.0;
 
-         ConvexPolygon2DReadOnly supportRegion = calculator.getFeasibleCoMRegion();
+         ConvexPolygon2DReadOnly supportRegion = calculator.getFeasibleRegion();
          supportRegionGraphics.identity();
          supportRegionGraphics.appendTranslation(0.0, 0.0, renderedHeight);
 

@@ -34,8 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.GRAVITY;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.GRAVITY;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
 
 public class WholeBodyContactState implements WholeBodyContactStateInterface
 {
@@ -594,7 +595,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public boolean isJointTorqueActuationConstraint(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
       return constraintActiveSetIndex >= staticEquilibriumInequalityConstraints;
    }
 
@@ -604,7 +605,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public OneDoFJointBasics getJointFromActuationConstraintIndex(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
       if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");
@@ -619,7 +620,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public boolean isActuationConstraintUpperBound(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
       if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");

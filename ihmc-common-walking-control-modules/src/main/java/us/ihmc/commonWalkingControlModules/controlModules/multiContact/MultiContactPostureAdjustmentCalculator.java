@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.multiContact;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedCoMMarginCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -30,7 +30,7 @@ public class MultiContactPostureAdjustmentCalculator implements WholeBodyPosture
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final WholeBodyContactState contactState;
-   private final CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator;
+   private final StabilityMarginRegionCalculator staticStabilityRegionCalculator;
    private final YoEnum<PostureAdjustmentMode> mode = new YoEnum<>(NAME_PREFIX + "Mode", registry, PostureAdjustmentMode.class);
    private final SensitivityBasedCoMMarginCalculator postureOptimizer;
 
@@ -59,7 +59,7 @@ public class MultiContactPostureAdjustmentCalculator implements WholeBodyPosture
       FREEZE
    }
 
-   public MultiContactPostureAdjustmentCalculator(CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
+   public MultiContactPostureAdjustmentCalculator(StabilityMarginRegionCalculator staticStabilityRegionCalculator,
                                                   WholeBodyContactState contactState,
                                                   FullHumanoidRobotModel fullRobotModel,
                                                   ReferenceFrame centerOfMassFrame,
