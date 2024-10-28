@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;

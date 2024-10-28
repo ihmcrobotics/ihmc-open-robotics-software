@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;

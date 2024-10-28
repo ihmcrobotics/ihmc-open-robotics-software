@@ -32,7 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;

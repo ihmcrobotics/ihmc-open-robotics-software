@@ -10,8 +10,6 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;

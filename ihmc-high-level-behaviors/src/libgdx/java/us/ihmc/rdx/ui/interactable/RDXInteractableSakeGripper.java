@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -32,37 +32,37 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    static
    {
       FINGERS_TO_PALM_OPEN[0].getTranslation().set(0.0, 0.03, 0.0);
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_OPEN[1].getRotation(), 180.0, 0.0, 0.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_OPEN[1].getRotation(), 180.0, 0.0, 0.0);
       FINGERS_TO_PALM_OPEN[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_HALF_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
    static
    {
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[0].getRotation(), 0.0, 0.0, -65.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[0].getRotation(), 0.0, 0.0, -65.0);
       FINGERS_TO_PALM_HALF_CLOSE[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[1].getRotation(), 180.0, 0.0, -65.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_HALF_CLOSE[1].getRotation(), 180.0, 0.0, -65.0);
       FINGERS_TO_PALM_HALF_CLOSE[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_CLOSE = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
    static
    {
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 0.0, 0.0, -100.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[0].getRotation(), 0.0, 0.0, -100.0);
       FINGERS_TO_PALM_CLOSE[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), 180.0, 0.0, -100.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CLOSE[1].getRotation(), 180.0, 0.0, -100.0);
       FINGERS_TO_PALM_CLOSE[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
    private static final RigidBodyTransform[] FINGERS_TO_PALM_CRUSH = new RigidBodyTransform[] {new RigidBodyTransform(), new RigidBodyTransform()};
    static
    {
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation(), 0.0, 0.0, -106.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[0].getRotation(), 0.0, 0.0, -106.0);
       FINGERS_TO_PALM_CRUSH[0].getTranslation().set(0.0, 0.03, 0.0);
 
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[1].getRotation(), 180.0, 0.0, -106.0);
+      EuclidCoreTools.setYawPitchRollDegrees(FINGERS_TO_PALM_CRUSH[1].getRotation(), 180.0, 0.0, -106.0);
       FINGERS_TO_PALM_CRUSH[1].getTranslation().set(0.0, -0.03, 0.0);
    }
 
@@ -233,14 +233,14 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    @Override
    public void setGripperClosure(double closure)
    {
-      us.ihmc.euclid.tools.EuclidCoreMissingTools.setYawPitchRollDegrees(fingersTransforms[0].getRotation(),
-                                                                         fingersTransforms[0].getRotation().getYaw(),
-                                                                         fingersTransforms[0].getRotation().getPitch(),
-                                                                         closure);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(fingersTransforms[1].getRotation(),
-                                                    180 + fingersTransforms[0].getRotation().getYaw(),
-                                                    fingersTransforms[1].getRotation().getPitch(),
-                                                    closure);
+      EuclidCoreTools.setYawPitchRollDegrees(fingersTransforms[0].getRotation(),
+                                             fingersTransforms[0].getRotation().getYaw(),
+                                             fingersTransforms[0].getRotation().getPitch(),
+                                             closure);
+      EuclidCoreTools.setYawPitchRollDegrees(fingersTransforms[1].getRotation(),
+                                             180 + fingersTransforms[0].getRotation().getYaw(),
+                                             fingersTransforms[1].getRotation().getPitch(),
+                                             closure);
    }
 
    @Override

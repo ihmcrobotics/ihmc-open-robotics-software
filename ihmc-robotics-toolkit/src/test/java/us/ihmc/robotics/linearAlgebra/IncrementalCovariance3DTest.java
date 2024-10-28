@@ -15,7 +15,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 
 public class IncrementalCovariance3DTest
 {

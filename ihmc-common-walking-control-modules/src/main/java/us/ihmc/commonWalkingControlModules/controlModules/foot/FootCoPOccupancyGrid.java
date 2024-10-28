@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;

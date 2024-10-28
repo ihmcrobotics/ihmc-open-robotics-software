@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;

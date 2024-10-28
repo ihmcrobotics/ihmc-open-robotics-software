@@ -42,7 +42,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -184,7 +184,7 @@ public class ConvexPolygonShrinkerTest
          ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
          ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
 
-         boolean completelyInside = EuclidGeometryMissingTools.isPolygonInside(smallPolygon, bigPolygon);
+         boolean completelyInside = EuclidGeometryTools.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
       }
    }

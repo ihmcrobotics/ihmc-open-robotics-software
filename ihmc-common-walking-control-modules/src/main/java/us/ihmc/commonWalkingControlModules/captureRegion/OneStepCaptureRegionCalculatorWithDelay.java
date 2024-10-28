@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -224,8 +224,8 @@ public class OneStepCaptureRegionCalculatorWithDelay
          unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAtTouchdown, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         int intersections = EuclidGeometryMissingTools.intersectionBetweenRay2DAndCircle(kinematicStepRange, footCentroid, copExtreme,
-                                                                                          predictedICPAtTouchdown, kinematicExtreme, null);
+         int intersections = EuclidGeometryTools.intersectionBetweenRay2DAndCircle(kinematicStepRange, footCentroid, copExtreme,
+                                                                                   predictedICPAtTouchdown, kinematicExtreme, null);
          if (intersections > 1)
             throw new RuntimeException("The cop was outside of the reachable range.");
 

@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 

@@ -64,7 +64,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;

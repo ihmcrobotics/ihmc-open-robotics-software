@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -80,7 +80,7 @@ public class KinematicsCollisionFrame extends ReferenceFrame
       this.zAxis.changeFrame(getParent());
 
       transformToParent.getTranslation().set(this.origin);
-      EuclidGeometryMissingTools.rotationMatrix3DFromZUpToVector3D(this.zAxis, transformToParent.getRotation());
+      EuclidGeometryTools.rotationMatrix3DFromZUpToVector3D(this.zAxis, transformToParent.getRotation());
       update();
    }
 

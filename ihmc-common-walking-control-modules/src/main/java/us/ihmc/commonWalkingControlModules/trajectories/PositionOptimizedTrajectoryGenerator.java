@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;

@@ -24,8 +24,8 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -553,7 +553,7 @@ public class ConvexPolygonToolsTest
          assertFalse(convexPolygonTools.doPolygonsIntersect(polygonWithOnePoint, sparePolygon));
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLine) == null);
          assertFalse(polygonWithOnePoint.isPointInside(arbitraryPoint0));
-         assertFalse(EuclidGeometryMissingTools.isPolygonInside(sparePolygon, polygonWithOnePoint));
+         assertFalse(EuclidGeometryTools.isPolygonInside(sparePolygon, polygonWithOnePoint));
          assertTrue(polygonWithOnePoint.orthogonalProjectionCopy(arbitraryPoint0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.pointIsOnPerimeter(pointThatDefinesThePolygon));
          assertFalse(polygonWithOnePoint.pointIsOnPerimeter(arbitraryPoint0));
@@ -645,7 +645,7 @@ public class ConvexPolygonToolsTest
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, polygonWithTwoPoints.getVertex(0),
                                    polygonWithTwoPoints.getVertex(1));
          assertFalse(polygonWithTwoPoints.isPointInside(arbitraryPoint0));
-         assertFalse(EuclidGeometryMissingTools.isPolygonInside(sparePolygon, polygonWithTwoPoints));
+         assertFalse(EuclidGeometryTools.isPolygonInside(sparePolygon, polygonWithTwoPoints));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
          assertTrue(polygonWithTwoPoints.getCentroid().getX() == 0.5 * (pointThatDefinesThePolygon0.getX() + pointThatDefinesThePolygon1.getX()));
          assertTrue(polygonWithTwoPoints.getCentroid().getY() == 0.5 * (pointThatDefinesThePolygon0.getY() + pointThatDefinesThePolygon1.getY()));

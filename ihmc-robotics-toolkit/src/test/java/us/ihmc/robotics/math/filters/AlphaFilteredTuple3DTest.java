@@ -1,4 +1,4 @@
-package us.ihmc.yoVariables.euclid.filters;
+package us.ihmc.robotics.math.filters;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Epsilons;

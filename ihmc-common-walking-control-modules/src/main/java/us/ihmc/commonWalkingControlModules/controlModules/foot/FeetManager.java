@@ -34,7 +34,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;

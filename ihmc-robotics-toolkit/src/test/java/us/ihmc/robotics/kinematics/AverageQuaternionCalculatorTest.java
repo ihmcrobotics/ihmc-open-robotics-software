@@ -10,7 +10,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.commons.AngleTools;
-import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 

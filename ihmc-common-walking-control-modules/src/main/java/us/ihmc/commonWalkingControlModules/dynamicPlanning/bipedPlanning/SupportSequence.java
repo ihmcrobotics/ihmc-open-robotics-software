@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -417,7 +417,7 @@ public class SupportSequence
 
       orientationError.set(solePose.getOrientation());
       orientationError.multiplyConjugateThis(footholdPose.getOrientation());
-      EuclidCoreMissingTools.projectRotationOnAxis(orientationError, zAxis, rotation);
+      EuclidCoreTools.projectRotationOnAxis(orientationError, zAxis, rotation);
       rotation.conjugate();
 
       solePose.appendTranslation(soleToHeel.getX(), soleToHeel.getY(), 0.0);

@@ -42,7 +42,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.mecano.MultiBodySystemMissingTools;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;

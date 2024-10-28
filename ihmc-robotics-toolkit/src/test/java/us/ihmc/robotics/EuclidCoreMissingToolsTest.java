@@ -38,47 +38,4 @@ public class EuclidCoreMissingToolsTest
       EuclidCoreMissingTools.floorToGivenPrecision(roundedVector, 1e-3);
       EuclidCoreTestTools.assertEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
-
-   @Test
-   public void testIsZero() throws Exception
-   {
-      Random random = new Random(23423L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         double x = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         double y = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         double z = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         double epsilon = RandomNumbers.nextDouble(random, 0.0, 10.0);
-
-         boolean isTuple2dZero = x < epsilon && y < epsilon;
-         boolean isTuple3dZero = x < epsilon && y < epsilon && z < epsilon;
-
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(x, y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(-x, y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(-x, -y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(x, -y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(x, y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(-x, y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(-x, -y), epsilon));
-         assertEquals(isTuple2dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point2D(x, -y), epsilon));
-
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, -y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, -y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, -y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, -y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, -y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(x, -y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, y, -z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, -y, z), epsilon));
-         assertEquals(isTuple3dZero, us.ihmc.euclid.tools.EuclidCoreMissingTools.isZero(new Point3D(-x, -y, -z), epsilon));
-      }
-   }
 }

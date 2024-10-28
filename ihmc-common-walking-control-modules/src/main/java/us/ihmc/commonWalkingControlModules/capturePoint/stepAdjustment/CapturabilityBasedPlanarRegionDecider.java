@@ -19,7 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;

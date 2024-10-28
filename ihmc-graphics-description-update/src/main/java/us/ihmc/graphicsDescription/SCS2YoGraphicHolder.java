@@ -1,4 +1,4 @@
-package us.ihmc.commons;
+package us.ihmc.graphicsDescription;
 
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;

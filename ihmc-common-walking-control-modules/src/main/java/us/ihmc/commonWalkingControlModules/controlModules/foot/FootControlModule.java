@@ -29,7 +29,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.SCS2YoGraphicHolder;
+import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;

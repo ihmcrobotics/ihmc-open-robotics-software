@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -75,7 +75,7 @@ public class PlanarRegionPolygonSnapper
 
    static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex, RigidBodyTransform transformToReturn)
    {
-      EuclidCoreMissingTools.transform(transformToReturn.getRotation(), highestVertex.getX(), highestVertex.getY(), 0.0, transformToReturn.getTranslation());
+      EuclidCoreTools.transform(transformToReturn.getRotation(), highestVertex.getX(), highestVertex.getY(), 0.0, transformToReturn.getTranslation());
       transformToReturn.getTranslation().scale(-1.0);
       transformToReturn.getTranslation().add(highestVertex);
    }
