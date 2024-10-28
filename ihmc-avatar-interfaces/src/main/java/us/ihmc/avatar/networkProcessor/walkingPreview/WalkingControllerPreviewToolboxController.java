@@ -44,6 +44,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -53,7 +54,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -213,7 +213,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       List<ContactablePlaneBody> allContactableBodies = new ArrayList<>(additionalContacts);
       allContactableBodies.addAll(feet.values());
 
-      double robotMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
+      double robotMass = MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator());
 
       for (RobotSide robotSide : RobotSide.values)
       {

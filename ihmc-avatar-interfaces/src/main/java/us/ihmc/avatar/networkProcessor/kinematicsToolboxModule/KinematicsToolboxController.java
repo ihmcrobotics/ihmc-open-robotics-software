@@ -73,7 +73,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
 import us.ihmc.wholeBodyControlCore.pidGains.PIDSE3GainsBasics;
 import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPIDSE3Gains;
@@ -468,7 +467,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // This will find the root body without using rootJoint so it can be null.
       rootBody = MultiBodySystemTools.getRootBody(desiredOneDoFJoints[0].getPredecessor());
-      totalRobotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
+      totalRobotMass = MultiBodySystemTools.computeSubTreeMass(rootBody);
 
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
@@ -481,7 +480,7 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = MessageTools.createKinematicsToolboxOutputStatus(desiredOneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      robotMass = MultiBodySystemMissingTools.computeSubTreeMass(rootBody);
+      robotMass = MultiBodySystemTools.computeSubTreeMass(rootBody);
       centerOfMassSafeMargin.set(0.04); // Same as the walking controller.
 
       spatialGains.setPositionProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.

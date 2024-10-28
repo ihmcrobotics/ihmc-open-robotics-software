@@ -48,9 +48,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -193,7 +193,7 @@ public class HumanoidKinematicsSimulation
       allContactableBodies.addAll(feet.values());
       contactableBodiesFactory.disposeFactory();
 
-      double totalRobotWeight = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalRobotWeight = MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator());
       for (RobotSide robotSide : RobotSide.values)
       {
          SettableFootSwitch footSwitch = new SettableFootSwitch(feet.get(robotSide), totalRobotWeight, 2, registry);

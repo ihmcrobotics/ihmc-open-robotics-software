@@ -30,7 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
-import us.ihmc.mecano.RigidBodyTwistCalculator;
+import us.ihmc.mecano.algorithms.RigidBodyTwistCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

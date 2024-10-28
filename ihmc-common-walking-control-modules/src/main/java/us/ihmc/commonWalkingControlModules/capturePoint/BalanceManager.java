@@ -40,8 +40,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -226,7 +226,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       double gravityZ = controllerToolbox.getGravityZ();
-      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalMass = MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator());
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();

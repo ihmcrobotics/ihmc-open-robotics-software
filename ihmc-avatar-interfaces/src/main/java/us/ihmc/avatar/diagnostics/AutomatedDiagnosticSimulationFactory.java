@@ -15,8 +15,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -152,7 +152,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
       double gravitationalAcceleration = 9.81;
-      double totalRobotWeight = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()) * gravitationalAcceleration;
+      double totalRobotWeight = MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator()) * gravitationalAcceleration;
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();

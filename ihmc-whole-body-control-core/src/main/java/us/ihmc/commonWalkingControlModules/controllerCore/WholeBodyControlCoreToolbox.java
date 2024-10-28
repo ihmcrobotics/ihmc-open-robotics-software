@@ -14,16 +14,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.mecano.GravityCoriolisExternalWrenchMatrixCalculator;
-import us.ihmc.mecano.RigidBodyTwistCalculator;
+import us.ihmc.mecano.algorithms.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.mecano.algorithms.RigidBodyTwistCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -184,7 +184,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
       rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
 
-      totalMassProvider = () -> MultiBodySystemMissingTools.computeSubTreeMass(multiBodySystemInput.getRootBody());
+      totalMassProvider = () -> MultiBodySystemTools.computeSubTreeMass(multiBodySystemInput.getRootBody());
 
       parentRegistry.addChild(registry);
    }

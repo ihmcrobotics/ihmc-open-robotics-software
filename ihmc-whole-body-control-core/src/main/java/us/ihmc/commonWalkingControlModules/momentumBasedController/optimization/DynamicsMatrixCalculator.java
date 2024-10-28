@@ -7,8 +7,8 @@ import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.mecano.FloatingBaseRigidBodyDynamicsCalculator;
-import us.ihmc.mecano.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.mecano.algorithms.FloatingBaseRigidBodyDynamicsCalculator;
+import us.ihmc.mecano.algorithms.GravityCoriolisExternalWrenchMatrixCalculator;
 
 /**
  * Helper class for computing the rigid body dynamics matrices. In general, the rigid body dynamics are represented by
