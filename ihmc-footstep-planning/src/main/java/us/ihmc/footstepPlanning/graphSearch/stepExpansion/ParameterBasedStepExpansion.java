@@ -46,6 +46,23 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       this.parameters = parameters;
       this.idealStepCalculator = idealStepCalculator;
       this.footPolygons = footPolygons;
+
+      fillExpansionMask();
+   }
+
+   /**
+    * This method fills the values we want to look for when we have the expansion mask parameter on
+    */
+   private void fillExpansionMask()
+   {
+      xyExpansionMask.add(0);
+      xyExpansionMask.add(1);
+      xyExpansionMask.add(3);
+      xyExpansionMask.add(6);
+
+      yawExpansionMask.add(0);
+      yawExpansionMask.add(1);
+      yawExpansionMask.add(3);
    }
 
    public void initialize()
