@@ -18,6 +18,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.referenceSpreadingToolboxAPI.ReferenceSpreadingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -47,6 +49,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
+   CommandInputManager commandInputManager;
 
    private final RSTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
@@ -71,6 +74,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       timeProvider = RSTimeProvider.createTimeProvider();
 
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      this.commandInputManager = commandInputManager;
 
       MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
                           .subtreeIterable()
@@ -123,6 +127,11 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       stateMachineHelper.updateJointTorques(robotConfigurationData.getJointTorques());
 
       stateMachine.doActionAndTransition();
+
+      if (commandInputManager.isNewCommandAvailable(ReferenceSpreadingToolboxInputCommand.class))
+      {
+         LogTools.info("Received ReferenceSpreadingToolboxInputCommand: " + commandInputManager.pollNewestCommand(ReferenceSpreadingToolboxInputCommand.class));
+      }
 
 //      LogTools.info("/dot{q} = " + robotConfigurationData.getJointVelocities());
    }

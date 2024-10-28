@@ -1,0 +1,30 @@
+#ifndef __toolbox_msgs__msg__ReferenceSpreadingToolboxInputMessage__idl__
+#define __toolbox_msgs__msg__ReferenceSpreadingToolboxInputMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the ReferenceSpreadingToolbox API.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::ReferenceSpreadingToolboxInputMessage_")
+      struct ReferenceSpreadingToolboxInputMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The state which the controller should go into. Options are: [0: WAITING, 1: RECORDING, 2: PLAYBACK]
+         */
+        octet state;
+      };
+    };
+  };
+};
+
+#endif
