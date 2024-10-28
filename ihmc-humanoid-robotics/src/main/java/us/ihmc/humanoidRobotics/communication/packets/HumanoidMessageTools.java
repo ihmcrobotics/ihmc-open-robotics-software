@@ -15,7 +15,6 @@ import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
@@ -1411,24 +1410,26 @@ public class HumanoidMessageTools
       return message;
    }
 
+   @Deprecated
    public static FisheyePacket createFisheyePacket(VideoSource videoSource,
                                                    long timeStamp,
                                                    byte[] data,
                                                    Point3DReadOnly position,
                                                    Orientation3DReadOnly orientation,
-                                                   CameraPinholeBrown intrinsicParameters)
+                                                   Object intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
       message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       return message;
    }
 
+   @Deprecated
    public static VideoPacket createVideoPacket(VideoSource videoSource,
                                                long timeStamp,
                                                byte[] data,
                                                Point3DReadOnly position,
                                                Orientation3DReadOnly orientation,
-                                               CameraPinholeBrown intrinsicParameters)
+                                               Object intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
       message.setVideoSource(videoSource.toByte());
@@ -1440,7 +1441,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, CameraPinholeBrown intrinsicParameters)
+   @Deprecated
+   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, Object intrinsicParameters)
    {
       LocalVideoPacket message = new LocalVideoPacket();
       message.timeStamp = timeStamp;
@@ -2416,38 +2418,40 @@ public class HumanoidMessageTools
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 
-   public static IntrinsicParametersMessage toIntrinsicParametersMessage(CameraPinholeBrown intrinsicParameters)
+   @Deprecated
+   public static IntrinsicParametersMessage toIntrinsicParametersMessage(Object intrinsicParameters)
    {
       IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
-      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
-      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
-      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
-      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
-      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
-      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
-      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
-      if (intrinsicParameters.radial != null)
-         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
-      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
-      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
+//      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
+//      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
+//      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
+//      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
+//      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
+//      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
+//      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
+//      if (intrinsicParameters.radial != null)
+//         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
+//      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
+//      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
       return intrinsicParametersMessage;
    }
 
-   public static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
+   @Deprecated
+   public static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-      intrinsicParameters.width = message.getWidth();
-      intrinsicParameters.height = message.getHeight();
-      intrinsicParameters.fx = message.getFx();
-      intrinsicParameters.fy = message.getFy();
-      intrinsicParameters.skew = message.getSkew();
-      intrinsicParameters.cx = message.getCx();
-      intrinsicParameters.cy = message.getCy();
-      if (!message.getRadial().isEmpty())
-         intrinsicParameters.radial = message.getRadial().toArray();
-      intrinsicParameters.t1 = message.getT1();
-      intrinsicParameters.t2 = message.getT2();
-      return intrinsicParameters;
+//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+//      intrinsicParameters.width = message.getWidth();
+//      intrinsicParameters.height = message.getHeight();
+//      intrinsicParameters.fx = message.getFx();
+//      intrinsicParameters.fy = message.getFy();
+//      intrinsicParameters.skew = message.getSkew();
+//      intrinsicParameters.cx = message.getCx();
+//      intrinsicParameters.cy = message.getCy();
+//      if (!message.getRadial().isEmpty())
+//         intrinsicParameters.radial = message.getRadial().toArray();
+//      intrinsicParameters.t1 = message.getT1();
+//      intrinsicParameters.t2 = message.getT2();
+      return new Object();
    }
 
    public static void packPredictedContactPoints(Point2DReadOnly[] contactPoints, FootstepDataMessage message)

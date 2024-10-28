@@ -1,6 +1,5 @@
 package us.ihmc.perception.opencv;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_objdetect;
@@ -59,15 +58,6 @@ public class OpenCVArUcoMarkerDetector
    public void setSourceImageForDetection(BytedecoImage optionalSourceColorImage)
    {
       this.optionalSourceColorImage = optionalSourceColorImage;
-   }
-
-   public void setCameraInstrinsics(CameraPinholeBrown depthCameraIntrinsics)
-   {
-      opencv_core.setIdentity(cameraMatrix);
-      cameraMatrix.ptr(0, 0).putDouble(depthCameraIntrinsics.getFx());
-      cameraMatrix.ptr(1, 1).putDouble(depthCameraIntrinsics.getFy());
-      cameraMatrix.ptr(0, 2).putDouble(depthCameraIntrinsics.getCx());
-      cameraMatrix.ptr(1, 2).putDouble(depthCameraIntrinsics.getCy());
    }
 
    public void setCameraIntrinsics(CameraIntrinsics cameraIntrinsics)
