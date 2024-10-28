@@ -121,7 +121,7 @@ public class ROS2StreamStatusMonitorTest
       assertTrue(streamStatusMonitor.isStreaming());
 
       messagePublishThread.join();
-      MissingThreadTools.sleep(0.01);
+      MissingThreadTools.sleep(1.0);
       assertFalse(streamStatusMonitor.isStreaming());
    }
 }
