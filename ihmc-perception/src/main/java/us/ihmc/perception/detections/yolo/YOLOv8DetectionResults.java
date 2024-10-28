@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.MatExpr;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -162,6 +163,7 @@ public class YOLOv8DetectionResults
                           null,
                           PixelFormat.UNKNOWN,
                           maskIntrinsics,
+                          CameraModel.PINHOLE,
                           detectionImage.getPose(),
                           detectionImage.getAcquisitionTime(),
                           detectionImage.getSequenceNumber(),

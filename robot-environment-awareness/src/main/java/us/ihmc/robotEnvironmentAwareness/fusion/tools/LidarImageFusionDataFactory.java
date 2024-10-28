@@ -12,7 +12,6 @@ import org.bytedeco.opencv.global.opencv_ximgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -21,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 
+@Deprecated
 public class LidarImageFusionDataFactory
 {
    private static final boolean enableDisplaySegmentedContour = true;
@@ -35,7 +35,7 @@ public class LidarImageFusionDataFactory
    private BufferedImage segmentedContour;
    private BufferedImage projectedPointCloud;
 
-   private final AtomicReference<CameraPinholeBrown> intrinsicParameters = new AtomicReference<>(PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
+   private final AtomicReference<Object> intrinsicParameters = new AtomicReference<>(PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
    private final AtomicReference<ImageSegmentationParameters> imageSegmentationParameters = new AtomicReference<>(null);
    private final AtomicReference<SegmentationRawDataFilteringParameters> segmentationRawDataFilteringParameters = new AtomicReference<>(null);
    private final AtomicReference<Point3D> cameraPosition = new AtomicReference<>(new Point3D());
@@ -213,7 +213,7 @@ public class LidarImageFusionDataFactory
       return projectedPointCloud;
    }
 
-   public void setIntrinsicParameters(CameraPinholeBrown intrinsicParameters)
+   public void setIntrinsicParameters(Object intrinsicParameters)
    {
       this.intrinsicParameters.set(intrinsicParameters);
    }

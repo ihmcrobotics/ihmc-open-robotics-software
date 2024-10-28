@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.Image32;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
@@ -40,6 +39,7 @@ import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+@Deprecated
 public class LidarImageFusionProcessorCommunicationModule
 {
    private final Messager messager;
@@ -136,7 +136,7 @@ public class LidarImageFusionProcessorCommunicationModule
       latestBufferedImage.set(bufferedImage);
       messager.submitMessage(LidarImageFusionAPI.CameraPositionState, message.getPosition());
       messager.submitMessage(LidarImageFusionAPI.CameraOrientationState, message.getOrientation());
-      messager.submitMessage(LidarImageFusionAPI.CameraIntrinsicParametersState, toIntrinsicParameters(message.getIntrinsicParameters()));
+//      messager.submitMessage(LidarImageFusionAPI.CameraIntrinsicParametersState, toIntrinsicParameters(message.getIntrinsicParameters()));
    }
 
    public void start() throws IOException
@@ -168,20 +168,22 @@ public class LidarImageFusionProcessorCommunicationModule
       return new LidarImageFusionProcessorCommunicationModule(ros2Node, networkProvider, kryoMessager, messager);
    }
 
-   private static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
+   @Deprecated
+   private static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-      intrinsicParameters.width = message.getWidth();
-      intrinsicParameters.height = message.getHeight();
-      intrinsicParameters.fx = message.getFx();
-      intrinsicParameters.fy = message.getFy();
-      intrinsicParameters.skew = message.getSkew();
-      intrinsicParameters.cx = message.getCx();
-      intrinsicParameters.cy = message.getCy();
-      if (!message.getRadial().isEmpty())
-         intrinsicParameters.radial = message.getRadial().toArray();
-      intrinsicParameters.t1 = message.getT1();
-      intrinsicParameters.t2 = message.getT2();
-      return intrinsicParameters;
+//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+//      intrinsicParameters.width = message.getWidth();
+//      intrinsicParameters.height = message.getHeight();
+//      intrinsicParameters.fx = message.getFx();
+//      intrinsicParameters.fy = message.getFy();
+//      intrinsicParameters.skew = message.getSkew();
+//      intrinsicParameters.cx = message.getCx();
+//      intrinsicParameters.cy = message.getCy();
+//      if (!message.getRadial().isEmpty())
+//         intrinsicParameters.radial = message.getRadial().toArray();
+//      intrinsicParameters.t1 = message.getT1();
+//      intrinsicParameters.t2 = message.getT2();
+//      return intrinsicParameters;
+      return new Object();
    }
 }
