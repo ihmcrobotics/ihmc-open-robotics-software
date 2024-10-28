@@ -1,21 +1,23 @@
 package us.ihmc.sensors;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.RestartableThread;
+import us.ihmc.tools.thread.PausableLoopingThread;
 
 public abstract class ImageSensor implements AutoCloseable
 {
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
-   private final RestartableThread grabThread;
+   private final String sensorName;
+
+   private final PausableLoopingThread grabThread;
    private final Object grabNotification = new Object();
 
-   public ImageSensor()
+   public ImageSensor(String sensorName)
    {
-      grabThread = new RestartableThread(getSensorName() + "GrabThread", this::grabAndNotify);
+      this.sensorName = sensorName;
+      grabThread = new PausableLoopingThread(this::grabAndNotify, sensorName + "Grabber");
    }
 
    /**
@@ -50,21 +52,17 @@ public abstract class ImageSensor implements AutoCloseable
     */
    public abstract RawImage getImage(int imageKey);
 
-   public abstract String getSensorName();
-
-   public CameraModel getCameraModel()
+   public String getSensorName()
    {
-      return CameraModel.PINHOLE;
+      return sensorName;
    }
 
    public synchronized void run(boolean run)
    {
       if (run)
-      {
          grabThread.start();
-      }
-      else if (grabThread != null)
-         grabThread.stop();
+      else
+         grabThread.pause();
    }
 
    public void waitForGrab() throws InterruptedException
@@ -89,7 +87,12 @@ public abstract class ImageSensor implements AutoCloseable
    @Override
    public void close()
    {
-      grabThread.blockingStop();
+      grabThread.blockingDestroy();
+   }
+
+   public PausableLoopingThread getGrabThread()
+   {
+      return grabThread;
    }
 
    private void grabAndNotify()

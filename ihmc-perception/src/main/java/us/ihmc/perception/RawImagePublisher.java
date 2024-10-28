@@ -40,11 +40,11 @@ public class RawImagePublisher implements AutoCloseable
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
-   public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish, CameraModel cameraModel) // TODO: Remove CameraModel after PR merge
+   public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
    {
       if (imageTopic.getType().equals(ImageMessage.class))
       {  // Topic is an ImageMessage topic -> publish as image message
-         publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish, cameraModel);
+         publishAsImageMessage((ROS2Topic<ImageMessage>) imageTopic, imageToPublish);
       }
       else if (imageTopic.getType().equals(SRTStreamStatus.class))
       {  // Topic is an SRT stream topic -> stream video over SRT
@@ -52,7 +52,7 @@ public class RawImagePublisher implements AutoCloseable
       }
    }
 
-   private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish, CameraModel cameraModel)
+   private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish)
    {
       GpuMat imageToCompress = imageToPublish.getGpuImageMat();
       BytePointer compressedImage;
@@ -92,7 +92,7 @@ public class RawImagePublisher implements AutoCloseable
       }
 
       // Pack the message and send it off
-      PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, cameraModel, imageMessage);
+      PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
    }
 
