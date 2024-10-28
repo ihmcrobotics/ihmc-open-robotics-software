@@ -31,7 +31,7 @@ yovariablesDependencies {
 yovariablesFiltersDependencies {
    api(ihmc.sourceSetProject("yovariables"))
 
-   api("us.ihmc:ihmc-yovariables-filters:source")
+   api("us.ihmc:ihmc-yovariables-filters:0.13.1")
 }
 
 testDependencies {

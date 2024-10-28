@@ -14,7 +14,6 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-matrix-library:0.19.0")
-   api("us.ihmc:ihmc-commons-utils:source")
    api("us.ihmc:ihmc-robotics-tools:source")
    api("org.ejml:ejml-simple:0.39")
    api("gov.nist.math:jama:1.0.3")
