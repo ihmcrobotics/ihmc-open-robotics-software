@@ -18,8 +18,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-tools:source")
    api("us.ihmc:euclid-frame-shape:0.22.0")
    api("us.ihmc:ihmc-yovariables-filters:0.13.1")
-   api("us.ihmc:mecano-update-yovariables-filters:source")
-   api("us.ihmc:mecano-update:source")
+   api("us.ihmc:mecano-yovariables-filters:17-0.18.1")
    api("us.ihmc:ihmc-graphics-description-update:source")
 }
 

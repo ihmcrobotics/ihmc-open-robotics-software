@@ -21,7 +21,7 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -126,7 +126,7 @@ public class SphereRobot
       scsRobot.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scsRobot.update();
 
-      totalMass = MultiBodySystemMissingTools.computeSubTreeMass(body);
+      totalMass = MultiBodySystemTools.computeSubTreeMass(body);
    }
 
    public SCSRobotFromInverseDynamicsRobotModel getScsRobot()

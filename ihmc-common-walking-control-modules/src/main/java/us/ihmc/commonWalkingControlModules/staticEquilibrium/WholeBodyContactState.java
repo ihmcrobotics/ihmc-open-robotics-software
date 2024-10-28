@@ -26,7 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.mecano.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.mecano.algorithms.GravityCoriolisExternalWrenchMatrixCalculator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

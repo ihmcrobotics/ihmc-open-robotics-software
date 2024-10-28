@@ -43,7 +43,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -238,7 +237,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.contactableBodies = contactableBodies;
 
       RigidBodyBasics elevator = fullRobotModel.getElevator();
-      this.totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(elevator));
+      this.totalMass.set(MultiBodySystemTools.computeSubTreeMass(elevator));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -341,7 +340,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
             handCenterOfMassFrames.put(robotSide, handCoMFrame);
             YoDouble handMass = new YoDouble(sidePrefix + "HandTotalMass", registry);
             handsMass.put(robotSide, handMass);
-            handMass.set(MultiBodySystemMissingTools.computeSubTreeMass(measurementLink));
+            handMass.set(MultiBodySystemTools.computeSubTreeMass(measurementLink));
          }
       }
 
@@ -426,7 +425,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void update()
    {
-      totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()));
+      totalMass.set(MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator()));
 
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();

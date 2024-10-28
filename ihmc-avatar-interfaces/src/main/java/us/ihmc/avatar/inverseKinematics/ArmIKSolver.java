@@ -18,6 +18,8 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingFactories;
@@ -29,6 +31,8 @@ import us.ihmc.robotics.outputData.JointDesiredOutputList;
 import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.Arrays;
 
 /**
  * Uses the WholeBodyControllerCore directly to get IK solutions for
@@ -116,7 +120,7 @@ public class ArmIKSolver
 
    public void copySourceToWork()
    {
-      us.ihmc.mecano.MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(sourceOneDoFJoints, workingOneDoFJoints);
+      MultiBodySystemTools.copyJointsState(Arrays.stream(sourceOneDoFJoints).toList(), Arrays.stream(workingOneDoFJoints).toList(), JointStateType.CONFIGURATION);
    }
 
    /**
