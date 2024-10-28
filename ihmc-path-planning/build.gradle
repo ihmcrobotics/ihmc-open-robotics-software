@@ -37,7 +37,7 @@ testDependencies {
 dataSetsDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-commons-testing:0.32.0")
+   api("us.ihmc:ihmc-commons-testing:0.33.0")
 }
 
 task updateDataSetList {
