@@ -39,6 +39,8 @@ public class RealsenseImageSensor extends ImageSensor
                                RealsenseConfiguration realsenseConfiguration,
                                Supplier<ReferenceFrame> sensorFrameSupplier)
    {
+      super(realsenseConfiguration.name().split("_")[0]);
+
       this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
       this.realsenseConfiguration = realsenseConfiguration;
@@ -129,12 +131,6 @@ public class RealsenseImageSensor extends ImageSensor
       {
          return new RawImage(grabbedImages[imageKey]);
       }
-   }
-
-   @Override
-   public String getSensorName()
-   {
-      return realsenseConfiguration.name().split("_")[0];
    }
 
    @Override
