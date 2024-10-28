@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.TestFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,16 +23,50 @@ import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParameterBasedNodeExpansionTest
+public class ParameterBasedStepExpansionTest
 {
    private static final double epsilon = 1e-6;
-   private DefaultFootstepPlannerParameters parameters;
+   private TestFootstepPlannerParameters parameters;
 
    @BeforeEach
    public void setupParameters()
    {
       // We create default parameters for the tests
-      parameters = new DefaultFootstepPlannerParameters();
+      parameters = new TestFootstepPlannerParameters();
+   }
+
+   @Test
+   public void testExpectedYawOffsetsForParameterBasedStepExpansion()
+   {
+      // Here we set the minimum step yaw to the yaw size of the lattice point multiplied by the number of offsets we want per side
+      double numberOfYawOffsetsForASide = 2;
+      double latticePointYaw = LatticePoint.gridSizeYaw;
+      parameters.setMinStepYaw(latticePointYaw * -numberOfYawOffsetsForASide);
+      parameters.setMaxStepYaw(latticePointYaw * numberOfYawOffsetsForASide);
+
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
+      expansion.initialize();
+
+      // Here is the expected number of yaw offsets we are trying to plan with
+      double minYaw = parameters.getMinStepYaw();
+      double maxYaw = parameters.getMaxStepYaw();
+      double totalYawOffset = Math.abs(maxYaw) + Math.abs(minYaw);
+
+      int expectedYawOffsets = 0;
+      for (double i = 0; i <= totalYawOffset;)
+      {
+         expectedYawOffsets++;
+         i += LatticePoint.gridSizeYaw;
+      }
+      // Convert the yaw offsets to a HastMap so we can get each unique item to see how many different yaw offsets we are working with
+      // This doesn't mean that each step considers all the yaw offsets, but we should expect some that have the option to use all the yaw offsets
+      HashSet<Double> uniqueYawOffsets = new HashSet<>();
+      for (int i = 0; i < expansion.getYawOffsets().size(); i++)
+      {
+         uniqueYawOffsets.add(expansion.getYawOffsets().get(i));
+      }
+
+      assertEquals(expectedYawOffsets, uniqueYawOffsets.size());
    }
 
    @Test
@@ -241,7 +275,6 @@ public class ParameterBasedNodeExpansionTest
       Random random = new Random(329032);
       int numberOfGraphNodes = 5;
       int numberOfChildNodes = 5;
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       int branchFactor = 100;
       parameters.setMaxBranchFactor(branchFactor);
@@ -282,7 +315,6 @@ public class ParameterBasedNodeExpansionTest
       Random random = new Random(329032);
       int numberOfGraphNodes = 5;
       int numberOfChildNodes = 5;
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       int branchFactor = 100;
       parameters.setMaxBranchFactor(branchFactor);
@@ -323,10 +355,9 @@ public class ParameterBasedNodeExpansionTest
    @Test
    public void testSelfIntersection()
    {
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       double clearance = 0.01;
 
-      // set width so expansion will step on stance foot if not prevented
+      // Set width so expansion will step on stance foot if not prevented
       parameters.setMinStepWidth(0.0);
       parameters.setMinStepLength(-0.2);
       parameters.setEnableExpansionMask(false);

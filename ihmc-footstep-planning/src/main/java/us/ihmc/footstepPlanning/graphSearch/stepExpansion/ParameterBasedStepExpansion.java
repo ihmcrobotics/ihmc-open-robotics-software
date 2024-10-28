@@ -46,20 +46,6 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       this.parameters = parameters;
       this.idealStepCalculator = idealStepCalculator;
       this.footPolygons = footPolygons;
-
-      fillExpansionMask();
-   }
-
-   private void fillExpansionMask()
-   {
-      xyExpansionMask.add(0);
-      xyExpansionMask.add(1);
-      xyExpansionMask.add(3);
-      xyExpansionMask.add(6);
-
-      yawExpansionMask.add(0);
-      yawExpansionMask.add(1);
-      yawExpansionMask.add(3);
    }
 
    public void initialize()
@@ -147,7 +133,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
          applyMask(fullExpansionToPack, nodeToExpand);
       }
 
-      // Sorting is primarily a debug tool for checking proximity to ideal step
+      // Sorting is primarily a debug tool for checking proximity to the ideal step
       if (SORT_FULL_EXPANSION)
       {
          if (idealStepCalculator != null)
@@ -156,7 +142,6 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             fullExpansionToPack.sort(idealStepProximityComparator);
          }
       }
-
    }
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)
@@ -244,5 +229,13 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
                                   step.getY() + footstepTranslation.getY(),
                                   stepYaw + step.getYaw(),
                                   step.getRobotSide().getOppositeSide());
+   }
+
+   /**
+    * This was made to use in tests to check if the number of yaw offsets is what we expect
+    */
+   public TDoubleArrayList getYawOffsets()
+   {
+      return yawOffsets;
    }
 }
