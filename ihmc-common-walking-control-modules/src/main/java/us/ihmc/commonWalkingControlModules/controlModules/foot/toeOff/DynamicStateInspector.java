@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
@@ -390,11 +390,11 @@ public class DynamicStateInspector
 
    double rayDistance(FrameLine2DReadOnly lineToIntersection, Point2DBasics intersectionToPack)
    {
-      boolean success = EuclidGeometryMissingTools.intersectionBetweenRay2DAndLine2D(desiredICP,
-                                                                                     errorDirection,
-                                                                                     lineToIntersection.getPoint(),
-                                                                                     lineToIntersection.getDirection(),
-                                                                                     intersectionToPack);
+      boolean success = EuclidGeometryTools.intersectionBetweenRay2DAndLine2D(desiredICP,
+                                                                              errorDirection,
+                                                                              lineToIntersection.getPoint(),
+                                                                              lineToIntersection.getDirection(),
+                                                                              intersectionToPack);
 
       if (success)
          return intersectionToPack.distance(currentICP);

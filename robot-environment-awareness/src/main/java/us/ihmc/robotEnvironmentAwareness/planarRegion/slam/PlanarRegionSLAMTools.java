@@ -13,7 +13,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
@@ -383,7 +383,7 @@ public class PlanarRegionSLAMTools
                                                                          double maximumPointProjectionDistance,
                                                                          PairList<PlanarRegion, Point2D> shadowMatches)
    {
-      BoundingBox2D intersection = EuclidGeometryMissingTools.computeIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+      BoundingBox2D intersection = EuclidGeometryTools.computeIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
       if (intersection == null)
       {
@@ -579,11 +579,11 @@ public class PlanarRegionSLAMTools
 
       if(useIntersectionOverUnion)
       {
-         return EuclidGeometryMissingTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
+         return EuclidGeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
       }
       else
       {
-         return EuclidGeometryMissingTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
+         return EuclidGeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
       }
 
    }

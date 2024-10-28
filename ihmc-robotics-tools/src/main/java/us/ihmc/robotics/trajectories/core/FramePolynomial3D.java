@@ -3,7 +3,7 @@ package us.ihmc.robotics.trajectories.core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameMissingFactories;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.robotics.trajectories.interfaces.FramePolynomial3DBasics;
 
 /**
@@ -33,9 +33,9 @@ public class FramePolynomial3D extends Polynomial3D implements FramePolynomial3D
 
       this.referenceFrame = referenceFrame;
 
-      framePosition = EuclidFrameMissingFactories.newLinkedFramePoint3DReadOnly(this, super.getPosition());
-      frameVelocity = EuclidFrameMissingFactories.newLinkedFrameVector3DReadOnly(this, super.getVelocity());
-      frameAcceleration = EuclidFrameMissingFactories.newLinkedFrameVector3DReadOnly(this, super.getAcceleration());
+      framePosition = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(this, super.getPosition());
+      frameVelocity = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, super.getVelocity());
+      frameAcceleration = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, super.getAcceleration());
    }
 
    @Override

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDX3DSituatedText;
@@ -23,10 +23,10 @@ public class RDXVRControllerButtonLabel
       textFrame.update(transformToParent ->
       {
          transformToParent.getTranslation().set(labelOffset);
-         EuclidCoreMissingTools.setYawPitchRollDegrees(transformToParent.getRotation(),
-                                                       -90.0 + side.negateIfLeftSide(10.0),
-                                                       0.0,
-                                                       15.0);
+         EuclidCoreTools.setYawPitchRollDegrees(transformToParent.getRotation(),
+                                                -90.0 + side.negateIfLeftSide(10.0),
+                                                0.0,
+                                                15.0);
          transformToParent.getRotation().append(labelOrientation);
       });
 

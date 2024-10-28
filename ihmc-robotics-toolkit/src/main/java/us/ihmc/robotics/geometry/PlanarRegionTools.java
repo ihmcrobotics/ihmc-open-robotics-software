@@ -6,7 +6,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -1250,19 +1249,19 @@ public class PlanarRegionTools
    {
       Point3DReadOnly pointOnPlane = region.getPoint();
       Vector3DReadOnly planeNormal = region.getNormal();
-      boolean intersectsPlane = EuclidGeometryMissingTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
-                                                                                               pointOnPlane.getY(),
-                                                                                               pointOnPlane.getZ(),
-                                                                                               planeNormal.getX(),
-                                                                                               planeNormal.getY(),
-                                                                                               planeNormal.getZ(),
-                                                                                               lineOriginInWorldX,
-                                                                                               lineOriginInWorldY,
-                                                                                               lineOriginInWorldZ,
-                                                                                               lineDirectionInWorldX,
-                                                                                               lineDirectionInWorldY,
-                                                                                               lineDirectionInWorldZ,
-                                                                                               intersectionToPack);
+      boolean intersectsPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
+                                                                                        pointOnPlane.getY(),
+                                                                                        pointOnPlane.getZ(),
+                                                                                        planeNormal.getX(),
+                                                                                        planeNormal.getY(),
+                                                                                        planeNormal.getZ(),
+                                                                                        lineOriginInWorldX,
+                                                                                        lineOriginInWorldY,
+                                                                                        lineOriginInWorldZ,
+                                                                                        lineDirectionInWorldX,
+                                                                                        lineDirectionInWorldY,
+                                                                                        lineDirectionInWorldZ,
+                                                                                        intersectionToPack);
 
       if (!intersectsPlane)
       {

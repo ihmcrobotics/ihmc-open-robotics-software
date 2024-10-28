@@ -15,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
-import us.ihmc.euclid.tools.EuclidCoreMissingRandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 import static org.junit.jupiter.api.Assertions.*;

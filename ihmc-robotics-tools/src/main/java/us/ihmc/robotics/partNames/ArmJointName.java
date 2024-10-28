@@ -2,7 +2,6 @@ package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.base.CaseFormat;
 
 public enum ArmJointName
 {
@@ -23,7 +22,7 @@ public enum ArmJointName
 
    public String getCamelCaseNameForStartOfExpression()
    {
-      return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name());
+      return getCamelCaseNameForMiddleOfExpression();
    }
 
    public String getCamelCaseNameForMiddleOfExpression()

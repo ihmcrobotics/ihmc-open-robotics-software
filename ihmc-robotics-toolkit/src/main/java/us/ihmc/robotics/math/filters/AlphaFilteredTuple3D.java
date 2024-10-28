@@ -1,4 +1,4 @@
-package us.ihmc.yoVariables.euclid.filters;
+package us.ihmc.robotics.math.filters;
 
 import org.apache.commons.lang3.NotImplementedException;
 import us.ihmc.euclid.interfaces.EuclidGeometry;

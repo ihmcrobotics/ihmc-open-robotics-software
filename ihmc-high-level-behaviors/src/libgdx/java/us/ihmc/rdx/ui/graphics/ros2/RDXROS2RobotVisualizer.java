@@ -15,7 +15,7 @@ import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.RDXFocusBasedCamera;
@@ -197,7 +197,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       }
 
       syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
-      if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPelvisPose, currentHistoryPelvisPose, Math.toRadians(2.0), 0.02))
+      if (!EuclidCoreTools.epsilonEquals(lastHistoryPelvisPose, currentHistoryPelvisPose, Math.toRadians(2.0), 0.02))
       {
          // FIXME: This can crash the UI when it has too many points
 //         lastHistoryPelvisPose.set(currentHistoryPelvisPose);

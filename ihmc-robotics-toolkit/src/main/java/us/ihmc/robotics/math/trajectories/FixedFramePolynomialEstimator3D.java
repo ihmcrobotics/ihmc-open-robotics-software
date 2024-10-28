@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameMissingFactories;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.commons.time.TimeIntervalBasics;
 import us.ihmc.commons.time.TimeIntervalProvider;
@@ -26,9 +26,9 @@ public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajec
    {
       this.referenceFrame = referenceFrame;
 
-      position = EuclidFrameMissingFactories.newLinkedFramePoint3DReadOnly(this, estimator.getPosition());
-      velocity = EuclidFrameMissingFactories.newLinkedFrameVector3DReadOnly(this, estimator.getVelocity());
-      acceleration = EuclidFrameMissingFactories.newLinkedFrameVector3DReadOnly(this, estimator.getAcceleration());
+      position = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(this, estimator.getPosition());
+      velocity = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getVelocity());
+      acceleration = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getAcceleration());
    }
 
 

@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.tools.EuclidCoreMissingTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -60,7 +60,7 @@ public class RDXProjectionSphere extends RDXProjectionShape
 
          vertexRay.set(vertex);
 
-         double angleOfIncidence = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
+         double angleOfIncidence = EuclidCoreTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
          double azimuthalAngle = Math.atan2(-vertex.getZ(), -vertex.getY());
 
          double imageX = principlePointX.get() + focalLengthX.get() * angleOfIncidence * Math.cos(azimuthalAngle);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -123,7 +122,7 @@ public class VisibilityTools
             normalToClusterToPack.normalize();
          }
 
-         return EuclidGeometryMissingTools
+         return EuclidGeometryTools
                .closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
                                                         closestPointOnLineToPack, closestPointOnClusterToPack);
       }
@@ -140,7 +139,7 @@ public class VisibilityTools
          Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
          Point2DReadOnly edgeEnd = listOfPointsInCluster.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
 
-         double distance = EuclidGeometryMissingTools
+         double distance = EuclidGeometryTools
                .closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPointOnLine,
                                                         closestPointOnCluster);
          if (distance < minDistance)

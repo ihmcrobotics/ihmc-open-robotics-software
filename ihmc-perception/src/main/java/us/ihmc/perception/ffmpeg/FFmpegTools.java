@@ -19,7 +19,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.util.HashMap;
 import java.util.Map;

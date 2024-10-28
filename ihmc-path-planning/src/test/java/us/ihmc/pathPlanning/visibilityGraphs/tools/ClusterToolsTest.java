@@ -16,7 +16,6 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -933,7 +932,7 @@ public class ClusterToolsTest
          ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
          ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
 
-         boolean completelyInside = EuclidGeometryMissingTools.isPolygonInside(smallPolygon, bigPolygon);
+         boolean completelyInside = EuclidGeometryTools.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
       }
    }

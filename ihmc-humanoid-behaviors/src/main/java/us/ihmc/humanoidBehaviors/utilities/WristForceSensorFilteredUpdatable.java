@@ -103,7 +103,6 @@ public class WristForceSensorFilteredUpdatable implements Updatable
                                                                                            forceSensorMinPassThroughFreq_Hz,
                                                                                            forceSensorMaxPassThroughFreq_Hz,
                                                                                            DT,
-                                                                                           FirstOrderBandPassFilteredYoDouble.FirstOrderFilterType.BAND,
                                                                                            registry);
 
       taskspaceStiffnessCalc = new TaskSpaceStiffnessCalculator(sidePrefix, DT, registry);

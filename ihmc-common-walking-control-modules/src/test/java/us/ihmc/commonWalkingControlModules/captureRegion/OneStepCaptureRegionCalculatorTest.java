@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryMissingTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -123,7 +123,7 @@ public class OneStepCaptureRegionCalculatorTest
 
       shrinker.scaleConvexPolygon(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
 
-      assertTrue(EuclidGeometryMissingTools.isPolygonInside(shrunkenPolygon, captureRegion));
+      assertTrue(EuclidGeometryTools.isPolygonInside(shrunkenPolygon, captureRegion));
 
       ArrayList<FramePoint2D> expectedPointsOutside = new ArrayList<FramePoint2D>();
       movePointsFactor = 1.03;
