@@ -79,6 +79,11 @@ public class PausableLoopingThread extends Thread
       this(DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, loopFrequencyLimit, name);
    }
 
+   public PausableLoopingThread(ExceptionHandler exceptionHandler, String name)
+   {
+      this(exceptionHandler, -1.0, name);
+   }
+
    public PausableLoopingThread(ExceptionHandler exceptionHandler, double loopFrequencyLimit, String name)
    {
       this(null, exceptionHandler, loopFrequencyLimit, name);
