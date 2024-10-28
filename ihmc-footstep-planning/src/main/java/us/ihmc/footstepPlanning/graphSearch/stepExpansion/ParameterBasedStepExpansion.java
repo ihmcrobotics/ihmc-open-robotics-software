@@ -9,7 +9,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -79,10 +78,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             if (reachSquared > maxReachSquared)
                continue;
 
-            double minYaw = parameters.getMinStepYaw();
-            double maxYaw = parameters.getMaxStepYaw();
-
-            for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticePoint.gridSizeYaw)
+            for (double yaw = parameters.getMinStepYaw(); yaw <= parameters.getMaxStepYaw(); yaw += LatticePoint.gridSizeYaw)
             {
                xOffsets.add(x);
                yOffsets.add(y);
