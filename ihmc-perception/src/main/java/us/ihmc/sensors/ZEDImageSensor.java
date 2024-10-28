@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -59,6 +60,8 @@ public class ZEDImageSensor extends ImageSensor
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, Supplier<ReferenceFrame> sensorFrameSupplier)
    {
+      super(zedModel.name());
+
       this.cameraID = cameraID;
       this.zedModel = zedModel;
       this.sensorFrameSupplier = sensorFrameSupplier;
@@ -222,7 +225,15 @@ public class ZEDImageSensor extends ImageSensor
                                       imagePixelFormat.toOpenCVType(),
                                       sl_mat_get_ptr(slMatPointer, SL_MEM_GPU),
                                       sl_mat_get_step_bytes(slMatPointer, SL_MEM_GPU));
-      return new RawImage(null, imageGpuMat, imagePixelFormat, cameraIntrinsics, sensorPose, lastGrabTime, grabSequenceNumber, MILLIMETER_TO_METERS);
+      return new RawImage(null,
+                          imageGpuMat,
+                          imagePixelFormat,
+                          cameraIntrinsics,
+                          CameraModel.PINHOLE,
+                          sensorPose,
+                          lastGrabTime,
+                          grabSequenceNumber,
+                          MILLIMETER_TO_METERS);
    }
 
    @Override
@@ -232,12 +243,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          return grabbedImages[imageKey].get();
       }
-   }
-
-   @Override
-   public String getSensorName()
-   {
-      return zedModel.name();
    }
 
    @Override
