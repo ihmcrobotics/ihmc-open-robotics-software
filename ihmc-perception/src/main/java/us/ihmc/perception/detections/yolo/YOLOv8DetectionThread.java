@@ -36,7 +36,7 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
    }
 
    @Override
-   public synchronized void runInLoop()
+   protected synchronized void runInLoop()
    {
       try
       {

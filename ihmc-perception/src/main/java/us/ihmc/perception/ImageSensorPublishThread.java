@@ -25,7 +25,7 @@ public class ImageSensorPublishThread extends PausableLoopingThread
    }
 
    @Override
-   public void runInLoop()
+   protected void runInLoop()
    {
       if (isDestroyed())
          return;
