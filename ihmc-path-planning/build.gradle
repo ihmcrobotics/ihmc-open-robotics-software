@@ -16,7 +16,7 @@ ihmc {
 mainDependencies {
    api("org.jgrapht:jgrapht-core:0.9.0")
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.21")
+   api("us.ihmc:ihmc-convex-optimization:0.17.22")
    api("us.ihmc:robot-environment-awareness:source")
 }
 
@@ -37,7 +37,7 @@ testDependencies {
 dataSetsDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-commons-testing:0.33.0")
+   api("us.ihmc:ihmc-commons-testing:0.34.0")
 }
 
 task updateDataSetList {

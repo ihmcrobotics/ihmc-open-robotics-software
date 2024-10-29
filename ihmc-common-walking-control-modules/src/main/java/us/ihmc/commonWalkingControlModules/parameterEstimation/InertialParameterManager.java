@@ -19,7 +19,7 @@ import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

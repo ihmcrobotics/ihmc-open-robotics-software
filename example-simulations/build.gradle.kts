@@ -13,13 +13,13 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-robot-data-logger:0.29.9")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.10")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
-   api("us.ihmc:ihmc-robotics-tools-visualizers:source")
+   api("us.ihmc:ihmc-robotics-tools-visualizers:0.15.0")
 
    api("us.ihmc:ihmc-simulation-toolkit:source")
-   api("us.ihmc:ihmc-math-linear-dynamic-systems:source")
+   api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.0")
 }
 
 testDependencies {

@@ -10,9 +10,9 @@ import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.SCS2DefinitionMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.SCS2DefinitionTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -70,7 +70,7 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
       MaterialDefinition material = new MaterialDefinition(ghostColor);
-      SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
+      SCS2DefinitionTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
                                                                              body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
       boolean createReferenceFrameGraphics = false;
       loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), RDXVisualTools.DESIRED_ROBOT_SCALING, createReferenceFrameGraphics);
