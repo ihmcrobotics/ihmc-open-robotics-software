@@ -29,7 +29,8 @@ public class ReferenceSpreadingStateHelper
    {
       BEFORE,
       AFTER,
-      WAITING
+      WAITING,
+      RECORD
    }
 
    private HandTrajectoryMessagePublisher trajectoryMessagePublisher;
@@ -45,12 +46,12 @@ public class ReferenceSpreadingStateHelper
 
    private final CollisionDetection collisionDetection;
 
-   public ReferenceSpreadingStateHelper(String filePath, DRCRobotModel robotModel,  FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
+   public ReferenceSpreadingStateHelper(String demoDirectory, DRCRobotModel robotModel,  FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
       this.trajectoryMessagePublisher = trajectoryMessagePublisher;
       this.registry = registry;
       collisionDetection = new CollisionDetection(14.5, 10, fullRobotModel, registry);
-      referenceSpreader = new ReferenceSpreader(filePath, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
+      referenceSpreader = new ReferenceSpreader(demoDirectory, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
       blendImpactReference = null;
@@ -68,14 +69,14 @@ public class ReferenceSpreadingStateHelper
       factory.addState(States.BEFORE, new BeforeState());
       factory.addState(States.AFTER, new AfterState());
       factory.addState(States.WAITING, new WaitingState());
+      factory.addState(States.RECORD, new RecordState());
 
       StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, t);
 
       factory.addTransition(States.BEFORE, States.AFTER, beforeToAfterTransitionCondition);
       factory.addDoneTransition(States.AFTER, States.WAITING);
 
-
-      return factory.build(States.BEFORE);
+      return factory.build(States.WAITING);
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
@@ -97,6 +98,32 @@ public class ReferenceSpreadingStateHelper
    public void updateJointTorques(us.ihmc.idl.IDLSequence.Float jointTorques)
    {
       this.jointTorques = jointTorques;
+   }
+
+   private class RecordState implements State
+   {
+
+      public RecordState()
+      {
+      }
+
+      public void doAction(double timeInState)
+      {
+         referenceSpreader.recordFrameOriginal();
+      }
+
+      public void onEntry()
+      {
+         LogTools.info("Starting recording!");
+         referenceSpreader.getOriginalReference().clearRecordingMemory();
+         referenceSpreader.getOriginalReference().reset();
+      }
+
+      public void onExit(double timeInState)
+      {
+         LogTools.info("Recording finished!" + "\nSpreading Trajectories now.");
+         referenceSpreader.spreadTrajectories();
+      }
    }
 
    private class BeforeState implements State
@@ -170,7 +197,6 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         LogTools.info("WaitingState: " + timeInState);
       }
 
       public void onEntry()

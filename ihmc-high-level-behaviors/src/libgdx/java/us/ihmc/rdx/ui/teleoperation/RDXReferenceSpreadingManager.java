@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.teleoperation;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.ReferenceSpreadingToolboxInputMessage;
@@ -48,6 +49,8 @@ public class RDXReferenceSpreadingManager
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
+   private final ImBoolean toolboxActive = new ImBoolean(false);
+
    ROS2ControllerHelper ros2ControllerHelper;
 
    RDXReferenceSpreadingManager(CommunicationHelper communicationHelper,
@@ -78,14 +81,28 @@ public class RDXReferenceSpreadingManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button(labels.get("Start toolbox")))
+      if (ImGui.checkbox(labels.get("Toolbox Active"), toolboxActive))
       {
-         startToolbox();
+         if(toolboxActive.get())
+         {
+            startToolbox();
+         }
+         else
+         {
+            stopToolbox();
+         }
       }
 
-      if (ImGui.button(labels.get("Start recording")))
+      if (ImGui.checkbox(labels.get("Record"), toolboxActive))
       {
-         startRecording();
+         if(toolboxActive.get())
+         {
+            startRecording();
+         }
+         else
+         {
+            stopRecording();
+         }
       }
    }
 
@@ -98,7 +115,26 @@ public class RDXReferenceSpreadingManager
       LogTools.info("Start RS");
    }
 
+   private void stopToolbox()
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.SLEEP);
+      toolboxStateMessage.setRequestLogging(true);
+      ros2ControllerHelper.publish(toolboxStatePublisher, toolboxStateMessage);
+      LogTools.info("Start RS");
+   }
+
    private void startRecording()
+   {
+      ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+      message.setState((byte) 0);
+      message.setSequenceId(sequenceId++);
+      ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+
+      LogTools.info("Message: " + message);
+   }
+
+   private void stopRecording()
    {
       ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
       message.setState((byte) 1);

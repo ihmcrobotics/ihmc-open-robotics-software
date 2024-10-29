@@ -37,7 +37,7 @@ public class ReferenceSpreader
    private final TrajectoryRecordReplay preImpactReference;
    private final TrajectoryRecordReplay postImpactReference;
    private final TrajectoryRecordReplay blendedImpactReference;
-   private List<String> keyMatrix = new ArrayList<>();
+   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.DEFAULT;
 
    private int impactIndex = -1;
    private double impactTime = Double.NaN;
@@ -51,6 +51,7 @@ public class ReferenceSpreader
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
    LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
+   double[] currentFrameArray = new double[0];
 
    Double timeDiff = 0.0;
    private final LinkedHashMap<String, Double> tempFrame = new LinkedHashMap<>();
@@ -64,19 +65,17 @@ public class ReferenceSpreader
    private double excludeInterval;
    private double blendInterval;
 
-   ReferenceSpreader(String filePath, Double excludeInterval, Double blendInterval, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
+   ReferenceSpreader(String demoDirectory, Double excludeInterval, Double blendInterval, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
    {
       this.registry = registry;
-      this.baseFinalPath = filePath.replace(".csv", "");
+      this.baseFinalPath = demoDirectory+"/Reference-Spreading";
       this.fullRobotModel = fullRobotModel;
       this.robotModel = robotModel;
 
-      this.originalReference = new TrajectoryRecordReplay(filePath, 1, true);
-      this.preImpactReference = new TrajectoryRecordReplay(filePath+"_pre.csv", 1, false);
-      this.postImpactReference = new TrajectoryRecordReplay(filePath+"_post.csv", 1, false);
-      this.blendedImpactReference = new TrajectoryRecordReplay(filePath+"_blended.csv", 1, false);
-      this.originalReference.importData(true);
-      this.keyMatrix = new ArrayList<>(originalReference.getKeyMatrix());
+      this.originalReference = new TrajectoryRecordReplay(baseFinalPath+".csv", 1, false);
+      this.preImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_pre.csv", 1, false);
+      this.postImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_post.csv", 1, false);
+      this.blendedImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_blended.csv", 1, false);
 
       this.collisionDetection = collisionDetection;
       this.excludeInterval = excludeInterval;
@@ -87,7 +86,21 @@ public class ReferenceSpreader
          jointNames.add(joint.getName());
          jointVelocities.add(0.0f);
       }
+   }
 
+   public void recordFrameOriginal()
+   {
+      LogTools.info("Number of variables: " + registry.getVariables());
+      currentFrameArray = new double[keyMatrix.size()];
+      for (String yoVariable : keyMatrix)
+      {
+         currentFrameArray[keyMatrix.indexOf(yoVariable)] = this.registry.getVariable(yoVariable).getValueAsDouble();
+         LogTools.info("Recording: " + yoVariable + " = " + currentFrame.get(yoVariable));
+      }
+   }
+
+   public void spreadTrajectories()
+   {
       detectImpact();
       extendPreImpactTrajectory();
       extendPostImpactTrajectory();
@@ -354,6 +367,11 @@ public class ReferenceSpreader
       }
       blendedImpactReference.saveRecordingMemory();
       LogTools.info("BlendedImpact trajectory extended (Saved to Memory)");
+   }
+
+   public TrajectoryRecordReplay getOriginalReference()
+   {
+      return originalReference;
    }
 
    public ReferenceSpreadingTrajectory getOriginalReferenceTrajectory()

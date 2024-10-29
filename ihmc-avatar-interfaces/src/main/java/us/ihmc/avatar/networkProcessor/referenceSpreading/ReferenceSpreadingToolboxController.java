@@ -86,9 +86,8 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
                                                                            "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
 //      String filePath = demoDirectory + "/testCSV.csv";
-      String filePath = demoDirectory + "/boxPickup.csv";
 
-      stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, robotModel, fullRobotModel, trajectoryMessagePublisher, registry);
+      stateMachineHelper = new ReferenceSpreadingStateHelper(demoDirectory, robotModel, fullRobotModel, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
@@ -130,7 +129,20 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       if (commandInputManager.isNewCommandAvailable(ReferenceSpreadingToolboxInputCommand.class))
       {
-         LogTools.info("Received ReferenceSpreadingToolboxInputCommand: " + commandInputManager.pollNewestCommand(ReferenceSpreadingToolboxInputCommand.class));
+         ReferenceSpreadingToolboxInputCommand command = commandInputManager.pollNewestCommand(ReferenceSpreadingToolboxInputCommand.class);
+         if (command != null)
+         {
+            if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.START_RECORDING)
+            {
+               LogTools.info("Start recording");
+               stateMachine.performTransition(States.RECORD);
+            }
+            else if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.STOP_RECORDING)
+            {
+               LogTools.info("Stop recording");
+               stateMachine.performTransition(States.WAITING);
+            }
+         }
       }
 
 //      LogTools.info("/dot{q} = " + robotConfigurationData.getJointVelocities());
