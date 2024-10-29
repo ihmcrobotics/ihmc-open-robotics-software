@@ -32,16 +32,12 @@ public class RealsenseImageSensor extends ImageSensor
 
    private final FramePose3D depthPose = new FramePose3D();
    private final FramePose3D colorPose = new FramePose3D();
-   private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
 
-   public RealsenseImageSensor(RealsenseDeviceManager realsenseManager,
-                               RealsenseConfiguration realsenseConfiguration,
-                               Supplier<ReferenceFrame> sensorFrameSupplier)
+   public RealsenseImageSensor(RealsenseDeviceManager realsenseManager, RealsenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 
-      this.sensorFrameSupplier = sensorFrameSupplier;
       this.realsenseManager = realsenseManager;
       this.realsenseConfiguration = realsenseConfiguration;
    }

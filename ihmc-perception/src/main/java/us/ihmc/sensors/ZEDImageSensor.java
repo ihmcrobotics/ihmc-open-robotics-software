@@ -46,7 +46,6 @@ public class ZEDImageSensor extends ImageSensor
    private int imageWidth;
    private int imageHeight;
 
-   private final Supplier<ReferenceFrame> sensorFrameSupplier;
    private float sensorCenterToCameraDistanceY = 0.0f;
    private final FramePose3D leftSensorPose = new FramePose3D();
    private final FramePose3D rightSensorPose = new FramePose3D();
@@ -58,13 +57,12 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_InitParameters zedInitParameters = new SL_InitParameters();
    private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, Supplier<ReferenceFrame> sensorFrameSupplier)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
       this.zedModel = zedModel;
-      this.sensorFrameSupplier = sensorFrameSupplier;
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
