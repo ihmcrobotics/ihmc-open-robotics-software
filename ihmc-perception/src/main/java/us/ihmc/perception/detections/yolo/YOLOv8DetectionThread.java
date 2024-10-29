@@ -45,13 +45,13 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
          RawImage colorImage = imageSensor.getImage(colorImageKey);
          RawImage depthImage = imageSensor.getImage(depthImageKey);
 
-         // Ensure color image is in RGB8
-         if (colorImage.getPixelFormat() != PixelFormat.RGB8)
+         // Ensure color image is in BGR8
+         if (colorImage.getPixelFormat() != PixelFormat.BGR8)
          {
-            GpuMat rgbMat = new GpuMat();
-            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), rgbMat, PixelFormat.RGB8);
+            GpuMat bgrMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), bgrMat, PixelFormat.BGR8);
             colorImage.release();
-            colorImage = colorImage.replaceImage(rgbMat);
+            colorImage = colorImage.replaceImage(bgrMat, PixelFormat.BGR8);
          }
 
          yoloExecutor.runYOLODetectionOnAllModels(colorImage, depthImage);
