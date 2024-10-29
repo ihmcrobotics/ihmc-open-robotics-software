@@ -167,19 +167,31 @@ public class RawImage
    }
 
    /**
-    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
     * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
    public RawImage replaceImage(Mat newCpuImageMat)
    {
+      return replaceImage(newCpuImageMat, this.pixelFormat);
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newCpuImageMat new CPU image mat to replace the current image. Must have the same dimensions.
+    * @param newPixelFormat the PixelFormat of the new image.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(Mat newCpuImageMat, PixelFormat newPixelFormat)
+   {
       if (getWidth() != newCpuImageMat.cols() || getHeight() != newCpuImageMat.rows())
          throw new IllegalArgumentException("New image must have the same dimensions as the current image");
 
       return new RawImage(newCpuImageMat,
                           null,
-                          this.pixelFormat,
+                          newPixelFormat,
                           this.cameraIntrinsics,
                           this.cameraModel,
                           this.sensorPose,
@@ -189,19 +201,31 @@ public class RawImage
    }
 
    /**
-    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Provides a new {@link RawImage} with the same pixel format, intrinsics, and metadata as this one, but with a different image.
     * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
     * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
     * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
     */
    public RawImage replaceImage(GpuMat newGpuImageMat)
    {
+      return replaceImage(newGpuImageMat, this.pixelFormat);
+   }
+
+   /**
+    * Provides a new {@link RawImage} with the same intrinsics and metadata as this one, but with a different image.
+    * Useful when applying changes to Mats and wishing to keep the same intrinsics & metadata in the {@link RawImage}.
+    * @param newGpuImageMat new GPU image mat to replace the current image. Must have the same dimensions.
+    * @param newPixelFormat the PixelFormat of the new image.
+    * @return A new {@link RawImage} with the same intrinsics & metadata, but with a different image.
+    */
+   public RawImage replaceImage(GpuMat newGpuImageMat, PixelFormat newPixelFormat)
+   {
       if (getWidth() != newGpuImageMat.cols() || getHeight() != newGpuImageMat.rows())
          throw new IllegalArgumentException("New image must have the same dimensions as the current image");
 
       return new RawImage(null,
                           newGpuImageMat,
-                          this.pixelFormat,
+                          newPixelFormat,
                           this.cameraIntrinsics,
                           this.cameraModel,
                           this.sensorPose,
