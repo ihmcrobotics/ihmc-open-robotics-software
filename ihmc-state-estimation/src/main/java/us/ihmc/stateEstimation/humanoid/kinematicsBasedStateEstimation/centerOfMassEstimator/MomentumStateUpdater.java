@@ -1,6 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
-import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

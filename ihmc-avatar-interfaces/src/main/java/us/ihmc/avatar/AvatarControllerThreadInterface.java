@@ -2,7 +2,7 @@ package us.ihmc.avatar;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

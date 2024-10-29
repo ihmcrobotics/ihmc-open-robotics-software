@@ -22,8 +22,8 @@ mainDependencies {
 
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-robotics-tools:source")
-   api("us.ihmc:mecano:17-0.18.1")
+   api("us.ihmc:ihmc-robotics-tools:0.15.0")
+   api("us.ihmc:mecano:17-0.19.0")
 }
 
 testDependencies {

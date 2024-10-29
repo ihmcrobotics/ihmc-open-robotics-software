@@ -27,10 +27,10 @@ ihmc {
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:joctomap:1.12.5")
+   api("us.ihmc:joctomap:1.12.6")
    api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-messager-javafx:0.2.0")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.9")
+   api("us.ihmc:ihmc-messager-javafx:0.2.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.10")
    api("us.ihmc:ihmc-ros-tools:source")
 
    val openblasVersion = "0.3.23-1.5.9"

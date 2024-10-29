@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.graphicsDescription.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
 
 public interface FootRotationCalculator extends SCS2YoGraphicHolder
 {

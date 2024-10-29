@@ -24,8 +24,9 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.MultiBodySystemMissingTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
@@ -37,6 +38,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -203,7 +205,9 @@ public class RDXArmManager
             readyToCopySolution = false;
             for (RobotSide side : interactableHands.sides())
             {
-               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+               MultiBodySystemTools.copyJointsState(List.of(armIKSolvers.get(side).getSolutionOneDoFJoints()),
+                                                    List.of(desiredRobotArmJoints.get(side)),
+                                                    JointStateType.CONFIGURATION);
             }
 
             readyToSolve = true;
