@@ -21,7 +21,7 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
 
    public YOLOv8DetectionThread(ROS2Helper ros2Helper, DetectionManager detectionManager, BooleanSupplier annotatedImageDemandSupplier)
    {
-      super(DefaultExceptionHandler.PROCEED_SILENTLY, YOLOv8DetectionThread.class.getSimpleName());
+      super(YOLOv8DetectionThread.class.getSimpleName());
 
       yoloExecutor = new YOLOv8DetectionExecutor(ros2Helper, annotatedImageDemandSupplier);
       yoloExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
@@ -36,26 +36,29 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
    }
 
    @Override
-   public synchronized void runInLoop() throws InterruptedException
+   public synchronized void runInLoop()
    {
-      imageSensor.waitForGrab();
-
-      RawImage colorImage = imageSensor.getImage(colorImageKey);
-      RawImage depthImage = imageSensor.getImage(depthImageKey);
-
-      // Ensure color image is in RGB8
-      if (colorImage.getPixelFormat() != PixelFormat.RGB8)
+      try
       {
-         GpuMat rgbMat = new GpuMat();
-         colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), rgbMat, PixelFormat.RGB8);
+         imageSensor.waitForGrab();
+
+         RawImage colorImage = imageSensor.getImage(colorImageKey);
+         RawImage depthImage = imageSensor.getImage(depthImageKey);
+
+         // Ensure color image is in RGB8
+         if (colorImage.getPixelFormat() != PixelFormat.RGB8)
+         {
+            GpuMat rgbMat = new GpuMat();
+            colorImage.getPixelFormat().convertToPixelFormat(colorImage.getGpuImageMat(), rgbMat, PixelFormat.RGB8);
+            colorImage.release();
+            colorImage = colorImage.replaceImage(rgbMat);
+         }
+
+         yoloExecutor.runYOLODetectionOnAllModels(colorImage, depthImage);
+
          colorImage.release();
-         colorImage = colorImage.replaceImage(rgbMat);
-      }
-
-      yoloExecutor.runYOLODetectionOnAllModels(colorImage, depthImage);
-
-      colorImage.release();
-      depthImage.release();
+         depthImage.release();
+      } catch (InterruptedException ignored) {}
    }
 
    @Override

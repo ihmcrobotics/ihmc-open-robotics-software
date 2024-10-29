@@ -1,15 +1,20 @@
 package us.ihmc.sensors;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausableLoopingThread;
+
+import java.util.function.Supplier;
 
 public abstract class ImageSensor implements AutoCloseable
 {
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
    private final String sensorName;
+   /** Sensor will be in world frame by default, unless a sensor frame supplier is specified through {@link #setSensorFrameSupplier(Supplier)}. */
+   protected volatile Supplier<ReferenceFrame> sensorFrameSupplier;
 
    private final PausableLoopingThread grabThread;
    private final Object grabNotification = new Object();
@@ -25,6 +30,15 @@ public abstract class ImageSensor implements AutoCloseable
     * @return Whether the sensor was successfully initialized and started.
     */
    protected abstract boolean startSensor();
+
+   /**
+    * Set the sensor frame supplier.
+    * @param sensorFrameSupplier Supplier of the sensor's reference frame.
+    */
+   public void setSensorFrameSupplier(Supplier<ReferenceFrame> sensorFrameSupplier)
+   {
+      this.sensorFrameSupplier = sensorFrameSupplier;
+   }
 
    /**
     * @return Whether the sensor is running. Not necessarily the same as whether the grab thread is running.
