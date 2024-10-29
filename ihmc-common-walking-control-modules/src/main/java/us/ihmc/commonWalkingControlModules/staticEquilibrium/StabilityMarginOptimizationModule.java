@@ -247,10 +247,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       /////////////////////////////// Compute nominal equality constraint to enforce static equilibrium ///////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      if (contactPointsHaveChanged)
-      {
-         nominalDecisionVariables = computeConstraintMatrices(contactState);
-      }
+      nominalDecisionVariables = computeConstraintMatrices(contactState, contactPointsHaveChanged);
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////// Compute map from positive x to nominal x ///////////////////////////////////////////
@@ -313,7 +310,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       rewardVectorC.reshape(solverDecisionVariables, 1);
    }
 
-   abstract int computeConstraintMatrices(WholeBodyContactStateInterface contactState);
+   abstract int computeConstraintMatrices(WholeBodyContactStateInterface contactState, boolean contactPointsHaveChanged);
 
    abstract int computeNumberOfSolverVariables(WholeBodyContactStateInterface contactState);
 
@@ -329,7 +326,11 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
 
    abstract ColorDefinition getRegionGraphicColor();
 
-   abstract int getNumberOfForceVariables();
+   abstract int getNumberOfNominalVariables();
+
+   abstract int getNumDynamicsConstraints();
+
+   abstract double getStabilityPointGradientCoefficient();
 
    private static int getBasisIndex(int contactIdx, int basisIdx)
    {
@@ -416,9 +417,9 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    }
 
    /**
-    * Returns the optimized (3n_c + 2) x 1 vector of forces and CoM, [f_0x f_0y f_0z f_1x ... f_nz c_x c_y]
+    * Returns the optimized vector of forces and CoM (if running CoM-based optimizer), [f_0x f_0y f_0z f_1x ... f_nz c_x c_y]
     */
-   public DMatrixRMaj getOptimizedForceAndCoM()
+   public DMatrixRMaj getNominalSolution()
    {
       return solutionNominal;
    }
@@ -436,7 +437,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    /**
     * Returns inequality constraint matrix Ain, for Ain x_force <= bin, where x_force = [f_0x, f_0y, ..., c_x, c_y]
     */
-   public DMatrixRMaj getConstraintMatrix()
+   public DMatrixRMaj getNominalConstraintMatrix()
    {
       return Ain;
    }
@@ -444,7 +445,7 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    /**
     * Returns transformation matrix from solver variables [rho_0, rho_1, ..., c_x+, c_y+, c_x-, c_y-] to nominal variables [f_0x, f_0y, ..., c_x, c_y]
     */
-   public DMatrixRMaj getRhoToForceTransformationMatrix()
+   public DMatrixRMaj getSolverToNominalTransformation()
    {
       return solverToNominalTransformation;
    }

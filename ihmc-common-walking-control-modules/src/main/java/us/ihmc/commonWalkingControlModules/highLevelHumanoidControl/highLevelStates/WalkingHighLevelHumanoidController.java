@@ -791,16 +791,16 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactCoMRegionCalculator();
       boolean useMultiContactStabilityRegion = false;
 
-//      if (isUpperBodyLoadBearing)
+      if (isUpperBodyLoadBearing)
       {
          updateWholeBodyContactState();
          controllerToolbox.updateMultiContactCoMRegion();
          useMultiContactStabilityRegion = multiContactRegionCalculator.hasSolvedWholeRegion();
       }
-//      else if (multiContactRegionCalculator != null)
-//      {
-//         multiContactRegionCalculator.clear();
-//      }
+      else if (multiContactRegionCalculator != null)
+      {
+         multiContactRegionCalculator.clear();
+      }
 
       FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleRegion() : zeroRegion;
 

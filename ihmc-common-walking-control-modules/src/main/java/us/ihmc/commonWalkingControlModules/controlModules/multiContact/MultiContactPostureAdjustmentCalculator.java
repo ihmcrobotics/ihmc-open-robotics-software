@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.multiContact;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedCoMMarginCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,7 +32,7 @@ public class MultiContactPostureAdjustmentCalculator implements WholeBodyPosture
    private final WholeBodyContactState contactState;
    private final StabilityMarginRegionCalculator staticStabilityRegionCalculator;
    private final YoEnum<PostureAdjustmentMode> mode = new YoEnum<>(NAME_PREFIX + "Mode", registry, PostureAdjustmentMode.class);
-   private final SensitivityBasedCoMMarginCalculator postureOptimizer;
+   private final SensitivityBasedStabilityGradientCalculator postureOptimizer;
 
    private final YoDouble[] qJointPostureAdjustment;
    private final YoDouble[] qdJointPostureAdjustment;
@@ -70,7 +70,7 @@ public class MultiContactPostureAdjustmentCalculator implements WholeBodyPosture
       this.contactState = contactState;
       this.staticStabilityRegionCalculator = staticStabilityRegionCalculator;
 
-      this.postureOptimizer = new SensitivityBasedCoMMarginCalculator(centerOfMassFrame, fullRobotModel, contactState, staticStabilityRegionCalculator, registry);
+      this.postureOptimizer = new SensitivityBasedStabilityGradientCalculator(centerOfMassFrame, fullRobotModel, contactState, staticStabilityRegionCalculator, registry);
       qJointPostureAdjustment = new YoDouble[contactState.getNumberOfJoints()];
       qdJointPostureAdjustment = new YoDouble[contactState.getNumberOfJoints()];
 

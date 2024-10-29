@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedCoMMarginCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -60,7 +60,7 @@ public class KinematicsToolboxMultiContactManager
    private final TObjectIntHashMap<OneDoFJointBasics> jointIndexMap = new TObjectIntHashMap<>();
    private final WholeBodyContactState wholeBodyContactState;
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
-   private final SensitivityBasedCoMMarginCalculator postureOptimizer;
+   private final SensitivityBasedStabilityGradientCalculator postureOptimizer;
    private final FullHumanoidRobotModel fullRobotModel;
    private final PDGains jointspaceGains = new PDGains();
 
@@ -161,11 +161,11 @@ public class KinematicsToolboxMultiContactManager
       this.multiContactRegionCalculator = multiContactRegionCalculator;
       this.updateDT = updateDT;
       this.fullRobotModel = fullRobotModel;
-      this.postureOptimizer = new SensitivityBasedCoMMarginCalculator(centerOfMassFrame,
-                                                                      fullRobotModel,
-                                                                      wholeBodyContactState,
-                                                                      multiContactRegionCalculator,
-                                                                      registry);
+      this.postureOptimizer = new SensitivityBasedStabilityGradientCalculator(centerOfMassFrame,
+                                                                              fullRobotModel,
+                                                                              wholeBodyContactState,
+                                                                              multiContactRegionCalculator,
+                                                                              registry);
 
       int numberOfJoints = wholeBodyContactState.getNumberOfJoints();
       OneDoFJointBasics[] oneDoFJoints = wholeBodyContactState.getOneDoFJoints();

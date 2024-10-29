@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CenterOfMassStabilityMarginOptimizationModule extends StabilityMarginOptimizationModule
 {
-   static final int STATIC_EQUILIBRIUM_CONSTRAINTS = 6;
+   static final int NUM_DYNAMICS_CONSTRAINTS = 6;
    static final int CoM_DIMENSIONS = 2;
 
    /* Indices for CoM position variables in x_force */
@@ -36,36 +36,39 @@ public class CenterOfMassStabilityMarginOptimizationModule extends StabilityMarg
    }
 
    @Override
-   int computeConstraintMatrices(WholeBodyContactStateInterface contactState)
+   int computeConstraintMatrices(WholeBodyContactStateInterface contactState, boolean contactPointsHaveChanged)
    {
       int nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
-      Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
-      beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
 
-      for (int contactIdx = 0; contactIdx < contactState.getNumberOfContactPoints(); contactIdx++)
+      if (contactPointsHaveChanged)
       {
-         FramePoint3D contactPoint = contactPointPositions.get(contactIdx);
+         Aeq.reshape(NUM_DYNAMICS_CONSTRAINTS, nominalDecisionVariables);
+         beq.reshape(NUM_DYNAMICS_CONSTRAINTS, 1);
 
-         int colOffset = 3 * contactIdx;
+         for (int contactIdx = 0; contactIdx < contactState.getNumberOfContactPoints(); contactIdx++)
+         {
+            FramePoint3D contactPoint = contactPointPositions.get(contactIdx);
+            int colOffset = LINEAR_DIMENSIONS * contactIdx;
 
-         Aeq.set(0, colOffset + Axis3D.X.ordinal(), 1.0);
-         Aeq.set(1, colOffset + Axis3D.Y.ordinal(), 1.0);
-         Aeq.set(2, colOffset + Axis3D.Z.ordinal(), 1.0);
+            Aeq.set(0, colOffset + Axis3D.X.ordinal(), 1.0);
+            Aeq.set(1, colOffset + Axis3D.Y.ordinal(), 1.0);
+            Aeq.set(2, colOffset + Axis3D.Z.ordinal(), 1.0);
 
-         Aeq.set(3, colOffset + Axis3D.Y.ordinal(), -contactPoint.getZ());
-         Aeq.set(3, colOffset + Axis3D.Z.ordinal(), contactPoint.getY());
-         Aeq.set(4, colOffset + Axis3D.X.ordinal(), contactPoint.getZ());
-         Aeq.set(4, colOffset + Axis3D.Z.ordinal(), -contactPoint.getX());
-         Aeq.set(5, colOffset + Axis3D.X.ordinal(), -contactPoint.getY());
-         Aeq.set(5, colOffset + Axis3D.Y.ordinal(), contactPoint.getX());
+            Aeq.set(3, colOffset + Axis3D.Y.ordinal(), -contactPoint.getZ());
+            Aeq.set(3, colOffset + Axis3D.Z.ordinal(), contactPoint.getY());
+            Aeq.set(4, colOffset + Axis3D.X.ordinal(), contactPoint.getZ());
+            Aeq.set(4, colOffset + Axis3D.Z.ordinal(), -contactPoint.getX());
+            Aeq.set(5, colOffset + Axis3D.X.ordinal(), -contactPoint.getY());
+            Aeq.set(5, colOffset + Axis3D.Y.ordinal(), contactPoint.getX());
+         }
+
+         cx_index = nominalDecisionVariables - 2;
+         cy_index = nominalDecisionVariables - 1;
+
+         Aeq.set(3, cy_index, -mg);
+         Aeq.set(4, cx_index, mg);
+         beq.set(2, 0, mg);
       }
-
-      cx_index = nominalDecisionVariables - 2;
-      cy_index = nominalDecisionVariables - 1;
-
-      Aeq.set(3, cy_index, -mg);
-      Aeq.set(4, cx_index, mg);
-      beq.set(2, 0, mg);
 
       return nominalDecisionVariables;
    }
@@ -132,8 +135,20 @@ public class CenterOfMassStabilityMarginOptimizationModule extends StabilityMarg
    }
 
    @Override
-   int getNumberOfForceVariables()
+   int getNumberOfNominalVariables()
    {
       return LINEAR_DIMENSIONS * numberOfContactPoints + CoM_DIMENSIONS;
+   }
+
+   @Override
+   int getNumDynamicsConstraints()
+   {
+      return NUM_DYNAMICS_CONSTRAINTS;
+   }
+
+   @Override
+   double getStabilityPointGradientCoefficient()
+   {
+      return 1.0;
    }
 }

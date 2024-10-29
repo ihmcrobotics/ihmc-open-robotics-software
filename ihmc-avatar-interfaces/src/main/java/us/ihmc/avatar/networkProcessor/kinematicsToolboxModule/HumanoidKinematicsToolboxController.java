@@ -288,8 +288,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
+
       multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoMStabilityMargin("", desiredFullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
+//      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
+
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
       multiContactManager = new KinematicsToolboxMultiContactManager(wholeBodyContactState, multiContactRegionCalculator, desiredFullRobotModel, desiredReferenceFrames.getCenterOfMassFrame(), updateDT, registry);
 
@@ -568,6 +571,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    public void updateInternal()
    {
+      updateTools();
+
+
       executionTimer.startMeasurement();
 
       if (commandInputManager.isNewCommandAvailable(HumanoidKinematicsToolboxConfigurationCommand.class))
@@ -604,17 +610,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          // update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
          wholeBodyContactState.updateActuationConstraintMatrix(true);
-         multiContactRegionCalculator.updateContactState(wholeBodyContactState, false);
+//         multiContactRegionCalculator.updateContactState(wholeBodyContactState, false);
+         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
 
          multiContactRegionLPSolveTimer.startMeasurement();
          if (multiContactRegionCalculator.hasSolvedWholeRegion())
          {
-            // Update one edge of the region
-            int vertexIndexToUpdate = multiContactRegionCalculator.getQueryCounter();
+            // Update the region by querying the stability in another direction
             multiContactRegionCalculator.performUpdateForNextVertex();
-
-            // Perform fixed-basis update for lowest margin edge
-            multiContactRegionCalculator.performFastUpdateForLowestMarginEdge(vertexIndexToUpdate);
          }
          else
          {

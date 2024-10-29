@@ -8,7 +8,7 @@ import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.CoM_DIMENSIONS;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.NUM_DYNAMICS_CONSTRAINTS;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.*;
 
 public class ContactPointConstraintMatrixVariation
@@ -34,7 +34,7 @@ public class ContactPointConstraintMatrixVariation
    {
       int nominalDecisionVariables = LINEAR_DIMENSIONS * wholeBodyContactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
 
-      equalityConstraintVariation.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
+      equalityConstraintVariation.reshape(NUM_DYNAMICS_CONSTRAINTS, nominalDecisionVariables);
       equalityConstraintVariation.zero();
 
       int colOffset = 3 * contactPointIndex;
@@ -53,7 +53,7 @@ public class ContactPointConstraintMatrixVariation
       MatrixTools.setMatrixBlock(inequalityConstraintVariation, equalityConstraintVariation.getNumRows(), 0, equalityConstraintVariation, 0, 0, equalityConstraintVariation.getNumRows(), equalityConstraintVariation.getNumCols(), -1.0);
 
       // TODO could optimize by only considering top 12 rows (ignoring joints)
-      CommonOps_DDRM.mult(inequalityConstraintVariation, stabilityMarginOptimizationModule.getRhoToForceTransformationMatrix(), solverConstraintVariation);
+      CommonOps_DDRM.mult(inequalityConstraintVariation, stabilityMarginOptimizationModule.getSolverToNominalTransformation(), solverConstraintVariation);
       return solverConstraintVariation;
    }
 }

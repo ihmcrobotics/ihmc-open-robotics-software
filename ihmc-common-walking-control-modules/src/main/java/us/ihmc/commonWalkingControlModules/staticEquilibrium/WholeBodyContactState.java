@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginOptimizationModule.NUM_DYNAMICS_CONSTRAINTS;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.GRAVITY;
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginOptimizationModule.LINEAR_DIMENSIONS;
 
@@ -270,7 +270,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
             continue;
          }
 
-         if (updateContactPointFrame)
+         // TODO check, this may be incorrect
+//         if (updateContactPointFrame)
          {
             worldAlignedContactPose.setToZero(contactPoint.contactFrame);
             worldAlignedContactPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -595,7 +596,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public boolean isJointTorqueActuationConstraint(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * NUM_DYNAMICS_CONSTRAINTS;
       return constraintActiveSetIndex >= staticEquilibriumInequalityConstraints;
    }
 
@@ -605,7 +606,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public OneDoFJointBasics getJointFromActuationConstraintIndex(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * NUM_DYNAMICS_CONSTRAINTS;
       if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");
@@ -620,7 +621,7 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
     */
    public boolean isActuationConstraintUpperBound(int constraintActiveSetIndex)
    {
-      int staticEquilibriumInequalityConstraints = 2 * STATIC_EQUILIBRIUM_CONSTRAINTS;
+      int staticEquilibriumInequalityConstraints = 2 * NUM_DYNAMICS_CONSTRAINTS;
       if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");

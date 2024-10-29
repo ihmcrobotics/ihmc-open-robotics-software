@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CenterOfPressureStabilityMarginOptimizationModule extends StabilityMarginOptimizationModule
 {
-   static final int STATIC_EQUILIBRIUM_CONSTRAINTS = 4;
+   static final int NUM_DYNAMICS_CONSTRAINTS = 4;
 
    /* Optimized net force */
    private final Vector3D optimizedLIPMForce = new Vector3D();
@@ -25,6 +25,7 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
 
    private final FramePoint3D midFootPoint = new FramePoint3D();
    private final FramePoint3D comPoint = new FramePoint3D();
+   private double forceToCoPOffsetMultiplier;
 
    private final Vector2D optimizedLIPMForce2D = new Vector2D();
    private final Vector2D comToCop = new Vector2D();
@@ -44,16 +45,15 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
    }
 
    @Override
-   int computeConstraintMatrices(WholeBodyContactStateInterface contactState)
+   int computeConstraintMatrices(WholeBodyContactStateInterface contactState, boolean contactPointsHaveChanged)
    {
       int nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints();
-      Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
-      beq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, 1);
+      Aeq.reshape(NUM_DYNAMICS_CONSTRAINTS, nominalDecisionVariables);
+      beq.reshape(NUM_DYNAMICS_CONSTRAINTS, 1);
 
       for (int contactIdx = 0; contactIdx < contactState.getNumberOfContactPoints(); contactIdx++)
       {
          FramePoint3D contactPoint = contactPointPositions.get(contactIdx);
-
          int colOffset = LINEAR_DIMENSIONS * contactIdx;
 
          Aeq.set(0, colOffset + Axis3D.Z.ordinal(), 1.0);
@@ -98,8 +98,17 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
          rewardVectorCNominal.set(colOffset + Axis3D.Y.ordinal(), 0, queryDirectionY);
       }
 
-      CommonOps_DDRM.multTransA(rewardVectorCNominal, getRhoToForceTransformationMatrix(), rewardVectorC);
+      CommonOps_DDRM.multTransA(rewardVectorCNominal, getSolverToNominalTransformation(), rewardVectorC);
       CommonOps_DDRM.transpose(rewardVectorC);
+
+      comPoint.setToZero(centerOfMassFrame);
+      midFootPoint.setToZero(midFeetZUpFrame);
+
+      comPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      midFootPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double dz = comPoint.getZ() - midFootPoint.getZ();
+      forceToCoPOffsetMultiplier = -dz / mg;
    }
 
    @Override
@@ -116,16 +125,7 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
       }
 
       optimizedLIPMForce2D.set(optimizedLIPMForce);
-
-      comPoint.setToZero(centerOfMassFrame);
-      midFootPoint.setToZero(midFeetZUpFrame);
-
-      comPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      midFootPoint.changeFrame(ReferenceFrame.getWorldFrame());
-
-      double dz = comPoint.getZ() - midFootPoint.getZ();
-
-      comToCop.setAndScale(-dz / mg, optimizedLIPMForce2D);
+      comToCop.setAndScale(forceToCoPOffsetMultiplier, optimizedLIPMForce2D);
 
       optimizedStabilityPoint.set(comPoint);
       optimizedStabilityPoint.add(comToCop);
@@ -150,8 +150,20 @@ public class CenterOfPressureStabilityMarginOptimizationModule extends Stability
    }
 
    @Override
-   int getNumberOfForceVariables()
+   int getNumberOfNominalVariables()
    {
       return LINEAR_DIMENSIONS * numberOfContactPoints;
+   }
+
+   @Override
+   int getNumDynamicsConstraints()
+   {
+      return NUM_DYNAMICS_CONSTRAINTS;
+   }
+
+   @Override
+   double getStabilityPointGradientCoefficient()
+   {
+      return forceToCoPOffsetMultiplier;
    }
 }

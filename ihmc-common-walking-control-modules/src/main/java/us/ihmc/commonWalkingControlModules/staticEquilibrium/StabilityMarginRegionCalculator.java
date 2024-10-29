@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -33,17 +34,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TEN_MILLIONTH;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
 
 /**
  * Helper class for using {@link StabilityMarginOptimizationModule} to update and manage a multi-contact stability region.
  */
 public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 {
-   private static final int NULL_MARGIN_INDEX = -1;
-   private static final double VERTEX_EPS = 3.0e-3;
+   private static final int NULL_INDEX = -1;
+   private static final double VERTEX_EPS = 1.0e-4;
 
    public static final int DIRECTIONS_TO_OPTIMIZE = 18;
    private final static double DELTA_ANGLE = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
@@ -55,7 +57,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
       {
          QUERY_X[i] = Math.cos(i * DELTA_ANGLE);
-         QUERY_Y[i] = Math.sin(i * DELTA_ANGLE);
+         QUERY_Y[i] = -Math.sin(i * DELTA_ANGLE);
       }
    }
 
@@ -74,8 +76,9 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    /* CoM stability region */
    private final YoFramePoint2D[] optimizedVertices = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
-   private final YoBoolean[] isDegenerateVertex = new YoBoolean[DIRECTIONS_TO_OPTIMIZE];
    private final YoFrameConvexPolygon2D feasibleRegion;
+//   private final int[] toEuclidPolygonIndexMap = new int[DIRECTIONS_TO_OPTIMIZE];
+   private final int[] fromEuclidPolygonIndexMap = new int[DIRECTIONS_TO_OPTIMIZE];
 
    /* YoVariablized CoM for margin visualization */
    private final YoFramePoint2D yoCenterOfMass;
@@ -96,12 +99,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    private Supplier<FramePoint3DReadOnly> centerOfMassSupplier = null;
    private boolean showNearestSupportEdgeGraphic = true;
 
-   public enum StabilityMarginMode
-   {
-      CENTER_OF_MASS,
-      CENTER_OF_PRESSURE
-   }
-
    public StabilityMarginRegionCalculator(StabilityMarginOptimizationModule optimizationModule, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this("", optimizationModule, parentRegistry, graphicsListRegistry);
@@ -120,7 +117,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
          optimizedVertices[vertex_idx] = new YoFramePoint2D("comStabilityMarginVertex" + vertex_idx, ReferenceFrame.getWorldFrame(), registry);
-         isDegenerateVertex[vertex_idx] = new YoBoolean("isDegenerate" + vertex_idx, registry);
          resolvedForces[vertex_idx] = new DMatrixRMaj(0);
          saturatedConstraintIndices[vertex_idx] = new TIntArrayList();
          solutionBasisIndices[vertex_idx] = new TIntArrayList();
@@ -139,11 +135,10 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       }
 
       feasibleRegion = new YoFrameConvexPolygon2D(namePrefix + "StabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE, registry);
-      feasibleRegion.clear();
 
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       stabilityMargin = new YoDouble(namePrefix + "StabilityMargin", registry);
-      lowestMarginEdgeIndex.set(NULL_MARGIN_INDEX);
+      lowestMarginEdgeIndex.set(NULL_INDEX);
       stabilityMargin.set(Double.POSITIVE_INFINITY);
 
       yoCenterOfMass = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
@@ -197,8 +192,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public void clear()
    {
-      feasibleRegion.clear();
-
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
          optimizedVertices[vertex_idx].setToNaN();
@@ -207,13 +200,12 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          solutionBasisIndices[vertex_idx].reset();
          nearestConstraintVertexA[vertex_idx].setToNaN();
          nearestConstraintVertexB[vertex_idx].setToNaN();
-         isDegenerateVertex[vertex_idx].set(false);
       }
 
       hasSolvedWholeRegion.set(false);
       queryCounter.set(0);
 
-      lowestMarginEdgeIndex.set(NULL_MARGIN_INDEX);
+      lowestMarginEdgeIndex.set(NULL_INDEX);
       stabilityMargin.set(Double.POSITIVE_INFINITY);
    }
 
@@ -232,11 +224,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       optimizationModule.updateContactState(contactState);
    }
 
-   public int getQueryCounter()
-   {
-      return queryCounter.getValue();
-   }
-
    public boolean performFullRegionUpdate()
    {
       for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
@@ -244,11 +231,10 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          if (!performUpdateForVertex(i))
             return false;
       }
-      for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
-      {
-         updateEdgeMargin(i);
-      }
+
+      updateFeasibleRegion();
       updateMinimumMarginEdge();
+
       return true;
    }
 
@@ -258,76 +244,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       boolean success = performUpdateForVertex(vertexIndexToUpdate);
       if (success)
          queryCounter.set((queryCounter.getValue() + 1) % DIRECTIONS_TO_OPTIMIZE);
-
-      // Updates vertices already deemed degenerate
-      updateDegenerateVertices(vertexIndexToUpdate);
-
-      updateEdgeMargin(getEdgeAOfVertex(vertexIndexToUpdate));
-      updateEdgeMargin(getEdgeBOfVertex(vertexIndexToUpdate));
-
-      updateMinimumMarginEdge();
-
-      return success;
-   }
-
-   private boolean performUpdateForEdge(int edgeIndex)
-   {
-      if (!performUpdateForVertex(getVertexAOfEdge(edgeIndex)))
-         return false;
-      if (!performUpdateForVertex(getVertexBOfEdge(edgeIndex)))
-         return false;
-
-      updateEdgeMargin(edgeIndex);
-      updateMinimumMarginEdge();
-
-      return true;
-   }
-
-   public void performFastUpdateForLowestMarginEdge(int vertexToTrust)
-   {
-      int lowestMarginEdgeIndex = this.lowestMarginEdgeIndex.getValue();
-      int vertexToUpdateA = getVertexAOfEdge(lowestMarginEdgeIndex);
-      int vertexToUpdateB = getVertexBOfEdge(lowestMarginEdgeIndex);
-
-      if (vertexToUpdateA != vertexToTrust)
-      {
-         performFixedBasisUpdateForVertex(vertexToUpdateA);
-         updateDegenerateVertices(vertexToUpdateA);
-      }
-      if (vertexToUpdateB != vertexToTrust)
-      {
-         performFixedBasisUpdateForVertex(vertexToUpdateB);
-         updateDegenerateVertices(vertexToUpdateB);
-      }
-
       updateFeasibleRegion();
-
-      YoFramePoint2D v0 = optimizedVertices[getVertexAOfEdge(lowestMarginEdgeIndex)];
-      YoFramePoint2D v1 = optimizedVertices[getVertexBOfEdge(lowestMarginEdgeIndex)];
-
-      if (v0.epsilonEquals(v1, VERTEX_EPS))
-      {
-         for (int vertexIndex = 0; vertexIndex < DIRECTIONS_TO_OPTIMIZE; vertexIndex++)
-         {
-            YoFramePoint2D vertex = optimizedVertices[vertexIndex];
-            YoFramePoint2D previousVertex = optimizedVertices[getPreviousIndex(vertexIndex)];
-            isDegenerateVertex[vertexIndex].set(vertex.epsilonEquals(previousVertex, VERTEX_EPS));
-         }
-         for (int vertexIndex = 0; vertexIndex < DIRECTIONS_TO_OPTIMIZE; vertexIndex++)
-         {
-            updateEdgeMargin(vertexIndex);
-         }
-
-         updateMinimumMarginEdge();
-      }
-      else
-      {
-         updateEdgeMargin(lowestMarginEdgeIndex);
-         stabilityMargin.set(comEdgeMargin[lowestMarginEdgeIndex].getValue());
-
-         nearestConstraintVertexA[lowestMarginEdgeIndex].set(v0);
-         nearestConstraintVertexB[lowestMarginEdgeIndex].set(v1);
-      }
+      return success;
    }
 
    private boolean performUpdateForVertex(int vertexIndex)
@@ -352,8 +270,8 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
             }
          }
 
-         DMatrixRMaj optimizedForceAndCoM = optimizationModule.getOptimizedForceAndCoM();
-         int numberOfForceVariables = optimizationModule.getNumberOfForceVariables();
+         DMatrixRMaj solution = optimizationModule.getNominalSolution();
+         int numberOfForceVariables = optimizationModule.getNumberOfNominalVariables();
          if (resolvedForces[vertexIndex].getNumRows() != numberOfForceVariables)
          {
             resolvedForces[vertexIndex].reshape(numberOfForceVariables, 1);
@@ -361,7 +279,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
          for (int f_idx = 0; f_idx < numberOfForceVariables; f_idx++)
          {
-            resolvedForces[vertexIndex].set(f_idx, optimizedForceAndCoM.get(f_idx, 0));
+            resolvedForces[vertexIndex].set(f_idx, solution.get(f_idx, 0));
          }
 
          minDictionaryRHSColumnEntries[vertexIndex].set(optimizationModule.getLinearProgramSolver().getSimplexStatistics().getMinDictionaryRHSColumnEntry());
@@ -382,23 +300,16 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          return false;
       }
 
-      Point2DReadOnly optimizedCoM = optimizationModule.getOptimizedStabilityPoint();
-      optimizedVertices[vertexIndex].set(optimizedCoM);
-      updateFeasibleRegion();
-
-      YoFramePoint2D previousVertex = optimizedVertices[getPreviousIndex(vertexIndex)];
-      isDegenerateVertex[vertexIndex].set(previousVertex.epsilonEquals(optimizedCoM, VERTEX_EPS));
+      Point2DReadOnly optimizedStabilityPoint = optimizationModule.getOptimizedStabilityPoint();
+      optimizedVertices[vertexIndex].set(optimizedStabilityPoint);
 
       return true;
    }
 
-   public boolean isDegenerateEdge(int edgeIndex)
-   {
-      return isDegenerateVertex[getVertexBOfEdge(edgeIndex)].getValue();
-   }
-
    private void updateFeasibleRegion()
    {
+      // Update ConvexPolygon2D object
+
       feasibleRegion.clear();
       boolean hasNaNVertex = false;
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
@@ -408,38 +319,128 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
          else
             feasibleRegion.addVertex(optimizedVertices[vertex_idx]);
       }
+
       feasibleRegion.update();
       hasSolvedWholeRegion.set(!hasNaNVertex);
+
+      if (!hasSolvedWholeRegion.getValue())
+         return;
+
+      // Update index correspondence map
+
+//      Arrays.fill(toEuclidPolygonIndexMap, NULL_INDEX);
+      Arrays.fill(fromEuclidPolygonIndexMap, NULL_INDEX);
+
+      for (int euclid_idx = 0; euclid_idx < feasibleRegion.getNumberOfVertices(); euclid_idx++)
+      {
+         int enumerated_idx = findVertexIndex(optimizedVertices, feasibleRegion.getVertex(euclid_idx));
+
+         if (enumerated_idx != NULL_INDEX)
+         {
+//            toEuclidPolygonIndexMap[enumerated_idx] = euclid_idx;
+            fromEuclidPolygonIndexMap[euclid_idx] = enumerated_idx;
+         }
+      }
+//      for (int enumerated_idx = 0; enumerated_idx < DIRECTIONS_TO_OPTIMIZE; enumerated_idx++)
+//      {
+//         if (toEuclidPolygonIndexMap[enumerated_idx] == NULL_INDEX)
+//         {
+//            toEuclidPolygonIndexMap[enumerated_idx] = tryToMapVertex(enumerated_idx);
+//         }
+//      }
+
+      // update lowest margin edge index
+
+      updateMinimumMarginEdge();
+   }
+
+   private static int findVertexIndex(Tuple2DReadOnly[] candidateVertices, Tuple2DReadOnly vertex)
+   {
+      for (int vertex_idx = 0; vertex_idx < candidateVertices.length; vertex_idx++)
+      {
+         if (vertex.epsilonEquals(candidateVertices[vertex_idx], VERTEX_EPS))
+            return vertex_idx;
+      }
+      return NULL_INDEX;
+   }
+
+//   private int tryToMapVertex(int unmapped_idx)
+//   {
+//      for (int enumerated_idx = 0; enumerated_idx < DIRECTIONS_TO_OPTIMIZE; enumerated_idx++)
+//      {
+//         if (enumerated_idx == unmapped_idx)
+//            continue;
+//         if (toEuclidPolygonIndexMap[enumerated_idx] == NULL_INDEX)
+//            continue;
+//         if (optimizedVertices[enumerated_idx].epsilonEquals(optimizedVertices[unmapped_idx], VERTEX_EPS))
+//            return toEuclidPolygonIndexMap[enumerated_idx];
+//      }
+//      return NULL_INDEX;
+//   }
+
+   /**
+    * Adapted from EuclidGeometryPolygonTools#closestEdgeIndexToPoint2D
+    */
+   private void updateMinimumMarginEdge()
+   {
+      FramePoint3DReadOnly centerOfMass = centerOfMassSupplier.get();
+      double comX = centerOfMass.getX();
+      double comY = centerOfMass.getY();
+
+      boolean isQueryOutsidePolygon = false;
+      int insideIndex = -1;
+      int outsideIndex = -1;
+      double minOutsideDistanceSquared = Double.POSITIVE_INFINITY;
+      double minInsideDistanceSquared = Double.POSITIVE_INFINITY;
+
+      for (int edgeIndex = 0; edgeIndex < feasibleRegion.getNumberOfVertices(); edgeIndex++)
+      {
+         Point2DReadOnly edgeStart = feasibleRegion.getVertex(edgeIndex);
+         Point2DReadOnly edgeEnd = feasibleRegion.getNextVertex(edgeIndex);
+
+         double distanceSquared = distanceSquaredFromPoint2DToLineSegment2D(comX, comY, edgeStart, edgeEnd);
+
+         boolean isOutsideEdge = isPoint2DOnSideOfLine2D(comX, comY, edgeStart, edgeEnd, feasibleRegion.isClockwiseOrdered());
+         isQueryOutsidePolygon |= isOutsideEdge;
+
+         /*
+          * By keeping track of whether the point is outside or inside w.r.t. to each edge, it is ensured
+          * that if the point is outside the polygon the edge returned is visible from the query.
+          */
+         if (isOutsideEdge)
+         {
+            if (distanceSquared < minOutsideDistanceSquared)
+            {
+               outsideIndex = edgeIndex;
+               minOutsideDistanceSquared = distanceSquared;
+            }
+         }
+         else
+         {
+            if (distanceSquared < minInsideDistanceSquared)
+            {
+               insideIndex = edgeIndex;
+               minInsideDistanceSquared = distanceSquared;
+            }
+         }
+      }
+
+      lowestMarginEdgeIndex.set(isQueryOutsidePolygon ? outsideIndex : insideIndex);
+      stabilityMargin.set(Math.sqrt(isQueryOutsidePolygon ? minOutsideDistanceSquared : minInsideDistanceSquared));
+
+      for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
+      {
+         nearestConstraintVertexA[vertex_idx].setToNaN();
+         nearestConstraintVertexB[vertex_idx].setToNaN();
+      }
+
+      nearestConstraintVertexA[lowestMarginEdgeIndex.getValue()].set(feasibleRegion.getVertex(lowestMarginEdgeIndex.getValue()));
+      nearestConstraintVertexB[lowestMarginEdgeIndex.getValue()].set(feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue()));
    }
 
    private void performFixedBasisUpdateForVertex(int vertexIndex)
    {
       optimizedVertices[vertexIndex].set(optimizationModule.solveForFixedBasis(solutionBasisIndices[vertexIndex]));
-   }
-
-   private void updateDegenerateVertices(int vertexIndex)
-   {
-      // Check clock-wise
-      int cwIndex = getNextIndex(vertexIndex);
-      while (isDegenerateVertex[cwIndex].getValue())
-      {
-         optimizedVertices[cwIndex].set(optimizedVertices[vertexIndex]);
-         cwIndex = getNextIndex(cwIndex);
-
-         if (cwIndex == vertexIndex)
-            break; // edge case of all degenerate
-      }
-
-      // Check counter-clockwise
-      int ccwIndex = vertexIndex;
-      while (isDegenerateVertex[ccwIndex].getValue())
-      {
-         ccwIndex = getPreviousIndex(ccwIndex);
-         optimizedVertices[ccwIndex].set(optimizedVertices[vertexIndex]);
-
-         if (ccwIndex == vertexIndex)
-            break; // edge case of all degenerate
-      }
    }
 
    public static double queryDirectionX(int index)
@@ -456,67 +457,6 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
    public StabilityMarginOptimizationModule getOptimizationModule()
    {
       return optimizationModule;
-   }
-
-   private void updateEdgeMargin(int edgeIndex)
-   {
-      if (centerOfMassSupplier == null)
-         return;
-
-      YoFramePoint2D v0 = optimizedVertices[getVertexAOfEdge(edgeIndex)];
-      YoFramePoint2D v1 = optimizedVertices[getVertexBOfEdge(edgeIndex)];
-
-      boolean containsInvalidVertex = v0.containsNaN() || v1.containsNaN() || isDegenerateVertex[getVertexBOfEdge(edgeIndex)].getValue();
-      if (containsInvalidVertex)
-      {
-         comEdgeMargin[edgeIndex].set(Double.NaN);
-         return;
-      }
-
-      if (hasSolvedWholeRegion() && (feasibleRegion.signedDistance(v0) < -VERTEX_EPS || feasibleRegion.signedDistance(v1) < -VERTEX_EPS))
-      {
-         comEdgeMargin[edgeIndex].set(Double.NaN);
-         return;
-      }
-
-      FramePoint3DReadOnly centerOfMass = centerOfMassSupplier.get();
-      centerOfMass.getReferenceFrame().checkReferenceFrameMatch(v0.getReferenceFrame());
-
-      double margin = EuclidGeometryTools.distanceFromPoint2DToLine2D(centerOfMass.getX(), centerOfMass.getY(), v0, v1);
-      comEdgeMargin[edgeIndex].set(margin);
-
-      yoCenterOfMass.set(centerOfMass);
-   }
-
-   public void updateMinimumMarginEdge()
-   {
-      if (centerOfMassSupplier == null)
-         return;
-
-      double minimumMarginDistance = Double.POSITIVE_INFINITY;
-      int minimumMarginEdgeIndex = NULL_MARGIN_INDEX;
-
-      for (int edgeIdx = 0; edgeIdx < DIRECTIONS_TO_OPTIMIZE; edgeIdx++)
-      {
-         double margin_i = comEdgeMargin[edgeIdx].getValue();
-         nearestConstraintVertexA[edgeIdx].setToNaN();
-         nearestConstraintVertexB[edgeIdx].setToNaN();
-
-         if (!Double.isNaN(margin_i) && margin_i < minimumMarginDistance)
-         {
-            minimumMarginDistance = margin_i;
-            minimumMarginEdgeIndex = edgeIdx;
-         }
-      }
-
-      if (minimumMarginEdgeIndex != NULL_MARGIN_INDEX)
-      {
-         stabilityMargin.set(minimumMarginDistance);
-         lowestMarginEdgeIndex.set(minimumMarginEdgeIndex);
-
-         nearestConstraintVertexA[minimumMarginEdgeIndex].set(optimizedVertices[getVertexAOfEdge(minimumMarginEdgeIndex)]);
-         nearestConstraintVertexB[minimumMarginEdgeIndex].set(optimizedVertices[getVertexBOfEdge(minimumMarginEdgeIndex)]);
-      }
    }
 
    /**
@@ -586,6 +526,16 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       return optimizedVertices[index];
    }
 
+//   public int toEuclidIndex(int enumeratedIndex)
+//   {
+//      return toEuclidPolygonIndexMap[enumeratedIndex];
+//   }
+
+   public int fromEuclidIndex(int euclidIndex)
+   {
+      return fromEuclidPolygonIndexMap[euclidIndex];
+   }
+
    public FramePoint3DReadOnly getCenterOfMass()
    {
       return centerOfMassSupplier.get();
@@ -609,7 +559,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    public boolean hasNearestConstraintEdge()
    {
-      return lowestMarginEdgeIndex.getValue() != NULL_MARGIN_INDEX;
+      return lowestMarginEdgeIndex.getValue() != NULL_INDEX;
    }
 
    public int getLowestMarginEdgeIndex()

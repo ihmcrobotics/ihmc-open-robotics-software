@@ -1122,12 +1122,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       multiContactRegionLPSolveTimer.startMeasurement();
       if (multiContactCoMRegionCalculator.hasSolvedWholeRegion())
       {
-         // Update one edge of the region
-         int vertexToUpdateIndex = multiContactCoMRegionCalculator.getQueryCounter();
+         // Update the region by querying the stability in another direction
          multiContactCoMRegionCalculator.performUpdateForNextVertex();
-
-         // Perform fixed-basis update for lowest margin edge
-         multiContactCoMRegionCalculator.performFastUpdateForLowestMarginEdge(vertexToUpdateIndex);
       }
       else
       {

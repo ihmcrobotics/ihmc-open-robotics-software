@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -33,7 +34,7 @@ import static us.ihmc.convexOptimization.linearProgram.LinearProgramSolver.compu
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TEN_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.percentageOfIntersectionBetweenTwoLine2Ds;
 
-public class SensitivityBasedCoMMarginCalculator
+public class SensitivityBasedStabilityGradientCalculator
 {
    private static final boolean doRandomSampling = false;
    private static final boolean doWeightingByVertexProximity = true;
@@ -66,7 +67,7 @@ public class SensitivityBasedCoMMarginCalculator
 
    private final ExecutionTimer nullspaceCalculationTimer = new ExecutionTimer("nullspaceCalculationTimer", registry);
 
-   private final YoDouble[] yoComputedSensitivity = new YoDouble[largestSupportedNullspace * DIRECTIONS_TO_OPTIMIZE];
+   private final YoDouble[] yoComputedSensitivity = new YoDouble[largestSupportedNullspace];
    private final YoDouble[] yoVertexSensitivity = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
    private final YoDouble[] yoVertexSensitivityPrev = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
    private final DMatrixRMaj computedSensitivity = new DMatrixRMaj(0);
@@ -83,7 +84,6 @@ public class SensitivityBasedCoMMarginCalculator
    private final YoDouble yoContactPointSensitivity = new YoDouble("contactPointSensitivity", registry);
    private final YoDouble yoPostureSensitivity = new YoDouble("postureSensitivity", registry);
 
-   private int edgeIndexToCompute;
    private int vertexIndexA;
    private int vertexIndexB;
    private double cosA;
@@ -95,11 +95,11 @@ public class SensitivityBasedCoMMarginCalculator
    private DMatrixRMaj primalSolutionB;
    private DMatrixRMaj dualSolutionB;
 
-   public SensitivityBasedCoMMarginCalculator(ReferenceFrame centerOfMassFrame,
-                                              FullHumanoidRobotModel fullRobotModel,
-                                              WholeBodyContactState wholeBodyContactState,
-                                              StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
-                                              YoRegistry parentRegistry)
+   public SensitivityBasedStabilityGradientCalculator(ReferenceFrame centerOfMassFrame,
+                                                      FullHumanoidRobotModel fullRobotModel,
+                                                      WholeBodyContactState wholeBodyContactState,
+                                                      StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
+                                                      YoRegistry parentRegistry)
    {
       JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
       this.nullspaceCalculator = new WholeBodyContactNullspaceCalculator(controlledJoints, centerOfMassFrame, fullRobotModel);
@@ -113,12 +113,9 @@ public class SensitivityBasedCoMMarginCalculator
                                                                                              wholeBodyContactState,
                                                                                              stabilityMarginRegionCalculator.getOptimizationModule());
 
-      for (int nullspace_idx = 0; nullspace_idx < largestSupportedNullspace; nullspace_idx++)
+      for (int i = 0; i < yoComputedSensitivity.length; i++)
       {
-         for (int edge_idx = 0; edge_idx < DIRECTIONS_TO_OPTIMIZE; edge_idx++)
-         {
-            yoComputedSensitivity[getSensitivityIndex(nullspace_idx, edge_idx)] = new YoDouble("sensitivity" + nullspace_idx + "_" + edge_idx, registry);
-         }
+         yoComputedSensitivity[i] = new YoDouble("sensitivity" + i, registry);
       }
       for (int i = 0; i < yoVertexSensitivity.length; i++)
       {
@@ -178,11 +175,9 @@ public class SensitivityBasedCoMMarginCalculator
       postureConstraintVariationCalculator.resetToInitialJointState();
 
       double optimalSensitivity = 0.0;
-      for (int nullspace_idx = 0; nullspace_idx < nullspaceDimensionality.getValue(); nullspace_idx++)
+      for (int i = 0; i < nullspaceDimensionality.getValue(); i++)
       {
-         double s_idx = yoComputedSensitivity[getSensitivityIndex(nullspace_idx, lowestMarginEdgeIndex)].getValue();
-         optimalSensitivity += EuclidCoreTools.square(s_idx);
-         computedSensitivity.set(nullspace_idx, 0, s_idx);
+         optimalSensitivity += EuclidCoreTools.square(yoComputedSensitivity[i].getValue());
       }
       yoPostureSensitivity.set(Math.sqrt(optimalSensitivity));
 
@@ -281,37 +276,31 @@ public class SensitivityBasedCoMMarginCalculator
 
       /* Compute constraint matrix variation */
       DMatrixRMaj solverConstraintVariation = postureConstraintVariationCalculator.computeFiniteDifference(nullspaceVelocity);
+      double sensitivityMultiplier = stabilityMarginRegionCalculator.getOptimizationModule().getStabilityPointGradientCoefficient();
 
-      for (int edgeIndex = 0; edgeIndex < DIRECTIONS_TO_OPTIMIZE; edgeIndex++)
-      {
-         if (!updateStabilityMarginData(edgeIndex))
-            continue;
+      double sensitivityA = sensitivityMultiplier * cosA * computeSensitivity(solverConstraintVariation, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
+      double sensitivityB = sensitivityMultiplier * cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
+      double sensitivity = sensitivityA * vertexAWeight + sensitivityB * vertexBWeight;
 
-         double sensitivityA = cosA * computeSensitivity(solverConstraintVariation, primalSolutionA, dualSolutionA, tempSensitivityMatrix);
-         double sensitivityB = cosB * computeSensitivity(solverConstraintVariation, primalSolutionB, dualSolutionB, tempSensitivityMatrix);
-         double sensitivity = sensitivityA * vertexAWeight + sensitivityB * vertexBWeight;
-
-         yoComputedSensitivity[getSensitivityIndex(nullspaceIndex, edgeIndex)].set(sensitivity);
-      }
+      yoComputedSensitivity[nullspaceIndex].set(sensitivity);
+      computedSensitivity.set(nullspaceIndex, 0, sensitivity);
 
       return true;
    }
 
    private boolean updateStabilityMarginData(int edgeIndex)
    {
-      edgeIndexToCompute = edgeIndex;
+      FrameConvexPolygon2DReadOnly feasibleRegion = stabilityMarginRegionCalculator.getFeasibleRegion();
 
-      if (stabilityMarginRegionCalculator.isDegenerateEdge(edgeIndex))
-         return false;
+      FramePoint2DReadOnly vertexA = feasibleRegion.getVertex(edgeIndex);
+      FramePoint2DReadOnly vertexB = feasibleRegion.getNextVertex(edgeIndex);
 
-      vertexIndexA = getVertexAOfEdge(edgeIndexToCompute);
-      vertexIndexB = getVertexBOfEdge(edgeIndexToCompute);
-      FramePoint2DReadOnly vertexA = stabilityMarginRegionCalculator.getOptimizedVertex(vertexIndexA);
-      FramePoint2DReadOnly vertexB = stabilityMarginRegionCalculator.getOptimizedVertex(vertexIndexB);
+      vertexIndexA = stabilityMarginRegionCalculator.fromEuclidIndex(edgeIndex);
+      vertexIndexB = stabilityMarginRegionCalculator.fromEuclidIndex(feasibleRegion.getNextVertexIndex(edgeIndex));
 
       double edgeDX = vertexB.getX() - vertexA.getX();
       double edgeDY = vertexB.getY() - vertexA.getY();
-      comMarginDirection.set(edgeDY, -edgeDX);
+      comMarginDirection.set(-edgeDY, edgeDX);
       comMarginDirection.normalize();
 
       FramePoint3DReadOnly centerOfMass = stabilityMarginRegionCalculator.getCenterOfMass();

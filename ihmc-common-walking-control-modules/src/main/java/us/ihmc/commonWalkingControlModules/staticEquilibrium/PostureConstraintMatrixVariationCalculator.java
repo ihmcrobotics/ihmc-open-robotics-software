@@ -97,15 +97,22 @@ public class PostureConstraintMatrixVariationCalculator
       CommonOps_DDRM.subtract(wholeBodyContactState.getActuationConstraintMatrix(), actuationConstraintNominal, actuationConstraintVariation);
       CommonOps_DDRM.scale(1.0 / integrationDT, actuationConstraintVariation);
 
-      int numCoMVariables = 2;
-      int numEquilibriumConstraints = 12;
-      constraintMatrixVariation.reshape(actuationConstraintVariation.getNumRows() + numEquilibriumConstraints,
-                                        actuationConstraintVariation.getNumCols() + numCoMVariables);
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEquilibriumConstraints, 0, actuationConstraintVariation, 0, 0,
+      DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
+      DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
+
+      int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
+
+      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, stabilityMarginOptimizationModule.getRhoToForceTransformationMatrix(), solverConstraintVariation);
+      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
+
+      /* Soft reset to initial configuration (don't call update frames by default) */
+//      MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
+//      resetToInitialJointState();
 
       constraintVarCalculatorSolverMathTimer.stopMeasurement();
       return solverConstraintVariation;
@@ -125,15 +132,18 @@ public class PostureConstraintMatrixVariationCalculator
       /* Integrate one preview tick and copy to robot model */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.VELOCITY, qd);
 
-      int numCoMVariables = 2;
-      int numEquilibriumConstraints = 12;
-      constraintMatrixVariation.reshape(actuationConstraintVariation.getNumRows() + numEquilibriumConstraints,
-                                        actuationConstraintVariation.getNumCols() + numCoMVariables);
-      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEquilibriumConstraints, 0, actuationConstraintVariation, 0, 0,
+      DMatrixRMaj solverToNominalTransformation = stabilityMarginOptimizationModule.getSolverToNominalTransformation();
+      DMatrixRMaj nominalConstraintMatrix = stabilityMarginOptimizationModule.getNominalConstraintMatrix();
+
+      int numInequalityDynamicsConstraints = stabilityMarginOptimizationModule.getNumDynamicsConstraints();
+      int numEqualityDynamicsConstraints = 2 * numInequalityDynamicsConstraints;
+
+      constraintMatrixVariation.reshape(nominalConstraintMatrix.getNumRows(), nominalConstraintMatrix.getNumCols());
+      MatrixTools.setMatrixBlock(constraintMatrixVariation, numEqualityDynamicsConstraints, 0, actuationConstraintVariation, 0, 0,
                                  actuationConstraintVariation.getNumRows(), actuationConstraintVariation.getNumCols(), 1.0);
 
       /* Transform constraint matrix variation to rho-space */
-      CommonOps_DDRM.mult(constraintMatrixVariation, stabilityMarginOptimizationModule.getRhoToForceTransformationMatrix(), solverConstraintVariation);
+      CommonOps_DDRM.mult(constraintMatrixVariation, solverToNominalTransformation, solverConstraintVariation);
 
       /* Reset joint configuration to initial */
       MultiBodySystemTools.insertJointsState(controlledJoints, JointStateType.CONFIGURATION, initialJointConfiguration);
