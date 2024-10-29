@@ -1,6 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -33,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class AtlasD435ToMultiSenseLeftEyeBridge
 {
    private static final double OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
@@ -53,7 +53,7 @@ public class AtlasD435ToMultiSenseLeftEyeBridge
       int imageHeight = 360;
       double fx = 500.0;
       double fy = 500.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
+      Object depthCameraIntrinsics = new Object();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("D435ToLeftEyeBridge", true);
 

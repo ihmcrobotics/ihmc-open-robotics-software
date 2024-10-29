@@ -159,6 +159,7 @@ public class ROS2SRTVideoSubscriber
                                                          null,
                                                          nextFramePixelFormat,
                                                          streamStatusMonitor.getCameraIntrinsics(),
+                                                         streamStatusMonitor.getCameraModel(),
                                                          frameSensorPose,
                                                          frameAcquisitionTime,
                                                          frameDataMessage.getSequenceNumber(),

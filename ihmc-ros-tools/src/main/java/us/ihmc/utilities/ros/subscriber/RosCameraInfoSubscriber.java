@@ -5,12 +5,12 @@ import java.util.concurrent.TimeUnit;
 
 import sensor_msgs.CameraInfo;
 import us.ihmc.utilities.ros.RosMainNode;
-import boofcv.struct.calib.CameraPinholeBrown;
 
+@Deprecated
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo> {
 
    boolean isCameraInfoReceived=false;
-   CameraPinholeBrown param = new CameraPinholeBrown();
+   Object param = new Object();
    RosMainNode rosMainNode;
    CountDownLatch latch = new CountDownLatch(1);
    
@@ -22,7 +22,7 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
    }
 
 
-   public CameraPinholeBrown getIntrinsicParametersBlocking() throws InterruptedException
+   public Object getIntrinsicParametersBlocking() throws InterruptedException
    {
       latch.await(5, TimeUnit.SECONDS);
       return param;
@@ -41,11 +41,11 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
       double[] P = message.getP();
 
       // assume P is a 4x3 matrix which was not written by a CV person
-      param.fx = P[0];
-      param.skew = P[1];
-      param.cx = P[2];
-      param.fy = P[5];
-      param.cy = P[6];
+//      param.fx = P[0];
+//      param.skew = P[1];
+//      param.cx = P[2];
+//      param.fy = P[5];
+//      param.cy = P[6];
       
       // Use these parameters for Gazebo in the future.
 
@@ -58,8 +58,8 @@ public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraIn
       //            packet.param.fy = K[4];
       //            packet.param.cy = K[5];
 
-      param.width = message.getWidth();
-      param.height = message.getHeight();
+//      param.width = message.getWidth();
+//      param.height = message.getHeight();
       //calc field of view
 //      double hfov;
 //

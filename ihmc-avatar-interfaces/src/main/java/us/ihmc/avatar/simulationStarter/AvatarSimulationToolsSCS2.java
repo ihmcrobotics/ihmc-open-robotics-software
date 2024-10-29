@@ -8,7 +8,6 @@ import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.startOpertorIn
 import java.util.ArrayList;
 import java.util.List;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
@@ -106,6 +105,7 @@ public class AvatarSimulationToolsSCS2
       return avatarSimulationEnvironment;
    }
 
+   @Deprecated
    public static class AvatarSimulationEnvironment
    {
       private final DRCRobotModel robotModel;
@@ -162,7 +162,7 @@ public class AvatarSimulationToolsSCS2
             double fov = cameraSensor.getFieldOfView().getValue();
 
             double f = width / 2 / Math.tan(fov / 2);
-            CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown(f, f, 0, (width - 1) / 2f, (height - 1) / 2f, width, height);
+            Object intrinsicParameters = new Object();
 
             cameraSensor.addCameraFrameConsumer((timestamp, frame) ->
             {

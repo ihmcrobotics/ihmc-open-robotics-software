@@ -8,16 +8,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import boofcv.abst.fiducial.FiducialDetector;
-import boofcv.alg.distort.pinhole.LensDistortionPinhole;
-import boofcv.factory.fiducial.ConfigFiducialBinary;
-import boofcv.factory.fiducial.FactoryFiducial;
-import boofcv.factory.filter.binary.ConfigThreshold;
-import boofcv.factory.filter.binary.ThresholdType;
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.calib.CameraPinhole;
-import boofcv.struct.image.GrayF32;
-import boofcv.struct.image.ImageType;
 import perception_msgs.msg.dds.VideoPacket;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.EulerType;
@@ -44,6 +34,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Deprecated
 public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
@@ -61,7 +52,7 @@ public class FiducialDetectorFromCameraImages
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private FiducialDetector<GrayF32> detector;
+   private Object detector;
    private Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
@@ -96,8 +87,8 @@ public class FiducialDetectorFromCameraImages
    {
       this.expectedFiducialSize.set(1.0);
       this.prefix = prefix;
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
+//      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+//                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
 
       expectedFiducialSize.addListener(new YoVariableChangedListener()
       {
@@ -106,8 +97,8 @@ public class FiducialDetectorFromCameraImages
          {
             synchronized (expectedFiducialSizeChangedConch)
             {
-               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                                       ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
+//               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+//                                                       ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
             }
          }
       });
@@ -172,7 +163,7 @@ public class FiducialDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
    }
 
-   public FiducialDetector<GrayF32> getFiducialDetector()
+   public Object getFiducialDetector()
    {
       return detector;
    }
@@ -188,15 +179,15 @@ public class FiducialDetectorFromCameraImages
    public void detect(VideoPacket videoPacket)
    {
       BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().copyArray());
-      detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
-             HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
+//      detect(bufferedImage, videoPacket.getPosition(), videoPacket.getOrientation(),
+//             HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
 
    }
 
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
-                      CameraPinhole intrinsicParameters)
+                      Object intrinsicParameters)
    {
-      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
+//      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
       //increase brightness for sim
       RescaleOp rescaleOp = new RescaleOp(4.5f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
@@ -228,28 +219,28 @@ public class FiducialDetectorFromCameraImages
          cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
          cameraPose.getPosition().set(cameraPositionInWorld);
 
-         GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
+//         GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
          if (DEBUG)
          {
-            image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
+//            image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
             frame.setVisible(true);
          }
 
-         detector.detect(grayImage);
+//         detector.detect(grayImage);
          int matchingFiducial = -1;
-         for (int i = 0; i < detector.totalFound(); i++)
-         {
-            if (detector.getId(i) == targetIDToLocate.getLongValue())
-            {
-               matchingFiducial = i;
-               //            System.out.println("matchingFiducial = " + matchingFiducial);
-            }
-         }
+//         for (int i = 0; i < detector.totalFound(); i++)
+//         {
+//            if (detector.getId(i) == targetIDToLocate.getLongValue())
+//            {
+//               matchingFiducial = i;
+//               //            System.out.println("matchingFiducial = " + matchingFiducial);
+//            }
+//         }
 
          if (matchingFiducial > -1)
          {
-            detector.getFiducialToCamera(matchingFiducial, fiducialToCamera);
+//            detector.getFiducialToCamera(matchingFiducial, fiducialToCamera);
 
             //         System.out.println("fiducialToCamera = \n" + fiducialToCamera);
 
