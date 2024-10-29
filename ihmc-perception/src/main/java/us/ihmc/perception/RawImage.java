@@ -222,22 +222,12 @@ public class RawImage
 
    public int getWidth()
    {
-      if (hasCpuImage())
-         return cpuImageMat.cols();
-      else if (hasGpuImage())
-         return gpuImageMat.cols();
-
-      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
+      return cameraIntrinsics.getWidth();
    }
 
    public int getHeight()
    {
-      if (hasCpuImage())
-         return cpuImageMat.rows();
-      else if (hasGpuImage())
-         return gpuImageMat.rows();
-
-      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
+      return cameraIntrinsics.getHeight();
    }
 
    public float getDepthDiscretization()
