@@ -149,7 +149,7 @@ public class PelvisICPBasedTranslationManager
       numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       icpOffsetMaxRate = new YoDouble(namePrefix + "icpOffsetMaxRate", registry);
-      icpOffsetMaxRate.set(0.04);
+      icpOffsetMaxRate.set(0.06);
 
       rateLimitedICPOffsetX = new RateLimitedYoVariable(namePrefix + "icpOffsetX_rl", registry, icpOffsetMaxRate, controlDT);
       rateLimitedICPOffsetY = new RateLimitedYoVariable(namePrefix + "icpOffsetY_rl", registry, icpOffsetMaxRate, controlDT);
