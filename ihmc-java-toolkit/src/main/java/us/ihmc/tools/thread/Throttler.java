@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * Throttler is used to allow things to happen at a slower rate
@@ -150,7 +151,7 @@ public class Throttler
          if (overtime < 0.0)
          {
             // Guarantees to sleep at least this amount (i.e. will sleep too long)
-            currentTime += MissingThreadTools.sleepAtLeast(-overtime);
+            currentTime += ThreadTools.parkAtLeast(-overtime);
 
             calculateOvertime(period);
          }

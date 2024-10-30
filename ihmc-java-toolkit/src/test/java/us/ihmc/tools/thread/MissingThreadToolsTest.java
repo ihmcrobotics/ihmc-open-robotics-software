@@ -2,16 +2,10 @@ package us.ihmc.tools.thread;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,48 +13,6 @@ import static us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService.ME
 
 public class MissingThreadToolsTest
 {
-   @Test
-   public void testSleepAtLeast()
-   {
-      assertTrue(conductSleepTest(0.0000000000001, false));
-      assertTrue(conductSleepTest(0.5e-9, false));
-      assertTrue(conductSleepTest(1e-9, false));
-      assertTrue(conductSleepTest(0.1, false));
-      assertTrue(conductSleepTest(0.0001, false));
-      assertTrue(conductSleepTest(0.0000000005, false));
-      assertTrue(conductSleepTest(1.1, false));
-      assertTrue(conductSleepTest(2.0, false));
-
-      assertTrue(conductSleepTest(0.0000000000001, true));
-      assertTrue(conductSleepTest(0.5e-9, true));
-      assertTrue(conductSleepTest(1e-9, true));
-      assertTrue(conductSleepTest(0.1, true));
-      assertTrue(conductSleepTest(0.0001, true));
-      assertTrue(conductSleepTest(0.0000000005, true));
-      assertTrue(conductSleepTest(1.1, true));
-      assertTrue(conductSleepTest(2.0, true));
-   }
-
-   private boolean conductSleepTest(double sleepDuration, boolean atLeast)
-   {
-      double before = Conversions.nanosecondsToSeconds(System.nanoTime());
-
-      if (atLeast)
-         MissingThreadTools.sleepAtLeast(sleepDuration);
-      else
-         MissingThreadTools.sleep(sleepDuration);
-
-      double after = Conversions.nanosecondsToSeconds(System.nanoTime());
-
-      double overslept = (after - before) - sleepDuration;
-
-      LogTools.info("Overslept %f ms".formatted(Conversions.secondsToMilliseconds(overslept)));
-
-      assertTrue(overslept < 0.005); // Assert we don't oversleep more than 5 milliseconds -- typically a lot lower
-
-      return overslept > 0.0;
-   }
-
    @Test
    public void testSecondsDecomposition()
    {
@@ -266,42 +218,5 @@ public class MissingThreadToolsTest
       assertEquals("ac", resultThree.read());
 
       executor.destroy();
-   }
-
-   @Test
-   public void testCancellableScheduledTasks()
-   {
-      ScheduledExecutorService scheduler = ThreadTools.newSingleDaemonThreadScheduledExecutor("Test");
-
-      StringBuilder output = new StringBuilder();
-
-      ScheduledFuture<?> scheduledFuture1 = scheduler.schedule(() -> output.append("A"), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(200);
-      scheduledFuture1.cancel(false);
-      scheduler.schedule(() -> output.append("B"), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(600);
-      ScheduledFuture<StringBuilder> scheduledFuture2 = scheduler.schedule(() -> output.append("C"), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(200);
-      scheduledFuture2.cancel(false);
-      ThreadTools.sleep(600);
-      scheduler.schedule(() -> output.append("D"), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(600);
-
-      scheduler.schedule(() -> ExceptionTools.handle(() ->
-      {
-         output.append("E");
-         throw new NullPointerException();
-      }, DefaultExceptionHandler.PRINT_MESSAGE), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(600);
-      ScheduledFuture<StringBuilder> scheduledFuture3 = scheduler.schedule(() -> output.append("F"), 400, TimeUnit.MILLISECONDS);
-      ThreadTools.sleep(200);
-      scheduledFuture3.cancel(false);
-      ThreadTools.sleep(600);
-
-      String recordedOutput = output.toString();
-      assertEquals("BDE", recordedOutput);
-      LogTools.info(recordedOutput);
-
-      scheduler.shutdown();
    }
 }
