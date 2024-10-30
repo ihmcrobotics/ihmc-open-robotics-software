@@ -519,12 +519,18 @@ public class PelvisICPBasedTranslationManager
 
    private void packCurrentDesiredPositionAndVelocity(FramePoint3D currentDesiredPosition, FrameVector3D currentDesiredVelocity)
    {
-      if (isResetting.getValue())
+      if (isResetting.getValue() && proportionalGain.getValue() > 0.0)
       {
          tempPosition2d.setToZero(pelvisZUpFrame);
          tempPosition2d.changeFrame(icpOffsetForReset.getReferenceFrame());
          tempPosition2d.scaleAdd(1.0 / proportionalGain.getValue(), icpOffsetForReset, tempPosition2d);
          currentDesiredPosition.setIncludingFrame(tempPosition2d, 0.0);
+
+         tempError2d.setIncludingFrame(icpOffsetForReset);
+         tempError2d.changeFrame(supportFrame);
+
+         rateLimitedICPOffsetX.set(tempError2d.getX());
+         rateLimitedICPOffsetY.set(tempError2d.getY());
       }
       else if (isRunning.getBooleanValue())
       {
@@ -662,19 +668,20 @@ public class PelvisICPBasedTranslationManager
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredCoPToModify);
 
          icpOffsetAfterProjection.sub(icpDesiredProjected, desiredICPToModify);
+         rateLimitedICPOffsetX.update(icpOffsetAfterProjection.getX());
+         rateLimitedICPOffsetY.update(icpOffsetAfterProjection.getY());
 
          // update cumulated error based on projection
          if (integralGain.getValue() > 1.0e-4)
          {
-            pelvisPositionCumulatedErrorClamped.setIncludingFrame(icpOffsetAfterProjection);
+            pelvisPositionCumulatedErrorClamped.setIncludingFrame(icpOffsetAfterProjection.getReferenceFrame(),
+                                                                  rateLimitedICPOffsetX.getValue(),
+                                                                  rateLimitedICPOffsetY.getValue());
             pelvisPositionCumulatedErrorClamped.changeFrame(worldFrame);
             pelvisPositionCumulatedErrorClamped.sub(proportionalTerm);
             pelvisPositionCumulatedErrorClamped.scale(1.0 / integralGain.getValue());
             pelvisPositionCumulatedError.set(pelvisPositionCumulatedErrorClamped);
          }
-
-         rateLimitedICPOffsetX.update(icpOffsetAfterProjection.getX());
-         rateLimitedICPOffsetY.update(icpOffsetAfterProjection.getY());
 
          desiredICPToModify.add(rateLimitedICPOffsetX.getValue(), rateLimitedICPOffsetY.getValue());
 
