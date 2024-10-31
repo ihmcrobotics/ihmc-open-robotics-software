@@ -226,7 +226,7 @@ class ROS2ToolsTest
       AtomicBoolean failed = new AtomicBoolean(false);
       StringBuilder stringToSend = new StringBuilder("Hello World!");
 
-      ROS2Node sharedMemoryNode = ROS2Tools.createSharedMemoryROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "SharedMemoryNode");
+      ROS2Node sharedMemoryNode = ROS2Tools.createSharedMemoryROS2Node(getClass().getSimpleName() + "SharedMemoryNode");
       ROS2Subscription<String> sharedMemorySubscriber = sharedMemoryNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(String.class), subscriber ->
       {
          String message = subscriber.takeNextData();

@@ -2,7 +2,6 @@ package us.ihmc.perception.streaming;
 
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2SRTStreamTopicPair;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.HashSet;
@@ -10,7 +9,7 @@ import java.util.Set;
 
 public class ROS2SRTVideoStreamImageMessageRelay
 {
-   private final ROS2Node loopbackNode = ROS2Tools.createSharedMemoryROS2Node(PubSubImplementation.FAST_RTPS, "srt_stream_image_message_republisher");
+   private final ROS2Node loopbackNode = ROS2Tools.createSharedMemoryROS2Node("srt_stream_image_message_republisher");
 
    private final Set<ROS2SRTVideoStreamImageMessageRelayWorker> workers = new HashSet<>();
 
