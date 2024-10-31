@@ -8,12 +8,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.tools.thread.Throttler;
-
-import java.util.Arrays;
-import java.util.HashSet;
+import us.ihmc.commons.thread.Throttler;
 
 /*
  *  FIXME: It doesn't make sense to have a visualizer for settings.

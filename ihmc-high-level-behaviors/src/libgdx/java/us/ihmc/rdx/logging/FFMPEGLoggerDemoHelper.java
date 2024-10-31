@@ -3,13 +3,13 @@ package us.ihmc.rdx.logging;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
-import us.ihmc.log.LogTools;
-import us.ihmc.commons.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
 
 import java.io.File;
 import java.lang.reflect.Constructor;

@@ -2,6 +2,7 @@ package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.TestTools;
 import us.ihmc.commons.UnitConversions;
@@ -57,7 +58,7 @@ public class ThrottlerAndFrequencyCounterTest
 
    private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
    {
-      LogTools.info("testThrottlerAndFrequencyCounter (using us.ihmc.tools.thread.Throttler) targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
+      LogTools.info("testThrottlerAndFrequencyCounter (using us.ihmc.commons.thread.Throttler) targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
 
       Throttler throttler = new Throttler();
       throttler.setFrequency(targetFrequency);
