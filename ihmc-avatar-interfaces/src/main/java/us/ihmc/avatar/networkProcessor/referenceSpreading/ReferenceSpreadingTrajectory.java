@@ -74,6 +74,89 @@ public class ReferenceSpreadingTrajectory
       keyMatrix = trajectoryPlayer.getKeyMatrix();
    }
 
+   public HandHybridJointspaceTaskspaceTrajectoryMessage getFirstHandHybridTrajectoryMessage(RobotSide robotSide, Double duration)
+   {
+      SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      SE3TrajectoryPointMessage se3TrajectoryPointMessage;
+
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      TrajectoryPoint1DMessage jointTrajectoryPointMessage = new TrajectoryPoint1DMessage();
+      OneDoFJointBasics joint;
+      double jointPosition;
+      double jointVelocity;
+
+      for (String jointName : JOINT_NAMES)
+      {
+         jointspaceTrajectoryMessage.getJointTrajectoryMessages().add().set(new OneDoFJointTrajectoryMessage());
+         jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(JOINT_NAMES.indexOf(jointName)).setSequenceId(JOINT_NAMES.indexOf(jointName));
+         //         jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(JOINT_NAMES.indexOf(jointName)).setWeight(0.01);
+      }
+
+      Point3D desiredPosition = new Point3D();
+      YawPitchRoll desiredOrientation = new YawPitchRoll();
+      Vector3D desiredLinearVelocity = new Vector3D();
+      Vector3D desiredAngularVelocity = new Vector3D();
+
+      LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
+      trajectoryPlayer.reset();
+      makeMap(trajectoryPlayer.play(false), currentFrame);
+      startTimeCSV = currentFrame.get("time[sec]") - duration;
+      //      LogTools.info("CurrentFrame: " + currentFrame);
+
+      int totalFrames = trajectoryPlayer.getNumberOfLines();
+      int frameInterval = Math.max(1, (totalFrames + (int) MAX_POINTS - 2) / ((int) MAX_POINTS - 1));
+      int frameIndex = 0;
+      int jointIndex;
+      double currentTime = currentFrame.get("time[sec]");
+      desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
+                          currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),
+                          currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionZ"));
+      desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQx"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQy"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQz"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQs"));
+
+      desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityX"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityY"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityZ"));
+      desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityX"),
+                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityY"),
+                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityZ"));
+
+      for (String jointName : JOINT_NAMES)
+      {
+         jointIndex = JOINT_NAMES.indexOf(jointName);
+
+         jointTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
+         joint = fullRobotModel.getOneDoFJointByName(robotSide.getUpperCaseName() + "_" + jointName);
+         jointPosition = Math.max(joint.getJointLimitLower(), Math.min(joint.getJointLimitUpper(), currentFrame.get("q_" + robotSide.getUpperCaseName() + "_" + jointName)));
+         jointVelocity = Math.max(joint.getVelocityLimitLower(), Math.min(joint.getVelocityLimitUpper(), currentFrame.get("qd_" + robotSide.getUpperCaseName() + "_" + jointName)));
+         jointTrajectoryPointMessage.setPosition(jointPosition);
+         jointTrajectoryPointMessage.setVelocity(jointVelocity);
+         jointTrajectoryPointMessage.setSequenceId(frameIndex);
+         jointspaceTrajectoryMessage.getJointTrajectoryMessages().get(jointIndex).getTrajectoryPoints().add().set(jointTrajectoryPointMessage);
+      }
+
+      se3TrajectoryPointMessage = createSE3TrajectoryPointMessage(currentTime - startTimeCSV,
+                                                                  desiredPosition,
+                                                                  desiredOrientation,
+                                                                  desiredLinearVelocity,
+                                                                  desiredAngularVelocity);
+      se3TrajectoryPointMessage.setSequenceId(frameIndex);
+      se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
+
+      HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+      handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+      handHybridTrajectoryMessage.setRobotSide(robotSide.toByte());
+      handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+
+      handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+
+      return handHybridTrajectoryMessage;
+   }
+
    public HandHybridJointspaceTaskspaceTrajectoryMessage getHandHybridTrajectoryMessage(RobotSide robotSide)
    {
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();

@@ -97,6 +97,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ImBoolean showAvoidanceCollisionMeshes = new ImBoolean();
    private final ImBoolean showContactCollisionMeshes = new ImBoolean();
    private RDXArmManager armManager;
+   private RDXReferenceSpreadingManager referenceSpreadingManager;
    private final RDXLocomotionManager locomotionManager;
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
@@ -177,6 +178,7 @@ public class RDXTeleoperationManager extends RDXPanel
                                      teleoperationParameters,
                                      interactableHands,
                                      wholeBodyIKManager::getEnabled);
+      referenceSpreadingManager = new RDXReferenceSpreadingManager(communicationHelper, robotModel, syncedRobot, desiredRobot, teleoperationParameters);
 
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
@@ -311,6 +313,7 @@ public class RDXTeleoperationManager extends RDXPanel
          if (hasEitherArm)
          {
             armManager.create(baseUI);
+            referenceSpreadingManager.create(baseUI);
             for (RobotSide side : interactableHands.sides())
             {
                interactableHands.get(side).setActionExecutor(() ->
@@ -366,6 +369,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       locomotionManager.update();
       armManager.update(interactablesEnabled.get());
+      referenceSpreadingManager.update(interactablesEnabled.get());
 
       if (interactablesEnabled.get())
       {
@@ -585,6 +589,9 @@ public class RDXTeleoperationManager extends RDXPanel
 
       ImGuiTools.separatorText("Arms & Hands", ImGuiTools.getMediumFont());
       armManager.renderImGuiWidgets();
+
+      ImGuiTools.separatorText("Reference Spreading", ImGuiTools.getMediumFont());
+      referenceSpreadingManager.renderImGuiWidgets();
    }
 
    private void renderTooltipsAndContextMenus()
@@ -722,6 +729,11 @@ public class RDXTeleoperationManager extends RDXPanel
    public RDXArmManager getArmManager()
    {
       return armManager;
+   }
+
+   public RDXReferenceSpreadingManager getReferenceSpreadingManager()
+   {
+      return referenceSpreadingManager;
    }
 
    public ControllerStatusTracker getControllerStatusTracker()

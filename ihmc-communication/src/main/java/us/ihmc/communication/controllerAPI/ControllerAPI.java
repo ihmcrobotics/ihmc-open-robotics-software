@@ -16,6 +16,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.msg.dds.ReferenceSpreadingToolboxInputMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -106,6 +107,9 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
       inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
 
+      // Commands supported by the reference spreading toolbox
+      inputMessageClasses.add(ReferenceSpreadingToolboxInputMessage.class);
+
       // Input messages that don't have a corresponding command
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
@@ -141,6 +145,9 @@ public final class ControllerAPI
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());
       inputMessageClassSpecificQoS.put(KinematicsStreamingToolboxInputMessage.class, ROS2QosProfile.BEST_EFFORT());
+
+      // Setting the output messages with specific QoS
+      outputMessageClassSpecificQoS.put(ReferenceSpreadingToolboxInputMessage.class, ROS2QosProfile.BEST_EFFORT());
 
       // Setting the output messages with specific QoS
       outputMessageClassSpecificQoS.put(CapturabilityBasedStatus.class, ROS2QosProfile.BEST_EFFORT());

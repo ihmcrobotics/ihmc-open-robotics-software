@@ -41,7 +41,7 @@ public class CollisionDetection
    double kd;
    double time = Double.NaN;
 
-   CollisionDetection(double minSigma, double kd, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+   public CollisionDetection(double minSigma, double kd, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
       this.minSigma = minSigma;
       this.kd = kd;
@@ -57,7 +57,6 @@ public class CollisionDetection
 
       this.fullRobotModel = fullRobotModel;
       baseBody = fullRobotModel.getElevator().getChildrenJoints().get(0).getSuccessor();
-
    }
 
    public boolean detectCollision(HashMap<RobotSide, SpatialVectorMessage> handWrenches, us.ihmc.idl.IDLSequence.Float jointVelocities, double currentTime)
@@ -93,12 +92,16 @@ public class CollisionDetection
 
          CommonOps_DDRM.mult(velocityMatrix, tempMatrix, powerMatrix);
 
-         sigmaDot.get(robotSide).set(-kd*kd*sigma.get(robotSide).getDoubleValue() + kd*powerMatrix.get(0, 0));
+         sigmaDot.get(robotSide).set(-kd*kd*sigma.get(robotSide).getDoubleValue() + Math.abs(kd*powerMatrix.get(0, 0)));
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
-//         LogTools.info(robotSide.getCamelCaseName() + " - Sigma: " + sigma.get(robotSide).getDoubleValue() + " SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue() + " Power: " + powerMatrix.get(0, 0));
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
             return true;
+         }
+
+         if (RobotSide.LEFT.equals(robotSide))
+         {
+            LogTools.info("Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
          }
       }
       time = currentTime;

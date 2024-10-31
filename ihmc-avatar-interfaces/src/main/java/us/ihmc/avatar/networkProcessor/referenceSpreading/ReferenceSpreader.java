@@ -28,16 +28,16 @@ public class ReferenceSpreader
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
    private final YoRegistry registry;
-   private final String baseFinalPath;
+   private String baseFinalPath;
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final DRCRobotModel robotModel;
 
-   private final TrajectoryRecordReplay originalReference;
+   private TrajectoryRecordReplay originalReference;
    private final TrajectoryRecordReplay preImpactReference;
    private final TrajectoryRecordReplay postImpactReference;
    private final TrajectoryRecordReplay blendedImpactReference;
-   private List<String> keyMatrix = new ArrayList<>();
+   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.RECORD;
 
    private int impactIndex = -1;
    private double impactTime = Double.NaN;
@@ -51,6 +51,7 @@ public class ReferenceSpreader
    private final QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
 
    LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
+   double[] currentFrameArray = new double[0];
 
    Double timeDiff = 0.0;
    private final LinkedHashMap<String, Double> tempFrame = new LinkedHashMap<>();
@@ -64,19 +65,17 @@ public class ReferenceSpreader
    private double excludeInterval;
    private double blendInterval;
 
-   ReferenceSpreader(String filePath, Double excludeInterval, Double blendInterval, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
+   ReferenceSpreader(String demoDirectory, Double excludeInterval, Double blendInterval, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, CollisionDetection collisionDetection, YoRegistry registry)
    {
       this.registry = registry;
-      this.baseFinalPath = filePath.replace(".csv", "");
+      this.baseFinalPath = demoDirectory+"/Reference-Spreading";
       this.fullRobotModel = fullRobotModel;
       this.robotModel = robotModel;
 
-      this.originalReference = new TrajectoryRecordReplay(filePath, 1, true);
-      this.preImpactReference = new TrajectoryRecordReplay(filePath+"_pre.csv", 1, false);
-      this.postImpactReference = new TrajectoryRecordReplay(filePath+"_post.csv", 1, false);
-      this.blendedImpactReference = new TrajectoryRecordReplay(filePath+"_blended.csv", 1, false);
-      this.originalReference.importData(true);
-      this.keyMatrix = new ArrayList<>(originalReference.getKeyMatrix());
+      this.originalReference = new TrajectoryRecordReplay(baseFinalPath+".csv", 1, false);
+      this.preImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_pre.csv", 1, false);
+      this.postImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_post.csv", 1, false);
+      this.blendedImpactReference = new TrajectoryRecordReplay(baseFinalPath+"_blended.csv", 1, false);
 
       this.collisionDetection = collisionDetection;
       this.excludeInterval = excludeInterval;
@@ -87,7 +86,16 @@ public class ReferenceSpreader
          jointNames.add(joint.getName());
          jointVelocities.add(0.0f);
       }
+   }
 
+   public void setTrajectoryFilePath(String filePath, Boolean createKeyMap)
+   {
+      originalReference = new TrajectoryRecordReplay(filePath, 1, createKeyMap);
+      baseFinalPath = filePath.replace(".csv", "");
+   }
+
+   public void spreadTrajectories()
+   {
       detectImpact();
       extendPreImpactTrajectory();
       extendPostImpactTrajectory();
@@ -110,31 +118,31 @@ public class ReferenceSpreader
          for (RobotSide robotSide : RobotSide.values())
          {
             SpatialVectorMessage spatialVectorMessage = new SpatialVectorMessage();
-            spatialVectorMessage.getLinearPart().setX(currentFrame.get("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getLinearPart().setY(currentFrame.get("filteredWrenchLinearPartY"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getLinearPart().setZ(currentFrame.get("filteredWrenchLinearPartZ"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setX(currentFrame.get("filteredWrenchAngularPartX"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setY(currentFrame.get("filteredWrenchAngularPartY"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setZ(currentFrame.get("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setX(currentFrame.get("filteredWrenchLinearPartX" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setY(currentFrame.get("filteredWrenchLinearPartY" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setZ(currentFrame.get("filteredWrenchLinearPartZ" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setX(currentFrame.get("filteredWrenchAngularPartX" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setY(currentFrame.get("filteredWrenchAngularPartY" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setZ(currentFrame.get("filteredWrenchAngularPartZ" + robotSide.getSideNameInAllCaps()));
             handWrenches.put(robotSide, spatialVectorMessage);
+         }
 
-            if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")))
-            {
-               impactIndex = originalReference.getTimeStepReplay();
-               impactTime = currentFrame.get("time[sec]");
-            }
+         if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")))
+         {
+            impactIndex = originalReference.getTimeStepReplay();
+            impactTime = currentFrame.get("time[sec]");
+         }
 
-            if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
-            {
-               postImpactData = new double[values.length];
-               System.arraycopy(values, 0, postImpactData, 0, values.length);
-               break;
-            }
+         if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
+         {
+            postImpactData = new double[values.length];
+            System.arraycopy(values, 0, postImpactData, 0, values.length);
+            break;
          }
       }
       if (impactIndex == -1)
-         new AssertionError("No impact detected for ReferenceSpreading! (Change tuning or check the data)");
-      LogTools.info("Impact detected at index: " + impactIndex + " time: " + impactTime + " Current time " + currentFrame.get("time[sec]"));
+         LogTools.error("No impact detected");
+      LogTools.info("Impact detected at index: " + impactIndex + " time: " + impactTime);
    }
 
    private void extendPreImpactTrajectory()
@@ -354,6 +362,11 @@ public class ReferenceSpreader
       }
       blendedImpactReference.saveRecordingMemory();
       LogTools.info("BlendedImpact trajectory extended (Saved to Memory)");
+   }
+
+   public TrajectoryRecordReplay getOriginalReference()
+   {
+      return originalReference;
    }
 
    public ReferenceSpreadingTrajectory getOriginalReferenceTrajectory()

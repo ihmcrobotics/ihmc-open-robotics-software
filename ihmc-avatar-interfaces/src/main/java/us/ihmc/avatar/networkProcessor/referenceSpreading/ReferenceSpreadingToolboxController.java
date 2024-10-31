@@ -18,6 +18,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.referenceSpreadingToolboxAPI.ReferenceSpreadingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -47,6 +49,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
+   CommandInputManager commandInputManager;
 
    private final RSTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
@@ -71,6 +74,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
       timeProvider = RSTimeProvider.createTimeProvider();
 
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      this.commandInputManager = commandInputManager;
 
       MultiBodySystemTools.getRootBody(fullRobotModel.getElevator())
                           .subtreeIterable()
@@ -80,11 +84,10 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
 //      todo: Add proper way of importing the CSV file.
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
-                                                                           "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
+                                                                           "nadia-hardware-drivers/ReferenceSpreadingRecordings/").getFilesystemDirectory()).toString();
 //      String filePath = demoDirectory + "/testCSV.csv";
-      String filePath = demoDirectory + "/boxPickup.csv";
 
-      stateMachineHelper = new ReferenceSpreadingStateHelper(filePath, robotModel, fullRobotModel, trajectoryMessagePublisher, registry);
+      stateMachineHelper = new ReferenceSpreadingStateHelper(demoDirectory, robotModel, fullRobotModel, trajectoryMessagePublisher, registry);
       stateMachine = stateMachineHelper.setUpStateMachines(time);
    }
 
@@ -124,6 +127,22 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
       stateMachine.doActionAndTransition();
 
+      if (commandInputManager.isNewCommandAvailable(ReferenceSpreadingToolboxInputCommand.class))
+      {
+         ReferenceSpreadingToolboxInputCommand command = commandInputManager.pollNewestCommand(ReferenceSpreadingToolboxInputCommand.class);
+         if (command != null)
+         {
+            if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.WAITING)
+            {
+               goToWaiting();
+            }
+            else if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.PLAYBACK)
+            {
+               startRS();
+            }
+         }
+      }
+
 //      LogTools.info("/dot{q} = " + robotConfigurationData.getJointVelocities());
    }
 
@@ -139,7 +158,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    public void startRS()
    {
-      stateMachine.performTransition(States.BEFORE);
+      stateMachine.performTransition(States.PREPARE);
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)

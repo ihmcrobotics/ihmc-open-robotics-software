@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.ReferenceSpreadingToolboxInputMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
@@ -11,10 +13,12 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.ExternalForceEstimationToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.referenceSpreadingToolboxAPI.ReferenceSpreadingToolboxInputCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,6 +43,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       this(robotModel, KinematicsStreamingToolboxParameters.defaultParameters(), startYoVariableServer,true,  pubSubImplementation);
    }
 
+//   Todo: Remove the keepAwake and do setTimeWithoutInputsBeforeGoingToSleep(Double.infinity);
    public ReferenceSpreadingToolboxModule(DRCRobotModel robotModel,
                                            KinematicsStreamingToolboxParameters parameters,
                                            boolean startYoVariableServer,
@@ -96,6 +101,14 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
          if(referenceSpreadingToolboxController != null)
             referenceSpreadingToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
       });
+
+//      ROS2Topic<?> referenceSpreadingInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+//
+//      ros2Node.createSubscription(referenceSpreadingInputTopic.withTypeName(ReferenceSpreadingToolboxInputMessage.class), s ->
+//      {
+//         if(referenceSpreadingToolboxController != null)
+//            LogTools.info("Received ReferenceSpreadingToolboxInputMessage: " + s.takeNextData());
+//      });
    }
 
    @Override
@@ -115,6 +128,7 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(ExternalForceEstimationToolboxConfigurationCommand.class);
+      commands.add(ReferenceSpreadingToolboxInputCommand.class);
       return commands;
    }
 
@@ -124,11 +138,10 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
       return getSupportedStatuses();
    }
 
-//   todo: change to ReferenceSpreadingOutputStatus
    public static List<Class<? extends Settable<?>>> getSupportedStatuses()
    {
       List<Class<? extends Settable<?>>> status = new ArrayList<>();
-      status.add(ExternalForceEstimationOutputStatus.class);
+//      status.add(ExternalForceEstimationOutputStatus.class);
       return status;
    }
 
@@ -152,5 +165,10 @@ public class ReferenceSpreadingToolboxModule extends ToolboxModule
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ToolboxAPIs.REFERENCE_SPREADING_TOOLBOX.withRobot(robotName).withInput();
+   }
+
+   public static ROS2Topic<ReferenceSpreadingToolboxInputMessage> getInputToolboxInputTopic(String robotName)
+   {
+      return ControllerAPI.getTopic(getInputTopic(robotName), ReferenceSpreadingToolboxInputMessage.class);
    }
 }
