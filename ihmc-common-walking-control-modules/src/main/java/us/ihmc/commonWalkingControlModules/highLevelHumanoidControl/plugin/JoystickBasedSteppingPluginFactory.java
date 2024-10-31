@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator.DynamicsBasedFootstepPlugin;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator.DynamicsBasedFootstepPluginFactory;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -25,6 +27,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 {
    private final ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory;
    private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
+   private final DynamicsBasedFootstepPluginFactory dynamicsBasedFootstepPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
    private final List<Updatable> updatables = new ArrayList<>();
    private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
@@ -34,6 +37,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    {
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       this.velocityPluginFactory = new VelocityBasedSteppingPluginFactory();
+      this.dynamicsBasedFootstepPluginFactory = new DynamicsBasedFootstepPluginFactory();
 
       //      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
 //      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
@@ -110,16 +114,29 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                                                         contactableFeet,
                                                                                         timeProvider);
 
+      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = dynamicsBasedFootstepPluginFactory.buildPlugin(referenceFrames,
+                                                                                                               updateDT,
+                                                                                                               walkingControllerParameters,
+                                                                                                               walkingStatusMessageOutputManager,
+                                                                                                               walkingCommandInputManager,
+                                                                                                               yoGraphicsListRegistry,
+                                                                                                               contactableFeet,
+                                                                                                               timeProvider);
+
       csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       csgFootstepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
       csgFootstepGenerator.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
 
-
       fastWalkingPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       fastWalkingPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       fastWalkingPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
       fastWalkingPlugin.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
+
+      dynamicsBasedFootstepPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+      dynamicsBasedFootstepPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+      dynamicsBasedFootstepPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+      dynamicsBasedFootstepPlugin.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
 
       walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                     commandInputManager::setHighLevelStateChangeStatusMessage);
@@ -135,7 +152,10 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
          commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
 
-      JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator, fastWalkingPlugin, updatables);
+      JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator,
+                                                                                                fastWalkingPlugin,
+                                                                                                dynamicsBasedFootstepPlugin,
+                                                                                                updatables);
       joystickBasedSteppingPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
 
       return joystickBasedSteppingPlugin;

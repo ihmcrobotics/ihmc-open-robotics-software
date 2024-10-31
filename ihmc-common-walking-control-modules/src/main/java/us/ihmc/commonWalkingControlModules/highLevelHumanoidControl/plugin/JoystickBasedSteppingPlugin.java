@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator.DynamicsBasedFootstepPlugin;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -23,6 +24,7 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
 
    public JoystickBasedSteppingPlugin(ComponentBasedFootstepDataMessageGenerator stepGenerator,
                                       VelocityBasedSteppingPlugin fastWalkingStepGenerator,
+                                      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin,
                                       List<Updatable> updatables)
    {
       this.stepGenerator = stepGenerator;
@@ -30,6 +32,7 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
       this.updatables = updatables;
       registry.addChild(stepGenerator.getRegistry());
       registry.addChild(fastWalkingStepGenerator.getRegistry());
+      registry.addChild(dynamicsBasedFootstepPlugin.getRegistry());
    }
 
    @Override
