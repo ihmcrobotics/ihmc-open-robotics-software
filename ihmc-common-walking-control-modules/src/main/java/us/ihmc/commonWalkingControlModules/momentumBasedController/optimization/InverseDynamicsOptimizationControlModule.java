@@ -98,6 +98,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
    private final YoDouble rhoMin = new YoDouble("ControllerCoreRhoMin", registry);
+   private final YoDouble maxTorqueScalar = new YoDouble("maxTorqueScalar", registry);
    private final MomentumModuleSolution momentumModuleSolution;
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
@@ -124,6 +125,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
+      maxTorqueScalar.set(1.0);
 
       for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
          inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
@@ -173,7 +175,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJointBasics joint = oneDoFJoints[i];
-            torqueConstrainedJoints.add(joint);
+            if (joint.getName().contains("RIGHT_SHOULDER") || joint.getName().contains("RIGHT_ELBOW"))
+               torqueConstrainedJoints.add(joint);
          }
       }
 
@@ -454,8 +457,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          for (int i = 0; i < torqueConstrainedJoints.size(); i++)
          {
             OneDoFJointBasics joint = torqueConstrainedJoints.get(i);
-            torqueConstraintMinimumCommand.addJoint(joint, joint.getEffortLimitLower());
-            torqueConstraintMaximumCommand.addJoint(joint, joint.getEffortLimitUpper());
+            torqueConstraintMinimumCommand.addJoint(joint, maxTorqueScalar.getValue() * joint.getEffortLimitLower());
+            torqueConstraintMaximumCommand.addJoint(joint, maxTorqueScalar.getValue() * joint.getEffortLimitUpper());
          }
       }
 
