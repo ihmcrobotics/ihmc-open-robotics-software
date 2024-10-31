@@ -12,7 +12,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.Throttler;
 
 import java.net.InetSocketAddress;
@@ -36,7 +35,7 @@ public class ROS2StreamStatusMonitorTest
    {
       // Messages being sent over ROS2 from previous test may mess up the next test,
       // so we wait a bit after running each test
-      MissingThreadTools.sleep(1.0);
+      ThreadTools.park(1.0);
    }
 
    @Test
@@ -86,8 +85,8 @@ public class ROS2StreamStatusMonitorTest
 
       assertTrue(streamStatusMonitor.isStreaming());
 
-      MissingThreadTools.sleep(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
-      MissingThreadTools.sleep(0.05); // Sleep a little extra
+      ThreadTools.park(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
+      ThreadTools.park(0.05); // Sleep a little extra
 
       assertFalse(streamStatusMonitor.isStreaming());
    }
@@ -121,7 +120,7 @@ public class ROS2StreamStatusMonitorTest
       assertTrue(streamStatusMonitor.isStreaming());
 
       messagePublishThread.join();
-      MissingThreadTools.sleep(0.01);
+      ThreadTools.park(0.01);
       assertFalse(streamStatusMonitor.isStreaming());
    }
 }

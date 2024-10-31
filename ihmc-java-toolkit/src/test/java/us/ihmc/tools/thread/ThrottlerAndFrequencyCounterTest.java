@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.TestTools;
 import us.ihmc.commons.UnitConversions;
@@ -21,7 +22,7 @@ public class ThrottlerAndFrequencyCounterTest
          frequencyCalculator.ping();
 
          double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         MissingThreadTools.sleep(sleepTimeSeconds);
+         ThreadTools.park(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
@@ -42,13 +43,13 @@ public class ThrottlerAndFrequencyCounterTest
          frequencyCalculator.ping();
 
          double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
-         MissingThreadTools.sleep(sleepTimeSeconds);
+         ThreadTools.park(sleepTimeSeconds);
       }
 
       frequencyCalculator.destroy();
 
       // Decaying sleep
-      MissingThreadTools.sleep(decayTimeSeconds);
+      ThreadTools.park(decayTimeSeconds);
 
       double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
       TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
