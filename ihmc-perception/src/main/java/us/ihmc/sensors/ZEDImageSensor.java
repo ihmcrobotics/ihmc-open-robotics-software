@@ -4,19 +4,24 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;
+import us.ihmc.zed.SL_PositionalTrackingParameters;
+import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RuntimeParameters;
+import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
-import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
 
@@ -54,8 +59,13 @@ public class ZEDImageSensor extends ImageSensor
    private Instant lastGrabTime;
    private boolean lastGrabFailed = false;
 
-   private final SL_InitParameters zedInitParameters = new SL_InitParameters();
-   private final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+   protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
+   protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
+
+   private boolean positionalTrackingEnabled = false;
+   private final MutableReferenceFrame trackedSensorFrame = new MutableReferenceFrame();
+   private final SL_Quaternion sensorRotation = new SL_Quaternion();
+   private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel)
    {
@@ -87,8 +97,15 @@ public class ZEDImageSensor extends ImageSensor
          setInitParameters(zedInitParameters);
 
          // Open the camera
-         int returnCode = sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+         int returnCode = openCamera();
          throwOnError(returnCode);
+
+         if (positionalTrackingEnabled)
+         {
+            SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
+            positionalTrackingParameters.mode(SL_POSITIONAL_TRACKING_MODE_GEN_2);
+            sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
+         }
 
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
@@ -139,7 +156,6 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
       parametersToSet.enable_image_enhancement(true);
-      parametersToSet.svo_real_time_mode(true);
       parametersToSet.depth_mode(SL_DEPTH_MODE_ULTRA);
       parametersToSet.depth_stabilization(1);
       parametersToSet.depth_maximum_distance(zedModel.getMaximumDepthDistance());
@@ -152,6 +168,11 @@ public class ZEDImageSensor extends ImageSensor
       parametersToSet.enable_right_side_measure(false);
       parametersToSet.open_timeout_sec(5.0f);
       parametersToSet.async_grab_camera_recovery(false);
+   }
+
+   protected int openCamera()
+   {
+      return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
    }
 
    @Override
@@ -182,6 +203,16 @@ public class ZEDImageSensor extends ImageSensor
          throwOnError(returnCode);
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;
+
+         // Update tracked position if tracking enabled
+         if (positionalTrackingEnabled)
+         {
+            sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
+
+            Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
+            Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
+            trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+         }
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
@@ -241,6 +272,21 @@ public class ZEDImageSensor extends ImageSensor
       {
          return grabbedImages[imageKey].get();
       }
+   }
+
+   public ReferenceFrame getTrackedSensorFrame()
+   {
+      return trackedSensorFrame.getReferenceFrame();
+   }
+
+   public int getCameraID()
+   {
+      return cameraID;
+   }
+
+   public void enablePositionalTracking(boolean enable)
+   {
+      positionalTrackingEnabled = enable;
    }
 
    @Override
