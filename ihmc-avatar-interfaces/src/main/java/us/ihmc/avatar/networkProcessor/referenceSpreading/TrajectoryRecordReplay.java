@@ -222,6 +222,17 @@ public class TrajectoryRecordReplay
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
+         if (!keyMatrix.isEmpty())
+         {
+            for (int i = 0; i < keyMatrix.size(); i++)
+            {
+               writer.print(keyMatrix.get(i));
+               if (i < keyMatrix.size() - 1)
+                  writer.append(",");
+            }
+            writer.println();
+         }
+
          for (int row = 0; row < dataMatrix.size(); row++)
          {
             double[] dataLine = dataMatrix.get(row);
@@ -284,8 +295,7 @@ public class TrajectoryRecordReplay
 
    public void setPath(String filePath)
    {
-      this.filePath = filePath;
-      this.reset();
+      setPath(filePath, true);
    }
 
    public void setPath(String filePath, boolean reset)
@@ -330,6 +340,12 @@ public class TrajectoryRecordReplay
    public List<String> getKeyMatrix()
    {
       return keyMatrix;
+   }
+
+   public void setKeyMatrix(List<String> keyMatrix)
+   {
+      this.keyMatrix.clear();
+      this.keyMatrix.addAll(keyMatrix);
    }
 
    private void parseKeyMatrix(List<String> keyMatrixToParse)

@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
+import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
@@ -40,6 +41,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.teleoperation.RDXReferenceSpreadingManager;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
@@ -54,6 +56,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -125,6 +128,10 @@ public class RDXVRKinematicsStreamingMode
    private int leftIndex = -1;
    private int rightIndex = -1;
 
+   private ROS2Topic<ReferenceSpreadingToolboxInputMessage> referenceSpreadingROSTopic;
+   private ROS2Topic<ToolboxStateMessage> toolboxStatePublisher;
+   private int sequenceId = 0;
+
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        RDXVRContext vrContext,
@@ -141,6 +148,9 @@ public class RDXVRKinematicsStreamingMode
       this.vrContext = vrContext;
       this.controllerStatusTracker = controllerStatusTracker;
       this.footstepPlacer = footstepPlacer;
+
+      referenceSpreadingROSTopic = ReferenceSpreadingToolboxModule.getInputToolboxInputTopic(syncedRobot.getRobotModel().getSimpleRobotName());
+      toolboxStatePublisher = ReferenceSpreadingToolboxModule.getInputTopic(robotModel.getSimpleRobotName()).withTypeName(ToolboxStateMessage.class);
    }
 
    public void create(boolean createToolbox)
@@ -281,6 +291,26 @@ public class RDXVRKinematicsStreamingMode
             streamToController.set(!streamToController.get());
             if (!streamToController.get())
                streamingDisabled.set();
+         }
+
+         InputDigitalActionData bButton = controller.getBButtonActionData();
+         if (bButton.bChanged() && !bButton.bState())
+         {
+//            Stop Reference Spreading Recording
+            ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+            message.setState((byte) 0);
+            message.setSequenceId(sequenceId++);
+            ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+            LogTools.info("Recording stopped!");
+         }
+         else if (bButton.bChanged() && bButton.bState())
+         {
+//            Start Reference Spreading Recording
+            ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+            message.setState((byte) 1);
+            message.setSequenceId(sequenceId++);
+            ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+            LogTools.info("Recording started!");
          }
 
          // NOTE: Implement hand open close for controller trigger button.

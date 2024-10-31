@@ -1,41 +1,26 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.ReferenceSpreadingToolboxInputMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.referenceSpreading.ReferenceSpreadingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.referenceSpreadingToolboxAPI.ReferenceSpreadingToolboxInputCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDX3DPanelHandWrenchIndicator;
-import us.ihmc.rdx.ui.affordances.RDXArmControlMode;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 public class RDXReferenceSpreadingManager
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labelRS = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labelToolbox = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labelsRecord = new ImGuiUniqueLabelMap(getClass());
 
    private final CommunicationHelper communicationHelper;
    private final DRCRobotModel robotModel;
@@ -50,6 +35,8 @@ public class RDXReferenceSpreadingManager
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
    private final ImBoolean toolboxActive = new ImBoolean(false);
+   private final ImBoolean recordActive = new ImBoolean(false);
+   private final ImBoolean referenceSpreadingActive = new ImBoolean(false);
 
    ROS2ControllerHelper ros2ControllerHelper;
 
@@ -81,27 +68,63 @@ public class RDXReferenceSpreadingManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Toolbox Active"), toolboxActive))
+      ImGui.text("Record: ");
+      ImGui.sameLine();
+      if (recordActive.get())
       {
-         if(toolboxActive.get())
+         if (ImGui.button(labelsRecord.get("Stop")))
          {
-            startToolbox();
+            stopRecording();
+            recordActive.set(false);
          }
-         else
+      }
+      else
+      {
+         if (ImGui.button(labelsRecord.get("Start")))
          {
-            stopToolbox();
+            startRecording();
+            recordActive.set(true);
          }
       }
 
-      if (ImGui.checkbox(labels.get("Record"), toolboxActive))
+      ImGui.text("Toolbox: ");
+      ImGui.sameLine();
+      if (toolboxActive.get())
       {
-         if(toolboxActive.get())
+         if (ImGui.button(labelToolbox.get("Stop")))
          {
-            startRecording();
+            stopToolbox();
+            toolboxActive.set(false);
+         }
+      }
+      else
+      {
+         if (ImGui.button(labelToolbox.get("Start")))
+         {
+            startToolbox();
+            toolboxActive.set(true);
+         }
+      }
+
+      if (toolboxActive.get())
+      {
+         ImGui.text("Reference Spreading: ");
+         ImGui.sameLine();
+         if (referenceSpreadingActive.get())
+         {
+            if (ImGui.button(labelRS.get("Stop")))
+            {
+               stopReferenceSpreading();
+               referenceSpreadingActive.set(false);
+            }
          }
          else
          {
-            stopRecording();
+            if (ImGui.button(labelRS.get("Start")))
+            {
+               startReferenceSpreading();
+               referenceSpreadingActive.set(true);
+            }
          }
       }
    }
@@ -127,7 +150,7 @@ public class RDXReferenceSpreadingManager
    private void startRecording()
    {
       ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
-      message.setState((byte) 0);
+      message.setState((byte) 1);
       message.setSequenceId(sequenceId++);
       ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
 
@@ -137,7 +160,27 @@ public class RDXReferenceSpreadingManager
    private void stopRecording()
    {
       ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
-      message.setState((byte) 1);
+      message.setState((byte) 0);
+      message.setSequenceId(sequenceId++);
+      ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+
+      LogTools.info("Message: " + message);
+   }
+
+   private void startReferenceSpreading()
+   {
+      ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+      message.setState((byte) 2);
+      message.setSequenceId(sequenceId++);
+      ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+
+      LogTools.info("Message: " + message);
+   }
+
+   private void stopReferenceSpreading()
+   {
+      ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+      message.setState((byte) 0);
       message.setSequenceId(sequenceId++);
       ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
 

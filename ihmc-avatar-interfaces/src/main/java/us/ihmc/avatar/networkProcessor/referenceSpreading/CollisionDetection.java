@@ -99,10 +99,10 @@ public class CollisionDetection
             return true;
          }
 
-//         if (RobotSide.LEFT.equals(robotSide))
-//         {
-//            LogTools.info("Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
-//         }
+         if (RobotSide.LEFT.equals(robotSide))
+         {
+            LogTools.info("Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
+         }
       }
       time = currentTime;
       return false;

@@ -28,16 +28,16 @@ public class ReferenceSpreader
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
    private final YoRegistry registry;
-   private final String baseFinalPath;
+   private String baseFinalPath;
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final DRCRobotModel robotModel;
 
-   private final TrajectoryRecordReplay originalReference;
+   private TrajectoryRecordReplay originalReference;
    private final TrajectoryRecordReplay preImpactReference;
    private final TrajectoryRecordReplay postImpactReference;
    private final TrajectoryRecordReplay blendedImpactReference;
-   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.DEFAULT;
+   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.RECORD;
 
    private int impactIndex = -1;
    private double impactTime = Double.NaN;
@@ -88,15 +88,10 @@ public class ReferenceSpreader
       }
    }
 
-   public void recordFrameOriginal()
+   public void setTrajectoryFilePath(String filePath, Boolean createKeyMap)
    {
-      LogTools.info("Number of variables: " + registry.getVariables());
-      currentFrameArray = new double[keyMatrix.size()];
-      for (String yoVariable : keyMatrix)
-      {
-         currentFrameArray[keyMatrix.indexOf(yoVariable)] = this.registry.getVariable(yoVariable).getValueAsDouble();
-         LogTools.info("Recording: " + yoVariable + " = " + currentFrame.get(yoVariable));
-      }
+      originalReference = new TrajectoryRecordReplay(filePath, 1, createKeyMap);
+      baseFinalPath = filePath.replace(".csv", "");
    }
 
    public void spreadTrajectories()
@@ -123,31 +118,31 @@ public class ReferenceSpreader
          for (RobotSide robotSide : RobotSide.values())
          {
             SpatialVectorMessage spatialVectorMessage = new SpatialVectorMessage();
-            spatialVectorMessage.getLinearPart().setX(currentFrame.get("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getLinearPart().setY(currentFrame.get("filteredWrenchLinearPartY"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getLinearPart().setZ(currentFrame.get("filteredWrenchLinearPartZ"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setX(currentFrame.get("filteredWrenchAngularPartX"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setY(currentFrame.get("filteredWrenchAngularPartY"+robotSide.getSideNameInAllCaps()));
-            spatialVectorMessage.getAngularPart().setZ(currentFrame.get("filteredWrenchAngularPartZ"+robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setX(currentFrame.get("filteredWrenchLinearPartX" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setY(currentFrame.get("filteredWrenchLinearPartY" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getLinearPart().setZ(currentFrame.get("filteredWrenchLinearPartZ" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setX(currentFrame.get("filteredWrenchAngularPartX" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setY(currentFrame.get("filteredWrenchAngularPartY" + robotSide.getSideNameInAllCaps()));
+            spatialVectorMessage.getAngularPart().setZ(currentFrame.get("filteredWrenchAngularPartZ" + robotSide.getSideNameInAllCaps()));
             handWrenches.put(robotSide, spatialVectorMessage);
+         }
 
-            if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")))
-            {
-               impactIndex = originalReference.getTimeStepReplay();
-               impactTime = currentFrame.get("time[sec]");
-            }
+         if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")))
+         {
+            impactIndex = originalReference.getTimeStepReplay();
+            impactTime = currentFrame.get("time[sec]");
+         }
 
-            if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
-            {
-               postImpactData = new double[values.length];
-               System.arraycopy(values, 0, postImpactData, 0, values.length);
-               break;
-            }
+         if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
+         {
+            postImpactData = new double[values.length];
+            System.arraycopy(values, 0, postImpactData, 0, values.length);
+            break;
          }
       }
       if (impactIndex == -1)
-         new AssertionError("No impact detected for ReferenceSpreading! (Change tuning or check the data)");
-      LogTools.info("Impact detected at index: " + impactIndex + " time: " + impactTime + " Current time " + currentFrame.get("time[sec]"));
+         LogTools.error("No impact detected");
+      LogTools.info("Impact detected at index: " + impactIndex + " time: " + impactTime);
    }
 
    private void extendPreImpactTrajectory()

@@ -84,7 +84,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
 //      todo: Add proper way of importing the CSV file.
       String demoDirectory = Objects.requireNonNull(new WorkspaceDirectory("nadia",
-                                                                           "nadia-hardware-drivers/src/test/resources/hybridPlaybackCSVs").getFilesystemDirectory()).toString();
+                                                                           "nadia-hardware-drivers/ReferenceSpreadingRecordings/").getFilesystemDirectory()).toString();
 //      String filePath = demoDirectory + "/testCSV.csv";
 
       stateMachineHelper = new ReferenceSpreadingStateHelper(demoDirectory, robotModel, fullRobotModel, trajectoryMessagePublisher, registry);
@@ -132,15 +132,13 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
          ReferenceSpreadingToolboxInputCommand command = commandInputManager.pollNewestCommand(ReferenceSpreadingToolboxInputCommand.class);
          if (command != null)
          {
-            if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.START_RECORDING)
+            if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.WAITING)
             {
-               LogTools.info("Start recording");
-               stateMachine.performTransition(States.RECORD);
+               goToWaiting();
             }
-            else if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.STOP_RECORDING)
+            else if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.PLAYBACK)
             {
-               LogTools.info("Stop recording");
-               stateMachine.performTransition(States.WAITING);
+               startRS();
             }
          }
       }
@@ -160,7 +158,7 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
 
    public void startRS()
    {
-      stateMachine.performTransition(States.BEFORE);
+      stateMachine.performTransition(States.PREPARE);
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)
