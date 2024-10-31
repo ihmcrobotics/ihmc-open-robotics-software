@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ROS2SRTVideoStreamImageMessageRelay
 {
-   private final ROS2Node loopbackNode = ROS2Tools.createLoopbackROS2Node(PubSubImplementation.FAST_RTPS, "srt_stream_image_message_republisher");
+   private final ROS2Node loopbackNode = ROS2Tools.createSharedMemoryROS2Node(PubSubImplementation.FAST_RTPS, "srt_stream_image_message_republisher");
 
    private final Set<ROS2SRTVideoStreamImageMessageRelayWorker> workers = new HashSet<>();
 

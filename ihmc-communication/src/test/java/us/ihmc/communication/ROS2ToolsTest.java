@@ -219,6 +219,42 @@ class ROS2ToolsTest
       outsideSubscriber.remove();
    }
 
+   @Test
+   public void testSharedMemoryROS2Node() throws InterruptedException
+   {
+      AtomicBoolean messageReceived = new AtomicBoolean(false);
+      AtomicBoolean failed = new AtomicBoolean(false);
+      StringBuilder stringToSend = new StringBuilder("Hello World!");
+
+      ROS2Node sharedMemoryNode = ROS2Tools.createSharedMemoryROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "SharedMemoryNode");
+      ROS2Subscription<String> sharedMemorySubscriber = sharedMemoryNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(String.class), subscriber ->
+      {
+         String message = subscriber.takeNextData();
+         messageReceived.set(true);
+         synchronized (messageReceived)
+         {
+            messageReceived.notify();
+         }
+         assertEquals(stringToSend.toString(), message.getDataAsString());
+         if (!stringToSend.toString().equals(message.getDataAsString()))
+            failed.set(true);
+      });
+
+      ROS2PublisherBasics<String> publisher = sharedMemoryNode.createPublisher(ROS2Tools.IHMC_ROOT.withType(String.class));
+      String messageToSend = new String();
+      messageToSend.setData(stringToSend.toString());
+      publisher.publish(messageToSend);
+
+      synchronized (messageReceived)
+      {
+         messageReceived.wait(1000);
+      }
+      assertTrue(messageReceived.get());
+      assertFalse(failed.get());
+
+      sharedMemorySubscriber.remove();
+   }
+
    private InetAddress getPhysicalAddress() throws IOException
    {
       Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();

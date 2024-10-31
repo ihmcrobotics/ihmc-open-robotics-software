@@ -46,7 +46,7 @@ public class SVOImageCompressionAlgorithmComparison
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2")
                                                                                         .toAbsolutePath()
                                                                                         .toString();
-   private final ROS2Node ros2Node = ROS2Tools.createLoopbackROS2Node(PubSubImplementation.FAST_RTPS, "compression_algorithm_comparison");
+   private final ROS2Node ros2Node = ROS2Tools.createSharedMemoryROS2Node(PubSubImplementation.FAST_RTPS, "compression_algorithm_comparison");
    private final ZEDColorDepthImageRetrieverSVO zedDataRetriever;
 
    private final ImageCompressionAlgorithmComparison algorithmComparison = new ImageCompressionAlgorithmComparison();

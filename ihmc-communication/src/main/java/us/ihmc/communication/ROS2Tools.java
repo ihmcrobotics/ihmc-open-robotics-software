@@ -2,8 +2,11 @@ package us.ihmc.communication;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.Domain;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.attributes.ParticipantProfile;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -107,6 +110,23 @@ public final class ROS2Tools
       }
 
       return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), loopbackAddress);
+   }
+
+   public static ROS2Node createSharedMemoryROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
+   {
+      Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
+
+      ParticipantProfile participantProfile = ROS2NodeInterface.createParticipantAttributes(FACTORY.getDomainId(), true);
+
+      // Use only shared memory transport
+      participantProfile.useOnlySharedMemoryTransport();
+
+      // We don't have access to this, but we should. The design needs to be rethought.
+      // This namespace should not live in ros2-library regardless.
+      // ROS2NodeBasics.DEFAULT_NAMESPACE
+      String defaultNamespace = "/us/ihmc";
+
+      return new ROS2Node(domain, nodeName, defaultNamespace, participantProfile);
    }
 
    /**
