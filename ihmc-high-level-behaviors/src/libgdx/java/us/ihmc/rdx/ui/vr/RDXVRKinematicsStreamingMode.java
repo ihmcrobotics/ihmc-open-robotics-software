@@ -25,6 +25,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -93,7 +94,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(45.0); // 120.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(36.0); // 45.0); // 120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -150,7 +151,7 @@ public class RDXVRKinematicsStreamingMode
 
    public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
    public static final Vector3D HAND_CONTACT_NORMAL_IN_WORLD = new Vector3D();
-   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.7; // 0.3;
+   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.4; // 0.3;
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
@@ -217,6 +218,7 @@ public class RDXVRKinematicsStreamingMode
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
+
       headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
@@ -227,11 +229,12 @@ public class RDXVRKinematicsStreamingMode
       prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
       kinematicsRecorder.setReplayCallback(isRecordStarting ->
-                                                {
-                                                   KSTLoggingMessage loggingMessage = new KSTLoggingMessage();
-                                                   loggingMessage.setStartLogging(isRecordStarting);
-                                                   ros2ControllerHelper.publishToController(loggingMessage);
-                                                });
+                                           {
+                                              LogTools.info("Publishing logging message to " + (isRecordStarting ? "start recording" : "stop recording"));
+                                              KSTLoggingMessage loggingMessage = new KSTLoggingMessage();
+                                              loggingMessage.setStartLogging(isRecordStarting);
+                                              ros2ControllerHelper.publishToController(loggingMessage);
+                                           });
 
       // TODO Luigi. remove when Nadia chest link has been replaced and we can remove the fake joints from the urdf
       // Message for deactivating the spine pitch and roll joints
@@ -843,12 +846,12 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Contact normal is hard-coded - HARDWARE
-//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          // Contact normal is hard-coded - SIMULATION
-         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
+//         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 

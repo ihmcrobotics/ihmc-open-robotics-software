@@ -187,7 +187,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ROS2Topic<KSTLoggingMessage> loggingTopic = HumanoidControllerAPI.getTopic(KSTLoggingMessage.class, robotName);
       ros2Node.createSubscription(loggingTopic, s ->
       {
-         LogTools.info("received logging request");
+         LogTools.info("Received logging request");
          controller.onLoggingRequestReceived(s.takeNextData());
       });
    }

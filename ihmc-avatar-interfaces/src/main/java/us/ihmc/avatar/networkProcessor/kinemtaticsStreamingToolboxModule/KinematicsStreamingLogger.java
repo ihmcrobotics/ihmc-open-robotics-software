@@ -4,11 +4,15 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessagePubSubType;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,35 +26,40 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KinematicsStreamingLogger
 {
    private final YoBoolean isLogging;
-   private final List<WholeBodyTrajectoryMessage> wholeBodyTrajectoryMessages = new ArrayList<>();
+   private final YoInteger messagesLogged;
+
+   private final List<Object> messagesToLog = new ArrayList<>();
 
    private final AtomicBoolean requestLogStart = new AtomicBoolean(false);
-   private final AtomicBoolean requestLogStop = new AtomicBoolean(false);
 
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private final JSONSerializer<WholeBodyTrajectoryMessage> wholeBodyTrajectorySerializer = new JSONSerializer<>(new WholeBodyTrajectoryMessagePubSubType());
+   private final JSONSerializer<WholeBodyStreamingMessage> wholeBodyStreamingSerializer = new JSONSerializer<>(new WholeBodyStreamingMessagePubSubType());
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
    public KinematicsStreamingLogger(YoRegistry registry)
    {
       isLogging = new YoBoolean("isLogging", registry);
+      messagesLogged = new YoInteger("messagesLogged", registry);
    }
 
-   public void update(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
+   public void update(Object messageToLog)
    {
       if (requestLogStart.getAndSet(false) && !isLogging.getValue())
       {
-         wholeBodyTrajectoryMessages.clear();
+         LogTools.info("Starting to log...");
+         messagesToLog.clear();
          isLogging.set(true);
+         messagesLogged.set(0);
       }
-      if (requestLogStop.getAndSet(false) && isLogging.getValue())
+
+      if (isLogging.getValue() && messageToLog != null)
       {
-         isLogging.set(false);
-         export();
-      }
-      if (isLogging.getValue() && wholeBodyTrajectoryMessage != null)
-      {
-         wholeBodyTrajectoryMessages.add(new WholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage));
+         if (messageToLog instanceof WholeBodyTrajectoryMessage  wholeBodyTrajectoryMessage)
+            messagesToLog.add(new WholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage));
+         else if (messageToLog instanceof WholeBodyStreamingMessage wholeBodyStreamingMessage)
+            messagesToLog.add(new WholeBodyStreamingMessage(wholeBodyStreamingMessage));
+         messagesLogged.set(messagesToLog.size());
       }
    }
 
@@ -68,17 +77,31 @@ public class KinematicsStreamingLogger
                        ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
                        ArrayNode root = objectMapper.createArrayNode();
 
-                       for (int i = 0; i < wholeBodyTrajectoryMessages.size(); i++)
+                       LogTools.info("Exporting " + messagesToLog.size() + " messages");
+
+                       for (int i = 0; i < messagesToLog.size(); i++)
                        {
-                          WholeBodyTrajectoryMessage message = wholeBodyTrajectoryMessages.get(i);
-                          JsonNode jsonNode = objectMapper.readTree(wholeBodyTrajectorySerializer.serializeToString(message));
-                          root.add(jsonNode);
+                          Object message = messagesToLog.get(i);
+                          if (message instanceof WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
+                          {
+                             root.add(objectMapper.readTree(wholeBodyTrajectorySerializer.serializeToString(wholeBodyTrajectoryMessage)));
+                          }
+                          else if (message instanceof WholeBodyStreamingMessage wholeBodyStreamingMessage)
+                          {
+                             root.add(objectMapper.readTree(wholeBodyStreamingSerializer.serializeToString(wholeBodyStreamingMessage)));
+                          }
                        }
 
                        objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, root);
+
+                       printStream.flush();
+                       outputStream.flush();
+                       printStream.close();
+                       outputStream.close();
                     }
                     catch (Exception e)
                     {
+                       LogTools.info("Log unsuccessful");
                        e.printStackTrace();
                     }
                  }).start();
@@ -86,12 +109,15 @@ public class KinematicsStreamingLogger
 
    public void onLogRequestStart()
    {
+      LogTools.info("Requesting to start log");
       requestLogStart.set(true);
    }
 
    public void onLogRequestFinish()
    {
-      requestLogStop.set(true);
+      LogTools.info("Stopping log and exporting");
+      isLogging.set(false);
+      export();
    }
 
    public static void main(String[] args)
@@ -102,7 +128,7 @@ public class KinematicsStreamingLogger
       logger.onLogRequestStart();
 
       WholeBodyTrajectoryMessage messageA = new WholeBodyTrajectoryMessage();
-      WholeBodyTrajectoryMessage messageB = new WholeBodyTrajectoryMessage();
+      WholeBodyStreamingMessage messageB = new WholeBodyStreamingMessage();
 
       messageA.setSequenceId(0);
       messageB.setSequenceId(1);
