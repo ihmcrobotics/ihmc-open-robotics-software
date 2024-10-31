@@ -252,9 +252,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    @Override
    public void destroy()
    {
+      unsubscribe();
       depthChannel.destroy();
       colorChannel.destroy();
-      unsubscribe();
       super.destroy();
    }
 
