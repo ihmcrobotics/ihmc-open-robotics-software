@@ -54,6 +54,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -68,6 +69,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -81,7 +83,8 @@ public class RDXVRKinematicsStreamingMode
 {
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.7;
-   final double COM_JOYSTICK_INCREMENT = 0.001;
+   private final double COM_JOYSTICK_INCREMENT = 0.001;
+   private final double COM_INCREMENT_MAX_RATE = 0.015;
    private static final double OBJECT_MASS = 0.4;
 
    private final ROS2SyncedRobotModel syncedRobot;
@@ -133,6 +136,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean comTracking = new ImBoolean(false);
    private final FramePoint3D comJoystickXYInput = new FramePoint3D();
    private final FramePoint3D comJoystickZInput = new FramePoint3D();
+   private final RateLimitedYoFrameVector rateLimitedCoM;
    private ReferenceFrame initialPelvisFrame;
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
@@ -182,6 +186,9 @@ public class RDXVRKinematicsStreamingMode
       this.controllerStatusTracker = controllerStatusTracker;
       this.footstepPlacer = footstepPlacer;
       this.handManager = handManager;
+
+      rateLimitedCoM = new RateLimitedYoFrameVector("rateLimitedCoM", "", new YoRegistry(getClass().getSimpleName()), COM_INCREMENT_MAX_RATE, streamPeriod, ReferenceFrame.getWorldFrame());
+      rateLimitedCoM.setToNaN();
    }
 
    public void create(boolean createToolbox)
@@ -590,12 +597,21 @@ public class RDXVRKinematicsStreamingMode
          { // control center of mass with right joystick
             KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
             comMessage.setHasDesiredLinearVelocity(false);
-            comMessage.getDesiredPositionInWorld().set(comJoystickXYInput.getX(), comJoystickXYInput.getY(), comJoystickZInput.getZ());
 
             if (comJoystickXYInput.containsNaN() || comJoystickZInput.containsNaN())
             {
                LogTools.info("CoM joystick offset contains NaN");
             }
+            else if (rateLimitedCoM.containsNaN())
+            {
+               rateLimitedCoM.set(comJoystickXYInput.getX(), comJoystickXYInput.getY(), comJoystickZInput.getZ());
+            }
+            else
+            {
+               rateLimitedCoM.update(comJoystickXYInput.getX(), comJoystickXYInput.getY(), comJoystickZInput.getZ());
+            }
+
+            comMessage.getDesiredPositionInWorld().set(rateLimitedCoM);
 
             comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
             comMessage.getSelectionMatrix().setXSelected(true);
@@ -1125,6 +1141,7 @@ public class RDXVRKinematicsStreamingMode
          comJoystickZInput.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
          comJoystickZInput.changeFrame(ReferenceFrame.getWorldFrame());
          comJoystickXYInput.setIncludingFrame(comJoystickZInput);
+         rateLimitedCoM.setToNaN();
 
          if (!this.enabled.get())
          {
