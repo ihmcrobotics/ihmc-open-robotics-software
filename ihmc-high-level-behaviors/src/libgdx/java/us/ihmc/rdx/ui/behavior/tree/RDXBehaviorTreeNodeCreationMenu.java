@@ -28,15 +28,19 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree tree;
-   private final WorkspaceResourceDirectory treeFilesDirectory;
+   private WorkspaceResourceDirectory treeFilesDirectory;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
+   private final List<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
+   private final Map<String, WorkspaceResourceDirectory> indexedTreeFolders = new TreeMap<>();
 
    public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -128,6 +132,22 @@ public class RDXBehaviorTreeNodeCreationMenu
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("Load existing tree from file:");
+      ImGui.text("Select folder:");
+      ImGui.popFont();
+      for (Map.Entry<String, WorkspaceResourceDirectory> indexedFolderEntry : indexedTreeFolders.entrySet())
+      {
+         if (ImGuiTools.textWithUnderlineOnHover(indexedFolderEntry.getKey()))
+         {
+            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            {
+               treeFilesDirectory = indexedFolderEntry.getValue();
+               reindexDirectory();
+            }
+         }
+      }
+
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+      ImGui.text("Select file:");
       ImGui.popFont();
 
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
@@ -246,6 +266,7 @@ public class RDXBehaviorTreeNodeCreationMenu
    public void reindexDirectory()
    {
       indexedTreeFiles.clear();
+      var t = treeFilesDirectory.queryContainedFiles();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
          if (queryContainedFile.getFileName().endsWith(".json"))
@@ -260,6 +281,12 @@ public class RDXBehaviorTreeNodeCreationMenu
                LogTools.error("Failed to load {}", queryContainedFile.getFileName());
             }
          }
+      }
+      for (WorkspaceResourceDirectory queryContainedFolder : treeFilesDirectory.queryContainedFolders(treeFilesDirectory.getClassForLoading(), "/behaviorTrees/"))
+      {
+         String folderPathName = queryContainedFolder.getPathNecessaryForResourceExploring();
+         String folderName = folderPathName.substring(folderPathName.lastIndexOf(".") + 1);
+         indexedTreeFolders.put(folderName, queryContainedFolder);
       }
    }
 }
