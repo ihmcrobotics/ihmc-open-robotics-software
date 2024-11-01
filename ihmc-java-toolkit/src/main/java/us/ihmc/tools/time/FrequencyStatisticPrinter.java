@@ -1,5 +1,6 @@
 package us.ihmc.tools.time;
 
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
