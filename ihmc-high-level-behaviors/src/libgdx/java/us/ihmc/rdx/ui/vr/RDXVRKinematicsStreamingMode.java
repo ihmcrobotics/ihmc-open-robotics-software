@@ -159,7 +159,7 @@ public class RDXVRKinematicsStreamingMode
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
-   private final SideDependentList<HandControlMode> handControlModes = new SideDependentList<>(HandControlMode.GRIPPER, HandControlMode.LOAD_BEARING);
+   private final SideDependentList<HandControlMode> handControlModes = new SideDependentList<>(HandControlMode.LOAD_BEARING, HandControlMode.GRIPPER);
 
    private enum HandControlMode
    {
@@ -862,12 +862,12 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Contact normal is hard-coded - HARDWARE
-         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          // Contact normal is hard-coded - SIMULATION
-//         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
+         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 
