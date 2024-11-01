@@ -115,40 +115,43 @@ public class RDXQuickATManager extends RDXPanel
          quickATDirectory.renderImGuiWidgetsAsDropDownMenu();
       }
 
-      if (!selectedNode.equals(defaultNode))
+      if (selectedNode != null)
       {
-         String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Options";
-         if (ImGui.button(labels.get(saveButtonLabel)))
+         if (!selectedNode.equals(defaultNode))
          {
-            fileToSaveHasCompleteName = !fileToSaveHasCompleteName;
-            if (fileToSaveHasCompleteName)
-               saveToFile(extraFileNameToSave.getString() + ".json");
-         }
-         if (!fileToSaveHasCompleteName)
-         {
-            ImGui.sameLine();
-            extraFileNameToSave.render();
-            ImGui.checkbox(labels.get("Arms"), saveArms);
-            if (saveArms.get())
+            String saveButtonLabel = fileToSaveHasCompleteName ? "Save AT" : "Confirm Options";
+            if (ImGui.button(labels.get(saveButtonLabel)))
             {
-               for (RobotSide side : RobotSide.values)
-               {
-                  ImGui.sameLine();
-                  ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
-               }
-               if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINTSPACE))
-               {
-                  armControlMode = RDXArmControlMode.JOINTSPACE;
-               }
-               if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.TASKSPACE))
-               {
-                  armControlMode = RDXArmControlMode.TASKSPACE;
-               }
+               fileToSaveHasCompleteName = !fileToSaveHasCompleteName;
+               if (fileToSaveHasCompleteName)
+                  saveToFile(extraFileNameToSave.getString() + ".json");
             }
-            ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
-            ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
-            ImGui.text("Saving Pending ...");
-            ImGui.popStyleColor();
+            if (!fileToSaveHasCompleteName)
+            {
+               ImGui.sameLine();
+               extraFileNameToSave.render();
+               ImGui.checkbox(labels.get("Arms"), saveArms);
+               if (saveArms.get())
+               {
+                  for (RobotSide side : RobotSide.values)
+                  {
+                     ImGui.sameLine();
+                     ImGui.checkbox(labels.get(side.getLowerCaseName()), saveArmsSide.get(side));
+                  }
+                  if (ImGui.radioButton(labels.get("Joint angles"), armControlMode == RDXArmControlMode.JOINTSPACE))
+                  {
+                     armControlMode = RDXArmControlMode.JOINTSPACE;
+                  }
+                  if (ImGui.radioButton(labels.get("Hands Pose"), armControlMode == RDXArmControlMode.TASKSPACE))
+                  {
+                     armControlMode = RDXArmControlMode.TASKSPACE;
+                  }
+               }
+               ImGui.checkbox(labels.get("Footsteps"), saveFootsteps);
+               ImGui.pushStyleColor(ImGuiCol.Text, 1.0f, 0.0f, 0.0f, 1.0f);
+               ImGui.text("Saving Pending ...");
+               ImGui.popStyleColor();
+            }
          }
       }
    }
