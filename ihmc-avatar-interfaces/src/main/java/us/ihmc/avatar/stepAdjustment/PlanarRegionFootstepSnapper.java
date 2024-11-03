@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -331,7 +331,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       if (!wiggleParameters.shouldPerformOptimization())
          return;
 
-      planarRegionFrame.setTransformAndUpdate(planarRegionToWiggleInside.getTransformToWorld());
+      planarRegionFrame.setPoseAndUpdate(planarRegionToWiggleInside.getTransformToWorld());
       soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToWiggle);
 
       soleFrameAfterSnapAndBeforeWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);

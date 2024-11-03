@@ -2,10 +2,9 @@ package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.robotics.TestTools;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.FrequencyCalculator;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ThrottlerAndFrequencyCounterTest
 {
@@ -27,7 +26,7 @@ public class ThrottlerAndFrequencyCounterTest
 
       frequencyCalculator.destroy();
 
-      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+      TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
    private static void testFrequencyCounterDecaying(double targetFrequency, double decayTimeSeconds, double epsilon)
@@ -52,7 +51,7 @@ public class ThrottlerAndFrequencyCounterTest
       MissingThreadTools.sleep(decayTimeSeconds);
 
       double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
-      assertEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
+      TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
    }
 
    private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
@@ -76,7 +75,7 @@ public class ThrottlerAndFrequencyCounterTest
 
       frequencyCalculator.destroy();
 
-      assertEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
+      TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
    @Test

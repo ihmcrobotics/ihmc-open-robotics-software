@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
-import us.ihmc.robotics.contactable.ListOfPointsContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -31,7 +31,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
-import us.ihmc.robotics.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;

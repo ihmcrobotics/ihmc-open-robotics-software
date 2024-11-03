@@ -24,7 +24,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.footstepPlanning.LocomotionParameters;
-import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;

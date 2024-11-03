@@ -11,6 +11,7 @@ import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

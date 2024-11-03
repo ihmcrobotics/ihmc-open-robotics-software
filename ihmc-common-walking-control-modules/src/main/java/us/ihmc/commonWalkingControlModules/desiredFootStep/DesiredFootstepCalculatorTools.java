@@ -45,7 +45,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getContactFrame());
+         tempFramePoint.changeFrame(contactableBody.getSoleFrame());
          tempVector.set(tempFramePoint);
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)

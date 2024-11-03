@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

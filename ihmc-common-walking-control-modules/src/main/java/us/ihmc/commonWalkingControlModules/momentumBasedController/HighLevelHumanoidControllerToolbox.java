@@ -34,7 +34,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.model.CenterOfMassStateProvider;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -43,13 +43,14 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.robotics.lists.FrameTuple2DArrayList;
-import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
-import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
-import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
+import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
@@ -79,7 +80,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static us.ihmc.robotics.lists.FrameTuple2DArrayList.createFramePoint2dArrayList;
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
 
 public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {
@@ -148,7 +149,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final SideDependentList<FrameTuple2DArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
+   private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
    protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
@@ -157,9 +158,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final AngularExcursionCalculator angularExcursionCalculator;
    private final YoFrameVector3D yoAngularMomentum, yoLinearMomentum;
-   private final FilteredFiniteDifferenceYoFrameVector3D yoAngularMomentumRate, yoLinearMomentumRate;
+   private final FilteredVelocityYoFrameVector yoAngularMomentumRate, yoLinearMomentumRate;
 
-   private final AlphaFilteredYoFrameVector3D filteredYoAngularMomentum, filteredYoLinearMomentum;
+   private final AlphaFilteredYoFrameVector filteredYoAngularMomentum, filteredYoLinearMomentum;
    private final YoDouble totalMass = new YoDouble("TotalMass", registry);
 
    private final FramePoint2D centerOfPressure = new FramePoint2D();
@@ -237,12 +238,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.contactableBodies = contactableBodies;
 
       RigidBodyBasics elevator = fullRobotModel.getElevator();
-      this.totalMass.set(MultiBodySystemTools.computeSubTreeMass(elevator));
+      this.totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(elevator));
 
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
-         ReferenceFrame soleFrame = contactableFoot.getContactFrame();
+         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          String namePrefix = soleFrame.getName() + "DesiredCoP";
          YoFramePoint2D yoDesiredCenterOfPressure = new YoFramePoint2D(namePrefix, soleFrame, registry);
          footDesiredCenterOfPressures.put(contactableFoot, yoDesiredCenterOfPressure);
@@ -259,17 +260,17 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getContactFrame().getName(),
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(),
                                                                     rigidBody,
-                                                                    contactableFoot.getContactFrame(),
-                                                                    contactableFoot.getContactPoints2D(),
+                                                                    contactableFoot.getSoleFrame(),
+                                                                    contactableFoot.getContactPoints2d(),
                                                                     coefficientOfFriction,
                                                                     registry);
 
          footContactStates.put(robotSide, contactState);
-         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2D());
+         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
 
-         FrameConvexPolygon2D defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
+         FrameConvexPolygon2D defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
          defaultFootPolygons.put(robotSide, defaultFootPolygon);
       }
 
@@ -292,7 +293,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       for (RobotSide robotSide : RobotSide.values)
       {
          yoCoPError.put(robotSide,
-                        new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getContactFrame(), registry));
+                        new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
       }
 
       if (wristForceSensors == null)
@@ -340,7 +341,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
             handCenterOfMassFrames.put(robotSide, handCoMFrame);
             YoDouble handMass = new YoDouble(sidePrefix + "HandTotalMass", registry);
             handsMass.put(robotSide, handMass);
-            handMass.set(MultiBodySystemTools.computeSubTreeMass(measurementLink));
+            handMass.set(MultiBodySystemMissingTools.computeSubTreeMass(measurementLink));
          }
       }
 
@@ -376,15 +377,15 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       YoDouble momentumRateAlpha = new YoDouble("filteredMomentumRateAlpha", registry);
       momentumRateAlpha.set(0.95); // switch to break frequency and move to walking parameters
 
-      yoAngularMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("AngularMomentumRate", "", momentumRateAlpha, controlDT, registry, yoAngularMomentum);
-      yoLinearMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("LinearMomentumRate", "", momentumRateAlpha, controlDT, registry, yoLinearMomentum);
+      yoAngularMomentumRate = new FilteredVelocityYoFrameVector("AngularMomentumRate", "", momentumRateAlpha, controlDT, registry, yoAngularMomentum);
+      yoLinearMomentumRate = new FilteredVelocityYoFrameVector("LinearMomentumRate", "", momentumRateAlpha, controlDT, registry, yoLinearMomentum);
 
       YoDouble angularMomentumAlpha = new YoDouble("filteredAngularMomentumAlpha", registry);
       YoDouble linearMomentumAlpha = new YoDouble("filteredLinearMomentumAlpha", registry);
       angularMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
       linearMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
-      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
-      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
+      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
+      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
@@ -425,7 +426,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void update()
    {
-      totalMass.set(MultiBodySystemTools.computeSubTreeMass(fullRobotModel.getElevator()));
+      totalMass.set(MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator()));
 
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
@@ -563,7 +564,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
-         ReferenceFrame planeFrame = contactablePlaneBody.getContactFrame();
+         ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
 
          copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
 
@@ -740,7 +741,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      List<? extends FramePoint2DReadOnly> defaultContactPoints = foot.getContactPoints2D();
+      List<FramePoint2D> defaultContactPoints = foot.getContactPoints2d();
       previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(defaultContactPoints);
       footContactState.setContactFramePoints(defaultContactPoints);
    }

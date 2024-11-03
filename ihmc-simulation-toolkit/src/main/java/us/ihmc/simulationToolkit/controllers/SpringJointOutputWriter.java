@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -35,7 +34,7 @@ public class SpringJointOutputWriter implements RobotController
             elasticJoints.add(simulatedJoint);
             String jointName = simulatedJoint.getName();
 
-            double breakFrequency = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(20.0, dt);
+            double breakFrequency = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(20.0, dt);
             AlphaFilteredYoVariable filteredDesired = new AlphaFilteredYoVariable(jointName + "_filteredQDesired", registry, breakFrequency);
             filteredDesired.update(0.0);
             filteredDesiredJointAngles.put(simulatedJoint, filteredDesired);

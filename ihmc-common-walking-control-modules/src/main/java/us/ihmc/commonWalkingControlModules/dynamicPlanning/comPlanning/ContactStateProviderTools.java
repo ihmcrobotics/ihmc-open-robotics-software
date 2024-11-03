@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import us.ihmc.commons.time.TimeIntervalTools;
+import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.List;
 

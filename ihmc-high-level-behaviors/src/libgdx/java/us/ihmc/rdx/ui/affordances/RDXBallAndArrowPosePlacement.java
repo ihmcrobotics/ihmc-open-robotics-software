@@ -26,6 +26,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;

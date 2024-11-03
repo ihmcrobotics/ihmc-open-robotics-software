@@ -7,11 +7,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.robotics.outputData.JointDesiredOutputBasics;
-import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.commons.lists.PairList;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;

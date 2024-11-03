@@ -45,7 +45,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
-import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;

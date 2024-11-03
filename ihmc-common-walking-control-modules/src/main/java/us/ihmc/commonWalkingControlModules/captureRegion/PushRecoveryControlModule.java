@@ -13,9 +13,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
-import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -110,7 +110,7 @@ public class PushRecoveryControlModule implements SCS2YoGraphicHolder
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
 
-      footPolygon.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(RobotSide.LEFT).getContactPoints2D()));
+      footPolygon.setIncludingFrame(FrameVertex2DSupplier.asFrameVertex2DSupplier(feet.get(RobotSide.LEFT).getContactPoints2d()));
 
       parentRegistry.addChild(registry);
 

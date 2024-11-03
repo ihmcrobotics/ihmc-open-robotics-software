@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -37,7 +39,8 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.euclid.QuaternionCalculus;
+import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class TwistCalculatorTest
 {
@@ -534,8 +537,8 @@ public class TwistCalculatorTest
       FrameVector3D bodyAngularVelocity = new FrameVector3D(worldFrame);
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
       Vector4D qDot = new Vector4D();
-      QuaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation, bodyOrientationInFuture, 0.5 * dt, qDot);
-      quaternionCalculus.computeAngularVelocityInParentFrame(bodyOrientation, qDot, bodyAngularVelocity);
+      quaternionCalculus.computeQDotByFiniteDifferenceCentral(bodyOrientation, bodyOrientationInFuture, 0.5 * dt, qDot);
+      quaternionCalculus.computeAngularVelocityInWorldFrame(bodyOrientation, qDot, bodyAngularVelocity);
 
       bodyAngularVelocity.changeFrame(bodyFrame);
       return bodyAngularVelocity;

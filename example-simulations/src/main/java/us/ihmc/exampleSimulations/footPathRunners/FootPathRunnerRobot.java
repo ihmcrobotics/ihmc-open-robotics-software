@@ -7,6 +7,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.List;
+import java.util.PriorityQueue;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
@@ -27,6 +28,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.EuclidGeometryPolygonMissingTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -224,10 +227,10 @@ public class ConvexPolygonTools
       {
          for (int indexB = 0; indexB < polygonB.getNumberOfVertices(); indexB++)
          {
-            double distance = EuclidGeometryTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
-                                                                                   polygonA.getNextVertex(indexA),
-                                                                                   polygonB.getVertex(indexB),
-                                                                                   polygonB.getNextVertex(indexB));
+            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
+                                                               polygonA.getNextVertex(indexA),
+                                                               polygonB.getVertex(indexB),
+                                                               polygonB.getNextVertex(indexB));
             minDistance = Math.min(minDistance, distance);
          }
       }
@@ -751,10 +754,10 @@ public class ConvexPolygonTools
    private static boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
                                                                                                                       ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
    {
-      return EuclidGeometryTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
-                                                                            polygonWithExactlyTwoVertices.getVertex(1),
-                                                                            polygonWithAtLeastTwoVertices.getPolygonVerticesView(),
-                                                                            polygonWithAtLeastTwoVertices.getNumberOfVertices());
+      return EuclidGeometryPolygonMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
+                                                                                          polygonWithExactlyTwoVertices.getVertex(1),
+                                                                                          polygonWithAtLeastTwoVertices.getPolygonVerticesView(),
+                                                                                          polygonWithAtLeastTwoVertices.getNumberOfVertices());
    }
 
    private static boolean findCrossingIndices(boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ, ConvexPolygon2DReadOnly polygonP,
@@ -880,7 +883,7 @@ public class ConvexPolygonTools
          Point2DReadOnly startQ = polygonQ.getVertex(startIndexQ);
          Point2DReadOnly endQ = polygonQ.getVertex(endIndexQ);
 
-         boolean success = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ, intersection);
+         boolean success = EuclidCoreMissingTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ, intersection);
          if (!success)
          {
             if (DEBUG)

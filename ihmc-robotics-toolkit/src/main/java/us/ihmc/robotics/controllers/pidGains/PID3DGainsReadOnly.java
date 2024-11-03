@@ -1,8 +1,8 @@
 package us.ihmc.robotics.controllers.pidGains;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-
 import java.util.Arrays;
+
+import us.ihmc.euclid.matrix.Matrix3D;
 
 /**
  * Read-only interface for PID gains in three dimensions.

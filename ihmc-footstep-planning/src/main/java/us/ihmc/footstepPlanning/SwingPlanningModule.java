@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;

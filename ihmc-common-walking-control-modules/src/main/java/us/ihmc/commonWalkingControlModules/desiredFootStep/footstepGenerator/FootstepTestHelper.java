@@ -33,7 +33,7 @@ public class FootstepTestHelper
 
       RobotSide currentSide = RobotSide.LEFT;
 
-      FramePoint3D lastFootstepPosition = new FramePoint3D(contactableFeet.get(currentSide).getContactFrame());
+      FramePoint3D lastFootstepPosition = new FramePoint3D(contactableFeet.get(currentSide).getSoleFrame());
       lastFootstepPosition.changeFrame(worldFrame);
 
       for (int i = 0; i < numberOfSteps; i++)
@@ -69,7 +69,7 @@ public class FootstepTestHelper
    {
       RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
       Footstep ret = new Footstep(robotSide, footstepPose);
-      ret.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2D());
+      ret.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 
       return ret;
    }
@@ -93,7 +93,7 @@ public class FootstepTestHelper
       if (footstepDataMessage.getPredictedContactPoints2d() != null && !footstepDataMessage.getPredictedContactPoints2d().isEmpty())
          footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepDataMessage));
       else
-         footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2D());
+         footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 
       return footstep;
    }

@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
-import us.ihmc.euclid.QuaternionCalculus;
+import us.ihmc.robotics.math.QuaternionCalculus;
 
 public class KSTToolsTest
 {
@@ -37,9 +37,9 @@ public class KSTToolsTest
          KSTTools.computeAngularVelocity(dt, previousOrientation, currentOrientation, actual);
 
          Vector4DBasics qDot = new Vector4D();
-         QuaternionCalculus.computeQDotByFiniteDifferenceCentral(previousOrientation, currentOrientation, 0.5 * dt, qDot);
+         calculus.computeQDotByFiniteDifferenceCentral(previousOrientation, currentOrientation, 0.5 * dt, qDot);
          Vector3DBasics expected = new Vector3D();
-         calculus.computeAngularVelocityInRotatedFrame(currentOrientation, qDot, expected);
+         calculus.computeAngularVelocityInBodyFixedFrame(currentOrientation, qDot, expected);
 
          EuclidCoreTestTools.assertEquals(expected, actual, EPSILON);
       }

@@ -2,6 +2,7 @@ package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.robotics.TestTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
@@ -38,7 +39,7 @@ public class RestartableThrottledThreadTest
       }
 
       frequencyStatisticPrinter.destroy();
-      assertEquals(hertz, frequencyCalculator.getFrequency(), 0.5, "Frequency not correct");
+      TestTools.assertEpsilonEquals(hertz, frequencyCalculator.getFrequency(), 0.5, "Frequency not correct");
    }
 
    @Test
@@ -66,7 +67,7 @@ public class RestartableThrottledThreadTest
       }
 
       frequencyStatisticPrinter.destroy();
-      assertEquals(hertz, frequencyCalculator.getFrequency(), 0.5, "Frequency not correct");
+      TestTools.assertEpsilonEquals(hertz, frequencyCalculator.getFrequency(), 0.5, "Frequency not correct");
       thread.stop();
    }
 

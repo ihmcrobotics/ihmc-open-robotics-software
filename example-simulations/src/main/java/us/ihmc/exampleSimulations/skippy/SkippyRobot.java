@@ -3,7 +3,9 @@ package us.ihmc.exampleSimulations.skippy;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,6 +14,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -42,7 +45,7 @@ public class SkippyRobot extends Robot
 
    private static final long serialVersionUID = -7671864179791904256L;
 
-   private final PoseReferenceFrame bodyZUpFrame;
+   private final TransformReferenceFrame bodyZUpFrame;
 
    public final GroundContactPoint footGroundContactPoint;
 
@@ -251,7 +254,7 @@ public class SkippyRobot extends Robot
       else
          throw new RuntimeException("No such robot " + robotType);
 
-      bodyZUpFrame = new PoseReferenceFrame("bodyFrame", ReferenceFrame.getWorldFrame());
+      bodyZUpFrame = new TransformReferenceFrame("bodyFrame", ReferenceFrame.getWorldFrame());
 
       GroundContactModel ground = new LinearGroundContactModel(this, 10000.0, 5000.0, 50.0, 5000.0, this.getRobotsYoRegistry());//50.0, 5000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();

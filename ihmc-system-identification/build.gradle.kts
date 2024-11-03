@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:simulation-construction-set:0.25.2")
+   api("us.ihmc:simulation-construction-set:0.25.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

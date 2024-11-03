@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -13,7 +14,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.robotics.geometry.TransformTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -84,7 +86,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.get(debrisTransform );
-      debrisTransform.appendRollRotation(-debrisRoll);
+      TransformTools.appendRotation(debrisTransform, -debrisRoll, Axis3D.X);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
@@ -128,7 +130,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.get(debrisTransform );
-      debrisTransform.appendPitchRotation(-debrisPitch);
+      TransformTools.appendRotation(debrisTransform, -debrisPitch, Axis3D.Y);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);

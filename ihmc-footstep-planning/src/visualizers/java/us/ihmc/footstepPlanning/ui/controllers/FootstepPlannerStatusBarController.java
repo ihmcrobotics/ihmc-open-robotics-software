@@ -34,6 +34,7 @@ import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController.FootstepResponseTableRow;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
