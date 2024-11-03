@@ -127,7 +127,7 @@ public class KSTTools
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
                    DoubleProvider time,
-                   boolean runPostureOptimizer,
+                   boolean defaultRunPostureOptimizer,
                    YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
    {
@@ -191,7 +191,7 @@ public class KSTTools
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
                                                              toolboxControllerPeriod,
-                                                             runPostureOptimizer,
+                                                             defaultRunPostureOptimizer,
                                                              yoGraphicsListRegistry,
                                                              registry);
 

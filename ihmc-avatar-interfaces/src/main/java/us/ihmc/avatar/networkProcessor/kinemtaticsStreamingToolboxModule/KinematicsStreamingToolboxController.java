@@ -91,7 +91,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                                                KinematicsStreamingToolboxParameters parameters,
                                                FullHumanoidRobotModel desiredFullRobotModel,
                                                FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               boolean runPostureOptimizer,
+                                               boolean defaultRunPostureOptimizer,
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
@@ -110,7 +110,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            desiredFullRobotModel,
                            fullRobotModelFactory,
                            time,
-                           runPostureOptimizer,
+                           defaultRunPostureOptimizer,
                            yoGraphicsListRegistry,
                            registry);
 

@@ -82,7 +82,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
                                            KinematicsStreamingToolboxParameters parameters,
-                                           boolean runPostureOptimizer,
+                                           boolean defaultRunPostureOptimizer,
                                            boolean startYoVariableServer,
                                            PubSubImplementation pubSubImplementation)
    {
@@ -93,7 +93,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
             (int) (parameters.getToolboxUpdatePeriod() * 1000),
             pubSubImplementation);
 
-      this.runPostureOptimizer = runPostureOptimizer;
+      this.runPostureOptimizer = defaultRunPostureOptimizer;
 
       setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
@@ -101,7 +101,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            runPostureOptimizer,
+                                                            defaultRunPostureOptimizer,
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setRobotStateUpdater(robotStateUpdater);

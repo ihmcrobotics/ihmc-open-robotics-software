@@ -207,7 +207,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final FrameVector3D tempContactNormal = new FrameVector3D();
    private final KinematicsToolboxMultiContactManager multiContactManager;
 
-   private final boolean runWithPostureOptimizer;
+   private final YoBoolean runWithPostureOptimizer = new YoBoolean("runWithPostureOptimizer", registry);
    private final KinematicsToolboxSupportRegionDebug supportRegionDebug = new KinematicsToolboxSupportRegionDebug();
    private final YoDouble unoptimizedCenterOfMassStabilityMargin = new YoDouble("unoptimizedCenterOfMassStabilityMargin", registry);
    private final YoFrameConvexPolygon2D unoptimizedStabilityRegion = new YoFrameConvexPolygon2D("unoptimizedStabilityRegion", ReferenceFrame.getWorldFrame(), 18, registry);
@@ -235,7 +235,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               double updateDT,
-                                              boolean runWithPostureOptimizer,
+                                              boolean defaultRunWithPostureOptimizer,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
@@ -244,7 +244,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
            desiredFullRobotModel,
            createListOfControllableRigidBodies(desiredFullRobotModel),
            updateDT,
-           runWithPostureOptimizer,
+           defaultRunWithPostureOptimizer,
            yoGraphicsListRegistry,
            parentRegistry);
    }
@@ -265,7 +265,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                               double updateDT,
-                                              boolean runWithPostureOptimizer,
+                                              boolean defaultRunWithPostureOptimizer,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
@@ -281,7 +281,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       this.desiredFullRobotModel = desiredFullRobotModel;
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
-      this.runWithPostureOptimizer = runWithPostureOptimizer;
+      this.runWithPostureOptimizer.set(defaultRunWithPostureOptimizer);
 
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
       Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
@@ -647,7 +647,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       super.updateInternal();
 //      updateContactInfo();
 
-      if (!runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      if (!runWithPostureOptimizer.getValue() && isUpperBodyLoadBearing.getValue())
       {
 //         LogTools.info("reporting s.r. debug status");
          supportRegionDebug.setCenterOfMassStabilityMargin(multiContactRegionCalculator.getStabilityMargin());
@@ -927,7 +927,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!isUpperBodyLoadBearing.getValue())
          return;
 
-      if (runWithPostureOptimizer && command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT))
+      if (runWithPostureOptimizer.getValue() && command.getEndEffector() == desiredFullRobotModel.getHand(RobotSide.RIGHT))
       {
          double activationAlpha = multiContactManager.getActivationAlpha();
          double orientationWeightRatio = 1.0 - activationAlpha;
@@ -1026,7 +1026,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       addHoldSupportRigidBodyCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
 
-      if (runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      if (runWithPostureOptimizer.getValue() && isUpperBodyLoadBearing.getValue())
       {
          multiContactManager.addPostureFeedbackCommands(bufferToPack);
       }
@@ -1037,7 +1037,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addJointLimitReductionCommand(bufferToPack);
 
-      if (runWithPostureOptimizer && isUpperBodyLoadBearing.getValue())
+      if (runWithPostureOptimizer.getValue() && isUpperBodyLoadBearing.getValue())
       {
          multiContactManager.addPostureInverseKinematicsCommands(bufferToPack);
       }

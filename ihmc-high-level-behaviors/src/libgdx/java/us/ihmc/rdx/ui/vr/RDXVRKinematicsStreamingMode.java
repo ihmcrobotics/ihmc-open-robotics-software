@@ -97,7 +97,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(36.0); // 45.0); // 120.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0); // 45.0); // 120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -236,13 +236,13 @@ public class RDXVRKinematicsStreamingMode
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
-      kinematicsRecorder.setReplayCallback(isRecordStarting ->
-                                           {
-                                              LogTools.info("Publishing logging message to " + (isRecordStarting ? "start recording" : "stop recording"));
-                                              KSTLoggingMessage loggingMessage = new KSTLoggingMessage();
-                                              loggingMessage.setStartLogging(isRecordStarting);
-                                              ros2ControllerHelper.publishToController(loggingMessage);
-                                           });
+//      kinematicsRecorder.setReplayCallback(isRecordStarting ->
+//                                           {
+//                                              LogTools.info("Publishing logging message to " + (isRecordStarting ? "start recording" : "stop recording"));
+//                                              KSTLoggingMessage loggingMessage = new KSTLoggingMessage();
+//                                              loggingMessage.setStartLogging(isRecordStarting);
+//                                              ros2ControllerHelper.publishToController(loggingMessage);
+//                                           });
 
       // TODO Luigi. remove when Nadia chest link has been replaced and we can remove the fake joints from the urdf
       // Message for deactivating the spine pitch and roll joints
@@ -408,7 +408,7 @@ public class RDXVRKinematicsStreamingMode
          });
       }
 
-      if ((enabled.get() || kinematicsRecorder.isReplaying()))
+      if (enabled.get())
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
 
@@ -683,6 +683,7 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
+
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
@@ -778,6 +779,7 @@ public class RDXVRKinematicsStreamingMode
    {
       if (rightAButtonPressed)
       {
+         LogTools.info("Right A Pressed - Enabling");
          setEnabled(!enabled.get());
       }
 
