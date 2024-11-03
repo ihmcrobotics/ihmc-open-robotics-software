@@ -5,8 +5,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class DiscreteFootstep

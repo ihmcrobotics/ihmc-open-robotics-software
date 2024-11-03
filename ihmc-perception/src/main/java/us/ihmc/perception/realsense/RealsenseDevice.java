@@ -31,7 +31,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.util.function.Supplier;
 

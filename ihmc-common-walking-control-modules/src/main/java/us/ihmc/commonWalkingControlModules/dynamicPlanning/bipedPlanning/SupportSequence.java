@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -26,8 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -417,7 +417,7 @@ public class SupportSequence
 
       orientationError.set(solePose.getOrientation());
       orientationError.multiplyConjugateThis(footholdPose.getOrientation());
-      EuclidCoreMissingTools.projectRotationOnAxis(orientationError, zAxis, rotation);
+      EuclidCoreTools.projectRotationOnAxis(orientationError, zAxis, rotation);
       rotation.conjugate();
 
       solePose.appendTranslation(soleToHeel.getX(), soleToHeel.getY(), 0.0);

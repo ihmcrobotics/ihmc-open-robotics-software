@@ -2,16 +2,15 @@ package us.ihmc.robotics.math.filters;
 
 import org.apache.commons.lang3.NotImplementedException;
 import us.ihmc.euclid.interfaces.EuclidGeometry;
-import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasics>
+public class AlphaFilteredTuple3D implements Tuple3DBasics
 {
-   private double alpha;
+   private final DoubleProvider alpha;
 
    private double x = Double.NaN;
    private double y = Double.NaN;
@@ -21,48 +20,39 @@ public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasi
    private boolean resetY = false;
    private boolean resetZ = false;
 
-   public AlphaFilteredTuple3D()
-   {
-      this.alpha = 0.0;
-   }
-
-   public AlphaFilteredTuple3D(double alpha)
+   public AlphaFilteredTuple3D(DoubleProvider alpha)
    {
       this.alpha = alpha;
    }
 
-   public AlphaFilteredTuple3D(double x, double y, double z, double alpha)
+   public AlphaFilteredTuple3D(double x, double y, double z, DoubleProvider alpha)
    {
       this.alpha = alpha;
-      beginReset();
-      set(x, y, z);
+      reset(x, y, z);
    }
 
-   public AlphaFilteredTuple3D(Tuple3DReadOnly other, double alpha)
+   public AlphaFilteredTuple3D(Tuple3DReadOnly other, DoubleProvider alpha)
    {
       this.alpha = alpha;
-      beginReset();
-      set(other);
+      reset(other);
    }
 
-   public void beginReset()
+   public void reset()
    {
       resetX = true;
       resetY = true;
       resetZ = true;
    }
 
-   public void endReset()
-   {
-      resetX = false;
-      resetY = false;
-      resetZ = false;
-   }
-
    public void reset(Tuple3DReadOnly other)
    {
-      beginReset();
-      set(other);
+      reset(other.getX(), other.getY(), other.getZ());
+   }
+
+   public void reset(double x, double y, double z)
+   {
+      reset();
+      set(x, y, z);
    }
 
    @Override
@@ -75,7 +65,7 @@ public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasi
       }
       else
       {
-         this.x = EuclidCoreTools.interpolate(x, this.x, alpha);
+         this.x = EuclidCoreTools.interpolate(x, this.x, alpha.getValue());
       }
    }
 
@@ -89,7 +79,7 @@ public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasi
       }
       else
       {
-         this.y = EuclidCoreTools.interpolate(y, this.y, alpha);
+         this.y = EuclidCoreTools.interpolate(y, this.y, alpha.getValue());
       }
    }
 
@@ -103,25 +93,8 @@ public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasi
       }
       else
       {
-         this.z = EuclidCoreTools.interpolate(z, this.z, alpha);
+         this.z = EuclidCoreTools.interpolate(z, this.z, alpha.getValue());
       }
-   }
-
-   public void setAlpha(double alpha)
-   {
-      this.alpha = alpha;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      throw new NotImplementedException("Sorry mate, " + getClass().getSimpleName() + " doesn't implement this method.");
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      throw new NotImplementedException("Sorry mate, " + getClass().getSimpleName() + " doesn't implement this method.");
    }
 
    @Override
@@ -149,15 +122,14 @@ public class AlphaFilteredTuple3D implements Tuple3DBasics, Settable<Tuple3DBasi
    }
 
    @Override
-   public void set(Tuple3DBasics other)
+   public void applyTransform(Transform transform)
    {
-      beginReset();
-      interpolate(other, this, alpha);
+      throw new NotImplementedException("Sorry mate, " + getClass().getSimpleName() + " doesn't implement this method.");
    }
 
    @Override
-   public String toString()
+   public void applyInverseTransform(Transform transform)
    {
-      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
+      throw new NotImplementedException("Sorry mate, " + getClass().getSimpleName() + " doesn't implement this method.");
    }
 }

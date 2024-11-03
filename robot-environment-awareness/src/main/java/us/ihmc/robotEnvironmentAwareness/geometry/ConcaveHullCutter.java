@@ -8,7 +8,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonCutResult;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
@@ -87,14 +86,14 @@ public class ConcaveHullCutter
           */
          double lineSegmentDirectionX = concaveHullVertices.get(nextVertex).getX() - concaveHullVertices.get(i).getX();
          double lineSegmentDirectionY = concaveHullVertices.get(nextVertex).getY() - concaveHullVertices.get(i).getY();
-         double percentage = EuclidCoreMissingTools.percentageOfIntersectionBetweenTwoLine2DsInfCase(concaveHullVertices.get(i).getX(),
-                                                                                                     concaveHullVertices.get(i).getY(),
-                                                                                                     lineSegmentDirectionX,
-                                                                                                     lineSegmentDirectionY,
-                                                                                                     cuttingLine.getPoint().getX(),
-                                                                                                     cuttingLine.getPoint().getY(),
-                                                                                                     cuttingLine.getDirection().getX(),
-                                                                                                     cuttingLine.getDirection().getY());
+         double percentage = EuclidGeometryTools.percentageOfIntersectionBetweenTwoLine2DsInfCase(concaveHullVertices.get(i).getX(),
+                                                                                                  concaveHullVertices.get(i).getY(),
+                                                                                                  lineSegmentDirectionX,
+                                                                                                  lineSegmentDirectionY,
+                                                                                                  cuttingLine.getPoint().getX(),
+                                                                                                  cuttingLine.getPoint().getY(),
+                                                                                                  cuttingLine.getDirection().getX(),
+                                                                                                  cuttingLine.getDirection().getY());
 
          if (percentage == Double.NaN) // non-intersecting parallel
          {

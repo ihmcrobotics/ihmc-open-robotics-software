@@ -18,7 +18,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphNode;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.InterRegionConnectionFilter;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 
@@ -123,7 +122,7 @@ public class VisibilityTools
             normalToClusterToPack.normalize();
          }
 
-         return EuclidCoreMissingTools
+         return EuclidGeometryTools
                .closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, listOfPointsInCluster.get(0), listOfPointsInCluster.get(1),
                                                         closestPointOnLineToPack, closestPointOnClusterToPack);
       }
@@ -140,7 +139,7 @@ public class VisibilityTools
          Point2DReadOnly edgeStart = listOfPointsInCluster.get(index);
          Point2DReadOnly edgeEnd = listOfPointsInCluster.get(EuclidGeometryPolygonTools.next(index, numberOfVertices));
 
-         double distance = EuclidCoreMissingTools
+         double distance = EuclidGeometryTools
                .closestPoint2DsBetweenTwoLineSegment2Ds(firstPointOfLine, secondPointOfLine, edgeStart, edgeEnd, closestPointOnLine,
                                                         closestPointOnCluster);
          if (distance < minDistance)

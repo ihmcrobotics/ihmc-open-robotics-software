@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
 import java.util.ArrayList;
@@ -1250,19 +1249,19 @@ public class PlanarRegionTools
    {
       Point3DReadOnly pointOnPlane = region.getPoint();
       Vector3DReadOnly planeNormal = region.getNormal();
-      boolean intersectsPlane = EuclidCoreMissingTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
-                                                                                           pointOnPlane.getY(),
-                                                                                           pointOnPlane.getZ(),
-                                                                                           planeNormal.getX(),
-                                                                                           planeNormal.getY(),
-                                                                                           planeNormal.getZ(),
-                                                                                           lineOriginInWorldX,
-                                                                                           lineOriginInWorldY,
-                                                                                           lineOriginInWorldZ,
-                                                                                           lineDirectionInWorldX,
-                                                                                           lineDirectionInWorldY,
-                                                                                           lineDirectionInWorldZ,
-                                                                                           intersectionToPack);
+      boolean intersectsPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane.getX(),
+                                                                                        pointOnPlane.getY(),
+                                                                                        pointOnPlane.getZ(),
+                                                                                        planeNormal.getX(),
+                                                                                        planeNormal.getY(),
+                                                                                        planeNormal.getZ(),
+                                                                                        lineOriginInWorldX,
+                                                                                        lineOriginInWorldY,
+                                                                                        lineOriginInWorldZ,
+                                                                                        lineDirectionInWorldX,
+                                                                                        lineDirectionInWorldY,
+                                                                                        lineDirectionInWorldZ,
+                                                                                        intersectionToPack);
 
       if (!intersectsPlane)
       {

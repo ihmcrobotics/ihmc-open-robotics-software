@@ -16,14 +16,14 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
-import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -211,7 +211,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SC
             wristsubtreeCenterOfMassFrames.put(robotSide, subtreeCoMFrame);
             YoDouble handMass = new YoDouble(namePrefix + "SubtreeMass", registry);
             wristSubtreeMass.put(robotSide, handMass);
-            handMass.set(MultiBodySystemMissingTools.computeSubTreeMass(measurementLink));
+            handMass.set(MultiBodySystemTools.computeSubTreeMass(measurementLink));
          }
 
          if (yoGraphicsListRegistry == null)

@@ -51,8 +51,6 @@ import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.Random;
-
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
 import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
 

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.factory;
 
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
 
 public interface SimulatedHandOutputWriter
 {

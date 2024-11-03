@@ -21,14 +21,14 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.commons.AngleTools;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFramePoint3D;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -93,14 +93,14 @@ public class TaskspaceToJointspaceCalculator
    private final YoFrameVector3D yoLinearVelocityFromError;
 
    private final YoDouble alphaSpatialVelocityFromError;
-   private final AlphaFilteredYoFrameVector filteredAngularVelocityFromError;
-   private final AlphaFilteredYoFrameVector filteredLinearVelocityFromError;
+   private final AlphaFilteredYoFrameVector3D filteredAngularVelocityFromError;
+   private final AlphaFilteredYoFrameVector3D filteredLinearVelocityFromError;
 
    private final YoFramePoint3D yoBaseParentJointFramePosition;
    private final YoFrameQuaternion yoBaseParentJointFrameOrientation;
 
    private final YoDouble alphaBaseParentJointPose;
-   private final AlphaFilteredYoFramePoint yoBaseParentJointFramePositionFiltered;
+   private final AlphaFilteredYoFramePoint3D yoBaseParentJointFramePositionFiltered;
    private final AlphaFilteredYoFrameQuaternion yoBaseParentJointFrameOrientationFiltered;
 
    private final YoBoolean enableFeedbackControl;
@@ -210,17 +210,17 @@ public class TaskspaceToJointspaceCalculator
       yoLinearVelocityFromError = new YoFrameVector3D(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
 
       alphaSpatialVelocityFromError = new YoDouble(namePrefix + "AlphaSpatialVelocityFromError", registry);
-      filteredAngularVelocityFromError = new AlphaFilteredYoFrameVector(namePrefix
-            + "FilteredAngularVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
-      filteredLinearVelocityFromError = new AlphaFilteredYoFrameVector(namePrefix
-            + "FilteredLinearVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
+      filteredAngularVelocityFromError = new AlphaFilteredYoFrameVector3D(namePrefix
+                                                                          + "FilteredAngularVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
+      filteredLinearVelocityFromError = new AlphaFilteredYoFrameVector3D(namePrefix
+                                                                         + "FilteredLinearVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
 
       yoBaseParentJointFramePosition = new YoFramePoint3D(namePrefix + "BaseParentJointFrame", worldFrame, registry);
       yoBaseParentJointFrameOrientation = new YoFrameQuaternion(namePrefix + "BaseParentJointFrame", worldFrame, registry);
 
       alphaBaseParentJointPose = new YoDouble(namePrefix + "AlphaBaseParentJointPose", registry);
-      yoBaseParentJointFramePositionFiltered = new AlphaFilteredYoFramePoint(namePrefix
-            + "BaseParentJointFramePositionFiltered", "", registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
+      yoBaseParentJointFramePositionFiltered = new AlphaFilteredYoFramePoint3D(namePrefix
+                                                                               + "BaseParentJointFramePositionFiltered", "", registry, alphaBaseParentJointPose, yoBaseParentJointFramePosition);
       yoBaseParentJointFrameOrientationFiltered = new AlphaFilteredYoFrameQuaternion(namePrefix
             + "BaseParentJointFrameOrientationFiltered", "", yoBaseParentJointFrameOrientation, alphaBaseParentJointPose, registry);
 

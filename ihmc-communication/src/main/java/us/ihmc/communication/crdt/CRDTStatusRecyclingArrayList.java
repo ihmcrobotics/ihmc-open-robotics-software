@@ -1,6 +1,7 @@
 package us.ihmc.communication.crdt;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.function.Consumer;
@@ -29,7 +30,7 @@ public class CRDTStatusRecyclingArrayList<T> extends CRDTStatusMutableField<Recy
    }
 
    /**
-    * Used only for preallocating using {@link us.ihmc.robotics.lists.RecyclingArrayListTools#getUnsafe}.
+    * Used only for preallocating using {@link RecyclingArrayListTools#getUnsafe}.
     */
    public RecyclingArrayList<T> getValueUnsafe()
    {

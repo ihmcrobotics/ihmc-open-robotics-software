@@ -4,10 +4,10 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -73,7 +73,7 @@ public class TouchdownErrorCompensator
 
    public boolean isFootPositionTrusted(RobotSide robotSide)
    {
-      MovingReferenceFrame soleFrame = (MovingReferenceFrame) contactableFeet.get(robotSide).getSoleFrame();
+      MovingReferenceFrame soleFrame = (MovingReferenceFrame) contactableFeet.get(robotSide).getContactFrame();
       linearVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getLinearPart());
       linearVelocity.changeFrame(soleFrame);
 
@@ -100,7 +100,7 @@ public class TouchdownErrorCompensator
       }
       else
       {
-         List<FramePoint2D> defaultContactPoints = contactableFeet.get(robotSide).getContactPoints2d();
+         List<? extends FramePoint2DReadOnly> defaultContactPoints = contactableFeet.get(robotSide).getContactPoints2D();
          for (int i = 0; i < defaultContactPoints.size(); i++)
          {
             footContactPoints.add().set(defaultContactPoints.get(i));

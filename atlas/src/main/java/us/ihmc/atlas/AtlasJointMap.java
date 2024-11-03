@@ -47,11 +47,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCHandType;

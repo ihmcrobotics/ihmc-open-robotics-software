@@ -12,7 +12,7 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialAcceleration;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.math.QuaternionCalculus;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -186,7 +186,7 @@ public class YoKinematicsToolboxOutputStatus implements KSTOutputDataBasics
       }
       else
       {
-         quaternionCalculus.computeAngularVelocityInBodyFixedFrame(rootJointPose.getOrientation(), quaternionDot, rootJointVelocity.getAngularPart());
+         quaternionCalculus.computeAngularVelocityInRotatedFrame(rootJointPose.getOrientation(), quaternionDot, rootJointVelocity.getAngularPart());
       }
    }
 

@@ -5,8 +5,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.math.YoVariableLimitChecker;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.lists.PairList;
-import us.ihmc.tools.lists.TripleList;
+import us.ihmc.commons.lists.TripleList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFrameOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

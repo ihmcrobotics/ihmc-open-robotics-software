@@ -14,8 +14,8 @@ import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.tools.StringTools;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXPelvisHeightSlider

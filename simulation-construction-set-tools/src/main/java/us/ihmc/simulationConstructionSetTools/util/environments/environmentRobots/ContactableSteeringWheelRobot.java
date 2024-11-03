@@ -20,7 +20,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -172,7 +172,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       YoGraphicsListRegistry graphListRegistry = new YoGraphicsListRegistry();
 
       steeringWheelFrame = new PoseReferenceFrame("steeringWheelFrame", steeringWheelPoseInWorld);
-      steeringWheelFrame.getPose(originalSteeringWheelPose);
+      originalSteeringWheelPose.set(steeringWheelFrame.getPose());
 
       //creating the pinJoint 
       Vector3D jointAxisVector = new Vector3D(0.0, 0.0, 1.0);
@@ -264,7 +264,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQYoVariable().getDoubleValue());
       newPose.set(originalSteeringWheelPose);
       newPose.multiply(pinJointTransform);
-      steeringWheelFrame.setPoseAndUpdate(newPose);
+      steeringWheelFrame.setTransformAndUpdate(newPose);
 
       super.updateAllGroundContactPointVelocities();
    }

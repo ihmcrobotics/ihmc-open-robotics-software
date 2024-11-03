@@ -2,6 +2,7 @@ package us.ihmc.robotics.interaction;
 
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePlane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,16 +11,15 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 
 public class DiscreteIsoscelesTriangularPrismRayIntersection
 {
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrame.getWorldFrame();
-   private final FramePlane3d basePlane = new FramePlane3d();
-   private final FramePlane3d leftPlane = new FramePlane3d();
-   private final FramePlane3d rightPlane = new FramePlane3d();
-   private final FramePlane3d topPlane = new FramePlane3d();
-   private final FramePlane3d bottomPlane = new FramePlane3d();
+   private final FramePlane3D basePlane = new FramePlane3D();
+   private final FramePlane3D leftPlane = new FramePlane3D();
+   private final FramePlane3D rightPlane = new FramePlane3D();
+   private final FramePlane3D topPlane = new FramePlane3D();
+   private final FramePlane3D bottomPlane = new FramePlane3D();
    private final YawPitchRoll tempOrientation = new YawPitchRoll();
    private final RigidBodyTransform shapeTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame shapeFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("shapeFrame",
@@ -76,7 +76,7 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
       closestIntersection.setToNaN();
       double closestDistance = Double.POSITIVE_INFINITY;
 
-      basePlane.getIntersectionWithLine(candidatePlaneIntersection, pickRay);
+      basePlane.intersectionWith(pickRay, candidatePlaneIntersection);
       if (isPointInside(candidatePlaneIntersection))
       {
          double distance = candidatePlaneIntersection.distance(pickRay.getPoint());
@@ -86,7 +86,7 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
             closestDistance = distance;
          }
       }
-      leftPlane.getIntersectionWithLine(candidatePlaneIntersection, pickRay);
+      leftPlane.intersectionWith(pickRay, candidatePlaneIntersection);
       if (isPointInside(candidatePlaneIntersection))
       {
          double distance = candidatePlaneIntersection.distance(pickRay.getPoint());
@@ -96,7 +96,7 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
             closestDistance = distance;
          }
       }
-      rightPlane.getIntersectionWithLine(candidatePlaneIntersection, pickRay);
+      rightPlane.intersectionWith(pickRay, candidatePlaneIntersection);
       if (isPointInside(candidatePlaneIntersection))
       {
          double distance = candidatePlaneIntersection.distance(pickRay.getPoint());
@@ -106,7 +106,7 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
             closestDistance = distance;
          }
       }
-      bottomPlane.getIntersectionWithLine(candidatePlaneIntersection, pickRay);
+      bottomPlane.intersectionWith(pickRay, candidatePlaneIntersection);
       if (isPointInside(candidatePlaneIntersection))
       {
          double distance = candidatePlaneIntersection.distance(pickRay.getPoint());
@@ -116,7 +116,7 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
             closestDistance = distance;
          }
       }
-      topPlane.getIntersectionWithLine(candidatePlaneIntersection, pickRay);
+      topPlane.intersectionWith(pickRay, candidatePlaneIntersection);
       if (isPointInside(candidatePlaneIntersection))
       {
          double distance = candidatePlaneIntersection.distance(pickRay.getPoint());

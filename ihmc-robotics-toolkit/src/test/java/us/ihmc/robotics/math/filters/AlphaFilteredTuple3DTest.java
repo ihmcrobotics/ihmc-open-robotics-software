@@ -11,10 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AlphaFilteredTuple3DTest extends Tuple3DBasicsTest<AlphaFilteredTuple3D>
 {
+   private double alpha;
+
    @Test
    public void testFirstSet()
    {
-      AlphaFilteredTuple3D tuple = new AlphaFilteredTuple3D(0.0);
+      double alpha = 0.0;
+      AlphaFilteredTuple3D tuple = new AlphaFilteredTuple3D(() -> alpha);
       tuple.set(0.0, 1.0, 2.0);
 
       assertEquals(0.0, tuple.getX(), getEpsilon());
@@ -28,9 +31,8 @@ public class AlphaFilteredTuple3DTest extends Tuple3DBasicsTest<AlphaFilteredTup
       Random random = new Random(12951L);
       for (int i = 0; i < 1000; ++i)
       {
-         double alpha = random.nextDouble(0.0, 1.0);
+         alpha = random.nextDouble(0.0, 1.0);
          AlphaFilteredTuple3D tuple = createRandomTuple(random);
-         tuple.setAlpha(alpha);
 
          double originalX = tuple.getX();
          double originalY = tuple.getY();
@@ -58,9 +60,8 @@ public class AlphaFilteredTuple3DTest extends Tuple3DBasicsTest<AlphaFilteredTup
       Random random = new Random(621541L);
       for (int i = 0; i < 1000; ++i)
       {
-         double alpha = random.nextDouble(0.0, 1.0);
+         alpha = random.nextDouble(0.0, 1.0);
          AlphaFilteredTuple3D tuple = createRandomTuple(random);
-         tuple.setAlpha(alpha);
 
          double originalX = tuple.getX();
          double originalY = tuple.getY();
@@ -82,19 +83,19 @@ public class AlphaFilteredTuple3DTest extends Tuple3DBasicsTest<AlphaFilteredTup
    @Override
    public AlphaFilteredTuple3D createEmptyTuple()
    {
-      return new AlphaFilteredTuple3D(0.0);
+      return new AlphaFilteredTuple3D(() -> alpha);
    }
 
    @Override
    public AlphaFilteredTuple3D createTuple(double v, double v1, double v2)
    {
-      return new AlphaFilteredTuple3D(v, v1, v2, 0.0);
+      return new AlphaFilteredTuple3D(v, v1, v2, () -> alpha);
    }
 
    @Override
    public AlphaFilteredTuple3D createRandomTuple(Random random)
    {
-      return new AlphaFilteredTuple3D(random.nextDouble(), random.nextDouble(), random.nextDouble(), 0.0);
+      return new AlphaFilteredTuple3D(random.nextDouble(), random.nextDouble(), random.nextDouble(), () -> alpha);
    }
 
    @Override

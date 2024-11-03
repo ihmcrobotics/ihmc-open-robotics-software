@@ -6,12 +6,12 @@ import Jama.Matrix;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
-import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
-import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
+import us.ihmc.wholeBodyControlCore.pidGains.PDGainsReadOnly;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.PDGains;
+import us.ihmc.math.ComplexNumber;
+import us.ihmc.math.ComplexConjugateMode;
+import us.ihmc.math.EigenvalueDecomposer;
+import us.ihmc.math.SingleRealMode;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -104,11 +104,11 @@ public class CoMHeightTimeDerivativesSmoother
 
       ComplexNumber[] eigenvalues = eigenvalueDecomposer.getEigenvalues();
       eigenValueOneReal.set(eigenvalues[0].real());
-      eigenValueOneImag.set(eigenvalues[0].imag());
+      eigenValueOneImag.set(eigenvalues[0].imaginary());
       eigenValueTwoReal.set(eigenvalues[1].real());
-      eigenValueTwoImag.set(eigenvalues[1].imag());
+      eigenValueTwoImag.set(eigenvalues[1].imaginary());
       eigenValueThreeReal.set(eigenvalues[2].real());
-      eigenValueThreeImag.set(eigenvalues[2].imag());
+      eigenValueThreeImag.set(eigenvalues[2].imaginary());
 
       if (DEBUG)
       {

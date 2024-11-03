@@ -1,5 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
+import us.ihmc.robotics.outputData.JointDesiredControlMode;
+
 /**
  * Mutable implementation if the {@link JointDesiredBehaviorReadOnly} interface.
  */

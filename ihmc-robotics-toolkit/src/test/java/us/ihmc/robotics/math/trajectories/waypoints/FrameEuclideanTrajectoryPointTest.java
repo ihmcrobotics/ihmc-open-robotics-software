@@ -37,7 +37,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEucli
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 
 public class FrameEuclideanTrajectoryPointTest
 {

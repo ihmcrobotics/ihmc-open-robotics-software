@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;

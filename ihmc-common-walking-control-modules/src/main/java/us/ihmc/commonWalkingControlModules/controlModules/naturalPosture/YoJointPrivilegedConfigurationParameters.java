@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
 import us.ihmc.commonWalkingControlModules.configurations.NaturalPostureParameters;
-import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
+import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

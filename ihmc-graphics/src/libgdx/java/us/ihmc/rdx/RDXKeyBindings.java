@@ -9,8 +9,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.StringTools;
 
 import java.util.Comparator;
 import java.util.HashMap;
