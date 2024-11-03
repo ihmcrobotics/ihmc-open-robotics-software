@@ -1,7 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {

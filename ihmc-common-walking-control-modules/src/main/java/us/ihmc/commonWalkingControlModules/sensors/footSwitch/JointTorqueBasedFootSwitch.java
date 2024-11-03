@@ -18,8 +18,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoVariables.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -93,7 +94,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       wrenchDetector = new JacobianBasedBasedTouchdownDetector(foot,
                                                                rootBody,
                                                                soleFrame,
-                                                               MultiBodySystemTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
+                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
                                                                contactForceThreshold,
                                                                contactThresholdWindowSize,
                                                                compensateGravity,

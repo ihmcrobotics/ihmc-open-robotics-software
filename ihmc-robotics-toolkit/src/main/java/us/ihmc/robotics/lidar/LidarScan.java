@@ -23,6 +23,9 @@ public class LidarScan
    public RigidBodyTransform localTransformEnd;
    public RigidBodyTransform averageTransform;
 
+   @Optional("TranformationInterpolationCalculator")
+   private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
+
    public float[] ranges;
    public int sensorId;
 
@@ -150,7 +153,7 @@ public class LidarScan
       this.worldTransformStart = start;
       this.worldTransformEnd = end;
       this.averageTransform = new RigidBodyTransform();
-      averageTransform.interpolate(worldTransformStart, worldTransformEnd, 0.5);
+      transformInterpolationCalculator.computeInterpolation(worldTransformStart, worldTransformEnd, averageTransform, .5);
    }
 
    public LidarScanParameters getScanParameters()
@@ -208,7 +211,7 @@ public class LidarScan
 
    public void getInterpolatedTransform(int index, RigidBodyTransform target)
    {
-      target.interpolate(worldTransformStart, worldTransformEnd, index / (double) (params.pointsPerSweep - 1));
+      transformInterpolationCalculator.computeInterpolation(worldTransformStart, worldTransformEnd, target, index / (double) (params.pointsPerSweep - 1));
    }
 
    public RigidBodyTransform getSweepTransform(int i)

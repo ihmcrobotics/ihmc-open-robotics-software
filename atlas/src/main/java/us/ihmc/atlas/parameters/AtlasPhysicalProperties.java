@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -75,9 +76,7 @@ public class AtlasPhysicalProperties implements RobotPhysicalProperties
 
          double y = robotSide.negateIfRightSide(0.1);
          double yaw = robotSide.negateIfRightSide(Math.PI / 2.0);
-         RigidBodyTransform handControlFrameToWristTransform = new RigidBodyTransform();
-         handControlFrameToWristTransform.getTranslation().setY(y);
-         handControlFrameToWristTransform.getRotation().setToYawOrientation(yaw);
+         RigidBodyTransform handControlFrameToWristTransform = TransformTools.createTransformFromTranslationAndEulerAngles(0.0, y, 0.0, 0.0, 0.0, yaw);
          handAttachmentPlateToWristTransforms.put(robotSide, handControlFrameToWristTransform);
       }
    }

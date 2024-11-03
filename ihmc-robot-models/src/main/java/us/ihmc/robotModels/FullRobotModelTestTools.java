@@ -17,7 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -103,7 +103,7 @@ public class FullRobotModelTestTools
             soleFrames.put(robotSide, soleFrame);
          }
 
-         totalMass = MultiBodySystemTools.computeSubTreeMass(elevator);
+         totalMass = MultiBodySystemMissingTools.computeSubTreeMass(elevator);
 
          legJointNames = new LegJointName[legJoints.get(RobotSide.LEFT).size()];
          armJointNames = new ArmJointName[armJoints.get(RobotSide.LEFT).size()];

@@ -36,10 +36,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanc
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygon2dTestHelpers;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.PairList;
+import us.ihmc.tools.lists.PairList;
 
 public class ClusterToolsTest
 {
@@ -932,7 +933,7 @@ public class ClusterToolsTest
          ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
          ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
 
-         boolean completelyInside = EuclidGeometryTools.isPolygonInside(smallPolygon, bigPolygon);
+         boolean completelyInside = ConvexPolygon2dCalculator.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
       }
    }

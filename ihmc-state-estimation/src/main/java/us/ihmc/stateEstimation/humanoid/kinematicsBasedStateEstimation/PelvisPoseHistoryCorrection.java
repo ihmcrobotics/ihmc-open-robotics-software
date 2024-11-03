@@ -12,8 +12,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -22,6 +20,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 /**
@@ -166,15 +165,15 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       interpolationRotationAlphaFilterAlphaValue = new YoDouble("interpolationRotationAlphaFilterAlphaValue", registry);
       interpolationRotationAlphaFilterBreakFrequency = new YoDouble("interpolationRotationAlphaFilterBreakFrequency", registry);
       interpolationRotationAlphaFilter = new AlphaFilteredYoVariable("PelvisRotationErrorCorrectionAlphaFilter", registry,
-                                                                     interpolationRotationAlphaFilterAlphaValue);
+            interpolationRotationAlphaFilterAlphaValue);
 
       interpolationTranslationAlphaFilterBreakFrequency.addListener(new YoVariableChangedListener()
       {
          @Override
          public void changed(YoVariable v)
          {
-            double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
-                                                                                    estimatorDT);
+            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
+                  estimatorDT);
             interpolationTranslationAlphaFilterAlphaValue.set(alpha);
          }
       });
@@ -459,8 +458,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    //TODO Check how to integrate the rotationCorrection here
    private void sendCorrectionUpdatePacket()
    {
-      totalRotationErrorFrame.getRotation(totalRotationError);
-      totalTranslationErrorFrame.getTranslation(totalTranslationError);
+      totalRotationErrorFrame.get(totalRotationError);
+      totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
       
       translationalResidualError.set(errorBetweenCurrentPositionAndCorrected.getTranslation());

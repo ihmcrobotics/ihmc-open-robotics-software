@@ -29,14 +29,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.wholeBodyControlCore.pidGains.GainCoupling;
-import us.ihmc.wholeBodyControlCore.pidGains.implementations.SymmetricYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.outputData.JointDesiredOutputList;
-import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.wholeBodyControlCore.pidGains.implementations.YoPID3DGains;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -61,7 +59,7 @@ public class MovingBaseRobotArmController implements RobotController
    private final AtomicBoolean controllerCoreModeHasChanged = new AtomicBoolean(false);
    private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
    private final YoDouble baseWeight = new YoDouble("baseWeight", registry);
-   private final YoPID3DGains basePositionGains = new YoPID3DGains("basePosition", GainCoupling.XYZ, true, registry);
+   private final SymmetricYoPIDSE3Gains basePositionGains = new SymmetricYoPIDSE3Gains("basePosition", registry);
    private final PointFeedbackControlCommand basePointCommand = new PointFeedbackControlCommand();
    private final YoSineGenerator3D sineGenerator = new YoSineGenerator3D("baseTrajectory", worldFrame, registry);
 
@@ -72,7 +70,8 @@ public class MovingBaseRobotArmController implements RobotController
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
-   private final SymmetricYoPIDSE3Gains handGains = new SymmetricYoPIDSE3Gains("hand", registry);
+   private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
+   private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
    private final YoFramePoint3D handTargetPosition = new YoFramePoint3D("handTarget", worldFrame, registry);
 
    private final YoFrameYawPitchRoll handTargetOrientation = new YoFrameYawPitchRoll("handTarget", worldFrame, registry);
@@ -166,8 +165,11 @@ public class MovingBaseRobotArmController implements RobotController
 
       handWeight.set(10.0);
 
-      handGains.setProportionalGains(100.0);
-      handGains.setDampingRatios(1.0);
+      handPositionGains.setProportionalGains(100.0);
+      handPositionGains.setDampingRatios(1.0);
+
+      handOrientationGains.setProportionalGains(100.0);
+      handOrientationGains.setDampingRatios(1.0);
 
       FramePoint3D initialHandPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialHandPosition.changeFrame(worldFrame);
@@ -275,8 +277,8 @@ public class MovingBaseRobotArmController implements RobotController
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handSpatialCommand.setPositionGains(handGains.getPositionGains());
-      handSpatialCommand.setOrientationGains(handGains.getOrientationGains());
+      handSpatialCommand.setPositionGains(handPositionGains);
+      handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.setControlBaseFrame(trajectory.getReferenceFrame());
 

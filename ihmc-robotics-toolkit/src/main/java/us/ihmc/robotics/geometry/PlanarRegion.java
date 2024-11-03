@@ -1614,7 +1614,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    {
       // Update Map Region Normal and Origin
       UnitVector3DReadOnly futureNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
-      Point3DReadOnly futureOrigin = EuclidGeometryTools.projectPointOntoPlane(plane, getPoint());
+      Point3DReadOnly futureOrigin = GeometryTools.projectPointOntoPlane(plane, getPoint());
 
       Vector3D axis = new Vector3D();
       axis.cross(getNormal(), futureNormal);

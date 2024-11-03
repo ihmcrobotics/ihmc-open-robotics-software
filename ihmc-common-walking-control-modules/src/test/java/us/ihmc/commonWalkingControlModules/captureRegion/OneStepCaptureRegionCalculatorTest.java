@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
 import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
@@ -123,7 +123,7 @@ public class OneStepCaptureRegionCalculatorTest
 
       shrinker.scaleConvexPolygon(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
 
-      assertTrue(EuclidGeometryTools.isPolygonInside(shrunkenPolygon, captureRegion));
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(shrunkenPolygon, captureRegion));
 
       ArrayList<FramePoint2D> expectedPointsOutside = new ArrayList<FramePoint2D>();
       movePointsFactor = 1.03;

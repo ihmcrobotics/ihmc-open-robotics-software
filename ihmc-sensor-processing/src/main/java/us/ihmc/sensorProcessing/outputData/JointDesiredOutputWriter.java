@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.outputData.JointDesiredOutputListBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**

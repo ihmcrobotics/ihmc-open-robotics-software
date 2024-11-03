@@ -4,7 +4,6 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.DynamicallyConsistentNullspaceCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -25,8 +24,8 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    public ConstrainedCentroidalMomentumMatrixCalculator(FloatingJointBasics rootJoint, ReferenceFrame centerOfMassFrame,
                                                         DMatrixRMaj selectionMatrix)
    {
-      this.dynamicallyConsistentNullspaceCalculator = new DynamicallyConsistentNullspaceCalculator(rootJoint,
-                                                                                                   true);
+      this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint,
+            true);
       this.centroidalMomentumCalculator = new CentroidalMomentumCalculator(rootJoint.getSuccessor(), centerOfMassFrame);
       this.selectionMatrix = selectionMatrix;
    }

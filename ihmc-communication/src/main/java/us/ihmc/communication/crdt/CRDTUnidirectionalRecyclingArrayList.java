@@ -1,7 +1,6 @@
 package us.ihmc.communication.crdt;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
 import java.util.function.Consumer;
@@ -32,7 +31,7 @@ public class CRDTUnidirectionalRecyclingArrayList<T> extends CRDTUnidirectionalM
    }
 
    /**
-    * Used only for preallocating using {@link RecyclingArrayListTools#getUnsafe}.
+    * Used only for preallocating using {@link us.ihmc.robotics.lists.RecyclingArrayListTools#getUnsafe}.
     */
    public RecyclingArrayList<T> getValueUnsafe()
    {

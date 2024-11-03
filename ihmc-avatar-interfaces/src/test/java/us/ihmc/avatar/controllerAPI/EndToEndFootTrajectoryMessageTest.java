@@ -48,7 +48,7 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.AngleTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;

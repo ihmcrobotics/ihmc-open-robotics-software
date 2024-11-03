@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import us.ihmc.commons.AngleTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -9,6 +8,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 

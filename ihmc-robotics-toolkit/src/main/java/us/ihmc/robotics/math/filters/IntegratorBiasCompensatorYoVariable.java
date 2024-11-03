@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.yoVariables.filters.ProcessingYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

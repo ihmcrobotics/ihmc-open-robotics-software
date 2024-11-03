@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.robotics.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
 
 public interface OneDoFJointTrajectoryGenerator extends DoubleTrajectoryGenerator
 {

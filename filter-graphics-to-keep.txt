@@ -1,2 +1,0 @@
-ihmc-graphics-description-update
-ihmc-robotics-toolkit/src/main/java/us/ihmc/robotics/SCS2YoGraphicsHolder.java

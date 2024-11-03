@@ -29,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.description.CrossFourBarJointDescription;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -175,7 +176,7 @@ public class FullRobotModelWrapper implements FullRobotModel
       oneDoFJoints = collectOneDoFJoints(elevator, null).toArray(new OneDoFJointBasics[0]);
       jointNameToOneDoFJointMap = Arrays.stream(oneDoFJoints).collect(Collectors.toMap(JointReadOnly::getName, Function.identity()));
 
-      totalMass = MultiBodySystemTools.computeSubTreeMass(elevator);
+      totalMass = MultiBodySystemMissingTools.computeSubTreeMass(elevator);
    }
 
    /**

@@ -8,11 +8,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.filters.AlphaFilterTools;
-import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,7 +59,7 @@ public class ForceSensorDistalMassCompensator
       distalMass = new YoDouble(sensorName + "DistalMass", registry);
       lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz",
                                                         registry,
-                                                        AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
+                                                        AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
       distalMassForceInWorld = new YoFrameVector3D(sensorName + "DistalWeight", world, registry);
       distalCoMInWorld = new YoFramePoint3D(sensorName + "DistalCoM", world, registry);
 
