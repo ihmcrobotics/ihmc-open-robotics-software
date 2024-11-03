@@ -17,7 +17,7 @@ import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.lists.PairList;
+import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAM
 {

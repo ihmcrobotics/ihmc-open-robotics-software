@@ -5,10 +5,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
-import us.ihmc.robotics.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.commons.time.TimeIntervalBasics;
-import us.ihmc.commons.time.TimeIntervalProvider;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3DFrameFactories;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajectoryGenerator, TimeIntervalProvider, Settable<FixedFramePolynomialEstimator3D>
 {
@@ -26,9 +29,9 @@ public class FixedFramePolynomialEstimator3D implements FixedFramePositionTrajec
    {
       this.referenceFrame = referenceFrame;
 
-      position = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(this, estimator.getPosition());
-      velocity = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getVelocity());
-      acceleration = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getAcceleration());
+      position = Polynomial3DFrameFactories.newLinkedFramePoint3DReadOnly(this, estimator.getPosition());
+      velocity = Polynomial3DFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getVelocity());
+      acceleration = Polynomial3DFrameFactories.newLinkedFrameVector3DReadOnly(this, estimator.getAcceleration());
    }
 
 

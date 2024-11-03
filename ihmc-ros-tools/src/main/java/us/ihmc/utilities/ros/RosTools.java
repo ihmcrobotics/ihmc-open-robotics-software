@@ -42,7 +42,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.StringTools;
+import us.ihmc.tools.string.StringTools;
 
 public class RosTools
 {

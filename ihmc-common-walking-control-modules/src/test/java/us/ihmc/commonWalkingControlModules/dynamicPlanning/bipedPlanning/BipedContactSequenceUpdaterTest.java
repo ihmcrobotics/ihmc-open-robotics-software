@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;

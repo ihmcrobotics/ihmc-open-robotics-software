@@ -1,10 +1,6 @@
 package us.ihmc.robotModels;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;

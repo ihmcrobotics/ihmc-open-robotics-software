@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.robotics.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;

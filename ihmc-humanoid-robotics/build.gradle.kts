@@ -14,7 +14,6 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
-   api("us.ihmc:ihmc-robotics-tools:0.15.0")
 }
 
 testDependencies {

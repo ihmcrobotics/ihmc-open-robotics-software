@@ -24,9 +24,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -34,6 +33,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -42,8 +42,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.List;
 
 /**
  * Manages using the interactables to preview and send whole body trajectory commands to the robot.
@@ -222,9 +220,7 @@ public class RDXWholeBodyIKManager
                      .getRootJoint()
                      .setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(),
                                             wholeBodyIKSolver.getSolution().getDesiredRootPosition());
-         MultiBodySystemTools.copyJointsState(List.of(wholeBodyIKSolver.getDesiredOneDoFJoints()),
-                                              List.of(desiredOneDoFJointsExcludingHands),
-                                              JointStateType.CONFIGURATION);
+         MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(), desiredOneDoFJointsExcludingHands);
          desiredRobot.setWholeBodyColor(RDXIKSolverColors.getColor(isSolutionGood));
          desiredRobot.getDesiredFullRobotModel().updateFrames();
 

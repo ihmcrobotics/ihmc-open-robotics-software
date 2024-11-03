@@ -10,8 +10,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
-import us.ihmc.scs2.definition.yoGraphic.SCS2YoGraphicHolder;
-import us.ihmc.wholeBodyControlCore.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.stateMachine.core.StateMachine;

@@ -17,9 +17,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
-import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import static us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector;
 
 public class FixedBaseRobotArm extends Robot
 {
@@ -86,8 +88,8 @@ public class FixedBaseRobotArm extends Robot
    private final ReferenceFrame handControlFrame;
    private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslation(), this);
    private final YoDouble dummyAlpha = new YoDouble("dummy", new YoRegistry("dummy"));
-   private final FilteredFiniteDifferenceYoFrameVector3D controlFrameLinearAcceleration;
-   private final FilteredFiniteDifferenceYoFrameVector3D controlFrameAngularAcceleration;
+   private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
+   private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
    private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
 
@@ -120,10 +122,10 @@ public class FixedBaseRobotArm extends Robot
 
       handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
-      controlFrameLinearAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
-                                                                                   controlFrameTracker.getYoVelocity());
-      controlFrameAngularAcceleration = new FilteredFiniteDifferenceYoFrameVector3D("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
-                                                                                    controlFrameTracker.getYoAngularVelocity());
+      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
+                                                                           controlFrameTracker.getYoVelocity());
+      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
+                                                                            controlFrameTracker.getYoAngularVelocity());
 
       setJointLimits();
 

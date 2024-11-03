@@ -39,7 +39,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelTestTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.mecano.algorithms.FloatingBaseRigidBodyDynamicsCalculator;
+import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -382,7 +382,7 @@ public class DynamicsMatrixCalculatorTest
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(contactablePlaneBody.getRigidBody());
       next.setCoefficientOfFriction(random.nextDouble());
-      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getContactFrame(), 1.0));
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3DWithFixedLength(random, contactablePlaneBody.getSoleFrame(), 1.0));
       next.setHasContactStateChanged(true);
 
       for (FramePoint3D contactPoint : contactablePlaneBody.getContactPointsCopy())

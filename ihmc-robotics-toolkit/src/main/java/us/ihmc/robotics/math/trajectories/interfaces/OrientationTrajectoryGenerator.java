@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.robotics.trajectories.interfaces.TrajectoryGenerator;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;

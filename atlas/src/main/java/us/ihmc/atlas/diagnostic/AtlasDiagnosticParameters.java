@@ -2,7 +2,7 @@ package us.ihmc.atlas.diagnostic;
 
 import static us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters.configureBehavior;
 import static us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters.configureSymmetricBehavior;
-import static us.ihmc.robotics.outputData.JointDesiredControlMode.EFFORT;
+import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
 
 import java.util.ArrayList;
 import java.util.Collections;

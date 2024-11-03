@@ -13,7 +13,6 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
@@ -32,8 +31,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotics.EuclidGeometryMissingTools;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.commons.lists.PairList;
+import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAMTools
 {
@@ -383,7 +383,7 @@ public class PlanarRegionSLAMTools
                                                                          double maximumPointProjectionDistance,
                                                                          PairList<PlanarRegion, Point2D> shadowMatches)
    {
-      BoundingBox2D intersection = EuclidGeometryTools.computeIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
+      BoundingBox2D intersection = EuclidGeometryMissingTools.computeIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
       if (intersection == null)
       {
@@ -579,11 +579,11 @@ public class PlanarRegionSLAMTools
 
       if(useIntersectionOverUnion)
       {
-         return EuclidGeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
+         return GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
       }
       else
       {
-         return EuclidGeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
+         return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
       }
 
    }

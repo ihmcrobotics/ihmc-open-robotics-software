@@ -29,6 +29,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class VirtualModelMomentumControllerTest
 {
@@ -53,6 +55,7 @@ public class VirtualModelMomentumControllerTest
       random = new Random(1000L);
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
@@ -66,6 +69,7 @@ public class VirtualModelMomentumControllerTest
 
       random = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -379,7 +383,7 @@ public class VirtualModelMomentumControllerTest
          caughtException = true;
       }
 
-      assertTrue(caughtException, "Wrong frame");
+      assertTrue("Wrong frame", caughtException);
    }
 
    @Test
@@ -410,7 +414,7 @@ public class VirtualModelMomentumControllerTest
          caughtException = true;
       }
 
-      assertTrue(caughtException, "Wrong frame");
+      assertTrue("Wrong frame", caughtException);
    }
 
    @Test

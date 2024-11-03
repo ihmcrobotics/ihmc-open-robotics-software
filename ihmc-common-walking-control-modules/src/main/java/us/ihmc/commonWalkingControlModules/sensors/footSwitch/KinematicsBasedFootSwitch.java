@@ -123,7 +123,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void update()
    {
-      double thisFootZ = getPointInWorld(foot.getContactFrame()).getZ();
+      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
 
       hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
@@ -132,7 +132,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
 
-      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getContactFrame());
+      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
       if (hasFootHitGroundFiltered())
       {
          footForce.set(0.0, 0.0, totalRobotWeight);
@@ -145,7 +145,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       double lowestZ = Double.MAX_VALUE;
       for (int i = 0; i < otherFeet.length; i++)
       {
-         double z = getPointInWorld(otherFeet[i].getContactFrame()).getZ();
+         double z = getPointInWorld(otherFeet[i].getSoleFrame()).getZ();
          if (z < lowestZ)
          {
             lowestZ = z;
@@ -190,7 +190,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public ReferenceFrame getMeasurementFrame()
    {
-      return foot.getContactFrame();
+      return foot.getSoleFrame();
    }
 
    @Override

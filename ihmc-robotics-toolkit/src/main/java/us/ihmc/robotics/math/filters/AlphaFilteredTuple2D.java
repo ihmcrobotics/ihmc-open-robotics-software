@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.filters;
 import org.apache.commons.lang3.NotImplementedException;
 
 import us.ihmc.euclid.interfaces.EuclidGeometry;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -25,10 +24,10 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
       reset();
    }
 
-   public AlphaFilteredTuple2D(Tuple2DReadOnly initialValue, DoubleProvider alpha)
+   public AlphaFilteredTuple2D(Tuple2DReadOnly other, DoubleProvider alpha)
    {
       this.alpha = alpha;
-      reset(initialValue);
+      reset(other);
    }
 
    public void reset()
@@ -39,13 +38,9 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
 
    public void reset(Tuple2DReadOnly other)
    {
-      reset(other.getX(), other.getY());
-   }
-
-   public void reset(double x, double y)
-   {
-      reset();
-      set(x, y);
+      resetX = true;
+      resetY = true;
+      set(other);
    }
 
    @Override
@@ -70,7 +65,7 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
       }
       else
       {
-         this.x = EuclidCoreTools.interpolate(x, this.x, alpha.getValue());
+         this.x = alpha.getValue() * this.x + (1.0 - alpha.getValue()) * x;
       }
    }
 
@@ -84,14 +79,8 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
       }
       else
       {
-         this.y = EuclidCoreTools.interpolate(y, this.y, alpha.getValue());
+         this.y = alpha.getValue() * this.y + (1.0 - alpha.getValue()) * y;
       }
-   }
-
-   @Override
-   public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
-   {
-      return epsilonEquals(geometry, epsilon);
    }
 
    @Override
@@ -104,5 +93,11 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
    public void applyInverseTransform(Transform transform, boolean checkIfTransformInXYPlane)
    {
       throw new NotImplementedException("Not supported by " + getClass().getSimpleName() + ".");
+   }
+
+   @Override
+   public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
+   {
+      return epsilonEquals(geometry, epsilon);
    }
 }

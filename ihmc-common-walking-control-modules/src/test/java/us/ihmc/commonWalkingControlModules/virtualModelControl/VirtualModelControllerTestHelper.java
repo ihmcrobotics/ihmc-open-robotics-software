@@ -37,8 +37,10 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
@@ -49,6 +51,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -61,8 +64,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class VirtualModelControllerTestHelper
 {
@@ -107,7 +108,7 @@ public class VirtualModelControllerTestHelper
    private static final Random random = new Random(100L);
 
    static void createVirtualModelControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
-                                             List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DMatrixRMaj selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
+         List<RigidBodyBasics> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, DMatrixRMaj selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
 
@@ -529,7 +530,7 @@ public class VirtualModelControllerTestHelper
       for (int i = 0; i < Wrench.SIZE; i++)
       {
          if (selectedValues.get(i, 0) == 1)
-            assertEquals(inputWrenchMatrix.get(i, 0), outputWrenchMatrix.get(i, 0), epsilon);
+            Assert.assertEquals(inputWrenchMatrix.get(i, 0), outputWrenchMatrix.get(i, 0), epsilon);
       }
    }
 
@@ -548,17 +549,17 @@ public class VirtualModelControllerTestHelper
       double epsilon = 1e-4;
 
       if (selectionMatrix.isAngularXSelected())
-         assertEquals(inputWrenchMatrix.get(0, 0), outputWrenchMatrix.get(0, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(0, 0), outputWrenchMatrix.get(0, 0), epsilon);
       if (selectionMatrix.isAngularYSelected())
-         assertEquals(inputWrenchMatrix.get(1, 0), outputWrenchMatrix.get(1, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(1, 0), outputWrenchMatrix.get(1, 0), epsilon);
       if (selectionMatrix.isAngularZSelected())
-         assertEquals(inputWrenchMatrix.get(2, 0), outputWrenchMatrix.get(2, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(2, 0), outputWrenchMatrix.get(2, 0), epsilon);
       if (selectionMatrix.isLinearXSelected())
-         assertEquals(inputWrenchMatrix.get(3, 0), outputWrenchMatrix.get(3, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(3, 0), outputWrenchMatrix.get(3, 0), epsilon);
       if (selectionMatrix.isLinearYSelected())
-         assertEquals(inputWrenchMatrix.get(4, 0), outputWrenchMatrix.get(4, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(4, 0), outputWrenchMatrix.get(4, 0), epsilon);
       if (selectionMatrix.isLinearZSelected())
-         assertEquals(inputWrenchMatrix.get(5, 0), outputWrenchMatrix.get(5, 0), epsilon);
+         Assert.assertEquals(inputWrenchMatrix.get(5, 0), outputWrenchMatrix.get(5, 0), epsilon);
 
    }
 

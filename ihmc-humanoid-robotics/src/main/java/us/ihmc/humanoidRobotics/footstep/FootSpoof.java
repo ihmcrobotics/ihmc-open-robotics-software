@@ -23,7 +23,8 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 
 /**
  * USE ONLY FOR TEST!
@@ -117,7 +118,7 @@ public class FootSpoof implements ContactablePlaneBody
 
    public void translate(double x, double y, double z)
    {
-      shinFrame.prependTranslationAndUpdate(x, y, z);
+      shinFrame.translateAndUpdate(x, y, z);
    }
 
    public void setSoleFrame(FramePoint3D position, FrameQuaternion orientation)
@@ -138,7 +139,7 @@ public class FootSpoof implements ContactablePlaneBody
       transformFromShinToWorld.set(transformFromSoleToWorld);
       transformFromShinToWorld.multiply(shinFrame.getTransformToDesiredFrame(soleFrame));
 
-      shinFrame.setTransformAndUpdate(transformFromShinToWorld);
+      shinFrame.setPoseAndUpdate(transformFromShinToWorld);
    }
 
    public String getName()
@@ -171,12 +172,12 @@ public class FootSpoof implements ContactablePlaneBody
       return false;
    }
 
-   public ReferenceFrame getContactFrame()
+   public ReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }
 
-   public List<FramePoint2D> getContactPoints2D()
+   public List<FramePoint2D> getContactPoints2d()
    {
       return contactPoints2d;
    }
@@ -189,5 +190,11 @@ public class FootSpoof implements ContactablePlaneBody
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   @Override
+   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
+   {
+      throw new RuntimeException("Not implemented");
    }
 }

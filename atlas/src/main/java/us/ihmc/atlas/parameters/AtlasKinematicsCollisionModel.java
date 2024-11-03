@@ -1,6 +1,7 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.euclid.Axis3D;

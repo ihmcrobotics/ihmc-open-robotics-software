@@ -18,21 +18,17 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MultiBodySystemMissingFactories;
-import us.ihmc.commons.AngleTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.outputData.JointDesiredOutputList;
-import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.robotics.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.Arrays;
 
 /**
  * Uses the WholeBodyControllerCore directly to get IK solutions for
@@ -75,16 +71,16 @@ public class ArmIKSolver
 
       // We clone a detached chest and single arm for the WBCC to work with. We just want to find arm joint angles.
       OneDoFJointBasics sourceFirstArmJoint = sourceFullRobotModel.getArmJoint(side, jointNameMap.getArmJointNames()[0]);
-      workChest = MultiBodySystemMissingFactories.getDetachedCopyOfSubtree(sourceFullRobotModel.getChest(),
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           sourceFirstArmJoint,
-                                                                           sourceFullRobotModel.getHand(side).getName());
+      workChest = MultiBodySystemMissingTools.getDetachedCopyOfSubtree(sourceFullRobotModel.getChest(),
+                                                                       ReferenceFrame.getWorldFrame(),
+                                                                       sourceFirstArmJoint,
+                                                                       sourceFullRobotModel.getHand(side).getName());
 
       hand = ArmIKSolverControlledBody.createHand(workChest, sourceFullRobotModel, jointNameMap, side);
       // Remove fingers
       hand.getWorkBody().getChildrenJoints().clear();
 
-      workingOneDoFJoints = MultiBodySystemMissingFactories.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
+      workingOneDoFJoints = MultiBodySystemMissingTools.getSubtreeJointArray(OneDoFJointBasics.class, workChest);
 
       SixDoFJoint rootSixDoFJoint = null; // don't need this for fixed base single limb IK
       CenterOfMassReferenceFrame centerOfMassFrame = null; // we don't need this
@@ -120,7 +116,7 @@ public class ArmIKSolver
 
    public void copySourceToWork()
    {
-      MultiBodySystemTools.copyJointsState(Arrays.stream(sourceOneDoFJoints).toList(), Arrays.stream(workingOneDoFJoints).toList(), JointStateType.CONFIGURATION);
+      MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(sourceOneDoFJoints, workingOneDoFJoints);
    }
 
    /**

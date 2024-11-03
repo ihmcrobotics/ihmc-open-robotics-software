@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.tools.UnitConversions;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {

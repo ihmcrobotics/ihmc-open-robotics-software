@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.WrenchTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -21,7 +22,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.LinearSpatialVectorTrajectoryGenerator.SpatialWaypoint;
-import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -94,7 +95,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 
    private void setControlFramePose(RigidBodyTransform controlFramePoseInBody)
    {
-      activeControlFrame.setTransformAndUpdate(controlFramePoseInBody);
+      activeControlFrame.setPoseAndUpdate(controlFramePoseInBody);
    }
 
    public void getDesiredWrench(WrenchBasics wrenchToPack)

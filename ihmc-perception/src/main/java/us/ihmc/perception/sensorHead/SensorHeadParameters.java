@@ -1,11 +1,11 @@
 package us.ihmc.perception.sensorHead;
 
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
  * These parameters are specific to the sensor head setup we've designed for Nadia.
@@ -52,7 +52,7 @@ public class SensorHeadParameters
       FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().set(-0.001668, 0.0675, -0.043698);
       Tuple3DReadOnly ousterBaseToBeamTranslation = getOusterBaseToBeamTranslation(OUSTER_PITCH_ANGLE_DEGREES);
       FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().sub(ousterBaseToBeamTranslation);
-      EuclidCoreTools.setYawPitchRollDegrees(FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_LEFT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
    /**
@@ -65,7 +65,7 @@ public class SensorHeadParameters
       FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().set(-0.001668, -0.0675, -0.043698);
       Tuple3DReadOnly ousterBaseToBeamTranslation = getOusterBaseToBeamTranslation(OUSTER_PITCH_ANGLE_DEGREES);
       FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getTranslation().sub(ousterBaseToBeamTranslation);
-      EuclidCoreTools.setYawPitchRollDegrees(FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
    public static final RigidBodyTransform FISHEYE_RIGHT_TO_FISHEYE_LEFT_TRANSFORM_ON_TESTBED = new RigidBodyTransform();

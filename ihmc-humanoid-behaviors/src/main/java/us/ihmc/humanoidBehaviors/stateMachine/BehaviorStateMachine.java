@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
+import java.util.Map;
+
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 
 public class BehaviorStateMachine<E extends Enum<E>>
 {

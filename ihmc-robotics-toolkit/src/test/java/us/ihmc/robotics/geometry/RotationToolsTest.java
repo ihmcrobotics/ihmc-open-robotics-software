@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.AngleTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -21,7 +20,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
-import us.ihmc.euclid.QuaternionCalculus;
+import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -389,8 +388,8 @@ public class RotationToolsTest
             RotationTools.integrateAngularVelocity(expectedAngularVelocity, t - dt, integrationResultPrevious);
             RotationTools.integrateAngularVelocity(expectedAngularVelocity, t, integrationResultCurrent);
             RotationTools.integrateAngularVelocity(expectedAngularVelocity, t + dt, integrationResultNext);
-            QuaternionCalculus.computeQDotByFiniteDifferenceCentral(integrationResultPrevious, integrationResultNext, dt, qDot);
-            quaternionCalculus.computeAngularVelocityInParentFrame(integrationResultCurrent, qDot, actualAngularVelocity);
+            quaternionCalculus.computeQDotByFiniteDifferenceCentral(integrationResultPrevious, integrationResultNext, dt, qDot);
+            quaternionCalculus.computeAngularVelocityInWorldFrame(integrationResultCurrent, qDot, actualAngularVelocity);
 
             assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7));
          }

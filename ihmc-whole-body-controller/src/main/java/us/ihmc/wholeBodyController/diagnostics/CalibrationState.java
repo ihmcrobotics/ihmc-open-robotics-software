@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public interface CalibrationState extends State
 {
