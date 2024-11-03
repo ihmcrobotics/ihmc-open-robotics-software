@@ -566,7 +566,8 @@ public class KSTTools
          trajectoryMessageFactory.computeChestTrajectoryMessage();
       if (isPelvisTaskspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computePelvisTrajectoryMessage();
-      // TODO pack com trajectory
+      if (isCenterOfMassOutputEnabled.getValue())
+         trajectoryMessageFactory.computeCenterOfMassTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);

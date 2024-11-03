@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -129,6 +130,7 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsStreamingToolboxModule toolbox;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
    private final HumanoidKinematicsToolboxConfigurationMessage ikHumanoidSolverConfigurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
+   private final KinematicsStreamingToolboxInputMessage previousToolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
 
    private SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
 
@@ -687,6 +689,7 @@ public class RDXVRKinematicsStreamingMode
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
+         previousToolboxInputMessage.set(toolboxInputMessage);
       }
 
       kinematicsRecorder.onUpdateEnd(getTrajectoryReplayFrame());
@@ -972,6 +975,9 @@ public class RDXVRKinematicsStreamingMode
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
 
+      // Compare with previous message
+      setToPreviousIfJoystickDeltaIsLarge(message);
+
       WeightMatrix3D linearWeightMatrix = new WeightMatrix3D();
       message.getLinearSelectionMatrix().setXSelected(positionWeight.getX() != 0.0);
       message.getLinearSelectionMatrix().setYSelected(positionWeight.getY() != 0.0);
@@ -1002,6 +1008,29 @@ public class RDXVRKinematicsStreamingMode
       message.setAngularRateLimitation(angularMomentumLimit);
 
       return message;
+   }
+
+   private void setToPreviousIfJoystickDeltaIsLarge(KinematicsToolboxRigidBodyMessage message)
+   {
+      Object<KinematicsToolboxRigidBodyMessage> previousInputs = previousToolboxInputMessage.getInputs();
+      for (int i = 0; i < previousInputs.size(); i++)
+      {
+         if (previousInputs.get(i).getEndEffectorHashCode() == message.getEndEffectorHashCode())
+         {
+            KinematicsToolboxRigidBodyMessage previousInput = previousInputs.get(i);
+            tempFramePose.getPosition().set(previousInput.getDesiredPositionInWorld());
+            tempFramePose.getOrientation().set(previousInput.getDesiredOrientationInWorld());
+
+            boolean isCloseInOrientation = tempFramePose.getOrientation().distance(message.getDesiredOrientationInWorld()) < Math.toRadians(20.0);
+            boolean isCloseInPosition = tempFramePose.getPosition().distance(message.getDesiredPositionInWorld()) < 0.15;
+
+            if (!isCloseInOrientation || !isCloseInPosition)
+            {
+               message.getDesiredOrientationInWorld().set(previousInput.getDesiredOrientationInWorld());
+               message.getDesiredPositionInWorld().set(previousInput.getDesiredPositionInWorld());
+            }
+         }
+      }
    }
 
    public void update(boolean ikStreamingModeEnabled)
@@ -1158,6 +1187,7 @@ public class RDXVRKinematicsStreamingMode
          comJoystickZInput.changeFrame(ReferenceFrame.getWorldFrame());
          comJoystickXYInput.setIncludingFrame(comJoystickZInput);
          rateLimitedCoM.setToNaN();
+         previousToolboxInputMessage.getInputs().clear();
 
          if (!this.enabled.get())
          {
