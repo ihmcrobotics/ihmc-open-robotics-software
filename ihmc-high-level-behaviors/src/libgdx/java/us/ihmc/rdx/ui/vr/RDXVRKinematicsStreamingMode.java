@@ -1325,11 +1325,11 @@ public class RDXVRKinematicsStreamingMode
    {
       boolean close = handsAreOpen.get(side).booleanValue();
       handsAreOpen.get(side).setValue(!close);
-      handManager.publishHandCommand(side, close ? SakeHandPreset.CLOSE : SakeHandPreset.FULLY_OPEN, false, false);
+      handManager.publishHandCommand(side, close ? SakeHandPreset.CLOSE : SakeHandPreset.OPEN, false, false);
 
       // TODO need to figure out a better option for how to distinguish open/close from carrying an object
 
-      if (side == RobotSide.RIGHT)
+      if (side == RobotSide.LEFT)
          return;
 
       ObjectCarryMessage objectCarryMessage = new ObjectCarryMessage();
