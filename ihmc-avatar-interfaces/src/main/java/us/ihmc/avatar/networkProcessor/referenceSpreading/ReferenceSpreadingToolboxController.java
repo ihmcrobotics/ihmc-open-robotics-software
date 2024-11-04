@@ -140,6 +140,10 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
             {
                startRS();
             }
+            else if (command.getState() == ReferenceSpreadingToolboxInputCommand.COMMAND.NORMAL)
+            {
+               startNormal();
+            }
          }
       }
 
@@ -159,6 +163,11 @@ public class ReferenceSpreadingToolboxController extends ToolboxController
    public void startRS()
    {
       stateMachine.performTransition(States.PREPARE);
+   }
+
+   public void startNormal()
+   {
+      stateMachine.performTransition(States.NORMAL);
    }
 
    public void setTrajectoryMessagePublisher(HandTrajectoryMessagePublisher trajectoryMessagePublisher)

@@ -90,5 +90,6 @@ public class ReferenceSpreadingToolboxInputCommand implements Command<ReferenceS
       public static final int WAITING = 0;
       public static final int RECORDING = 1;
       public static final int PLAYBACK = 2;
+      public static final int NORMAL = 3;
    }
 }

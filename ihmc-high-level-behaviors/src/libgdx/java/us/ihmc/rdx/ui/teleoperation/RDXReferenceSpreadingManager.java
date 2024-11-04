@@ -21,6 +21,7 @@ public class RDXReferenceSpreadingManager
    private final ImGuiUniqueLabelMap labelRS = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiUniqueLabelMap labelToolbox = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiUniqueLabelMap labelsRecord = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiUniqueLabelMap labelsPlayback = new ImGuiUniqueLabelMap(getClass());
 
    private final CommunicationHelper communicationHelper;
    private final DRCRobotModel robotModel;
@@ -37,6 +38,7 @@ public class RDXReferenceSpreadingManager
    private final ImBoolean toolboxActive = new ImBoolean(false);
    private final ImBoolean recordActive = new ImBoolean(false);
    private final ImBoolean referenceSpreadingActive = new ImBoolean(false);
+   private final ImBoolean normalPlaybackActive = new ImBoolean(false);
 
    ROS2ControllerHelper ros2ControllerHelper;
 
@@ -126,6 +128,24 @@ public class RDXReferenceSpreadingManager
                referenceSpreadingActive.set(true);
             }
          }
+         ImGui.text("Normal Playback: ");
+         ImGui.sameLine();
+         if (normalPlaybackActive.get())
+         {
+            if (ImGui.button(labelsPlayback.get("Stop")))
+            {
+               stopNormalPlayback();
+               normalPlaybackActive.set(false);
+            }
+         }
+         else
+         {
+            if (ImGui.button(labelsPlayback.get("Start")))
+            {
+               startNormalPlayback();
+               normalPlaybackActive.set(true);
+            }
+         }
       }
    }
 
@@ -178,6 +198,26 @@ public class RDXReferenceSpreadingManager
    }
 
    private void stopReferenceSpreading()
+   {
+      ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+      message.setState((byte) 0);
+      message.setSequenceId(sequenceId++);
+      ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+
+      LogTools.info("Message: " + message);
+   }
+
+   private void startNormalPlayback()
+   {
+      ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
+      message.setState((byte) 3);
+      message.setSequenceId(sequenceId++);
+      ros2ControllerHelper.publish(referenceSpreadingROSTopic, message);
+
+      LogTools.info("Message: " + message);
+   }
+
+   private void stopNormalPlayback()
    {
       ReferenceSpreadingToolboxInputMessage message = new ReferenceSpreadingToolboxInputMessage();
       message.setState((byte) 0);

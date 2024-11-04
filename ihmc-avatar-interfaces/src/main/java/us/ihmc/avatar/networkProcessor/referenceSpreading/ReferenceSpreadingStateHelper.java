@@ -37,7 +37,8 @@ public class ReferenceSpreadingStateHelper
       BEFORE,
       AFTER,
       WAITING,
-      PREPARE
+      PREPARE,
+      NORMAL
    }
 
    private HandTrajectoryMessagePublisher trajectoryMessagePublisher;
@@ -78,6 +79,7 @@ public class ReferenceSpreadingStateHelper
 
       factory.addState(States.BEFORE, new BeforeState());
       factory.addState(States.AFTER, new AfterState());
+      factory.addState(States.NORMAL, new NormalState());
       factory.addState(States.WAITING, new WaitingState());
       factory.addState(States.PREPARE, new PrepareState());
 
@@ -202,6 +204,51 @@ public class ReferenceSpreadingStateHelper
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = blendImpactReference.getHandHybridTrajectoryMessage(robotSide);
 //            LogTools.info("Message: " + handHybridTrajectoryMessage);
+            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
+         }
+
+         LogTools.info("Published all messages");
+      }
+
+      public void onExit(double timeInState)
+      {
+         LogTools.info("Exiting AfterState");
+      }
+   }
+
+   private class NormalState implements State
+   {
+      public NormalState()
+      {
+      }
+
+      public void doAction(double timeInState)
+      {
+         //         LogTools.info("AfterState: " + timeInState);
+      }
+
+      public void onEntry()
+      {
+
+         try {
+            Optional<Path> mostRecentFile = Files.list(Paths.get(demoDirectory))
+                                                 .filter(Files::isRegularFile)
+                                                 .max(Comparator.comparingLong(p -> p.toFile().lastModified()));
+
+            mostRecentFile.ifPresent(file -> {
+               LogTools.info("Preparing signal: " + file);
+               referenceSpreader.setTrajectoryFilePath(file.toString(), true);
+            });
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
+
+         ReferenceSpreadingTrajectory originalTrajectory = referenceSpreader.getOriginalReferenceTrajectory();
+         originalTrajectory.setInitialTimeDuration(PREPARE_DURATION);
+         for (RobotSide robotSide : RobotSide.values())
+         {
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = originalTrajectory.getHandHybridTrajectoryMessage(robotSide);
+            //            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 

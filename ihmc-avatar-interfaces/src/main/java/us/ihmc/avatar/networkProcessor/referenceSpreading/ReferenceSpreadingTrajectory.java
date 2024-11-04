@@ -39,7 +39,6 @@ public class ReferenceSpreadingTrajectory
 {
    protected final YoRegistry registry;
 
-   private static final double INITIAL_TIME_DURATION = 0;
    private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
 
@@ -51,6 +50,7 @@ public class ReferenceSpreadingTrajectory
 
 
    private Double startTimeCSV = null;
+   private double initialTimeDuration = 0;
 
    ReferenceSpreadingTrajectory(TrajectoryRecordReplay trajectoryPlayer, List<String> keyMatrix, DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
@@ -200,7 +200,7 @@ public class ReferenceSpreadingTrajectory
       LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
       trajectoryPlayer.reset();
       makeMap(trajectoryPlayer.play(false), currentFrame);
-      startTimeCSV = currentFrame.get("time[sec]") - INITIAL_TIME_DURATION;
+      startTimeCSV = currentFrame.get("time[sec]") - initialTimeDuration;
 //      LogTools.info("CurrentFrame: " + currentFrame);
 
       int totalFrames = trajectoryPlayer.getNumberOfLines();
@@ -304,6 +304,11 @@ public class ReferenceSpreadingTrajectory
          startTimeCSV = currentFrame.get("time[sec]");
       }
       return startTimeCSV;
+   }
+
+   public void setInitialTimeDuration(double initialTimeDuration)
+   {
+      this.initialTimeDuration = initialTimeDuration;
    }
 
    private void makeMap(double[] values, LinkedHashMap<String, Double> mapToPack)
