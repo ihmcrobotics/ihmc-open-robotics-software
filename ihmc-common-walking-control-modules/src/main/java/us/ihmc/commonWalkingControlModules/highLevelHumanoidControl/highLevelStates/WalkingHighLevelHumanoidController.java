@@ -58,8 +58,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -788,7 +786,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
-      StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactCoMRegionCalculator();
+      StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
       boolean useMultiContactStabilityRegion = false;
 
       if (isUpperBodyLoadBearing)

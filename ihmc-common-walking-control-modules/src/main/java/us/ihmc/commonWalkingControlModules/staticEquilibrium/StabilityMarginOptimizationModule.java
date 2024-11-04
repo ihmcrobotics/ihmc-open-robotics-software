@@ -70,7 +70,7 @@ import java.util.List;
  */
 public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphicHolder
 {
-   static final boolean DEBUG = true;
+   static final boolean DEBUG = false;
    static final double GRAVITY = 9.81;
    static final int NUM_BASIS_VECTORS = 4;
    static final int MAX_CONTACT_POINTS = 12;
@@ -118,9 +118,9 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    /* Whether LP solver converged or not */
    private boolean foundSolution = false;
 
-   /* Position of optimized CoM */
+   /* Position of optimized stability point */
    private final Point2D optimizedStabilityPoint = new Point2D();
-   /* Yo-Position of optimized CoM */
+   /* Yo-Position of optimized stability point */
    private final YoFramePoint3D yoOptimizedStabilityPoint;
 
    private final YoDouble equalityConstraintEpsilon;
@@ -212,11 +212,14 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
    {
       clearInternal(contactPointsHaveChanged);
 
+      boolean constraintsAreExpressedInLocalFrame = getSolverFrame() != ReferenceFrame.getWorldFrame();
+      boolean recomputeAllConstraints = contactPointsHaveChanged || constraintsAreExpressedInLocalFrame;
+
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////// Compute contact point positions and corresponding basis vectors ////////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      if (contactPointsHaveChanged)
+      if (recomputeAllConstraints)
       {
          numberOfContactPoints = contactState.getNumberOfContactPoints();
 
@@ -231,14 +234,16 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
 
             for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
             {
-               FrameVector3D basisVector = basisVectors.get(getBasisIndex(contactIdx, basisIdx));
+               int basisIndex = getBasisIndex(contactIdx, basisIdx);
+
+               FrameVector3D basisVector = basisVectors.get(basisIndex);
                basisVector.setIncludingFrame(contactFrame, Axis3D.Z);
                double axisPolarCoordinate = basisIdx * 2.0 * Math.PI / NUM_BASIS_VECTORS;
                tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, basisVectorAngle);
                tempAxisAngle.transform(basisVector);
 
                basisVector.changeFrame(getSolverFrame());
-               yoBasisVectors.get(getBasisIndex(contactIdx, basisIdx)).setMatchingFrame(basisVector);
+               yoBasisVectors.get(basisIndex).setMatchingFrame(basisVector);
             }
          }
       }
@@ -247,13 +252,13 @@ public abstract class StabilityMarginOptimizationModule implements SCS2YoGraphic
       /////////////////////////////// Compute nominal equality constraint to enforce static equilibrium ///////////////////////////////
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      nominalDecisionVariables = computeConstraintMatrices(contactState, contactPointsHaveChanged);
+      nominalDecisionVariables = computeConstraintMatrices(contactState, recomputeAllConstraints);
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       /////////////////////////////////////////// Compute map from positive x to nominal x ///////////////////////////////////////////
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      if (contactPointsHaveChanged)
+      if (recomputeAllConstraints)
       {
          solverDecisionVariables = computeNumberOfSolverVariables(contactState);
 
