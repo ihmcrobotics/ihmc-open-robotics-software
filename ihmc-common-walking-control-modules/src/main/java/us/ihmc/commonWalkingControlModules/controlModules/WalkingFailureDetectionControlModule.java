@@ -67,9 +67,6 @@ public class WalkingFailureDetectionControlModule
       isFallDetectionActivated = new YoBoolean("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
 
-      // TODO do not merge into develop
-//      isFallDetectionActivated.set(false);
-
       icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.05);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
       isRobotFalling = new YoBoolean("isRobotFalling", registry);
