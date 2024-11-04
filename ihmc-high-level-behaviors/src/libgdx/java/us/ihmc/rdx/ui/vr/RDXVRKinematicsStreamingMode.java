@@ -86,7 +86,7 @@ public class RDXVRKinematicsStreamingMode
    final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.7;
    private final double COM_JOYSTICK_INCREMENT = 0.001;
    private final double COM_INCREMENT_MAX_RATE = 0.015;
-   private static final double OBJECT_MASS = 0.4;
+   private static final double OBJECT_MASS = 0.8;
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -877,12 +877,12 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Contact normal is hard-coded - HARDWARE
-//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          // Contact normal is hard-coded - SIMULATION
-         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
+//         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 
@@ -1333,7 +1333,7 @@ public class RDXVRKinematicsStreamingMode
 
       ObjectCarryMessage objectCarryMessage = new ObjectCarryMessage();
       objectCarryMessage.setObjectMass(OBJECT_MASS);
-      objectCarryMessage.setIsPickingUp(true);
+      objectCarryMessage.setIsPickingUp(close);
       objectCarryMessage.setRobotSide(side.toByte());
 
       LogTools.info("publishing object carry message");
