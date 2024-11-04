@@ -78,6 +78,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
+   private static final FrameVector2D zeroVector = new FrameVector2D();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -104,6 +105,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
+
+   private final YoBoolean isUsingPrecomputedICPTraj = new YoBoolean("isUsingPrecomputedICPTraj", registry);
+   private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
+   private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
+   private final FramePoint2D previousDesiredCenterOfPressurePrecomputed = new FramePoint2D();
+   private final YoDouble previousPrecomputedICPTime = new YoDouble("previousPrecomputedICPTime", registry);
+   private final YoDouble icpBlendDuration = new YoDouble("icpBlendDuration", registry);
 
    private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
    private final ICPControllerParameters.FeedbackAlphaCalculator feedbackAlphaCalculator;
@@ -255,6 +263,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
+      icpBlendDuration.set(2.5);
 
       if (walkingMessageHandler != null)
       {
@@ -308,6 +317,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
+
+      previousPrecomputedICPTime.setToNaN();
 
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
@@ -559,11 +570,26 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          if (blendICPTrajectories.getBooleanValue())
          {
-            precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedICPTraj.set(precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
          }
          else
          {
-            precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedICPTraj.set(precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
+         }
+
+         if (isUsingPrecomputedICPTraj.getValue())
+         {
+            previousDesiredCapturePointPrecomputed.set(desiredCapturePoint2d);
+            previousDesiredCapturePointVelocityPrecomputed.set(desiredCapturePointVelocity2d);
+            previousDesiredCenterOfPressurePrecomputed.set(perfectCMP2d);
+            previousPrecomputedICPTime.set(yoTime.getValue());
+         }
+         else if (!Double.isNaN(previousPrecomputedICPTime.getDoubleValue()) && yoTime.getValue() - previousPrecomputedICPTime.getValue() < icpBlendDuration.getValue())
+         {
+            double alphaPrecomputed = 1.0 - (yoTime.getValue() - previousPrecomputedICPTime.getValue()) / icpBlendDuration.getValue();
+            desiredCapturePoint2d.interpolate(previousDesiredCapturePointPrecomputed, alphaPrecomputed);
+            desiredCapturePointVelocity2d.interpolate(zeroVector, alphaPrecomputed);
+            perfectCMP2d.interpolate(previousDesiredCenterOfPressurePrecomputed, alphaPrecomputed);
          }
       }
 

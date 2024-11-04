@@ -775,7 +775,6 @@ public class RDXVRKinematicsStreamingMode
             wakeUpToolbox();
          }
       }
-
    }
 
    private void handleRightControllJoystickInput(boolean rightAButtonPressed, boolean rightTriggerPressed, double forwardJoystickValue, double lateralJoystickValue)
@@ -878,12 +877,12 @@ public class RDXVRKinematicsStreamingMode
          handLoadBearingMessage.getContactPointInBodyFrame().set(contactPoint);
 
          // Contact normal is hard-coded - HARDWARE
-         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
-         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
+//         FrameVector3D contactNormal = new FrameVector3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame(), HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME);
+//         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+//         handLoadBearingMessage.getContactNormalInWorld().set(contactNormal);
 
          // Contact normal is hard-coded - SIMULATION
-//         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
+         handLoadBearingMessage.getContactNormalInWorld().set(HAND_CONTACT_NORMAL_IN_WORLD);
 
          handsAreLoaded.put(robotSide, true);
 

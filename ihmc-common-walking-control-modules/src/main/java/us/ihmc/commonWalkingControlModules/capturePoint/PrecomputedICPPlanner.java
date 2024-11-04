@@ -194,7 +194,7 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       yoDesiredCMPPosition.set(desiredCMPPosition);
    }
 
-   public void compute(double time,
+   public boolean compute(double time,
                        FramePoint2DBasics desiredCapturePoint2dToPack,
                        FrameVector2DBasics desiredCapturePointVelocity2dToPack,
                        FramePoint2DBasics desiredCoP2DToPack)
@@ -214,9 +214,10 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
       centerOfMassTrajectoryHandler.clearPointsInPast();
       momentumTrajectoryHandler.clearPointsInPast();
+      return isWithinInterval(time);
    }
 
-   public void computeAndBlend(double time,
+   public boolean computeAndBlend(double time,
                                FixedFramePoint2DBasics desiredCapturePoint2dToPack,
                                FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
                                FixedFramePoint2DBasics desiredCenterOfPressure2dToPack)
@@ -254,6 +255,7 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
       centerOfMassTrajectoryHandler.clearPointsInPast();
       momentumTrajectoryHandler.clearPointsInPast();
+      return isWithinInterval(time);
    }
 
    public boolean isWithinInterval(double time)

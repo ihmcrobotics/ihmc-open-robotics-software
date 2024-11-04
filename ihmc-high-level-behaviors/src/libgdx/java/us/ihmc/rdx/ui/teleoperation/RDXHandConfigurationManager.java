@@ -85,7 +85,7 @@ public class RDXHandConfigurationManager
       {
          sakeHandDesiredCommandMessage.setRequestResetErrors(true);
       }
-      else if (handPreset != null)
+      else if (handPreset != null && sakeHandStatus.get(side) != null)
       {
          double handPositionLowerLimit = sakeHandStatus.get(side).getPositionLowerLimit();
          double handPositionUpperLimit = sakeHandStatus.get(side).getPositionUpperLimit();
