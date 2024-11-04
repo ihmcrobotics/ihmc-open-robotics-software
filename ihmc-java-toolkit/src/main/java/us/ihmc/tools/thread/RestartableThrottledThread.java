@@ -8,6 +8,9 @@ import us.ihmc.commons.thread.Throttler;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @deprecated Use {@link us.ihmc.commons.thread.RepeatingTaskThread} with a frequency limit set.
+ */
 public class RestartableThrottledThread
 {
    private final String name;
@@ -89,11 +92,5 @@ public class RestartableThrottledThread
    public boolean isRunning()
    {
       return running.getPlain();
-   }
-
-   // only used for testing
-   boolean isAlive()
-   {
-      return thread == null ? false : thread.isAlive();
    }
 }

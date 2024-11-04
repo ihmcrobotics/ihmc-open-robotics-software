@@ -7,6 +7,10 @@ import us.ihmc.commons.exception.ExceptionTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * @deprecated Use {@link us.ihmc.commons.thread.RepeatingTaskThread} instead.
+ */
+@Deprecated
 public class RestartableThread
 {
    private final String name;
@@ -93,10 +97,5 @@ public class RestartableThread
    public boolean isRunning()
    {
       return running.getPlain();
-   }
-
-   boolean isAlive()
-   {
-      return thread == null ? false : thread.isAlive();
    }
 }
