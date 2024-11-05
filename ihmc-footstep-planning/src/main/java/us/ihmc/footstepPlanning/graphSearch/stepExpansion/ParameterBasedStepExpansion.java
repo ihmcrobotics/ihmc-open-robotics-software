@@ -249,10 +249,11 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    }
 
    /**
-    * This was made to use in tests to check if the number of yaw offsets is what we expect
+    * This was made to use in tests to check if the number of yaw offsets is what we expect which is why we are packing a variable.
+    * We don't want the {@link #yawOffsets} to be modified
     */
-   public TDoubleArrayList getYawOffsets()
+   void getYawOffsets(TDoubleArrayList yawOffsetsToPack)
    {
-      return yawOffsets;
+      yawOffsetsToPack.addAll(yawOffsets);
    }
 }

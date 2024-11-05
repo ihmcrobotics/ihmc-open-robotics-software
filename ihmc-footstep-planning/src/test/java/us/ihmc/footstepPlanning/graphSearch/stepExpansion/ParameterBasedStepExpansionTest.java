@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -61,9 +62,11 @@ public class ParameterBasedStepExpansionTest
       // Convert the yaw offsets to a HastMap so we can get each unique item to see how many different yaw offsets we are working with
       // This doesn't mean that each step considers all the yaw offsets, but we should expect some that have the option to use all the yaw offsets
       HashSet<Double> uniqueYawOffsets = new HashSet<>();
-      for (int i = 0; i < expansion.getYawOffsets().size(); i++)
+      TDoubleArrayList yawOffsets = new TDoubleArrayList();
+      expansion.getYawOffsets(yawOffsets);
+      for (int i = 0; i < yawOffsets.size(); i++)
       {
-         uniqueYawOffsets.add(expansion.getYawOffsets().get(i));
+         uniqueYawOffsets.add(yawOffsets.get(i));
       }
 
       assertEquals(expectedYawOffsets, uniqueYawOffsets.size());
