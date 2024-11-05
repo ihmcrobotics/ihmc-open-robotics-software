@@ -41,7 +41,7 @@ public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<PrimitiveDataVectorMessage> bodyPathParametersSerializer = new JSONSerializer<>(new PrimitiveDataVectorMessagePubSubType());
+   private final JSONSerializer<AStarBodyPathPlannerParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new AStarBodyPathPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 

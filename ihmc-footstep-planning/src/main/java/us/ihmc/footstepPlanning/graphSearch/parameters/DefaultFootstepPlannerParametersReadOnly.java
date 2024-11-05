@@ -635,20 +635,17 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    {
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
 
-      // Heuristic settings
       packet.setAStarHeuristicsWeight(getAStarHeuristicsWeight());
       packet.setMaxBranchFactor(getMaxBranchFactor());
       packet.setEnableExpansionMask(getEnableExpansionMask());
       packet.setUseReachabilityMap(getUseReachabilityMap());
       packet.setSolutionQualityThreshold(getSolutionQualityThreshold());
 
-      // Ideal footstep parameters
       packet.setIdealFootstepWidth(getIdealFootstepWidth());
       packet.setIdealFootstepLength(getIdealFootstepLength());
       packet.setIdealSideStepWidth(getIdealSideStepWidth());
       packet.setIdealBackStepLength(getIdealBackStepLength());
 
-      // Footstep restriction parameters
       packet.setMinFootholdPercent(getMinFootholdPercent());
       packet.setMinClearanceFromStance(getMinClearanceFromStance());
       packet.setMinSurfaceIncline(getMinSurfaceIncline());
@@ -662,7 +659,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
       packet.setMaxSwingZ(getMaxSwingZ());
       packet.setMaxSwingReach(getMaxSwingReach());
 
-      // Cost parameters
       packet.setCostPerStep(getCostPerStep());
       packet.setForwardWeight(getForwardWeight());
       packet.setLateralWeight(getLateralWeight());
@@ -678,7 +674,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
       packet.setHeightMapSnapThreshold(getHeightMapSnapThreshold());
       packet.setReferencePlanAlpha(getReferencePlanAlpha());
 
-      // Other configuration parameters
       packet.setCheckForBodyBoxCollisions(getCheckForBodyBoxCollisions());
       packet.setBodyBoxWidth(getBodyBoxWidth());
       packet.setBodyBoxHeight(getBodyBoxHeight());
@@ -688,14 +683,24 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
       packet.setBodyBoxBaseZ(getBodyBoxBaseZ());
       packet.setIntermediateBodyBoxChecks(getIntermediateBodyBoxChecks());
 
-      // Shin collision check settings
       packet.setEnableShinCollisionCheck(getEnableShinCollisionCheck());
       packet.setShinLength(getShinLength());
       packet.setShinToeClearance(getShinToeClearance());
       packet.setShinHeelClearance(getShinHeelClearance());
       packet.setShinHeightOffset(getShinHeightOffset());
 
-      // Additional collision and cliff avoidance settings
+      packet.setWiggleInsideDeltaTarget(getWiggleInsideDeltaTarget());
+      packet.setWiggleInsideDeltaMinimum(getWiggleInsideDeltaMinimum());
+      packet.setWiggleWhilePlanning(getWiggleWhilePlanning());
+      packet.setEnableConcaveHullWiggler(getEnableConcaveHullWiggler());
+      packet.setMaximumXyWiggleDistance(getMaxXYWiggleDistance());
+      packet.setMaximumYawWiggle(getMaxYawWiggle());
+      packet.setMaximumZPenetrationOnValleyRegions(getMaxZPenetrationOnValleyRegions());
+      packet.setMaximumSnapHeight(getMaximumSnapHeight());
+      packet.setFinalTurnProximity(getFinalTurnProximity());
+      packet.setDistanceFromPathTolerance(getDistanceFromPathTolerance());
+      packet.setDeltaYawFromReferenceTolerance(getDeltaYawFromReferenceTolerance());
+
       packet.setCheckForPathCollisions(getCheckForPathCollisions());
       packet.setCliffBottomHeightToAvoid(getCliffBottomHeightToAvoid());
       packet.setMinDistanceFromCliffBottoms(getMinDistanceFromCliffBottoms());

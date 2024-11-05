@@ -318,9 +318,9 @@ public class FootstepPlannerLogVisualizerController
       footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
-      // publish body path parameteres
+      // publish body path parameters
       AStarBodyPathPlannerParameters bodyPathPlannerParameters = new AStarBodyPathPlannerParameters();
-      StoredPropertySetMessageTools.fromMessage(footstepPlannerLog.getBodyPathParametersPacket(), bodyPathPlannerParameters);
+      bodyPathPlannerParameters.set(footstepPlannerLog.getBodyPathParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.AStarBodyPathPlannerParameters, bodyPathPlannerParameters);
 
       // publish swing parameters

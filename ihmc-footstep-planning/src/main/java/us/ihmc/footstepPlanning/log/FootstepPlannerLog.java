@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
 import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -23,7 +24,7 @@ public class FootstepPlannerLog
    // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
-   private final PrimitiveDataVectorMessage bodyPathParametersPacket = new PrimitiveDataVectorMessage();
+   private final AStarBodyPathPlannerParametersPacket bodyPathParametersPacket = new AStarBodyPathPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
@@ -58,7 +59,7 @@ public class FootstepPlannerLog
       return footstepParametersPacket;
    }
 
-   public PrimitiveDataVectorMessage getBodyPathParametersPacket()
+   public AStarBodyPathPlannerParametersPacket getBodyPathParametersPacket()
    {
       return bodyPathParametersPacket;
    }

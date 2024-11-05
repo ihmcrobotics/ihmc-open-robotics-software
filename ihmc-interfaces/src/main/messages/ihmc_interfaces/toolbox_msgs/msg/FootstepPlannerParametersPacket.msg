@@ -254,9 +254,6 @@ float64 reference_plan_alpha -11.1
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -11.1
 
-# Gets the weight for the heuristics in the A Star planner.
-float64 a_star_heuristics_weight -11.1
-
 # Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
 uint32 intermediate_body_box_checks 1
 
