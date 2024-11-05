@@ -201,7 +201,7 @@ public class FootstepPlannerLogLoader
          }
 
          // load status packet
-         File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
+         File statusFile = new File(logDirectory, FootstepPlannerLogger.outputStatusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));

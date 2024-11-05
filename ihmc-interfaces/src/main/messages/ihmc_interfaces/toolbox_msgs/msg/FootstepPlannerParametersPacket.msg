@@ -40,7 +40,7 @@ float64 wiggle_inside_delta_minimum -11.1
 # where the parent is the last footstep taken on the other foot.
 #
 # This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
-float64 maximum_step_reach -11.1
+float64 max_step_reach -11.1
 
 # Maximum yaw between consecutive footsteps
 #
@@ -49,7 +49,7 @@ float64 maximum_step_reach -11.1
 # This restricts the planner from planning kinematically infeasible footsteps. It is constant through the
 # space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
 # its maximum reach.
-float64 maximum_step_yaw -11.1
+float64 max_step_yaw -11.1
 
 # If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
 bool use_reachability_map false
@@ -64,7 +64,7 @@ float64 solution_quality_threshold -11.1
 #
 # If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
 # on top of each other. If too high, footsteps might not be kinematically feasible.
-float64 minimum_step_width -11.1
+float64 min_step_width -11.1
 
 # Minimum step length the planner will consider for candidate steps.
 #
@@ -73,34 +73,34 @@ float64 minimum_step_width -11.1
 #
 # If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
 # on top of each other. If too high, footsteps might not be kinematically feasible.
-float64 minimum_step_length -11.1
+float64 min_step_length -11.1
 
 # Minimum step yaw.
-float64 minimum_step_yaw -11.1
+float64 min_step_yaw -11.1
 
 # Maximum vertical distance between consecutive footsteps
 #
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
-float64 maximum_step_z -11.1
+float64 max_step_z -11.1
 
 # Maximum vertical distance between start-of-swing and touchdown
-float64 maximum_swing_z -11.1
+float64 max_swing_z -11.1
 
 # Maximum xy distance between start-of-swing and touchdown
-float64 maximum_swing_reach -11.1
+float64 max_swing_reach -11.1
 
 # Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
 #
 # If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
-float64 minimum_foothold_percent 0.9
+float64 min_foothold_percent 0.9
 
 # The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
 # then the value specified here.
 #
 # More specifically, if a footstep has an associated planar region and that regions surface normal has a
-# z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
-float64 minimum_surface_incline_radians -11.1
+# z-value less than cos(minSurfaceIncline), it will be rejected.
+float64 min_surface_incline -11.1
 
 # The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
 # If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -133,29 +133,29 @@ float64 maximum_z_penetration_on_valley_regions -11.1
 # where the parent is the last footstep taken on the other foot.
 #
 # If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
-float64 maximum_step_width -11.1
+float64 max_step_width -11.1
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
 # nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# until it is minDistanceFromCliffBottoms away from it.
 #
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
-float64 cliff_base_height_to_avoid -11.1
+float64 cliff_bottom_height_to_avoid -11.1
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
 # nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# until it is minDistanceFromCliffBottoms away from it.
 #
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
-float64 minimum_distance_from_cliff_bottoms -11.1
+float64 min_distance_from_cliff_bottoms -11.1
 
 # The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
 # nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffTops away from it.
+# until it is minDistanceFromCliffTops away from it.
 #
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -164,12 +164,12 @@ float64 cliff_top_height_to_avoid -11.1
 
 # The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
 # nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# until it is minDistanceFromCliffBottoms away from it.
 #
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
-float64 minimum_distance_from_cliff_tops -11.1
+float64 min_distance_from_cliff_tops -11.1
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -270,7 +270,7 @@ float64 delta_yaw_from_reference_tolerance -11.1
 
 # Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
 # ideal step are considered and the others are ignored. Set to non-positive number to disable
-int32 maximum_branch_factor -1
+int32 max_branch_factor -1
 
 # If true, enables a mask that reduces the number of calculated steps away from the ideal step
 bool enable_expansion_mask true
@@ -289,7 +289,7 @@ float64 shin_heel_clearance -11.1
 float64 shin_length -11.1
 
 # Height offset of shin collidable cylinder
-float64 shin_height_offet -11.1
+float64 shin_height_offset -11.1
 
 # When using a height map, maximum accepted rms error
 float64 rms_error_threshold -11.1
@@ -309,3 +309,4 @@ float64 scaled_foot_polygon_percentage -11.1
 
 # When using a height map, a distance is set that determines if a cliff is detected or not
 float64 cliff_height_threshold -11.1
+

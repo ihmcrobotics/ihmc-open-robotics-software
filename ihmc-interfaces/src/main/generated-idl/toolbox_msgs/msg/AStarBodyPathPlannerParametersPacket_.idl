@@ -1,0 +1,195 @@
+#ifndef __toolbox_msgs__msg__AStarBodyPathPlannerParametersPacket__idl__
+#define __toolbox_msgs__msg__AStarBodyPathPlannerParametersPacket__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       * This message defines the parameters for the A* body path planner.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::AStarBodyPathPlannerParametersPacket_")
+      struct AStarBodyPathPlannerParametersPacket
+      {
+        /**
+         * Unique ID used to identify this message.
+         */
+        unsigned long sequence_id;
+        /**
+         * Whether or not the planner checks for collisions.
+         */
+        boolean check_for_collisions;
+        /**
+         * Whether the planner computes surface normals. If false, traversibility and roll are also not computed.
+         */
+        boolean compute_surface_normal_cost;
+        /**
+         * Whether the planner computes and checks traversibility.
+         */
+        boolean compute_traversibility;
+        /**
+         * Whether the body path plan is post-processed with the smoother.
+         */
+        boolean perform_smoothing;
+        /**
+         * This is the weight assigned to roll in the search space. Increasing this value will decrease the likelihood of the path moving sideways across slopes.
+         */
+        double roll_cost_weight;
+        /**
+         * The angle in degrees of the deadband applied to the computed roll. Increasing this value decreases the effect small rolls have on the path.
+         */
+        double roll_cost_deadband;
+        /**
+         * When the roll is below this angle, the cost is linearly discounted to zero. Increasing this value decreases the effect roll has on the path.
+         */
+        double max_penalized_roll_angle;
+        /**
+         * The node height of a vertex is determined as the average height of all cells within this radius.
+         */
+        double snap_radius;
+        /**
+         * When computing the vertex height, cells that are this distance below the max height are ignored when taking the average.
+         */
+        double min_snap_height_threshold;
+        /**
+         * Weight assigned to minimizing the incline the path takes.
+         */
+        double incline_cost_weight;
+        /**
+         * Deadband applied to the incline in the search.
+         */
+        double incline_cost_deadband;
+        /**
+         * The maximum incline, in degrees, that is allowed for the body path planner to traverse.
+         */
+        double max_incline;
+        /**
+         * Width of the collision box used for checking collisions with the environment.
+         */
+        double collision_box_size_y;
+        /**
+         * Depth of the collision box used for checking collisions with the environment.
+         */
+        double collision_box_size_x;
+        /**
+         * Intersection height below which collisions are ignored.
+         */
+        double collision_box_ground_clearance;
+        /**
+         * Weight placed on maximizing traversibility in the plan.
+         */
+        double traversibility_weight;
+        /**
+         * Weight placed on the traversibility at the start node when computing the overall traversibility score.
+         */
+        double traversibility_stance_weight;
+        /**
+         * Weight placed on the traversibility at the end node when computing the overall traversibility score.
+         */
+        double traversibility_step_weight;
+        /**
+         * Minimum score on the start node traversibility to say an edge is traversible.
+         */
+        double min_traversibility_score;
+        /**
+         * Minimum angle in degrees to penalize in the traversibility score.
+         */
+        double min_normal_angle_to_penalize_for_traversibility;
+        /**
+         * Maximum angle in degrees to penalize in the traversibility score.
+         */
+        double max_normal_angle_to_penalize_for_traversibility;
+        /**
+         * Weight to place on the surface normals when computing the traversibility score.
+         */
+        double traversibility_incline_weight;
+        /**
+         * Box width of cells to include when performing the traversibility calculation.
+         */
+        double traversibility_search_width;
+        /**
+         * Minimum number of occupied neighbor cells to say a vertex is traversible.
+         */
+        long min_occupied_neighbors_for_traversibility;
+        /**
+         * Half the typical stance width of the robot, used to compute the traversibility.
+         */
+        double half_stance_width;
+        /**
+         * Width of the height window of cells to include in the traversibility calculation.
+         */
+        double traversibility_height_window_width;
+        /**
+         * Deadband applied to the height distance of cells in the traversibility calculation.
+         */
+        double traversibility_height_window_deadband;
+        /**
+         * Distance to the ground plane estimate that is needed to say the two nodes are in the ground plane.
+         */
+        double height_proximity_for_saying_walking_on_ground;
+        /**
+         * Minimum discount applied to non-ground cells when computing the traversibility on the ground plane.
+         */
+        double traversibility_non_ground_discount_when_walking_on_ground;
+        /**
+         * Weight placed on the gradient for avoiding collisions in the smoother.
+         */
+        double smoother_collision_weight;
+        /**
+         * Weight placed on the gradient for minimizing the angle between successive segments of the body path.
+         */
+        double smoother_smoothness_weight;
+        /**
+         * Discount applied to the smoothness gradients of turn points.
+         */
+        double smoother_turn_point_smoothness_discount;
+        /**
+         * Minimum curvature in degrees to penalize with a gradient.
+         */
+        double smoother_min_curvature_to_penalize;
+        /**
+         * Weight placed on the gradient for making vertices of the body path plan an equal distance apart.
+         */
+        double smoother_equal_spacing_weight;
+        /**
+         * Weight placed on the gradient for minimizing the roll cost of the body path plan.
+         */
+        double smoother_roll_weight;
+        /**
+         * Weight placed on a gradient that drives the waypoint towards the initial value.
+         */
+        double smoother_displacement_weight;
+        /**
+         * Weight placed on the gradient for maximizing the traversibility of the body path plan.
+         */
+        double smoother_traversibility_weight;
+        /**
+         * Weight placed on the gradient pushing the body path plan towards cells in the ground plane.
+         */
+        double smoother_ground_plane_weight;
+        /**
+         * Traversibility threshold resulting in a zero gradient for traversibility.
+         */
+        double smoother_minimum_traversibility_to_search_for;
+        /**
+         * Traversibility threshold above which the traversibility gradient begins to carry less weight.
+         */
+        double smoother_traversibility_threshold_for_no_discount;
+        /**
+         * Gain applied to the smoother gradient for iterative modifications.
+         */
+        double smoother_hill_climb_gain;
+        /**
+         * Minimum gradient vector magnitude to terminate the smoother iterations.
+         */
+        double smoother_gradient_threshold_to_terminate;
+      };
+    };
+  };
+};
+
+#endif

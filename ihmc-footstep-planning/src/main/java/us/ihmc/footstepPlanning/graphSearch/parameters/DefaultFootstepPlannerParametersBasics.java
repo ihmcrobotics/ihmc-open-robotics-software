@@ -360,29 +360,29 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
       if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
          setWiggleInsideDeltaMinimum(parametersPacket.getWiggleInsideDeltaMinimum());
-      if (parametersPacket.getMaximumStepReach() != noValue)
-         setMaxStepReach(parametersPacket.getMaximumStepReach());
-      if (parametersPacket.getMaximumStepYaw() != noValue)
-         setMaxStepYaw(parametersPacket.getMaximumStepYaw());
+      if (parametersPacket.getMaxStepReach() != noValue)
+         setMaxStepReach(parametersPacket.getMaxStepReach());
+      if (parametersPacket.getMaxStepYaw() != noValue)
+         setMaxStepYaw(parametersPacket.getMaxStepYaw());
       setUseReachabilityMap(parametersPacket.getUseReachabilityMap());
       if (parametersPacket.getSolutionQualityThreshold() != noValue)
          setSolutionQualityThreshold(parametersPacket.getSolutionQualityThreshold());
-      if (parametersPacket.getMinimumStepWidth() != noValue)
-         setMinStepWidth(parametersPacket.getMinimumStepWidth());
-      if (parametersPacket.getMinimumStepLength() != noValue)
-         setMinStepLength(parametersPacket.getMinimumStepLength());
-      if (parametersPacket.getMinimumStepYaw() != noValue)
-         setMinStepYaw(parametersPacket.getMinimumStepYaw());
-      if (parametersPacket.getMaximumStepZ() != noValue)
-         setMaxStepZ(parametersPacket.getMaximumStepZ());
-      if (parametersPacket.getMaximumSwingZ() != noValue)
-         setMaxSwingZ(parametersPacket.getMaximumSwingZ());
-      if (parametersPacket.getMaximumSwingReach() != noValue)
-         setMaxSwingReach(parametersPacket.getMaximumSwingReach());
-      if (parametersPacket.getMinimumFootholdPercent() != noValue)
-         setMinFootholdPercent(parametersPacket.getMinimumFootholdPercent());
-      if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
-         setMinSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
+      if (parametersPacket.getMinStepWidth() != noValue)
+         setMinStepWidth(parametersPacket.getMinStepWidth());
+      if (parametersPacket.getMinStepLength() != noValue)
+         setMinStepLength(parametersPacket.getMinStepLength());
+      if (parametersPacket.getMinStepYaw() != noValue)
+         setMinStepYaw(parametersPacket.getMinStepYaw());
+      if (parametersPacket.getMaxStepZ() != noValue)
+         setMaxStepZ(parametersPacket.getMaxStepZ());
+      if (parametersPacket.getMaxSwingZ() != noValue)
+         setMaxSwingZ(parametersPacket.getMaxSwingZ());
+      if (parametersPacket.getMaxSwingReach() != noValue)
+         setMaxSwingReach(parametersPacket.getMaxSwingReach());
+      if (parametersPacket.getMinFootholdPercent() != noValue)
+         setMinFootholdPercent(parametersPacket.getMinFootholdPercent());
+      if (parametersPacket.getMinSurfaceIncline() != noValue)
+         setMinSurfaceInclineRadians(parametersPacket.getMinSurfaceIncline());
       setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
@@ -391,16 +391,16 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setMaxYawWiggle(parametersPacket.getMaximumYawWiggle());
       if (parametersPacket.getMaximumZPenetrationOnValleyRegions() != noValue)
          setMaxZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
-      if (parametersPacket.getMaximumStepWidth() != noValue)
-         setMaxStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffBaseHeightToAvoid() != noValue)
-         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBaseHeightToAvoid());
-      if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
-         setMinDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
+      if (parametersPacket.getMaxStepWidth() != noValue)
+         setMaxStepWidth(parametersPacket.getMaxStepWidth());
+      if (parametersPacket.getCliffBottomHeightToAvoid() != noValue)
+         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBottomHeightToAvoid());
+      if (parametersPacket.getMinDistanceFromCliffBottoms() != noValue)
+         setMinDistanceFromCliffBottoms(parametersPacket.getMinDistanceFromCliffBottoms());
       if (parametersPacket.getCliffTopHeightToAvoid() != noValue)
          this.setCliffTopHeightToAvoid(parametersPacket.getCliffTopHeightToAvoid());
-      if (parametersPacket.getMinimumDistanceFromCliffTops() != noValue)
-         setMinDistanceFromCliffTops(parametersPacket.getMinimumDistanceFromCliffTops());
+      if (parametersPacket.getMinDistanceFromCliffTops() != noValue)
+         setMinDistanceFromCliffTops(parametersPacket.getMinDistanceFromCliffTops());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
@@ -442,8 +442,8 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setShinToeClearance(parametersPacket.getShinToeClearance());
       if (parametersPacket.getShinHeelClearance() != noValue)
          setShinHeelClearance(parametersPacket.getShinHeelClearance());
-      if (parametersPacket.getShinHeightOffet() != noValue)
-         setShinHeightOffset(parametersPacket.getShinHeightOffet());
+      if (parametersPacket.getShinHeightOffset() != noValue)
+         setShinHeightOffset(parametersPacket.getShinHeightOffset());
 
       if (parametersPacket.getBodyBoxDepth() != noValue)
       {
@@ -465,7 +465,7 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       {
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
       }
-      setMaxBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setMaxBranchFactor(parametersPacket.getMaxBranchFactor());
       setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
 
       if (parametersPacket.getRmsErrorThreshold() != noValue)
