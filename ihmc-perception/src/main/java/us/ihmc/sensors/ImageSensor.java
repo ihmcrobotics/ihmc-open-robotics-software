@@ -1,10 +1,10 @@
 package us.ihmc.sensors;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.PausableLoopingThread;
 
 import java.util.function.Supplier;
 
@@ -16,13 +16,13 @@ public abstract class ImageSensor implements AutoCloseable
    /** Sensor will be in world frame by default, unless a sensor frame supplier is specified through {@link #setSensorFrameSupplier(Supplier)}. */
    protected volatile Supplier<ReferenceFrame> sensorFrameSupplier;
 
-   private final PausableLoopingThread grabThread;
+   private final RepeatingTaskThread grabThread;
    private final Object grabNotification = new Object();
 
    public ImageSensor(String sensorName)
    {
       this.sensorName = sensorName;
-      grabThread = new PausableLoopingThread(this::grabAndNotify, sensorName + "Grabber");
+      grabThread = new RepeatingTaskThread(this::grabAndNotify, sensorName + "Grabber");
    }
 
    /**
@@ -73,10 +73,10 @@ public abstract class ImageSensor implements AutoCloseable
 
    public synchronized void run(boolean run)
    {
-      if (run)
+      if (!grabThread.isAlive())
          grabThread.start();
-      else
-         grabThread.pause();
+
+      grabThread.setRepeating(run);
    }
 
    public void waitForGrab() throws InterruptedException
@@ -101,10 +101,10 @@ public abstract class ImageSensor implements AutoCloseable
    @Override
    public void close()
    {
-      grabThread.blockingDestroy();
+      grabThread.blockingKill();
    }
 
-   public PausableLoopingThread getGrabThread()
+   public RepeatingTaskThread getGrabThread()
    {
       return grabThread;
    }

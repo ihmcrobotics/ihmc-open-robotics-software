@@ -1,6 +1,7 @@
 package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.opencl.global.OpenCL;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -14,9 +15,8 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
-import us.ihmc.tools.thread.PausableLoopingThread;
 
-public class RapidPlanarRegionsExtractionThread extends PausableLoopingThread
+public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
 {
    private static final double UPDATE_FREQUENCY = 10.0;
 
@@ -33,7 +33,8 @@ public class RapidPlanarRegionsExtractionThread extends PausableLoopingThread
 
    public RapidPlanarRegionsExtractionThread(ROS2PublishSubscribeAPI ros2, OpenCLManager openCLManager, ImageSensor imageSensor, int depthImageKey)
    {
-      super(UPDATE_FREQUENCY, imageSensor.getSensorName() + RapidPlanarRegionsExtractionThread.class.getSimpleName());
+      super(imageSensor.getSensorName() + RapidPlanarRegionsExtractionThread.class.getSimpleName());
+      setFrequencyLimit(UPDATE_FREQUENCY);
 
       this.ros2 = ros2;
       this.openCLManager = openCLManager;
@@ -44,7 +45,7 @@ public class RapidPlanarRegionsExtractionThread extends PausableLoopingThread
    }
 
    @Override
-   protected void runInLoop()
+   protected void runTask()
    {
       try
       {
@@ -90,9 +91,9 @@ public class RapidPlanarRegionsExtractionThread extends PausableLoopingThread
    }
 
    @Override
-   public void destroy()
+   public void kill()
    {
-      super.destroy();
+      super.kill();
       interrupt();
 
       extractor.destroy();

@@ -1,17 +1,16 @@
 package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.sensors.ImageSensor;
-import us.ihmc.tools.thread.PausableLoopingThread;
 
 import java.util.function.BooleanSupplier;
 
-public class YOLOv8DetectionThread extends PausableLoopingThread
+public class YOLOv8DetectionThread extends RepeatingTaskThread
 {
    private final YOLOv8DetectionExecutor yoloExecutor;
 
@@ -36,7 +35,7 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
    }
 
    @Override
-   protected synchronized void runInLoop()
+   protected synchronized void runTask()
    {
       try
       {
@@ -62,9 +61,9 @@ public class YOLOv8DetectionThread extends PausableLoopingThread
    }
 
    @Override
-   public void destroy()
+   public void kill()
    {
-      super.destroy();
+      super.kill();
       interrupt();
       yoloExecutor.destroy();
    }

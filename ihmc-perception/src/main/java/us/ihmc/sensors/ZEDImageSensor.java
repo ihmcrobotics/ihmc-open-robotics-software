@@ -103,7 +103,7 @@ public class ZEDImageSensor extends ImageSensor
          if (positionalTrackingEnabled)
          {
             SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
-            positionalTrackingParameters.mode(SL_POSITIONAL_TRACKING_MODE_GEN_2);
+//            positionalTrackingParameters.mode(SL_POSITIONAL_TRACKING_MODE_GEN_2);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
@@ -211,7 +211,8 @@ public class ZEDImageSensor extends ImageSensor
 
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
-            trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+            if (!euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
+               trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
          }
 
          // Retrieve the grabbed depth image

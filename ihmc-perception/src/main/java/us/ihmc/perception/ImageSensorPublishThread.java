@@ -1,15 +1,15 @@
 package us.ihmc.perception;
 
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
-import us.ihmc.tools.thread.PausableLoopingThread;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class ImageSensorPublishThread extends PausableLoopingThread
+public class ImageSensorPublishThread extends RepeatingTaskThread
 {
    private final Map<Integer, ROS2Topic<? extends Packet<?>>> imageKeyToTopicMap;
    private final RawImagePublisher publisher;
@@ -25,11 +25,8 @@ public class ImageSensorPublishThread extends PausableLoopingThread
    }
 
    @Override
-   protected void runInLoop()
+   protected void runTask()
    {
-      if (isDestroyed())
-         return;
-
       try
       {  // Wait for images to be grabbed
          imageSensor.waitForGrab();
@@ -48,9 +45,9 @@ public class ImageSensorPublishThread extends PausableLoopingThread
    }
 
    @Override
-   public void destroy()
+   public void kill()
    {
-      super.destroy();
+      super.kill();
       interrupt();
 
       publisher.close();
