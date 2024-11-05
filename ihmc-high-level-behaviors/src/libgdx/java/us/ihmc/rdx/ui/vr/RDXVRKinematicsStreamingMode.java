@@ -190,7 +190,7 @@ public class RDXVRKinematicsStreamingMode
       this.footstepPlacer = footstepPlacer;
       this.handManager = handManager;
 
-      rateLimitedCoM = new RateLimitedYoFrameVector("rateLimitedCoM", "", new YoRegistry(getClass().getSimpleName()), COM_INCREMENT_MAX_RATE, streamPeriod, ReferenceFrame.getWorldFrame());
+      rateLimitedCoM = new RateLimitedYoFrameVector("rateLimitedCoM", "", new YoRegistry(getClass().getSimpleName()), 10.0, streamPeriod, ReferenceFrame.getWorldFrame());
       rateLimitedCoM.setToNaN();
    }
 
@@ -1337,6 +1337,6 @@ public class RDXVRKinematicsStreamingMode
       objectCarryMessage.setRobotSide(side.toByte());
 
       LogTools.info("publishing object carry message");
-      ros2ControllerHelper.publishToController(objectCarryMessage);
+//      ros2ControllerHelper.publishToController(objectCarryMessage);
    }
 }

@@ -277,6 +277,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final Twist currentPelvisTwist = new Twist();
 
+   // 0.719275
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
