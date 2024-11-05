@@ -3,8 +3,6 @@ package us.ihmc.perception.cuda;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.PointerPointer;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
@@ -47,24 +45,15 @@ public class CUDAProgramTest
       // Get a stream
       CUstream_st stream = CUDAStreamManager.getStream();
 
-      // Construct a program
-      CUDAProgram additionProgram = new CUDAProgram("add.cu", ADD_KERNEL);
-
-      // Load the kernel
-      additionProgram.loadKernel("add");
-
-      // Create host & device pointers
-      try (IntPointer a = new IntPointer(1L).put(3);
-           IntPointer b = new IntPointer(1L).put(7);
+      try (CUDAProgram additionProgram = new CUDAProgram("add.cu", ADD_KERNEL); // Construct the program
+           CUDAKernel additionKernel = additionProgram.loadKernel("add");         // Load the kernel
            IntPointer sum = new IntPointer(1L);
-           IntPointer deviceSum = new IntPointer();
-           PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L))
+           IntPointer deviceSum = new IntPointer())
       {
-         cudaMallocAsync(deviceSum, sum.sizeof(), stream);
-         deviceSumPointer.put(deviceSum);
+         cudaMallocAsync(deviceSum, deviceSum.sizeof(), stream);
 
-         // Run the kernel
-         additionProgram.runKernel(stream, "add", new dim3(), new dim3(), 0, a, b, deviceSumPointer);
+         additionKernel.withInt(3).withInt(7).withPointer(deviceSum);
+         additionKernel.run(stream, new dim3(), new dim3(), 0);
 
          // Copy result from device to host
          cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
@@ -77,7 +66,44 @@ public class CUDAProgramTest
          assertEquals(10, sum.get());
       }
 
-      additionProgram.destroy();
+      CUDAStreamManager.releaseStream(stream);
+   }
+
+   @Test
+   public void testMultipleKernelRuns()
+   {
+      int runs = 10;
+
+      // Get a stream
+      CUstream_st stream = CUDAStreamManager.getStream();
+
+      try (CUDAProgram additionProgram = new CUDAProgram("add.cu", ADD_KERNEL); // Construct the program
+           CUDAKernel additionKernel = additionProgram.loadKernel("add");         // Load the kernel
+           IntPointer sum = new IntPointer(1L);
+           IntPointer deviceSum = new IntPointer())
+      {
+         cudaMallocAsync(deviceSum, deviceSum.sizeof(), stream);
+
+         for (int a = 0; a < runs; ++a)
+         {
+            for (int b = 0; b < runs; ++b)
+            {
+               additionKernel.clearParameters();
+               additionKernel.withInt(a).withInt(b).withPointer(deviceSum);
+               additionKernel.run(stream, new dim3(), new dim3(), 0);
+
+               // Copy result from device to host
+               cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
+               cudaStreamSynchronize(stream);
+
+               // Ensure we got the correct result!
+               assertEquals(a + b, sum.get());
+            }
+         }
+
+         // Free host memory
+         cudaFreeAsync(deviceSum, stream);
+      }
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -91,22 +117,16 @@ public class CUDAProgramTest
       // Construct a program
       String[] headerName = {"test_values.cuh"};
       String[] headerContents = {KERNEL_HEADER};
-
-      CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
-
-      // Load the kernel
-      additionProgram.loadKernel("add");
-
-      // Create pointers
-      try (IntPointer sum = new IntPointer(1L);
-           IntPointer deviceSum = new IntPointer();
-           PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L))
+      try (CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
+           CUDAKernel additionKernel = additionProgram.loadKernel("add"); // Load the kernel
+           IntPointer sum = new IntPointer(1L);
+           IntPointer deviceSum = new IntPointer())
       {
          cudaMallocAsync(deviceSum, sum.sizeof(), stream);
-         deviceSumPointer.put(deviceSum);
 
          // Run the kernel
-         additionProgram.runKernel(stream, "add", new dim3(1, 1, 1), new dim3(1, 1, 1), 0, deviceSumPointer);
+         additionKernel.withPointer(deviceSum);
+         additionKernel.run(stream, new dim3(), new dim3(), 0);
 
          // Download result from device to host
          cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
@@ -114,12 +134,7 @@ public class CUDAProgramTest
 
          // Free device memory
          cudaFreeAsync(deviceSum, stream);
-
-         // Ensure we got the correct result!
-         assertEquals(10, sum.get());
       }
-
-      additionProgram.destroy();
 
       CUDAStreamManager.releaseStream(stream);
    }
@@ -133,29 +148,25 @@ public class CUDAProgramTest
       // Create a CUDA program with files
       Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
       Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
-      CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
-      // Load the kernels
-      program.loadKernel("add");
-      program.loadKernel("subtract");
+      try (CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
-      // Create pointers
-      try (IntPointer sum = new IntPointer(1L);
+           // Load the kernels
+           CUDAKernel additionKernel = program.loadKernel("add");
+           CUDAKernel subtractionKernel = program.loadKernel("subtract");
+
+           // Create pointers
+           IntPointer sum = new IntPointer(1L);
            IntPointer deviceSum = new IntPointer();
-           PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L);
 
            IntPointer difference = new IntPointer(1L);
-           IntPointer deviceDifference = new IntPointer();
-           PointerPointer<Pointer> deviceDifferencePointer = new PointerPointer<>(1L))
+           IntPointer deviceDifference = new IntPointer())
       {
          cudaMallocAsync(deviceSum, sum.sizeof(), stream);
-         deviceSumPointer.put(deviceSum);
          cudaMallocAsync(deviceDifference, difference.sizeof(), stream);
-         deviceDifferencePointer.put(deviceDifference);
 
-         // Run the kernels
-         program.runKernel(stream, "add", new dim3(), new dim3(), 0, deviceSumPointer);
-         program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, deviceDifferencePointer);
+         additionKernel.withPointer(deviceSum).run(stream, new dim3(), new dim3(), 0);
+         subtractionKernel.withPointer(deviceDifference).run(stream, new dim3(), new dim3(), 0);
 
          // Download results from device to host
          cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
@@ -170,8 +181,6 @@ public class CUDAProgramTest
          assertEquals(10, sum.get());
          assertEquals(4, difference.get());
       }
-
-      program.destroy();
 
       CUDAStreamManager.releaseStream(stream);
    }
