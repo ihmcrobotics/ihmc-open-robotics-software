@@ -50,7 +50,11 @@ public class FootstepPlannerLoggerTest
    }
 
    /**
-    * Because of different OS's this test was created to ensure that on Windows and Ubuntu we can still log the footstep planner correctly
+    * This test was created to investigate a problem where logging didn't seem to be working, however after more investigation it was because it was trying
+    * to be run on the Continuous Integration (CI) server. Its possible to set a environmental variable to run these classes "as if they were on the server" and
+    * that was happening here.
+    *
+    * This test isn't much and is nice to have lying around to prevent future change from breaking the logger
     */
    @Test
    public void testFootstepLoggingDefaultDirectory()
