@@ -61,7 +61,7 @@ public class ReferenceSpreadingStateHelper
       this.registry = registry;
       this.demoDirectory = demoDirectory;
 
-      collisionDetection = new CollisionDetection(14.5, 10, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(10, 10, fullRobotModel, registry);
       referenceSpreader = new ReferenceSpreader(demoDirectory, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
@@ -171,6 +171,7 @@ public class ReferenceSpreadingStateHelper
          for (RobotSide robotSide : RobotSide.values())
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide);
+            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 
@@ -203,7 +204,7 @@ public class ReferenceSpreadingStateHelper
          for (RobotSide robotSide : RobotSide.values())
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = blendImpactReference.getHandHybridTrajectoryMessage(robotSide);
-//            LogTools.info("Message: " + handHybridTrajectoryMessage);
+            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 
@@ -248,7 +249,7 @@ public class ReferenceSpreadingStateHelper
          for (RobotSide robotSide : RobotSide.values())
          {
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = originalTrajectory.getHandHybridTrajectoryMessage(robotSide);
-            //            LogTools.info("Message: " + handHybridTrajectoryMessage);
+            LogTools.info("Message: " + handHybridTrajectoryMessage);
             trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
          }
 
