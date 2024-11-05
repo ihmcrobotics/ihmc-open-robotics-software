@@ -82,9 +82,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final YoBoolean doPrepareForLocomotion;
    private boolean hasContactStateChanged = false;
 
-   private final double nominalMass;
-   private double objectCarryMass;
-   private boolean isCarryingObject = false;
+   private final YoDouble objectCarryMass;
+   private final YoBoolean isCarryingObject;
    private final RateLimitedYoVariable alphaLoadedCarriedObject;
    private final SpatialInertia baselineInertia = new SpatialInertia();
    private final SpatialInertia objectCarryCombinedInertia = new SpatialInertia();
@@ -230,8 +229,8 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       this.defaultControlMode = new EnumParameter<>(namePrefix
                                                     + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
       this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
-
-      nominalMass = bodyToControl.getInertia().getMass();
+      isCarryingObject = new YoBoolean(bodyName + "isCarrying", registry);
+      objectCarryMass = new YoDouble(bodyName + "objectMass", registry);
 
       double loadDuration = 2.0;
       alphaLoadedCarriedObject = new RateLimitedYoVariable(namePrefix + "alphaLoadedCarry", registry, 1.0 / loadDuration, controlDT);
@@ -319,11 +318,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       if (alphaLoadedCarriedObject != null)
       {
-         alphaLoadedCarriedObject.update(isCarryingObject ? 1.0 : 0.0);
+         alphaLoadedCarriedObject.update(isCarryingObject.getValue() ? 1.0 : 0.0);
 
          if (alphaLoadedCarriedObject.getValue() > 1.0e-4)
          {
-            double additionalPayloadMass = alphaLoadedCarriedObject.getValue() * objectCarryMass;
+            double additionalPayloadMass = alphaLoadedCarriedObject.getValue() * objectCarryMass.getDoubleValue();
 
             objectCarryCombinedInertia.setIncludingFrame(baselineInertia);
             objectCarryCombinedInertia.setMass(additionalPayloadMass);
@@ -462,10 +461,10 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       LogTools.info("Received object carry command!");
 //
-      isCarryingObject = objectCarryCommand.isPickingUp();
+      isCarryingObject.set(objectCarryCommand.isPickingUp());
 
-      if (isCarryingObject)
-         objectCarryMass = objectCarryCommand.getObjectMass();
+      if (isCarryingObject.getValue())
+         objectCarryMass.set(objectCarryCommand.getObjectMass());
    }
 
    /**
