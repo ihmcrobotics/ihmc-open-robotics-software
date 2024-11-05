@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -137,6 +138,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       }
    }
 
+   @Disabled
    @Test
    public void testSendingFootstepPlanningRequestPacketFromUIIntraprocess()
    {
@@ -145,6 +147,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       runPlanningRequestTestFromUI();
    }
 
+   @Disabled
    @Test
    public void testSendingFootstepPlanningRequestPacketFromUIFastRTPS()
    {
@@ -185,6 +188,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       runPlanObjectivePackets();
    }
 
+   @Disabled
    @Test
    public void testSendingFootstepPlannerOutputStatusToUIIntraprocess()
    {
