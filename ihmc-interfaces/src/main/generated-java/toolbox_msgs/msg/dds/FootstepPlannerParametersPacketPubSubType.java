@@ -15,7 +15,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "63e5676b9454933877d344c8979da80b3a6d0c40ae2050e11baf259fe7a01969";
+   		return "5d67bcedc66bf9e40d91667a00c36ca3e4e1170c37b6f14225761ac76484ddda";
    }
    
    @Override
@@ -472,7 +472,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMaximumStepWidth());
 
-      cdr.write_type_6(data.getCliffBaseHeightToAvoid());
+      cdr.write_type_6(data.getCliffBottomHeightToAvoid());
 
       cdr.write_type_6(data.getMinimumDistanceFromCliffBottoms());
 
@@ -614,7 +614,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMaximumStepWidth(cdr.read_type_6());
       	
-      data.setCliffBaseHeightToAvoid(cdr.read_type_6());
+      data.setCliffBottomHeightToAvoid(cdr.read_type_6());
       	
       data.setMinimumDistanceFromCliffBottoms(cdr.read_type_6());
       	
@@ -730,7 +730,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_yaw_wiggle", data.getMaximumYawWiggle());
       ser.write_type_6("maximum_z_penetration_on_valley_regions", data.getMaximumZPenetrationOnValleyRegions());
       ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
-      ser.write_type_6("cliff_base_height_to_avoid", data.getCliffBaseHeightToAvoid());
+      ser.write_type_6("cliff_bottom_height_to_avoid", data.getCliffBottomHeightToAvoid());
       ser.write_type_6("minimum_distance_from_cliff_bottoms", data.getMinimumDistanceFromCliffBottoms());
       ser.write_type_6("cliff_top_height_to_avoid", data.getCliffTopHeightToAvoid());
       ser.write_type_6("minimum_distance_from_cliff_tops", data.getMinimumDistanceFromCliffTops());
@@ -804,7 +804,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumYawWiggle(ser.read_type_6("maximum_yaw_wiggle"));
       data.setMaximumZPenetrationOnValleyRegions(ser.read_type_6("maximum_z_penetration_on_valley_regions"));
       data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
-      data.setCliffBaseHeightToAvoid(ser.read_type_6("cliff_base_height_to_avoid"));
+      data.setCliffBottomHeightToAvoid(ser.read_type_6("cliff_bottom_height_to_avoid"));
       data.setMinimumDistanceFromCliffBottoms(ser.read_type_6("minimum_distance_from_cliff_bottoms"));
       data.setCliffTopHeightToAvoid(ser.read_type_6("cliff_top_height_to_avoid"));
       data.setMinimumDistanceFromCliffTops(ser.read_type_6("minimum_distance_from_cliff_tops"));

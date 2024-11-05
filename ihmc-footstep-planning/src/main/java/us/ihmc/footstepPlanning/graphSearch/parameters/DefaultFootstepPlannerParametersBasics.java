@@ -393,8 +393,8 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setMaxZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
       if (parametersPacket.getMaximumStepWidth() != noValue)
          setMaxStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffBaseHeightToAvoid() != noValue)
-         this.setCliffBottomHeightToAvoid(parametersPacket.getCliffBaseHeightToAvoid());
+      if (parametersPacket.getCliffBottomHeightToAvoid() != noValue)
+         this.setCliffBottomHeightToAvoid(parametersPacket.getCliffBottomHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
       if (parametersPacket.getCliffTopHeightToAvoid() != noValue)
