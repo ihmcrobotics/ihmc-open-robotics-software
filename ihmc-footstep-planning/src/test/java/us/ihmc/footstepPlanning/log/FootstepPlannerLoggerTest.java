@@ -1,11 +1,10 @@
 package us.ihmc.footstepPlanning.log;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.time.Stopwatch;
@@ -14,6 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.DataSet;
@@ -21,6 +21,7 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
 
@@ -29,25 +30,15 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FootstepPlannerLoggerTest
 {
    private static final String logDirectory = System.getProperty("user.home") + File.separator + "testLog" + File.separator;
+   private final FootstepPlannerRequest request = new FootstepPlannerRequest();
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("TestModule");
 
-   @AfterAll
-   public static void cleanTestDirectory()
+   @BeforeEach
+   public void setupFootstepPlannerRequest()
    {
-      FootstepPlannerLogger.deleteOldLogs(0, logDirectory);
-   }
-
-   /**
-    * This test ensures that logging the footstep plan's doesn't take too long. The speed in which this takes doesn't need ot be exact but
-    * this allows us to ensure that logging of footstep plan's isn't slow. The will slow down threads if planning over and over again
-    */
-   @Disabled
-   @Test
-   public void testFootstepLoggingSpeed()
-   {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+      // Set up the request for some tests
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
 
-      FootstepPlannerRequest request = new FootstepPlannerRequest();
       Pose3D initialMidFootPose = new Pose3D(dataSet.getPlannerInput().getStartPosition(), new Quaternion(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0));
       Pose3D goalMidFootPose = new Pose3D(dataSet.getPlannerInput().getGoalPosition(), new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
@@ -56,11 +47,36 @@ public class FootstepPlannerLoggerTest
       request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(true);
+   }
 
-      planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
-      planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
+   /**
+    * Because of different OS's this test was created to ensure that on Windows and Ubuntu we can still log the footstep planner correctly
+    */
+   @Test
+   public void testFootstepLoggingDefaultDirectory()
+   {
+      planningModule.handleRequest(request);
 
+      FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
+
+      // Here we compare that the default log directory matches where we expect the logs to go
+      String defaultLogsDirectory = FootstepPlannerLogger.defaultLogsDirectory;
+      String ihmcFolder = IHMCCommonPaths.ASTAR_FOOTSTEP_PLANNER_DIRECTORY.toString();
+      assertEquals(ihmcFolder, defaultLogsDirectory);
+
+      // Log the session and ensure that the latest log directory is not empty, so some data exists inside it
+      logger.logSession();
+      assertFalse(logger.getLatestLogDirectory().isEmpty());
+   }
+
+   /**
+    * This test ensures that logging the footstep plan's doesn't take too long. The speed in which this takes doesn't need ot be exact but
+    * this allows us to ensure that logging of footstep plan isn't slow. Otherwise, this will slow down threads if planning over and over again
+    */
+   @Disabled
+   @Test
+   public void testFootstepLoggingSpeed()
+   {
       planningModule.handleRequest(request);
 
       // Everything above this creates a plan that we will be able to log
@@ -83,23 +99,6 @@ public class FootstepPlannerLoggerTest
    @Test
    public void testLogger()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
-
-      FootstepPlannerRequest request = new FootstepPlannerRequest();
-      Pose3D initialMidFootPose = new Pose3D(dataSet.getPlannerInput().getStartPosition(), new Quaternion(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0));
-      Pose3D goalMidFootPose = new Pose3D(dataSet.getPlannerInput().getGoalPosition(), new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
-      request.setRequestedInitialStanceSide(RobotSide.LEFT);
-      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
-      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
-      request.setAssumeFlatGround(false);
-      request.setPlanBodyPath(true);
-
-      planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
-      planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
-
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
 
       FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
@@ -107,8 +106,8 @@ public class FootstepPlannerLoggerTest
       assertTrue(success, "Error generating footstep planner log");
 
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load(new File(logger.getLatestLogDirectory()));
-      Assertions.assertSame(loadResult, FootstepPlannerLogLoader.LoadResult.LOADED, "Error loading footstep planner log");
+      LoadResult loadResult = logLoader.load(new File(logger.getLatestLogDirectory()));
+      assertSame(loadResult, LoadResult.LOADED, "Error loading footstep planner log");
 
       FootstepPlannerLog log = logLoader.getLog();
 
@@ -126,5 +125,7 @@ public class FootstepPlannerLoggerTest
       assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));
       assertTrue(expectedFootstepParameters.epsilonEquals(log.getFootstepParametersPacket(), 1e-5));
       assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), 1e-5));
+
+      FootstepPlannerLogger.deleteOldLogs(0, logDirectory);
    }
 }
