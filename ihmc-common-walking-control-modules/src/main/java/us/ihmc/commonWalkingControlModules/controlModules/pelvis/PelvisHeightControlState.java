@@ -111,7 +111,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       positionController = new RigidBodyPositionController(pelvis, elevator, elevator, pelvisFrame, baseFrame, yoTime, false, registry, graphicsListRegistry);
 
-      defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry, 0.719275);
+      defaultHeight = new DoubleParameter(getClass().getSimpleName() + "DefaultHeight", registry, 1.05);
       minHeight = new DoubleParameter(getClass().getSimpleName() + "MinHeight", registry, 0.0);
       maxDistanceAnklePelvis = new DoubleParameter(getClass().getSimpleName() + "MaxDistanceAnklePelvis", registry, Double.POSITIVE_INFINITY);
       offset = new DoubleParameter(getClass().getSimpleName() + "Offset", registry, 0.0);
