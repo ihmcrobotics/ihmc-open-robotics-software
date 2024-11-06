@@ -1,7 +1,7 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,7 +13,8 @@ import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.tools.thread.RestartableThrottledThread;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.sensors.ImageSensor;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IterativeClosestPointManager
 {
-   private static final double ICP_WORK_FREQUENCY = 20.0;
+   private static final double ICP_WORK_FREQUENCY = 10.0;
    private static final double EPSILON = 0.001;
 
    private final ROS2Helper ros2Helper;
@@ -34,7 +35,10 @@ public class IterativeClosestPointManager
    private final ConcurrentHashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new ConcurrentHashMap<>();
    private final ROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
-   private final RestartableThrottledThread workerThread;
+   private final RepeatingTaskThread workerThread;
+
+   private ImageSensor imageSensor;
+   private int depthImageKey;
 
    private List<Point3D32> environmentPointCloud;
 
@@ -46,7 +50,6 @@ public class IterativeClosestPointManager
       requestMessageSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_REQUEST);
 
       // Each time a request message is received, we update the corresponding worker accordingly
-      // TODO: Find out whether messages can be skipped, resulting in updates being missed
       requestMessageSubscription.addCallback(requestMessage ->
       {
          long nodeID = requestMessage.getNodeId();
@@ -65,7 +68,6 @@ public class IterativeClosestPointManager
             IterativeClosestPointWorker worker = nodeIDToWorkerMap.get(nodeID);
 
             // Check if size changed
-            PrimitiveRigidBodyShape shape = PrimitiveRigidBodyShape.fromByte(requestMessage.getShape());
             Vector3D lengths = requestMessage.getLengths();
             Vector3D radii = requestMessage.getRadii();
             int numberOfShapeSamples = requestMessage.getNumberOfShapeSamples();
@@ -90,7 +92,20 @@ public class IterativeClosestPointManager
          }
       });
 
-      workerThread = new RestartableThrottledThread("ICPWorkers", ICP_WORK_FREQUENCY, this::runWorkers);
+      workerThread = new RepeatingTaskThread(this::runWorkers, "ICPWorkers").setFrequencyLimit(ICP_WORK_FREQUENCY);
+   }
+
+   /**
+    * Optionally, you may provide an image sensor to retrieve depth images from.
+    * This removes the need to call {@link #setEnvironmentPointCloud(RawImage)}.
+    *
+    * @param imageSensor The image sensor from which to retrieve depth images.
+    * @param depthImageKey The key of the depth image.
+    */
+   public void setImageSensor(ImageSensor imageSensor, int depthImageKey)
+   {
+      this.imageSensor = imageSensor;
+      this.depthImageKey = depthImageKey;
    }
 
    /**
@@ -109,12 +124,12 @@ public class IterativeClosestPointManager
 
    public void startWorkers()
    {
-      workerThread.start();
+      workerThread.startRepeating();
    }
 
    public void stopWorkers()
    {
-      workerThread.stop();
+      workerThread.stopRepeating();
    }
 
    public boolean isDemanded()
@@ -124,7 +139,9 @@ public class IterativeClosestPointManager
 
    public void destroy()
    {
-      workerThread.blockingStop();
+      requestMessageSubscription.destroy();
+      nodeIDToWorkerMap.clear();
+      workerThread.blockingKill();
    }
 
    /**
@@ -133,6 +150,19 @@ public class IterativeClosestPointManager
     */
    private void runWorkers()
    {
+      if (!isDemanded())
+         return;
+
+      if (imageSensor != null)
+      {
+         RawImage depthImage = imageSensor.getImage(depthImageKey);
+         if (depthImage == null)
+            return;
+
+         setEnvironmentPointCloud(imageSensor.getImage(depthImageKey));
+         depthImage.release();
+      }
+
       for (Map.Entry<Long, IterativeClosestPointWorker> entry : nodeIDToWorkerMap.entrySet())
       {
          long nodeID = entry.getKey();
