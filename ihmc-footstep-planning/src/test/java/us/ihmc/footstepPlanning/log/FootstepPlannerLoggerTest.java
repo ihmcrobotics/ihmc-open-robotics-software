@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
@@ -61,7 +62,9 @@ public class FootstepPlannerLoggerTest
     * It's possible to set an environmental variable to run these classes "as if they were on the server" and
     * that was happening here.
     * This test isn't much computation and is nice to have lying around to prevent future change from breaking the logger
+    * This test likely won't run on CI because it's checking a hard coded path
     */
+   @Disabled
    @Test
    public void testFootstepLoggingDefaultDirectory()
    {
