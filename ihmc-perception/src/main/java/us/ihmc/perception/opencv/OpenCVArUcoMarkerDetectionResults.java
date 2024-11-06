@@ -18,7 +18,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 
 /**
  * This class provides support for copying the full output from
