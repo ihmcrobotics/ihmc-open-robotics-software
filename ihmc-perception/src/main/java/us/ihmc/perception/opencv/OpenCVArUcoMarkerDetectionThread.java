@@ -79,7 +79,7 @@ public class OpenCVArUcoMarkerDetectionThread extends RepeatingTaskThread
     *
     * @return A swap reference to the latest results.
     */
-   public SwapReference<OpenCVArUcoMarkerDetectionResults> getResults()
+   public SwapReference<OpenCVArUcoMarkerDetectionResults> getResultSwapReference()
    {
       return resultSwapReference;
    }
