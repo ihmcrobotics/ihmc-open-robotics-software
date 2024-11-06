@@ -374,48 +374,86 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
 
    default void set(AStarBodyPathPlannerParametersPacket packet)
    {
-      setCheckForCollisions(packet.getCheckForCollisions());
-      setComputeSurfaceNormalCost(packet.getComputeSurfaceNormalCost());
-      setComputeTraversibility(packet.getComputeTraversibility());
-      setPerformSmoothing(packet.getPerformSmoothing());
+         setCheckForCollisions(packet.getCheckForCollisions());
+         setComputeSurfaceNormalCost(packet.getComputeSurfaceNormalCost());
+         setComputeTraversibility(packet.getComputeTraversibility());
+         setPerformSmoothing(packet.getPerformSmoothing());
 
-      setRollCostWeight(packet.getRollCostWeight());
-      setRollCostDeadband(packet.getRollCostDeadband());
-      setMaxPenalizedRollAngle(packet.getMaxPenalizedRollAngle());
-      setSnapRadius(packet.getSnapRadius());
-      setMinSnapHeightThreshold(packet.getMinSnapHeightThreshold());
-      setInclineCostWeight(packet.getInclineCostWeight());
-      setInclineCostDeadband(packet.getInclineCostDeadband());
-      setMaxIncline(packet.getMaxIncline());
-      setCollisionBoxSizeY(packet.getCollisionBoxSizeY());
-      setCollisionBoxSizeX(packet.getCollisionBoxSizeX());
-      setCollisionBoxGroundClearance(packet.getCollisionBoxGroundClearance());
-      setTraversibilityWeight(packet.getTraversibilityWeight());
-      setTraversibilityStanceWeight(packet.getTraversibilityStanceWeight());
-      setTraversibilityStepWeight(packet.getTraversibilityStepWeight());
-      setMinTraversibilityScore(packet.getMinTraversibilityScore());
-      setMinNormalAngleToPenalizeForTraversibility(packet.getMinNormalAngleToPenalizeForTraversibility());
-      setMaxNormalAngleToPenalizeForTraversibility(packet.getMaxNormalAngleToPenalizeForTraversibility());
-      setTraversibilityInclineWeight(packet.getTraversibilityInclineWeight());
-      setTraversibilitySearchWidth(packet.getTraversibilitySearchWidth());
-      setMinOccupiedNeighborsForTraversibility(packet.getMinOccupiedNeighborsForTraversibility());
-      setHalfStanceWidth(packet.getHalfStanceWidth());
-      setTraversibilityHeightWindowWidth(packet.getTraversibilityHeightWindowWidth());
-      setTraversibilityHeightWindowDeadband(packet.getTraversibilityHeightWindowDeadband());
-      setHeightProximityForSayingWalkingOnGround(packet.getHeightProximityForSayingWalkingOnGround());
-      setTraversibilityNonGroundDiscountWhenWalkingOnGround(packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
-      setSmootherCollisionWeight(packet.getSmootherCollisionWeight());
-      setSmootherSmoothnessWeight(packet.getSmootherSmoothnessWeight());
-      setSmootherTurnPointSmoothnessDiscount(packet.getSmootherTurnPointSmoothnessDiscount());
-      setSmootherMinCurvatureToPenalize(packet.getSmootherMinCurvatureToPenalize());
-      setSmootherEqualSpacingWeight(packet.getSmootherEqualSpacingWeight());
-      setSmootherRollWeight(packet.getSmootherRollWeight());
-      setSmootherDisplacementWeight(packet.getSmootherDisplacementWeight());
-      setSmootherTraversibilityWeight(packet.getSmootherTraversibilityWeight());
-      setSmootherGroundPlaneWeight(packet.getSmootherGroundPlaneWeight());
-      setSmootherMinimumTraversibilityToSearchFor(packet.getSmootherMinimumTraversibilityToSearchFor());
-      setSmootherTraversibilityThresholdForNoDiscount(packet.getSmootherTraversibilityThresholdForNoDiscount());
-      setSmootherHillClimbGain(packet.getSmootherHillClimbGain());
-      setSmootherGradientThresholdToTerminate(packet.getSmootherGradientThresholdToTerminate());
+      if (packet.getRollCostWeight() != -1.0)
+         setRollCostWeight(packet.getRollCostWeight());
+      if (packet.getRollCostDeadband() != -1.0)
+         setRollCostDeadband(packet.getRollCostDeadband());
+      if (packet.getMaxPenalizedRollAngle() != -1.0)
+         setMaxPenalizedRollAngle(packet.getMaxPenalizedRollAngle());
+      if (packet.getSnapRadius() != -1.0)
+         setSnapRadius(packet.getSnapRadius());
+      if (packet.getMinSnapHeightThreshold() != -1.0)
+         setMinSnapHeightThreshold(packet.getMinSnapHeightThreshold());
+      if (packet.getInclineCostWeight() != -1.0)
+         setInclineCostWeight(packet.getInclineCostWeight());
+      if (packet.getInclineCostDeadband() != -1.0)
+         setInclineCostDeadband(packet.getInclineCostDeadband());
+      if (packet.getMaxIncline() != -1.0)
+         setMaxIncline(packet.getMaxIncline());
+      if (packet.getCollisionBoxSizeY() != -1.0)
+         setCollisionBoxSizeY(packet.getCollisionBoxSizeY());
+      if (packet.getCollisionBoxSizeX() != -1.0)
+         setCollisionBoxSizeX(packet.getCollisionBoxSizeX());
+      if (packet.getCollisionBoxGroundClearance() != -1.0)
+         setCollisionBoxGroundClearance(packet.getCollisionBoxGroundClearance());
+      if (packet.getTraversibilityWeight() != -1.0)
+         setTraversibilityWeight(packet.getTraversibilityWeight());
+      if (packet.getTraversibilityStanceWeight() != -1.0)
+         setTraversibilityStanceWeight(packet.getTraversibilityStanceWeight());
+      if (packet.getTraversibilityStepWeight() != -1.0)
+         setTraversibilityStepWeight(packet.getTraversibilityStepWeight());
+      if (packet.getMinTraversibilityScore() != -1.0)
+         setMinTraversibilityScore(packet.getMinTraversibilityScore());
+      if (packet.getMinNormalAngleToPenalizeForTraversibility() != -1.0)
+         setMinNormalAngleToPenalizeForTraversibility(packet.getMinNormalAngleToPenalizeForTraversibility());
+      if (packet.getMaxNormalAngleToPenalizeForTraversibility() != -1.0)
+         setMaxNormalAngleToPenalizeForTraversibility(packet.getMaxNormalAngleToPenalizeForTraversibility());
+      if (packet.getTraversibilityInclineWeight() != -1.0)
+         setTraversibilityInclineWeight(packet.getTraversibilityInclineWeight());
+      if (packet.getTraversibilitySearchWidth() != -1.0)
+         setTraversibilitySearchWidth(packet.getTraversibilitySearchWidth());
+      if (packet.getMinOccupiedNeighborsForTraversibility() != -1.0)
+         setMinOccupiedNeighborsForTraversibility(packet.getMinOccupiedNeighborsForTraversibility());
+      if (packet.getHalfStanceWidth() != -1.0)
+         setHalfStanceWidth(packet.getHalfStanceWidth());
+      if (packet.getTraversibilityHeightWindowWidth() != -1.0)
+         setTraversibilityHeightWindowWidth(packet.getTraversibilityHeightWindowWidth());
+      if (packet.getTraversibilityHeightWindowDeadband() != -1.0)
+         setTraversibilityHeightWindowDeadband(packet.getTraversibilityHeightWindowDeadband());
+      if (packet.getHeightProximityForSayingWalkingOnGround() != -1.0)
+         setHeightProximityForSayingWalkingOnGround(packet.getHeightProximityForSayingWalkingOnGround());
+      if (packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround() != -1.0)
+         setTraversibilityNonGroundDiscountWhenWalkingOnGround(packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
+      if (packet.getSmootherCollisionWeight() != -1.0)
+         setSmootherCollisionWeight(packet.getSmootherCollisionWeight());
+      if (packet.getSmootherSmoothnessWeight() != -1.0)
+         setSmootherSmoothnessWeight(packet.getSmootherSmoothnessWeight());
+      if (packet.getSmootherTurnPointSmoothnessDiscount() != -1.0)
+         setSmootherTurnPointSmoothnessDiscount(packet.getSmootherTurnPointSmoothnessDiscount());
+      if (packet.getSmootherMinCurvatureToPenalize() != -1.0)
+         setSmootherMinCurvatureToPenalize(packet.getSmootherMinCurvatureToPenalize());
+      if (packet.getSmootherEqualSpacingWeight() != -1.0)
+         setSmootherEqualSpacingWeight(packet.getSmootherEqualSpacingWeight());
+      if (packet.getSmootherRollWeight() != -1.0)
+         setSmootherRollWeight(packet.getSmootherRollWeight());
+      if (packet.getSmootherDisplacementWeight() != -1.0)
+         setSmootherDisplacementWeight(packet.getSmootherDisplacementWeight());
+      if (packet.getSmootherTraversibilityWeight() != -1.0)
+         setSmootherTraversibilityWeight(packet.getSmootherTraversibilityWeight());
+      if (packet.getSmootherGroundPlaneWeight() != -1.0)
+         setSmootherGroundPlaneWeight(packet.getSmootherGroundPlaneWeight());
+      if (packet.getSmootherMinimumTraversibilityToSearchFor() != -1.0)
+         setSmootherMinimumTraversibilityToSearchFor(packet.getSmootherMinimumTraversibilityToSearchFor());
+      if (packet.getSmootherTraversibilityThresholdForNoDiscount() != -1.0)
+         setSmootherTraversibilityThresholdForNoDiscount(packet.getSmootherTraversibilityThresholdForNoDiscount());
+      if (packet.getSmootherHillClimbGain() != -1.0)
+         setSmootherHillClimbGain(packet.getSmootherHillClimbGain());
+      if (packet.getSmootherGradientThresholdToTerminate() != -1.0)
+         setSmootherGradientThresholdToTerminate(packet.getSmootherGradientThresholdToTerminate());
    }
 }

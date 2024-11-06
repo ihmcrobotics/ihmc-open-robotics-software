@@ -111,7 +111,7 @@ public class FootstepPlannerLogger
 
    /**
     * It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging.
-    * This method expects the folder to exist or it will throw an exception
+    * This method expects the folder to exist, or it will throw an exception
     */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {

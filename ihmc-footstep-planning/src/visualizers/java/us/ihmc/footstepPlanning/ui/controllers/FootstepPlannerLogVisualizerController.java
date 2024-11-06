@@ -38,7 +38,6 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -320,7 +319,7 @@ public class FootstepPlannerLogVisualizerController
 
       // publish body path parameters
       AStarBodyPathPlannerParameters bodyPathPlannerParameters = new AStarBodyPathPlannerParameters();
-      bodyPathPlannerParameters.set(footstepPlannerLog.getBodyPathParametersPacket());
+      bodyPathPlannerParameters.set(footstepPlannerLog.getAStarBodyPathPlannerParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.AStarBodyPathPlannerParameters, bodyPathPlannerParameters);
 
       // publish swing parameters

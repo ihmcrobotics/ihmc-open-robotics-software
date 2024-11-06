@@ -2,8 +2,6 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
@@ -186,7 +184,7 @@ public class FootstepPlannerLogLoader
          {
             InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
             jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            log.getAStarBodyPathPlannerParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
             bodyPathParametersPacketInputStream.close();
          }
 

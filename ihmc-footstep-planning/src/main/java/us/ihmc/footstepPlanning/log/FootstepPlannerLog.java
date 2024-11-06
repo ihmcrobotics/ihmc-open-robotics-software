@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.log;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
@@ -59,7 +58,7 @@ public class FootstepPlannerLog
       return footstepParametersPacket;
    }
 
-   public AStarBodyPathPlannerParametersPacket getBodyPathParametersPacket()
+   public AStarBodyPathPlannerParametersPacket getAStarBodyPathPlannerParametersPacket()
    {
       return bodyPathParametersPacket;
    }
