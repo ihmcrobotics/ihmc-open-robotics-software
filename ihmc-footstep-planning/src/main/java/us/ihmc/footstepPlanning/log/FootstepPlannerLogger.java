@@ -1,7 +1,17 @@
 package us.ihmc.footstepPlanning.log;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacketPubSubType;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -18,13 +28,15 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -33,12 +45,24 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -141,7 +165,7 @@ public class FootstepPlannerLogger
       {
          Path earliestLogDirectory = sortedLogFolderPaths.first();
          LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
+         FileUtils.deleteQuietly(earliestLogDirectory.toFile());
          sortedLogFolderPaths.remove(earliestLogDirectory);
       }
 
@@ -267,6 +291,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -287,6 +312,7 @@ public class FootstepPlannerLogger
 
          logVariableDescriptors(planner.getBodyPathPlannerRegistry());
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -343,6 +369,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -399,6 +426,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {

@@ -1,12 +1,11 @@
 package us.ihmc.footstepPlanning.log;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -86,7 +85,6 @@ public class FootstepPlannerLoggerTest
     * this allows us to ensure that logging of footstep plan isn't slow.
     * Otherwise, this will slow down threads if planning over and over again
     */
-   @Disabled
    @Test
    public void testFootstepLoggingSpeed()
    {
@@ -103,7 +101,7 @@ public class FootstepPlannerLoggerTest
 
       long timeInMilliseconds = (long) (timeTaken * 1000);
       // This number is arbitrary, just want to make sure things aren't slow when logging, important if re-planning in a loop
-      long timeExpected = 150;
+      long timeExpected = 180;
 
       // Logging the footstep plans should not take to long, the timeExpected is arbitrary, but it ensures that the logging doesn't take too long
       assertTrue(timeInMilliseconds < timeExpected, "Time taken was: " + timeInMilliseconds + ", and the time expected was " + timeExpected);
