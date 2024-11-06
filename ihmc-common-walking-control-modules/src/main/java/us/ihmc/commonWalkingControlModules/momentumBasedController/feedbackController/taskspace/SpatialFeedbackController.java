@@ -41,6 +41,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
@@ -138,6 +139,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0,0);
+   private int[] activeAxis = new int[0];
 
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
@@ -156,6 +158,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoSE3OffsetFrame controlFrame;
    JointIndexHandler jointIndexHandler;
    private int[] jointIndices;
+   JointBasics[] jointPath;
+   List<Integer> allJointIndices;
+
 
    protected final double dt;
    protected final boolean isRootBody;
@@ -376,19 +381,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
 
-      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
-      List<Integer> allJointIndices = new ArrayList<>();
-
-      for (JointBasics joint : jointPath)
-      {
-         int[] indices = jointIndexHandler.getJointIndices(joint);
-         for (int index : indices)
-         {
-            allJointIndices.add(index);
-         }
-      }
-      jointIndices = allJointIndices.stream().mapToInt(i -> i).toArray();
-
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
       virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
@@ -403,6 +395,28 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
+
+      if (isImpedanceEnabled())
+      {
+         jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
+         allJointIndices = new ArrayList<>();
+
+         for (JointBasics joint : jointPath)
+         {
+            int[] indices = jointIndexHandler.getJointIndices(joint);
+            for (int index : indices)
+            {
+               allJointIndices.add(index);
+            }
+         }
+         jointIndices = new int[allJointIndices.size()];
+         for (int i = 0; i < allJointIndices.size(); i++) {
+            jointIndices[i] = allJointIndices.get(i);
+         }
+
+         activeAxis = new int[selectionMatrix.getNumberOfSelectedAxes()];
+         selectionMatrix.getActiveAxes(activeAxis);
+      }
 
       command.getControlFramePoseIncludingFrame(controlFramePosition, controlFrameOrientation);
       controlFrame.setOffsetToParent(controlFramePosition, controlFrameOrientation);
@@ -1177,6 +1191,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
+      tempMatrix.reshape(activeAxis.length, jacobianMatrix.getNumCols());
+      MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, activeAxis.length, tempMatrix);
+      jacobianMatrix.set(tempMatrix);
+
       subMassMatrix.set(massMatrixCalculator.getMassMatrix());
       massMatrixCalculator.reset();
       subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
@@ -1188,7 +1206,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
-      CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, inverseInertiaMatrix);
+      CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, tempMatrix);
+
+      inverseInertiaMatrix.set(CommonOps_DDRM.identity(6,6));
+      CommonOps_DDRM.insert(tempMatrix, inverseInertiaMatrix, activeAxis, activeAxis.length, activeAxis, activeAxis.length);
    }
 
    private final DMatrixRMaj inertiaMatrix = new DMatrixRMaj(0, 0);

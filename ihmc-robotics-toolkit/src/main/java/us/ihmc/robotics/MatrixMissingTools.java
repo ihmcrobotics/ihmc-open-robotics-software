@@ -258,6 +258,31 @@ public class MatrixMissingTools
       }
    }
 
+   public static void extractRows(DMatrixRMaj src, int rows[], int rowsSize, DMatrixRMaj dst)
+   {
+      if (rowsSize == 0)
+         return;
+
+      if (src.getNumCols() != dst.getNumCols())
+         throw new IllegalArgumentException(
+               "src and dst must have the same number of columns, was: [src cols: " + src.getNumCols() + ", dst cols: " + dst.getNumCols() + "]");
+      if (src.getNumRows() < rows[rowsSize - 1] + 1)
+         throw new IllegalArgumentException(
+               "src is too small, min size: [rows: " + (rows[rowsSize - 1] + 1) + "], was: [rows: " + src.getNumRows() + "]");
+      if (dst.getNumRows() < rowsSize)
+         throw new IllegalArgumentException(
+               "dst is too small, min size: [rows: " + rowsSize + "], was: [rows: " + dst.getNumRows() + "]");
+
+      for (int i = 0; i < rowsSize; i++)
+      {
+         int srcRow = rows[i];
+         for (int j = 0; j < src.getNumCols(); j++)
+         {
+            dst.unsafe_set(i, j, src.unsafe_get(srcRow, j));
+         }
+      }
+   }
+
    public static DMatrixRMaj createVector(int size, double fillValue)
    {
       DMatrixRMaj vector = new DMatrixRMaj(size, 1);
