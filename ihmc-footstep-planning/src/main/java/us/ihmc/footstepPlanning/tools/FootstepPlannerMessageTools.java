@@ -78,7 +78,7 @@ public class FootstepPlannerMessageTools
       packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaxZPenetrationOnValleyRegions());
       packet.setMaximumStepWidth(parameters.getMaxStepWidth());
       packet.setMinimumDistanceFromCliffBottoms(parameters.getMinDistanceFromCliffBottoms());
-      packet.setCliffBaseHeightToAvoid(parameters.getCliffBottomHeightToAvoid());
+      packet.setCliffBottomHeightToAvoid(parameters.getCliffBottomHeightToAvoid());
       packet.setMinimumDistanceFromCliffTops(parameters.getMinDistanceFromCliffTops());
       packet.setCliffTopHeightToAvoid(parameters.getCliffTopHeightToAvoid());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
