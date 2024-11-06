@@ -150,12 +150,12 @@ public class FootstepPlannerLoggerTest
 
       // Expected body path planner packet
       AStarBodyPathPlannerParametersPacket expectedBodyPathParameters = new AStarBodyPathPlannerParametersPacket();
-      FootstepPlannerMessageTools.copyParametersToPacket(expectedBodyPathParameters, planningModule.getAStarBodyPathPlannerParameters());
+      expectedBodyPathParameters.set(planningModule.getAStarBodyPathPlannerParameters().getAsPacket());
       assertTrue(expectedBodyPathParameters.epsilonEquals(log.getAStarBodyPathPlannerParametersPacket(), EPSILON));
 
       // Expected swing planner parameters
       SwingPlannerParametersPacket expectedSwingPlannerParameters = new SwingPlannerParametersPacket();
-      FootstepPlannerMessageTools.copyParametersToPacket(expectedSwingPlannerParameters, planningModule.getSwingPlannerParameters());
+      expectedSwingPlannerParameters.set(planningModule.getSwingPlannerParameters().getAsPacket());
       assertTrue(expectedSwingPlannerParameters.epsilonEquals(log.getSwingPlannerParametersPacket(), EPSILON));
 
       // Delete the log to avoid creating a bunch of logs when running these tests
