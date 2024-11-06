@@ -64,7 +64,7 @@ public class PlanarRegionCliffAvoiderTest
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
       DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
-      parameters.setCliffBaseHeightToAvoid(0.01);
+      parameters.setCliffBottomHeightToAvoid(0.01);
       parameters.setMinDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       double footLength = 0.2;
@@ -121,7 +121,7 @@ public class PlanarRegionCliffAvoiderTest
 
       DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
-      parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
+      parameters.setCliffBottomHeightToAvoid(cliffHeightToAvoid);
       parameters.setMinDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);

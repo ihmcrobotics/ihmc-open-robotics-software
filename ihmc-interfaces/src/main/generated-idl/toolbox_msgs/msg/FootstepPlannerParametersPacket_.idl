@@ -213,10 +213,10 @@ module toolbox_msgs
          * generator is capable of swinging over.
          */
         @defaultValue(value=-11.1)
-        double cliff_base_height_to_avoid;
+        double cliff_bottom_height_to_avoid;
         /**
          * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-         * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+         * nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
          * until it is minimumDistanceFromCliffBottoms away from it.
          * 
          * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will

@@ -639,7 +639,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getMaxYawWiggle(), packet.getMaximumYawWiggle(), epsilon, "Max yaw wiggle isn't equal.");
       assertEquals(parameters.getMaxZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(), epsilon, "Max Z penetration isn't equal.");
       assertEquals(parameters.getMaxStepWidth(), packet.getMaximumStepWidth(), epsilon, "Max step width isn't equal.");
-      assertEquals(parameters.getCliffBottomHeightToAvoid(), packet.getCliffBaseHeightToAvoid(), epsilon, "Cliff base height to avoid isn't equal.");
+      assertEquals(parameters.getCliffBottomHeightToAvoid(), packet.getCliffBottomHeightToAvoid(), epsilon, "Cliff base height to avoid isn't equal.");
       assertEquals(parameters.getMinDistanceFromCliffBottoms(), packet.getMinimumDistanceFromCliffBottoms(), epsilon, "Minimum distance from cliff bottoms isn't equal.");
       assertEquals(parameters.getCliffTopHeightToAvoid(), packet.getCliffTopHeightToAvoid(), epsilon, "Cliff top height to avoid isn't equal.");
       assertEquals(parameters.getMinDistanceFromCliffTops(), packet.getMinimumDistanceFromCliffTops(), epsilon, "Minimum distance from cliff tops isn't equal.");
