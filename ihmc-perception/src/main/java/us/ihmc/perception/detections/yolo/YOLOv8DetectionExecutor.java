@@ -277,6 +277,8 @@ public class YOLOv8DetectionExecutor
          {
             YOLOv8DetectionOutput detection = entry.getKey();
             RawImage maskImage = entry.getValue().get();
+            if (maskImage == null || maskImage.isEmpty())
+               return;
 
             String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
 
