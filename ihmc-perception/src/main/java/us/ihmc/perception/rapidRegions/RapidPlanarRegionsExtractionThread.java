@@ -106,6 +106,7 @@ public class RapidPlanarRegionsExtractionThread extends RepeatingTaskThread
    {
       super.kill();
 
-      extractor.destroy();
+      if (extractor != null)
+         extractor.destroy();
    }
 }
