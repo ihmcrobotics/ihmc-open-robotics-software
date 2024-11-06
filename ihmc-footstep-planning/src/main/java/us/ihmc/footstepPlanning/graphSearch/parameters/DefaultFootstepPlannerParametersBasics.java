@@ -310,7 +310,7 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.checkForPathCollisions, checkForPathCollisions);
    }
 
-   default void setCliffBaseHeightToAvoid(double height)
+   default void setCliffBottomHeightToAvoid(double height)
    {
       set(DefaultFootstepPlannerParameters.cliffBottomHeightToAvoid, height);
    }
@@ -394,7 +394,7 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       if (parametersPacket.getMaxStepWidth() != noValue)
          setMaxStepWidth(parametersPacket.getMaxStepWidth());
       if (parametersPacket.getCliffBottomHeightToAvoid() != noValue)
-         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBottomHeightToAvoid());
+         this.setCliffBottomHeightToAvoid(parametersPacket.getCliffBottomHeightToAvoid());
       if (parametersPacket.getMinDistanceFromCliffBottoms() != noValue)
          setMinDistanceFromCliffBottoms(parametersPacket.getMinDistanceFromCliffBottoms());
       if (parametersPacket.getCliffTopHeightToAvoid() != noValue)

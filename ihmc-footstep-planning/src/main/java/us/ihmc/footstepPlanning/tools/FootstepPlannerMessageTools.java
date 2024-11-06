@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.tools;
 
-import net.java.games.input.Component.Identifier.Axis;
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
