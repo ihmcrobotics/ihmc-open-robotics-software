@@ -408,7 +408,7 @@ public class RDXBlackflyCalibrationSuite
                                  undistortionRemapBorderValue);
 
             newCameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
-            arUcoMarkerDetector.update(texture.getRGBA8Image());
+            arUcoMarkerDetector.update(texture.getRGBA8Image().getBytedecoOpenCVMat());
             arUcoMarkerDetectionUI.copyOutputData(arUcoMarkerDetector);
             arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
 
