@@ -17,24 +17,22 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
-import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
-import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FootstepPlannerLoggerTest
 {
    /**
-    * We use an epsilon here because when data gets logs it may get slightly rounded depending on the situation. So we want to check that things haven't changed
+    * We use an epsilon here because when data gets logs, it may get slightly rounded depending on the situation.
+    * So we want to check that things haven't changed
     * a ton
     */
    private static final double EPSILON = 1e-5;
@@ -59,8 +57,9 @@ public class FootstepPlannerLoggerTest
    }
 
    /**
-    * This test was created to investigate a problem where logging didn't seem to be working, however after more investigation it was because it was trying
-    * to be run on the Continuous Integration (CI) server. Its possible to set a environmental variable to run these classes "as if they were on the server" and
+    * This test was created to investigate a problem where logging didn't seem to be working, however, after more investigation it was because it was trying
+    * to be run on the Continuous Integration (CI) server.
+    * It's possible to set an environmental variable to run these classes "as if they were on the server" and
     * that was happening here.
     * This test isn't much computation and is nice to have lying around to prevent future change from breaking the logger
     */
@@ -82,8 +81,10 @@ public class FootstepPlannerLoggerTest
    }
 
    /**
-    * This test ensures that logging the footstep plan's doesn't take too long. The speed in which this takes doesn't need ot be exact but
-    * this allows us to ensure that logging of footstep plan isn't slow. Otherwise, this will slow down threads if planning over and over again
+    * This test ensures that logging the footstep plan's doesn't take too long.
+    * The speed in which this runs at doesn't need ot exact, but
+    * this allows us to ensure that logging of footstep plan isn't slow.
+    * Otherwise, this will slow down threads if planning over and over again
     */
    @Disabled
    @Test
@@ -161,8 +162,8 @@ public class FootstepPlannerLoggerTest
    }
 
    /**
-    * When deleting logs we want to make sure that all the files get deleted, we don't want to be leaving files around or parts of old logs.
-    * This test ensure that when a log gets deleted that the directory is empty
+    * When deleting logs, we want to make sure that all the files get deleted, we don't want to be leaving files around or parts of old logs.
+    * This test ensures that when a log gets deleted that the directory is empty
     */
    @Test
    public void testDeletingOldLogs()
@@ -181,8 +182,8 @@ public class FootstepPlannerLoggerTest
       // This should delete this latest log which means the folder should be empty, the folder should still exist however
       FootstepPlannerLogger.deleteOldLogs(0, pathToLogRequest);
 
-      // Check that folder is empty
+      // Check that folder doesn't exist; we expect to delete all the logs and if the directory is empty it gets deleted so it shouldn't exist anymore
       File directory = new File(pathToLogRequest);
-      assertEquals(0, Objects.requireNonNull(directory.list()).length);
+      assertNull(directory.list());
    }
 }
