@@ -104,6 +104,7 @@ public class RapidHeightMapUpdateThread extends RepeatingTaskThread
       super.kill();
       interrupt();
 
-      heightMapManager.destroy();
+      if (heightMapManager != null)
+         heightMapManager.destroy();
    }
 }
