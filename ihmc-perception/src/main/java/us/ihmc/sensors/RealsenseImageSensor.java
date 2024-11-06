@@ -107,10 +107,14 @@ public class RealsenseImageSensor extends ImageSensor
       // Update grabbed images
       synchronized (grabbedImages)
       {
-         grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage, realsense.getColorCameraIntrinsics(), colorPose, grabTime, grabSequenceNumber);
+         grabbedImages[COLOR_IMAGE_KEY] = RawImage.createWithBGRImage(bgrImage,
+                                                                      realsense.getColorCameraIntrinsics(),
+                                                                      new FramePose3D(colorPose),
+                                                                      grabTime,
+                                                                      grabSequenceNumber);
          grabbedImages[DEPTH_IMAGE_KEY] = RawImage.createWith16BitDepth(depthImage,
                                                                         realsense.getDepthCameraIntrinsics(),
-                                                                        depthPose,
+                                                                        new FramePose3D(depthPose),
                                                                         grabTime,
                                                                         grabSequenceNumber,
                                                                         (float) realsense.getDepthDiscretization());

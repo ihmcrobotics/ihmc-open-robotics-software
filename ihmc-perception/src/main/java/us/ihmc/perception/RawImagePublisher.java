@@ -40,7 +40,7 @@ public class RawImagePublisher implements AutoCloseable
    }
 
    @SuppressWarnings("unchecked") // Trust me bro, I know what I'm doing
-   public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
+   public synchronized void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
    {
       if (imageTopic.getType().equals(ImageMessage.class))
       {  // Topic is an ImageMessage topic -> publish as image message
@@ -97,7 +97,7 @@ public class RawImagePublisher implements AutoCloseable
    }
 
    @Override
-   public void close()
+   public synchronized void close()
    {
       System.out.println("Closing " + getClass().getSimpleName());
       compressionTools.destroy();

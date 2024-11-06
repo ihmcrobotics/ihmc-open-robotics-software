@@ -260,7 +260,7 @@ public class ZEDImageSensor extends ImageSensor
                           imagePixelFormat,
                           cameraIntrinsics,
                           CameraModel.PINHOLE,
-                          sensorPose,
+                          new FramePose3D(sensorPose),
                           lastGrabTime,
                           grabSequenceNumber,
                           MILLIMETER_TO_METERS);
