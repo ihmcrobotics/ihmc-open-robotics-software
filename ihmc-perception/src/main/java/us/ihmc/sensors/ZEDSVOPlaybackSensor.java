@@ -11,15 +11,15 @@ import java.nio.file.Path;
 
 import static us.ihmc.zed.global.zed.*;
 
-public class ZEDSVOPlayback extends ZEDImageSensor
+public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
    private final String svoFileName;
    private final ZEDSVOCurrentFileMessage svoStatusMessage = new ZEDSVOCurrentFileMessage();
    private final RepeatingTaskThread publishInfoThread;
 
-   public ZEDSVOPlayback(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, String svoFileName)
+   public ZEDSVOPlaybackSensor(ROS2PublishSubscribeAPI ros2, int cameraID, ZEDModelData zedModel, String svoFileName)
    {
-      super(cameraID, zedModel);
+      super(cameraID, zedModel, SL_INPUT_TYPE_SVO);
       this.svoFileName = svoFileName;
 
       if (!Files.exists(Path.of(svoFileName)))
@@ -63,7 +63,6 @@ public class ZEDSVOPlayback extends ZEDImageSensor
    {
       super.setInitParameters(parametersToSet);
       parametersToSet.svo_real_time_mode(true);
-      parametersToSet.input_type(SL_INPUT_TYPE_SVO);
    }
 
    @Override
