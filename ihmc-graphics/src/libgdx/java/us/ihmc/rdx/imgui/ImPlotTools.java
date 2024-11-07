@@ -4,6 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
+import imgui.extension.implot.flag.ImPlotAxis;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 
@@ -60,11 +61,13 @@ public final class ImPlotTools
    public static void renderEmptyPlotArea(String label, float width, float height)
    {
       emptyPlotSize.set(width, height);
-      if (ImPlot.beginPlot(label, "", "", emptyPlotSize,
-                           ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect | ImPlotFlags.NoTitle | ImPlotFlags.NoMousePos,
-                           ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel,
-                           ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel))
+      if (ImPlot.beginPlot(label, emptyPlotSize,
+                           ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect | ImPlotFlags.NoTitle | ImPlotFlags.NoMouseText))
       {
+         ImPlot.setupAxis(ImPlotAxis.X1, "", ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel);
+         ImPlot.setupAxis(ImPlotAxis.Y1, "", ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.NoLabel);
+         ImPlot.setupFinish();
+
          ImPlot.endPlot();
       }
    }

@@ -49,7 +49,7 @@ public class ImPlotPlot
       flags += ImPlotFlags.NoMenus;
       flags += ImPlotFlags.NoBoxSelect;
       flags += ImPlotFlags.NoTitle;
-      flags += ImPlotFlags.NoMousePos;
+      flags += ImPlotFlags.NoMouseText;
 
       xFlags = ImPlotAxisFlags.None;
       xFlags += ImPlotAxisFlags.NoDecorations;
@@ -78,13 +78,15 @@ public class ImPlotPlot
 
       outerBoundsDimensionsPixels.x = plotWidth;
       outerBoundsDimensionsPixels.y = plotHeight;
-      customBeforePlotLogic.run();
-      if (ImPlot.beginPlot(labels.get("Plot"), xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
+      if (ImPlot.beginPlot(labels.get("Plot"), outerBoundsDimensionsPixels, flags))
       {
-         customDuringPlotLogic.run();
+         ImPlot.setupAxis(ImPlotAxis.X1, xLabel, xFlags);
+         ImPlot.setupAxis(ImPlotAxis.Y1, yLabel, yFlags);
+         customBeforePlotLogic.run();
+         ImPlot.setupLegend(ImPlotLocation.SouthWest, ImPlotLegendFlags.Horizontal | ImPlotLegendFlags.Outside);
+         ImPlot.setupFinish();
 
-         boolean outside = true;
-         ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, outside);
+         customDuringPlotLogic.run();
 
          boolean showingLegendPopup = false;
          for (ImPlotPlotLine plotLine : plotLines)
@@ -95,7 +97,7 @@ public class ImPlotPlot
          if (!plotLines.isEmpty() && ImPlot.isPlotHovered())
          {
             ImPlotPoint plotMousePosition = ImPlot.getPlotMousePos(ImPlotTools.IMPLOT_AUTO);
-            int bufferIndex = (int) Math.round(plotMousePosition.getX());
+            int bufferIndex = (int) Math.round(plotMousePosition.x);
 
             StringBuilder tooltipText = new StringBuilder();
             for (ImPlotPlotLine plotLine : plotLines)
@@ -105,8 +107,6 @@ public class ImPlotPlot
                tooltipText.append(plotLine.getValueString(bufferIndex)).append("\n");
             }
             ImGui.setTooltip(tooltipText.toString().trim());
-
-            plotMousePosition.destroy();
          }
 
          if (popupContextWindowImGuiRenderer != null && !showingLegendPopup && ImGui.beginPopupContextWindow())
@@ -117,7 +117,7 @@ public class ImPlotPlot
 
          if (dragAndDropPayloadConsumer != null)
          {
-            if (ImPlot.beginDragDropTarget())
+            if (ImPlot.beginDragDropTargetPlot())
             {
                String payload = ImGui.acceptDragDropPayload(String.class);
 

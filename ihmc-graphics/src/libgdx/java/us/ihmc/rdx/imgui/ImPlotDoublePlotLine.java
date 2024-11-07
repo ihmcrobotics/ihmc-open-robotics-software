@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotAxis;
 import imgui.flag.ImGuiCond;
 
 import java.text.DecimalFormat;
@@ -50,6 +51,6 @@ public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
             limitY = Math.max(doubleSwapBuffer.getValue(i), limitY);
          }
       }
-      ImPlot.setNextPlotLimitsY(0.0, limitY, ImGuiCond.Always);
+      ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, limitY, ImGuiCond.Always);
    }
 }

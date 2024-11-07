@@ -61,7 +61,7 @@ public class RDX3DPanelTooltip
 
          float textPositionX = drawStartX + 5.0f;
          float textPositionY = drawStartY + 2.0f;
-         ImGui.getWindowDrawList().addText(font, font.getFontSize(), textPositionX, textPositionY, Color.WHITE.toIntBits(), text);
+         ImGui.getWindowDrawList().addText(font, (int) font.getFontSize(), textPositionX, textPositionY, Color.WHITE.toIntBits(), text);
       }
    }
 }

@@ -252,32 +252,32 @@ public class ImGuiTools
 
    public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue);
+      return ImGui.sliderScalar(label, imDouble.getData(), minValue, maxValue);
    }
 
    public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format);
+      return ImGui.sliderScalar(label, imDouble.getData(), minValue, maxValue, format);
    }
 
    public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format, int imGuiSliderFlags)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
+      return ImGui.sliderScalar(label, imDouble.getData(), minValue, maxValue, format, imGuiSliderFlags);
    }
 
    public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue);
+      return ImGui.sliderScalar(label, imInt.getData(), minValue, maxValue);
    }
 
    public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format);
+      return ImGui.sliderScalar(label, imInt.getData(), minValue, maxValue, format);
    }
 
    public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
    {
-      return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+      return ImGui.sliderScalar(label, imInt.getData(), minValue, maxValue, format, imGuiSliderFlags);
    }
 
    public static boolean smallCheckbox(String label, ImBoolean checked)
@@ -510,6 +510,8 @@ public class ImGuiTools
     */
    public static void setupFonts(ImGuiIO io)
    {
+      ImGui.getIO().getFonts().setFreeTypeRenderer(true);
+
       if (SystemUtils.IS_OS_WINDOWS)
          FONT_DIRECTORY = System.getenv("WINDIR") + "/Fonts";
       else

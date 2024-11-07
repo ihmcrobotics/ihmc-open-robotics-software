@@ -324,8 +324,8 @@ public class RDXImGuiWindowAndDockSystem
 
    public void dispose()
    {
-      imGuiGl3.dispose();
-      imGuiGlfw.dispose();
+      imGuiGl3.shutdown();
+      imGuiGlfw.shutdown();
 
       ImGui.destroyContext();
       if (debugMessageCallback != null)

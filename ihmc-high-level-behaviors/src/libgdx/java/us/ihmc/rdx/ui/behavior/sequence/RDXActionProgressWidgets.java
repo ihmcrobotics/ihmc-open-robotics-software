@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotAxis;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
@@ -111,7 +112,7 @@ public class RDXActionProgressWidgets
             double plotMaxY = plotLine.getMaxYValue();
             max = Double.isNaN(max) ? plotMaxY : Math.max(plotMaxY, max);
          }
-         ImPlot.setNextPlotLimitsY(0.0, Double.isNaN(max) ? limitYMin : Double.max(limitYMin, max), ImGuiCond.Always);
+         ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, Double.isNaN(max) ? limitYMin : Double.max(limitYMin, max), ImGuiCond.Always);
       });
    }
 

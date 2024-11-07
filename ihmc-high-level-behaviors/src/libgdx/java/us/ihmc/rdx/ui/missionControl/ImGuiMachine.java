@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.missionControl;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.flag.ImPlotAxis;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
@@ -80,17 +81,17 @@ public class ImGuiMachine
       cpuPlot.setFlags(plotFlags);
       cpuPlot.setXFlags(plotAxisXFlags);
       cpuPlot.setYFlags(plotAxisYFlags);
-      cpuPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
+      cpuPlot.setCustomBeforePlotLogic(() -> ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, 103.0, ImGuiCond.Always));
 
       ramPlot.setFlags(plotFlags);
       ramPlot.setXFlags(plotAxisXFlags);
       ramPlot.setYFlags(plotAxisYFlags);
-      ramPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, lastResourceUsageMessage.getMemoryTotal(), ImGuiCond.Always));
+      ramPlot.setCustomBeforePlotLogic(() -> ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, lastResourceUsageMessage.getMemoryTotal(), ImGuiCond.Always));
 
       netPlot.setFlags(plotFlags);
       netPlot.setXFlags(plotAxisXFlags);
       netPlot.setYFlags(plotAxisYFlags);
-      netPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always));
+      netPlot.setCustomBeforePlotLogic(() -> ImPlot.setupAxisLimits(ImPlotAxis.Y1, -3000.0, 103000.0, ImGuiCond.Always));
 
       this.ros2Node = ros2Node;
 
@@ -154,7 +155,7 @@ public class ImGuiMachine
             plot.setXFlags(plotAxisXFlags);
             plot.setYFlags(plotAxisYFlags);
             String gpuModel = message.getNvidiaGpuModels().getString(0);
-            plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
+            plot.setCustomBeforePlotLogic(() -> ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, 103.0, ImGuiCond.Always));
             plot.getPlotLines()
                 .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %",
                                               GRAPH_BUFFER_SIZE,
@@ -174,7 +175,7 @@ public class ImGuiMachine
             plot.setYFlags(plotAxisYFlags);
             String gpuModel = message.getNvidiaGpuModels().getString(0);
             float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
-            plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
+            plot.setCustomBeforePlotLogic(() -> ImPlot.setupAxisLimits(ImPlotAxis.Y1, 0.0, totalGpuMemory, ImGuiCond.Always));
             plot.getPlotLines()
                 .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)",
                                               GRAPH_BUFFER_SIZE,
