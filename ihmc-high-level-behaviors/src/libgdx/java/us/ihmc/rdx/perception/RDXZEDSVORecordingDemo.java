@@ -136,7 +136,7 @@ public class RDXZEDSVORecordingDemo
                }
             }
          };
-         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          zed2ColoredPointCloudVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
       }
@@ -146,7 +146,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        ros2Node,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
       }
 
@@ -155,7 +155,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                         ros2Node,
                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
-         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
       }
 
@@ -164,7 +164,7 @@ public class RDXZEDSVORecordingDemo
          RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                     ros2Node,
                                                                                                     PerceptionAPI.ZED2_DEPTH);
-         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
+         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
       }
    }
