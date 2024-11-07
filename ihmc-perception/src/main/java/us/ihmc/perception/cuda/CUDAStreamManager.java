@@ -38,6 +38,7 @@ public class CUDAStreamManager
       return streams.get(streamsGotten++ % streams.size()).get();
    }
 
+
    @SuppressWarnings("SuspiciousMethodCalls")
    public static synchronized void releaseStream(CUstream_st stream)
    {

@@ -24,7 +24,7 @@ import static org.bytedeco.cuda.global.nvrtc.*;
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
 import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
 
-class CUDAProgram
+public class CUDAProgram
 {
    private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
                                                     "--dopt=on",                     // Optimize code
