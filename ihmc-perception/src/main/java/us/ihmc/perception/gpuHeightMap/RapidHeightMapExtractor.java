@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -29,6 +31,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 /**
  * Extracts height map and some other cost metric maps on the GPU using OpenCL kernels
@@ -194,6 +199,7 @@ public class RapidHeightMapExtractor
 
       initialize();
       reset();
+
    }
 
    public void recomputeDerivedParameters()
@@ -512,6 +518,34 @@ public class RapidHeightMapExtractor
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
       localHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(offset));
       globalHeightMapImage.getBytedecoOpenCVMat().put(new Scalar(offset));
+
+
+      /*
+
+      Mat myMat = [ 10, 24, 12, ... ]
+
+      myMat = { offset }
+
+      GpuMat gpuMat = new GpuMat();
+
+      // Put values into gpuMat
+
+      PointerPointer<Pointer> pointerToCudaPointer = new PointerPointer<>();
+      pointerToCudaPointer.put(gpuMat.data()) // Gives you CUDA pointer
+
+      uint16* data
+
+      IntPointer myArr = ...;
+
+      for (int i = 0; i < size; ++i)
+         myArr.put(i, value);
+
+      Pointer deviceArray = ...
+
+      cudaMemcpy(deviceArray, myArr, size)
+
+
+       */
 
       localHeightMapImage.writeOpenCLImage(openCLManager);
       globalHeightMapImage.writeOpenCLImage(openCLManager);
