@@ -102,8 +102,8 @@ public class RDXIterativeClosestPointWorkerDemo
    {
       zedImageRetriever = new ZEDColorDepthImageRetriever(0,
                                                           ReferenceFrame::getWorldFrame,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH)::isDemanded,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR)::isDemanded);
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
@@ -221,14 +221,14 @@ public class RDXIterativeClosestPointWorkerDemo
             RDXROS2ImageMessageVisualizer zedDepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Depth Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                                                       PerceptionAPI.ZED2_DEPTH);
-            zedDepthImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_COLOR);
+            zedDepthImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zedDepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Point Cloud",
                                                                                                                 node,
                                                                                                                 PerceptionAPI.ZED2_DEPTH,
                                                                                                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+            zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);

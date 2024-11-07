@@ -341,7 +341,7 @@ public class RDXSceneGraphDemo
                                                                                                                      PerceptionAPI.ZED2_DEPTH,
                                                                                                                      PerceptionAPI.ZED2_COLOR_IMAGES.get(
                                                                                                                            RobotSide.LEFT));
-         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          zed2ColoredPointCloudVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
       }
@@ -351,7 +351,7 @@ public class RDXSceneGraphDemo
          RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
       }
 
@@ -360,7 +360,7 @@ public class RDXSceneGraphDemo
          RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                         PubSubImplementation.FAST_RTPS,
                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
-         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
       }
 
@@ -369,7 +369,7 @@ public class RDXSceneGraphDemo
          RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                     PubSubImplementation.FAST_RTPS,
                                                                                                     PerceptionAPI.ZED2_DEPTH);
-         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
+         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
       }
 

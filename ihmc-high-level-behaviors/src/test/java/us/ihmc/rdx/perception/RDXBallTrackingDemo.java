@@ -63,8 +63,8 @@ public class RDXBallTrackingDemo
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH)::isDemanded,
-                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR)::isDemanded);
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
+                                                       new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       imageRetriever.start();
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
@@ -129,14 +129,14 @@ public class RDXBallTrackingDemo
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("Point Cloud",
                                                                                                              ros2Node,
                                                                                                              PerceptionAPI.ZED2_DEPTH,
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            pointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+            pointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer);
 
             RDXROS2BallTrackingVisualizer ballTrajectoryVisualizer = new RDXROS2BallTrackingVisualizer("Ball Trajectory", PerceptionAPI.BALL_TRAJECTORY, ros2Helper);

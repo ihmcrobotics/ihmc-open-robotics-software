@@ -107,6 +107,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = BEST_EFFORT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
+   public static final ROS2Topic<Empty> REQUEST_REALSENSE = PERCEPTION_MODULE.withSuffix("request_realsense").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_REALSENSE_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_realsense_point_cloud").withType(Empty.class);
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "left")
                                                                                                                         .withType(BigVideoPacket.class)
@@ -139,9 +140,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> ZED_SVO_PAUSE = PERCEPTION_MODULE.withSuffix("zed_svo_pause").withType(Empty.class);
    public static final ROS2Topic<Empty> ZED_SVO_PLAY = PERCEPTION_MODULE.withSuffix("zed_svo_play").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_ZED = PERCEPTION_MODULE.withSuffix("request_zed").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_COLOR = PERCEPTION_MODULE.withSuffix("request_zed_color").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_DEPTH = PERCEPTION_MODULE.withSuffix("request_zed_depth").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_ZED_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_zed_publication").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_CENTERPOSE = PERCEPTION_MODULE.withSuffix("request_centerpose").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);

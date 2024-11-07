@@ -120,7 +120,7 @@ public class PerceptionAndAutonomyProcess
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
    private ROS2DemandGraphNode depthOverlapRemovalDemandNode;
-   private ROS2DemandGraphNode zedPointCloudDemandNode;
+   private ROS2DemandGraphNode zedPublishDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
    private ROS2DemandGraphNode zedDepthDemandNode;
    private RawImage zedDepthImage;
@@ -361,7 +361,7 @@ public class PerceptionAndAutonomyProcess
       sensorStreamer.destroy();
 
       depthOverlapRemovalDemandNode.destroy();
-      zedPointCloudDemandNode.destroy();
+      zedPublishDemandNode.destroy();
       zedColorDemandNode.destroy();
       zedDepthDemandNode.destroy();
       realsenseDemandNode.destroy();
@@ -647,9 +647,7 @@ public class PerceptionAndAutonomyProcess
    {
       // Initialize all nodes
       depthOverlapRemovalDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OVERLAP_REMOVAL);
-      zedPointCloudDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
-      zedDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
-      zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
+      zedPublishDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_PUBLICATION);
       realsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
       ousterDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
       ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
@@ -668,8 +666,8 @@ public class PerceptionAndAutonomyProcess
       // build the graph
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
       zedDepthDemandNode.addDependents(planarRegionsDemandNode); // Using ZED for planar regions
-      zedDepthDemandNode.addDependents(zedPointCloudDemandNode); // Used by global visualizer to demand color & depth
-      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerPoseDemandNode, ballDetectionDemandNode);
+      zedDepthDemandNode.addDependents(zedPublishDemandNode); // Used by global visualizer to demand color & depth
+      zedColorDemandNode.addDependents(zedPublishDemandNode, centerPoseDemandNode, ballDetectionDemandNode);
       planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
       realsenseDemandNode.addDependents(heightMapDemandNode);
@@ -682,7 +680,7 @@ public class PerceptionAndAutonomyProcess
     */
    private void forceEnableAllSensors(ROS2PublishSubscribeAPI ros2)
    {
-      zedHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+      zedHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_ZED_PUBLICATION);
       zedHeartbeat.setAlive(true);
 
       realsenseHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
