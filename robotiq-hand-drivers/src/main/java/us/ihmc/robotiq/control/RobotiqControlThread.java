@@ -13,6 +13,7 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.OldHandAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -46,7 +47,7 @@ public class RobotiqControlThread extends HandControlThread
 
       ROS2PublisherBasics<HandJointAnglePacket> handJointAnglePublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(HandJointAnglePacket.class));
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
-      realtimeROS2Node.createSubscription(inputTopic.withTypeName(HandDesiredConfigurationMessage.class),
+      realtimeROS2Node.createSubscription(OldHandAPI.getHandDesiredConfigurationTopic(robotName),
                                           handDesiredConfigurationMessageSubscriber);
       realtimeROS2Node.createSubscription(inputTopic.withTypeName(ManualHandControlPacket.class), manualHandControlProvider);
       realtimeROS2Node.spin();
