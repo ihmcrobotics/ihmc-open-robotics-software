@@ -43,6 +43,7 @@ public class ZEDImageSensor extends ImageSensor
 
    private final int cameraID;
    private final ZEDModelData zedModel;
+   private final int slInputType;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -67,12 +68,13 @@ public class ZEDImageSensor extends ImageSensor
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel)
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType)
    {
       super(zedModel.name());
 
       this.cameraID = cameraID;
       this.zedModel = zedModel;
+      this.slInputType = slInputType;
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
@@ -103,7 +105,6 @@ public class ZEDImageSensor extends ImageSensor
          if (positionalTrackingEnabled)
          {
             SL_PositionalTrackingParameters positionalTrackingParameters = new SL_PositionalTrackingParameters();
-//            positionalTrackingParameters.mode(SL_POSITIONAL_TRACKING_MODE_GEN_2);
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
@@ -151,7 +152,7 @@ public class ZEDImageSensor extends ImageSensor
    {
       parametersToSet.camera_fps(CAMERA_FPS);
       parametersToSet.resolution(SL_RESOLUTION_HD720);
-      parametersToSet.input_type(SL_INPUT_TYPE_USB);
+      parametersToSet.input_type(slInputType);
       parametersToSet.camera_device_id(cameraID);
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
       parametersToSet.camera_disable_self_calib(false);
