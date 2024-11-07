@@ -39,8 +39,11 @@ public class ReferenceSpreadingTrajectory
 {
    protected final YoRegistry registry;
 
-   private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
-   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
+//   private static final String ENDEFFECTOR_NAME = "GRIPPER_YAW_LINK"; // 7DOF Arm
+   private static final String ENDEFFECTOR_NAME = "ELBOW_PITCH_LINK"; // 4DOF Arm
+   private static final double MAX_POINTS = 100; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
+//   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z"); //7DOF Arm
+private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y"); //4DOF arm
 
    private final TrajectoryRecordReplay trajectoryPlayer;
    private String filePath;
@@ -110,20 +113,20 @@ public class ReferenceSpreadingTrajectory
       int frameIndex = 0;
       int jointIndex;
       double currentTime = currentFrame.get("time[sec]");
-      desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
-                          currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),
-                          currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionZ"));
-      desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQx"),
-                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQy"),
-                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQz"),
-                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQs"));
+      desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionX"),
+                          currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionY"),
+                          currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionZ"));
+      desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQx"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQy"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQz"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQs"));
 
-      desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityX"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityY"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityZ"));
-      desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityX"),
-                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityY"),
-                                 currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityZ"));
+      desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityX"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityY"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityZ"));
+      desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityX"),
+                                 currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityY"),
+                                 currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityZ"));
 
       for (String jointName : JOINT_NAMES)
       {
@@ -215,20 +218,20 @@ public class ReferenceSpreadingTrajectory
          if (frameIndex % frameInterval == 0)
          {
             double currentTime = currentFrame.get("time[sec]");
-            desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionX"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionY"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "PositionZ"));
-            desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQx"),
-                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQy"),
-                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQz"),
-                                             currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "OrientationQs"));
+            desiredPosition.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionX"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionY"),
+                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "PositionZ"));
+            desiredOrientation.setQuaternion(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQx"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQy"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQz"),
+                                             currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQs"));
 
-            desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityX"),
-                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityY"),
-                                      currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "LinearVelocityZ"));
-            desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityX"),
-                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityY"),
-                                       currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrent" + "AngularVelocityZ"));
+            desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityX"),
+                                      currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityY"),
+                                      currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityZ"));
+            desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityX"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityY"),
+                                       currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityZ"));
 
             for (String jointName : JOINT_NAMES)
             {
@@ -252,13 +255,13 @@ public class ReferenceSpreadingTrajectory
             se3TrajectoryPointMessage.setSequenceId(frameIndex);
             se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add().set(se3TrajectoryPointMessage);
 
-            desiredFeedForwardWrench.getForce().set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackX"),
-                                                    currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackY"),
-                                                    currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKpositionFeedbackZ"));
+            desiredFeedForwardWrench.getForce().set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "positionFeedbackX"),
+                                                    currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "positionFeedbackY"),
+                                                    currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "positionFeedbackZ"));
 
-            desiredFeedForwardWrench.getTorque().set(currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackX"),
-                                                     currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackY"),
-                                                     currentFrame.get(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKorientationFeedbackZ"));
+            desiredFeedForwardWrench.getTorque().set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "orientationFeedbackX"),
+                                                     currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "orientationFeedbackY"),
+                                                     currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "orientationFeedbackZ"));
 
             wrenchTrajectoryPointMessage.setTime(currentTime - startTimeCSV);
             wrenchTrajectoryPointMessage.getWrench().set(desiredFeedForwardWrench);

@@ -25,7 +25,8 @@ import java.util.LinkedHashMap;
 
 public class ReferenceSpreader
 {
-   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z");
+//   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z"); // 7DOFS
+   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y"); // 4DOFS
 
    private final YoRegistry registry;
    private String baseFinalPath;
@@ -37,7 +38,7 @@ public class ReferenceSpreader
    private final TrajectoryRecordReplay preImpactReference;
    private final TrajectoryRecordReplay postImpactReference;
    private final TrajectoryRecordReplay blendedImpactReference;
-   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.RECORD;
+   private List<String> keyMatrix = ReferenceSpreadingKeyMatrix.RECORD_4DOF;
 
    private int impactIndex = -1;
    private double impactTime = Double.NaN;
