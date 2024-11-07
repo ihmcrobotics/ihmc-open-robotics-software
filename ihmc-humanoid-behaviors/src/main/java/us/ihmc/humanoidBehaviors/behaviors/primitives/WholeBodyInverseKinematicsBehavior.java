@@ -4,6 +4,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -109,9 +110,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
-      createSubscriberFromController(KinematicsToolboxOutputStatus.class, kinematicsToolboxOutputQueue::put);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsToolboxInputTopic);
-      kinematicsToolboxRigidBodyPublisher = createPublisherForController(KinematicsToolboxRigidBodyMessage.class);
+      createSubscriber(ToolboxAPIs.getIKToolboxTopic(KinematicsToolboxOutputStatus.class, robotName), kinematicsToolboxOutputQueue::put);
+      toolboxStatePublisher = createPublisher(ToolboxAPIs.getIKToolboxTopic(ToolboxStateMessage.class, robotName));
+      kinematicsToolboxRigidBodyPublisher = createPublisher(ToolboxAPIs.getIKToolboxTopic(KinematicsToolboxRigidBodyMessage.class, robotName));
       wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
 
       clear();

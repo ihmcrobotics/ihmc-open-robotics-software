@@ -74,7 +74,6 @@ public abstract class AbstractBehavior implements RobotController
    protected final ROS2Topic behaviorInputTopic, behaviorOutputTopic;
 
    protected final ROS2Topic footstepPlannerInputTopic, footstepPlannerOutputTopic;
-   protected final ROS2Topic kinematicsToolboxInputTopic;
    protected final ROS2Topic kinematicsPlanningToolboxInputTopic, kinematicsPlanningToolboxOutputTopic;
 
    private static int behaviorUniqID = 0;
@@ -102,7 +101,6 @@ public abstract class AbstractBehavior implements RobotController
 
       footstepPlannerInputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       footstepPlannerOutputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
-      kinematicsToolboxInputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
       kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
       kinematicsPlanningToolboxOutputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
