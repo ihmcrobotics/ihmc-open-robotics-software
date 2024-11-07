@@ -21,8 +21,7 @@ import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
+import static us.ihmc.perception.cuda.CUDATools.*;
 
 class CUDAProgram
 {
@@ -271,6 +270,12 @@ class CUDAProgram
     */
    private static String getComputeVersion()
    {
+      if (!hasCUDA())
+         LogTools.fatal("CUDA Runtime has not been found. To install CUDA Toolkit, follow the instructions in ihmc-perception/README.md.");
+
+      if (!hasCUDADevice())
+         LogTools.fatal("No CUDA device found. An NVIDIA GPU is required to run this code.");
+
       cudaDeviceProp deviceProperties = new cudaDeviceProp();
       cudaGetDeviceProperties(deviceProperties, 0);
       int majorVersion = deviceProperties.major();
