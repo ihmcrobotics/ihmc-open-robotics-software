@@ -48,12 +48,12 @@ libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 
-   val gdxVersion = "1.12.1"
+   val gdxVersion = "1.13.0"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
    api("com.github.mgsx-dev.gdx-gltf:core:2.2.1")
 
-   val lwjglVersion = "3.3.3"
+   val lwjglVersion = "3.3.4"
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-linux")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows")
@@ -65,12 +65,12 @@ libgdxDependencies {
    api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-windows-x86")
    api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-macos")
 
-   val imguiVersion = "1.86.11"
+   val imguiVersion = "1.87.6"
    api("io.github.spair:imgui-java-binding:$imguiVersion")
    api("io.github.spair:imgui-java-lwjgl3:$imguiVersion")
-   api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")
-   api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
-   api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-linux:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-macos:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-windows:$imguiVersion")
 
    val javaFXVersion = "17.0.9"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
