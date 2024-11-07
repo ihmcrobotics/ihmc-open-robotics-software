@@ -39,7 +39,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       // Subscribe to play message
       ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, () -> getGrabThread().startRepeating());
 
-      publishInfoThread = new RepeatingTaskThread(() ->
+      publishInfoThread = new RepeatingTaskThread("PublishSVOInfoThread", () ->
       {
          svoStatusMessage.setCurrentFileName(svoFileName);
          svoStatusMessage.setRecordMode((byte) 1); // playback
@@ -47,7 +47,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
          svoStatusMessage.setLength(getLength());
 
          ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
-      }, "PublishSVOInfoThread").setFrequencyLimit(ZEDImageSensor.CAMERA_FPS);
+      }).setFrequencyLimit(ZEDImageSensor.CAMERA_FPS);
       publishInfoThread.start();
    }
 

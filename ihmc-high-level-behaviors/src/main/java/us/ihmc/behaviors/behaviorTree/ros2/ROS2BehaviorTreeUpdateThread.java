@@ -23,7 +23,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       setFrequencyLimit(ROS2BehaviorTreeState.SYNC_FREQUENCY);
 
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));

@@ -28,7 +28,7 @@ public class ROS2SRTSensorStreamer
 
    public ROS2SRTSensorStreamer()
    {
-      this(new ROS2NodeBuilder.build(ROS2SRTSensorStreamer.class.getSimpleName().toLowerCase() + "_node"));
+      this(new ROS2NodeBuilder().build(ROS2SRTSensorStreamer.class.getSimpleName().toLowerCase() + "_node"));
       destroyROS2Node = true;
    }
 
