@@ -79,7 +79,5 @@ public class ROS2SceneGraphUpdateThread extends RepeatingTaskThread
       ReferenceFrame pelvisFrame = robotPelvisFrameSupplier.get();
       sceneGraph.updateOnRobotOnly(pelvisFrame);
       sceneGraph.updatePublication();
-
-      // TODO: add behavior tree?
    }
 }

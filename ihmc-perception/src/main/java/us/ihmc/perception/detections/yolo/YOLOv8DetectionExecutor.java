@@ -137,7 +137,7 @@ public class YOLOv8DetectionExecutor
 
    /**
     * Non-blocking call to run YOLO on the provided images
-    * @param colorImage RGB color image, used for YOLO detection
+    * @param colorImage BGR color image, used for YOLO detection
     * @param depthImage 16UC1 depth image, used to get points of detected objects
     */
    public void runYOLODetection(YOLOv8ObjectDetector yoloDetector, RawImage colorImage, RawImage depthImage)

@@ -92,7 +92,7 @@ public class IterativeClosestPointManager
          }
       });
 
-      workerThread = new RepeatingTaskThread(this::runWorkers, "ICPWorkers").setFrequencyLimit(ICP_WORK_FREQUENCY);
+      workerThread = new RepeatingTaskThread("ICPWorkers", this::runWorkers).setFrequencyLimit(ICP_WORK_FREQUENCY);
    }
 
    /**

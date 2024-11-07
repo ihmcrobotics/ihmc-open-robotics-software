@@ -2,9 +2,9 @@ package us.ihmc.sensors;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.function.Supplier;
 
@@ -22,7 +22,7 @@ public abstract class ImageSensor implements AutoCloseable
    public ImageSensor(String sensorName)
    {
       this.sensorName = sensorName;
-      grabThread = new RepeatingTaskThread(this::grabAndNotify, sensorName + "Grabber");
+      grabThread = new RepeatingTaskThread(sensorName + "Grabber", this::grabAndNotify);
    }
 
    /**
@@ -114,7 +114,7 @@ public abstract class ImageSensor implements AutoCloseable
       // If the sensor is not running, try to start the sensor
       if (!isSensorRunning() && !startSensor())
       {  // if sensor failed to start, sleep a bit and retry
-         MissingThreadTools.sleep(SECONDS_BETWEEN_RETRIES);
+         ThreadTools.park(SECONDS_BETWEEN_RETRIES);
          return;
       }
 
