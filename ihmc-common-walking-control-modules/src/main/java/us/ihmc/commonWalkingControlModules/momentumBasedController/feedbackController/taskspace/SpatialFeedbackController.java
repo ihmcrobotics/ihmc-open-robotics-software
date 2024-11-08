@@ -393,6 +393,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       dampingRatioMatrix.set(4,4, gains.getPositionGains().getDampingRatios()[1]);
       dampingRatioMatrix.set(5,5, gains.getPositionGains().getDampingRatios()[2]);
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
+      selectionMatrix.getAngularPart().setAxisSelection(false, false, true);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
 
