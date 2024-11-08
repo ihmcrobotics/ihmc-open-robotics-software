@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.commons.time.TimeIntervalProvider;
 
 public interface PolynomialReadOnly extends TimeIntervalProvider, DoubleTrajectoryGenerator
 {
