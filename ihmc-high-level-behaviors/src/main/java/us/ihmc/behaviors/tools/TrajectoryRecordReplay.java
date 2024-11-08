@@ -1,12 +1,17 @@
 package us.ihmc.behaviors.tools;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.IntPredicate;
+import java.util.function.IntToDoubleFunction;
 
 /**
  * Class to record and replay multidimensional trajectories.
@@ -30,6 +35,9 @@ public class TrajectoryRecordReplay
    private String recordFileName = "";
    private final List<JoystickData> joystickData = new ArrayList<>();
    private int replayIndex = 0;
+
+   private long replayStartTimeMillis;
+   private int lastReplayIndex = -1;
 
    public TrajectoryRecordReplay(String filePath, int numberParts)
    {
@@ -85,20 +93,69 @@ public class TrajectoryRecordReplay
       dataMatrix.add(localValues);
    }
 
-   public void onUpdateStart()
+   /**
+    * Updates replay index and returns whether it is still replaying
+    */
+   public boolean onUpdateStartReplay()
    {
-      joystickData.add(new JoystickData());
+      if (replayIndex == -1)
+      { // First replay tick, initialize
+         replayIndex = 0;
+         lastReplayIndex = -1;
+         replayStartTimeMillis = System.currentTimeMillis();
+         return true;
+      }
+      else
+      { // Replaying, search for next index
+         long timeInTrajectory = System.currentTimeMillis() - replayStartTimeMillis;
+         lastReplayIndex = replayIndex;
+         replayIndex = findCurrentIndex(timeInTrajectory);
+         return replayIndex < joystickData.size() - 1;
+      }
+   }
+
+   private int findCurrentIndex(long timeInTrajectory)
+   {
+      int searchIndex = lastReplayIndex;
+      while (searchIndex < joystickData.size() && timeInTrajectory < joystickData.get(searchIndex).timeInTrajectoryMillis)
+      {
+         searchIndex++;
+      }
+
+      // grab the closer index
+      if (searchIndex == 0)
+         return searchIndex;
+
+      long dtPrev = Math.abs(joystickData.get(searchIndex - 1).timeInTrajectoryMillis - timeInTrajectory);
+      long dtNext = Math.abs(joystickData.get(searchIndex).timeInTrajectoryMillis - timeInTrajectory);
+      return dtNext < dtPrev ? searchIndex : searchIndex - 1;
+   }
+
+   public void onUpdateStartRecord()
+   {
+      if (joystickData.isEmpty())
+      { // First record tick, initialize
+         replayStartTimeMillis = System.currentTimeMillis();
+      }
+
+      long timeInTrajectoryMillis = System.currentTimeMillis() - replayStartTimeMillis;
+      joystickData.add(new JoystickData(timeInTrajectoryMillis));
    }
 
    public void recordControllerData(RobotSide robotSide,
                                     boolean aButtonPressed,
                                     boolean triggerPressed,
-                                    double forwardJoystickValue,
-                                    double lateralJoystickValue,
                                     ReferenceFrame desiredControlFrame,
-                                    ReferenceFrame recordInFrame)
+                                    ReferenceFrame recordFrame)
    {
-      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerPressed, forwardJoystickValue, lateralJoystickValue, desiredControlFrame, recordInFrame);
+      joystickData.get(joystickData.size() - 1).set(robotSide, aButtonPressed, triggerPressed, desiredControlFrame, recordFrame);
+   }
+
+   public void recordDesiredCenterOfMass(FramePoint3DReadOnly usedDesiredCenterOfMass, ReferenceFrame recordFrame)
+   {
+      FramePoint3D desiredCenterOfMass = joystickData.get(joystickData.size() - 1).desiredCenterOfMass;
+      desiredCenterOfMass.setIncludingFrame(usedDesiredCenterOfMass);
+      desiredCenterOfMass.changeFrame(recordFrame);
    }
 
    /**
@@ -142,12 +199,6 @@ public class TrajectoryRecordReplay
       }
    }
 
-   public boolean onUpdateEnd()
-   {
-      replayIndex++;
-      return replayIndex < joystickData.size();
-   }
-
    public void onRecordStart()
    {
       joystickData.clear();
@@ -185,9 +236,10 @@ public class TrajectoryRecordReplay
 
    public boolean onReplayStart(String replayFileToLoad, ReferenceFrame loadInFrame)
    {
-      replayIndex = 0;
       joystickData.clear();
       File replayFile = new File(replayFileToLoad);
+      replayIndex = -1;
+      replayStartTimeMillis = -1;
 
       try
       {
@@ -198,11 +250,13 @@ public class TrajectoryRecordReplay
             joystickData.add(new JoystickData(line.split(","), loadInFrame));
          }
          fileReader.close();
+
          return true;
       }
       catch (Exception e)
       {
          e.printStackTrace();
+
          return false;
       }
    }
@@ -285,6 +339,7 @@ public class TrajectoryRecordReplay
       concatenatedDataMatrix.clear();
       splitDataMatrix.clear();
       recordFileName = "";
+      replayStartTimeMillis = -1;
    }
 
    private double[] concatenateWithCopy(double[] array1, double[] array2)
@@ -328,11 +383,6 @@ public class TrajectoryRecordReplay
          this.reset();
    }
 
-   public void setNumberOfParts(int numberOfParts)
-   {
-      this.numberOfParts = numberOfParts;
-   }
-
    public List<double[]> getData()
    {
       return dataMatrix;
@@ -362,20 +412,21 @@ public class TrajectoryRecordReplay
    {
       private boolean leftAButtonPressed;
       private boolean leftTriggerPressed;
-      private double leftForwardJoystickValue;
-      private double leftLateralJoystickValue;
       private final FramePose3D leftDesiredControllerPose;
 
       private boolean rightAButtonPressed;
       private boolean rightTriggerPressed;
-      private double rightForwardJoystickValue;
-      private double rightLateralJoystickValue;
       private final FramePose3D rightDesiredControllerPose;
 
-      public JoystickData()
+      private final long timeInTrajectoryMillis;
+      private final FramePoint3D desiredCenterOfMass;
+
+      public JoystickData(long timeInTrajectoryMillis)
       {
          leftDesiredControllerPose = new FramePose3D();
          rightDesiredControllerPose = new FramePose3D();
+         desiredCenterOfMass = new FramePoint3D();
+         this.timeInTrajectoryMillis = timeInTrajectoryMillis;
       }
 
       public JoystickData(String[] data, ReferenceFrame loadInFrame)
@@ -384,8 +435,6 @@ public class TrajectoryRecordReplay
 
          leftAButtonPressed = Boolean.parseBoolean(data[index++]);
          leftTriggerPressed = Boolean.parseBoolean(data[index++]);
-         leftForwardJoystickValue = Double.parseDouble(data[index++]);
-         leftLateralJoystickValue = Double.parseDouble(data[index++]);
          leftDesiredControllerPose = new FramePose3D(loadInFrame);
          leftDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          leftDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
@@ -393,39 +442,34 @@ public class TrajectoryRecordReplay
 
          rightAButtonPressed = Boolean.parseBoolean(data[index++]);
          rightTriggerPressed = Boolean.parseBoolean(data[index++]);
-         rightForwardJoystickValue = Double.parseDouble(data[index++]);
-         rightLateralJoystickValue = Double.parseDouble(data[index++]);
          rightDesiredControllerPose = new FramePose3D(loadInFrame);
          rightDesiredControllerPose.getOrientation().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          rightDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         timeInTrajectoryMillis = Long.parseLong(data[index]);
+         desiredCenterOfMass = new FramePoint3D(loadInFrame, Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
       }
 
       void set(RobotSide robotSide,
                boolean aButtonPressed,
                boolean triggerPressed,
-               double forwardJoystickValue,
-               double lateralJoystickValue,
                ReferenceFrame desiredControlFrame,
-               ReferenceFrame recordInFrame)
+               ReferenceFrame recordFrame)
       {
          if (robotSide == RobotSide.LEFT)
          {
             leftAButtonPressed = aButtonPressed;
             leftTriggerPressed = triggerPressed;
-            leftForwardJoystickValue = forwardJoystickValue;
-            leftLateralJoystickValue = lateralJoystickValue;
             leftDesiredControllerPose.setToZero(desiredControlFrame);
-            leftDesiredControllerPose.changeFrame(recordInFrame);
+            leftDesiredControllerPose.changeFrame(recordFrame);
          }
          else
          {
             rightAButtonPressed = aButtonPressed;
             rightTriggerPressed = triggerPressed;
-            rightForwardJoystickValue = forwardJoystickValue;
-            rightLateralJoystickValue = lateralJoystickValue;
             rightDesiredControllerPose.setToZero(desiredControlFrame);
-            rightDesiredControllerPose.changeFrame(recordInFrame);
+            rightDesiredControllerPose.changeFrame(recordFrame);
          }
       }
 
@@ -434,8 +478,6 @@ public class TrajectoryRecordReplay
       {
          return leftAButtonPressed + "," +
                 leftTriggerPressed + "," +
-                leftForwardJoystickValue + "," +
-                leftLateralJoystickValue + "," +
                 leftDesiredControllerPose.getOrientation().getX() + "," +
                 leftDesiredControllerPose.getOrientation().getY() + "," +
                 leftDesiredControllerPose.getOrientation().getZ() + "," +
@@ -446,45 +488,67 @@ public class TrajectoryRecordReplay
 
                 rightAButtonPressed + "," +
                 rightTriggerPressed + "," +
-                rightForwardJoystickValue + "," +
-                rightLateralJoystickValue + "," +
                 rightDesiredControllerPose.getOrientation().getX() + "," +
                 rightDesiredControllerPose.getOrientation().getY() + "," +
                 rightDesiredControllerPose.getOrientation().getZ() + "," +
                 rightDesiredControllerPose.getOrientation().getS() + "," +
                 rightDesiredControllerPose.getPosition().getX() + "," +
                 rightDesiredControllerPose.getPosition().getY() + "," +
-                rightDesiredControllerPose.getPosition().getZ() + "\n";
+                rightDesiredControllerPose.getPosition().getZ() + "," +
+
+                timeInTrajectoryMillis + "\n";
       }
    }
 
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////////////////////////////   Getters for button presses   /////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    public boolean getAButtonPressed(RobotSide robotSide)
    {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      return robotSide == RobotSide.LEFT ? joystickData.leftAButtonPressed : joystickData.rightAButtonPressed;
+      return checkButtonPressOverInterval(lastReplayIndex, replayIndex, i -> getAButtonPressed(robotSide, i, joystickData));
    }
 
    public boolean getTriggerPressed(RobotSide robotSide)
    {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      return robotSide == RobotSide.LEFT ? joystickData.leftTriggerPressed : joystickData.rightTriggerPressed;
-   }
-
-   public double getForwardJoystick(RobotSide robotSide)
-   {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      return robotSide == RobotSide.LEFT ? joystickData.leftForwardJoystickValue : joystickData.rightForwardJoystickValue;
-   }
-
-   public double getLateralJoystick(RobotSide robotSide)
-   {
-      JoystickData joystickData = this.joystickData.get(replayIndex);
-      return robotSide == RobotSide.LEFT ? joystickData.leftLateralJoystickValue : joystickData.rightLateralJoystickValue;
+      return checkButtonPressOverInterval(lastReplayIndex, replayIndex, i -> getTriggerPressed(robotSide, i, joystickData));
    }
 
    public void packDesiredHandControlFrame(RobotSide robotSide, FramePose3D poseToPack)
    {
       JoystickData joystickData = this.joystickData.get(replayIndex);
       poseToPack.set(robotSide == RobotSide.LEFT ? joystickData.leftDesiredControllerPose : joystickData.rightDesiredControllerPose);
+   }
+
+   public FramePoint3D getDesiredCenterOfMass()
+   {
+      JoystickData joystickData = this.joystickData.get(replayIndex);
+      return joystickData.desiredCenterOfMass;
+   }
+
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////////////////////////////////////////   Helper methods   ///////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   private static boolean getAButtonPressed(RobotSide robotSide, int index, List<JoystickData> joystickDataList)
+   {
+      JoystickData joystickData = joystickDataList.get(index);
+      return robotSide == RobotSide.LEFT ? joystickData.leftAButtonPressed : joystickData.rightAButtonPressed;
+   }
+
+   private static boolean getTriggerPressed(RobotSide robotSide, int index, List<JoystickData> joystickDataList)
+   {
+      JoystickData joystickData = joystickDataList.get(index);
+      return robotSide == RobotSide.LEFT ? joystickData.leftTriggerPressed : joystickData.rightTriggerPressed;
+   }
+
+   private static boolean checkButtonPressOverInterval(int indexStartExclusive, int indexEndInclusive, IntPredicate buttonPressProvider)
+   {
+      for (int index = indexEndInclusive; index > indexStartExclusive; index--)
+      {
+         if (buttonPressProvider.test(index))
+            return true;
+      }
+      return false;
    }
 }

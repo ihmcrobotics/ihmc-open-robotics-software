@@ -5,12 +5,13 @@ import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
@@ -35,7 +36,7 @@ public class KinematicsRecordReplay
    private final ImInt numberOfParts = new ImInt(2);
    private final TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay("", 1);
    private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString(), 100);
-   private final ImBoolean enablerRecording = new ImBoolean(false);
+   private final ImBoolean enableRecording = new ImBoolean(false);
    private boolean isRecording = false;
 
 //   private final String defaultReplayFile = "241009_wallBracing0_goodRun.csv";
@@ -45,11 +46,10 @@ public class KinematicsRecordReplay
    private final String defaultReplayFile = "241104110158-0600.csv";
 
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/" + defaultReplayFile).toString(), 100);
-   private final ImBoolean enablerReplay = new ImBoolean(false);
+   private final ImBoolean enableReplay = new ImBoolean(false);
    private boolean isReplaying = false;
    private final ImBoolean enabledKinematicsStreaming;
    private boolean isUserMoving = false;
-   private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final SceneGraph sceneGraph;
    private ReferenceFrame sceneNodeFrame;
@@ -66,83 +66,14 @@ public class KinematicsRecordReplay
       this.sceneGraph = sceneGraph;
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       this.handDesiredControlFrames = handDesiredControlFrames;
-
-      trajectoryRecorder.setNumberOfParts(numberOfParts.get()); // default to 2
-      for (int n = 0; n < numberOfParts.get(); n++)
-         framesToRecordHistory.add(new ArrayList<>());
-
       trajectoryRecorder.setDoneReplay(true);
-   }
-
-   public void updateNumberOfParts()
-   {
-      trajectoryRecorder.setNumberOfParts(numberOfParts.get());
-      framesToRecordHistory.clear();
-      for (int n = 0; n < numberOfParts.get(); n++)
-         framesToRecordHistory.add(new ArrayList<>());
    }
 
    public void requestRecordReplay()
    {
+      /* Processed in onUpdateEnd, depending on if enableRecord or enableReplay are selected */
       LogTools.info("record/replay requested");
       requestRecordReplay = true;
-   }
-
-   public void processRecordReplayInput(InputDigitalActionData triggerButton)
-   {
-      // check streaming is on, recording is on and trigger button has been pressed once. if button is pressed again recording is stopped
-      if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
-      {
-         isRecording = !isRecording;
-
-         // check if recording file path has been set to a different one from previous recording. In case update file path.
-         if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
-            trajectoryRecorder.setPath(recordPath.get()); //recorder is reset when changing path
-      }
-      // check replay is on and trigger button has been pressed once. if button is pressed again replay is stopped
-      if (enablerReplay.get() && triggerButton.bChanged() && !triggerButton.bState())
-      {
-         isReplaying = !isReplaying;
-
-         // check if replay file has been set to a different one from previous replay. In case update file path.
-         if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
-            trajectoryRecorder.setPath(replayPath.get()); // replayer is reset when changing path
-      }
-   }
-
-   /**
-    * Record frame
-    */
-   public void framePoseToRecord(FramePose3DReadOnly framePose, String frameName)
-   {
-      if (isRecording)
-      {
-         if (isMoving(framePose)) //check from framePose if the user is moving
-         { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
-            framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            FramePose3D frameToRecord = new FramePose3D(framePose);
-            // transform to object reference frame if using object detection
-            if (sceneNodeFrame != null)
-               frameToRecord.changeFrame(sceneNodeFrame);
-
-            ensureOrientationContinuity(frameToRecord, frameName);
-            double[] dataTrajectories = new double[7];
-            frameToRecord.getOrientation().get(dataTrajectories);
-            frameToRecord.getPosition().get(4, dataTrajectories);
-            trajectoryRecorder.record(dataTrajectories);
-         }
-      }
-      else if (!(trajectoryRecorder.hasSavedRecording()))
-      {
-         trajectoryRecorder.concatenateData();
-         trajectoryRecorder.saveRecording();
-         if (!firstFramePose.isEmpty() && !previousFramePose.isEmpty())
-         {
-            for (String frame : previousFramePose.keySet())
-               previousFramePose.replace(frame, firstFramePose.get(frame));
-         }
-         isUserMoving = false;
-      }
    }
 
    public void setReplayCallback(Consumer<Boolean> replayCallback)
@@ -154,15 +85,28 @@ public class KinematicsRecordReplay
    {
       requestRecordReplay = false;
 
-      if (isRecording)
+      if (isReplaying)
       {
-         trajectoryRecorder.onUpdateStart();
+         isReplaying = trajectoryRecorder.onUpdateStartReplay();
+         if (!isReplaying)
+         { // Finished replaying
+            LogTools.info("Finished replayed!");
+            isReplaying = false;
+            replayCallback.accept(false);
+         }
+      }
+      else if (isRecording)
+      {
+         trajectoryRecorder.onUpdateStartRecord();
       }
    }
 
+   /**
+    * Called each tick regardless of record/replay status.
+    */
    public void onUpdateEnd(ReferenceFrame loadInFrame)
    {
-      if (requestRecordReplay && enablerRecording.get())
+      if (requestRecordReplay && enableRecording.get())
       { // Toggle record state
          if (isRecording)
          {
@@ -179,26 +123,15 @@ public class KinematicsRecordReplay
          }
       }
 
-      else if (requestRecordReplay && enablerReplay.get() && !isReplaying)
+      else if (requestRecordReplay && enableReplay.get() && !isReplaying)
       { // Start to replay
          LogTools.info("Starting to replay!");
          isReplaying = trajectoryRecorder.onReplayStart(replayPath.get(), loadInFrame);
          replayCallback.accept(true);
       }
-
-      else if (isReplaying)
-      {
-         isReplaying = trajectoryRecorder.onUpdateEnd();
-         if (!isReplaying)
-         { // Finished replaying
-            LogTools.info("Finished replayed!");
-            isReplaying = false;
-            replayCallback.accept(false);
-         }
-      }
    }
 
-   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, double forwardJoystickValue, double lateralJoystickValue, ReferenceFrame recordInFrame)
+   public void recordControllerData(RobotSide robotSide, boolean aButtonPressed, boolean triggerPressed, ReferenceFrame recordFrame)
    {
       if (!isRecording)
          return;
@@ -206,10 +139,13 @@ public class KinematicsRecordReplay
       trajectoryRecorder.recordControllerData(robotSide,
                                               aButtonPressed,
                                               triggerPressed,
-                                              forwardJoystickValue,
-                                              lateralJoystickValue,
                                               handDesiredControlFrames.get(robotSide).getReferenceFrame(),
-                                              recordInFrame);
+                                              recordFrame);
+   }
+
+   public void recordDesiredCenterOfMass(FramePoint3DReadOnly desiredCenterOfMass, ReferenceFrame recordFrame)
+   {
+      trajectoryRecorder.recordDesiredCenterOfMass(desiredCenterOfMass, recordFrame);
    }
 
    /**
@@ -264,61 +200,10 @@ public class KinematicsRecordReplay
    }
 
    /**
-    * Check if user is moving a certain bodyPart. Useful to start a recording only after the user started actually moving
-    */
-   private boolean isMoving(FramePose3DReadOnly framePose)
-   {
-      if (!isUserMoving)
-      {
-         Pose3D lastFramePose = new Pose3D(framePose);
-         framesToRecordHistory.get(partId).add(lastFramePose);
-         // check if last value of frame pose translated by 4cm with respect to first value of frame pose
-         if (framesToRecordHistory.get(partId).size() > 1)
-         {
-            double distance = (framesToRecordHistory.get(partId).get(framesToRecordHistory.get(partId).size() - 1)).getTranslation()
-                                                                                                                   .distance(framesToRecordHistory.get(partId)
-                                                                                                                                                  .get(0)
-                                                                                                                                                  .getTranslation());
-            isUserMoving = distance > 0.04;
-         }
-         if (!isUserMoving) // if still not moving analyze next frame at next call
-         {
-            partId++;
-            if (partId >= framesToRecordHistory.size())
-               partId = 0;
-         }
-      }
-      if (isUserMoving && partId > 0)  // preventing start recording while skipping the frame of other parts, wait to have all parts in the next frame
-      {
-         partId++;
-         if (partId >= framesToRecordHistory.size())
-            partId = 0;
-         return false;
-      }
-      return isUserMoving && partId == 0;
-   }
-
-   /**
     * Pack frame with frame from replay
     */
    public void framePoseToPack(RobotSide robotSide, FramePose3D framePose)
    {
-//      framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
-//      // Read file with stored trajectories: read set point per timestep until file is over
-//      double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
-//      if (sceneNodeFrame != null)
-//         framePose.changeFrame(sceneNodeFrame);
-//      // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-//      framePose.getOrientation().set(dataPoint);
-//      framePose.getPosition().set(4, dataPoint);
-//      if (sceneNodeFrame != null)
-//         framePose.changeFrame(ReferenceFrame.getWorldFrame());
-//      if (trajectoryRecorder.hasDoneReplay())
-//      {
-//         isReplaying = false;
-//         enablerReplay.set(false);
-//      }
-
       if (isReplaying)
       {
          if (robotSide == null)
@@ -329,9 +214,7 @@ public class KinematicsRecordReplay
 
    public void renderRecordWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGuiTools.volatileInputInt(labels.get("Number of Robot Parts to Record/Replay"), numberOfParts))
-         updateNumberOfParts();
-      if (ImGui.checkbox(labels.get("Record Motion"), enablerRecording))
+      if (ImGui.checkbox(labels.get("Record Motion"), enableRecording))
       {
 //         setRecording(enablerRecording.get());
       }
@@ -347,9 +230,9 @@ public class KinematicsRecordReplay
 
    public void renderReplayWidgets(ImGuiUniqueLabelMap labels)
    {
-      if (ImGui.checkbox(labels.get("Replay Motion"), enablerReplay))
+      if (ImGui.checkbox(labels.get("Replay Motion"), enableReplay))
       {
-         setReplay(enablerReplay.get());
+         setReplay(enableReplay.get());
       }
       ImGui.sameLine();
       ImGui.inputText(labels.get("Replay File"), replayPath);
@@ -402,11 +285,11 @@ public class KinematicsRecordReplay
    {
       LogTools.info("Enable recording: " + enableRecording);
 
-      if (enableRecording != this.enablerRecording.get())
-         this.enablerRecording.set(enableRecording);
+      if (enableRecording != this.enableRecording.get())
+         this.enableRecording.set(enableRecording);
       if (enableRecording)
       {
-         this.enablerReplay.set(false); // check no concurrency replay and record
+         this.enableReplay.set(false); // check no concurrency replay and record
       }
       else
       {
@@ -417,23 +300,23 @@ public class KinematicsRecordReplay
 
    public void setReplay(boolean enablerReplay)
    {
-      if (enablerReplay != this.enablerReplay.get())
-         this.enablerReplay.set(enablerReplay);
+      if (enablerReplay != this.enableReplay.get())
+         this.enableReplay.set(enablerReplay);
       if (enablerReplay)
       {
-         if (enablerRecording.get() || enabledKinematicsStreaming.get())
-            this.enablerReplay.set(false); // check no concurrency replay and record/streaming
+         if (enableRecording.get() || enabledKinematicsStreaming.get())
+            this.enableReplay.set(false); // check no concurrency replay and record/streaming
       }
    }
 
    public ImBoolean isRecordingEnabled()
    {
-      return enablerRecording;
+      return enableRecording;
    }
 
    public ImBoolean isReplayingEnabled()
    {
-      return enablerReplay;
+      return enableReplay;
    }
 
    public boolean isRecording()
@@ -456,14 +339,9 @@ public class KinematicsRecordReplay
       return trajectoryRecorder.getTriggerPressed(robotSide);
    }
 
-   public double getLateralJoystickValue(RobotSide robotSide)
+   public FramePoint3D getDesiredCenterOfMass()
    {
-      return trajectoryRecorder.getLateralJoystick(robotSide);
-   }
-
-   public double getForwardJoystickValue(RobotSide robotSide)
-   {
-      return trajectoryRecorder.getForwardJoystick(robotSide);
+      return trajectoryRecorder.getDesiredCenterOfMass();
    }
 
    public String getReplayPath()

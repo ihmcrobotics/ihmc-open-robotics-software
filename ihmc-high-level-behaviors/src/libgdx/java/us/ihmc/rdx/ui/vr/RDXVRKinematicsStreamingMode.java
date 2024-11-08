@@ -55,6 +55,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -139,7 +140,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean comTracking = new ImBoolean(false);
    private final FramePoint3D comJoystickXYInput = new FramePoint3D();
    private final FramePoint3D comJoystickZInput = new FramePoint3D();
-   private final RateLimitedYoFrameVector rateLimitedCoM;
+   private final RateLimitedYoFramePoint rateLimitedCoM;
    private ReferenceFrame initialPelvisFrame;
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
@@ -190,7 +191,7 @@ public class RDXVRKinematicsStreamingMode
       this.footstepPlacer = footstepPlacer;
       this.handManager = handManager;
 
-      rateLimitedCoM = new RateLimitedYoFrameVector("rateLimitedCoM", "", new YoRegistry(getClass().getSimpleName()), 10.0, streamPeriod, ReferenceFrame.getWorldFrame());
+      rateLimitedCoM = new RateLimitedYoFramePoint("rateLimitedCoM", "", new YoRegistry(getClass().getSimpleName()), 10.0, streamPeriod, ReferenceFrame.getWorldFrame());
       rateLimitedCoM.setToNaN();
    }
 
@@ -353,8 +354,8 @@ public class RDXVRKinematicsStreamingMode
       {
          boolean leftAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.LEFT);
          boolean leftTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.LEFT);
-         double forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.LEFT);
-         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.LEFT);
+         double forwardJoystickValue = Double.NaN;
+         double lateralJoystickValue = Double.NaN;
          handleLeftControllerJoystickInput(leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, false);
       }
       else
@@ -374,7 +375,7 @@ public class RDXVRKinematicsStreamingMode
 
             // Check if left joystick is pressed in order to trigger recording or replay of motion
             gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-            kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, forwardJoystickValue, lateralJoystickValue, getTrajectoryRecordFrame());
+            kinematicsRecorder.recordControllerData(RobotSide.LEFT, leftAButtonPressed, leftTriggerPressed, getTrajectoryRecordFrame());
          });
       }
 
@@ -388,8 +389,8 @@ public class RDXVRKinematicsStreamingMode
       {
          boolean rightAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.RIGHT);
          boolean rightTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.RIGHT);
-         double forwardJoystickValue = kinematicsRecorder.getForwardJoystickValue(RobotSide.RIGHT);
-         double lateralJoystickValue = kinematicsRecorder.getLateralJoystickValue(RobotSide.RIGHT);
+         double forwardJoystickValue = Double.NaN;
+         double lateralJoystickValue = Double.NaN;
          handleRightControllJoystickInput(rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue);
       }
       else
@@ -406,8 +407,17 @@ public class RDXVRKinematicsStreamingMode
             handleRightControllJoystickInput(rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue);
 
             gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
-            kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, forwardJoystickValue, lateralJoystickValue, getTrajectoryRecordFrame());
+            kinematicsRecorder.recordControllerData(RobotSide.RIGHT, rightAButtonPressed, rightTriggerPressed, getTrajectoryRecordFrame());
          });
+      }
+
+      if (kinematicsRecorder.isRecording())
+      {
+         kinematicsRecorder.recordDesiredCenterOfMass(rateLimitedCoM, getTrajectoryRecordFrame());
+      }
+      else if (kinematicsRecorder.isReplaying())
+      {
+         rateLimitedCoM.setMatchingFrame(kinematicsRecorder.getDesiredCenterOfMass());
       }
 
       if (enabled.get())
@@ -718,7 +728,10 @@ public class RDXVRKinematicsStreamingMode
       {
          performHandAction(RobotSide.LEFT);
       }
-      if (forwardJoystickValue != 0.0)
+
+      // TODO load and set CoM
+
+      if (!Double.isNaN(forwardJoystickValue) && forwardJoystickValue != 0.0)
       {
          comJoystickZInput.changeFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
 
@@ -811,7 +824,7 @@ public class RDXVRKinematicsStreamingMode
 
       //         LogTools.info(forwardJoystickValue + ", " + lateralJoystickValue);
 
-      if (forwardJoystickValue != 0.0 || lateralJoystickValue != 0.0)
+      if (!Double.isNaN(forwardJoystickValue) && !Double.isNaN(lateralJoystickValue) && (forwardJoystickValue != 0.0 || lateralJoystickValue != 0.0))
       {
          comJoystickXYInput.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
 
