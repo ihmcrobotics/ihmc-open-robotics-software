@@ -37,29 +37,39 @@ public class ExampleCUDAKernel
       // Allocates the memory for the stream and makes sure the GPU knows about the stream
       cudart.cudaStreamCreate(stream);
 
-      // This is going to hold the kernel source code
+      // The CUDAProgram is going to hold the kernel source code
       CUDAProgram program = new CUDAProgram(userFriendlyNameOfProgram, KERNEL_TO_ADD_THE_VALUES_OF_TWO_ARRAYS);
       CUDAKernel kernel = program.loadKernel(kernelName);
 
-      // Don't need this we can pass it in as a primitive type
+      // Primitive types can be passed directly into the kernel class.
+      // However, because we use it in different places, we have made this a variable
       int arraySize = 5;
+
+      // Allocating memory for an array and populating it with values in the constructor.
+      // The values stored in these variables will be passed to the kernel
       FloatPointer cpuArrayX = new FloatPointer(1.0f, 2.0f, 3.0f, 4.0f, 5.0f);
       FloatPointer cpuArrayY = new FloatPointer(5.0f, 4.0f, 3.0f, 2.0f, 1.0f);
 
+      // These are pointers to the gpu memory, where we will upload the data too.
       FloatPointer gpuArrayX = new FloatPointer();
       FloatPointer gpuArrayY = new FloatPointer();
 
-      //TODO look into this because it may mess up addition on the kernel
+      // Allocate memory on the gpu, to allocate the right size we need to get the sizeof the datatype being passed to the gpu
       cudaMallocAsync(gpuArrayX, (long) gpuArrayX.sizeof() * arraySize, stream);
       cudaMallocAsync(gpuArrayY, (long) gpuArrayY.sizeof() * arraySize, stream);
 
-      cudaMemcpyAsync(gpuArrayX, cpuArrayX, (long) cpuArrayX.sizeof() * arraySize, cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(gpuArrayY, cpuArrayY, (long) cpuArrayY.sizeof() * arraySize, cudaMemcpyDefault, stream);
+      // This variable is specific to CUDA TODO
+      int cudaDefaultValue = cudaMemcpyDefault;
+
+      // Copy the cpu data into the gpu
+      // (cpuArrayX.sizeof() * arraySize) in this case saying (byteSizeOfFloat * numberOfFloats)
+      cudaMemcpyAsync(gpuArrayX, cpuArrayX, (long) cpuArrayX.sizeof() * arraySize, cudaDefaultValue, stream);
+      cudaMemcpyAsync(gpuArrayY, cpuArrayY, (long) cpuArrayY.sizeof() * arraySize, cudaDefaultValue, stream);
 
       kernel.withInt(arraySize).withPointer(gpuArrayX).withPointer(gpuArrayY);
       kernel.run(stream, new dim3(), new dim3(), 0);
 
-      cudaMemcpyAsync(cpuArrayY, gpuArrayY, (long) gpuArrayY.sizeof() * arraySize, cudaMemcpyDefault, stream);
+      cudaMemcpyAsync(cpuArrayY, gpuArrayY, (long) gpuArrayY.sizeof() * arraySize, cudaDefaultValue, stream);
 
       cudaStreamSynchronize(stream);
 
