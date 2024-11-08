@@ -68,16 +68,16 @@ public class ExampleCUDAKernel
 
       program.close();
 
-      float[] test = new float[arraySize];
-      LogTools.info(cpuArrayX.get(test).get(0));
+      // Copy array Y to a Java array
+      float[] javaArrayY = new float[arraySize];
+      cpuArrayY.get(javaArrayY);
+      LogTools.info("Results: {}", javaArrayY);
 
       cpuArrayX.close();
       cpuArrayY.close();
       gpuArrayX.close();
       gpuArrayY.close();
       kernel.close();
-
-
 
       // At the end we have to destroy the stream to release the memory
       cudart.cudaStreamDestroy(stream);
