@@ -15,7 +15,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fc7bc927cf2bd0aadef7fc3b35e035c01609d70cc507bdacf9b2bb6325bf1c30";
+   		return "0f5c28b7da1b5511d105dce87e7b6e812bd74cf484b7f47937d395a4916ec07c";
    }
    
    @Override

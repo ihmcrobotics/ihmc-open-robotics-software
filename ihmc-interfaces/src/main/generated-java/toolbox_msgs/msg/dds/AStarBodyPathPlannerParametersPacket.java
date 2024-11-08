@@ -12,6 +12,7 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPlannerParametersPacket> implements Settable<AStarBodyPathPlannerParametersPacket>, EpsilonComparable<AStarBodyPathPlannerParametersPacket>
 {
+   public static final double DEFAULT_NO_VALUE = -11.1;
    /**
             * Unique ID used to identify this message.
             */

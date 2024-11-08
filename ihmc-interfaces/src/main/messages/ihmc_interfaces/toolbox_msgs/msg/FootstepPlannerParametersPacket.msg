@@ -7,6 +7,10 @@ byte ROBOT_SIDE_RIGHT = 1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Heuristic inflation weight, used to speed up the planner at the expense of optimality
+# Should not be less than 1.0
+float64 a_star_heuristics_weight
+
 # Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
 # to run slower.
 bool check_for_body_box_collisions false

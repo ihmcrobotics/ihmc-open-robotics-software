@@ -1,5 +1,7 @@
 # This message is part of the IHMC footstep planning module.
 
+float64 DEFAULT_NO_VALUE = -11.1
+
 # This message defines the parameters for the A* body path planner.
 
 # Unique ID used to identify this message.

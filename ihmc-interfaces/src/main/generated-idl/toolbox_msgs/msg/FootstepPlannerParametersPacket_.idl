@@ -28,6 +28,11 @@ module toolbox_msgs
          */
         unsigned long sequence_id;
         /**
+         * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+         * Should not be less than 1.0
+         */
+        double a_star_heuristics_weight;
+        /**
          * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
          * to run slower.
          */
@@ -370,11 +375,6 @@ module toolbox_msgs
          */
         @defaultValue(value=-11.1)
         double cost_per_step;
-        /**
-         * Gets the weight for the heuristics in the A Star planner.
-         */
-        @defaultValue(value=-11.1)
-        double a_star_heuristics_weight;
         /**
          * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
          */

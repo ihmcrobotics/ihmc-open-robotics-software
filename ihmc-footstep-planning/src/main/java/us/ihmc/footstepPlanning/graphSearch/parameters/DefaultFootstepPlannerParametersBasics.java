@@ -65,9 +65,9 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.minClearanceFromStance, clearance);
    }
 
-   default void setMinSurfaceInclineRadians(double surfaceInclineRadians)
+   default void setMinSurfaceIncline(double minSurfaceIncline)
    {
-      set(DefaultFootstepPlannerParameters.minSurfaceIncline, surfaceInclineRadians);
+      set(DefaultFootstepPlannerParameters.minSurfaceIncline, minSurfaceIncline);
    }
 
    default void setMinStepWidth(double minimumStepWidth)
@@ -382,7 +382,7 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       if (parametersPacket.getMinFootholdPercent() != noValue)
          setMinFootholdPercent(parametersPacket.getMinFootholdPercent());
       if (parametersPacket.getMinSurfaceIncline() != noValue)
-         setMinSurfaceInclineRadians(parametersPacket.getMinSurfaceIncline());
+         setMinSurfaceIncline(parametersPacket.getMinSurfaceIncline());
       setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)

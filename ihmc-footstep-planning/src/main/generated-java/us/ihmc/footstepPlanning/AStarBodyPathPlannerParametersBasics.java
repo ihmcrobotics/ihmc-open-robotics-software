@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 /**
@@ -374,86 +375,88 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
 
    default void set(AStarBodyPathPlannerParametersPacket packet)
    {
+      double noValue = AStarBodyPathPlannerParametersPacket.DEFAULT_NO_VALUE;
+
          setCheckForCollisions(packet.getCheckForCollisions());
          setComputeSurfaceNormalCost(packet.getComputeSurfaceNormalCost());
          setComputeTraversibility(packet.getComputeTraversibility());
          setPerformSmoothing(packet.getPerformSmoothing());
 
-      if (packet.getRollCostWeight() != -1.0)
+      if (packet.getRollCostWeight() != noValue)
          setRollCostWeight(packet.getRollCostWeight());
-      if (packet.getRollCostDeadband() != -1.0)
+      if (packet.getRollCostDeadband() != noValue)
          setRollCostDeadband(packet.getRollCostDeadband());
-      if (packet.getMaxPenalizedRollAngle() != -1.0)
+      if (packet.getMaxPenalizedRollAngle() != noValue)
          setMaxPenalizedRollAngle(packet.getMaxPenalizedRollAngle());
-      if (packet.getSnapRadius() != -1.0)
+      if (packet.getSnapRadius() != noValue)
          setSnapRadius(packet.getSnapRadius());
-      if (packet.getMinSnapHeightThreshold() != -1.0)
+      if (packet.getMinSnapHeightThreshold() != noValue)
          setMinSnapHeightThreshold(packet.getMinSnapHeightThreshold());
-      if (packet.getInclineCostWeight() != -1.0)
+      if (packet.getInclineCostWeight() != noValue)
          setInclineCostWeight(packet.getInclineCostWeight());
-      if (packet.getInclineCostDeadband() != -1.0)
+      if (packet.getInclineCostDeadband() != noValue)
          setInclineCostDeadband(packet.getInclineCostDeadband());
-      if (packet.getMaxIncline() != -1.0)
+      if (packet.getMaxIncline() != noValue)
          setMaxIncline(packet.getMaxIncline());
-      if (packet.getCollisionBoxSizeY() != -1.0)
+      if (packet.getCollisionBoxSizeY() != noValue)
          setCollisionBoxSizeY(packet.getCollisionBoxSizeY());
-      if (packet.getCollisionBoxSizeX() != -1.0)
+      if (packet.getCollisionBoxSizeX() != noValue)
          setCollisionBoxSizeX(packet.getCollisionBoxSizeX());
-      if (packet.getCollisionBoxGroundClearance() != -1.0)
+      if (packet.getCollisionBoxGroundClearance() != noValue)
          setCollisionBoxGroundClearance(packet.getCollisionBoxGroundClearance());
-      if (packet.getTraversibilityWeight() != -1.0)
+      if (packet.getTraversibilityWeight() != noValue)
          setTraversibilityWeight(packet.getTraversibilityWeight());
-      if (packet.getTraversibilityStanceWeight() != -1.0)
+      if (packet.getTraversibilityStanceWeight() != noValue)
          setTraversibilityStanceWeight(packet.getTraversibilityStanceWeight());
-      if (packet.getTraversibilityStepWeight() != -1.0)
+      if (packet.getTraversibilityStepWeight() != noValue)
          setTraversibilityStepWeight(packet.getTraversibilityStepWeight());
-      if (packet.getMinTraversibilityScore() != -1.0)
+      if (packet.getMinTraversibilityScore() != noValue)
          setMinTraversibilityScore(packet.getMinTraversibilityScore());
-      if (packet.getMinNormalAngleToPenalizeForTraversibility() != -1.0)
+      if (packet.getMinNormalAngleToPenalizeForTraversibility() != noValue)
          setMinNormalAngleToPenalizeForTraversibility(packet.getMinNormalAngleToPenalizeForTraversibility());
-      if (packet.getMaxNormalAngleToPenalizeForTraversibility() != -1.0)
+      if (packet.getMaxNormalAngleToPenalizeForTraversibility() != noValue)
          setMaxNormalAngleToPenalizeForTraversibility(packet.getMaxNormalAngleToPenalizeForTraversibility());
-      if (packet.getTraversibilityInclineWeight() != -1.0)
+      if (packet.getTraversibilityInclineWeight() != noValue)
          setTraversibilityInclineWeight(packet.getTraversibilityInclineWeight());
-      if (packet.getTraversibilitySearchWidth() != -1.0)
+      if (packet.getTraversibilitySearchWidth() != noValue)
          setTraversibilitySearchWidth(packet.getTraversibilitySearchWidth());
-      if (packet.getMinOccupiedNeighborsForTraversibility() != -1.0)
+      if (packet.getMinOccupiedNeighborsForTraversibility() != noValue)
          setMinOccupiedNeighborsForTraversibility(packet.getMinOccupiedNeighborsForTraversibility());
-      if (packet.getHalfStanceWidth() != -1.0)
+      if (packet.getHalfStanceWidth() != noValue)
          setHalfStanceWidth(packet.getHalfStanceWidth());
-      if (packet.getTraversibilityHeightWindowWidth() != -1.0)
+      if (packet.getTraversibilityHeightWindowWidth() != noValue)
          setTraversibilityHeightWindowWidth(packet.getTraversibilityHeightWindowWidth());
-      if (packet.getTraversibilityHeightWindowDeadband() != -1.0)
+      if (packet.getTraversibilityHeightWindowDeadband() != noValue)
          setTraversibilityHeightWindowDeadband(packet.getTraversibilityHeightWindowDeadband());
-      if (packet.getHeightProximityForSayingWalkingOnGround() != -1.0)
+      if (packet.getHeightProximityForSayingWalkingOnGround() != noValue)
          setHeightProximityForSayingWalkingOnGround(packet.getHeightProximityForSayingWalkingOnGround());
-      if (packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround() != -1.0)
+      if (packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround() != noValue)
          setTraversibilityNonGroundDiscountWhenWalkingOnGround(packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
-      if (packet.getSmootherCollisionWeight() != -1.0)
+      if (packet.getSmootherCollisionWeight() != noValue)
          setSmootherCollisionWeight(packet.getSmootherCollisionWeight());
-      if (packet.getSmootherSmoothnessWeight() != -1.0)
+      if (packet.getSmootherSmoothnessWeight() != noValue)
          setSmootherSmoothnessWeight(packet.getSmootherSmoothnessWeight());
-      if (packet.getSmootherTurnPointSmoothnessDiscount() != -1.0)
+      if (packet.getSmootherTurnPointSmoothnessDiscount() != noValue)
          setSmootherTurnPointSmoothnessDiscount(packet.getSmootherTurnPointSmoothnessDiscount());
-      if (packet.getSmootherMinCurvatureToPenalize() != -1.0)
+      if (packet.getSmootherMinCurvatureToPenalize() != noValue)
          setSmootherMinCurvatureToPenalize(packet.getSmootherMinCurvatureToPenalize());
-      if (packet.getSmootherEqualSpacingWeight() != -1.0)
+      if (packet.getSmootherEqualSpacingWeight() != noValue)
          setSmootherEqualSpacingWeight(packet.getSmootherEqualSpacingWeight());
-      if (packet.getSmootherRollWeight() != -1.0)
+      if (packet.getSmootherRollWeight() != noValue)
          setSmootherRollWeight(packet.getSmootherRollWeight());
-      if (packet.getSmootherDisplacementWeight() != -1.0)
+      if (packet.getSmootherDisplacementWeight() != noValue)
          setSmootherDisplacementWeight(packet.getSmootherDisplacementWeight());
-      if (packet.getSmootherTraversibilityWeight() != -1.0)
+      if (packet.getSmootherTraversibilityWeight() != noValue)
          setSmootherTraversibilityWeight(packet.getSmootherTraversibilityWeight());
-      if (packet.getSmootherGroundPlaneWeight() != -1.0)
+      if (packet.getSmootherGroundPlaneWeight() != noValue)
          setSmootherGroundPlaneWeight(packet.getSmootherGroundPlaneWeight());
-      if (packet.getSmootherMinimumTraversibilityToSearchFor() != -1.0)
+      if (packet.getSmootherMinimumTraversibilityToSearchFor() != noValue)
          setSmootherMinimumTraversibilityToSearchFor(packet.getSmootherMinimumTraversibilityToSearchFor());
-      if (packet.getSmootherTraversibilityThresholdForNoDiscount() != -1.0)
+      if (packet.getSmootherTraversibilityThresholdForNoDiscount() != noValue)
          setSmootherTraversibilityThresholdForNoDiscount(packet.getSmootherTraversibilityThresholdForNoDiscount());
-      if (packet.getSmootherHillClimbGain() != -1.0)
+      if (packet.getSmootherHillClimbGain() != noValue)
          setSmootherHillClimbGain(packet.getSmootherHillClimbGain());
-      if (packet.getSmootherGradientThresholdToTerminate() != -1.0)
+      if (packet.getSmootherGradientThresholdToTerminate() != noValue)
          setSmootherGradientThresholdToTerminate(packet.getSmootherGradientThresholdToTerminate());
    }
 }

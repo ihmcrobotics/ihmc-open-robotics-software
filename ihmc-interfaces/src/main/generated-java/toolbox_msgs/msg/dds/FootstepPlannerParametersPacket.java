@@ -19,6 +19,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long sequence_id_;
    /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public double a_star_heuristics_weight_;
+   /**
             * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
             * to run slower.
             */
@@ -317,10 +322,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double cost_per_step_ = -11.1;
    /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public double a_star_heuristics_weight_ = -11.1;
-   /**
             * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
    public long intermediate_body_box_checks_ = 1;
@@ -403,6 +404,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public void set(FootstepPlannerParametersPacket other)
    {
       sequence_id_ = other.sequence_id_;
+
+      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
 
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
 
@@ -506,8 +509,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       cost_per_step_ = other.cost_per_step_;
 
-      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
-
       intermediate_body_box_checks_ = other.intermediate_body_box_checks_;
 
       distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
@@ -555,6 +556,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
+   {
+      a_star_heuristics_weight_ = a_star_heuristics_weight;
+   }
+   /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public double getAStarHeuristicsWeight()
+   {
+      return a_star_heuristics_weight_;
    }
 
    /**
@@ -1511,21 +1529,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
-   {
-      a_star_heuristics_weight_ = a_star_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public double getAStarHeuristicsWeight()
-   {
-      return a_star_heuristics_weight_;
-   }
-
-   /**
             * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
    public void setIntermediateBodyBoxChecks(long intermediate_body_box_checks)
@@ -1795,6 +1798,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_path_collisions_, other.check_for_path_collisions_, epsilon)) return false;
@@ -1897,8 +1902,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.intermediate_body_box_checks_, other.intermediate_body_box_checks_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
@@ -1945,6 +1948,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       FootstepPlannerParametersPacket otherMyClass = (FootstepPlannerParametersPacket) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
+      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
 
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
 
@@ -2048,8 +2053,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
-      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
-
       if(this.intermediate_body_box_checks_ != otherMyClass.intermediate_body_box_checks_) return false;
 
       if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
@@ -2094,6 +2097,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("FootstepPlannerParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("a_star_heuristics_weight=");
+      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
       builder.append("check_for_path_collisions=");
@@ -2196,8 +2201,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.reference_plan_alpha_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
-      builder.append("a_star_heuristics_weight=");
-      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
       builder.append("intermediate_body_box_checks=");
       builder.append(this.intermediate_body_box_checks_);      builder.append(", ");
       builder.append("distance_from_path_tolerance=");
