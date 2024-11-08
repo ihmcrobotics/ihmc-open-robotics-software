@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.SensitivityBasedStabilityGradientCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -105,30 +106,6 @@ public class KinematicsToolboxMultiContactManager
 
    private final YoDouble maxPostureAdjustmentRate = new YoDouble("maxPostureAdjustmentRate", registry);
    private final RateLimitedYoVariable activationAlpha;
-
-   public enum PostureOptimizerState
-   {
-      /* Low margin, high sensitivity */
-      OPTIMIZER,
-      /* Medium margin or low margin + low sensitivity */
-      FREEZE,
-      /* High margin */
-      NOMINAL;
-
-      private static final PostureOptimizerState[] values = values();
-
-      public byte toByte()
-      {
-         return (byte) ordinal();
-      }
-
-      public static PostureOptimizerState fromByte(byte enumAsByte)
-      {
-         if (enumAsByte == -1)
-            return null;
-         return values[enumAsByte];
-      }
-   }
 
    private enum StabilityMarginLevel
    {
@@ -483,5 +460,15 @@ public class KinematicsToolboxMultiContactManager
             //         privilegedConfigurationCommand.addJoint(oneDoFJoints[i], qPrivNominal[i].getValue());
          }
       }
+   }
+
+   public PostureOptimizerState getMode()
+   {
+      return mode.getValue();
+   }
+
+   public double getPostureSensitivity()
+   {
+      return postureOptimizer.getPostureSensitivity();
    }
 }

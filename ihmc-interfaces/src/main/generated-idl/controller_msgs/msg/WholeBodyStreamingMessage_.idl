@@ -11,6 +11,15 @@ module controller_msgs
   {
     module dds
     {
+      const octet POSTURE_MODE_OPTIMIZER =
+      0;
+
+      const octet POSTURE_MODE_FREEZE =
+      1;
+
+      const octet POSTURE_MODE_NOMINAL =
+      2;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.
@@ -78,6 +87,8 @@ module controller_msgs
          */
         boolean has_neck_streaming_message;
         controller_msgs::msg::dds::JointspaceStreamingMessage neck_streaming_message;
+        double posture_sensitivity;
+        octet posture_optimizer_mode;
       };
     };
   };

@@ -3,6 +3,7 @@ package us.ihmc.communication.controllerAPI;
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
@@ -19,6 +20,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 
 public final class MessageUnpackingTools
 {
@@ -114,6 +117,11 @@ public final class MessageUnpackingTools
    }
 
    public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker()
+   {
+      return createWholeBodyStreamingMessageUnpacker(null, null);
+   }
+
+   public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker(DoubleConsumer postureConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
    {
       return new MessageUnpacker<>()
       {
@@ -252,6 +260,18 @@ public final class MessageUnpackingTools
                                          streamIntegrationDuration,
                                          sourceTimestamp);
                   messagesToPack.add(handTrajectoryMessage);
+               }
+
+               if (postureConsumer != null)
+               {
+                  double postureSensitivity = message.getPostureSensitivity();
+                  postureConsumer.accept(postureSensitivity);
+               }
+
+               if (stabilityStateConsumer != null)
+               {
+                  PostureOptimizerState postureOptimizerState = PostureOptimizerState.fromByte(message.getPostureOptimizerMode());
+                  stabilityStateConsumer.accept(postureOptimizerState);
                }
             }
          }

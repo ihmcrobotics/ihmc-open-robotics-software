@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
@@ -103,6 +104,7 @@ public class TrajectoryRecordReplay
          replayIndex = 0;
          lastReplayIndex = -1;
          replayStartTimeMillis = System.currentTimeMillis();
+         LogTools.info("Replay started");
          return true;
       }
       else
@@ -110,20 +112,26 @@ public class TrajectoryRecordReplay
          long timeInTrajectory = System.currentTimeMillis() - replayStartTimeMillis;
          lastReplayIndex = replayIndex;
          replayIndex = findCurrentIndex(timeInTrajectory);
-         return replayIndex < joystickData.size() - 1;
+         boolean isStillReplaying = replayIndex < joystickData.size() - 1;
+         if (!isStillReplaying)
+         {
+            long duration = System.currentTimeMillis() - replayStartTimeMillis;
+            LogTools.info("Done replaying... duration = " + duration + "ms");
+         }
+         return isStillReplaying;
       }
    }
 
    private int findCurrentIndex(long timeInTrajectory)
    {
       int searchIndex = lastReplayIndex;
-      while (searchIndex < joystickData.size() && timeInTrajectory < joystickData.get(searchIndex).timeInTrajectoryMillis)
+      while (searchIndex < joystickData.size() && joystickData.get(searchIndex).timeInTrajectoryMillis < timeInTrajectory)
       {
          searchIndex++;
       }
 
       // grab the closer index
-      if (searchIndex == 0)
+      if (searchIndex <= 0 || searchIndex >= joystickData.size() - 1)
          return searchIndex;
 
       long dtPrev = Math.abs(joystickData.get(searchIndex - 1).timeInTrajectoryMillis - timeInTrajectory);
@@ -232,6 +240,9 @@ public class TrajectoryRecordReplay
       {
          e.printStackTrace();
       }
+
+      long duration = System.currentTimeMillis() - replayStartTimeMillis;
+      LogTools.info("Record ended. Duration = " + duration + "ms");
    }
 
    public boolean onReplayStart(String replayFileToLoad, ReferenceFrame loadInFrame)
@@ -408,7 +419,7 @@ public class TrajectoryRecordReplay
       this.recordFileName = recordFileName;
    }
 
-   private class JoystickData
+   private static class JoystickData
    {
       private boolean leftAButtonPressed;
       private boolean leftTriggerPressed;
@@ -447,7 +458,8 @@ public class TrajectoryRecordReplay
          rightDesiredControllerPose.getPosition().set(Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
          rightDesiredControllerPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         timeInTrajectoryMillis = Long.parseLong(data[index]);
+         String timestampToParse = data[index++];
+         timeInTrajectoryMillis = Long.parseLong(timestampToParse);
          desiredCenterOfMass = new FramePoint3D(loadInFrame, Double.parseDouble(data[index++]), Double.parseDouble(data[index++]), Double.parseDouble(data[index++]));
       }
 
@@ -496,7 +508,10 @@ public class TrajectoryRecordReplay
                 rightDesiredControllerPose.getPosition().getY() + "," +
                 rightDesiredControllerPose.getPosition().getZ() + "," +
 
-                timeInTrajectoryMillis + "\n";
+                timeInTrajectoryMillis + "," +
+                desiredCenterOfMass.getX() + "," +
+                desiredCenterOfMass.getY() + "," +
+                desiredCenterOfMass.getZ() + "\n";
       }
    }
 
@@ -550,5 +565,11 @@ public class TrajectoryRecordReplay
             return true;
       }
       return false;
+   }
+
+   public static void main(String[] args)
+   {
+      System.out.println(Long.parseLong("156"));
+      System.out.println(Double.parseDouble("NaN"));
    }
 }

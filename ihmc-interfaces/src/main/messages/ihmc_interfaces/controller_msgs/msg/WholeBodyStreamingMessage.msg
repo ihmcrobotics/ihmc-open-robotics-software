@@ -43,3 +43,11 @@ ihmc_common_msgs/EuclideanStreamingMessage center_of_mass_trajectory_message
 # Information for the neck joints
 bool has_neck_streaming_message
 JointspaceStreamingMessage neck_streaming_message
+
+float64 posture_sensitivity
+
+byte POSTURE_MODE_OPTIMIZER = 0
+byte POSTURE_MODE_FREEZE = 1
+byte POSTURE_MODE_NOMINAL = 2
+
+byte posture_optimizer_mode 0

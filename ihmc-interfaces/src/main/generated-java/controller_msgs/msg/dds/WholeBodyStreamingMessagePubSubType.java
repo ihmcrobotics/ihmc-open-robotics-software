@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54e59564971229a55c43fda365c2db67f54ac60ae24a420c8db14fbabbcd1175";
+   		return "057d01c89a434c0b44493daa35469e2962cde91626b7eae4b2b45929c1222d8e";
    }
    
    @Override
@@ -92,6 +92,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -157,6 +161,12 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getCdrSerializedSize(data.getNeckStreamingMessage(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -195,6 +205,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_7(data.getHasNeckStreamingMessage());
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getNeckStreamingMessage(), cdr);
+      cdr.write_type_6(data.getPostureSensitivity());
+
+      cdr.write_type_9(data.getPostureOptimizerMode());
+
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.CDR cdr)
@@ -231,6 +245,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setHasNeckStreamingMessage(cdr.read_type_7());
       	
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getNeckStreamingMessage(), cdr);	
+      data.setPostureSensitivity(cdr.read_type_6());
+      	
+      data.setPostureOptimizerMode(cdr.read_type_9());
+      	
 
    }
 
@@ -265,6 +283,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_7("has_neck_streaming_message", data.getHasNeckStreamingMessage());
       ser.write_type_a("neck_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getNeckStreamingMessage());
 
+      ser.write_type_6("posture_sensitivity", data.getPostureSensitivity());
+      ser.write_type_9("posture_optimizer_mode", data.getPostureOptimizerMode());
    }
 
    @Override
@@ -298,6 +318,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setHasNeckStreamingMessage(ser.read_type_7("has_neck_streaming_message"));
       ser.read_type_a("neck_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getNeckStreamingMessage());
 
+      data.setPostureSensitivity(ser.read_type_6("posture_sensitivity"));
+      data.setPostureOptimizerMode(ser.read_type_9("posture_optimizer_mode"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.WholeBodyStreamingMessage src, controller_msgs.msg.dds.WholeBodyStreamingMessage dest)
