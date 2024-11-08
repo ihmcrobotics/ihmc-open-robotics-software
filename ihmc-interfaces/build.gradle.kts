@@ -37,7 +37,7 @@ mainDependencies {
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
       exclude(group = "org.junit.platform", module = "junit-platform-launcher")
    }
-   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-commons:0.34.0")
 }
 
 testDependencies {
@@ -46,7 +46,7 @@ testDependencies {
 
 generatorDependencies {
    api("us.ihmc:euclid:0.21.0")
-   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-commons:0.34.0")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.24.4")
 }
 
