@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoEuclideanTrajectoryPoint;
@@ -278,6 +279,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          return;
       }
 
+      double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       if (Precision.equals(start.getTime(), end.getTime()))
       {
          currentPosition.set(start.getPosition());
@@ -285,11 +287,18 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          currentAcceleration.setToZero();
          return;
       }
+      else if (Precision.equals(start.getTime(), end.getTime(), 0.05))
+      {
+         double alpha = (time - start.getTime()) / (end.getTime() - start.getTime());
+         currentPosition.interpolate(start.getPosition(), end.getPosition(), alpha);
+         currentVelocity.interpolate(start.getLinearVelocity(), end.getLinearVelocity(), alpha);
+         currentAcceleration.setToZero();
+         return;
+      }
 
       // Initialize the segment trajectory, in case the index or waypoints have changed
       subTrajectory.setCubicDirectly(end.getTime()
             - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
-      double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getPosition());

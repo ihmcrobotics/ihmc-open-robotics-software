@@ -5,9 +5,15 @@ import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTra
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.util.Precision;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -15,6 +21,7 @@ import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectory
 import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameEuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameSO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
@@ -22,6 +29,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3Tr
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
+import us.ihmc.yoVariables.euclid.YoPoint3D;
+import us.ihmc.yoVariables.euclid.YoQuaternion;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.YoMutableFrameObject;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -48,6 +58,9 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
    private final YoInteger currentWaypointIndex;
    private final List<FixedFrameSO3TrajectoryPointBasics> waypoints;
 
+   private final FixedFrameQuaternionBasics currentOrientation;
+   private final FixedFrameVector3DBasics currentVelocity;
+   private final FixedFrameVector3DBasics currentAcceleration;
    private final HermiteCurveBasedOrientationTrajectoryGenerator subTrajectory;
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
@@ -72,6 +85,14 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
 
       currentTrajectoryTime = new YoDouble(namePrefix + "CurrentTrajectoryTime", registry);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
+      
+      String currentOrientationName = namePrefix + "CurrentOrientation";
+      String currentVelocityName = namePrefix + "CurrentVelocity";
+      String currentAccelerationName = namePrefix + "CurrentAcceleration";
+
+      currentOrientation = EuclidFrameFactories.newLinkedFixedFrameQuaternionBasics(this, new YoQuaternion(currentOrientationName, registry));
+      currentVelocity = EuclidFrameFactories.newLinkedFixedFrameVector3DBasics(this, new YoVector3D(currentVelocityName, registry));
+      currentAcceleration = EuclidFrameFactories.newLinkedFixedFrameVector3DBasics(this, new YoVector3D(currentAccelerationName, registry));
 
       subTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "SubTrajectory", referenceFrame, registry);
 
@@ -257,6 +278,42 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
          changedSubTrajectory = true;
       }
 
+      int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
+
+      FixedFrameSO3TrajectoryPointBasics start = waypoints.get(currentWaypointIndex.getValue());
+      FixedFrameSO3TrajectoryPointBasics end = waypoints.get(secondWaypointIndex);
+
+      if (time < start.getTime())
+      {
+         currentOrientation.set(start.getOrientation());
+         currentVelocity.setToZero();
+         currentAcceleration.setToZero();
+         return;
+      }
+      if (time > end.getTime())
+      {
+         currentOrientation.set(end.getOrientation());
+         currentVelocity.setToZero();
+         currentAcceleration.setToZero();
+         return;
+      }
+
+      if (Precision.equals(start.getTime(), end.getTime()))
+      {
+         currentOrientation.set(start.getOrientation());
+         currentVelocity.set(start.getAngularVelocity());
+         currentAcceleration.setToZero();
+         return;
+      }
+      else if (Precision.equals(start.getTime(), end.getTime(), 0.05))
+      {
+         double alpha = (time - start.getTime()) / (end.getTime() - start.getTime());
+         currentOrientation.interpolate(start.getOrientation(), end.getOrientation(), alpha);
+         currentVelocity.interpolate(start.getAngularVelocity(), end.getAngularVelocity(), alpha);
+         currentAcceleration.setToZero();
+         return;
+      }
+
       if (changedSubTrajectory)
       {
          initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
@@ -264,6 +321,9 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
 
       double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
       subTrajectory.compute(subTrajectoryTime);
+      currentOrientation.set(subTrajectory.getOrientation());
+      currentVelocity.set(subTrajectory.getAngularVelocity());
+      currentAcceleration.set(subTrajectory.getAngularAcceleration());
    }
 
    @Override
@@ -292,19 +352,19 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
    @Override
    public FrameQuaternionReadOnly getOrientation()
    {
-      return subTrajectory.getOrientation();
+      return currentOrientation;
    }
 
    @Override
    public FrameVector3DReadOnly getAngularVelocity()
    {
-      return subTrajectory.getAngularVelocity();
+      return currentVelocity;
    }
 
    @Override
    public FrameVector3DReadOnly getAngularAcceleration()
    {
-      return subTrajectory.getAngularAcceleration();
+      return currentAcceleration;
    }
 
    public int getCurrentNumberOfWaypoints()

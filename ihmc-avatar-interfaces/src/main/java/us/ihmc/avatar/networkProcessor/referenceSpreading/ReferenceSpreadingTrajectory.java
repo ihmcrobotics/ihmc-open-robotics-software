@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static us.ihmc.commons.MathTools.roundToPrecision;
 import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createSE3TrajectoryMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createSE3TrajectoryPointMessage;
@@ -41,7 +42,7 @@ public class ReferenceSpreadingTrajectory
 
 //   private static final String ENDEFFECTOR_NAME = "GRIPPER_YAW_LINK"; // 7DOF Arm
    private static final String ENDEFFECTOR_NAME = "ELBOW_PITCH_LINK"; // 4DOF Arm
-   private static final double MAX_POINTS = 100; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
+   private static final double MAX_POINTS = 200; // se3TrajectoryMessage.getTaskspaceTrajectoryPoints().capacity() does not seem to work. So set manually!
 //   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z"); //7DOF Arm
 private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y"); //4DOF arm
 
@@ -121,12 +122,8 @@ private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHO
                                        currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQz"),
                                        currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "OrientationQs"));
 
-      desiredLinearVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityX"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityY"),
-                                currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "LinearVelocityZ"));
-      desiredAngularVelocity.set(currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityX"),
-                                 currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityY"),
-                                 currentFrame.get(robotSide.getUpperCaseName() + "_" + ENDEFFECTOR_NAME + "Current" + "AngularVelocityZ"));
+      desiredLinearVelocity.set(0,0,0);
+      desiredAngularVelocity.set(0,0,0);
 
       for (String jointName : JOINT_NAMES)
       {
@@ -201,6 +198,7 @@ private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHO
       pidGainsTrajectoryPointMessage.getAngularGains().set(convertToPID3DGainsMessage(robotModel.getWalkingControllerParameters().getImpedanceHandOrientationControlGains()));
 
       LinkedHashMap<String, Double> currentFrame = new LinkedHashMap<>();
+      LinkedHashMap<String, Double> lastFrame = new LinkedHashMap<>();
       trajectoryPlayer.reset();
       makeMap(trajectoryPlayer.play(false), currentFrame);
       startTimeCSV = currentFrame.get("time[sec]") - initialTimeDuration;
@@ -214,6 +212,9 @@ private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHO
       while (!trajectoryPlayer.hasDoneReplay())
       {
          makeMap(trajectoryPlayer.play(false), currentFrame);
+         if (lastFrame.isEmpty())
+            lastFrame = new LinkedHashMap<>(currentFrame);
+
 //         LogTools.info(currentFrame);
          if (frameIndex % frameInterval == 0)
          {
@@ -281,6 +282,7 @@ private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHO
                pidGainsTrajectoryMessage.getPidGainsTrajectoryPoints().add().set(pidGainsTrajectoryPointMessage);
             }
          }
+         lastFrame = new LinkedHashMap<>(currentFrame);
          frameIndex++;
       }
 
