@@ -52,8 +52,14 @@ public class CollisionDetection
          sigma.put(robotSide, new YoDouble(fullRobotModel.getHand(robotSide) +"Sigma" + robotSide.getPascalCaseName(), registry));
       }
 
-      jointMap.put(RobotSide.LEFT, Arrays.asList(12, 13, 14, 22, 23, 24, 25, 26, 27, 28));
-      jointMap.put(RobotSide.RIGHT, Arrays.asList(12, 13 ,14, 15, 16, 17, 18, 19, 20, 21));
+//      todo: Automate this process with the fullRobotModel and end-effector/base
+//      7 DOF arms
+//      jointMap.put(RobotSide.LEFT, Arrays.asList(12, 13, 14, 22, 23, 24, 25, 26, 27, 28));
+//      jointMap.put(RobotSide.RIGHT, Arrays.asList(12, 13 ,14, 15, 16, 17, 18, 19, 20, 21));
+
+//      4 DOF Arms
+         jointMap.put(RobotSide.LEFT, Arrays.asList(12, 13, 14, 19, 20, 21, 22));
+         jointMap.put(RobotSide.RIGHT, Arrays.asList(12, 13 ,14, 15, 16, 17, 18));
 
       this.fullRobotModel = fullRobotModel;
       baseBody = fullRobotModel.getElevator().getChildrenJoints().get(0).getSuccessor();

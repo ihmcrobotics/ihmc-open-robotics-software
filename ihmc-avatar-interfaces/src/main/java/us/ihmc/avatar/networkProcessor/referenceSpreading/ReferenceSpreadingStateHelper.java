@@ -61,7 +61,7 @@ public class ReferenceSpreadingStateHelper
       this.registry = registry;
       this.demoDirectory = demoDirectory;
 
-      collisionDetection = new CollisionDetection(10, 10, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(0.3, 10, fullRobotModel, registry);
       referenceSpreader = new ReferenceSpreader(demoDirectory, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();

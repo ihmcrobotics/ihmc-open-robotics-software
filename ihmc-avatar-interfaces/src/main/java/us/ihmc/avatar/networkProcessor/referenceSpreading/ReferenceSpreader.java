@@ -28,6 +28,9 @@ public class ReferenceSpreader
 //   private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y", "WRIST_Z", "WRIST_X", "GRIPPER_Z"); // 7DOFS
    private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHOULDER_X", "SHOULDER_Z", "ELBOW_Y"); // 4DOFS
 
+   //     private static final String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
+   private static final String nameEndEffector = "_ELBOW_PITCH_LINKCurrent";
+
    private final YoRegistry registry;
    private String baseFinalPath;
 
@@ -111,7 +114,7 @@ public class ReferenceSpreader
          double[] values = originalReference.play(true);
          makeMap(values, currentFrame);
 //         Hard-coded with jointMap of `CollisionDetection`
-         for (int i = 12; i <= 28; i++)
+         for (int i = 12; i < 23; i++)
          {
             jointVelocities.set(i, currentFrame.get("qd_" + jointNames.get(i)).floatValue());
          }
@@ -149,7 +152,6 @@ public class ReferenceSpreader
    private void extendPreImpactTrajectory()
    {
       double[] preImpactData = null;
-      String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
 
       originalReference.reset();
       originalReference.play(false);
@@ -215,8 +217,6 @@ public class ReferenceSpreader
 
    private void extendPostImpactTrajectory()
    {
-      String nameEndEffector = "_GRIPPER_YAW_LINKCurrent";
-
       originalReference.reset();
       originalReference.play(false);
 
@@ -309,29 +309,29 @@ public class ReferenceSpreader
                                 + postImpactValues[getKeyIndex("q_" + robotSide.getUpperCaseName() + "_" + jointName)] * blendFactor);
                }
 
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX",
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX")] * (1 - blendFactor)
-                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionX")] * blendFactor);
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY",
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY")] * (1 - blendFactor)
-                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionY")] * blendFactor);
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ",
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ")] * (1 - blendFactor)
-                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentPositionZ")] * blendFactor);
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionX",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionX")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionX")] * blendFactor);
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionY",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionY")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionY")] * blendFactor);
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "PositionZ",
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionZ")] * (1 - blendFactor)
+                                 + postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "PositionZ")] * blendFactor);
 
-               preRotation.set(preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx")],
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy")],
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz")],
-                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs")]);
-               postRotation.set(postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx")],
-                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy")],
-                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz")],
-                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs")]);
+               preRotation.set(preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQx")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQy")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQz")],
+                                 preImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQs")]);
+               postRotation.set(postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQx")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQy")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQz")],
+                                 postImpactValues[getKeyIndex(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQs")]);
                quaternionCalculus.interpolate(blendFactor,preRotation, postRotation, rotation);
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQx", rotation.getX());
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQy", rotation.getY());
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQz", rotation.getZ());
-               currentFrame.put(robotSide.getUpperCaseName() + "_GRIPPER_YAW_LINKCurrentOrientationQs", rotation.getS());
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQx", rotation.getX());
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQy", rotation.getY());
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQz", rotation.getZ());
+               currentFrame.put(robotSide.getUpperCaseName() + nameEndEffector + "OrientationQs", rotation.getS());
 
                currentFrame.put("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps(),
                                  preImpactValues[getKeyIndex("filteredWrenchLinearPartX"+robotSide.getSideNameInAllCaps())] * (1 - blendFactor)
