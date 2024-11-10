@@ -2,8 +2,6 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
@@ -41,7 +39,7 @@ public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<PrimitiveDataVectorMessage> bodyPathParametersSerializer = new JSONSerializer<>(new PrimitiveDataVectorMessagePubSubType());
+   private final JSONSerializer<AStarBodyPathPlannerParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new AStarBodyPathPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -186,7 +184,7 @@ public class FootstepPlannerLogLoader
          {
             InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
             jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            log.getAStarBodyPathPlannerParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
             bodyPathParametersPacketInputStream.close();
          }
 
@@ -201,7 +199,7 @@ public class FootstepPlannerLogLoader
          }
 
          // load status packet
-         File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);
+         File statusFile = new File(logDirectory, FootstepPlannerLogger.outputStatusPacketFileName);
          InputStream statusPacketInputStream = new FileInputStream(statusFile);
          jsonNode = objectMapper.readTree(statusPacketInputStream);
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));

@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters.*;
@@ -371,5 +372,68 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
    default double getSmootherGradientThresholdToTerminate()
    {
       return get(smootherGradientThresholdToTerminate);
+   }
+
+   default AStarBodyPathPlannerParametersPacket getAsPacket()
+   {
+      AStarBodyPathPlannerParametersPacket packet = new AStarBodyPathPlannerParametersPacket();
+
+      // Collision and surface normal settings
+      packet.setCheckForCollisions(getCheckForCollisions());
+      packet.setComputeSurfaceNormalCost(getComputeSurfaceNormalCost());
+      packet.setComputeTraversibility(getComputeTraversibility());
+
+      // Smoothing and roll cost parameters
+      packet.setPerformSmoothing(getPerformSmoothing());
+      packet.setRollCostWeight(getRollCostWeight());
+      packet.setRollCostDeadband(getRollCostDeadband());
+      packet.setMaxPenalizedRollAngle(getMaxPenalizedRollAngle());
+
+      // Snap settings
+      packet.setSnapRadius(getSnapRadius());
+      packet.setMinSnapHeightThreshold(getMinSnapHeightThreshold());
+
+      // Incline parameters
+      packet.setInclineCostWeight(getInclineCostWeight());
+      packet.setInclineCostDeadband(getInclineCostDeadband());
+      packet.setMaxIncline(getMaxIncline());
+
+      // Collision box dimensions
+      packet.setCollisionBoxSizeY(getCollisionBoxSizeY());
+      packet.setCollisionBoxSizeX(getCollisionBoxSizeX());
+      packet.setCollisionBoxGroundClearance(getCollisionBoxGroundClearance());
+
+      // Traversibility settings
+      packet.setTraversibilityWeight(getTraversibilityWeight());
+      packet.setTraversibilityStanceWeight(getTraversibilityStanceWeight());
+      packet.setTraversibilityStepWeight(getTraversibilityStepWeight());
+      packet.setMinTraversibilityScore(getMinTraversibilityScore());
+      packet.setMinNormalAngleToPenalizeForTraversibility(getMinNormalAngleToPenalizeForTraversibility());
+      packet.setMaxNormalAngleToPenalizeForTraversibility(getMaxNormalAngleToPenalizeForTraversibility());
+      packet.setTraversibilityInclineWeight(getTraversibilityInclineWeight());
+      packet.setTraversibilitySearchWidth(getTraversibilitySearchWidth());
+      packet.setMinOccupiedNeighborsForTraversibility(getMinOccupiedNeighborsForTraversibility());
+      packet.setHalfStanceWidth(getHalfStanceWidth());
+      packet.setTraversibilityHeightWindowWidth(getTraversibilityHeightWindowWidth());
+      packet.setTraversibilityHeightWindowDeadband(getTraversibilityHeightWindowDeadband());
+      packet.setHeightProximityForSayingWalkingOnGround(getHeightProximityForSayingWalkingOnGround());
+      packet.setTraversibilityNonGroundDiscountWhenWalkingOnGround(getTraversibilityNonGroundDiscountWhenWalkingOnGround());
+
+      // Smoother parameters
+      packet.setSmootherCollisionWeight(getSmootherCollisionWeight());
+      packet.setSmootherSmoothnessWeight(getSmootherSmoothnessWeight());
+      packet.setSmootherTurnPointSmoothnessDiscount(getSmootherTurnPointSmoothnessDiscount());
+      packet.setSmootherMinCurvatureToPenalize(getSmootherMinCurvatureToPenalize());
+      packet.setSmootherEqualSpacingWeight(getSmootherEqualSpacingWeight());
+      packet.setSmootherRollWeight(getSmootherRollWeight());
+      packet.setSmootherDisplacementWeight(getSmootherDisplacementWeight());
+      packet.setSmootherTraversibilityWeight(getSmootherTraversibilityWeight());
+      packet.setSmootherGroundPlaneWeight(getSmootherGroundPlaneWeight());
+      packet.setSmootherMinimumTraversibilityToSearchFor(getSmootherMinimumTraversibilityToSearchFor());
+      packet.setSmootherTraversibilityThresholdForNoDiscount(getSmootherTraversibilityThresholdForNoDiscount());
+      packet.setSmootherHillClimbGain(getSmootherHillClimbGain());
+      packet.setSmootherGradientThresholdToTerminate(getSmootherGradientThresholdToTerminate());
+
+      return packet;
    }
 }

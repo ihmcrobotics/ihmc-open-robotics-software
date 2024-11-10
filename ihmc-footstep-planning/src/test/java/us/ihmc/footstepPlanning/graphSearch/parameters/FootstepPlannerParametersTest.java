@@ -117,7 +117,7 @@ public class FootstepPlannerParametersTest
    public void testMinSurfaceIncline()
    {
       double minSurfaceIncline = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinSurfaceInclineRadians(minSurfaceIncline);
+      parameters.setMinSurfaceIncline(minSurfaceIncline);
       assertEquals(minSurfaceIncline, parameters.getMinSurfaceIncline(), epsilon);
    }
 
