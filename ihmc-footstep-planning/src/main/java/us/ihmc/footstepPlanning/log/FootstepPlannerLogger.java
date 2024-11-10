@@ -66,6 +66,11 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+/**
+ * The {@link FootstepPlannerLogger} logs the data for a footstep plan to a folder. The parameters used for planning,
+ * what is being requested by the planner, the output of the planner, and the iteration data of the planner is being logged.
+ * By logging these footstep plans, we can attempt to understand what the planner was trying to do. This is vital to debugging
+ */
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat directoryDateFormat = new SimpleDateFormat("yyyyMMdd");
