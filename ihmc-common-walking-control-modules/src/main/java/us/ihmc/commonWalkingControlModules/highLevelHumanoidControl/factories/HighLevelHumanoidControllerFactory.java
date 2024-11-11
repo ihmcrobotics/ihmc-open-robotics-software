@@ -728,7 +728,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
                                                                        9,
-                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
+                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker(postureConsumer, stabilityStateConsumer));
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }

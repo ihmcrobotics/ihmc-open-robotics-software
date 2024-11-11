@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -1075,5 +1076,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          contactPointInBodyFixedFrame.setIncludingFrame(initialPosition);
          contactPointInBodyFixedFrame.changeFrame(rigidBody.getBodyFixedFrame());
       }
+   }
+
+   public PostureOptimizerState getMode()
+   {
+      return multiContactManager.getMode();
+   }
+
+   public double getPostureSensitivity()
+   {
+      return multiContactManager.getPostureSensitivity();
    }
 }
