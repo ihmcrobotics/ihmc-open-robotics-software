@@ -476,11 +476,10 @@ public class KSTTools
       else
       {
          WholeBodyStreamingMessage messageToPublish = setupStreamingMessage(outputToPublish);
-         logger.update(messageToPublish);
-         streamingMessagePublisher.publish(messageToPublish);
-
          messageToPublish.setPostureSensitivity(ikController.getPostureSensitivity());
          messageToPublish.setPostureOptimizerMode(ikController.getMode().toByte());
+         logger.update(messageToPublish);
+         streamingMessagePublisher.publish(messageToPublish);
       }
    }
 

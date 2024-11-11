@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxMultiContactManager.PostureOptimizerState;
+import us.ihmc.communication.PostureOptimizerState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
