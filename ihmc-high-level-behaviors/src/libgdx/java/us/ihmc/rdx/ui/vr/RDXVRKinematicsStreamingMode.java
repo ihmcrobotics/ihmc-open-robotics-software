@@ -157,9 +157,11 @@ public class RDXVRKinematicsStreamingMode
    private int rightIndex = -1;
    private RDXMultiContactRegionGraphic polygonGraphic;
 
-   public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, 0.0, 0.0);
+//   public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0, -1.0, 0.0);
+//   public static final double angle = Math.toRadians(-45.0);
+   public static final Vector3D HAND_CONTACT_NORMAL_IN_MID_FEET_ZUP_FRAME = new Vector3D(-1.0 / Math.sqrt(2.0), -1.0 / Math.sqrt(2.0), 0.0);
    public static final Vector3D HAND_CONTACT_NORMAL_IN_WORLD = new Vector3D();
-   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.4; // 0.3;
+   private static final double HAND_CONTACT_COEFFICIENT_OF_FRICTION = 0.25; // 0.3;
    private static final boolean CONTROL_LOADED_HAND_ORIENTATION = true;
 
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
@@ -417,7 +419,20 @@ public class RDXVRKinematicsStreamingMode
       }
       else if (kinematicsRecorder.isReplaying())
       {
-         rateLimitedCoM.setMatchingFrame(kinematicsRecorder.getDesiredCenterOfMass());
+         FramePoint3D com = kinematicsRecorder.getDesiredCenterOfMass();
+         if (com.containsNaN())
+         {
+            comJoystickXYInput.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+            comJoystickZInput.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+            comJoystickXYInput.changeFrame(ReferenceFrame.getWorldFrame());
+            comJoystickZInput.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+         {
+            comJoystickXYInput.setMatchingFrame(com);
+            comJoystickZInput.setMatchingFrame(com);
+            rateLimitedCoM.setMatchingFrame(com);
+         }
       }
 
       if (enabled.get())

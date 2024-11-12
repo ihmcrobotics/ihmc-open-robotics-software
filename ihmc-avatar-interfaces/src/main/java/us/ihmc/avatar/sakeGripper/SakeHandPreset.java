@@ -6,9 +6,9 @@ package us.ihmc.avatar.sakeGripper;
 public enum SakeHandPreset
 {
    /** Open the fingers to 105 degrees. */
-   OPEN(65.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   OPEN(170.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Close almost all the way to achieve no torque when nothings being grabbed. */
-   CLOSE(10.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
+   CLOSE(5.0, 9.5),
    /** Close with specified torque */
    GRIP(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_SAFE),
    /** Fully opens fingers */
