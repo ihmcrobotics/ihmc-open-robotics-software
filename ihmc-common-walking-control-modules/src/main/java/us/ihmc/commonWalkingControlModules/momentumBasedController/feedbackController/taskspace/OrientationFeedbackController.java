@@ -130,6 +130,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    JointIndexHandler jointIndexHandler;
    private int[] jointIndices;
+   List<JointBasics> jointPath;
+   List<Integer> allJointIndices;
 
    private final double dt;
    private final boolean isRootBody;
@@ -320,18 +322,24 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       setImpedanceEnabled(command.getIsImpedanceEnabled());
 
-      JointBasics[] jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
-      List<Integer> allJointIndices = new ArrayList<>();
-
-      for (JointBasics joint : jointPath)
+      if (isImpedanceEnabled())
       {
-         int[] indices = jointIndexHandler.getJointIndices(joint);
-         for (int index : indices)
+         MultiBodySystemTools.collectJointPath(bodyBase, endEffector, jointPath);
+         allJointIndices = new ArrayList<>();
+
+         for (JointBasics joint : jointPath)
          {
-            allJointIndices.add(index);
+            int[] indices = jointIndexHandler.getJointIndices(joint);
+            for (int index : indices)
+            {
+               allJointIndices.add(index);
+            }
+         }
+         jointIndices = new int[allJointIndices.size()];
+         for (int i = 0; i < allJointIndices.size(); i++) {
+            jointIndices[i] = allJointIndices.get(i);
          }
       }
-      jointIndices = allJointIndices.stream().mapToInt(i -> i).toArray();
 
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());

@@ -161,7 +161,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    List<JointBasics> jointPath;
    List<Integer> allJointIndices;
 
-
    protected final double dt;
    protected final boolean isRootBody;
    protected final boolean computeIntegralTerm;
