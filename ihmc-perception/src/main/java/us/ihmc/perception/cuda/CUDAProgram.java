@@ -78,8 +78,6 @@ public class CUDAProgram implements AutoCloseable
    }
 
    /**
-    * Construct a {@link CUDAProgram} with parameters.
-    *
     * @param programName The user-friendly name of the program.
     *                    There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
     * @param programCode The source code (i.e., the contents of the .cu file)
