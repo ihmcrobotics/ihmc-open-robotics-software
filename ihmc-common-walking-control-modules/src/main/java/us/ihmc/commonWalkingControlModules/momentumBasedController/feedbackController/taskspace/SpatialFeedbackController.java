@@ -158,7 +158,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoSE3OffsetFrame controlFrame;
    JointIndexHandler jointIndexHandler;
    private int[] jointIndices;
-   JointBasics[] jointPath;
+   List<JointBasics> jointPath;
    List<Integer> allJointIndices;
 
 
@@ -399,7 +399,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (isImpedanceEnabled())
       {
-         jointPath = MultiBodySystemTools.createJointPath(bodyBase, endEffector);
+         MultiBodySystemTools.collectJointPath(bodyBase, endEffector, jointPath);
          allJointIndices = new ArrayList<>();
 
          for (JointBasics joint : jointPath)
