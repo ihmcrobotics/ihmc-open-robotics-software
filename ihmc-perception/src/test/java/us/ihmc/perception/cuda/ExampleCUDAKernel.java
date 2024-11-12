@@ -9,7 +9,7 @@ import us.ihmc.log.LogTools;
 import static org.bytedeco.cuda.global.cudart.*;
 
 /**
- * This is a simple example of a kernel that adds two arrays together. The ways in which kernels can be run vary such that you can create all the Bytedeco Pointers
+ * This is a simple example of a kernel that adds two arrays together. The ways in which kernels can be run vary such that you can create all the JavaCPP Pointers
  * inside a try-with-resources. The user can create more threads on the GPU. This example attempted to keep things really simple and avoided most of that overhead.
  */
 public class ExampleCUDAKernel
