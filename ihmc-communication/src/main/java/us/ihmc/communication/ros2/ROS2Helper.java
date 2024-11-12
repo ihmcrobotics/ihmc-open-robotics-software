@@ -4,7 +4,6 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -114,7 +113,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
-      new ROS2Callback<>(ros2NodeInterface, Empty.class, topic, message -> notification.set());
+      ros2NodeInterface.createSubscription2(topic.withType(Empty.class), message -> notification.set());
       return notification;
    }
 
