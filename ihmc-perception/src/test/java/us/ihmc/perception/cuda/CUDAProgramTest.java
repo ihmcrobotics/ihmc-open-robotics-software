@@ -57,6 +57,7 @@ public class CUDAProgramTest
 
          // Copy result from device to host
          cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
+         cudaStreamSynchronize(stream);
 
          // Free host memory
          cudaFreeAsync(deviceSum, stream);
