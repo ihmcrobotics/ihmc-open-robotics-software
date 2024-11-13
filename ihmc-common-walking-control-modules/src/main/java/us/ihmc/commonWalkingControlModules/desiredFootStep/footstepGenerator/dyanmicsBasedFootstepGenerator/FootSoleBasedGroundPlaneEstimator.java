@@ -18,6 +18,7 @@ import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.geometry.YoGroundPlaneEstimator;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class FootSoleBasedGroundPlaneEstimator
 {
-   private final FullHumanoidRobotModel robotModel;
+   private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final MovingReferenceFrame centerOfMassControlZUpFrame;
 
@@ -51,11 +52,11 @@ public class FootSoleBasedGroundPlaneEstimator
     *
     * @param parentRegistry the {@code YoRegistry} used to register YoVariables constructed within this class
     */
-   public FootSoleBasedGroundPlaneEstimator(MovingReferenceFrame centerOfMassControlZUpFrame, FullHumanoidRobotModel robotModel, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public FootSoleBasedGroundPlaneEstimator(MovingReferenceFrame centerOfMassControlZUpFrame, CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.centerOfMassControlZUpFrame = centerOfMassControlZUpFrame;
 
-      this.robotModel = robotModel;
+      this.referenceFrames = referenceFrames;
 
       groundPlaneEstimator = new YoGroundPlaneEstimator("FootSoleBased",
                                                         parentRegistry,
@@ -116,7 +117,7 @@ public class FootSoleBasedGroundPlaneEstimator
 
          if (!isInToeOff)
          {
-            frameContactPoint.setMatchingFrame(robotModel.getSoleFrame(supportSide), contactPoints.get(i));
+            frameContactPoint.setMatchingFrame(referenceFrames.getSoleFrame(supportSide), contactPoints.get(i));
             frameContactPoint.addZ(groundPlaneVerticalOffset.getDoubleValue());
          }
          else if (i > 1)

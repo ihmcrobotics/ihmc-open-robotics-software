@@ -87,8 +87,9 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    private DirectionalControlMessenger directionalControlMessenger;
    private StopWalkingMessenger stopWalkingMessenger;
    private StartWalkingMessenger startWalkingMessenger;
+   private FootstepMessenger footstepMessenger;
 
-   public DynamicsBasedFootstepPlugin(FullHumanoidRobotModel robotModel, double updateDT, CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DynamicsBasedFootstepPlugin(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.updateDT = updateDT;
       this.referenceFrames = referenceFrames;
@@ -115,18 +116,18 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.getTranslation().set(currentCoMPosition);
-            transformToParent.getRotation().set((FrameQuaternionReadOnly) desiredPelvisOrientation);
+            transformToParent.getRotation().set(desiredPelvisOrientation);
          }
       };
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
 
-      groundPlaneEstimator = new FootSoleBasedGroundPlaneEstimator(centerOfMassControlZUpFrame, robotModel, yoGraphicsListRegistry, registry);
+      groundPlaneEstimator = new FootSoleBasedGroundPlaneEstimator(centerOfMassControlZUpFrame, referenceFrames, yoGraphicsListRegistry, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          footStates.put(robotSide, new YoEnum<>("footStates" + variableNameSuffix, registry, FootState.class));
-         touchdownCalculator = new DynamicsBasedFootstepTouchdownCalculator(robotSide, centerOfMassControlZUpFrame, getCenterOfMassVelocity(), , robotModel, groundPlaneEstimator, parameters, gravity, , registry);
+         touchdownCalculator = new DynamicsBasedFootstepTouchdownCalculator(robotSide, centerOfMassControlZUpFrame, getCenterOfMassVelocity(), , robotModel, groundPlaneEstimator, parameters, gravity, desiredVelocityProvider, registry);
       }
    }
 
@@ -137,6 +138,8 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
       currentCoMPosition.setFromReferenceFrame(centerOfMassFrame);
 
+      handleDesiredsFromProviders();
+
       // TODO maybe wrong?
       desiredPelvisOrientation.setToYawOrientation(referenceFrames.getChestFrame().getTransformToWorldFrame().getRotation().getYaw());
       desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
@@ -145,8 +148,6 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       centerOfMassControlZUpFrame.update();
 
       currentCoMVelocity.setMatchingFrame(controllerToolbox.getCenterOfMassVelocity());
-
-
 
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
@@ -201,7 +202,29 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          footstepCompletionSide.setValue(null);
       }
 
+      // Submit footsteps
+      if (walk.getValue() && footstepMessenger != null)
+      {
+         if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
+         {
+            currentFootstepDataListCommandID.increment();
+            footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
+            footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
+            footstepMessenger.submitFootsteps(footstepDataListMessage);
+            counter = 0;
+         }
+         else
+         {
+            counter++;
+         }
+      }
 
+      walkPreviousValue.set(walk.getValue());
+   }
+
+   private void handleDesiredsFromProviders()
+   {
       Vector2DReadOnly desiredVelocity = desiredVelocityProvider.getDesiredVelocity();
       double desiredVelocityX = desiredVelocity.getX();
       double desiredVelocityY = desiredVelocity.getY();
@@ -223,12 +246,16 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
       this.desiredTurningVelocity.set(turningVelocity);
-
    }
 
-   private FrameVector3DReadOnly getCenterOfMassVelocity()
+   /**
+    * Sets the protocol for sending footsteps to the controller.
+    *
+    * @param footstepMessenger the callback used to send footsteps.
+    */
+   public void setFootstepMessenger(FootstepMessenger footstepMessenger)
    {
-      return currentCoMVelocity;
+      this.footstepMessenger = footstepMessenger;
    }
 
    /**
@@ -356,6 +383,11 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
 
+   }
+
+   private FrameVector3DReadOnly getCenterOfMassVelocity()
+   {
+      return currentCoMVelocity;
    }
 
    @Override

@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -76,16 +77,17 @@ public class DynamicsBasedFootstepPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
-   public DynamicsBasedFootstepPlugin buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
-                                             double updateDT,
-                                             WalkingControllerParameters walkingControllerParameters,
-                                             StatusMessageOutputManager walkingStatusMessageOutputManager,
-                                             CommandInputManager walkingCommandInputManager,
-                                             YoGraphicsListRegistry yoGraphicsListRegistry,
-                                             SideDependentList<? extends ContactableBody> contactableFeet,
-                                             DoubleProvider timeProvider)
+   public DynamicsBasedFootstepPlugin buildPlugin(FullHumanoidRobotModel robotModel,
+                                                  CommonHumanoidReferenceFrames referenceFrames,
+                                                  double updateDT,
+                                                  WalkingControllerParameters walkingControllerParameters,
+                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
+                                                  CommandInputManager walkingCommandInputManager,
+                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                  SideDependentList<? extends ContactableBody> contactableFeet,
+                                                  DoubleProvider timeProvider)
    {
-      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = new DynamicsBasedFootstepPlugin();
+      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = new DynamicsBasedFootstepPlugin(robotModel, referenceFrames, updateDT, yoGraphicsListRegistry);
 
       dynamicsBasedFootstepPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
       {
@@ -112,6 +114,7 @@ public class DynamicsBasedFootstepPluginFactory implements HumanoidSteppingPlugi
 
       dynamicsBasedFootstepPlugin.setFootstepStatusListener(walkingStatusMessageOutputManager);
 
+      dynamicsBasedFootstepPlugin.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
       return dynamicsBasedFootstepPlugin;
    }
