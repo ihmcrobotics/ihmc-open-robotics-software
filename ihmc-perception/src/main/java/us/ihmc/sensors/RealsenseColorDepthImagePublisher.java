@@ -94,11 +94,7 @@ public class RealsenseColorDepthImagePublisher
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(depthImageToPublish,
-                                                 depthPNGPointer,
-                                                 CompressionType.ZSTD_NVJPEG_HYBRID,
-                                                 CameraModel.PINHOLE,
-                                                 depthImageMessage);
+         PerceptionMessageTools.packImageMessage(depthImageToPublish, depthPNGPointer, CompressionType.ZSTD_NVJPEG_HYBRID, depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
          lastDepthSequenceNumber = depthImageToPublish.getSequenceNumber();
@@ -146,7 +142,7 @@ public class RealsenseColorDepthImagePublisher
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, CameraModel.PINHOLE, colorImageMessage);
+         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, colorImageMessage);
 
          ros2ColorImagePublisher.publish(colorImageMessage);
          lastColorSequenceNumber = colorImageToPublish.getSequenceNumber();

@@ -113,7 +113,7 @@ public class BallDetectionManager
 
             // send it out to UI
             ImageMessage imageMessage = new ImageMessage();
-            PerceptionMessageTools.packImageMessage(maskImage, compressedImage, CompressionType.PNG, CameraModel.PINHOLE, imageMessage);
+            PerceptionMessageTools.packImageMessage(maskImage, compressedImage, CompressionType.PNG, imageMessage);
             imageMessage.setSequenceNumber(maskImageSequenceNumber++);
             MessageTools.toMessage(maskAcquisitionTime, imageMessage.getAcquisitionTime());
             ros2Helper.publish(PerceptionAPI.BALL_SEGMENTATION_IMAGE, imageMessage);

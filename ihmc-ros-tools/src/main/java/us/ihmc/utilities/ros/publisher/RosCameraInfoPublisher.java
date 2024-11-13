@@ -2,10 +2,10 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
 
+@Deprecated
 public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
 {
    private int seq = 0;
@@ -25,7 +25,7 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
    {
    }
 
-   public void publish(String frameID, CameraPinholeBrown params, Time t)
+   public void publish(String frameID, Object params, Time t)
    {
         CameraInfo message = getMessage();
         Header header = message.getHeader();
@@ -62,23 +62,23 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
        R[8] = 1.0;
 */
 
-        K[0] = params.getFx();
-        K[1] = params.getSkew();
-        K[2] = params.getCx();
+//        K[0] = params.getFx();
+//        K[1] = params.getSkew();
+//        K[2] = params.getCx();
         K[3] = 0.0;
-        K[4] = params.getFy();
-        K[5] = params.getCy();
+//        K[4] = params.getFy();
+//        K[5] = params.getCy();
         K[6] = 0.0;
         K[7] = 0.0;
         K[8] = 1.0;
 
-        P[0] = params.getFx();
-        P[1] = params.getSkew();
-        P[2] = params.getCx();
+//        P[0] = params.getFx();
+//        P[1] = params.getSkew();
+//        P[2] = params.getCx();
         P[3] = Tx;
         P[4] = 0.0;
-        P[5] = params.getFy();
-        P[6] = params.getCy();
+//        P[5] = params.getFy();
+//        P[6] = params.getCy();
         P[7] = Ty;
         P[8] = 0.0;
         P[9] = 0.0;
@@ -91,8 +91,8 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
         D[3] =  0.0;
         D[4] =  0.0;
 
-        message.setWidth(params.getWidth());
-        message.setHeight(params.getHeight());
+//        message.setWidth(params.getWidth());
+//        message.setHeight(params.getHeight());
         message.setBinningX(0);
         message.setBinningY(0);
         message.setDistortionModel("plumb_bob");

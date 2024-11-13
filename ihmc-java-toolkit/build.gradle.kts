@@ -1,7 +1,5 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -24,7 +22,7 @@ mainDependencies {
    api("xml-apis:xml-apis:2.0.2")
    api("com.sun.xml.bind:jaxb-impl:4.0.5")
 
-   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ihmc-commons:0.34.0")
    api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:euclid-geometry:0.21.0")

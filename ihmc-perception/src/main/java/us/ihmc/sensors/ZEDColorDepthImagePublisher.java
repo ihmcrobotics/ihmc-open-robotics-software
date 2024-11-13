@@ -142,11 +142,7 @@ public class ZEDColorDepthImagePublisher
          BytePointer compressedDepthPointer = dataCompressor.compressDepth(depthImageToPublish.getGpuImageMat());
 
          // Pack the image message
-         PerceptionMessageTools.packImageMessage(depthImageToPublish,
-                                                 compressedDepthPointer,
-                                                 CompressionType.ZSTD_NVJPEG_HYBRID,
-                                                 CameraModel.PINHOLE,
-                                                 depthImageMessage);
+         PerceptionMessageTools.packImageMessage(depthImageToPublish, compressedDepthPointer, CompressionType.ZSTD_NVJPEG_HYBRID, depthImageMessage);
 
          // Close GpuMat
          compressedDepthPointer.close();
@@ -219,7 +215,7 @@ public class ZEDColorDepthImagePublisher
 
          // Publish compressed image
          ImageMessage colorImageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, CameraModel.PINHOLE, colorImageMessage);
+         PerceptionMessageTools.packImageMessage(colorImageToPublish, colorJPEGPointer, CompressionType.NVJPEG, colorImageMessage);
          ros2ColorImagePublishers.get(side).publish(colorImageMessage);
 
          lastColorSequenceNumbers.put(side, colorImageToPublish.getSequenceNumber());
