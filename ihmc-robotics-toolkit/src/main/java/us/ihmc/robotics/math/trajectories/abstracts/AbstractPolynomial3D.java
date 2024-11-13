@@ -11,7 +11,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
-import us.ihmc.commons.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 
 import java.util.List;
 
