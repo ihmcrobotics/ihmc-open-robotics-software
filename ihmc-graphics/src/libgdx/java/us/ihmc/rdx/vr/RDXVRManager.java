@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class RDXVRManager
 {
-   public static final boolean ENABLE_VR = true;
+   public static final boolean ENABLE_VR = false;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 

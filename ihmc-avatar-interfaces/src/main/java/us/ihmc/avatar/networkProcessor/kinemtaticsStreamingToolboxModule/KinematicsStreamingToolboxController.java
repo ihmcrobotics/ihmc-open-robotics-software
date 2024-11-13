@@ -250,10 +250,10 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public void onLoggingRequestReceived(KSTLoggingMessage loggingMessage)
    {
       // Disabling logging for real robot
-//      if (loggingMessage.getStartLogging())
-//         tools.getLogger().onLogRequestStart();
-//      else
-//         tools.getLogger().onLogRequestFinish();
+      if (loggingMessage.getStartLogging())
+         tools.getLogger().onLogRequestStart();
+      else
+         tools.getLogger().onLogRequestFinish();
    }
 
    @Override
