@@ -138,11 +138,10 @@ public class ReferenceSpreadingStateHelper
                referenceSpreader.spreadTrajectories();
             });
 
-            for (RobotSide robotSide : RobotSide.values())
-            {
-               HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(robotSide, PREPARE_DURATION);
-               trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
-            }
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.LEFT, PREPARE_DURATION);
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.RIGHT, PREPARE_DURATION);
+            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
+            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
             LogTools.info("Published Message to go back to the initial state!");
          } catch (IOException e) {
@@ -168,12 +167,10 @@ public class ReferenceSpreadingStateHelper
 
       public void onEntry()
       {
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = preImpactReference.getHandHybridTrajectoryMessage(robotSide);
-            LogTools.info("Message: " + handHybridTrajectoryMessage);
-            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
-         }
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = preImpactReference.getHandHybridTrajectoryMessage(RobotSide.LEFT);
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = preImpactReference.getHandHybridTrajectoryMessage(RobotSide.RIGHT);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
          LogTools.info("Published all messages");
       }
@@ -201,12 +198,10 @@ public class ReferenceSpreadingStateHelper
          LogTools.info("Entering AfterState");
          referenceSpreader.blendImpactTrajectory(timeInPreTrajectory + preImpactReference.getStartTimeCSV());
          blendImpactReference = referenceSpreader.getBlendedReferenceTrajectory();
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = blendImpactReference.getHandHybridTrajectoryMessage(robotSide);
-            LogTools.info("Message: " + handHybridTrajectoryMessage);
-            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
-         }
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = blendImpactReference.getHandHybridTrajectoryMessage(RobotSide.LEFT);
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = blendImpactReference.getHandHybridTrajectoryMessage(RobotSide.RIGHT);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
          LogTools.info("Published all messages");
       }
@@ -246,12 +241,10 @@ public class ReferenceSpreadingStateHelper
 
          ReferenceSpreadingTrajectory originalTrajectory = referenceSpreader.getOriginalReferenceTrajectory();
          originalTrajectory.setInitialTimeDuration(PREPARE_DURATION);
-         for (RobotSide robotSide : RobotSide.values())
-         {
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessage = originalTrajectory.getHandHybridTrajectoryMessage(robotSide);
-            LogTools.info("Message: " + handHybridTrajectoryMessage);
-            trajectoryMessagePublisher.publish(handHybridTrajectoryMessage);
-         }
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = originalTrajectory.getHandHybridTrajectoryMessage(RobotSide.LEFT);
+         HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = originalTrajectory.getHandHybridTrajectoryMessage(RobotSide.RIGHT);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
+         trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
          LogTools.info("Published all messages");
       }
