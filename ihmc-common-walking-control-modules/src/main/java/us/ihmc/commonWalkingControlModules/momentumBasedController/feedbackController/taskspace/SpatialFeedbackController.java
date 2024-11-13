@@ -1,7 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.lu.LUDecompositionAlt_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.dense.row.linsol.lu.LinearSolverLu_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -133,19 +138,21 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoPIDSE3Gains gains;
    protected final YoPID3DGains positionGains;
    protected final YoPID3DGains orientationGains;
+
    protected final Matrix3D tempGainMatrix = new Matrix3D();
    protected final DMatrixRMaj dampingRatioMatrix = new DMatrixRMaj(6, 6);
-   private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
-   private final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0,0);
-   private int[] activeAxis = new int[0];
+   protected final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+   protected final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0,0);
+   protected final TIntArrayList activeAxis = new TIntArrayList();
 
    private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
    protected final RigidBodyTwistProvider rigidBodyTwistProvider;
    protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   protected final LinearSolverLu_DDRM inverseSolver = new LinearSolverLu_DDRM(new LUDecompositionAlt_DDRM());
 
    protected final RigidBodyBasics rootBody;
    protected RigidBodyBasics base;
@@ -156,10 +163,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final RigidBodyBasics endEffector;
    protected final YoSE3OffsetFrame controlFrame;
-   JointIndexHandler jointIndexHandler;
-   private int[] jointIndices;
-   List<JointBasics> jointPath;
-   List<Integer> allJointIndices;
+   protected final JointIndexHandler jointIndexHandler;
+   protected final TIntArrayList jointIndices = new TIntArrayList();
+   protected final List<JointBasics> jointPath = new ArrayList<>();
 
    protected final double dt;
    protected final boolean isRootBody;
@@ -399,22 +405,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (isImpedanceEnabled())
       {
          MultiBodySystemTools.collectJointPath(bodyBase, endEffector, jointPath);
-         allJointIndices = new ArrayList<>();
+         jointIndices.clear();
 
-         for (JointBasics joint : jointPath)
+         for (int i = 0; i < jointPath.size(); i++)
          {
-            int[] indices = jointIndexHandler.getJointIndices(joint);
-            for (int index : indices)
-            {
-               allJointIndices.add(index);
-            }
-         }
-         jointIndices = new int[allJointIndices.size()];
-         for (int i = 0; i < allJointIndices.size(); i++) {
-            jointIndices[i] = allJointIndices.get(i);
+            jointIndices.add(jointIndexHandler.getJointIndices(jointPath.get(i)));
          }
 
-         activeAxis = new int[selectionMatrix.getNumberOfSelectedAxes()];
+         activeAxis.reset();
          selectionMatrix.getActiveAxes(activeAxis);
       }
 
@@ -505,8 +503,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FrameVector3D angularIntegralFeedback = new FrameVector3D();
 
    protected final DMatrixRMaj tempFeedbackMatrix = new DMatrixRMaj(6, 1);
-
-   private final Matrix3D inverseInertiaMatrix3D = new Matrix3D();
 
    @Override
    public void computeInverseDynamics()
@@ -846,6 +842,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
    private final Matrix3D tempMatrix3D = new Matrix3D();
 
+   private final DMatrixRMaj tempSqrtMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Vt = new DMatrixRMaj(0, 0);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
+
+
    /**
     * Computes the feedback term resulting from the error in linear velocity:<br>
     * x<sub>FB</sub><sup>linear</sup> = kd<sup>linear</sup> * (xDot<sub>desired</sub> -
@@ -914,14 +917,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);
 
-         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
 //         LogTools.info("K_p^{1/2} = " + sqrtProportionalGainMatrix);
 
          tempMatrix.set(inverseInertiaMatrix);
 
-//         Todo: Already inverted in computeCoriolisTerm so don't do the inverse twice
-         CommonOps_DDRM.invert(tempMatrix);
-         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
+         MatrixMissingTools.invert(tempMatrix, inverseSolver);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix, tempSqrtMatrix, U, W, Vt, svd);
 
 //         for (int row = 0; row < tempMatrix.getNumRows(); row++)
 //         {
@@ -1175,9 +1177,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
    }
 
-   private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj identityMatrix = CommonOps_DDRM.identity(6, 6);
 
    private void computeInverseInertiaMatrix()
    {
@@ -1191,25 +1194,25 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
       jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
 
-      tempMatrix.reshape(activeAxis.length, jacobianMatrix.getNumCols());
-      MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, activeAxis.length, tempMatrix);
+      tempMatrix.reshape(activeAxis.size(), jacobianMatrix.getNumCols());
+      MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, tempMatrix);
       jacobianMatrix.set(tempMatrix);
 
       subMassMatrix.set(massMatrixCalculator.getMassMatrix());
       massMatrixCalculator.reset();
       subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
 
-      subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
-      CommonOps_DDRM.extract(subMassMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
+      subMassInverseMatrix.reshape(jointIndices.size(), jointIndices.size());
+      MatrixMissingTools.extract(subMassMatrix, jointIndices, jointIndices, subMassInverseMatrix);
 
-      CommonOps_DDRM.invert(subMassInverseMatrix);
+      MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
 
-      inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
+      inverseInertiaTempMatrix.reshape(jointIndices.size(), jointIndices.size());
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
       CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, tempMatrix);
 
-      inverseInertiaMatrix.set(CommonOps_DDRM.identity(6,6));
-      CommonOps_DDRM.insert(tempMatrix, inverseInertiaMatrix, activeAxis, activeAxis.length, activeAxis, activeAxis.length);
+      inverseInertiaMatrix.set(identityMatrix);
+      MatrixMissingTools.insert(tempMatrix, inverseInertiaMatrix, activeAxis, activeAxis);
    }
 
    private final DMatrixRMaj inertiaMatrix = new DMatrixRMaj(0, 0);
@@ -1220,7 +1223,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       inertiaMatrix.reshape(inverseInertiaMatrix.getNumRows(), inverseInertiaMatrix.getNumCols());
       inertiaMatrix.set(inverseInertiaMatrix);
-      CommonOps_DDRM.invert(inertiaMatrix);
+      MatrixMissingTools.invert(inertiaMatrix, inverseSolver);
 
       if (savedInertiaMatrix.getNumCols()==0)
       {
@@ -1233,7 +1236,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       coriolisMatrix.reshape(inertiaMatrix.getNumRows(), inertiaMatrix.getNumCols());
       CommonOps_DDRM.add(inertiaMatrix, -1, savedInertiaMatrix, coriolisMatrix);
-      CommonOps_DDRM.scale(0.5*1/dt, coriolisMatrix);
+      CommonOps_DDRM.scale(0.5/dt, coriolisMatrix);
       savedInertiaMatrix.set(inertiaMatrix);
    }
 

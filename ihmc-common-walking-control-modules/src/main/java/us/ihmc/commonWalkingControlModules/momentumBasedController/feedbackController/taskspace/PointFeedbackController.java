@@ -2,6 +2,10 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.lu.LUDecompositionAlt_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.dense.row.linsol.lu.LinearSolverLu_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -114,6 +118,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RigidBodyTwistProvider rigidBodyTwistProvider;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   protected final LinearSolverLu_DDRM inverseSolver = new LinearSolverLu_DDRM(new LUDecompositionAlt_DDRM());
 
    private RigidBodyBasics base;
    protected RigidBodyBasics bodyBase;
@@ -623,6 +628,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
 
+   private final DMatrixRMaj tempSqrtMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Vt = new DMatrixRMaj(0, 0);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
+
    /**
     * Computes the feedback term resulting from the error in linear velocity:<br>
     * x<sub>FB</sub> = kd * (xDot<sub>desired</sub> - xDot<sub>current</sub>)
@@ -667,10 +678,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);
 
-         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
          tempMatrix.set(inverseInertiaMatrix);
-         CommonOps_DDRM.invert(tempMatrix);
-         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
+         MatrixMissingTools.invert(tempMatrix, inverseSolver);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix, tempSqrtMatrix, U, W, Vt, svd);
 
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
@@ -837,7 +848,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       massInverseMatrix.reshape(massInverseMatrix.getNumRows(), massInverseMatrix.getNumCols());
       subMassInverseMatrix.set(new DMatrixRMaj(jointIndices.length, jointIndices.length));
       CommonOps_DDRM.extract(massInverseMatrix, jointIndices, jointIndices.length, jointIndices, jointIndices.length, subMassInverseMatrix);
-      CommonOps_DDRM.invert(subMassInverseMatrix);
+      MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
 
       inverseInertiaTempMatrix.reshape(jointIndices.length, jointIndices.length);
       CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);

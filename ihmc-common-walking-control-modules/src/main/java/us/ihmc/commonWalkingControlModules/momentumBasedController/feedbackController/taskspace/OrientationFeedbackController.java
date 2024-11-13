@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
@@ -631,6 +633,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
 
+   private final DMatrixRMaj tempSqrtMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Vt = new DMatrixRMaj(0, 0);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
+
    /**
     * Computes the feedback term resulting from the error in angular velocity:<br>
     * x<sub>FB</sub> = kd * (&omega;<sub>desired</sub> - &omega;<sub>current</sub>)
@@ -677,10 +685,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          sqrtProportionalGainMatrix.reshape(6,6);
          sqrtInertiaMatrix.reshape(6,6);
 
-         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
          tempMatrix.set(inverseInertiaMatrix);
          CommonOps_DDRM.invert(tempMatrix);
-         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix, tempSqrtMatrix, U, W, Vt, svd);
 
          CommonOps_DDRM.mult(sqrtInertiaMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
          CommonOps_DDRM.multAdd(sqrtProportionalGainMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);

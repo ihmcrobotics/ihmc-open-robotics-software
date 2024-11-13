@@ -1,5 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 
@@ -721,6 +722,27 @@ public class SelectionMatrix6D
          activeAxesToPack[index++] = 4;
       if (isLinearZSelected())
          activeAxesToPack[index++] = 5;
+   }
+
+   /**
+    * Returns a list of indices for the active axes
+    * @param activeAxesToPack list to store the active axes
+    */
+   public void getActiveAxes(TIntArrayList activeAxesToPack)
+   {
+      activeAxesToPack.reset();
+      if (isAngularXSelected())
+         activeAxesToPack.add(0);
+      if (isAngularYSelected())
+         activeAxesToPack.add(1);
+      if (isAngularZSelected())
+         activeAxesToPack.add(2);
+      if (isLinearXSelected())
+         activeAxesToPack.add(3);
+      if (isLinearYSelected())
+         activeAxesToPack.add(4);
+      if (isLinearZSelected())
+         activeAxesToPack.add(5);
    }
 
    @Override
