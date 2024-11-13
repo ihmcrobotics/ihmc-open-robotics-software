@@ -10,7 +10,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
