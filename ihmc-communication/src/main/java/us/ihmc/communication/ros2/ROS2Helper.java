@@ -110,7 +110,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
-      new ROS2Callback<>(ros2NodeInterface, Empty.class, topic, message -> notification.set());
+      ros2NodeInterface.createSubscription2(topic.withType(Empty.class), message -> notification.set());
       return notification;
    }
 
