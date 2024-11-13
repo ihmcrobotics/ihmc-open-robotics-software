@@ -12,6 +12,7 @@ ihmc {
 }
 
 mainDependencies {
+   api("us.ihmc:ihmc-commons-testing:0.35.0")
    api("us.ihmc:ihmc-perception:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
