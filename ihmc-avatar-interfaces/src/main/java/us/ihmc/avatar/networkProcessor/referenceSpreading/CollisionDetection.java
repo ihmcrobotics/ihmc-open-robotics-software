@@ -38,13 +38,20 @@ public class CollisionDetection
    private final HashMap<RobotSide, List<Integer>> jointMap = new HashMap<>(RobotSide.values().length);
 
    double minSigma;
-   double kd;
+   double kReturn;
+   double kForce;
    double time = Double.NaN;
 
    public CollisionDetection(double minSigma, double kd, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
    {
+      this(minSigma, kd, kd, fullRobotModel, null);
+   }
+
+   public CollisionDetection(double minSigma, double kReturn, double kForce, FullHumanoidRobotModel fullRobotModel, YoRegistry registry)
+   {
       this.minSigma = minSigma;
-      this.kd = kd;
+      this.kReturn = kReturn;
+      this.kForce = kForce;
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -98,7 +105,7 @@ public class CollisionDetection
 
          CommonOps_DDRM.mult(velocityMatrix, tempMatrix, powerMatrix);
 
-         sigmaDot.get(robotSide).set(-kd*kd*sigma.get(robotSide).getDoubleValue() + Math.abs(kd*powerMatrix.get(0, 0)));
+         sigmaDot.get(robotSide).set(-kReturn * sigma.get(robotSide).getDoubleValue() + Math.abs(kForce * powerMatrix.get(0, 0)));
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
