@@ -28,8 +28,8 @@ import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.commons.time.TimeIntervalProvider;
-import us.ihmc.commons.time.TimeIntervalReadOnly;
+import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
