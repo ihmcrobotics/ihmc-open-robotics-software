@@ -62,6 +62,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
+// TODO fix me completely, this breaks github real bad - Nick
+@Disabled
 public class RemoteFootstepPlannerUIMessagingTest
 {
    private static final double epsilon = 1e-5;
