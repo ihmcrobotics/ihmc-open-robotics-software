@@ -3,8 +3,8 @@ package us.ihmc.robotics.math.trajectories.interfaces;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.commons.time.TimeIntervalBasics;
-import us.ihmc.commons.time.TimeIntervalProvider;
+import us.ihmc.robotics.time.TimeIntervalBasics;
+import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public interface Polynomial3DReadOnly extends PositionTrajectoryGenerator, TimeIntervalProvider
 {
