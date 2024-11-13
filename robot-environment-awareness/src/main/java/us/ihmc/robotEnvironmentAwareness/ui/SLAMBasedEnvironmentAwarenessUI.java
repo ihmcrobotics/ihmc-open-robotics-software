@@ -16,7 +16,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -161,7 +160,7 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 
       ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "slam_ui");
       ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)
          {

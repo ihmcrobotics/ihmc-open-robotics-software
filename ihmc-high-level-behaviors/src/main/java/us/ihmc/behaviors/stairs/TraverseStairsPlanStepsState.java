@@ -6,7 +6,6 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -91,8 +90,8 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
 //      });
 
       footstepListPublisher = helper.getROS2Node().createPublisher(TraverseStairsBehaviorAPI.PLANNED_STEPS);
-      new ROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
-      new ROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
+      helper.getROS2Node().createSubscription2(TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
+      helper.getROS2Node().createSubscription2(TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
    }
 
    @Override

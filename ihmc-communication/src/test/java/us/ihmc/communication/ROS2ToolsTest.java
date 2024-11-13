@@ -6,14 +6,12 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
-import std_msgs.msg.dds.String;
 import test_msgs.msg.dds.LongString;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Subscription;
@@ -97,10 +95,7 @@ class ROS2ToolsTest
       ROS2PublisherBasics<Int64> intPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(Int64.class));
 
       MutableInt count = new MutableInt();
-      new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, message ->
-      {
-         LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
-      });
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(Int64.class), message -> LogTools.info("Received int #{}: {}", count.getAndIncrement(), message));
 
       new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
       {
@@ -119,17 +114,17 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      ROS2PublisherBasics<String> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(String.class));
+      ROS2PublisherBasics<std_msgs.msg.dds.String> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(std_msgs.msg.dds.String.class));
 
       MutableInt count = new MutableInt();
-      new ROS2Callback<>(ros2Node, String.class, ROS2Tools.IHMC_ROOT, message ->
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(std_msgs.msg.dds.String.class), message ->
       {
          LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
       });
 
       new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
       {
-         String message = new String();
+         std_msgs.msg.dds.String message = new std_msgs.msg.dds.String();
          StringBuilder builder = new StringBuilder();
          for (int i = 0; i < 100; i++)
             builder.append(i);
@@ -150,7 +145,7 @@ class ROS2ToolsTest
       ROS2PublisherBasics<LongString> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(LongString.class));
 
       MutableInt count = new MutableInt();
-      new ROS2Callback<>(ros2Node, LongString.class, ROS2Tools.IHMC_ROOT, message ->
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(LongString.class), message ->
       {
          LogTools.info("Received int #{}: {}", count.getAndIncrement(), MessageTools.unpackLongStringFromByteSequence(message.getLongString()));
       });
@@ -178,9 +173,7 @@ class ROS2ToolsTest
       StringBuilder stringToSend = new StringBuilder("Hello World!");
 
       ROS2Node loopbackNode = ROS2Tools.createLoopbackROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "LoopbackNode");
-      ROS2Subscription<String> loopbackSubscriber = loopbackNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(String.class), subscriber ->
-      {
-         String message = subscriber.takeNextData();
+      ROS2Subscription<std_msgs.msg.dds.String> loopbackSubscriber = loopbackNode.createSubscription2(ROS2Tools.IHMC_ROOT.withType(std_msgs.msg.dds.String.class), message -> {
          messageReceived.set(true);
          synchronized (messageReceived)
          {
@@ -197,14 +190,14 @@ class ROS2ToolsTest
                                            getClass().getSimpleName(),
                                            new RTPSCommunicationFactory().getDomainId(),
                                            outsiderAddress);
-      ROS2Subscription<String> outsideSubscriber = outsiderNode.createSubscription(ROS2Tools.IHMC_ROOT.withType(String.class), subscriber ->
+      ROS2Subscription<std_msgs.msg.dds.String> outsideSubscriber = outsiderNode.createSubscription2(ROS2Tools.IHMC_ROOT.withType(std_msgs.msg.dds.String.class), subscriber ->
       {
          LogTools.error("Outsider node should NOT receive any messages");
          failed.set(true);
       });
 
-      ROS2PublisherBasics<String> stringPublisher = loopbackNode.createPublisher(ROS2Tools.IHMC_ROOT.withType(String.class));
-      String messageToSend = new String();
+      ROS2PublisherBasics<std_msgs.msg.dds.String> stringPublisher = loopbackNode.createPublisher(ROS2Tools.IHMC_ROOT.withType(std_msgs.msg.dds.String.class));
+      std_msgs.msg.dds.String messageToSend = new std_msgs.msg.dds.String();
       messageToSend.setData(stringToSend.toString());
       stringPublisher.publish(messageToSend);
 

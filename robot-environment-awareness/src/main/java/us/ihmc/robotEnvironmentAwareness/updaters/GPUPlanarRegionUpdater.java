@@ -3,7 +3,6 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import geometry_msgs.Point;
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ScanPointFilter;
@@ -61,11 +60,9 @@ public class GPUPlanarRegionUpdater
 
    public void attachROS2Tuner(ROS2NodeInterface ros2Node)
    {
-      new ROS2Callback<>(ros2Node,
-                             PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS,
+      ros2Node.createSubscription2(PerceptionAPI.CONCAVE_HULL_FACTORY_PARAMETERS,
                              parameters -> concaveHullFactoryParameters.setFromColonCommaString(parameters.getParameters().toString()));
-      new ROS2Callback<>(ros2Node,
-                             PerceptionAPI.POLYGONIZER_PARAMETERS,
+      ros2Node.createSubscription2(PerceptionAPI.POLYGONIZER_PARAMETERS,
                              parameters -> polygonizerParameters.setFromColonCommaString(parameters.getParameters().toString()));
    }
 

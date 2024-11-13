@@ -36,7 +36,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -113,9 +112,9 @@ public class RemoteHumanoidRobotInterface
       return new ROS2SyncedRobotModel(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
    }
 
-   public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
+   public void createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
-      return new ROS2Callback<>(ros2Node, FootstepStatusMessage.class, topicName.withOutput(), consumer);
+      ros2Node.createSubscription2(topicName.withOutput().withType(FootstepStatusMessage.class), consumer);
    }
 
    public FootstepStatusMessage getLatestFootstepStatusMessage()

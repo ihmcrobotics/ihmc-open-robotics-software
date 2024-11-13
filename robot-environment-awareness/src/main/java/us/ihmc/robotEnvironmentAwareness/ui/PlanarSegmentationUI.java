@@ -9,7 +9,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -110,7 +109,7 @@ public class PlanarSegmentationUI implements PerceptionUI
 
       ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "planar_segmentation_ui");
       ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)
          {
