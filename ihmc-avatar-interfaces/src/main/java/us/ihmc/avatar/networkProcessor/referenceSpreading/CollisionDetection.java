@@ -72,6 +72,16 @@ public class CollisionDetection
       baseBody = fullRobotModel.getElevator().getChildrenJoints().get(0).getSuccessor();
    }
 
+   public void reset()
+   {
+      time = Double.NaN;
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         sigma.get(robotSide).set(0);
+         sigmaDot.get(robotSide).set(0);
+      }
+   }
+
    public boolean detectCollision(HashMap<RobotSide, SpatialVectorMessage> handWrenches, us.ihmc.idl.IDLSequence.Float jointVelocities, double currentTime)
    {
       if (Double.isNaN(time) || currentTime < time)
@@ -109,6 +119,7 @@ public class CollisionDetection
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
+            LogTools.warn("Collision Detected!!!!");
             return true;
          }
 

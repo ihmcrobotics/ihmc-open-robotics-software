@@ -30,7 +30,7 @@ import java.util.Optional;
 public class ReferenceSpreadingStateHelper
 {
    private final Double BLEND_INTERVAL = 0.1;
-   private final Double PREPARE_DURATION = 1.5;
+   private final Double PREPARE_DURATION = 2.0;
 
    public enum States
    {
@@ -61,7 +61,8 @@ public class ReferenceSpreadingStateHelper
       this.registry = registry;
       this.demoDirectory = demoDirectory;
 
-      collisionDetection = new CollisionDetection(0.3, 10, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(10, 200, 200, fullRobotModel, registry);
+//      collisionDetection = new CollisionDetection(4, 100, 10, fullRobotModel, registry);
       referenceSpreader = new ReferenceSpreader(demoDirectory, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
 
       preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
@@ -137,6 +138,8 @@ public class ReferenceSpreadingStateHelper
                referenceSpreader.setTrajectoryFilePath(file.toString(), true);
                referenceSpreader.spreadTrajectories();
             });
+            collisionDetection.reset();
+
 
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.LEFT, PREPARE_DURATION);
             HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.RIGHT, PREPARE_DURATION);
@@ -220,7 +223,8 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         //         LogTools.info("AfterState: " + timeInState);
+         LogTools.info("AfterState: " + timeInState);
+         collisionDetection.detectCollision(handWrenches, jointVelocities, timeInState);
       }
 
       public void onEntry()
@@ -247,6 +251,7 @@ public class ReferenceSpreadingStateHelper
          trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
          LogTools.info("Published all messages");
+         collisionDetection.reset();
       }
 
       public void onExit(double timeInState)

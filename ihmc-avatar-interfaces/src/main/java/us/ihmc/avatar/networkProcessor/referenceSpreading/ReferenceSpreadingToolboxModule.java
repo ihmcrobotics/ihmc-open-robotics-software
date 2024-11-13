@@ -32,7 +32,7 @@ import java.util.List;
 
 public class ReferenceSpreadingToolboxModule extends ToolboxModule
 {
-   public static final int UPDATE_PERIOD_MILLIS = 60;
+   public static final int UPDATE_PERIOD_MILLIS = 1;
    private static final double defaultTimeWithoutInputsBeforeSleep = 60.0;
 
    private final ReferenceSpreadingToolboxController referenceSpreadingToolboxController;
