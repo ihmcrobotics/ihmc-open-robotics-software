@@ -303,6 +303,7 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
    {
       subscription.remove();
       subscription = null;
+      subscribed = false;
    }
 
    @Override
