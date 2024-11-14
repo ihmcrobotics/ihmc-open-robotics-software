@@ -110,6 +110,11 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addState(ContinuousHikingState.READY_TO_PLAN, readyToPlanState);
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
 
+      // TODO Set these to true for Tufts integration, need a better long term solution
+      continuousHikingParameters.setEnableContinuousHiking(true);
+      continuousHikingParameters.setStepPublisherEnabled(true);
+      // -------------------------------------------------------
+
       // Create different conditions
       StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage,
                                                                                                                                        continuousHikingParameters);

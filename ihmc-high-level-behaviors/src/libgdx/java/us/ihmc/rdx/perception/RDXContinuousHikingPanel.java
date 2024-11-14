@@ -136,7 +136,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                       message -> terrainPlanningDebugger.reset());
 
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
-      createParametersPanel(continuousHikingParameters, continuousHikingParametersPanel, remotePropertySets, ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS);
+//      createParametersPanel(continuousHikingParameters, continuousHikingParametersPanel, remotePropertySets, ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS);
       RDXStoredPropertySetTuner monteCarloPlannerParametersPanel = new RDXStoredPropertySetTuner("Monte Carlo Footstep Planner Parameters (CH)");
       createParametersPanel(monteCarloPlannerParameters,
                             monteCarloPlannerParametersPanel,
@@ -229,7 +229,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.text("And the enabled checkbox must be checked");
       ImGui.text("By holding CTRL the robot will walk forward");
       ImGui.separator();
-      continuousHikingParametersPanel.renderImGuiWidgets();
+//      continuousHikingParametersPanel.renderImGuiWidgets();
 
       ImGui.checkbox("Local Render Mode", localRenderMode);
       ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
@@ -319,7 +319,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the checkbox is checked
-      if (continuousHikingParameters.getEnableContinuousHiking())
+//      if (continuousHikingParameters.getEnableContinuousHiking())
       {
          commandMessage.setEnableContinuousWalking(walkingEnabled);
          commandMessage.setPublishToController(ImGui.getIO().getKeyAlt());
