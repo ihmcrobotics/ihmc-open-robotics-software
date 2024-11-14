@@ -28,6 +28,11 @@ module toolbox_msgs
          */
         unsigned long sequence_id;
         /**
+         * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+         * Should not be less than 1.0
+         */
+        double a_star_heuristics_weight;
+        /**
          * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
          * to run slower.
          */
@@ -77,7 +82,7 @@ module toolbox_msgs
          * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
          */
         @defaultValue(value=-11.1)
-        double maximum_step_reach;
+        double max_step_reach;
         /**
          * Maximum yaw between consecutive footsteps
          * 
@@ -88,7 +93,7 @@ module toolbox_msgs
          * its maximum reach.
          */
         @defaultValue(value=-11.1)
-        double maximum_step_yaw;
+        double max_step_yaw;
         /**
          * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
          */
@@ -108,7 +113,7 @@ module toolbox_msgs
          * on top of each other. If too high, footsteps might not be kinematically feasible.
          */
         @defaultValue(value=-11.1)
-        double minimum_step_width;
+        double min_step_width;
         /**
          * Minimum step length the planner will consider for candidate steps.
          * 
@@ -119,12 +124,12 @@ module toolbox_msgs
          * on top of each other. If too high, footsteps might not be kinematically feasible.
          */
         @defaultValue(value=-11.1)
-        double minimum_step_length;
+        double min_step_length;
         /**
          * Minimum step yaw.
          */
         @defaultValue(value=-11.1)
-        double minimum_step_yaw;
+        double min_step_yaw;
         /**
          * Maximum vertical distance between consecutive footsteps
          * 
@@ -132,33 +137,33 @@ module toolbox_msgs
          * z-up sole frame.
          */
         @defaultValue(value=-11.1)
-        double maximum_step_z;
+        double max_step_z;
         /**
          * Maximum vertical distance between start-of-swing and touchdown
          */
         @defaultValue(value=-11.1)
-        double maximum_swing_z;
+        double max_swing_z;
         /**
          * Maximum xy distance between start-of-swing and touchdown
          */
         @defaultValue(value=-11.1)
-        double maximum_swing_reach;
+        double max_swing_reach;
         /**
          * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
          * 
          * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
          */
         @defaultValue(value=0.9)
-        double minimum_foothold_percent;
+        double min_foothold_percent;
         /**
          * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
          * then the value specified here.
          * 
          * More specifically, if a footstep has an associated planar region and that regions surface normal has a
-         * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+         * z-value less than cos(minSurfaceIncline), it will be rejected.
          */
         @defaultValue(value=-11.1)
-        double minimum_surface_incline_radians;
+        double min_surface_incline;
         /**
          * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
          * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -202,33 +207,33 @@ module toolbox_msgs
          * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
          */
         @defaultValue(value=-11.1)
-        double maximum_step_width;
+        double max_step_width;
         /**
          * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
          * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-         * until it is minimumDistanceFromCliffBottoms away from it.
+         * until it is minDistanceFromCliffBottoms away from it.
          * 
          * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
          * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
          * generator is capable of swinging over.
          */
         @defaultValue(value=-11.1)
-        double cliff_base_height_to_avoid;
+        double cliff_bottom_height_to_avoid;
         /**
          * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
          * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
-         * until it is minimumDistanceFromCliffBottoms away from it.
+         * until it is minDistanceFromCliffBottoms away from it.
          * 
          * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
          * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
          * generator is capable of swinging over.
          */
         @defaultValue(value=-11.1)
-        double minimum_distance_from_cliff_bottoms;
+        double min_distance_from_cliff_bottoms;
         /**
          * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
          * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-         * until it is minimumDistanceFromCliffTops away from it.
+         * until it is minDistanceFromCliffTops away from it.
          * 
          * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
          * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -239,14 +244,14 @@ module toolbox_msgs
         /**
          * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
          * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-         * until it is minimumDistanceFromCliffBottoms away from it.
+         * until it is minDistanceFromCliffBottoms away from it.
          * 
          * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
          * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
          * generator is capable of swinging over.
          */
         @defaultValue(value=-11.1)
-        double minimum_distance_from_cliff_tops;
+        double min_distance_from_cliff_tops;
         /**
          * Some node checkers will check if a bounding box that describes the body of the robot will move
          * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -371,11 +376,6 @@ module toolbox_msgs
         @defaultValue(value=-11.1)
         double cost_per_step;
         /**
-         * Gets the weight for the heuristics in the A Star planner.
-         */
-        @defaultValue(value=-11.1)
-        double a_star_heuristics_weight;
-        /**
          * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
          */
         @defaultValue(value=1)
@@ -397,7 +397,7 @@ module toolbox_msgs
          * ideal step are considered and the others are ignored. Set to non-positive number to disable
          */
         @defaultValue(value=-1)
-        long maximum_branch_factor;
+        long max_branch_factor;
         /**
          * If true, enables a mask that reduces the number of calculated steps away from the ideal step
          */
@@ -427,7 +427,7 @@ module toolbox_msgs
          * Height offset of shin collidable cylinder
          */
         @defaultValue(value=-11.1)
-        double shin_height_offet;
+        double shin_height_offset;
         /**
          * When using a height map, maximum accepted rms error
          */

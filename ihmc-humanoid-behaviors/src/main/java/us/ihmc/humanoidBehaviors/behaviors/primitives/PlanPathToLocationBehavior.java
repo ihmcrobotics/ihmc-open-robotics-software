@@ -202,7 +202,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 
             FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
-            plannerParametersPacket.setMaximumStepYaw(0.8);
+            plannerParametersPacket.setMaxStepYaw(0.8);
             footstepPlannerParametersPublisher.publish(plannerParametersPacket);
 
             footstepPlanningRequestPublisher.publish(request);

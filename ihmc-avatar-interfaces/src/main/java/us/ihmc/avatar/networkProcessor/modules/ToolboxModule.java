@@ -1,19 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.net.BindException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.google.common.base.CaseFormat;
-
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -26,7 +13,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputL
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -48,6 +34,18 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.net.BindException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as
  * an example.
@@ -67,7 +65,6 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    private final boolean manageROS2Node;
    private final ROS2NodeInterface ros2Node;
-   protected final ManagedROS2Node managedROS2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
@@ -141,16 +138,14 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       if (ros2Node == null)
          ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       this.ros2Node = ros2Node;
-      this.managedROS2Node = new ManagedROS2Node(ros2Node);
       // Disable the comms to prevent message recival while creating the toolbox.
-      this.managedROS2Node.setEnabled(false);
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopic(),
                                                                     commandInputManager,
                                                                     getOutputTopic(),
                                                                     statusOutputManager,
-                                                                    managedROS2Node);
+                                                                    ros2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -169,7 +164,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      managedROS2Node.createSubscription(getInputTopic().withTypeName(ToolboxStateMessage.class), new NewMessageListener<ToolboxStateMessage>()
+      ros2Node.createSubscription(getInputTopic().withTypeName(ToolboxStateMessage.class), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
 
@@ -180,12 +175,10 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             receivedPacket(message);
          }
       });
-      registerExtraPuSubs(managedROS2Node);
+      registerExtraPuSubs(ros2Node);
 
       if (manageROS2Node && ros2Node instanceof RealtimeROS2Node rtNode)
          rtNode.spin();
-
-      this.managedROS2Node.setEnabled(true);
    }
 
    public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
@@ -486,8 +479,6 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          yoVariableServer.close();
          yoVariableServer = null;
       }
-
-      managedROS2Node.setEnabled(false);
 
       if (manageROS2Node)
          ((ROS2Node) ros2Node).destroy();

@@ -35,7 +35,6 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -72,8 +71,8 @@ public class LidarImageFusionProcessorCommunicationModule
       networkProvider.registerStereoVisionPointCloudHandler(this::dispatchStereoVisionPointCloudMessage);
       networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
 
-      new ROS2Callback<>(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT, this::dispatchImage32);
-      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(Image32.class), this::dispatchImage32);
+      ros2Node.createSubscription2(ROS2Tools.IHMC_ROOT.withType(VideoPacket.class), this::dispatchVideoPacket);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 

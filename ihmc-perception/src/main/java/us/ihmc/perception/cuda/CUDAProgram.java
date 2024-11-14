@@ -1,14 +1,10 @@
 package us.ihmc.perception.cuda;
 
 import org.apache.logging.log4j.Level;
-import org.bytedeco.cuda.cudart.CUfunc_st;
 import org.bytedeco.cuda.cudart.CUmod_st;
-import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaDeviceProp;
-import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.nvrtc._nvrtcProgram;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
@@ -16,24 +12,18 @@ import us.ihmc.log.LogTools;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
+import static us.ihmc.perception.cuda.CUDATools.*;
 
-class CUDAProgram
+public class CUDAProgram implements AutoCloseable
 {
    private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
                                                     "--dopt=on",                     // Optimize code
                                                     "-G"};                           // More code optimization
 
    private final CUmod_st module = new CUmod_st();
-   private final Map<String, CUfunc_st> kernels = new HashMap<>();
-
-   private int error;
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options
@@ -113,36 +103,23 @@ class CUDAProgram
       initialize(programName, programCode, headerNames, headerContents, compilationOptions);
    }
 
-   public void loadKernel(String kernelName)
+   public CUDAKernel loadKernel(String kernelName)
    {
       // Load the kernel from module
-      CUfunc_st kernel = new CUfunc_st();
-      error = cuModuleGetFunction(kernel, module, kernelName);
-      checkCUDAError(error);
-      kernels.put(kernelName, kernel);
+      return new CUDAKernel(kernelName, module);
    }
 
-   public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
+   @Override
+   public void close()
    {
-      if (!kernels.containsKey(kernelName))
-         throw new IllegalStateException("Kernel (" + kernelName + ") requested has not been loaded yet.");
-
-      // Run kernel
-      CUfunc_st kernel = kernels.get(kernelName);
-      launchKernelFunction(stream, kernel, gridSize, blockSize, sharedMemorySize, arguments);
-   }
-
-   public void destroy()
-   {
-      for (CUfunc_st kernel : kernels.values())
-         kernel.close();
-
       cuModuleUnload(module);
       module.close();
    }
 
    private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions)
    {
+      int error;
+
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
       compileProgram(programName, programCode, headerNames, headerContents, compilationOptions, compiledProgram);
@@ -238,39 +215,16 @@ class CUDAProgram
    }
 
    /**
-    * Launches a CUDA kernel.
-    * @param stream CUDA stream on which the kernel will be synchronized.
-    * @param function The kernel function to launch.
-    * @param gridSize Grid size of the kernel execution.
-    * @param blockSize Block size of the kernel execution. Should not exceed maximum block size of the device.
-    * @param sharedMemorySize Size, in byte, of the memory shared by threads in each block.
-    * @param arguments List of arguments (parameters) being passed into the kernel.
-    */
-   private static void launchKernelFunction(CUstream_st stream, CUfunc_st function, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
-   {
-      PointerPointer<Pointer> argumentsPointer = arguments == null ? new PointerPointer<>() : new PointerPointer<>(arguments);
-
-      int error = cuLaunchKernel(function,
-                                 gridSize.x(),
-                                 gridSize.y(),
-                                 gridSize.z(),
-                                 blockSize.x(),
-                                 blockSize.y(),
-                                 blockSize.z(),
-                                 sharedMemorySize,
-                                 stream,
-                                 argumentsPointer,
-                                 new PointerPointer<>());
-
-      CUDATools.checkCUDAError(error);
-      argumentsPointer.close();
-   }
-
-   /**
     * @return A fairly recent compute version available on the device.
     */
    private static String getComputeVersion()
    {
+      if (!hasCUDA())
+         LogTools.fatal("CUDA Runtime has not been found. To install CUDA Toolkit, follow the instructions in ihmc-perception/README.md.");
+
+      if (!hasCUDADevice())
+         LogTools.fatal("No CUDA device found. An NVIDIA GPU is required to run this code.");
+
       cudaDeviceProp deviceProperties = new cudaDeviceProp();
       cudaGetDeviceProperties(deviceProperties, 0);
       int majorVersion = deviceProperties.major();
