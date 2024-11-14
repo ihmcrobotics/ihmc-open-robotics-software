@@ -421,6 +421,7 @@ public class WalkingCommandConsumer
             SE3PIDGainsTrajectoryControllerCommand gainsCommand = command.getPIDGainsTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
+            LogTools.info("Info: " + feedForwardCommand.getNumberOfTrajectoryPoints() + "-" + taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints() + "-" + gainsCommand.getNumberOfTrajectoryPoints());
             if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
             {
                if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())

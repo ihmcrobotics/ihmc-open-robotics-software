@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -357,6 +358,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
+         LogTools.info("test0");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
          return true;
@@ -375,6 +377,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
+         LogTools.info("test1");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 
@@ -406,6 +409,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
+         LogTools.info("test2");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 
@@ -434,6 +438,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
+         LogTools.info("test3");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 

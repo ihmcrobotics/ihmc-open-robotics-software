@@ -434,7 +434,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (yoFeedForwardAcceleration != null)
       {
          yoFeedForwardAcceleration.setIncludingFrame(command.getReferenceAngularAcceleration(), command.getReferenceLinearAcceleration());
-         LogTools.info("Endeffector: " + endEffector.getName() + " Feedforward acceleration: " + yoFeedForwardAcceleration.getLinearPart() + "-" + yoFeedForwardAcceleration.getAngularPart());
+//         LogTools.info("Endeffector: " + endEffector.getName() + " Feedforward acceleration: " + yoFeedForwardAcceleration.getLinearPart() + "-" + yoFeedForwardAcceleration.getAngularPart());
          yoFeedForwardAcceleration.checkReferenceFrameMatch(yoDesiredPose);
          yoFeedForwardAcceleration.setCommandId(currentCommandId);
       }

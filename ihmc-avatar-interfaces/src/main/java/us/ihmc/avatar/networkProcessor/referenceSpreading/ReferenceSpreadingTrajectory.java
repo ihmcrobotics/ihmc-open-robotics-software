@@ -292,7 +292,7 @@ private static final List<String> JOINT_NAMES = Arrays.asList("SHOULDER_Y", "SHO
       handHybridTrajectoryMessage.getTaskspaceTrajectoryMessage().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
       handHybridTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-//      handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
+      handHybridTrajectoryMessage.getFeedforwardTaskspaceTrajectoryMessage().set(wrenchTrajectoryMessage);
 
       if (!pidGainsTrajectoryMessage.getPidGainsTrajectoryPoints().isEmpty())
          handHybridTrajectoryMessage.getTaskspacePidGainsTrajectoryMessage().set(pidGainsTrajectoryMessage);

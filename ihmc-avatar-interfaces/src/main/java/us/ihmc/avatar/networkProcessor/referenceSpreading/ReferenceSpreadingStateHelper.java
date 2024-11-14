@@ -224,7 +224,7 @@ public class ReferenceSpreadingStateHelper
 
       public void doAction(double timeInState)
       {
-         LogTools.info("AfterState: " + timeInState);
+//         LogTools.info("AfterState: " + timeInState);
          collisionDetection.detectCollision(handWrenches, jointVelocities, timeInState);
       }
 
@@ -248,6 +248,7 @@ public class ReferenceSpreadingStateHelper
          originalTrajectory.setInitialTimeDuration(PREPARE_DURATION);
          HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = originalTrajectory.getHandHybridTrajectoryMessage(RobotSide.LEFT);
          HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = originalTrajectory.getHandHybridTrajectoryMessage(RobotSide.RIGHT);
+         LogTools.info("message Left: " + handHybridTrajectoryMessageLeft);
          trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
          trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
