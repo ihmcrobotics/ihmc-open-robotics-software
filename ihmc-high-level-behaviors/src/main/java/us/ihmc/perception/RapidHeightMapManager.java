@@ -77,11 +77,14 @@ public class RapidHeightMapManager
 
 
    {
-      heightMapImage.download(new Mat(heightmapMat));
+//      heightMapImage.download(heightmapMat);
+
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          OpenCVTools.convertFloatToShort(latestDepthImage, heightmapMat, 1000.0, 0.0);
       else
          latestDepthImage.convertTo(heightmapMat, opencv_core.CV_16UC1);
+
+      heightMapImage.upload(heightmapMat);
 
       if (resetHeightMapRequested.poll())
       {
@@ -114,11 +117,11 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                             (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
-//      RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, temp);
+      RapidHeightMapExtractorCuda.packHeightMapData(rapidHeightMapExtractor, temp);
       return temp;
    }
 
