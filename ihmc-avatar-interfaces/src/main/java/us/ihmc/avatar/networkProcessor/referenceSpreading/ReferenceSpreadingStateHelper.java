@@ -136,6 +136,7 @@ public class ReferenceSpreadingStateHelper
             mostRecentFile.ifPresent(file -> {
                LogTools.info("Preparing signal: " + file);
                referenceSpreader.setTrajectoryFilePath(file.toString(), true);
+               collisionDetection.reset();
                referenceSpreader.spreadTrajectories();
             });
             collisionDetection.reset();
