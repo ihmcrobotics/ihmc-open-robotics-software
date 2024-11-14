@@ -336,12 +336,20 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
       orientationHelper.getDesiredOrientation(desiredOrientation);
 
+
       if (positionHelper.handleTrajectoryCommand(euclideanCommand, desiredOrientation) && orientationHelper.handleTrajectoryCommand(so3Command))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orientationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
          if (command.getExecutionMode() != ExecutionMode.STREAM)
             statusHelper.registerNewTrajectory(command);
+
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
+         positionHelper.getFeedForwardTrajectoryList().clear();
+         positionHelper.getFeedForwardTrajectoryTimes().clear();
+         orientationHelper.getFeedForwardTrajectoryList().clear();
+         orientationHelper.getFeedForwardTrajectoryTimes().clear();
          return true;
       }
 
@@ -360,6 +368,14 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
+
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
+         positionHelper.getFeedForwardTrajectoryList().clear();
+         positionHelper.getFeedForwardTrajectoryTimes().clear();
+         orientationHelper.getFeedForwardTrajectoryList().clear();
+         orientationHelper.getFeedForwardTrajectoryTimes().clear();
+
          return true;
       }
 
@@ -379,11 +395,13 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 
-
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
          positionHelper.getFeedForwardTrajectoryList().clear();
          positionHelper.getFeedForwardTrajectoryTimes().clear();
          orientationHelper.getFeedForwardTrajectoryList().clear();
          orientationHelper.getFeedForwardTrajectoryTimes().clear();
+
          for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
          {
             positionHelper.getFeedForwardTrajectoryList().add().set(feedForwardCommand.getTrajectoryPoint(i));
@@ -412,6 +430,10 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
          positionHelper.getGainsTrajectoryPoints().clear();
          orientationHelper.getGainsTrajectoryPoints().clear();
+         positionHelper.getFeedForwardTrajectoryList().clear();
+         positionHelper.getFeedForwardTrajectoryTimes().clear();
+         orientationHelper.getFeedForwardTrajectoryList().clear();
+         orientationHelper.getFeedForwardTrajectoryTimes().clear();
 
          for (int i = 0; i < gainsCommand.getNumberOfTrajectoryPoints(); i++)
          {
@@ -439,12 +461,12 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 
+         positionHelper.getGainsTrajectoryPoints().clear();
+         orientationHelper.getGainsTrajectoryPoints().clear();
          positionHelper.getFeedForwardTrajectoryList().clear();
          positionHelper.getFeedForwardTrajectoryTimes().clear();
-         positionHelper.getGainsTrajectoryPoints().clear();
          orientationHelper.getFeedForwardTrajectoryList().clear();
          orientationHelper.getFeedForwardTrajectoryTimes().clear();
-         orientationHelper.getGainsTrajectoryPoints().clear();
 
          for (int i = 0; i < feedForwardCommand.getNumberOfTrajectoryPoints(); i++)
          {

@@ -117,13 +117,12 @@ public class CollisionDetection
 
          sigmaDot.get(robotSide).set(-kReturn * sigma.get(robotSide).getDoubleValue() + Math.abs(kForce * powerMatrix.get(0, 0)));
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
+         LogTools.info("side: " + robotSide.getLowerCaseName() + "Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
             LogTools.warn("Collision Detected!!!!");
             return true;
          }
-
-         LogTools.info("side: " + robotSide.getLowerCaseName() + "Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
       }
       time = currentTime;
       return false;

@@ -363,7 +363,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       if (!gainsTrajectoryPoints.isEmpty())
       {
          gains = gainsTrajectoryPoints.get(
-                                            gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+               Math.max(gainsTrajectoryPoints.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex(),0))
                                       .getAngular();
          feedbackControlCommand.setGains(gains);
       }
