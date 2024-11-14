@@ -6,7 +6,6 @@ buildscript {
    }
    dependencies {
       classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.24.4")
-      classpath("us.ihmc:log-tools:0.6.4") // removes vulnerable log4j versions from plugin classpath; can be removed later
    }
 }
 
