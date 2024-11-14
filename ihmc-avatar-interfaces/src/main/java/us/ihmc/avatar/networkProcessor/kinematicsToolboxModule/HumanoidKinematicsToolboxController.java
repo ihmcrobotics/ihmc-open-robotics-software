@@ -648,7 +648,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       super.updateInternal();
 //      updateContactInfo();
 
-      if (!runWithPostureOptimizer.getValue() && isUpperBodyLoadBearing.getValue())
+      if (!KinematicsStreamingToolboxModule.PUBLISH_TO_CONTROLLER && isUpperBodyLoadBearing.getValue())
       {
 //         LogTools.info("reporting s.r. debug status");
          supportRegionDebug.setCenterOfMassStabilityMargin(multiContactRegionCalculator.getStabilityMargin());
