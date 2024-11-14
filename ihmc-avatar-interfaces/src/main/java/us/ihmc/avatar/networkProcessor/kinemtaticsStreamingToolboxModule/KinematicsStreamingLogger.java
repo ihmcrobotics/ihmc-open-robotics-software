@@ -66,6 +66,7 @@ public class KinematicsStreamingLogger
       ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotName);
       ros2Node.createSubscription(objectCarryTopic, s ->
       {
+         LogTools.info("Received object carry message");
          ObjectCarryMessage message = s.takeNextData();
          message.setLogTimestamp(System.nanoTime() - logStartTimeNanos.get());
          latestObjectCarryMessage.set(message);
@@ -162,7 +163,7 @@ public class KinematicsStreamingLogger
          }
 
          ArrayNode objectCarryArray = root.addArray();
-         for (int i = 0; i < objectCarryArray.size(); i++)
+         for (int i = 0; i < objectCarryMessages.size(); i++)
          {
             objectCarryArray.add(objectMapper.readTree(objectCarrySerializer.serializeToString(objectCarryMessages.get(i))));
          }
@@ -173,6 +174,10 @@ public class KinematicsStreamingLogger
          outputStream.flush();
          printStream.close();
          outputStream.close();
+
+         streamingMessages.clear();
+         loadBearingMessages.clear();
+         objectCarryMessages.clear();
       }
       catch (Exception e)
       {
