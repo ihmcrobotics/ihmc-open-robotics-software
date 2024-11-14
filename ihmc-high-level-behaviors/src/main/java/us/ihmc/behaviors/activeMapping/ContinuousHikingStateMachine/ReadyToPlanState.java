@@ -164,6 +164,9 @@ public class ReadyToPlanState implements State
          // This allows for walking to a goal that isn't straight forward, its assumed that if there is no goal we will just resume walking straight forward
          case WALK_TO_GOAL ->
          {
+            // Allow for more planning time with this one, just plan for one step length
+            continuousHikingParameters.setPlannerTimeoutFraction(1.0);
+
             // Set the goalPoses here so that we return a good value regardless of what happens next
             goalPoses = walkToGoalWayPointPoses.get(0);
 

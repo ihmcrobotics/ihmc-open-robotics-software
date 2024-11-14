@@ -204,12 +204,14 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
-      remotePropertySets.setPropertyChanged();
-
-      // When running on the process we don't want to create the parameters locally, this gets done on the remote side
+      // When running on the process, we don't want to create the parameters locally; this gets done on the remote side
       if (runningLocally)
       {
          ros2PropertySetGroup.update();
+      }
+      else
+      {
+         remotePropertySets.setPropertyChanged();
       }
 
       if (latestFootstepPlan != null)
