@@ -1,7 +1,6 @@
 package us.ihmc.tools.time;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
  */
 public class FrequencyCalculator
 {
-   private double alpha = 0.3;
+   private final double alpha = 0.3;
    private double lastEventTime = Double.NaN;
    private double smoothedPeriod = Double.NaN;
 
