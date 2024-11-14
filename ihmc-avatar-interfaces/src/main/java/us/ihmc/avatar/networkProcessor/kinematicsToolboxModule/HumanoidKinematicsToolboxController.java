@@ -1087,4 +1087,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       return multiContactManager.getPostureSensitivity();
    }
+
+   public boolean isPostureOptimizerEnabled()
+   {
+      return runWithPostureOptimizer.getValue();
+   }
 }

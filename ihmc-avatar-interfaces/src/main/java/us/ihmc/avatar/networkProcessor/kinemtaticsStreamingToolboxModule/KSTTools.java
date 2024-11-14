@@ -242,7 +242,7 @@ public class KSTTools
 
       useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
       useStreamingPublisher.set(parameters.getUseStreamingPublisher());
-      logger = new KinematicsStreamingLogger(registry);
+      logger = new KinematicsStreamingLogger(ikController::isPostureOptimizerEnabled, registry);
    }
 
    public void update()

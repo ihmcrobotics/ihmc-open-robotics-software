@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -36,11 +37,13 @@ public class KinematicsStreamingLogger
    private final JSONSerializer<WholeBodyTrajectoryMessage> wholeBodyTrajectorySerializer = new JSONSerializer<>(new WholeBodyTrajectoryMessagePubSubType());
    private final JSONSerializer<WholeBodyStreamingMessage> wholeBodyStreamingSerializer = new JSONSerializer<>(new WholeBodyStreamingMessagePubSubType());
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private final BooleanProvider isPostureOptimizerEnabled;
 
-   public KinematicsStreamingLogger(YoRegistry registry)
+   public KinematicsStreamingLogger(BooleanProvider isPostureOptimizerEnabled, YoRegistry registry)
    {
       isLogging = new YoBoolean("isLogging", registry);
       messagesLogged = new YoInteger("messagesLogged", registry);
+      this.isPostureOptimizerEnabled = isPostureOptimizerEnabled;
    }
 
    public void update(Object messageToLog)
@@ -63,13 +66,13 @@ public class KinematicsStreamingLogger
       }
    }
 
-   private void export()
+   private void export(boolean isPostureOptimizerEnabled)
    {
       new Thread(() ->
                  {
                     try
                     {
-                       String fileName = logDirectory + dateFormat.format(new Date()) + "_" + "KinematicsStreamingToolbox.json";
+                       String fileName = logDirectory + dateFormat.format(new Date()) + "_" + (isPostureOptimizerEnabled ? "opt" : "noOpt") + "KinematicsStreamingToolbox.json";
                        FileOutputStream outputStream = new FileOutputStream(fileName);
                        PrintStream printStream = new PrintStream(outputStream);
 
@@ -117,14 +120,14 @@ public class KinematicsStreamingLogger
    {
       LogTools.info("Stopping log and exporting");
       isLogging.set(false);
-      export();
+      export(isPostureOptimizerEnabled.getValue());
    }
 
    public static void main(String[] args)
    {
       // run a test export
 
-      KinematicsStreamingLogger logger = new KinematicsStreamingLogger(new YoRegistry("test"));
+      KinematicsStreamingLogger logger = new KinematicsStreamingLogger(() -> false, new YoRegistry("test"));
       logger.onLogRequestStart();
 
       WholeBodyTrajectoryMessage messageA = new WholeBodyTrajectoryMessage();
