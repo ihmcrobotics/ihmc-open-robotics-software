@@ -98,6 +98,7 @@ public class RigidBodyOrientationControlHelper
 
    private final BooleanProvider useBaseFrameForControl;
    private final YoBoolean isImpedanceEnabled;
+   private final YoBoolean isFeedforwardEnabled;
 
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
    private final FixedFrameQuaternionBasics controlFrameOrientation;
@@ -147,6 +148,8 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
       isImpedanceEnabled = enableImpedanceControl;
+      isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
+      isFeedforwardEnabled.set(true);
 
       gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
@@ -330,6 +333,9 @@ public class RigidBodyOrientationControlHelper
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+
+      if (!isFeedforwardEnabled.getBooleanValue())
+         feedForwardAcceleration.set(0.0, 0.0, 0.0);
 
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
       feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());

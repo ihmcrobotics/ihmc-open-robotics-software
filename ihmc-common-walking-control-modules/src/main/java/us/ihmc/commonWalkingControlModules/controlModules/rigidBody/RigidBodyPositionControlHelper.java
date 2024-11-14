@@ -106,6 +106,7 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
    private final BooleanProvider useBaseFrameForControl;
    private final YoBoolean isImpedanceEnabled;
+   private final YoBoolean isFeedforwardEnabled;
 
    private final RigidBodyTransform previousControlFramePose = new RigidBodyTransform();
    private final RigidBodyTransform controlFramePose = new RigidBodyTransform();
@@ -160,6 +161,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       feedbackControlCommand.setPrimaryBase(baseBody);
       feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
       isImpedanceEnabled = enableImpedanceControl;
+      isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
+      isFeedforwardEnabled.set(true);
 
       gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
@@ -384,6 +387,9 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+
+      if (!isFeedforwardEnabled.getBooleanValue())
+         feedForwardAcceleration.set(0.0, 0.0, 0.0);
 
       feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, feedForwardAcceleration);
       feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
