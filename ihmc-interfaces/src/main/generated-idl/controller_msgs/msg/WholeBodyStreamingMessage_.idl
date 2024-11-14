@@ -89,6 +89,14 @@ module controller_msgs
         controller_msgs::msg::dds::JointspaceStreamingMessage neck_streaming_message;
         double posture_sensitivity;
         octet posture_optimizer_mode;
+        /**
+         * The timestamp (in nanoseconds) at which this message was logged
+         */
+        long long log_timestamp;
+        /**
+         * Whether the optimizer is enabled
+         */
+        boolean optimizer_enabled;
       };
     };
   };

@@ -52,6 +52,10 @@ module controller_msgs
          * The time to delay this command on the controller side before being executed.
          */
         double execution_delay_time;
+        /**
+         * The timestamp (in nanoseconds) at which this message was logged
+         */
+        long long log_timestamp;
       };
     };
   };

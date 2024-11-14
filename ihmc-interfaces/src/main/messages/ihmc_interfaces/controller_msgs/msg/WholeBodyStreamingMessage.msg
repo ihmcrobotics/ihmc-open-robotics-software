@@ -51,3 +51,9 @@ byte POSTURE_MODE_FREEZE = 1
 byte POSTURE_MODE_NOMINAL = 2
 
 byte posture_optimizer_mode 0
+
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
+# Whether the optimizer is enabled
+bool optimizer_enabled

@@ -1356,7 +1356,7 @@ public class RDXVRKinematicsStreamingMode
 
       // TODO need to figure out a better option for how to distinguish open/close from carrying an object
 
-      if (side == RobotSide.LEFT)
+      if (side == RobotSide.RIGHT)
          return;
 
       ObjectCarryMessage objectCarryMessage = new ObjectCarryMessage();
@@ -1365,6 +1365,6 @@ public class RDXVRKinematicsStreamingMode
       objectCarryMessage.setRobotSide(side.toByte());
 
       LogTools.info("publishing object carry message");
-      //      ros2ControllerHelper.publishToController(objectCarryMessage);
+      ros2ControllerHelper.publishToController(objectCarryMessage);
    }
 }

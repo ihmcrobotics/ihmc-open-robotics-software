@@ -1,19 +1,24 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.msg.dds.HandLoadBearingMessagePubSubType;
+import controller_msgs.msg.dds.ObjectCarryMessage;
+import controller_msgs.msg.dds.ObjectCarryMessagePubSubType;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessagePubSubType;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType;
+import toolbox_msgs.msg.dds.KSTLoggingMessage;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,123 +28,161 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class KinematicsStreamingLogger
 {
-   private final YoBoolean isLogging;
-   private final YoInteger messagesLogged;
-
-   private final List<Object> messagesToLog = new ArrayList<>();
-
-   private final AtomicBoolean requestLogStart = new AtomicBoolean(false);
-
-   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-   private final JSONSerializer<WholeBodyTrajectoryMessage> wholeBodyTrajectorySerializer = new JSONSerializer<>(new WholeBodyTrajectoryMessagePubSubType());
-   private final JSONSerializer<WholeBodyStreamingMessage> wholeBodyStreamingSerializer = new JSONSerializer<>(new WholeBodyStreamingMessagePubSubType());
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-   private final BooleanProvider isPostureOptimizerEnabled;
-
-   public KinematicsStreamingLogger(BooleanProvider isPostureOptimizerEnabled, YoRegistry registry)
+   private static void runStandaloneLogger()
    {
-      isLogging = new YoBoolean("isLogging", registry);
-      messagesLogged = new YoInteger("messagesLogged", registry);
-      this.isPostureOptimizerEnabled = isPostureOptimizerEnabled;
-   }
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "KinematicsStreamingLogger");
 
-   public void update(Object messageToLog)
-   {
-      if (requestLogStart.getAndSet(false) && !isLogging.getValue())
+      AtomicBoolean requestStartLogging = new AtomicBoolean();
+      AtomicBoolean requestStopLogging = new AtomicBoolean();
+      AtomicLong logStartTimeNanos = new AtomicLong();
+
+      AtomicReference<WholeBodyStreamingMessage> latestStreamingMessage = new AtomicReference<>();
+      AtomicReference<HandLoadBearingMessage> latestLoadBearingMessage = new AtomicReference<>();
+      AtomicReference<ObjectCarryMessage> latestObjectCarryMessage = new AtomicReference<>();
+
+      String robotName = "Nadia";
+
+      ROS2Topic<KSTLoggingMessage> loggingTopic = HumanoidControllerAPI.getTopic(KSTLoggingMessage.class, robotName);
+      ros2Node.createSubscription(loggingTopic, s ->
       {
-         LogTools.info("Starting to log...");
-         messagesToLog.clear();
-         isLogging.set(true);
-         messagesLogged.set(0);
-      }
+         LogTools.info("Received logging request");
+         KSTLoggingMessage loggingMessage = s.takeNextData();
+         if (loggingMessage.getStartLogging())
+         {
+            requestStartLogging.set(true);
+            logStartTimeNanos.set(System.nanoTime());
+         }
+         else
+         {
+            requestStopLogging.set(true);
+         }
+      });
 
-      if (isLogging.getValue() && messageToLog != null)
+      ROS2Topic<ObjectCarryMessage> objectCarryTopic = HumanoidControllerAPI.getTopic(ObjectCarryMessage.class, robotName);
+      ros2Node.createSubscription(objectCarryTopic, s ->
       {
-         if (messageToLog instanceof WholeBodyTrajectoryMessage  wholeBodyTrajectoryMessage)
-            messagesToLog.add(new WholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage));
-         else if (messageToLog instanceof WholeBodyStreamingMessage wholeBodyStreamingMessage)
-            messagesToLog.add(new WholeBodyStreamingMessage(wholeBodyStreamingMessage));
-         messagesLogged.set(messagesToLog.size());
+         ObjectCarryMessage message = s.takeNextData();
+         message.setLogTimestamp(System.nanoTime() - logStartTimeNanos.get());
+         latestObjectCarryMessage.set(message);
+      });
+
+      ROS2Topic<HandLoadBearingMessage> loadBearingTopic = HumanoidControllerAPI.getTopic(HandLoadBearingMessage.class, robotName);
+      ros2Node.createSubscription(loadBearingTopic, s ->
+      {
+         HandLoadBearingMessage message = s.takeNextData();
+         message.setLogTimestamp(System.nanoTime() - logStartTimeNanos.get());
+         latestLoadBearingMessage.set(message);
+      });
+
+      ROS2Topic<WholeBodyStreamingMessage> streamingMessageTopic = HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName);
+      ros2Node.createSubscription(streamingMessageTopic, s ->
+      {
+         WholeBodyStreamingMessage message = s.takeNextData();
+         message.setLogTimestamp(System.nanoTime() - logStartTimeNanos.get());
+         latestStreamingMessage.set(message);
+      });
+
+      AtomicBoolean isLogging = new AtomicBoolean();
+      List<WholeBodyStreamingMessage> streamingMessages = new ArrayList<>();
+      List<HandLoadBearingMessage> loadBearingMessages = new ArrayList<>();
+      List<ObjectCarryMessage> objectCarryMessages = new ArrayList<>();
+
+      while (true)
+      {
+         if (requestStartLogging.getAndSet(false))
+            isLogging.set(true);
+
+         if (isLogging.get())
+         {
+            WholeBodyStreamingMessage streamingMessage = latestStreamingMessage.getAndSet(null);
+            if (streamingMessage != null)
+               streamingMessages.add(streamingMessage);
+
+            HandLoadBearingMessage loadBearingMessage = latestLoadBearingMessage.getAndSet(null);
+            if (loadBearingMessage != null)
+               loadBearingMessages.add(loadBearingMessage);
+
+            ObjectCarryMessage objectCarryMessage = latestObjectCarryMessage.getAndSet(null);
+            if (objectCarryMessage != null)
+               objectCarryMessages.add(objectCarryMessage);
+
+            if (requestStopLogging.getAndSet(false))
+            {
+               // export
+               export(streamingMessages, loadBearingMessages, objectCarryMessages);
+               isLogging.set(false);
+            }
+         }
+         else
+         {
+            requestStopLogging.set(false);
+         }
       }
    }
 
-   private void export(boolean isPostureOptimizerEnabled)
+   private static void export(List<WholeBodyStreamingMessage> streamingMessages,
+                              List<HandLoadBearingMessage> loadBearingMessages,
+                              List<ObjectCarryMessage> objectCarryMessages)
    {
-      new Thread(() ->
-                 {
-                    try
-                    {
-                       String fileName = logDirectory + dateFormat.format(new Date()) + "_" + (isPostureOptimizerEnabled ? "opt" : "noOpt") + "KinematicsStreamingToolbox.json";
-                       FileOutputStream outputStream = new FileOutputStream(fileName);
-                       PrintStream printStream = new PrintStream(outputStream);
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
-                       JsonFactory jsonFactory = new JsonFactory();
-                       ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-                       ArrayNode root = objectMapper.createArrayNode();
+      JSONSerializer<WholeBodyStreamingMessage> wholeBodyStreamingSerializer = new JSONSerializer<>(new WholeBodyStreamingMessagePubSubType());
+      JSONSerializer<HandLoadBearingMessage> loadBearingSerializer = new JSONSerializer<>(new HandLoadBearingMessagePubSubType());
+      JSONSerializer<ObjectCarryMessage> objectCarrySerializer = new JSONSerializer<>(new ObjectCarryMessagePubSubType());
 
-                       LogTools.info("Exporting " + messagesToLog.size() + " messages");
+      try
+      {
+         String fileName = logDirectory + dateFormat.format(new Date()) + "_KinematicsStreamingToolbox.json";
+         FileOutputStream outputStream = new FileOutputStream(fileName);
+         PrintStream printStream = new PrintStream(outputStream);
 
-                       for (int i = 0; i < messagesToLog.size(); i++)
-                       {
-                          Object message = messagesToLog.get(i);
-                          if (message instanceof WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
-                          {
-                             root.add(objectMapper.readTree(wholeBodyTrajectorySerializer.serializeToString(wholeBodyTrajectoryMessage)));
-                          }
-                          else if (message instanceof WholeBodyStreamingMessage wholeBodyStreamingMessage)
-                          {
-                             root.add(objectMapper.readTree(wholeBodyStreamingSerializer.serializeToString(wholeBodyStreamingMessage)));
-                          }
-                       }
+         JsonFactory jsonFactory = new JsonFactory();
+         ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
 
-                       objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, root);
+         ArrayNode root = objectMapper.createArrayNode();
 
-                       printStream.flush();
-                       outputStream.flush();
-                       printStream.close();
-                       outputStream.close();
-                    }
-                    catch (Exception e)
-                    {
-                       LogTools.info("Log unsuccessful");
-                       e.printStackTrace();
-                    }
-                 }).start();
-   }
+         LogTools.info("Exporting " + streamingMessages.size() + " messages");
 
-   public void onLogRequestStart()
-   {
-      LogTools.info("Requesting to start log");
-      requestLogStart.set(true);
-   }
+         ArrayNode streamingArray = root.addArray();
+         for (int i = 0; i < streamingMessages.size(); i++)
+         {
+            streamingArray.add(objectMapper.readTree(wholeBodyStreamingSerializer.serializeToString(streamingMessages.get(i))));
+         }
 
-   public void onLogRequestFinish()
-   {
-      LogTools.info("Stopping log and exporting");
-      isLogging.set(false);
-      export(isPostureOptimizerEnabled.getValue());
+         ArrayNode loadBearingArray = root.addArray();
+         for (int i = 0; i < loadBearingMessages.size(); i++)
+         {
+            loadBearingArray.add(objectMapper.readTree(loadBearingSerializer.serializeToString(loadBearingMessages.get(i))));
+         }
+
+         ArrayNode objectCarryArray = root.addArray();
+         for (int i = 0; i < objectCarryArray.size(); i++)
+         {
+            objectCarryArray.add(objectMapper.readTree(objectCarrySerializer.serializeToString(objectCarryMessages.get(i))));
+         }
+
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, root);
+
+         printStream.flush();
+         outputStream.flush();
+         printStream.close();
+         outputStream.close();
+      }
+      catch (Exception e)
+      {
+         LogTools.info("Log unsuccessful");
+         e.printStackTrace();
+      }
    }
 
    public static void main(String[] args)
    {
-      // run a test export
-
-      KinematicsStreamingLogger logger = new KinematicsStreamingLogger(() -> false, new YoRegistry("test"));
-      logger.onLogRequestStart();
-
-      WholeBodyTrajectoryMessage messageA = new WholeBodyTrajectoryMessage();
-      WholeBodyStreamingMessage messageB = new WholeBodyStreamingMessage();
-
-      messageA.setSequenceId(0);
-      messageB.setSequenceId(1);
-
-      logger.update(messageA);
-      logger.update(messageB);
-
-      logger.onLogRequestFinish();
-      logger.update(null);
+      runStandaloneLogger();
    }
 }

@@ -66,4 +66,10 @@ float64 posture_sensitivity
 
 int8 posture_optimizer_mode
 
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
+# Whether the optimizer is enabled
+bool optimizer_enabled
+
 

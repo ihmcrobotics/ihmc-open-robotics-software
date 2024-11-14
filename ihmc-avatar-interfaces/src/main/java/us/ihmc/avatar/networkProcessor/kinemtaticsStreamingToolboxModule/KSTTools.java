@@ -117,7 +117,6 @@ public class KSTTools
    {
    };
    private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
-   private final KinematicsStreamingLogger logger;
 
    private final SideDependentList<ObjectCarryManager> objectCarryManagers = new SideDependentList<>();
 
@@ -242,7 +241,6 @@ public class KSTTools
 
       useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
       useStreamingPublisher.set(parameters.getUseStreamingPublisher());
-      logger = new KinematicsStreamingLogger(ikController::isPostureOptimizerEnabled, registry);
    }
 
    public void update()
@@ -464,13 +462,11 @@ public class KSTTools
       if (finalizeTrajectory)
       {
          WholeBodyTrajectoryMessage messageToPublish = setupFinalizeTrajectoryMessage(outputToPublish);
-         logger.update(messageToPublish);
          trajectoryMessagePublisher.publish(messageToPublish);
       }
       else if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
       {
          WholeBodyTrajectoryMessage messageToPublish = setupTrajectoryMessage(outputToPublish);
-         logger.update(messageToPublish);
          trajectoryMessagePublisher.publish(messageToPublish);
       }
       else
@@ -478,7 +474,6 @@ public class KSTTools
          WholeBodyStreamingMessage messageToPublish = setupStreamingMessage(outputToPublish);
          messageToPublish.setPostureSensitivity(ikController.getPostureSensitivity());
          messageToPublish.setPostureOptimizerMode(ikController.getMode().toByte());
-         logger.update(messageToPublish);
          streamingMessagePublisher.publish(messageToPublish);
       }
    }
@@ -679,11 +674,6 @@ public class KSTTools
    public HumanoidKinematicsToolboxController getIKController()
    {
       return ikController;
-   }
-
-   public KinematicsStreamingLogger getLogger()
-   {
-      return logger;
    }
 
    public double getToolboxControllerPeriod()

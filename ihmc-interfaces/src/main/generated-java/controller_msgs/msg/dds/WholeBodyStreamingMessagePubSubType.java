@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "057d01c89a434c0b44493daa35469e2962cde91626b7eae4b2b45929c1222d8e";
+   		return "a52fa8a084f4612d4f28892a3e3044f01afd7887bdbadf701f76e854dd273611";
    }
    
    @Override
@@ -96,6 +96,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -167,6 +171,12 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -209,6 +219,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_9(data.getPostureOptimizerMode());
 
+      cdr.write_type_11(data.getLogTimestamp());
+
+      cdr.write_type_7(data.getOptimizerEnabled());
+
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.CDR cdr)
@@ -249,6 +263,10 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setPostureOptimizerMode(cdr.read_type_9());
       	
+      data.setLogTimestamp(cdr.read_type_11());
+      	
+      data.setOptimizerEnabled(cdr.read_type_7());
+      	
 
    }
 
@@ -285,6 +303,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_6("posture_sensitivity", data.getPostureSensitivity());
       ser.write_type_9("posture_optimizer_mode", data.getPostureOptimizerMode());
+      ser.write_type_11("log_timestamp", data.getLogTimestamp());
+      ser.write_type_7("optimizer_enabled", data.getOptimizerEnabled());
    }
 
    @Override
@@ -320,6 +340,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setPostureSensitivity(ser.read_type_6("posture_sensitivity"));
       data.setPostureOptimizerMode(ser.read_type_9("posture_optimizer_mode"));
+      data.setLogTimestamp(ser.read_type_11("log_timestamp"));
+      data.setOptimizerEnabled(ser.read_type_7("optimizer_enabled"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.WholeBodyStreamingMessage src, controller_msgs.msg.dds.WholeBodyStreamingMessage dest)

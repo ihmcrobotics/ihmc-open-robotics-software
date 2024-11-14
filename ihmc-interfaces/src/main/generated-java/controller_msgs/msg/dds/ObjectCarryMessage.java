@@ -26,6 +26,10 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
             * World-frame offset from hand control frame to bag com
             */
    public us.ihmc.euclid.tuple3D.Vector3D hand_to_bag_com_offset_;
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long log_timestamp_;
 
    public ObjectCarryMessage()
    {
@@ -47,6 +51,8 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       object_mass_ = other.object_mass_;
 
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.hand_to_bag_com_offset_, hand_to_bag_com_offset_);
+      log_timestamp_ = other.log_timestamp_;
+
    }
 
    /**
@@ -103,6 +109,21 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       return hand_to_bag_com_offset_;
    }
 
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public void setLogTimestamp(long log_timestamp)
+   {
+      log_timestamp_ = log_timestamp;
+   }
+   /**
+            * The timestamp (in nanoseconds) at which this message was logged
+            */
+   public long getLogTimestamp()
+   {
+      return log_timestamp_;
+   }
+
 
    public static Supplier<ObjectCarryMessagePubSubType> getPubSubType()
    {
@@ -128,6 +149,8 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_mass_, other.object_mass_, epsilon)) return false;
 
       if (!this.hand_to_bag_com_offset_.epsilonEquals(other.hand_to_bag_com_offset_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.log_timestamp_, other.log_timestamp_, epsilon)) return false;
+
 
       return true;
    }
@@ -148,6 +171,8 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       if(this.object_mass_ != otherMyClass.object_mass_) return false;
 
       if (!this.hand_to_bag_com_offset_.equals(otherMyClass.hand_to_bag_com_offset_)) return false;
+      if(this.log_timestamp_ != otherMyClass.log_timestamp_) return false;
+
 
       return true;
    }
@@ -165,7 +190,9 @@ public class ObjectCarryMessage extends Packet<ObjectCarryMessage> implements Se
       builder.append("object_mass=");
       builder.append(this.object_mass_);      builder.append(", ");
       builder.append("hand_to_bag_com_offset=");
-      builder.append(this.hand_to_bag_com_offset_);
+      builder.append(this.hand_to_bag_com_offset_);      builder.append(", ");
+      builder.append("log_timestamp=");
+      builder.append(this.log_timestamp_);
       builder.append("}");
       return builder.toString();
    }

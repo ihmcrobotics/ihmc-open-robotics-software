@@ -16,4 +16,7 @@ float64 object_mass
 # World-frame offset from hand control frame to bag com
 geometry_msgs/Vector3 hand_to_bag_com_offset
 
+# The timestamp (in nanoseconds) at which this message was logged
+int64 log_timestamp
+
 

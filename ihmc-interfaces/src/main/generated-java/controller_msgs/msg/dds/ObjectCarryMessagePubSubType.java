@@ -15,7 +15,7 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ff0a80dc0280ce59a8f75df8dca0bf8996cc0017efeb16e061a0661503db7393";
+   		return "a5e2b221bccc99bcb0661574e18f338d369590e1df54b0d3eb2f6c80d84162cd";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,6 +86,9 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getHandToBagComOffset(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -97,6 +102,8 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       cdr.write_type_6(data.getObjectMass());
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getHandToBagComOffset(), cdr);
+      cdr.write_type_11(data.getLogTimestamp());
+
    }
 
    public static void read(controller_msgs.msg.dds.ObjectCarryMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +115,8 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setObjectMass(cdr.read_type_6());
       	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getHandToBagComOffset(), cdr);	
+      data.setLogTimestamp(cdr.read_type_11());
+      	
 
    }
 
@@ -119,6 +128,7 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_6("object_mass", data.getObjectMass());
       ser.write_type_a("hand_to_bag_com_offset", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getHandToBagComOffset());
 
+      ser.write_type_11("log_timestamp", data.getLogTimestamp());
    }
 
    @Override
@@ -129,6 +139,7 @@ public class ObjectCarryMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setObjectMass(ser.read_type_6("object_mass"));
       ser.read_type_a("hand_to_bag_com_offset", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getHandToBagComOffset());
 
+      data.setLogTimestamp(ser.read_type_11("log_timestamp"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ObjectCarryMessage src, controller_msgs.msg.dds.ObjectCarryMessage dest)
