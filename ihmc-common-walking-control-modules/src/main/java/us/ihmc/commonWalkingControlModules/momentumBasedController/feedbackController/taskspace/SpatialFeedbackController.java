@@ -592,16 +592,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.changeFrame(controlFrame);
       desiredAngularAcceleration.changeFrame(controlFrame);
 
-      if (!isImpedanceEnabled())
-      {
-         feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
-         feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
-         feedForwardLinearAction.changeFrame(controlFrame);
-         feedForwardAngularAction.changeFrame(controlFrame);
+      feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
+      feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
+      feedForwardLinearAction.changeFrame(controlFrame);
+      feedForwardAngularAction.changeFrame(controlFrame);
 
-         desiredLinearAcceleration.add(feedForwardLinearAction);
-         desiredAngularAcceleration.add(feedForwardAngularAction);
-      }
+      desiredLinearAcceleration.add(feedForwardLinearAction);
+      desiredAngularAcceleration.add(feedForwardAngularAction);
 
       proccessInverseDynamicsDesiredAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
 
