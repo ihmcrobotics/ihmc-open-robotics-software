@@ -37,7 +37,7 @@ public class RapidHeightMapManager
    private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
-   private final GpuMat heightMapImage;
+//   private final GpuMat heightMapImage;
    private final Mat heightmapMat;
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
@@ -52,10 +52,10 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor = new RapidHeightMapExtractorCuda(leftFootSoleFrame, rightFootSoleFrame);
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
-      heightMapImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
+//      heightMapImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
       heightmapMat = new Mat();
 //      heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      rapidHeightMapExtractor.create(heightMapImage, 1);
+      rapidHeightMapExtractor.create(heightmapMat, 1);
 
       // We use a notification in order to only call resetting the height map in one place
       ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -84,7 +84,7 @@ public class RapidHeightMapManager
       else
          latestDepthImage.convertTo(heightmapMat, opencv_core.CV_16UC1);
 
-      heightMapImage.upload(heightmapMat);
+//      heightMapImage.upload(heightmapMat);
 
       if (resetHeightMapRequested.poll())
       {
