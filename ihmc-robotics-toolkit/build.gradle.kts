@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.log-tools-plugin") version "0.6.4"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -23,7 +23,6 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
 
-   api("us.ihmc:log-tools:0.6.4")
    api("us.ihmc:euclid-frame-shape:0.21.0")
    api("us.ihmc:mecano:17-0.18.1")
    api("us.ihmc:mecano-yovariables:17-0.18.1")
