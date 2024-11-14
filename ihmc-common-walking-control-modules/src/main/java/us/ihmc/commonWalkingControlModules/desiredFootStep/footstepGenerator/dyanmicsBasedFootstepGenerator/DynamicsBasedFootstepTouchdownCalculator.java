@@ -23,7 +23,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
 
    private final FrameVector3DReadOnly centroidalAngularMomentum;
 
-   private final FootSoleBasedGroundPlaneEstimator groundPlaneEstimator;
+//   private final FootSoleBasedGroundPlaneEstimator groundPlaneEstimator;
 
    private final YoBoolean isInitialStanceValid;
 
@@ -88,7 +88,6 @@ public class DynamicsBasedFootstepTouchdownCalculator
                                                    FrameVector3DReadOnly centerOfMassVelocity,
                                                    FrameVector3DReadOnly centroidalAngularMomentum,
                                                    FullHumanoidRobotModel robotModel,
-                                                   FootSoleBasedGroundPlaneEstimator groundPlaneEstimator,
                                                    DynamicsBasedFootstepParameters parameters,
                                                    double gravity,
                                                    Vector2DReadOnly desiredVelocityProvider,
@@ -98,7 +97,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
       this.centerOfMassControlZUpFrame = centerOfMassControlZUpFrame;
       this.centerOfMassVelocity = centerOfMassVelocity;
       this.centroidalAngularMomentum = centroidalAngularMomentum;
-      this.groundPlaneEstimator = groundPlaneEstimator;
+//      this.groundPlaneEstimator = groundPlaneEstimator;
       this.desiredVelocityProvider = desiredVelocityProvider;
       soleFrames = robotModel.getSoleFrames();
       mass = robotModel.getTotalMass();
@@ -205,12 +204,17 @@ public class DynamicsBasedFootstepTouchdownCalculator
 //      desiredTouchdownPosition2D.addY(supportSide.negateIfLeftSide(fastWalkingParameters.getFixedWidthOffset()));
 
       // determine touchdown z position from x position, y position, and ground plane
-      desiredTouchdownPosition.setMatchingFrame(groundPlaneEstimator.getGroundPosition(desiredTouchdownPosition2D));
+      desiredTouchdownPosition.setMatchingFrame(desiredTouchdownPosition2D, 0.0);
    }
 
    public FramePoint3DReadOnly getDesiredTouchdownPosition()
    {
       return desiredTouchdownPosition;
+   }
+
+   public FramePoint2DReadOnly getDesiredTouchdownPosition2D()
+   {
+      return desiredTouchdownPosition2D;
    }
 
    public FrameVector2DReadOnly getPredictedVelocityAtTouchdown()

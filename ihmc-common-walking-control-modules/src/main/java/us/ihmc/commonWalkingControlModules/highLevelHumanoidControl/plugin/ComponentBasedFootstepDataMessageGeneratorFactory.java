@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator.DynamicsBasedFootstepPlugin;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -138,6 +139,17 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
+
+      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = new DynamicsBasedFootstepPlugin(robotModel,
+                                                                                                referenceFrames,
+                                                                                                updateDT,
+                                                                                                yoGraphicsListRegistry,
+                                                                                                timeProvider);
+
+      registryField.get().addChild(dynamicsBasedFootstepPlugin.getRegistry());
+
+      continuousStepGenerator.setDynamicsBasedFootstepPlugin(dynamicsBasedFootstepPlugin);
+
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());

@@ -1,30 +1,29 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPlugin;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -53,15 +52,17 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    // Estimates
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D currentCentroidalLinearMomentum = new YoFrameVector3D("currentCentroidalLinearMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D currentCentroidalAngularMomentum = new YoFrameVector3D("currentCentroidalAngularMomentum" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+   private final AngularExcursionCalculator angularExcursionCalculator;
    private final MovingReferenceFrame centerOfMassControlFrame;
    private final MovingZUpFrame centerOfMassControlZUpFrame;
-   private final ReferenceFrame centerOfMassFrame;
-   private final FootSoleBasedGroundPlaneEstimator groundPlaneEstimator;
+   private final MovingReferenceFrame centerOfMassFrame;
+//   private final FootSoleBasedGroundPlaneEstimator groundPlaneEstimator;
 
    // Command/Desired output related stuff
    private final SideDependentList<DynamicsBasedFootstepTouchdownCalculator> touchdownCalculator = new SideDependentList<>();
-   private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-   private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
+   private final SideDependentList<FramePoint2D> desiredTouchdownPositions = new SideDependentList<>();
 
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
@@ -74,9 +75,16 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    // Foot state information
    public enum FootState {SUPPORT, SWING}
    private final SideDependentList<YoEnum<FootState>> footStates = new SideDependentList<>();
+   private final SideDependentList<StateMachine<FootState, State>> footStateMachines = new SideDependentList<>();
    private final YoEnum<RobotSide> newestSupportSide = new YoEnum<>("newestSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final MutableObject<FootstepStatus> latestFootstepStatusReceived = new MutableObject<>(null);
    private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
+   private final YoBoolean inDoubleSupport = new YoBoolean("inDoubleSupport" + variableNameSuffix, registry);
+   private RobotSide trailingSide = RobotSide.LEFT;
+
+   //
+   private final SideDependentList<FramePoint2D> pendulumBase = new SideDependentList<>();
+   private final FramePoint2D netPendulumBase = new FramePoint2D();
 
    //
    private final static Vector2DReadOnly zero2D = new Vector2D();
@@ -89,14 +97,18 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    private StartWalkingMessenger startWalkingMessenger;
    private FootstepMessenger footstepMessenger;
 
-   public DynamicsBasedFootstepPlugin(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DynamicsBasedFootstepPlugin(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
    {
       this.updateDT = updateDT;
       this.referenceFrames = referenceFrames;
 
+      // Parameters
       parameters = new DynamicsBasedFootstepParameters(gravity, registry);
 
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      // All things estimates
+      centerOfMassFrame = (MovingReferenceFrame) referenceFrames.getCenterOfMassFrame();
+
+      angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, robotModel.getElevator(), updateDT, registry, null);
 
       desiredPelvisOrientation = new YoFrameQuaternion("pelvisDesiredOrientation" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
@@ -122,23 +134,132 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
 
-      groundPlaneEstimator = new FootSoleBasedGroundPlaneEstimator(centerOfMassControlZUpFrame, referenceFrames, yoGraphicsListRegistry, registry);
+      //groundPlaneEstimator = new FootSoleBasedGroundPlaneEstimator(centerOfMassControlZUpFrame, referenceFrames, yoGraphicsListRegistry, registry);
 
+      // Side-dependant stuff, most of the desired-related things
       for (RobotSide robotSide : RobotSide.values)
       {
-         footStates.put(robotSide, new YoEnum<>("footStates" + variableNameSuffix, registry, FootState.class));
-         touchdownCalculator = new DynamicsBasedFootstepTouchdownCalculator(robotSide, centerOfMassControlZUpFrame, getCenterOfMassVelocity(), , robotModel, groundPlaneEstimator, parameters, gravity, desiredVelocityProvider, registry);
+         footStates.put(robotSide, new YoEnum<>(robotSide.getLowerCaseName() + "FootStates" + variableNameSuffix, registry, FootState.class));
+
+         pendulumBase.put(robotSide, new FramePoint2D(centerOfMassControlZUpFrame));
+
+         touchdownCalculator.put(robotSide, new DynamicsBasedFootstepTouchdownCalculator(robotSide,
+                                                                                         centerOfMassControlZUpFrame,
+                                                                                         getCenterOfMassVelocity(),
+                                                                                         currentCentroidalAngularMomentum,
+                                                                                         robotModel,
+                                                                                         parameters,
+                                                                                         gravity,
+                                                                                         desiredVelocity,
+                                                                                         registry));
+
+         desiredTouchdownPositions.put(robotSide, new FramePoint2D());
+
+         StateMachineFactory<FootState, State> stateMachineFactory = new StateMachineFactory<>(FootState.class);
+         stateMachineFactory.setRegistry(registry).setNamePrefix(robotSide.getLowerCaseName() + variableNameSuffix).buildYoClock(yoTime);
+
+         stateMachineFactory.addState(FootState.SUPPORT, new SupportFootState(robotSide));
+         stateMachineFactory.addState(FootState.SWING, new SwingFootState(robotSide));
+
+         stateMachineFactory.addDoneTransition(FootState.SUPPORT, FootState.SWING);
+         stateMachineFactory.addDoneTransition(FootState.SWING, FootState.SUPPORT);
+
+         footStateMachines.put(robotSide, stateMachineFactory.build(FootState.SUPPORT));
+      }
+   }
+
+   private class SupportFootState implements State
+   {
+      private final RobotSide robotSide;
+
+      private SupportFootState(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      @Override
+      public void onEntry()
+      {
+         pendulumBase.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleZUpFrame(robotSide));
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+
+      }
+
+      @Override
+      public void onExit(double timeInState)
+      {
+
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return footStates.get(robotSide).getEnumValue() == FootState.SWING;
+      }
+   }
+
+   private class SwingFootState implements State
+   {
+      private final RobotSide robotSide;
+
+      private SwingFootState(RobotSide robotSide)
+      {
+         this.robotSide = robotSide;
+      }
+
+      @Override
+      public void onEntry()
+      {
+         calculate(touchdownCalculator.get(robotSide),
+                   robotSide,
+                   getStepDuration(robotSide),
+                   pendulumBase.get(robotSide.getOppositeSide()),
+                   netPendulumBase,
+                   inDoubleSupport.getBooleanValue(),
+                   desiredTouchdownPositions.get(robotSide));
+      }
+
+      @Override
+      public void doAction(double timeInState)
+      {
+         double timeToReachGoal = getStepDuration(robotSide) - timeInState;
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getStepDuration(robotSide));
+
+         calculate(touchdownCalculator.get(robotSide),
+                   robotSide,
+                   timeToReachGoal,
+                   pendulumBase.get(robotSide.getOppositeSide()),
+                   netPendulumBase,
+                   inDoubleSupport.getBooleanValue(),
+                   desiredTouchdownPositions.get(robotSide));
+      }
+
+      @Override
+      public void onExit(double timeInState)
+      {
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return footStates.get(robotSide).getEnumValue() == FootState.SUPPORT;
       }
    }
 
    @Override
    public void update(double time)
    {
-      groundPlaneEstimator.update();
+//      groundPlaneEstimator.update();
 
       currentCoMPosition.setFromReferenceFrame(centerOfMassFrame);
 
-      handleDesiredsFromProviders();
+      angularExcursionCalculator.compute();
+      currentCentroidalLinearMomentum.setMatchingFrame(angularExcursionCalculator.getLinearMomentum());
+      currentCentroidalAngularMomentum.setMatchingFrame(angularExcursionCalculator.getAngularMomentum());
 
       // TODO maybe wrong?
       desiredPelvisOrientation.setToYawOrientation(referenceFrames.getChestFrame().getTransformToWorldFrame().getRotation().getYaw());
@@ -147,80 +268,95 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       centerOfMassControlFrame.update();
       centerOfMassControlZUpFrame.update();
 
-      currentCoMVelocity.setMatchingFrame(controllerToolbox.getCenterOfMassVelocity());
+      currentCoMVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
 
-      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
-      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
-      footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
+      handleDesiredsFromProviders();
 
-      if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
-         walk.set(walkInputProvider.getValue());
+      inDoubleSupport.set(footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT &&
+                          footStates.get(RobotSide.RIGHT).getEnumValue() == FootState.SUPPORT);
 
-      if (!walk.getValue())
+      calculateNetPendulumBase();
+
+      for (RobotSide robotSide : RobotSide.values)
+         footStateMachines.get(robotSide).doActionAndTransition();
+   }
+
+   public void calculate(RobotSide swingSide,
+                         double timeToReachGoal,
+                         FramePose2DReadOnly pendulumBase,
+                         FramePose2DReadOnly netPendulumBase,
+                         FramePose2DBasics touchdownPositionToPack)
+   {
+      calculate(touchdownCalculator.get(swingSide),
+                swingSide, timeToReachGoal,
+                pendulumBase.getPosition(),
+                netPendulumBase.getPosition(),
+                inDoubleSupport.getBooleanValue(),
+                touchdownPositionToPack.getPosition());
+   }
+
+   private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
+   private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();;
+
+   public void calculate(DynamicsBasedFootstepTouchdownCalculator touchdownCalculator,
+                                RobotSide swingSide,
+                                double timeToReachGoal,
+                                FramePoint2DReadOnly pendulumBase,
+                                FramePoint2DReadOnly netPendulumBase,
+                                boolean isInDoubleSupport,
+                                FixedFramePoint2DBasics touchdownPositionToPack)
+   {
+      tempPendulumBase.setIncludingFrame(pendulumBase);
+      tempPendulumBase.changeFrame(centerOfMassControlZUpFrame);
+
+      tempNetPendulumBase.setIncludingFrame(netPendulumBase);
+      tempNetPendulumBase.changeFrame(referenceFrames.getSoleZUpFrame(getTrailingSide()));
+
+      touchdownCalculator.computeDesiredTouchdownPosition(swingSide.getOppositeSide(), timeToReachGoal, tempPendulumBase, tempNetPendulumBase, isInDoubleSupport);
+      touchdownPositionToPack.setMatchingFrame(touchdownCalculator.getDesiredTouchdownPosition2D());
+   }
+
+   private void calculateNetPendulumBase()
+   {
+      // if only one foot is in contact, get the pendulum base directly from the support state
+      if (!inDoubleSupport.getBooleanValue())
       {
-         footsteps.clear();
-
-         if (stopWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+         if (footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT)
          {
-            stopWalkingMessenger.submitStopWalkingRequest();
+            netPendulumBase.setMatchingFrame(pendulumBase.get(RobotSide.LEFT));
+            setTrailingSide(RobotSide.LEFT);
          }
 
-         walkPreviousValue.set(false);
-         return;
-      }
-      else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
-      {
-         startWalkingMessenger.submitStartWalkingRequest();
-      }
-
-      if (walk.getValue() != walkPreviousValue.getValue())
-      {
-         counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
-      }
-
-      { // Processing footstep status
-         FootstepStatus statusToProcess = latestFootstepStatusReceived.getValue();
-
-         if (statusToProcess != null)
-         {
-            if (statusToProcess == FootstepStatus.STARTED)
-            {
-               if (!footsteps.isEmpty())
-                  footsteps.remove(0);
-            }
-            else if (statusToProcess == FootstepStatus.COMPLETED)
-            {
-               currentSupportSide.set(footstepCompletionSide.getValue());
-               if (parameters.getNumberOfFixedFootsteps() == 0)
-                  footsteps.clear();
-            }
-         }
-
-         latestFootstepStatusReceived.setValue(null);
-         footstepCompletionSide.setValue(null);
-      }
-
-      // Submit footsteps
-      if (walk.getValue() && footstepMessenger != null)
-      {
-         if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
-         {
-            currentFootstepDataListCommandID.increment();
-            footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
-            footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
-            footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
-            footstepMessenger.submitFootsteps(footstepDataListMessage);
-            counter = 0;
-         }
          else
          {
-            counter++;
+            netPendulumBase.setMatchingFrame(pendulumBase.get(RobotSide.RIGHT));
+            setTrailingSide(RobotSide.RIGHT);
          }
+
+         return;
       }
 
-      walkPreviousValue.set(walk.getValue());
+      // Figure out the side that you're shifting the weight away from based on the clock
+      RobotSide trailingSide;
+      if (footStateMachines.get(RobotSide.LEFT).getTimeInCurrentState() > footStateMachines.get(RobotSide.RIGHT).getTimeInCurrentState())
+         trailingSide = RobotSide.LEFT;
+      else
+         trailingSide = RobotSide.RIGHT;
+
+      setTrailingSide(trailingSide);
+
+      // compute the double support duration
+      double doubleSupportDuration = getTransferDuration(trailingSide.getOppositeSide());
+
+      // compute the fraction through the double support state that we are at the current time
+      double alpha = 1.0;
+      if (doubleSupportDuration > 0.0)
+         alpha = MathTools.clamp(footStateMachines.get(trailingSide.getOppositeSide()).getTimeInCurrentState() / doubleSupportDuration, 0.0, 1.0);
+
+      // interpolate between the two pendulum bases based on the percentage through double support
+      netPendulumBase.changeFrameAndProjectToXYPlane(pendulumBase.get(trailingSide).getReferenceFrame());
+      netPendulumBase.interpolate(pendulumBase.get(trailingSide), pendulumBase.get(trailingSide.getOppositeSide()), alpha);
+      netPendulumBase.changeFrame(referenceFrames.getSoleZUpFrame(trailingSide));
    }
 
    private void handleDesiredsFromProviders()
@@ -230,22 +366,22 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
-      if (desiredVelocityProvider.isUnitVelocity())
-      {
-         double minMaxVelocityX = maxStepLength / stepTime.getValue();
-         double minMaxVelocityY = maxStepWidth / stepTime.getValue();
-         desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
-         desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
-      }
+//      if (desiredVelocityProvider.isUnitVelocity())
+//      {
+//         double minMaxVelocityX = maxStepLength / stepTime.getValue();
+//         double minMaxVelocityY = maxStepWidth / stepTime.getValue();
+//         desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
+//         desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
+//      }
+//
+//      if (desiredTurningVelocityProvider.isUnitVelocity())
+//      {
+//         double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
+//         turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
+//      }
 
-      if (desiredTurningVelocityProvider.isUnitVelocity())
-      {
-         double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
-         turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
-      }
-
-      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
-      this.desiredTurningVelocity.set(turningVelocity);
+//      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+//      this.desiredTurningVelocity.set(turningVelocity);
    }
 
    /**
@@ -385,9 +521,44 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
    }
 
-   private FrameVector3DReadOnly getCenterOfMassVelocity()
+   private void setTrailingSide(RobotSide robotSide)
+   {
+      trailingSide = robotSide;
+   }
+
+   private RobotSide getTrailingSide()
+   {
+      return trailingSide;
+   }
+
+   public void getDesiredTouchdownPosition2D(RobotSide robotSide, FixedFramePoint2DBasics touchdownPositionToPack)
+   {
+      touchdownPositionToPack.setMatchingFrame(getDesiredTouchdownPosition2D(robotSide));
+   }
+
+   public FramePoint2DReadOnly getDesiredTouchdownPosition2D(RobotSide robotSide)
+   {
+      return desiredTouchdownPositions.get(robotSide);
+   }
+
+   public FrameVector3DReadOnly getCenterOfMassVelocity()
    {
       return currentCoMVelocity;
+   }
+
+   public double getSwingDuration(RobotSide swingSide)
+   {
+      return parameters.getSwingDuration(swingSide).getDoubleValue();
+   }
+
+   public double getTransferDuration(RobotSide swingSide)
+   {
+      return parameters.getSwingDuration(swingSide).getDoubleValue() * parameters.getDoubleSupportFraction(swingSide).getDoubleValue();
+   }
+
+   public double getStepDuration(RobotSide swingSide)
+   {
+      return getSwingDuration(swingSide) + getTransferDuration(swingSide);
    }
 
    @Override

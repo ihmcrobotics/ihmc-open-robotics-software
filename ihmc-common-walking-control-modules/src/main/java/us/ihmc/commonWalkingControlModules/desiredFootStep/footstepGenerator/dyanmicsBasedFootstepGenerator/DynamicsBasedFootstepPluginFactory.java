@@ -87,7 +87,7 @@ public class DynamicsBasedFootstepPluginFactory implements HumanoidSteppingPlugi
                                                   SideDependentList<? extends ContactableBody> contactableFeet,
                                                   DoubleProvider timeProvider)
    {
-      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = new DynamicsBasedFootstepPlugin(robotModel, referenceFrames, updateDT, yoGraphicsListRegistry);
+      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin = new DynamicsBasedFootstepPlugin(robotModel, referenceFrames, updateDT, yoGraphicsListRegistry, timeProvider);
 
       dynamicsBasedFootstepPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
       {

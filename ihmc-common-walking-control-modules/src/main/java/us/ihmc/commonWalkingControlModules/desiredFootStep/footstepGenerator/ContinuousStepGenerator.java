@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dyanmicsBasedFootstepGenerator.DynamicsBasedFootstepPlugin;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -36,6 +37,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -119,6 +121,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
    private final String variableNameSuffix = "CSG";
 
+   /////////////////////////////////////////////////
+   public enum CSGMode {STANDARD, DYNAMIC}
+   private final YoEnum<CSGMode> csgMode = new YoEnum<>("csgMode", registry, CSGMode.class);
+
+   private final OptionalFactoryField<DynamicsBasedFootstepPlugin> dynamicsBasedFootstepPlugin = new OptionalFactoryField<>("CSGDynamicsBasedFootstepProvider");
+   /////////////////
+
    private BooleanProvider walkInputProvider;
    private DoubleProvider swingHeightInputProvider;
    private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
@@ -198,12 +207,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    {
       stepGeneratorTimer.startMeasurement();
 
-      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
-      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
-      footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
-
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
@@ -230,7 +233,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
-      { // Processing footstep status
+      // Process footstep status
+      {
          FootstepStatus statusToProcess = latestStatusReceived.getValue();
 
          if (statusToProcess != null)
@@ -253,6 +257,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          footstepCompletionSide.setValue(null);
       }
 
+      // Determine swing side
       RobotSide swingSide;
 
       if (footsteps.isEmpty())
@@ -272,6 +277,24 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          swingSide = RobotSide.fromByte(previousFootstep.getRobotSide()).getOppositeSide();
 
          previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
+      }
+
+      // Set parameters for FootstepDataListMessage
+      if (csgMode.getEnumValue() == CSGMode.DYNAMIC && dynamicsBasedFootstepPlugin.hasValue())
+      {
+         footstepDataListMessage.setDefaultSwingDuration(dynamicsBasedFootstepPlugin.get().getSwingDuration(swingSide));
+         footstepDataListMessage.setDefaultTransferDuration(dynamicsBasedFootstepPlugin.get().getTransferDuration(swingSide));
+         footstepDataListMessage.setFinalTransferDuration(dynamicsBasedFootstepPlugin.get().getTransferDuration(swingSide));
+         footstepDataListMessage.setAreFootstepsAdjustable(false);
+         footstepDataListMessage.setOffsetFootstepsWithExecutionError(false);
+      }
+      else
+      {
+         footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
+         footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
+         footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
+         footstepDataListMessage.setAreFootstepsAdjustable(parameters.getStepsAreAdjustable());
+         footstepDataListMessage.setOffsetFootstepsWithExecutionError(parameters.getShiftUpcomingStepsWithTouchdown());
       }
 
       double maxStepLength = parameters.getMaxStepLength();
@@ -307,32 +330,44 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       for (int i = startingIndexToAdjust; i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
-         double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocityX, maxStepLength);
-         double yDisplacement = stepTime.getValue() * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
-         double headingDisplacement = stepTime.getValue() * turningVelocity;
+         FootstepDataMessage footstep = footsteps.add();
+         RobotSide footstepSide = !(RobotSide.fromByte(footstep.getRobotSide()) == null) ? RobotSide.fromByte(footstep.getRobotSide()) : RobotSide.LEFT;
 
-         if (swingSide == RobotSide.LEFT)
+         ////// TODO new stuff here
+         if (csgMode.getEnumValue() == CSGMode.DYNAMIC && dynamicsBasedFootstepPlugin.hasValue())
          {
-            yDisplacement = MathTools.clamp(yDisplacement, minStepWidth, maxStepWidth);
-            headingDisplacement = MathTools.clamp(headingDisplacement, turnMaxAngleInward, turnMaxAngleOutward);
+            if (i == startingIndexToAdjust)
+            {
+               dynamicsBasedFootstepPlugin.get().update(time);
+               dynamicsBasedFootstepPlugin.get().getDesiredTouchdownPosition2D(footstepSide, nextFootstepPose2D.getPosition());
+            }
+            else
+            {
+               dynamicsBasedFootstepPlugin.get().calculate(footstepSide,
+                                                           dynamicsBasedFootstepPlugin.get().getStepDuration(footstepSide),
+                                                           footstepPose2D,
+                                                           footstepPose2D,
+                                                           nextFootstepPose2D);
+            }
          }
          else
          {
-            yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth, -minStepWidth);
-            headingDisplacement = MathTools.clamp(headingDisplacement, -turnMaxAngleOutward, -turnMaxAngleInward);
+            calculateNextFootstepPose2D(stepTime.getValue(),
+                                        desiredVelocityX,
+                                        desiredVelocityY,
+                                        desiredTurningVelocity.getDoubleValue(),
+                                        swingSide,
+                                        maxStepLength,
+                                        maxStepWidth,
+                                        defaultStepWidth,
+                                        minStepWidth,
+                                        turnMaxAngleInward,
+                                        turnMaxAngleOutward,
+                                        footstepPose2D,
+                                        nextFootstepPose2D);
          }
 
-         double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(defaultStepWidth);
-         nextFootstepPose2D.set(footstepPose2D);
-         // Applying the translation before the rotation allows the rotation to be centered in between the feet.
-         // This ordering seems to provide the most natural footsteps.
-         nextFootstepPose2D.appendTranslation(0.0, halfInPlaceWidth);
-         nextFootstepPose2D.appendRotation(headingDisplacement);
-         nextFootstepPose2D.appendTranslation(0.0, -halfInPlaceWidth);
-         nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
-
          nextFootstepPose3D.set(nextFootstepPose2D);
-         FootstepDataMessage footstep = footsteps.add();
 
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
             footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
@@ -441,6 +476,36 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       stepGeneratorTimer.stopMeasurement();
    }
 
+   private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
+                                                   RobotSide swingSide, double maxStepLength, double maxStepWidth, double defaultStepWidth,
+                                                   double minStepWidth, double turnMaxAngleInward, double turnMaxAngleOutward,
+                                                   FramePose2D stanceFootPose2D, FramePose2D nextFootstepPose2DToPack)
+   {
+      double xDisplacement = MathTools.clamp(stepTime * desiredVelocityX, maxStepLength);
+      double yDisplacement = stepTime * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
+      double headingDisplacement = stepTime * desiredTurningVelocity;
+
+      if (swingSide == RobotSide.LEFT)
+      {
+         yDisplacement = MathTools.clamp(yDisplacement, minStepWidth, maxStepWidth);
+         headingDisplacement = MathTools.clamp(headingDisplacement, turnMaxAngleInward, turnMaxAngleOutward);
+      }
+      else
+      {
+         yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth, -minStepWidth);
+         headingDisplacement = MathTools.clamp(headingDisplacement, -turnMaxAngleOutward, -turnMaxAngleInward);
+      }
+
+      double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(defaultStepWidth);
+      nextFootstepPose2DToPack.set(stanceFootPose2D);
+      // Applying the translation before the rotation allows the rotation to be centered in between the feet.
+      // This ordering seems to provide the most natural footsteps.
+      nextFootstepPose2DToPack.appendTranslation(0.0, halfInPlaceWidth);
+      nextFootstepPose2DToPack.appendRotation(headingDisplacement);
+      nextFootstepPose2DToPack.appendTranslation(0.0, -halfInPlaceWidth);
+      nextFootstepPose2DToPack.appendTranslation(xDisplacement, yDisplacement);
+   }
+
    /**
     * Sets the number of footsteps that are to be planned every tick.
     *
@@ -510,6 +575,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredTurningVelocityProvider(DesiredTurningVelocityProvider desiredTurningVelocityProvider)
    {
       this.desiredTurningVelocityProvider = desiredTurningVelocityProvider;
+      dynamicsBasedFootstepPlugin.get().setDesiredTurningVelocityProvider(desiredTurningVelocityProvider);
    }
 
    /**
@@ -520,6 +586,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
    {
       this.desiredVelocityProvider = desiredVelocityProvider;
+      dynamicsBasedFootstepPlugin.get().setDesiredVelocityProvider(desiredVelocityProvider);
    }
 
    /**
@@ -601,6 +668,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
    {
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+      dynamicsBasedFootstepPlugin.get().setFootstepStatusListener(statusMessageOutputManager);
    }
 
    /**
@@ -754,6 +822,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setAlternateStepChooser(AlternateStepChooser alternateStepChooser)
    {
       this.alternateStepChooser = alternateStepChooser;
+   }
+
+   public void setDynamicsBasedFootstepPlugin(DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin)
+   {
+      this.dynamicsBasedFootstepPlugin.set(dynamicsBasedFootstepPlugin);
    }
 
    /**

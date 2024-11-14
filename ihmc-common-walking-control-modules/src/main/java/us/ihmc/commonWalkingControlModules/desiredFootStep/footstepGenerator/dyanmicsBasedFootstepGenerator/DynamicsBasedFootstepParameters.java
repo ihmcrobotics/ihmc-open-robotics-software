@@ -62,6 +62,7 @@ public class DynamicsBasedFootstepParameters
       for (RobotSide robotSide : RobotSide.values)
       {
          String suffix = robotSide.getPascalCaseName() + "CurrentStep";
+         stageableYoDoubles.put(robotSide, new ArrayList<>());
 
          swingDurationCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "swingDuration", suffix + suffix2, swingDuration, registry));
          doubleSupportFractionCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "doubleSupportFraction", suffix + suffix2, doubleSupportFraction, registry));
@@ -71,7 +72,6 @@ public class DynamicsBasedFootstepParameters
          poleCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "pole", suffix + suffix2, pole, registry));
          omegaCurrentStep.put(robotSide,  createStageableYoDouble(robotSide, "omega", suffix + suffix2, omega, registry));
 
-         stageableYoDoubles.put(robotSide, new ArrayList<>());
       }
 
       comHeight.addListener(change -> omega.set(Math.sqrt(Math.abs(gravityZ / comHeight.getDoubleValue()))));

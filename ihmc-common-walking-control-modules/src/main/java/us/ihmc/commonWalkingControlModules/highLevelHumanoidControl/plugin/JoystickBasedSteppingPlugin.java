@@ -24,7 +24,6 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
 
    public JoystickBasedSteppingPlugin(ComponentBasedFootstepDataMessageGenerator stepGenerator,
                                       VelocityBasedSteppingPlugin fastWalkingStepGenerator,
-                                      DynamicsBasedFootstepPlugin dynamicsBasedFootstepPlugin,
                                       List<Updatable> updatables)
    {
       this.stepGenerator = stepGenerator;
@@ -32,7 +31,7 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
       this.updatables = updatables;
       registry.addChild(stepGenerator.getRegistry());
       registry.addChild(fastWalkingStepGenerator.getRegistry());
-      registry.addChild(dynamicsBasedFootstepPlugin.getRegistry());
+//      registry.addChild(dynamicsBasedFootstepPlugin.getRegistry());
    }
 
    @Override
