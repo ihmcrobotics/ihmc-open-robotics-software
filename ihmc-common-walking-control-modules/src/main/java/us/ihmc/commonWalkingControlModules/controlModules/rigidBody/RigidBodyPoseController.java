@@ -358,7 +358,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
-         LogTools.info("test0");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
          return true;
@@ -377,7 +376,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
-         LogTools.info("test1");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 
@@ -409,7 +407,6 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    {
       if (handleTrajectoryCommand(command) && jointControlHelper.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
-         LogTools.info("test2");
          hybridModeActive.set(true);
          statusHelper.registerNewTrajectory(command);
 

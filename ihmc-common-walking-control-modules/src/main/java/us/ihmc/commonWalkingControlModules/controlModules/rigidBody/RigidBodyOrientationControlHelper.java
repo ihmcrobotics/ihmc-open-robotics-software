@@ -302,8 +302,8 @@ public class RigidBodyOrientationControlHelper
       if (!feedForwardTrajectoryList.isEmpty())
       {
          feedForwardAcceleration.set(feedForwardTrajectoryList.get(
-               feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
-                                                              .getAngularPart());
+                             Math.max(feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex(),0))
+                       .getAngularPart());
       }
 
       if (!gainsTrajectoryPoints.isEmpty())

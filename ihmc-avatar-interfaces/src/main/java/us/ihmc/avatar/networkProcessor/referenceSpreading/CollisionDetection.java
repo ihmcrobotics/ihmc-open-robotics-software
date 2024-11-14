@@ -119,13 +119,13 @@ public class CollisionDetection
          sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
-            LogTools.warn("Collision Detected!!!!");
+//            LogTools.warn("Collision Detected!!!!");
             return true;
          }
 
          if (RobotSide.LEFT.equals(robotSide))
          {
-            LogTools.info("Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
+//            LogTools.info("Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
          }
       }
       time = currentTime;

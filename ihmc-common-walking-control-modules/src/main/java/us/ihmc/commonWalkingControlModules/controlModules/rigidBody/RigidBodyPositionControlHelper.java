@@ -355,11 +355,8 @@ public class RigidBodyPositionControlHelper implements SCS2YoGraphicHolder
 
       if (!feedForwardTrajectoryList.isEmpty())
       {
-         LogTools.info("Test : " + feedForwardTrajectoryList.get(
-                                             feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
-                                       .getLinearPart());
          feedForwardAcceleration.set(feedForwardTrajectoryList.get(
-              feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex())
+              Math.max(feedForwardTrajectoryList.size()-pointQueue.size()-trajectoryGenerator.getCurrentNumberOfWaypoints()+trajectoryGenerator.getCurrentWaypointIndex(),0))
                                                               .getLinearPart());
       }
 
