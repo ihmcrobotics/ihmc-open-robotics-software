@@ -22,8 +22,8 @@ public class ExampleCUDAKernel2D
       Path programPath = Path.of(Objects.requireNonNull(getClass().getResource("matrix_element_wise_addition.cu")).getPath());
       CUstream_st stream = CUDAStreamManager.getStream();
 
-      int width = 3;
-      int height = 5;
+      int width = (int) Math.sqrt(4096.0);
+      int height = (int) Math.sqrt(4096.0);
 
       try (Mat matA = new Mat(height, width, opencv_core.CV_16UC1, new Scalar(3));
            Mat matB = new Mat(height, width, opencv_core.CV_16UC1, new Scalar(5));
@@ -36,7 +36,6 @@ public class ExampleCUDAKernel2D
            CUDAProgram elementWiseAdditionProgram = new CUDAProgram(programPath);
            CUDAKernel additionKernel = elementWiseAdditionProgram.loadKernel("element_wise_add"))
       {
-
          gpuMatA.upload(matA);
          gpuMatB.upload(matB);
 
