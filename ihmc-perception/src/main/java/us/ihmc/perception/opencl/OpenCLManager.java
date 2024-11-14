@@ -30,40 +30,40 @@ public class OpenCLManager
 
    static
    {
-      if (!initialized)
-      {
-         Loader.load(OpenCL.class);
-
-         /* Get platform/device information */
-         IntPointer platformCount = new IntPointer(1);
-         IntPointer deviceCount = new IntPointer(1);
-
-         OpenCLTools.checkReturnCode(clGetPlatformIDs(1, platformId, platformCount));
-         OpenCLTools.checkReturnCode(clGetDeviceIDs(platformId, CL_DEVICE_TYPE_DEFAULT, 1, deviceId, deviceCount));
-
-         LogTools.info("Number of platforms: {}", platformCount.get());
-         LogTools.info("Number of devices: {}", deviceCount.get());
-
-         for (int i = 0; i < platformCount.get(); i++)
-         {
-            String message = "OpenCL Platform:";
-            message += " Name: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_NAME);
-            message += " Vendor: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VENDOR);
-            message += " Version: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VERSION);
-            LogTools.info(message);
-         }
-
-         for (int i = 0; i < deviceCount.get(); i++)
-         {
-            String message = "OpenCL Device:";
-            message += " Name: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_NAME);
-            message += " Vendor: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_VENDOR);
-            message += " Driver Version: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DRIVER_VERSION);
-            LogTools.info(message);
-         }
-
-         initialized = true;
-      }
+      //      if (!initialized)
+      //      {
+      //         Loader.load(OpenCL.class);
+      //
+      //         /* Get platform/device information */
+      //         IntPointer platformCount = new IntPointer(1);
+      //         IntPointer deviceCount = new IntPointer(1);
+      //
+      //         OpenCLTools.checkReturnCode(clGetPlatformIDs(1, platformId, platformCount));
+      //         OpenCLTools.checkReturnCode(clGetDeviceIDs(platformId, CL_DEVICE_TYPE_DEFAULT, 1, deviceId, deviceCount));
+      //
+      //         LogTools.info("Number of platforms: {}", platformCount.get());
+      //         LogTools.info("Number of devices: {}", deviceCount.get());
+      //
+      //         for (int i = 0; i < platformCount.get(); i++)
+      //         {
+      //            String message = "OpenCL Platform:";
+      //            message += " Name: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_NAME);
+      //            message += " Vendor: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VENDOR);
+      //            message += " Version: " + OpenCLTools.readPlatformInfoParameter(platformId, i, CL_PLATFORM_VERSION);
+      //            LogTools.info(message);
+      //         }
+      //
+      //         for (int i = 0; i < deviceCount.get(); i++)
+      //         {
+      //            String message = "OpenCL Device:";
+      //            message += " Name: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_NAME);
+      //            message += " Vendor: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DEVICE_VENDOR);
+      //            message += " Driver Version: " + OpenCLTools.readDeviceInfoParameter(deviceId, i, CL_DRIVER_VERSION);
+      //            LogTools.info(message);
+      //         }
+      //
+      //         initialized = true;
+      //      }
    }
 
    // A new context and command queue are created for each OpenCLManager
@@ -217,14 +217,14 @@ public class OpenCLManager
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
       OpenCLTools.checkReturnCode(clEnqueueWriteBuffer(commandQueue,
-                                           bufferObject,
-                                           blockingWrite,
-                                           offset,
-                                           sizeInBytes,
-                                           hostMemoryPointer,
-                                           numberOfEventsInWaitList,
-                                           eventWaitList,
-                                           event));
+                                                       bufferObject,
+                                                       blockingWrite,
+                                                       offset,
+                                                       sizeInBytes,
+                                                       hostMemoryPointer,
+                                                       numberOfEventsInWaitList,
+                                                       eventWaitList,
+                                                       event));
    }
 
    public void enqueueWriteImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
@@ -243,16 +243,16 @@ public class OpenCLManager
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
       OpenCLTools.checkReturnCode(clEnqueueWriteImage(commandQueue,
-                                          image,
-                                          blockingWrite,
-                                          origin,
-                                          region,
-                                          inputRowPitch,
-                                          inputSlicePitch,
-                                          hostMemoryPointer,
-                                          numberOfEventsInWaitList,
-                                          eventWaitList,
-                                          event));
+                                                      image,
+                                                      blockingWrite,
+                                                      origin,
+                                                      region,
+                                                      inputRowPitch,
+                                                      inputSlicePitch,
+                                                      hostMemoryPointer,
+                                                      numberOfEventsInWaitList,
+                                                      eventWaitList,
+                                                      event));
    }
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
@@ -302,14 +302,14 @@ public class OpenCLManager
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
       OpenCLTools.checkReturnCode(clEnqueueNDRangeKernel(commandQueue,
-                                             kernel,
-                                             numberOfWorkDimensions,
-                                             globalWorkOffset,
-                                             globalWorkSize,
-                                             localWorkSize,
-                                             numberOfEventsInWaitList,
-                                             eventWaitList,
-                                             event));
+                                                         kernel,
+                                                         numberOfWorkDimensions,
+                                                         globalWorkOffset,
+                                                         globalWorkSize,
+                                                         localWorkSize,
+                                                         numberOfEventsInWaitList,
+                                                         eventWaitList,
+                                                         event));
    }
 
    public void enqueueReadBuffer(_cl_mem bufferObject, Pointer hostMemoryPointer)
@@ -339,16 +339,16 @@ public class OpenCLManager
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
       OpenCLTools.checkReturnCode(clEnqueueReadImage(commandQueue,
-                                         image,
-                                         blockingRead,
-                                         origin,
-                                         region,
-                                         inputRowPitch,
-                                         inputSlicePitch,
-                                         hostMemoryPointer,
-                                         numberOfEventsInWaitList,
-                                         eventWaitList,
-                                         event));
+                                                     image,
+                                                     blockingRead,
+                                                     origin,
+                                                     region,
+                                                     inputRowPitch,
+                                                     inputSlicePitch,
+                                                     hostMemoryPointer,
+                                                     numberOfEventsInWaitList,
+                                                     eventWaitList,
+                                                     event));
    }
 
    public void enqueueFillBuffer(_cl_mem bufferObject, long sizeInBytes, byte value)

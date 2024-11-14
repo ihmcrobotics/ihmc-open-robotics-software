@@ -81,7 +81,7 @@ public class RDXLocomotionManager
    private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
    private final RDXBallAndArrowGoalFootstepPlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowGoalFootstepPlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan;
-   private final RDXFootstepPlanning footstepPlanning;
+   //   private final RDXFootstepPlanning footstepPlanning;
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
    private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
@@ -122,13 +122,13 @@ public class RDXLocomotionManager
       teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
       teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
-      footstepPlanning = new RDXFootstepPlanning(robotModel,
-                                                 syncedRobot,
-                                                 controllerStatusTracker,
-                                                 locomotionParameters,
-                                                 footstepPlannerParametersToUse,
-                                                 bodyPathPlannerParameters,
-                                                 swingFootPlannerParameters);
+      //      footstepPlanning = new RDXFootstepPlanning(robotModel,
+      //                                                 syncedRobot,
+      //                                                 controllerStatusTracker,
+      //                                                 locomotionParameters,
+      //                                                 footstepPlannerParametersToUse,
+      //                                                 bodyPathPlannerParameters,
+      //                                                 swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
    }
@@ -220,27 +220,27 @@ public class RDXLocomotionManager
          footstepPlannerParametersToUse.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
       }
 
-      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (parametersChanged && ballAndArrowMidFeetPosePlacement.isPlaced()))
-      {
-         footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
-      }
-
-      if (walkPathControlRing.getGoalUpdatedNotification().poll() || (parametersChanged && walkPathControlRing.isSelected()))
-      {
-         footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
-      }
-
-      footstepPlanning.update();
-
-      if (footstepPlanning.getPlannerOutputNotification().poll())
-      {
-         FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
-         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
-         if (output.getBodyPath().size() > 0)
-            bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
-         else
-            bodyPathPlanGraphic.clear();
-      }
+      //      if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (parametersChanged && ballAndArrowMidFeetPosePlacement.isPlaced()))
+      //      {
+      //         footstepPlanning.queueAsynchronousPlanning(ballAndArrowMidFeetPosePlacement.getGoalPose());
+      //      }
+      //
+      //      if (walkPathControlRing.getGoalUpdatedNotification().poll() || (parametersChanged && walkPathControlRing.isSelected()))
+      //      {
+      //         footstepPlanning.queueAsynchronousPlanning(walkPathControlRing.getGoalPose());
+      //      }
+      //
+      //      footstepPlanning.update();
+      //
+      //      if (footstepPlanning.getPlannerOutputNotification().poll())
+      //      {
+      //         FootstepPlannerOutput output = footstepPlanning.getPlannerOutputNotification().read();
+      //         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
+      //         if (output.getBodyPath().size() > 0)
+      //            bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
+      //         else
+      //            bodyPathPlanGraphic.clear();
+      //      }
 
       if (walkPathControlRing.getBecomesModifiedNotification().poll())
       {
@@ -390,7 +390,7 @@ public class RDXLocomotionManager
    {
       walkPathControlRing.update();
    }
-   
+
    public void calculateWalkPathControlRingVRPick(RDXVRContext vrContext)
    {
       if (!manualFootstepPlacement.isPlacingFootstep())
@@ -404,18 +404,18 @@ public class RDXLocomotionManager
          if (walkPathControlRing.getFootstepPlannerGoalGizmo().getPathControlRingGizmo().getIsGizmoHoveredVR().get(RobotSide.RIGHT))
          {
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-            {
-               controller.setBButtonText("Delete all");
-               if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
-               {
-                  deleteAll();
-               }
-               controller.setAButtonText("Walk");
-               if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
-               {
-                  interactableFootstepPlan.walkFromSteps();
-               }
-            });
+                                                                    {
+                                                                       controller.setBButtonText("Delete all");
+                                                                       if (controller.getBButtonActionData().bChanged() && controller.getBButtonActionData().bState())
+                                                                       {
+                                                                          deleteAll();
+                                                                       }
+                                                                       controller.setAButtonText("Walk");
+                                                                       if (controller.getAButtonActionData().bChanged() && controller.getAButtonActionData().bState())
+                                                                       {
+                                                                          interactableFootstepPlan.walkFromSteps();
+                                                                       }
+                                                                    });
          }
 
          walkPathControlRing.processVRInput(vrContext);
@@ -436,7 +436,7 @@ public class RDXLocomotionManager
 
    public void destroy()
    {
-      footstepPlanning.destroy();
+      //      footstepPlanning.destroy();
       controllerFootstepQueueGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       interactableFootstepPlan.destroy();
@@ -500,33 +500,33 @@ public class RDXLocomotionManager
 
    public void renderOverlayElements(RDX3DPanel panel3D)
    {
-      boolean isPlanning = footstepPlanning.isPlanning();
-      boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
-      if (isPlanning || hasPlannedRecently)
-      {
-         if (isPlanning)
-         {
-            if (!wasPlanning)
-            {
-               wasPlanning = true;
-               panel3D.getNotificationManager().pushNotification("Planning footsteps...");
-            }
-            footstepPlanningCompleteTimer.reset();
-         }
-         else
-         {
-            if (wasPlanning)
-            {
-               wasPlanning = false;
-               panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
-            }
-         }
-      }
+      //      boolean isPlanning = footstepPlanning.isPlanning();
+      //      boolean hasPlannedRecently = footstepPlanningCompleteTimer.isRunning(2.0);
+      //      if (isPlanning || hasPlannedRecently)
+      //      {
+      //         if (isPlanning)
+      //         {
+      //            if (!wasPlanning)
+      //            {
+      //               wasPlanning = true;
+      //               panel3D.getNotificationManager().pushNotification("Planning footsteps...");
+      //            }
+      //            footstepPlanningCompleteTimer.reset();
+      //         }
+      //         else
+      //         {
+      //            if (wasPlanning)
+      //            {
+      //               wasPlanning = false;
+      //               panel3D.getNotificationManager().pushNotification("Footstep planning completed.");
+      //            }
+      //         }
+      //      }
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      footstepPlanning.setHeightMapData(heightMapData);
+      //      footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
    }
 
