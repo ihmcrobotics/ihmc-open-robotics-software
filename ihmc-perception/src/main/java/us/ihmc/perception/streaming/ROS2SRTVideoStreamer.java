@@ -10,7 +10,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.net.InetSocketAddress;
 import java.util.Map;

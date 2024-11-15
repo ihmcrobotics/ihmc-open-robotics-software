@@ -11,7 +11,7 @@ import java.util.ArrayDeque;
 /**
  * This is designed to be functionally the same as ros topic hz but usable for lots of things.
  *
- * Deprecated - not super accurate. Use {@link FrequencyCalculator} instead.
+ * Deprecated - not super accurate. Use {@link us.ihmc.commons.time.FrequencyCalculator} instead.
  */
 @Deprecated
 public class FrequencyStatisticPrinter
