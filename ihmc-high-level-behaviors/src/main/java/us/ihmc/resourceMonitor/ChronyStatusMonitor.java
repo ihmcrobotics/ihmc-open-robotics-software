@@ -1,4 +1,4 @@
-package us.ihmc.missionControl.resourceMonitor;
+package us.ihmc.resourceMonitor;
 
 public class ChronyStatusMonitor extends ResourceMonitor
 {

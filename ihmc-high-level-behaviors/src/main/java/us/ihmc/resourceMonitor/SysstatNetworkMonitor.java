@@ -1,4 +1,4 @@
-package us.ihmc.missionControl.resourceMonitor;
+package us.ihmc.resourceMonitor;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
