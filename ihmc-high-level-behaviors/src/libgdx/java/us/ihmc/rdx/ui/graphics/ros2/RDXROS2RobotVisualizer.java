@@ -81,18 +81,18 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
    }
 
-   public void setupCameraTracking(RDXFocusBasedCamera cameraForTracking)
-   {
-      this.cameraForTracking = cameraForTracking;
-      trackRobot.set(true);
-   }
-
    public void createAndSetupStandalone(RDXBaseUI baseUI)
    {
       setupCameraTracking(baseUI.getPrimary3DPanel().getCamera3D());
       baseUI.getImGuiPanelManager().addPanel(getTitle(), this::renderImGuiWidgets);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       baseUI.getPrimaryScene().addRenderableProvider(this);
+   }
+
+   public void setupCameraTracking(RDXFocusBasedCamera cameraForTracking)
+   {
+      this.cameraForTracking = cameraForTracking;
+      trackRobot.set(true);
    }
 
    @Override
