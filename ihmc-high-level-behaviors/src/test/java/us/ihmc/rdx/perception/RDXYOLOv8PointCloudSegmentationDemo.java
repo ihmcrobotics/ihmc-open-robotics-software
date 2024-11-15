@@ -127,10 +127,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
             zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
             perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer);
 
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
          }
 
          @Override

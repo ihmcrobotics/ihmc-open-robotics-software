@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -35,19 +36,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
 
-public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
+public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotConfigurationData>
 {
-   private final RDXBaseUI baseUI;
    private final ROS2PublishSubscribeAPI ros2;
    private final RDXMultiBodyGraphic multiBodyGraphic;
-   private final ROS2Topic<?> topic;
+   private final ROS2Topic<RobotConfigurationData> topic;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final ImBoolean showHistory = new ImBoolean(false);
-   private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
-   private RDXFocusBasedCamera cameraForTracking;
+   private RDXFocusBasedCamera cameraForTracking = null;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
@@ -64,23 +62,13 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
-   public RDXROS2RobotVisualizer(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
-   {
-      this(baseUI, ros2, syncedRobot, () -> null);
-   }
-
-   public RDXROS2RobotVisualizer(RDXBaseUI baseUI,
-                                 ROS2PublishSubscribeAPI ros2,
-                                 ROS2SyncedRobotModel syncedRobot,
-                                 Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier)
+   public RDXROS2RobotVisualizer(ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
       super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer");
 
-      this.baseUI = baseUI;
       this.ros2 = ros2;
       this.topic = StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName());
       this.syncedRobot = syncedRobot;
-      this.cameraForTrackingSupplier = cameraForTrackingSupplier;
 
       multiBodyGraphic = new RDXMultiBodyGraphic(getTitle());
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
@@ -92,15 +80,28 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
       footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
    }
 
+   public void createAndSetupStandalone(RDXBaseUI baseUI)
+   {
+      setActive(true);
+      setupCameraTracking(baseUI.getPrimary3DPanel().getCamera3D());
+      baseUI.getImGuiPanelManager().addPanel(getTitle(), this::renderImGuiWidgets);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+      baseUI.getPrimaryScene().addRenderableProvider(this);
+      create();
+   }
+
+   public void setupCameraTracking(RDXFocusBasedCamera cameraForTracking)
+   {
+      this.cameraForTracking = cameraForTracking;
+      trackRobot.set(true);
+   }
+
    @Override
    public void create()
    {
       super.create();
 
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
-
       multiBodyGraphic.create();
-      cameraForTracking = cameraForTrackingSupplier.get();
       multiBodyGraphic.loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
 
       ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
@@ -170,6 +171,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
       footstepHistoryGraphic.update();
    }
 
+   @Override
    public void processImGuiInput(ImGui3DViewInput input)
    {
       if (input.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('P'))
@@ -247,7 +249,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
    }
 
    @Override
-   public ROS2Topic<?> getTopic()
+   public ROS2Topic<RobotConfigurationData> getTopic()
    {
       return topic;
    }

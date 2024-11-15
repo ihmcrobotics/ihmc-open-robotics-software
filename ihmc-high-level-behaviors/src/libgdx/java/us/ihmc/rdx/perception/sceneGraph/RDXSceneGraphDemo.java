@@ -118,10 +118,8 @@ public class RDXSceneGraphDemo
 
             // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
             createVisualizers();
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
 
             // Setup sensors
             if (SENSOR_MODE == SensorMode.SIMULATED)

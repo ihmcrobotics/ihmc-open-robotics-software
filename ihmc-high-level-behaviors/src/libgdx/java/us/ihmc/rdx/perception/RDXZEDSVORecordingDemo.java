@@ -76,14 +76,12 @@ public class RDXZEDSVORecordingDemo
             baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
             recorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
 
             addZEDVisualizers(perceptionVisualizerPanel);
 
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
          }
 
          @Override

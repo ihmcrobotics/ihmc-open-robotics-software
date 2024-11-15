@@ -11,6 +11,7 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
@@ -126,6 +127,16 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       }
 
       updateHeartbeat();
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+
+   }
+
+   public void processImGuiInput(ImGui3DViewInput input)
+   {
+
    }
 
    public abstract void renderImGuiWidgets();

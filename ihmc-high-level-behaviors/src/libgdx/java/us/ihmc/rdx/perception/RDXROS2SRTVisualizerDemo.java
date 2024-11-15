@@ -41,9 +41,8 @@ public class RDXROS2SRTVisualizerDemo
             visualizersPanel.addVisualizer(zedLeftColorVisualizer);
             visualizersPanel.addVisualizer(zedRightColorVisualizer);
             visualizersPanel.addVisualizer(zedDepthVisualizer);
-            visualizersPanel.create();
+            visualizersPanel.create(baseUI);
 
-            baseUI.getImGuiPanelManager().addPanel(visualizersPanel);
             baseUI.create();
          }
 

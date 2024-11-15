@@ -78,9 +78,7 @@ public class RDXCenterposeObjectDetectionDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            perceptionVisualizerPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
+            perceptionVisualizerPanel.create(baseUI);
          }
 
          @Override

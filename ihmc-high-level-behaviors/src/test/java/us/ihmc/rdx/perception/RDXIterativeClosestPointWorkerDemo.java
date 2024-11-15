@@ -236,10 +236,8 @@ public class RDXIterativeClosestPointWorkerDemo
             referenceFrameGraphic = new RDXReferenceFrameGraphic(0.3);
             baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic);
 
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
          }
 
          @Override

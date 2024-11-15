@@ -175,8 +175,7 @@ public class RDXOpenCVTrackerDemo
             colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
-            perceptionVisualizerPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            perceptionVisualizerPanel.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
             baseUI.create();
          }

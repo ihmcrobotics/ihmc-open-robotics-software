@@ -66,9 +66,6 @@ public class RDXSteppableRegionCalculatorDemo
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);
 
-      baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-      baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -76,7 +73,7 @@ public class RDXSteppableRegionCalculatorDemo
          {
             heightMapUI.create();
             steppableRegionsUI.create();
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
             baseUI.create();
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
