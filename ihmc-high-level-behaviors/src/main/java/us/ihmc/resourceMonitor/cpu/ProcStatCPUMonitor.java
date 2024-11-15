@@ -1,7 +1,7 @@
-package us.ihmc.missionControl.resourceMonitor.cpu;
+package us.ihmc.resourceMonitor.cpu;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.missionControl.resourceMonitor.ResourceMonitor;
+import us.ihmc.resourceMonitor.ResourceMonitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
