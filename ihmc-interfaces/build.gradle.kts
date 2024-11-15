@@ -49,7 +49,7 @@ generatorDependencies {
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
 val msg_packages = listOf("ihmc_common_msgs",
-                          "mission_control_msgs",
+                          "system_monitor_msgs",
                           "controller_msgs",
                           "toolbox_msgs",
                           "quadruped_msgs",
