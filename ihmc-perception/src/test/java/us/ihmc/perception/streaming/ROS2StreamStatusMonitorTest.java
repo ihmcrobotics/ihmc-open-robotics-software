@@ -17,11 +17,12 @@ import us.ihmc.commons.thread.Throttler;
 
 import java.net.InetSocketAddress;
 
+import static java.lang.Thread.interrupted;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2StreamStatusMonitorTest
 {
-   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stream_status_monitor_test_node");
+   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "stream_status_monitor_test_node");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("test");
 
@@ -107,8 +108,8 @@ public class ROS2StreamStatusMonitorTest
 
       Thread messagePublishThread = ThreadTools.startAsDaemon(() ->
       {
-         // Publish messages for 1 second
-         for (float i = 0.0f; i < messagePublishFrequency; i++)
+         // Publish messages for 3 second
+         while (!interrupted())
          {
             ROS2_HELPER.publish(TEST_TOPIC, statusMessage);
          }
@@ -117,11 +118,12 @@ public class ROS2StreamStatusMonitorTest
          ROS2_HELPER.publish(TEST_TOPIC, statusMessage);
       }, getClass().getSimpleName() + "Thread");
 
-      streamStatusMonitor.waitForStream(1.0);
+      streamStatusMonitor.waitForStream(1.5);
       assertTrue(streamStatusMonitor.isStreaming());
 
+      messagePublishThread.interrupt();
       messagePublishThread.join();
-      MissingThreadTools.sleep(0.01);
+      MissingThreadTools.sleep(0.5);
       assertFalse(streamStatusMonitor.isStreaming());
    }
 }
