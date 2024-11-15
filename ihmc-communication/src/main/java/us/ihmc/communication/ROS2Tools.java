@@ -28,7 +28,6 @@ import java.util.function.Consumer;
  *    <li>{@link FootstepPlannerAPI}</li>
  *    <li>{@link us.ihmc.communication.controllerAPI.ControllerAPI}</li>
  *    <li>{@link HumanoidControllerAPI}</li>
- *    <li>{@link MissionControlAPI}</li>
  *    <li>{@link PerceptionAPI}</li>
  *    <li>{@link SakeHandAPI}</li>
  *    <li>{@link StateEstimatorAPI}</li>
