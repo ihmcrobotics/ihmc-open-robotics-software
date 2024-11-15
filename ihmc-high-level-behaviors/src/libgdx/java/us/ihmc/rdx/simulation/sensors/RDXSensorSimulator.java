@@ -24,6 +24,11 @@ import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.time.Instant;
 
+/*
+ * TODO:
+ *  1. add noise
+ *  2. use glsl to linearize depth + add noise
+ */
 public class RDXSensorSimulator
 {
    private static final double METER_TO_MILLIMETERS = 1000.0;
@@ -67,6 +72,11 @@ public class RDXSensorSimulator
 
       double focalLength = calculateFocalLength(imageHeight, verticalFOV);
       cameraIntrinsics = new CameraIntrinsics(imageHeight, imageWidth, focalLength, focalLength, 0.5 * imageWidth, 0.5 * imageHeight);
+   }
+
+   private double calculateFocalLength(int imageHeight, float verticalFOV)
+   {
+      return (0.5 * imageHeight) / Math.tan(Math.toRadians(0.5 * verticalFOV));
    }
 
    public void create(RDX3DScene scene)
@@ -123,11 +133,6 @@ public class RDXSensorSimulator
       }
    }
 
-   private double calculateFocalLength(int imageHeight, float verticalFOV)
-   {
-      return (0.5 * imageHeight) / Math.tan(Math.toRadians(0.5 * verticalFOV));
-   }
-
    public void grab(RigidBodyTransform cameraTransformToWorld)
    {
       // Update camera pose
@@ -157,6 +162,7 @@ public class RDXSensorSimulator
          simulationScene.render(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
          simulationScene.postRender();
 
+         // Save the grab time
          colorGrabTime = Instant.now();
 
          // Read the grabbed color image
@@ -167,7 +173,7 @@ public class RDXSensorSimulator
          opencv_core.flip(colorImage, colorImage, OpenCVTools.FLIP_Y);
       }
 
-      if (depthImage != null)
+      if (depthImage != null) // If depth is enabled
       {
          // Render and "grab" the color image
          simulationScene.preRenderDepth(camera);
@@ -175,6 +181,7 @@ public class RDXSensorSimulator
          simulationScene.renderDepth(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
          simulationScene.postRenderDepth();
 
+         // Save the grab time
          depthGrabTime = Instant.now();
 
          // Read the depth buffer
@@ -221,5 +228,13 @@ public class RDXSensorSimulator
          throw new IllegalStateException("No depth image has been grabbed.");
 
       return new RawImage(depthImage.clone(), null, PixelFormat.GRAY16, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, depthGrabTime, sequenceNumber, 0.001f);
+   }
+
+   public void destroy()
+   {
+      enableColor(false);
+      enableDepth(false);
+      if (frameBuffer != null)
+         frameBuffer.dispose();
    }
 }

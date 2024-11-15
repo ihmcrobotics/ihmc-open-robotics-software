@@ -7,6 +7,7 @@ import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.rdx.DepthSensorDemoObjectsModel;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.perception.RDXMatImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -31,6 +32,8 @@ public class RDXSensorSimulatorDemo
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private List<Point3D32> pointCloud = new ArrayList<>();
 
+   private RDXMatImagePanel imagePanel;
+
    public RDXSensorSimulatorDemo()
    {
       sensorSimulator = new RDXSensorSimulator(WIDTH, HEIGHT, FOV, MIN_RANGE, MAX_RANGE);
@@ -44,6 +47,9 @@ public class RDXSensorSimulatorDemo
             baseUI.create();
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
             baseUI.getPrimaryScene().addModelInstance(new DepthSensorDemoObjectsModel().newInstance(), RDXSceneLevel.GROUND_TRUTH);
+
+            imagePanel = new RDXMatImagePanel("Simulated color", WIDTH, HEIGHT, false);
+            baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
 
             sensorSimulator.create(baseUI.getPrimaryScene());
             sensorSimulator.enableColor(true);
@@ -63,14 +69,23 @@ public class RDXSensorSimulatorDemo
          {
             if (throttler.run())
             {
+               // "Grab" the image
                sensorSimulator.grab(sensorPoseGizmo.getTransformToParent());
 
+               // Get the grabbed images
                RawImage colorImage = sensorSimulator.getColorImage();
                RawImage depthImage = sensorSimulator.getDepthImage();
 
+               // Set point cloud to render
                pointCloud = pointCloudExtractor.extractPointCloud(depthImage);
                pointCloudRenderer.setPointsToRender(pointCloud);
 
+               // Set color image to render
+               imagePanel.ensureDimensionsMatch(colorImage.getWidth(), colorImage.getHeight());
+               colorImage.getCpuImageMat().copyTo(imagePanel.getImage());
+               imagePanel.display();
+
+               // Release the grabbed images
                colorImage.release();
                depthImage.release();
             }
@@ -84,6 +99,8 @@ public class RDXSensorSimulatorDemo
          public void dispose()
          {
             baseUI.dispose();
+            pointCloudExtractor.destroy();
+            pointCloudRenderer.dispose();
          }
       });
    }
