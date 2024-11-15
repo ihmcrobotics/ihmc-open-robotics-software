@@ -70,7 +70,7 @@ public class RDXSensorSimulatorDemo
             if (throttler.run())
             {
                // "Grab" the image
-               sensorSimulator.grab(sensorPoseGizmo.getTransformToParent());
+               sensorSimulator.render(sensorPoseGizmo.getTransformToParent());
 
                // Get the grabbed images
                RawImage colorImage = sensorSimulator.getColorImage();

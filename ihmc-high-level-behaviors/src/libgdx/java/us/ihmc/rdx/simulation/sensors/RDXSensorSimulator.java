@@ -133,7 +133,7 @@ public class RDXSensorSimulator
       }
    }
 
-   public void grab(RigidBodyTransform cameraTransformToWorld)
+   public void render(RigidBodyTransform cameraTransformToWorld)
    {
       // Update camera pose
       LibGDXTools.toLibGDX(cameraTransformToWorld, cameraTransform);
@@ -217,7 +217,7 @@ public class RDXSensorSimulator
    public RawImage getColorImage()
    {
       if (colorImage == null)
-         throw new IllegalStateException("No color image has been grabbed.");
+         throw new IllegalStateException("No color image has been rendered.");
 
       return new RawImage(colorImage.clone(), null, PixelFormat.RGBA8, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, colorGrabTime, sequenceNumber, 0.0f);
    }
@@ -225,7 +225,7 @@ public class RDXSensorSimulator
    public RawImage getDepthImage()
    {
       if (depthImage == null)
-         throw new IllegalStateException("No depth image has been grabbed.");
+         throw new IllegalStateException("No depth image has been rendered.");
 
       return new RawImage(depthImage.clone(), null, PixelFormat.GRAY16, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, depthGrabTime, sequenceNumber, 0.001f);
    }
