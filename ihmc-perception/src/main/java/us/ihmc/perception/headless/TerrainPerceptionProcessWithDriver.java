@@ -34,7 +34,7 @@ import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
