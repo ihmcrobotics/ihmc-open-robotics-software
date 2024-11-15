@@ -16,7 +16,6 @@ import static org.bytedeco.cuda.global.cudart.*;
  */
 public class ExampleCUDAKernel
 {
-
    private static final String KERNEL_TO_ADD_THE_VALUES_OF_TWO_ARRAYS = """
          extern "C"
          
