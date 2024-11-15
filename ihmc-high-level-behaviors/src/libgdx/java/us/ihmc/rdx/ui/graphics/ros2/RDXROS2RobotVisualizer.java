@@ -10,7 +10,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,13 +25,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
-import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
-import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
-import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD455;
-import us.ihmc.rdx.ui.interactable.RDXInteractableZED2i;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +48,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final Point3D robotTranslationDifference = new Point3D();
    private final String chestName;
    private final ROS2SyncedRobotModel syncedRobot;
-   private HumanoidReferenceFrames referenceFramesToUseForSensors;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSliderFloat opacitySlider = new ImGuiSliderFloat("Opacity", "%.2f", 1.0f);
-   private RDXInteractableOuster interactableOuster;
-   private RDXInteractableRealsenseD455 interactableRealsenseD455;
-   private SideDependentList<RDXInteractableBlackflyFujinon> interactableBlackflyFujinons = new SideDependentList<>();
-   private RDXInteractableZED2i interactableZED2i;
    private boolean isFading = false;
    private final Pose3D lastHistoryPelvisPose = new Pose3D();
    private final Pose3D currentHistoryPelvisPose = new Pose3D();
@@ -68,6 +57,19 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
    private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
+   private final ArrayList<Runnable> updateListeners = new ArrayList<>();
+   private final ArrayList<OpacityListener> opacityListeners = new ArrayList<>();
+   private final ArrayList<ActiveListener> activeListeners = new ArrayList<>();
+
+   public interface OpacityListener
+   {
+      void setOpacity(float opacity);
+   }
+
+   public interface ActiveListener
+   {
+      void setActive(boolean active);
+   }
 
    public RDXROS2RobotVisualizer(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
@@ -85,8 +87,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
 
-      referenceFramesToUseForSensors = syncedRobot.getReferenceFrames();
-
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
       previousRobotMidFeetUnderPelvis.setToNaN();
       chestName = syncedRobot.getRobotModel().getJointMap().getChestName();
@@ -96,60 +96,16 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
    }
 
-   /** In simulation we want to use the ground truth frames rather than state estimator frames. */
-   public void setReferenceFramesToUseForSensors(HumanoidReferenceFrames referenceFramesToUseForSensors)
-   {
-      this.referenceFramesToUseForSensors = referenceFramesToUseForSensors;
-   }
-
    @Override
    public void create()
    {
       super.create();
+
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+
       getMultiBodyGraphic().create();
-      if (baseUI != null)
-         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
       getMultiBodyGraphic().loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
-
-      interactableOuster = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
-                                                     referenceFramesToUseForSensors.getOusterLidarFrame(),
-                                                     syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
-      interactableOuster.getInteractableFrameModel()
-                        .addRemoteTuning(ros2,
-                                         PerceptionAPI.OUSTER_TO_CHEST_TUNING,
-                                         syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
-      interactableRealsenseD455 = new RDXInteractableRealsenseD455(baseUI.getPrimary3DPanel(),
-                                                                   referenceFramesToUseForSensors.getSteppingCameraFrame(),
-                                                                   syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
-      interactableRealsenseD455.getInteractableFrameModel()
-                               .addRemoteTuning(ros2,
-                                                PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
-                                                syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
-      RDXInteractableBlackflyFujinon interactableBlackflyLeftFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
-                                                                                                          referenceFramesToUseForSensors.getSituationalAwarenessCameraFrame(RobotSide.LEFT),
-                                                                                                          syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
-      interactableBlackflyLeftFujinon.getInteractableFrameModel()
-                                     .addRemoteTuning(ros2,
-                                                      PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(RobotSide.LEFT),
-                                                      syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
-      interactableBlackflyFujinons.set(RobotSide.LEFT, interactableBlackflyLeftFujinon);
-
-      RDXInteractableBlackflyFujinon interactableBlackflyRightFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
-                                                                                                           referenceFramesToUseForSensors.getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
-                                                                                                           syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
-      interactableBlackflyRightFujinon.getInteractableFrameModel()
-                                      .addRemoteTuning(ros2,
-                                                       PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(RobotSide.RIGHT),
-                                                       syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
-      interactableBlackflyFujinons.set(RobotSide.RIGHT, interactableBlackflyRightFujinon);
-
-      interactableZED2i = new RDXInteractableZED2i(baseUI.getPrimary3DPanel(),
-                                                   referenceFramesToUseForSensors.getExperimentalCameraFrame(),
-                                                   syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
-      interactableZED2i.getInteractableFrameModel().addRemoteTuning(ros2,
-                                                                    PerceptionAPI.EXPERIMENTAL_CAMERA_TO_PARENT_TUNING,
-                                                                    syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
 
       ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
       {
@@ -185,15 +141,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
          {
             getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(chestName);
          }
-         interactableOuster.getInteractableFrameModel().setShowing(!hideChest.get());
-         interactableRealsenseD455.getInteractableFrameModel().setShowing(!hideChest.get());
-         interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().setShowing(!hideChest.get()));
-         interactableZED2i.getInteractableFrameModel().setShowing(!hideChest.get());
 
-         interactableOuster.getInteractableFrameModel().update();
-         interactableRealsenseD455.getInteractableFrameModel().update();
-         interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().update());
-         interactableZED2i.getInteractableFrameModel().update();
+         for (Runnable updateListener : updateListeners)
+            updateListener.run();
       }
 
       syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
@@ -252,10 +202,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       if (getMultiBodyGraphic().isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
       {
          getMultiBodyGraphic().setOpacity(opacitySlider.getFloatValue());
-         interactableOuster.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
-         interactableRealsenseD455.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
-         interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue()));
-         interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
+
+         for (OpacityListener opacityListener : opacityListeners)
+            opacityListener.setOpacity(opacitySlider.getFloatValue());
       }
 
       ImGui.checkbox(labels.get("Show History"), showHistory);
@@ -284,6 +233,15 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       }
    }
 
+   @Override
+   public void setActive(boolean active)
+   {
+      super.setActive(active);
+
+      for (ActiveListener activeListener : activeListeners)
+         activeListener.setActive(active);
+   }
+
    public void destroy()
    {
       super.destroy();
@@ -305,14 +263,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
    }
 
-   public void visualizeSensors(boolean visualize)
-   {
-      interactableOuster.getInteractableFrameModel().setShowing(visualize);
-      interactableRealsenseD455.getInteractableFrameModel().setShowing(visualize);
-      interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().setShowing(visualize));
-      interactableZED2i.getInteractableFrameModel().setShowing(visualize);
-   }
-
    public void fadeVisuals(float finalOpacity, float opacityVariation)
    {
       if (finalOpacity != opacitySlider.getFloatValue())
@@ -321,10 +271,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
          float newOpacity = (opacitySlider.getFloatValue() > finalOpacity) ? Math.max(opacitySlider.getFloatValue() - opacityVariation, finalOpacity) : Math.min(opacitySlider.getFloatValue() + opacityVariation, finalOpacity);
          opacitySlider.setFloatValue(newOpacity);
          getMultiBodyGraphic().setOpacity(newOpacity);
-         interactableOuster.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity);
-         interactableRealsenseD455.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity);
-         interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity));
-         interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity);
+
+         for (OpacityListener opacityListener : opacityListeners)
+            opacityListener.setOpacity(newOpacity);
       }
       else
       {
@@ -335,5 +284,20 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    public boolean isFading()
    {
       return isFading;
+   }
+
+   public void addUpdateListener(Runnable updateListener)
+   {
+      updateListeners.add(updateListener);
+   }
+
+   public void addOpacityListener(OpacityListener opacityListener)
+   {
+      opacityListeners.add(opacityListener);
+   }
+
+   public void addActiveListener(ActiveListener activeListener)
+   {
+      activeListeners.add(activeListener);
    }
 }
