@@ -17,6 +17,9 @@ import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
 import static us.ihmc.perception.cuda.CUDATools.*;
 
+/**
+ * This class is used to compile the CUDA code and retrieve kernels specified by the users.
+ */
 public class CUDAProgram implements AutoCloseable
 {
    private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
@@ -27,6 +30,7 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options
+    *
     * @param programPath {@link Path} to the .cu file.
     * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     */
@@ -37,8 +41,9 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
-    * @param programPath {@link Path} to the .cu file.
-    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    *
+    * @param programPath        {@link Path} to the .cu file.
+    * @param headerPaths        {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
@@ -72,6 +77,13 @@ public class CUDAProgram implements AutoCloseable
       }
    }
 
+   /**
+    * Construct a {@link CUDAProgram} with default compilation options
+    *
+    * @param programName The user-friendly name of the program.
+    *                    There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode The source code (i.e., the contents of the .cu file)
+    */
    public CUDAProgram(String programName, String programCode)
    {
       this(programName, programCode, null, null);
@@ -79,9 +91,11 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
+    *
+    * @param programName    The user-friendly name of the program.
+    *                       There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode    The program code (i.e., the contents of the .cu file).
+    * @param headerNames    List of header names included (with {@code #include}) in the code.
     * @param headerContents Contents of the headers included in the code.
     */
    public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
@@ -91,10 +105,12 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Construct a {@link CUDAProgram} specifying the name, code, header names, header contents, and compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
-    * @param headerContents Contents of the headers included in the code.
+    *
+    * @param programName        The user-friendly name of the program.
+    *                           There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode        The program code (i.e., the contents of the .cu file).
+    * @param headerNames        List of header names included (with {@code #include}) in the code.
+    * @param headerContents     Contents of the headers included in the code.
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
@@ -149,13 +165,14 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Compiles a CUDA program to an {@code _nvrtcProgram}.
-    * @param programName [IN] The name of the program (usually the file name with a .cu extension).
-    * @param programCode [IN] The program code (i.e. the contents of the .cu file).
-    * @param headerNames [IN] List of header names included (with {@code #include}) in the code.
-    * @param headerContents [IN] Contents of the headers included in the code.
+    *
+    * @param programName        [IN] The name of the program (usually the file name with a .cu extension).
+    * @param programCode        [IN] The program code (i.e. the contents of the .cu file).
+    * @param headerNames        [IN] List of header names included (with {@code #include}) in the code.
+    * @param headerContents     [IN] Contents of the headers included in the code.
     * @param compilationOptions [IN] List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
-    * @param compiledProgram [OUT] The compiled program.
+    * @param compiledProgram    [OUT] The compiled program.
     */
    private static void compileProgram(String programName,
                                       String programCode,
@@ -192,9 +209,10 @@ public class CUDAProgram implements AutoCloseable
 
    /**
     * Retrieves and logs the compilation log of the compiled {@code program}.
-    * @param program The compiled program.
+    *
+    * @param program     The compiled program.
     * @param programName Name of the compiled program.
-    * @param logLevel Level at which to output the log.
+    * @param logLevel    Level at which to output the log.
     */
    private static void printProgramLog(_nvrtcProgram program, String programName, Level logLevel)
    {
