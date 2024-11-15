@@ -82,10 +82,12 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
 
    public void createAndSetupStandalone(RDXBaseUI baseUI)
    {
+      setActive(true);
       setupCameraTracking(baseUI.getPrimary3DPanel().getCamera3D());
       baseUI.getImGuiPanelManager().addPanel(getTitle(), this::renderImGuiWidgets);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       baseUI.getPrimaryScene().addRenderableProvider(this);
+      create();
    }
 
    public void setupCameraTracking(RDXFocusBasedCamera cameraForTracking)
