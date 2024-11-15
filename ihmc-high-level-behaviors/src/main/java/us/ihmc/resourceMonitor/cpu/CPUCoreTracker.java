@@ -1,4 +1,4 @@
-package us.ihmc.missionControl.resourceMonitor.cpu;
+package us.ihmc.resourceMonitor.cpu;
 
 public class CPUCoreTracker
 {
