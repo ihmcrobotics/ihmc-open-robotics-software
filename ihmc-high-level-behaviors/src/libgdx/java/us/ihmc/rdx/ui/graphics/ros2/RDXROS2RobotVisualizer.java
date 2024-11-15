@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
 
 public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotConfigurationData>
 {
