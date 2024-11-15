@@ -155,7 +155,7 @@ __device__ float length2D(float2 vec) {
     return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
-__device__ float get_spatial_average(int xIndex, int yIndex, float3* globalMap, float* params)
+__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short* globalMap, float* params)
 {
    // perform a smoothing over neighboring cells
    float heightSum = 0.0f;
@@ -171,7 +171,7 @@ for (int i = -1; i < 2; i++)
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
                 int index = nyIndex * globalCellsPerAxis + nxIndex;
-                heightSum += globalMap[index].x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                heightSum += globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 count++;
             }
         }
@@ -179,7 +179,7 @@ for (int i = -1; i < 2; i++)
     return (count > 0) ? heightSum / (float)count : 0.0f;
 }
 
-__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, float3* globalMap, float* params)
+__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short* globalMap, float* params)
 {
    float totalDeviation = 0.0f;
    int count = 0;
@@ -195,7 +195,7 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, float
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
                 int index = nyIndex * globalCellsPerAxis + nxIndex;
-                float height = globalMap[index].x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+                float height = globalMap[index] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 totalDeviation += (height - average) * (height - average);
                 count++;
             }
@@ -205,7 +205,7 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, float
     return (count > 0) ? sqrt(totalDeviation / (float)count) : 0.0f;
 }
 
-__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, float3* globalMap, float *params)
+__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short* globalMap, float *params)
 {
    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalMap, params);
    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalMap, params);
@@ -222,8 +222,10 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
 
    return finalHeight;
 }
+extern "C"
+__global__ void heightMapUpdateKernel( unsigned short *in,size_t pitchIn,unsigned short *out,size_t pitchOut,float *params,float *sensorToZUpFrameTf,float *zUpToSensorFrameTf)
 
-__global__ void heightMapUpdateKernel( float3 *in,float3 *out,float *params,float *sensorToZUpFrameTf,float *zUpToSensorFrameTf)
+
 {
 int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
 int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -282,7 +284,7 @@ for (int pitch_count_offset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2
          if ((yaw_count >= 0) && (yaw_count < params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < params[DEPTH_INPUT_HEIGHT]))
          {
 
-         float depthValue = in[yaw_count * 720 + pitch_count].x;
+         unsigned short depthValue = in[yaw_count * (int)params[DEPTH_INPUT_WIDTH] + pitch_count];
          float depth = static_cast<float>(depthValue) / 1000.0f;
             float3 queryPointInSensor;
             if (params[MODE] == 0) // Spherical
@@ -332,16 +334,15 @@ for (int pitch_count_offset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2
    averageHeightZ = clamp(averageHeightZ, params[MIN_CLAMP_HEIGHT], params[MAX_CLAMP_HEIGHT]);
    averageHeightZ += params[HEIGHT_OFFSET];
 
-out[(int)(xIndex * (int)params[DEPTH_INPUT_WIDTH] + yIndex)] = make_float3(
-    static_cast<float>(averageHeightZ * params[HEIGHT_SCALING_FACTOR]),
-    0.0f,
-    0.0f
-);
+   unsigned short heightValue = static_cast<unsigned short>(
+           averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
+       out[yIndex * (int)params[DEPTH_INPUT_WIDTH] + xIndex] = heightValue;
+
 
 
 }
-
-__global__ void heightMapRegistrationKernel(float3 *localMap, float3 *globalMap,float *params, float *worldToZUpFrameTf, float *sensorToGroundTf) {
+extern "C"
+__global__ void heightMapRegistrationKernel(unsigned short *localMap,size_t pitchLocal, unsigned short *globalMap,size_t pitchGlobal,float *params, float *worldToZUpFrameTf, float *sensorToGroundTf) {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -384,13 +385,15 @@ bool isColliding = length2D(cellCenterInZUpFrameXY) < params[ROBOT_COLLISION_RAD
 
    // Extract the height from the local map at the local cell index (if within bounds)
        float sensorHeight = sensorToGroundTf[11] - 1.5f;
-       float previousHeight = globalMap[yIndex * localCellsPerAxis + xIndex].x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+       float previousHeight = globalMap[yIndex * localCellsPerAxis + xIndex] / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
        float localHeight = previousHeight;
 
 
-       if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis) {
-           localHeight = localMap[localCellIndex.y * localCellsPerAxis + localCellIndex.x].x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-       }
+
+
+        if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis && localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis) {
+               localHeight = (localMap[localCellIndex.y * localCellsPerAxis + localCellIndex.x] / params[HEIGHT_SCALING_FACTOR]) - params[HEIGHT_OFFSET];
+           }
 
        float finalHeight = previousHeight;
 
@@ -416,14 +419,17 @@ bool isColliding = length2D(cellCenterInZUpFrameXY) < params[ROBOT_COLLISION_RAD
    finalHeight += params[HEIGHT_OFFSET];
 
    // Put the height value in the global map at the global cell index
-    globalMap[yIndex * localCellsPerAxis + xIndex] = make_float3(finalHeight * params[HEIGHT_SCALING_FACTOR], 0.0f, 0.0f);
+    globalMap[yIndex * localCellsPerAxis + xIndex] = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
+
 }
 
-
-__global__ void croppingKernel(float3 * inputMap,float3 * croppedMap,float *params)
+extern "C"
+__global__ void croppingKernel(unsigned short * inputMap, size_t pitchInput,
+                                unsigned short * croppedMap, size_t pitchCropped,
+                                float * params)
 {
-   int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-   int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     int globalMapSizeX = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
     int globalMapSizeY = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
@@ -432,23 +438,33 @@ __global__ void croppingKernel(float3 * inputMap,float3 * croppedMap,float *para
         make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
         make_float2(0.0f, 0.0f),
         params[GLOBAL_CELL_SIZE],
-        static_cast<int>(params[GLOBAL_CENTER_INDEX])).x;
+        static_cast<int>(params[GLOBAL_CENTER_INDEX])
+    ).x;
 
     int globalSensorIndexY = coordinate_to_indices(
         make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
         make_float2(0.0f, 0.0f),
         params[GLOBAL_CELL_SIZE],
-        static_cast<int>(params[GLOBAL_CENTER_INDEX])).y;
-
+        static_cast<int>(params[GLOBAL_CENTER_INDEX])
+    ).y;
 
     int globalCellIndexX = globalSensorIndexX + xIndex - static_cast<int>(params[CROPPED_WINDOW_CENTER_INDEX]);
     int globalCellIndexY = globalSensorIndexY + yIndex - static_cast<int>(params[CROPPED_WINDOW_CENTER_INDEX]);
+
+    // Compute pointers for input and cropped map rows using pitch
+    unsigned short * inputRow = (unsigned short*)((char*)inputMap + globalCellIndexY * pitchInput);
+    unsigned short * croppedRow = (unsigned short*)((char*)croppedMap + yIndex * pitchCropped);
+
     // Check if global cell index is within bounds
-    if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX && globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY) {
-        float height = inputMap[globalCellIndexY * globalMapSizeX + globalCellIndexX].x;
-        croppedMap[yIndex * blockDim.x + xIndex] = make_float3(height, 0.0f, 0.0f);
-    } else {
-        croppedMap[yIndex * blockDim.x + xIndex] = make_float3(0.0f, 0.0f, 0.0f);
+    if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX && globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY)
+    {
+        // Access the input map using the row pointer
+        unsigned short height = inputRow[globalCellIndexX];
+        croppedRow[xIndex] = height;
+    }
+    else
+    {
+        croppedRow[xIndex] = 0; // Assign 0 for out-of-bounds cells
     }
 }
 
@@ -456,6 +472,28 @@ __global__ void croppingKernel(float3 * inputMap,float3 * croppedMap,float *para
 
 
 
+
+
+// extern "C"
+// __global__
+//  void heightMapUpdateKernel(int * sum)
+//  {
+//      *sum = 7 + 3;
+//  }
+//
+// extern "C"
+//  __global__
+//  void heightMapRegistrationKernel(int * in, int * out)
+//  {
+//      *out = *in + 3;
+//  }
+//
+// extern "C"
+//  __global__
+//  void croppingKernel(int * inn, int * outt)
+//  {
+//     *outt = *inn + 4;
+//  }
 
 
 
