@@ -50,9 +50,9 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
 
    public void create(RDXBaseUI baseUI)
    {
-      baseUI.getImGuiPanelManager().addPanel(this);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+      baseUI.getImGuiPanelManager().addPanel(this);
       baseUI.getPrimaryScene().addRenderableProvider(this);
 
       for (RDXVisualizer visualizer : visualizers)
