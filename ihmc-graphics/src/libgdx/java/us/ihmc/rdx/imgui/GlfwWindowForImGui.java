@@ -11,7 +11,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.tools.processManagement.UnsignedByteTools;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

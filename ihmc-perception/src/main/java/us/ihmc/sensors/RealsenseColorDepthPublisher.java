@@ -34,7 +34,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.time.Instant;
 import java.util.function.Supplier;

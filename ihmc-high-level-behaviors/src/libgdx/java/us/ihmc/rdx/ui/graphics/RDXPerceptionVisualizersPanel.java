@@ -7,8 +7,10 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.Comparator;
 import java.util.Locale;
@@ -46,8 +48,13 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
       queueRemoveChild(visualizer.getPanel());
    }
 
-   public void create()
+   public void create(RDXBaseUI baseUI)
    {
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+      baseUI.getImGuiPanelManager().addPanel(this);
+      baseUI.getPrimaryScene().addRenderableProvider(this);
+
       for (RDXVisualizer visualizer : visualizers)
       {
          visualizer.create();
@@ -61,6 +68,24 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
       {
          if (visualizer.isActive())
             visualizer.update();
+      }
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      for (RDXVisualizer visualizer : visualizers)
+      {
+         if (visualizer.isActive())
+            visualizer.calculate3DViewPick(input);
+      }
+   }
+
+   public void processImGuiInput(ImGui3DViewInput input)
+   {
+      for (RDXVisualizer visualizer : visualizers)
+      {
+         if (visualizer.isActive())
+            visualizer.processImGuiInput(input);
       }
    }
 
