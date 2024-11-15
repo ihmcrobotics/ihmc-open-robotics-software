@@ -155,12 +155,10 @@ public class RDXZEDArUcoMarkerDemo
          {
             arUcoDetectionImagePanel = new RDXMatImagePanel("ArUco Detections", 1280, 720, false);
             perceptionVisualizersPanel.addVisualizer(pointCloudVisualizer);
-            perceptionVisualizersPanel.create();
+            perceptionVisualizersPanel.create(baseUI);
 
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizersPanel);
             baseUI.getImGuiPanelManager().addPanel(arUcoDetectionImagePanel.getImagePanel());
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(markerPoseGraphics);
             baseUI.create();
          }
