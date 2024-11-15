@@ -4,15 +4,16 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
@@ -105,16 +106,10 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
-   public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
-   {
-      return new ROS2TypelessInput(ros2NodeInterface, topic);
-   }
-
-   @Override
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
-      new ROS2Callback<>(ros2NodeInterface, Empty.class, topic, message -> notification.set());
+      ros2NodeInterface.createSubscription2(topic.withType(Empty.class), message -> notification.set());
       return notification;
    }
 

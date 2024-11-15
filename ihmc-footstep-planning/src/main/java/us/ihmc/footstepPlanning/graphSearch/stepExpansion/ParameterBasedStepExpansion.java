@@ -49,6 +49,9 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       fillExpansionMask();
    }
 
+   /**
+    * This method fills the values we want to look for when we have the expansion mask parameter on
+    */
    private void fillExpansionMask()
    {
       xyExpansionMask.add(0);
@@ -136,7 +139,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
          applyMask(fullExpansionToPack, nodeToExpand);
       }
 
-      // Sorting is primarily a debug tool for checking proximity to ideal step
+      // Sorting is primarily a debug tool for checking proximity to the ideal step
       if (SORT_FULL_EXPANSION)
       {
          if (idealStepCalculator != null)
@@ -232,5 +235,14 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
                                   step.getY() + footstepTranslation.getY(),
                                   stepYaw + step.getYaw(),
                                   step.getRobotSide().getOppositeSide());
+   }
+
+   /**
+    * This was made to use in tests to check if the number of yaw offsets is what we expect which is why we are packing a variable.
+    * We don't want the {@link #yawOffsets} to be modified
+    */
+   void getYawOffsets(TDoubleArrayList yawOffsetsToPack)
+   {
+      yawOffsetsToPack.addAll(yawOffsets);
    }
 }
