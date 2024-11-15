@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.util.concurrent.AtomicDouble;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -193,7 +192,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                                                                                                            0.5f));
 
       ros2Node.createSubscription(customRegionTopic.withTypeName(PlanarRegionsListMessage.class), this::dispatchCustomPlanarRegion);
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");
          stop();

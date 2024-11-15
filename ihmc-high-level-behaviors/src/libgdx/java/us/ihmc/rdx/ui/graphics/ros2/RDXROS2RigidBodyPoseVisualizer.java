@@ -18,7 +18,6 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
@@ -102,7 +101,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      new ROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, this::queueRenderRigidBodyPose);
+      ros2Node.createSubscription2(PerceptionAPI.MOCAP_RIGID_BODY, this::queueRenderRigidBodyPose);
    }
 
    private void unsubscribe()

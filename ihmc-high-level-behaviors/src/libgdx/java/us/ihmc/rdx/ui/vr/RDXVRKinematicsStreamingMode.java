@@ -57,8 +57,8 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.*;

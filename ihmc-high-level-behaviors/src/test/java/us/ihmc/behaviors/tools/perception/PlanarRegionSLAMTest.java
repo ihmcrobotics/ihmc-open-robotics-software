@@ -48,7 +48,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 class PlanarRegionSLAMTest
 {

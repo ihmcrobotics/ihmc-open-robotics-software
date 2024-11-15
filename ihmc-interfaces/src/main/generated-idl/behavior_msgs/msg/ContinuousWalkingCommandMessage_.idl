@@ -12,17 +12,13 @@ module behavior_msgs
       struct ContinuousWalkingCommandMessage
       {
         /**
-         * flag to enable/disable publishing to controller
+         * flag to enable/disable continuous hiking state machine with keyboard
          */
-        boolean publish_to_controller;
+        boolean enable_continuous_hiking_with_keyboard;
         /**
-         * flag to enable/disable continuous walking state machine
+         * flag to enable/disable continuous hiking state machine with joystick controller
          */
-        boolean enable_continuous_walking;
-        /**
-         * number of steps to send to controller
-         */
-        unsigned short number_of_steps_to_send;
+        boolean enable_continuous_hiking_with_joystick_controller;
         /**
          * forward joystick value
          */

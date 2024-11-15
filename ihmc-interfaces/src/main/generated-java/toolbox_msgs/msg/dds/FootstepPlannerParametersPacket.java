@@ -19,6 +19,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public long sequence_id_;
    /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public double a_star_heuristics_weight_;
+   /**
             * Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
             * to run slower.
             */
@@ -61,7 +66,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
             */
-   public double maximum_step_reach_ = -11.1;
+   public double max_step_reach_ = -11.1;
    /**
             * Maximum yaw between consecutive footsteps
             * 
@@ -71,7 +76,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
             * its maximum reach.
             */
-   public double maximum_step_yaw_ = -11.1;
+   public double max_step_yaw_ = -11.1;
    /**
             * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
             */
@@ -89,7 +94,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public double minimum_step_width_ = -11.1;
+   public double min_step_width_ = -11.1;
    /**
             * Minimum step length the planner will consider for candidate steps.
             * 
@@ -99,40 +104,40 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public double minimum_step_length_ = -11.1;
+   public double min_step_length_ = -11.1;
    /**
             * Minimum step yaw.
             */
-   public double minimum_step_yaw_ = -11.1;
+   public double min_step_yaw_ = -11.1;
    /**
             * Maximum vertical distance between consecutive footsteps
             * 
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double maximum_step_z_ = -11.1;
+   public double max_step_z_ = -11.1;
    /**
             * Maximum vertical distance between start-of-swing and touchdown
             */
-   public double maximum_swing_z_ = -11.1;
+   public double max_swing_z_ = -11.1;
    /**
             * Maximum xy distance between start-of-swing and touchdown
             */
-   public double maximum_swing_reach_ = -11.1;
+   public double max_swing_reach_ = -11.1;
    /**
             * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
             * 
             * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
             */
-   public double minimum_foothold_percent_ = 0.9;
+   public double min_foothold_percent_ = 0.9;
    /**
             * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
             * then the value specified here.
             * 
             * More specifically, if a footstep has an associated planar region and that regions surface normal has a
-            * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+            * z-value less than cos(minSurfaceIncline), it will be rejected.
             */
-   public double minimum_surface_incline_radians_ = -11.1;
+   public double min_surface_incline_ = -11.1;
    /**
             * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
             * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -172,11 +177,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
             */
-   public double maximum_step_width_ = -11.1;
+   public double max_step_width_ = -11.1;
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -185,18 +190,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double cliff_bottom_height_to_avoid_ = -11.1;
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-            * nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public double minimum_distance_from_cliff_bottoms_ = -11.1;
+   public double min_distance_from_cliff_bottoms_ = -11.1;
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffTops away from it.
+            * until it is minDistanceFromCliffTops away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -206,13 +211,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public double minimum_distance_from_cliff_tops_ = -11.1;
+   public double min_distance_from_cliff_tops_ = -11.1;
    /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -317,10 +322,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double cost_per_step_ = -11.1;
    /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public double a_star_heuristics_weight_ = -11.1;
-   /**
             * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
    public long intermediate_body_box_checks_ = 1;
@@ -338,7 +339,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
             * ideal step are considered and the others are ignored. Set to non-positive number to disable
             */
-   public int maximum_branch_factor_ = -1;
+   public int max_branch_factor_ = -1;
    /**
             * If true, enables a mask that reduces the number of calculated steps away from the ideal step
             */
@@ -363,7 +364,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Height offset of shin collidable cylinder
             */
-   public double shin_height_offet_ = -11.1;
+   public double shin_height_offset_ = -11.1;
    /**
             * When using a height map, maximum accepted rms error
             */
@@ -404,6 +405,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    {
       sequence_id_ = other.sequence_id_;
 
+      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
+
       check_for_body_box_collisions_ = other.check_for_body_box_collisions_;
 
       check_for_path_collisions_ = other.check_for_path_collisions_;
@@ -420,29 +423,29 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       wiggle_inside_delta_minimum_ = other.wiggle_inside_delta_minimum_;
 
-      maximum_step_reach_ = other.maximum_step_reach_;
+      max_step_reach_ = other.max_step_reach_;
 
-      maximum_step_yaw_ = other.maximum_step_yaw_;
+      max_step_yaw_ = other.max_step_yaw_;
 
       use_reachability_map_ = other.use_reachability_map_;
 
       solution_quality_threshold_ = other.solution_quality_threshold_;
 
-      minimum_step_width_ = other.minimum_step_width_;
+      min_step_width_ = other.min_step_width_;
 
-      minimum_step_length_ = other.minimum_step_length_;
+      min_step_length_ = other.min_step_length_;
 
-      minimum_step_yaw_ = other.minimum_step_yaw_;
+      min_step_yaw_ = other.min_step_yaw_;
 
-      maximum_step_z_ = other.maximum_step_z_;
+      max_step_z_ = other.max_step_z_;
 
-      maximum_swing_z_ = other.maximum_swing_z_;
+      max_swing_z_ = other.max_swing_z_;
 
-      maximum_swing_reach_ = other.maximum_swing_reach_;
+      max_swing_reach_ = other.max_swing_reach_;
 
-      minimum_foothold_percent_ = other.minimum_foothold_percent_;
+      min_foothold_percent_ = other.min_foothold_percent_;
 
-      minimum_surface_incline_radians_ = other.minimum_surface_incline_radians_;
+      min_surface_incline_ = other.min_surface_incline_;
 
       wiggle_while_planning_ = other.wiggle_while_planning_;
 
@@ -456,15 +459,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       maximum_z_penetration_on_valley_regions_ = other.maximum_z_penetration_on_valley_regions_;
 
-      maximum_step_width_ = other.maximum_step_width_;
+      max_step_width_ = other.max_step_width_;
 
       cliff_bottom_height_to_avoid_ = other.cliff_bottom_height_to_avoid_;
 
-      minimum_distance_from_cliff_bottoms_ = other.minimum_distance_from_cliff_bottoms_;
+      min_distance_from_cliff_bottoms_ = other.min_distance_from_cliff_bottoms_;
 
       cliff_top_height_to_avoid_ = other.cliff_top_height_to_avoid_;
 
-      minimum_distance_from_cliff_tops_ = other.minimum_distance_from_cliff_tops_;
+      min_distance_from_cliff_tops_ = other.min_distance_from_cliff_tops_;
 
       body_box_height_ = other.body_box_height_;
 
@@ -506,15 +509,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       cost_per_step_ = other.cost_per_step_;
 
-      a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
-
       intermediate_body_box_checks_ = other.intermediate_body_box_checks_;
 
       distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
 
       delta_yaw_from_reference_tolerance_ = other.delta_yaw_from_reference_tolerance_;
 
-      maximum_branch_factor_ = other.maximum_branch_factor_;
+      max_branch_factor_ = other.max_branch_factor_;
 
       enable_expansion_mask_ = other.enable_expansion_mask_;
 
@@ -526,7 +527,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       shin_length_ = other.shin_length_;
 
-      shin_height_offet_ = other.shin_height_offet_;
+      shin_height_offset_ = other.shin_height_offset_;
 
       rms_error_threshold_ = other.rms_error_threshold_;
 
@@ -555,6 +556,23 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
+   {
+      a_star_heuristics_weight_ = a_star_heuristics_weight;
+   }
+   /**
+            * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+            * Should not be less than 1.0
+            */
+   public double getAStarHeuristicsWeight()
+   {
+      return a_star_heuristics_weight_;
    }
 
    /**
@@ -692,9 +710,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
             */
-   public void setMaximumStepReach(double maximum_step_reach)
+   public void setMaxStepReach(double max_step_reach)
    {
-      maximum_step_reach_ = maximum_step_reach;
+      max_step_reach_ = max_step_reach;
    }
    /**
             * Maximum xy-distance the planner will consider for candidate steps.
@@ -703,9 +721,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
             */
-   public double getMaximumStepReach()
+   public double getMaxStepReach()
    {
-      return maximum_step_reach_;
+      return max_step_reach_;
    }
 
    /**
@@ -717,9 +735,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
             * its maximum reach.
             */
-   public void setMaximumStepYaw(double maximum_step_yaw)
+   public void setMaxStepYaw(double max_step_yaw)
    {
-      maximum_step_yaw_ = maximum_step_yaw;
+      max_step_yaw_ = max_step_yaw;
    }
    /**
             * Maximum yaw between consecutive footsteps
@@ -730,9 +748,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
             * its maximum reach.
             */
-   public double getMaximumStepYaw()
+   public double getMaxStepYaw()
    {
-      return maximum_step_yaw_;
+      return max_step_yaw_;
    }
 
    /**
@@ -774,9 +792,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public void setMinimumStepWidth(double minimum_step_width)
+   public void setMinStepWidth(double min_step_width)
    {
-      minimum_step_width_ = minimum_step_width;
+      min_step_width_ = min_step_width;
    }
    /**
             * Minimum step width the planner will consider for candidate steps.
@@ -787,9 +805,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public double getMinimumStepWidth()
+   public double getMinStepWidth()
    {
-      return minimum_step_width_;
+      return min_step_width_;
    }
 
    /**
@@ -801,9 +819,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public void setMinimumStepLength(double minimum_step_length)
+   public void setMinStepLength(double min_step_length)
    {
-      minimum_step_length_ = minimum_step_length;
+      min_step_length_ = min_step_length;
    }
    /**
             * Minimum step length the planner will consider for candidate steps.
@@ -814,24 +832,24 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
             * on top of each other. If too high, footsteps might not be kinematically feasible.
             */
-   public double getMinimumStepLength()
+   public double getMinStepLength()
    {
-      return minimum_step_length_;
+      return min_step_length_;
    }
 
    /**
             * Minimum step yaw.
             */
-   public void setMinimumStepYaw(double minimum_step_yaw)
+   public void setMinStepYaw(double min_step_yaw)
    {
-      minimum_step_yaw_ = minimum_step_yaw;
+      min_step_yaw_ = min_step_yaw;
    }
    /**
             * Minimum step yaw.
             */
-   public double getMinimumStepYaw()
+   public double getMinStepYaw()
    {
-      return minimum_step_yaw_;
+      return min_step_yaw_;
    }
 
    /**
@@ -840,9 +858,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public void setMaximumStepZ(double maximum_step_z)
+   public void setMaxStepZ(double max_step_z)
    {
-      maximum_step_z_ = maximum_step_z;
+      max_step_z_ = max_step_z;
    }
    /**
             * Maximum vertical distance between consecutive footsteps
@@ -850,39 +868,39 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
             * z-up sole frame.
             */
-   public double getMaximumStepZ()
+   public double getMaxStepZ()
    {
-      return maximum_step_z_;
+      return max_step_z_;
    }
 
    /**
             * Maximum vertical distance between start-of-swing and touchdown
             */
-   public void setMaximumSwingZ(double maximum_swing_z)
+   public void setMaxSwingZ(double max_swing_z)
    {
-      maximum_swing_z_ = maximum_swing_z;
+      max_swing_z_ = max_swing_z;
    }
    /**
             * Maximum vertical distance between start-of-swing and touchdown
             */
-   public double getMaximumSwingZ()
+   public double getMaxSwingZ()
    {
-      return maximum_swing_z_;
+      return max_swing_z_;
    }
 
    /**
             * Maximum xy distance between start-of-swing and touchdown
             */
-   public void setMaximumSwingReach(double maximum_swing_reach)
+   public void setMaxSwingReach(double max_swing_reach)
    {
-      maximum_swing_reach_ = maximum_swing_reach;
+      max_swing_reach_ = max_swing_reach;
    }
    /**
             * Maximum xy distance between start-of-swing and touchdown
             */
-   public double getMaximumSwingReach()
+   public double getMaxSwingReach()
    {
-      return maximum_swing_reach_;
+      return max_swing_reach_;
    }
 
    /**
@@ -890,18 +908,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
             */
-   public void setMinimumFootholdPercent(double minimum_foothold_percent)
+   public void setMinFootholdPercent(double min_foothold_percent)
    {
-      minimum_foothold_percent_ = minimum_foothold_percent;
+      min_foothold_percent_ = min_foothold_percent;
    }
    /**
             * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
             * 
             * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
             */
-   public double getMinimumFootholdPercent()
+   public double getMinFootholdPercent()
    {
-      return minimum_foothold_percent_;
+      return min_foothold_percent_;
    }
 
    /**
@@ -909,22 +927,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * then the value specified here.
             * 
             * More specifically, if a footstep has an associated planar region and that regions surface normal has a
-            * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+            * z-value less than cos(minSurfaceIncline), it will be rejected.
             */
-   public void setMinimumSurfaceInclineRadians(double minimum_surface_incline_radians)
+   public void setMinSurfaceIncline(double min_surface_incline)
    {
-      minimum_surface_incline_radians_ = minimum_surface_incline_radians;
+      min_surface_incline_ = min_surface_incline;
    }
    /**
             * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
             * then the value specified here.
             * 
             * More specifically, if a footstep has an associated planar region and that regions surface normal has a
-            * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+            * z-value less than cos(minSurfaceIncline), it will be rejected.
             */
-   public double getMinimumSurfaceInclineRadians()
+   public double getMinSurfaceIncline()
    {
-      return minimum_surface_incline_radians_;
+      return min_surface_incline_;
    }
 
    /**
@@ -1039,9 +1057,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
             */
-   public void setMaximumStepWidth(double maximum_step_width)
+   public void setMaxStepWidth(double max_step_width)
    {
-      maximum_step_width_ = maximum_step_width;
+      max_step_width_ = max_step_width;
    }
    /**
             * Maximum step width the planner will consider for candidate steps.
@@ -1051,15 +1069,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * 
             * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
             */
-   public double getMaximumStepWidth()
+   public double getMaxStepWidth()
    {
-      return maximum_step_width_;
+      return max_step_width_;
    }
 
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -1072,7 +1090,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -1085,35 +1103,35 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-            * nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public void setMinimumDistanceFromCliffBottoms(double minimum_distance_from_cliff_bottoms)
+   public void setMinDistanceFromCliffBottoms(double min_distance_from_cliff_bottoms)
    {
-      minimum_distance_from_cliff_bottoms_ = minimum_distance_from_cliff_bottoms;
+      min_distance_from_cliff_bottoms_ = min_distance_from_cliff_bottoms;
    }
    /**
             * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-            * nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public double getMinimumDistanceFromCliffBottoms()
+   public double getMinDistanceFromCliffBottoms()
    {
-      return minimum_distance_from_cliff_bottoms_;
+      return min_distance_from_cliff_bottoms_;
    }
 
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffTops away from it.
+            * until it is minDistanceFromCliffTops away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -1126,7 +1144,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffTops away from it.
+            * until it is minDistanceFromCliffTops away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -1140,28 +1158,28 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public void setMinimumDistanceFromCliffTops(double minimum_distance_from_cliff_tops)
+   public void setMinDistanceFromCliffTops(double min_distance_from_cliff_tops)
    {
-      minimum_distance_from_cliff_tops_ = minimum_distance_from_cliff_tops;
+      min_distance_from_cliff_tops_ = min_distance_from_cliff_tops;
    }
    /**
             * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
             * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-            * until it is minimumDistanceFromCliffBottoms away from it.
+            * until it is minDistanceFromCliffBottoms away from it.
             * 
             * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
             * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
             * generator is capable of swinging over.
             */
-   public double getMinimumDistanceFromCliffTops()
+   public double getMinDistanceFromCliffTops()
    {
-      return minimum_distance_from_cliff_tops_;
+      return min_distance_from_cliff_tops_;
    }
 
    /**
@@ -1511,21 +1529,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
-   {
-      a_star_heuristics_weight_ = a_star_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the A Star planner.
-            */
-   public double getAStarHeuristicsWeight()
-   {
-      return a_star_heuristics_weight_;
-   }
-
-   /**
             * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
    public void setIntermediateBodyBoxChecks(long intermediate_body_box_checks)
@@ -1578,17 +1581,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
             * ideal step are considered and the others are ignored. Set to non-positive number to disable
             */
-   public void setMaximumBranchFactor(int maximum_branch_factor)
+   public void setMaxBranchFactor(int max_branch_factor)
    {
-      maximum_branch_factor_ = maximum_branch_factor;
+      max_branch_factor_ = max_branch_factor;
    }
    /**
             * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
             * ideal step are considered and the others are ignored. Set to non-positive number to disable
             */
-   public int getMaximumBranchFactor()
+   public int getMaxBranchFactor()
    {
-      return maximum_branch_factor_;
+      return max_branch_factor_;
    }
 
    /**
@@ -1671,16 +1674,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    /**
             * Height offset of shin collidable cylinder
             */
-   public void setShinHeightOffet(double shin_height_offet)
+   public void setShinHeightOffset(double shin_height_offset)
    {
-      shin_height_offet_ = shin_height_offet;
+      shin_height_offset_ = shin_height_offset;
    }
    /**
             * Height offset of shin collidable cylinder
             */
-   public double getShinHeightOffet()
+   public double getShinHeightOffset()
    {
-      return shin_height_offet_;
+      return shin_height_offset_;
    }
 
    /**
@@ -1795,6 +1798,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_body_box_collisions_, other.check_for_body_box_collisions_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.check_for_path_collisions_, other.check_for_path_collisions_, epsilon)) return false;
@@ -1811,29 +1816,29 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_minimum_, other.wiggle_inside_delta_minimum_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_, other.maximum_step_reach_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_reach_, other.max_step_reach_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_, other.maximum_step_yaw_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_yaw_, other.max_step_yaw_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_reachability_map_, other.use_reachability_map_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_threshold_, other.solution_quality_threshold_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_width_, other.minimum_step_width_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_step_width_, other.min_step_width_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_length_, other.minimum_step_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_step_length_, other.min_step_length_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_yaw_, other.minimum_step_yaw_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_step_yaw_, other.min_step_yaw_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_z_, other.maximum_step_z_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_z_, other.max_step_z_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_z_, other.maximum_swing_z_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_swing_z_, other.max_swing_z_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_swing_reach_, other.maximum_swing_reach_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_swing_reach_, other.max_swing_reach_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_foothold_percent_, other.minimum_foothold_percent_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_foothold_percent_, other.min_foothold_percent_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_surface_incline_, other.min_surface_incline_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.wiggle_while_planning_, other.wiggle_while_planning_, epsilon)) return false;
 
@@ -1847,15 +1852,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_z_penetration_on_valley_regions_, other.maximum_z_penetration_on_valley_regions_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_, other.maximum_step_width_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_step_width_, other.max_step_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_bottom_height_to_avoid_, other.cliff_bottom_height_to_avoid_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_bottoms_, other.minimum_distance_from_cliff_bottoms_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_distance_from_cliff_bottoms_, other.min_distance_from_cliff_bottoms_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_top_height_to_avoid_, other.cliff_top_height_to_avoid_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_tops_, other.minimum_distance_from_cliff_tops_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_distance_from_cliff_tops_, other.min_distance_from_cliff_tops_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
 
@@ -1897,15 +1902,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.intermediate_body_box_checks_, other.intermediate_body_box_checks_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.delta_yaw_from_reference_tolerance_, other.delta_yaw_from_reference_tolerance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_branch_factor_, other.maximum_branch_factor_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_branch_factor_, other.max_branch_factor_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_expansion_mask_, other.enable_expansion_mask_, epsilon)) return false;
 
@@ -1917,7 +1920,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_length_, other.shin_length_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offset_, other.shin_height_offset_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rms_error_threshold_, other.rms_error_threshold_, epsilon)) return false;
 
@@ -1946,6 +1949,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
+
       if(this.check_for_body_box_collisions_ != otherMyClass.check_for_body_box_collisions_) return false;
 
       if(this.check_for_path_collisions_ != otherMyClass.check_for_path_collisions_) return false;
@@ -1962,29 +1967,29 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.wiggle_inside_delta_minimum_ != otherMyClass.wiggle_inside_delta_minimum_) return false;
 
-      if(this.maximum_step_reach_ != otherMyClass.maximum_step_reach_) return false;
+      if(this.max_step_reach_ != otherMyClass.max_step_reach_) return false;
 
-      if(this.maximum_step_yaw_ != otherMyClass.maximum_step_yaw_) return false;
+      if(this.max_step_yaw_ != otherMyClass.max_step_yaw_) return false;
 
       if(this.use_reachability_map_ != otherMyClass.use_reachability_map_) return false;
 
       if(this.solution_quality_threshold_ != otherMyClass.solution_quality_threshold_) return false;
 
-      if(this.minimum_step_width_ != otherMyClass.minimum_step_width_) return false;
+      if(this.min_step_width_ != otherMyClass.min_step_width_) return false;
 
-      if(this.minimum_step_length_ != otherMyClass.minimum_step_length_) return false;
+      if(this.min_step_length_ != otherMyClass.min_step_length_) return false;
 
-      if(this.minimum_step_yaw_ != otherMyClass.minimum_step_yaw_) return false;
+      if(this.min_step_yaw_ != otherMyClass.min_step_yaw_) return false;
 
-      if(this.maximum_step_z_ != otherMyClass.maximum_step_z_) return false;
+      if(this.max_step_z_ != otherMyClass.max_step_z_) return false;
 
-      if(this.maximum_swing_z_ != otherMyClass.maximum_swing_z_) return false;
+      if(this.max_swing_z_ != otherMyClass.max_swing_z_) return false;
 
-      if(this.maximum_swing_reach_ != otherMyClass.maximum_swing_reach_) return false;
+      if(this.max_swing_reach_ != otherMyClass.max_swing_reach_) return false;
 
-      if(this.minimum_foothold_percent_ != otherMyClass.minimum_foothold_percent_) return false;
+      if(this.min_foothold_percent_ != otherMyClass.min_foothold_percent_) return false;
 
-      if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
+      if(this.min_surface_incline_ != otherMyClass.min_surface_incline_) return false;
 
       if(this.wiggle_while_planning_ != otherMyClass.wiggle_while_planning_) return false;
 
@@ -1998,15 +2003,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_z_penetration_on_valley_regions_ != otherMyClass.maximum_z_penetration_on_valley_regions_) return false;
 
-      if(this.maximum_step_width_ != otherMyClass.maximum_step_width_) return false;
+      if(this.max_step_width_ != otherMyClass.max_step_width_) return false;
 
       if(this.cliff_bottom_height_to_avoid_ != otherMyClass.cliff_bottom_height_to_avoid_) return false;
 
-      if(this.minimum_distance_from_cliff_bottoms_ != otherMyClass.minimum_distance_from_cliff_bottoms_) return false;
+      if(this.min_distance_from_cliff_bottoms_ != otherMyClass.min_distance_from_cliff_bottoms_) return false;
 
       if(this.cliff_top_height_to_avoid_ != otherMyClass.cliff_top_height_to_avoid_) return false;
 
-      if(this.minimum_distance_from_cliff_tops_ != otherMyClass.minimum_distance_from_cliff_tops_) return false;
+      if(this.min_distance_from_cliff_tops_ != otherMyClass.min_distance_from_cliff_tops_) return false;
 
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
 
@@ -2048,15 +2053,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
-      if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
-
       if(this.intermediate_body_box_checks_ != otherMyClass.intermediate_body_box_checks_) return false;
 
       if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
 
       if(this.delta_yaw_from_reference_tolerance_ != otherMyClass.delta_yaw_from_reference_tolerance_) return false;
 
-      if(this.maximum_branch_factor_ != otherMyClass.maximum_branch_factor_) return false;
+      if(this.max_branch_factor_ != otherMyClass.max_branch_factor_) return false;
 
       if(this.enable_expansion_mask_ != otherMyClass.enable_expansion_mask_) return false;
 
@@ -2068,7 +2071,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.shin_length_ != otherMyClass.shin_length_) return false;
 
-      if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
+      if(this.shin_height_offset_ != otherMyClass.shin_height_offset_) return false;
 
       if(this.rms_error_threshold_ != otherMyClass.rms_error_threshold_) return false;
 
@@ -2094,6 +2097,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("FootstepPlannerParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("a_star_heuristics_weight=");
+      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
       builder.append("check_for_body_box_collisions=");
       builder.append(this.check_for_body_box_collisions_);      builder.append(", ");
       builder.append("check_for_path_collisions=");
@@ -2110,30 +2115,30 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.wiggle_inside_delta_target_);      builder.append(", ");
       builder.append("wiggle_inside_delta_minimum=");
       builder.append(this.wiggle_inside_delta_minimum_);      builder.append(", ");
-      builder.append("maximum_step_reach=");
-      builder.append(this.maximum_step_reach_);      builder.append(", ");
-      builder.append("maximum_step_yaw=");
-      builder.append(this.maximum_step_yaw_);      builder.append(", ");
+      builder.append("max_step_reach=");
+      builder.append(this.max_step_reach_);      builder.append(", ");
+      builder.append("max_step_yaw=");
+      builder.append(this.max_step_yaw_);      builder.append(", ");
       builder.append("use_reachability_map=");
       builder.append(this.use_reachability_map_);      builder.append(", ");
       builder.append("solution_quality_threshold=");
       builder.append(this.solution_quality_threshold_);      builder.append(", ");
-      builder.append("minimum_step_width=");
-      builder.append(this.minimum_step_width_);      builder.append(", ");
-      builder.append("minimum_step_length=");
-      builder.append(this.minimum_step_length_);      builder.append(", ");
-      builder.append("minimum_step_yaw=");
-      builder.append(this.minimum_step_yaw_);      builder.append(", ");
-      builder.append("maximum_step_z=");
-      builder.append(this.maximum_step_z_);      builder.append(", ");
-      builder.append("maximum_swing_z=");
-      builder.append(this.maximum_swing_z_);      builder.append(", ");
-      builder.append("maximum_swing_reach=");
-      builder.append(this.maximum_swing_reach_);      builder.append(", ");
-      builder.append("minimum_foothold_percent=");
-      builder.append(this.minimum_foothold_percent_);      builder.append(", ");
-      builder.append("minimum_surface_incline_radians=");
-      builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
+      builder.append("min_step_width=");
+      builder.append(this.min_step_width_);      builder.append(", ");
+      builder.append("min_step_length=");
+      builder.append(this.min_step_length_);      builder.append(", ");
+      builder.append("min_step_yaw=");
+      builder.append(this.min_step_yaw_);      builder.append(", ");
+      builder.append("max_step_z=");
+      builder.append(this.max_step_z_);      builder.append(", ");
+      builder.append("max_swing_z=");
+      builder.append(this.max_swing_z_);      builder.append(", ");
+      builder.append("max_swing_reach=");
+      builder.append(this.max_swing_reach_);      builder.append(", ");
+      builder.append("min_foothold_percent=");
+      builder.append(this.min_foothold_percent_);      builder.append(", ");
+      builder.append("min_surface_incline=");
+      builder.append(this.min_surface_incline_);      builder.append(", ");
       builder.append("wiggle_while_planning=");
       builder.append(this.wiggle_while_planning_);      builder.append(", ");
       builder.append("reject_if_wiggle_not_satisfied=");
@@ -2146,16 +2151,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_yaw_wiggle_);      builder.append(", ");
       builder.append("maximum_z_penetration_on_valley_regions=");
       builder.append(this.maximum_z_penetration_on_valley_regions_);      builder.append(", ");
-      builder.append("maximum_step_width=");
-      builder.append(this.maximum_step_width_);      builder.append(", ");
+      builder.append("max_step_width=");
+      builder.append(this.max_step_width_);      builder.append(", ");
       builder.append("cliff_bottom_height_to_avoid=");
       builder.append(this.cliff_bottom_height_to_avoid_);      builder.append(", ");
-      builder.append("minimum_distance_from_cliff_bottoms=");
-      builder.append(this.minimum_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("min_distance_from_cliff_bottoms=");
+      builder.append(this.min_distance_from_cliff_bottoms_);      builder.append(", ");
       builder.append("cliff_top_height_to_avoid=");
       builder.append(this.cliff_top_height_to_avoid_);      builder.append(", ");
-      builder.append("minimum_distance_from_cliff_tops=");
-      builder.append(this.minimum_distance_from_cliff_tops_);      builder.append(", ");
+      builder.append("min_distance_from_cliff_tops=");
+      builder.append(this.min_distance_from_cliff_tops_);      builder.append(", ");
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
       builder.append("body_box_depth=");
@@ -2196,16 +2201,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.reference_plan_alpha_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
-      builder.append("a_star_heuristics_weight=");
-      builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
       builder.append("intermediate_body_box_checks=");
       builder.append(this.intermediate_body_box_checks_);      builder.append(", ");
       builder.append("distance_from_path_tolerance=");
       builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
       builder.append("delta_yaw_from_reference_tolerance=");
       builder.append(this.delta_yaw_from_reference_tolerance_);      builder.append(", ");
-      builder.append("maximum_branch_factor=");
-      builder.append(this.maximum_branch_factor_);      builder.append(", ");
+      builder.append("max_branch_factor=");
+      builder.append(this.max_branch_factor_);      builder.append(", ");
       builder.append("enable_expansion_mask=");
       builder.append(this.enable_expansion_mask_);      builder.append(", ");
       builder.append("enable_shin_collision_check=");
@@ -2216,8 +2219,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.shin_heel_clearance_);      builder.append(", ");
       builder.append("shin_length=");
       builder.append(this.shin_length_);      builder.append(", ");
-      builder.append("shin_height_offet=");
-      builder.append(this.shin_height_offet_);      builder.append(", ");
+      builder.append("shin_height_offset=");
+      builder.append(this.shin_height_offset_);      builder.append(", ");
       builder.append("rms_error_threshold=");
       builder.append(this.rms_error_threshold_);      builder.append(", ");
       builder.append("rms_error_cost=");

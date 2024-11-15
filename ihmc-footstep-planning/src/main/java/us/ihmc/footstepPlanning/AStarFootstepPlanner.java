@@ -202,12 +202,15 @@ public class AStarFootstepPlanner
          reportStatus(request, outputToPack);
          return;
       }
-
-      // Start planning loop
+      else
+      {
+         outputToPack.setGoalPose(goalMidFootPose);
+      }
 
       // Either the request has a null reference plan, or a plan we can use
       referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
 
+      // Start planning loop
       while (true)
       {
          iterations++;

@@ -9,6 +9,10 @@ int8 ROBOT_SIDE_RIGHT=1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Heuristic inflation weight, used to speed up the planner at the expense of optimality
+# Should not be less than 1.0
+float64 a_star_heuristics_weight
+
 # Sets whether or not the search should check if the body is colliding with the world. This may cause the planner
 # to run slower.
 bool check_for_body_box_collisions
@@ -49,7 +53,7 @@ float64 wiggle_inside_delta_minimum
 # 
 # This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
 # Field default value -11.1
-float64 maximum_step_reach
+float64 max_step_reach
 
 # Maximum yaw between consecutive footsteps
 # 
@@ -59,7 +63,7 @@ float64 maximum_step_reach
 # space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
 # its maximum reach.
 # Field default value -11.1
-float64 maximum_step_yaw
+float64 max_step_yaw
 
 # If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
 bool use_reachability_map
@@ -76,7 +80,7 @@ float64 solution_quality_threshold
 # If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
 # on top of each other. If too high, footsteps might not be kinematically feasible.
 # Field default value -11.1
-float64 minimum_step_width
+float64 min_step_width
 
 # Minimum step length the planner will consider for candidate steps.
 # 
@@ -86,40 +90,40 @@ float64 minimum_step_width
 # If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
 # on top of each other. If too high, footsteps might not be kinematically feasible.
 # Field default value -11.1
-float64 minimum_step_length
+float64 min_step_length
 
 # Minimum step yaw.
 # Field default value -11.1
-float64 minimum_step_yaw
+float64 min_step_yaw
 
 # Maximum vertical distance between consecutive footsteps
 # 
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
 # z-up sole frame.
 # Field default value -11.1
-float64 maximum_step_z
+float64 max_step_z
 
 # Maximum vertical distance between start-of-swing and touchdown
 # Field default value -11.1
-float64 maximum_swing_z
+float64 max_swing_z
 
 # Maximum xy distance between start-of-swing and touchdown
 # Field default value -11.1
-float64 maximum_swing_reach
+float64 max_swing_reach
 
 # Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
 # 
 # If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
 # Field default value 0.9
-float64 minimum_foothold_percent
+float64 min_foothold_percent
 
 # The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
 # then the value specified here.
 # 
 # More specifically, if a footstep has an associated planar region and that regions surface normal has a
-# z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
+# z-value less than cos(minSurfaceIncline), it will be rejected.
 # Field default value -11.1
-float64 minimum_surface_incline_radians
+float64 min_surface_incline
 
 # The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
 # If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -156,11 +160,11 @@ float64 maximum_z_penetration_on_valley_regions
 # 
 # If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
 # Field default value -11.1
-float64 maximum_step_width
+float64 max_step_width
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
 # nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# until it is minDistanceFromCliffBottoms away from it.
 # 
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -169,18 +173,18 @@ float64 maximum_step_width
 float64 cliff_bottom_height_to_avoid
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-# nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+# until it is minDistanceFromCliffBottoms away from it.
 # 
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
 # Field default value -11.1
-float64 minimum_distance_from_cliff_bottoms
+float64 min_distance_from_cliff_bottoms
 
 # The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
 # nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffTops away from it.
+# until it is minDistanceFromCliffTops away from it.
 # 
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
@@ -190,13 +194,13 @@ float64 cliff_top_height_to_avoid
 
 # The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
 # nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
-# until it is minimumDistanceFromCliffBottoms away from it.
+# until it is minDistanceFromCliffBottoms away from it.
 # 
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
 # Field default value -11.1
-float64 minimum_distance_from_cliff_tops
+float64 min_distance_from_cliff_tops
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -301,10 +305,6 @@ float64 reference_plan_alpha
 # Field default value -11.1
 float64 cost_per_step
 
-# Gets the weight for the heuristics in the A Star planner.
-# Field default value -11.1
-float64 a_star_heuristics_weight
-
 # Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
 # Field default value 1
 uint32 intermediate_body_box_checks
@@ -322,7 +322,7 @@ float64 delta_yaw_from_reference_tolerance
 # Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
 # ideal step are considered and the others are ignored. Set to non-positive number to disable
 # Field default value -1
-int32 maximum_branch_factor
+int32 max_branch_factor
 
 # If true, enables a mask that reduces the number of calculated steps away from the ideal step
 # Field default value True
@@ -346,7 +346,7 @@ float64 shin_length
 
 # Height offset of shin collidable cylinder
 # Field default value -11.1
-float64 shin_height_offet
+float64 shin_height_offset
 
 # When using a height map, maximum accepted rms error
 # Field default value -11.1

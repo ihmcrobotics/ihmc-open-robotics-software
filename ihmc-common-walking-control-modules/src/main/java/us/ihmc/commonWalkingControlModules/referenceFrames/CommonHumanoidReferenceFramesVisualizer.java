@@ -23,6 +23,7 @@ public class CommonHumanoidReferenceFramesVisualizer extends ReferenceFramesVisu
       addReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       addReferenceFrame(referenceFrames.getCenterOfMassFrame());
       addReferenceFrame(referenceFrames.getPelvisFrame());
+      addReferenceFrame(referenceFrames.getChestFrame());
 
       if (additionalFramesToVisualize != null && additionalFramesToVisualize.length > 0)
       {

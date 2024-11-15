@@ -3,7 +3,6 @@ package us.ihmc.communication.ros2;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.ImageMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -64,7 +63,7 @@ public class RealtimeROS2PublisherSubscriberTest
       LogTools.info("Subscribing to {}", typedTopic.toString());
       FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
       ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "hz");
-      new ROS2Callback<>(node, typedTopic, message -> hz.ping());
+      node.createSubscription2(typedTopic, message -> hz.ping());
 
       ThreadTools.sleepForever();
    }
