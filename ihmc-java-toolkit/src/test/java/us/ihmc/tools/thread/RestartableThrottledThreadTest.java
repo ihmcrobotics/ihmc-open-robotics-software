@@ -3,7 +3,7 @@ package us.ihmc.tools.thread;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.robotics.TestTools;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import static org.junit.jupiter.api.Assertions.*;
