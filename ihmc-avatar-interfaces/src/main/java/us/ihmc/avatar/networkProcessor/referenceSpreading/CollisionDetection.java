@@ -55,8 +55,9 @@ public class CollisionDetection
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         sigmaDot.put(robotSide, new YoDouble(fullRobotModel.getHand(robotSide) + "SigmaDot", registry));
-         sigma.put(robotSide, new YoDouble(fullRobotModel.getHand(robotSide) +"Sigma" + robotSide.getPascalCaseName(), registry));
+//         Im Sorry for this yovariable name. Please fix with variable in function.
+         sigmaDot.put(robotSide, new YoDouble(fullRobotModel.getHand(robotSide) + "SigmaDot_"+ (int) minSigma, registry));
+         sigma.put(robotSide, new YoDouble(fullRobotModel.getHand(robotSide) +"Sigma_"+ (int) minSigma + robotSide.getPascalCaseName(), registry));
       }
 
 //      todo: Automate this process with the fullRobotModel and end-effector/base
@@ -116,8 +117,10 @@ public class CollisionDetection
          CommonOps_DDRM.mult(velocityMatrix, tempMatrix, powerMatrix);
 
          sigmaDot.get(robotSide).set(-kReturn * sigma.get(robotSide).getDoubleValue() + Math.abs(kForce * powerMatrix.get(0, 0)));
-         sigma.get(robotSide).set(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time));
-         LogTools.info("side: " + robotSide.getLowerCaseName() + "Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
+         sigma.get(robotSide).set(Math.max(Math.min(sigma.get(robotSide).getDoubleValue() + sigmaDot.get(robotSide).getDoubleValue()*(currentTime - time),200),-200));
+         if (currentTime<787792)
+            LogTools.info("side: " + robotSide.getLowerCaseName() + "Time: " + currentTime + ", Sigma: " + sigma.get(robotSide).getDoubleValue()+ ", SigmaDot: " + sigmaDot.get(robotSide).getDoubleValue());
+
          if (Math.abs(sigma.get(robotSide).getDoubleValue()) > minSigma)
          {
             LogTools.warn("Collision Detected!!!!");

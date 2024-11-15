@@ -54,6 +54,7 @@ public class ReferenceSpreadingStateHelper
    private Double timeInPreTrajectory = 0.0;
 
    private final CollisionDetection collisionDetection;
+   private final CollisionDetection collisionDetectionLive;
 
    public ReferenceSpreadingStateHelper(String demoDirectory, DRCRobotModel robotModel,  FullHumanoidRobotModel fullRobotModel, HandTrajectoryMessagePublisher trajectoryMessagePublisher, YoRegistry registry)
    {
@@ -61,11 +62,13 @@ public class ReferenceSpreadingStateHelper
       this.registry = registry;
       this.demoDirectory = demoDirectory;
 
-      collisionDetection = new CollisionDetection(20, 200, 200, fullRobotModel, registry);
-//      collisionDetection = new CollisionDetection(4, 100, 10, fullRobotModel, registry);
+      collisionDetection = new CollisionDetection(10, 200, 200, fullRobotModel, registry);
+      collisionDetectionLive = new CollisionDetection(40, 10, 10, fullRobotModel, registry);
+//      collisionDetectionLive = new CollisionDetection(11, 100, 10, fullRobotModel, registry); // Simulation
       referenceSpreader = new ReferenceSpreader(demoDirectory, 0.01, BLEND_INTERVAL, robotModel, fullRobotModel, collisionDetection, registry);
+      referenceSpreader.setImpactTime(858351.794432519+1.40);
 
-      preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
+      preImpactReference = null;
       blendImpactReference = null;
 
       for (RobotSide robotSide : RobotSide.values()) {
@@ -84,7 +87,7 @@ public class ReferenceSpreadingStateHelper
       factory.addState(States.WAITING, new WaitingState());
       factory.addState(States.PREPARE, new PrepareState());
 
-      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetection.detectCollision(handWrenches, jointVelocities, t);
+      StateTransitionCondition beforeToAfterTransitionCondition = t -> collisionDetectionLive.detectCollision(handWrenches, jointVelocities, t);
       StateTransitionCondition prepareToBeforeTransitionCondition = t -> t > PREPARE_DURATION;
 
       factory.addTransition(States.PREPARE, States.BEFORE, prepareToBeforeTransitionCondition);
@@ -140,12 +143,13 @@ public class ReferenceSpreadingStateHelper
                referenceSpreader.spreadTrajectories();
             });
             collisionDetection.reset();
+            collisionDetectionLive.reset();
 
-
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.LEFT, PREPARE_DURATION);
-            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.RIGHT, PREPARE_DURATION);
-            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
-            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
+//            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.LEFT, PREPARE_DURATION);
+//            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = referenceSpreader.getOriginalReferenceTrajectory().getFirstHandHybridTrajectoryMessage(RobotSide.RIGHT, PREPARE_DURATION);
+//            LogTools.info(handHybridTrajectoryMessageLeft);
+//            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
+//            trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
             LogTools.info("Published Message to go back to the initial state!");
          } catch (IOException e) {
@@ -171,6 +175,8 @@ public class ReferenceSpreadingStateHelper
 
       public void onEntry()
       {
+         preImpactReference = referenceSpreader.getPreImpactReferenceTrajectory();
+         preImpactReference.setInitialTimeDuration(PREPARE_DURATION);
          HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageLeft = preImpactReference.getHandHybridTrajectoryMessage(RobotSide.LEFT);
          HandHybridJointspaceTaskspaceTrajectoryMessage handHybridTrajectoryMessageRight = preImpactReference.getHandHybridTrajectoryMessage(RobotSide.RIGHT);
          trajectoryMessagePublisher.publish(handHybridTrajectoryMessageLeft);
@@ -225,7 +231,7 @@ public class ReferenceSpreadingStateHelper
       public void doAction(double timeInState)
       {
 //         LogTools.info("AfterState: " + timeInState);
-         collisionDetection.detectCollision(handWrenches, jointVelocities, timeInState);
+         collisionDetectionLive.detectCollision(handWrenches, jointVelocities, timeInState);
       }
 
       public void onEntry()
@@ -253,7 +259,7 @@ public class ReferenceSpreadingStateHelper
          trajectoryMessagePublisher.publish(handHybridTrajectoryMessageRight);
 
          LogTools.info("Published all messages");
-         collisionDetection.reset();
+         collisionDetectionLive.reset();
       }
 
       public void onExit(double timeInState)

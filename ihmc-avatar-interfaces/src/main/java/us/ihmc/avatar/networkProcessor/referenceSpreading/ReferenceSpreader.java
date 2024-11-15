@@ -131,10 +131,14 @@ public class ReferenceSpreader
             handWrenches.put(robotSide, spatialVectorMessage);
          }
 
-         if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")))
+         if (impactIndex ==-1 && collisionDetection.detectCollision(handWrenches, jointVelocities, currentFrame.get("time[sec]")) && Double.isNaN(impactTime))
          {
             impactIndex = originalReference.getTimeStepReplay();
             impactTime = currentFrame.get("time[sec]");
+         }
+         else if (impactIndex ==-1 && !Double.isNaN(impactTime) && currentFrame.get("time[sec]") >= impactTime)
+         {
+            impactIndex = originalReference.getTimeStepReplay();
          }
 
          if (impactIndex!=-1 && currentFrame.get("time[sec]") > impactTime + excludeInterval)
@@ -390,6 +394,11 @@ public class ReferenceSpreader
       List<String> blendedKeyMatrix = new ArrayList<>(keyMatrix);
       blendedKeyMatrix.add("blendingFactor");
       return new ReferenceSpreadingTrajectory(blendedImpactReference, blendedKeyMatrix, robotModel, fullRobotModel, registry);
+   }
+
+   public void setImpactTime(double impactTime)
+   {
+      this.impactTime = impactTime;
    }
 
    private int getKeyIndex(String key)
