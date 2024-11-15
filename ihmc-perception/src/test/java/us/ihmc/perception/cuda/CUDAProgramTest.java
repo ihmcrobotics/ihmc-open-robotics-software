@@ -201,237 +201,95 @@ public class CUDAProgramTest
       CUDAStreamManager.releaseStream(stream);
    }
 
+   @Test
+   public void testKernelWithHeader()
+   {
+      // Get a stream
+      CUstream_st stream = CUDAStreamManager.getStream();
+
+      // Construct a program
+      String[] headerName = {"test_values.cuh"};
+      String[] headerContents = {KERNEL_HEADER};
+
+      CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
+
+      // Load the kernel
+      additionProgram.loadKernel("add");
+
+      // Create pointers
+      try (IntPointer sum = new IntPointer(1L); IntPointer deviceSum = new IntPointer(); PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L))
+      {
+         cudaMallocAsync(deviceSum, sum.sizeof(), stream);
+         deviceSumPointer.put(deviceSum);
+
+         // Run the kernel
+         additionProgram.runKernel(stream, "add", new dim3(1, 1, 1), new dim3(1, 1, 1), 0, deviceSumPointer);
+
+         // Download result from device to host
+         cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
+         cudaStreamSynchronize(stream);
+
+         // Free device memory
+         cudaFreeAsync(deviceSum, stream);
+
+         // Ensure we got the correct result!
+         assertEquals(10, sum.get());
+      }
+
+      additionProgram.destroy();
+
+      CUDAStreamManager.releaseStream(stream);
+   }
 
    @Test
-   public void testMatrixSum()
+   public void testLoadingKernelFromFile() throws URISyntaxException
    {
+      // Get a stream
       CUstream_st stream = CUDAStreamManager.getStream();
-      CUDAProgram additionProgram = new CUDAProgram("add_matrices.cu", ADD_MATRICES_KERNEL);
-      additionProgram.loadKernel("add_matrices");
 
-      // Example: 640x480 image, single-channel or multi-channel
-      int width = 2;
-      int height = 2;
-      int channels = 1; // e.g., RGB image
+      // Create a CUDA program with files
+      Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
+      Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
+      CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
-      // Create and fill OpenCV Mats for the two input matrices
-      Mat matA = new Mat(height,width,opencv_core.CV_16UC1); // RGB format
-      Mat matB = new Mat(height, width,opencv_core.CV_16UC1);
-      // Randomly fill the matrices (or load images)
-      System.out.println(matA.getPointer());
+      // Load the kernels
+      program.loadKernel("add");
+      program.loadKernel("subtract");
 
-      matA.ptr(0, 0).putInt(1);
-      matA.ptr(0, 1).putInt(2);
-      matA.ptr(1, 0).putInt(3);
-      matA.ptr(1, 1).putInt(4);
-//
-//      matB.ptr(0, 0).putInt(1);
-//      matB.ptr(0, 1).putInt(2);
-//      matB.ptr(1, 0).putInt(3);
-//      matB.ptr(1, 1).putInt(4);
-//
-//      System.out.println("here");
-//      System.out.println(matA.getPointer(0));
-//      System.out.println("here");
+      // Create pointers
+      try (IntPointer sum = new IntPointer(1L);
+           IntPointer deviceSum = new IntPointer();
+           PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L);
 
+           IntPointer difference = new IntPointer(1L);
+           IntPointer deviceDifference = new IntPointer();
+           PointerPointer<Pointer> deviceDifferencePointer = new PointerPointer<>(1L))
+      {
+         cudaMallocAsync(deviceSum, sum.sizeof(), stream);
+         deviceSumPointer.put(deviceSum);
+         cudaMallocAsync(deviceDifference, difference.sizeof(), stream);
+         deviceDifferencePointer.put(deviceDifference);
 
+         // Run the kernels
+         program.runKernel(stream, "add", new dim3(), new dim3(), 0, deviceSumPointer);
+         program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, deviceDifferencePointer);
 
-//       Allocate GPU memory and copy data from host (CPU) to device (GPU)
-//      long numBytes = width * height * channels * Integer.BYTES;
-//
-//      //make host pointers
-//      BytePointer hostPointerA = new BytePointer(numBytes);
-//      BytePointer hostPointerB = new BytePointer(numBytes);
-//      BytePointer hostPointerSum = new BytePointer(numBytes);
-//
-//      //fill host pointers
-//      hostPointerA.put(matA);
-//      hostPointerB.put(matB);
-//
-//      //make device pointers
-//      Pointer deviceA = new Pointer();
-//      Pointer deviceB = new Pointer();
-//      Pointer deviceSum = new Pointer();
-////
-//      //assign memory for device pointers
-//      cudaMallocAsync(deviceA, numBytes, stream);
-//      cudaMallocAsync(deviceB, numBytes, stream);
-//      cudaMallocAsync(deviceSum, numBytes, stream);
-////
-//      //copy input to memory of gpu
-//      cudaMemcpyAsync(deviceA, hostPointerA, numBytes, cudaMemcpyHostToDevice, stream);
-//      cudaMemcpyAsync(deviceB, hostPointerB, numBytes, cudaMemcpyHostToDevice, stream);
-//
-//      //make device pointers
-//      PointerPointer<Pointer> deviceAPointer = new PointerPointer<>(1L);
-//      PointerPointer<Pointer> deviceBPointer = new PointerPointer<>(1L);
-//      PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L);
-//
-//      //put device pointers in pointer pointers
-//      deviceAPointer.put(deviceA);
-//      deviceBPointer.put(deviceB);
-//      deviceSumPointer.put(deviceSum);
-//
-//      //run the kernel
-//      additionProgram.runKernel(stream, "add_matrices", new dim3(1, 1, 1), new dim3(2, 2, 1), 0, deviceAPointer, deviceBPointer, deviceSumPointer);
-//      cudaStreamSynchronize(stream);
-//      //copy from device pointer to host pointer
-//      cudaMemcpyAsync(hostPointerSum, deviceSum, numBytes, cudaMemcpyDeviceToHost, stream);
-//
-//      System.out.println(hostPointerSum.get(0));
-//      System.out.println(hostPointerSum.get(1));
-//      System.out.println(hostPointerSum.get(2));
-//      System.out.println(hostPointerSum.get(3));
+         // Download results from device to host
+         cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
+         cudaMemcpyAsync(difference, deviceDifference, difference.sizeof(), cudaMemcpyDefault, stream);
+         cudaStreamSynchronize(stream);
+
+         // Free device memory
+         cudaFreeAsync(deviceSum, stream);
+         cudaFreeAsync(deviceDifference, stream);
+
+         // Ensure we got the correct result!
+         assertEquals(10, sum.get());
+         assertEquals(4, difference.get());
+      }
+
+      program.destroy();
+
+      CUDAStreamManager.releaseStream(stream);
    }
-
-//
-//      for (int i = 0; i < 7; i++)
-//         assertEquals(80, sum.get(i));
-//
-//      hostPointerA.deallocate();
-//      hostPointerB.deallocate();
-//      sum.deallocate();
-//
-//      cudaFreeAsync(deviceA, stream);
-//      cudaFreeAsync(deviceB, stream);
-//      cudaFreeAsync(deviceSum, stream);
-//
-//      additionProgram.destroy();
-//
-//      CUDAStreamManager.releaseStream(stream);
-//   }
-//
-//      // Configure kernel launch parameters
-//
-//      // Set up and launch kernel
-//      cudaStream_t stream = new cudaStream_t();
-//      cudaStreamCreate(stream);
-//      CUmodule module = new CUmodule();
-//      CUfunction function = new CUfunction();
-//
-//      additionProgram.loadKernel("add_matrices");
-//      additionProgram.runKernel(stream, "add_matrices", grid, block, 0, deviceA, deviceB, deviceResult, width, height, channels);
-//
-//      cudaStreamSynchronize(stream);
-//
-//      // Copy result back to host
-//      Mat resultMat = new Mat(height, width, opencv_core.CV_8UC3);
-//      cudaMemcpy(resultMat.data(), deviceResult, numBytes, cudaMemcpyDeviceToHost);
-//
-//      // Clean up
-//      cudaFree(deviceA);
-//      cudaFree(deviceB);
-//      cudaFree(deviceResult);
-//      cudaStreamDestroy(stream);
-//
-//      // Display or further process resultMat if desired
-//      System.out.println("Matrix addition completed on GPU!");
-//
-//      // Optional: Display result (if you have GUI capabilities)
-//      // imshow("Result", resultMat);
-//      // waitKey();
-//   }
-//}
-//   }
-
-//@Disabled
-//@Test
-//public void testVectorSum()
-//{
-//   // TODO we want to write a vector element sum kernel, where each of the elements of the vector get added together and returned from the GPU. This requires
-//   // memory blocking to execute properly, forcing each kernel to run sequentially, rather than in parallel. It is a stupid operation to do on the GPU, but
-//   // provides an informative example for how to do this kind of thing.
-//}
-
-@Test
-public void testKernelWithHeader()
-{
-   // Get a stream
-   CUstream_st stream = CUDAStreamManager.getStream();
-
-   // Construct a program
-   String[] headerName = {"test_values.cuh"};
-   String[] headerContents = {KERNEL_HEADER};
-
-   CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
-
-   // Load the kernel
-   additionProgram.loadKernel("add");
-
-   // Create pointers
-   try (IntPointer sum = new IntPointer(1L); IntPointer deviceSum = new IntPointer(); PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L))
-   {
-      cudaMallocAsync(deviceSum, sum.sizeof(), stream);
-      deviceSumPointer.put(deviceSum);
-
-      // Run the kernel
-      additionProgram.runKernel(stream, "add", new dim3(1, 1, 1), new dim3(1, 1, 1), 0, deviceSumPointer);
-
-      // Download result from device to host
-      cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
-      cudaStreamSynchronize(stream);
-
-      // Free device memory
-      cudaFreeAsync(deviceSum, stream);
-
-      // Ensure we got the correct result!
-      assertEquals(10, sum.get());
-   }
-
-   additionProgram.destroy();
-
-   CUDAStreamManager.releaseStream(stream);
-}
-
-@Test
-public void testLoadingKernelFromFile() throws URISyntaxException
-{
-   // Get a stream
-   CUstream_st stream = CUDAStreamManager.getStream();
-
-   // Create a CUDA program with files
-   Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
-   Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
-   CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
-
-   // Load the kernels
-   program.loadKernel("add");
-   program.loadKernel("subtract");
-
-   // Create pointers
-   try (IntPointer sum = new IntPointer(1L);
-        IntPointer deviceSum = new IntPointer();
-        PointerPointer<Pointer> deviceSumPointer = new PointerPointer<>(1L);
-
-        IntPointer difference = new IntPointer(1L);
-        IntPointer deviceDifference = new IntPointer();
-        PointerPointer<Pointer> deviceDifferencePointer = new PointerPointer<>(1L))
-   {
-      cudaMallocAsync(deviceSum, sum.sizeof(), stream);
-      deviceSumPointer.put(deviceSum);
-      cudaMallocAsync(deviceDifference, difference.sizeof(), stream);
-      deviceDifferencePointer.put(deviceDifference);
-
-      // Run the kernels
-      program.runKernel(stream, "add", new dim3(), new dim3(), 0, deviceSumPointer);
-      program.runKernel(stream, "subtract", new dim3(), new dim3(), 0, deviceDifferencePointer);
-
-      // Download results from device to host
-      cudaMemcpyAsync(sum, deviceSum, sum.sizeof(), cudaMemcpyDefault, stream);
-      cudaMemcpyAsync(difference, deviceDifference, difference.sizeof(), cudaMemcpyDefault, stream);
-      cudaStreamSynchronize(stream);
-
-      // Free device memory
-      cudaFreeAsync(deviceSum, stream);
-      cudaFreeAsync(deviceDifference, stream);
-
-      // Ensure we got the correct result!
-      assertEquals(10, sum.get());
-      assertEquals(4, difference.get());
-   }
-
-   program.destroy();
-
-   CUDAStreamManager.releaseStream(stream);
-}
 }
