@@ -23,6 +23,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -57,19 +58,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
    private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
-   private final ArrayList<Runnable> updateListeners = new ArrayList<>();
-   private final ArrayList<OpacityListener> opacityListeners = new ArrayList<>();
-   private final ArrayList<ActiveListener> activeListeners = new ArrayList<>();
-
-   public interface OpacityListener
-   {
-      void setOpacity(float opacity);
-   }
-
-   public interface ActiveListener
-   {
-      void setActive(boolean active);
-   }
+   private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
    public RDXROS2RobotVisualizer(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
@@ -142,8 +131,11 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
             getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(chestName);
          }
 
-         for (Runnable updateListener : updateListeners)
-            updateListener.run();
+         for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
+         {
+            interactableFrameModel.setShowing(!hideChest.get());
+            interactableFrameModel.update();
+         }
       }
 
       syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
@@ -203,8 +195,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       {
          getMultiBodyGraphic().setOpacity(opacitySlider.getFloatValue());
 
-         for (OpacityListener opacityListener : opacityListeners)
-            opacityListener.setOpacity(opacitySlider.getFloatValue());
+         for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
+            interactableFrameModel.getModelInstance().setOpacity(opacitySlider.getFloatValue());
       }
 
       ImGui.checkbox(labels.get("Show History"), showHistory);
@@ -238,8 +230,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    {
       super.setActive(active);
 
-      for (ActiveListener activeListener : activeListeners)
-         activeListener.setActive(active);
+      for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
+         interactableFrameModel.setShowing(active);
    }
 
    public void destroy()
@@ -272,8 +264,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
          opacitySlider.setFloatValue(newOpacity);
          getMultiBodyGraphic().setOpacity(newOpacity);
 
-         for (OpacityListener opacityListener : opacityListeners)
-            opacityListener.setOpacity(newOpacity);
+         for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
+            interactableFrameModel.getModelInstance().setOpacity(newOpacity);
       }
       else
       {
@@ -286,18 +278,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       return isFading;
    }
 
-   public void addUpdateListener(Runnable updateListener)
+   public void attachInteractableFrameModel(RDXInteractableFrameModel interactableFrameModel)
    {
-      updateListeners.add(updateListener);
-   }
-
-   public void addOpacityListener(OpacityListener opacityListener)
-   {
-      opacityListeners.add(opacityListener);
-   }
-
-   public void addActiveListener(ActiveListener activeListener)
-   {
-      activeListeners.add(activeListener);
+      interactableFrameModels.add(interactableFrameModel);
    }
 }
