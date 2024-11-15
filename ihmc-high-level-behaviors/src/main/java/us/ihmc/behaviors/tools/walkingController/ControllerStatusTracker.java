@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.ArrayList;
 import java.util.List;

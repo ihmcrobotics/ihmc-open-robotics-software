@@ -20,7 +20,7 @@ import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 /**
  * Subscribes to ROS 2 webcam images with best performance.

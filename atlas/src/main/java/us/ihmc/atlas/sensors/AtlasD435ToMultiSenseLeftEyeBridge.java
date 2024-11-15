@@ -22,7 +22,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;

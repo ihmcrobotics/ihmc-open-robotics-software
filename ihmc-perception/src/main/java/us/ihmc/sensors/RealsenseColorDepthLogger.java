@@ -20,7 +20,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;

@@ -4,6 +4,7 @@ import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

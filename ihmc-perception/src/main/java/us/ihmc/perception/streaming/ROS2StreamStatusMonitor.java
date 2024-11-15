@@ -13,7 +13,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;

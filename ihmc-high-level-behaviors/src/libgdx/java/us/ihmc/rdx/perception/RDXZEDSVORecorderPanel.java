@@ -10,7 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 public class RDXZEDSVORecorderPanel
 {
