@@ -48,9 +48,9 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.transferTime, transferTime);
    }
 
-   default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
+   default void setPlanningTimeoutAsAFractionOfTheStepDuration(double planningTimeoutAsAFractionOfTheStepDuration)
    {
-      set(ContinuousHikingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
+      set(ContinuousHikingParameters.planningTimeoutAsAFractionOfTheStepDuration, planningTimeoutAsAFractionOfTheStepDuration);
    }
 
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)

@@ -41,8 +41,7 @@ public class ContinuousPlannerToolsTest
 
    /**
     * This test checks to make sure the goal poses are at the expected distance from the start, and at the expected height from the start, and that the width
-    * is
-    * about as expected (not super strict on the accuracy of the width). Meant to test
+    * is about as expected (not super strict on the accuracy of the width). Meant to test
     * {@link ContinuousPlannerTools#setRandomizedStraightGoalPoses(FramePose3D, SideDependentList, float, float, float, float)}
     */
    @Test
@@ -52,8 +51,8 @@ public class ContinuousPlannerToolsTest
       SideDependentList<FramePose3D> goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
                                                                                                        stancePose,
                                                                                                        (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                                       X_RANDOM_MARGIN,
                                                                                                        (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                                       X_RANDOM_MARGIN,
                                                                                                        NOMINAL_STANCE_WIDTH);
 
       // These are the maximum and minimum values where the goal pose should be able to exist

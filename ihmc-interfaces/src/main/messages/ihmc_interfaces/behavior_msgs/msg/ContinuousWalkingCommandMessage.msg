@@ -1,11 +1,8 @@
-# flag to enable/disable publishing to controller
-bool publish_to_controller
+# flag to enable/disable continuous hiking state machine with keyboard
+bool enable_continuous_hiking_with_keyboard
 
-# flag to enable/disable continuous walking state machine
-bool enable_continuous_walking
-
-# number of steps to send to controller
-uint16 number_of_steps_to_send
+# flag to enable/disable continuous hiking state machine with joystick controller
+bool enable_continuous_hiking_with_joystick_controller
 
 # forward joystick value
 float64 forward_value
