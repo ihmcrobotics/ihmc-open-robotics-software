@@ -7,11 +7,11 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -23,21 +23,26 @@ import java.util.Objects;
  */
 public class ExampleCUDAKernel2D
 {
-   public ExampleCUDAKernel2D()
+   public ExampleCUDAKernel2D() throws URISyntaxException
    {
       // We load the kernel from resources; this is a good place to store kernels to separate them from the Java classes
-      Path programPath = Path.of(Objects.requireNonNull(getClass().getResource("matrix_element_wise_addition.cu")).getPath());
+      Path programPath = Path.of(Objects.requireNonNull(getClass().getResource("matrix_element_wise_addition.cu")).toURI());
       // Create the stream
       CUstream_st stream = CUDAStreamManager.getStream();
 
       // Here we want to maximize the number of threads we can, this helps optimize the kernel for runtime.
       // By the rules of CUDA, a block cannot have more than 1024 threads.
       // So since we are using a matrix, we are going to have a height and a width, so those squared can't be more the 1024.
-      int height = (int) Math.sqrt(10.0);
-      int width = (int) Math.sqrt(10.0);
+      // Here we expect a grid of 3x3
+      int height = (int) Math.sqrt(9.0);
+      int width = (int) Math.sqrt(9.0);
+
+      // The following commented code below will fail because it will try to create more than 1024 threads within one block, try it...
+      //      int height = (int) Math.sqrt(1024.0) + 1;
+      //      int width = (int) Math.sqrt(1024.0) + 1;
 
       // Note this name DOES have to match the name of the CUDA kernel you want to run, that means the name of the method.
-      //  Its not guaranteed to be the name of the file either if the ( .cu ) file contains more then one method
+      //  It's not guaranteed to be the name of the file either if the ( .cu ) file contains more than one method
       String kernelName = "element_wise_add";
 
       // This is where we create all of our objects that will be used in the kernel, the following formatting will be gross because of all the comments
@@ -95,6 +100,7 @@ public class ExampleCUDAKernel2D
 
    /**
     * This prints the result to the terminal, helpful for the user to see what's going on
+    *
     * @param cpuResult the results that has been filled from the gpu after the kernel has run
     */
    private static void printResult(Mat cpuResult)
@@ -111,7 +117,7 @@ public class ExampleCUDAKernel2D
       }
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws URISyntaxException
    {
       new ExampleCUDAKernel2D();
    }
