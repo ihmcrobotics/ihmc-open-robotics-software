@@ -25,9 +25,11 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +37,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
-public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
+public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer
 {
    private final RDXBaseUI baseUI;
    private final ROS2PublishSubscribeAPI ros2;
+   private final RDXMultiBodyGraphic multiBodyGraphic;
+   private final ROS2Topic<?> topic;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final ImBoolean showHistory = new ImBoolean(false);
@@ -70,12 +74,15 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
                                  ROS2SyncedRobotModel syncedRobot,
                                  Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier)
    {
-      super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer", StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+      super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer");
+
       this.baseUI = baseUI;
       this.ros2 = ros2;
+      this.topic = StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName());
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
 
+      multiBodyGraphic = new RDXMultiBodyGraphic(getTitle());
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
       previousRobotMidFeetUnderPelvis.setToNaN();
       chestName = syncedRobot.getRobotModel().getJointMap().getChestName();
@@ -92,9 +99,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
 
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
 
-      getMultiBodyGraphic().create();
+      multiBodyGraphic.create();
       cameraForTracking = cameraForTrackingSupplier.get();
-      getMultiBodyGraphic().loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
+      multiBodyGraphic.loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
 
       ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
       {
@@ -106,10 +113,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    @Override
    public void update()
    {
-      if (getMultiBodyGraphic().isRobotLoaded())
+      if (multiBodyGraphic.isRobotLoaded())
       {
          super.update();
-         getMultiBodyGraphic().update();
+         multiBodyGraphic.update();
 
          if (cameraForTracking != null && trackRobot.get())
          {
@@ -124,11 +131,11 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
 
          if (hideChest.get())
          {
-            getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().add(chestName);
+            multiBodyGraphic.getMultiBody().getRigidBodiesToHide().add(chestName);
          }
          else
          {
-            getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(chestName);
+            multiBodyGraphic.getMultiBody().getRigidBodiesToHide().remove(chestName);
          }
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
@@ -174,8 +181,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      getMultiBodyGraphic().renderImGuiWidgets();
+      multiBodyGraphic.renderImGuiWidgets();
 
       if (ImGui.button(labels.get("Snap to Robot")))
       {
@@ -191,9 +197,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       }
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Hide chest"), hideChest);
-      if (getMultiBodyGraphic().isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
+      if (multiBodyGraphic.isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
       {
-         getMultiBodyGraphic().setOpacity(opacitySlider.getFloatValue());
+         multiBodyGraphic.setOpacity(opacitySlider.getFloatValue());
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
             interactableFrameModel.getModelInstance().setOpacity(opacitySlider.getFloatValue());
@@ -213,10 +219,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      getMultiBodyGraphic().setActive(isActive());
+      multiBodyGraphic.setActive(isActive());
 
       super.getRenderables(renderables, pool, sceneLevels);
-      getMultiBodyGraphic().getRenderables(renderables, pool, sceneLevels);
+      multiBodyGraphic.getRenderables(renderables, pool, sceneLevels);
 
       if (showHistory.get())
       {
@@ -237,7 +243,18 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    public void destroy()
    {
       super.destroy();
-      getMultiBodyGraphic().destroy();
+      multiBodyGraphic.destroy();
+   }
+
+   @Override
+   public ROS2Topic<?> getTopic()
+   {
+      return topic;
+   }
+
+   public RDXMultiBodyGraphic getMultiBodyGraphic()
+   {
+      return multiBodyGraphic;
    }
 
    public ImBoolean getTrackRobot()
@@ -262,7 +279,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
          isFading = true;
          float newOpacity = (opacitySlider.getFloatValue() > finalOpacity) ? Math.max(opacitySlider.getFloatValue() - opacityVariation, finalOpacity) : Math.min(opacitySlider.getFloatValue() + opacityVariation, finalOpacity);
          opacitySlider.setFloatValue(newOpacity);
-         getMultiBodyGraphic().setOpacity(newOpacity);
+         multiBodyGraphic.setOpacity(newOpacity);
 
          for (RDXInteractableFrameModel interactableFrameModel : interactableFrameModels)
             interactableFrameModel.getModelInstance().setOpacity(newOpacity);
