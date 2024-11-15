@@ -80,7 +80,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
-   private final ImGuiRemoteROS2StoredPropertySetGroup userRemotePropertySets;
+   private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
 
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
@@ -93,16 +93,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    // When running in simulation only, these fields allow to run the Continuous Hiking Process locally
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-   private ROS2StoredPropertySetGroup remoteRos2PropertySetGroup;
+   private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
-   private final boolean publishAndSubscribe;
+   private boolean publishAndSubscribe;
 
-   public RDXContinuousHikingPanel(RDXBaseUI baseUI,
-                                   ROS2Node ros2Node,
-                                   ROS2Helper ros2Helper,
-                                   DRCRobotModel robotModel,
-                                   ROS2SyncedRobotModel syncedRobotModel,
-                                   boolean publishAndSubscribe)
+   public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, ROS2Helper ros2Helper, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
    {
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
@@ -110,7 +105,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
       this.syncedRobotModel = syncedRobotModel;
-      this.publishAndSubscribe = publishAndSubscribe;
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
@@ -144,27 +138,27 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                       message -> terrainPlanningDebugger.reset());
 
-      userRemotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
-                            userRemotePropertySets,
+                            hostStoredPropertySets,
                             ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS);
       RDXStoredPropertySetTuner monteCarloPlannerParametersPanel = new RDXStoredPropertySetTuner("Monte Carlo Footstep Planner Parameters (CH)");
       createParametersPanel(monteCarloPlannerParameters,
                             monteCarloPlannerParametersPanel,
-                            userRemotePropertySets,
+                            hostStoredPropertySets,
                             ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS);
       RDXStoredPropertySetTuner footstepPlanningParametersPanel = new RDXStoredPropertySetTuner("Footstep Planner Parameters (CH)");
       createParametersPanel(footstepPlannerParameters,
                             footstepPlanningParametersPanel,
-                            userRemotePropertySets,
+                            hostStoredPropertySets,
                             ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner swingPlannerParametersPanel = new RDXStoredPropertySetTuner("Swing Planner Parameters (CH)");
-      createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, userRemotePropertySets, ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS);
+      createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(RapidHeightMapExtractor.getHeightMapParameters(),
                             heightMapParametersPanel,
-                            userRemotePropertySets,
+                            hostStoredPropertySets,
                             PerceptionComms.HEIGHT_MAP_PARAMETERS);
    }
 
@@ -186,27 +180,28 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
     * method should not be called as it will interfere with the remote process
     */
-   public void startContinuousPlannerSchedulingTask()
+   public void startContinuousPlannerSchedulingTask(boolean publishAndSubscribe)
    {
+      this.publishAndSubscribe = publishAndSubscribe;
       runSubscriberOnly = true;
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      remoteRos2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      clientStoredPropertySets = new ROS2StoredPropertySetGroup(ros2Helper);
 
       // Add Continuous Hiking Parameters to be between the UI and this process
       ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
-      remoteRos2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
 
       // Add Monte Carlo Footstep Planner Parameters to be between the UI and this process
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      remoteRos2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
 
       // Add A* Footstep Planner Parameters to be between the UI and this process
       DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters("ForContinuousWalking");
-      remoteRos2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
 
       // Add Swing Planner Parameters to be synced between the UI and this process
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      remoteRos2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
+      clientStoredPropertySets.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
 
       continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
                                                                             ros2Node,
@@ -236,13 +231,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * There are three situations that can occur when tyring to use Continuous Hiking.
     * <ul>
     *    <li>Case 1: The situation where we are simulating the process running on a remote machine but in reality its running locally.
-    *    This is where we only want to update the property sets running on that process. Represented by {@link #remoteRos2PropertySetGroup}.
+    *    This is where we only want to update the property sets running on that process. Represented by {@link #clientStoredPropertySets}.
     *    So in this sense we are only subscribing to any updates sent from the user</li>
     *    <li>Case 2: The situation where we are running everything in one simulation.
     *    Here we want to publish, and subscribe in one place as everything is being run on the same machine.
-    *    So we update {@link #remoteRos2PropertySetGroup} and {@link #userRemotePropertySets}</li>
+    *    So we update {@link #clientStoredPropertySets} and {@link #hostStoredPropertySets}</li>
     *    <li>Case 3: Then the situation where we only want to publish the property sets to be sent to the remote process.
-    *    This is when we don't want to subscribe but we publish and changes to {@link #userRemotePropertySets} so the remote process can receive these chagnes</li>
+    *    This is when we don't want to subscribe but we publish and changes to {@link #hostStoredPropertySets} so the remote process can receive these chagnes</li>
     *
     * </ul>
     */
@@ -250,16 +245,16 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       if (runSubscriberOnly && !publishAndSubscribe)  // Case 1
       {
-         remoteRos2PropertySetGroup.update();
+         clientStoredPropertySets.update();
       }
       else if (publishAndSubscribe) // Case 2
       {
-         remoteRos2PropertySetGroup.update();
-         userRemotePropertySets.setPropertyChanged();
+         clientStoredPropertySets.update();
+         hostStoredPropertySets.setPropertyChanged();
       }
       else  // Case 3
       {
-         userRemotePropertySets.setPropertyChanged();
+         hostStoredPropertySets.setPropertyChanged();
       }
    }
 
