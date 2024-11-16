@@ -60,38 +60,30 @@ import java.util.List;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
-   //   private static final boolean RUN_SUBSCRIBER_ONLY = Boolean.parseBoolean(System.getProperty("enalbe.subscriber.only", "true"));
-
+   private static final int numberOfKnotPoints = 12;
+   private static final int maxIterationsOptimization = 100;
    private final ROS2Node ros2Node;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobotModel;
-
-   private static final int numberOfKnotPoints = 12;
-   private static final int maxIterationsOptimization = 100;
    private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
-
-   private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
    private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
-
    private final ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final RDXStoredPropertySetTuner continuousHikingParametersPanel = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (CH)");
    private final ImGuiRemoteROS2StoredPropertySetGroup hostStoredPropertySets;
-
-   private FootstepPlan latestFootstepPlan;
-   private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
-
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useHybridPlanner = new ImBoolean(false);
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
-
-   // When running in simulation only, these fields allow to run the Continuous Hiking Process locally
+   private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private FootstepPlan latestFootstepPlan;
+   private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
+   // When running in simulation only, these fields allow running the Continuous Hiking Process locally
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
    private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
