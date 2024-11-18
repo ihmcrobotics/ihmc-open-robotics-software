@@ -140,17 +140,14 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
-                                                                       indexedTreeFile.getNumberOfFramesInWorld(),
-                                                                       indexedTreeFile.getReferenceFrameNames().size());
-         if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
+         if (ImGuiTools.textWithUnderlineOnHover(indexedTreeFile.getTreeFile().getFileName()))
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
                RDXBehaviorTreeNode<?, ?> loadedNode = null;
                try
                {
-                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
                }
                catch (Exception e)
                {
@@ -158,7 +155,7 @@ public class RDXBehaviorTreeNodeCreationMenu
                                  Error loading {}.
                                  Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
                                  Error: {}
-                                 """, textToDisplay, e.getMessage());
+                                 """, indexedTreeFile.getTreeFile().getFileName(), e.getMessage());
                }
 
                if (loadedNode != null)
