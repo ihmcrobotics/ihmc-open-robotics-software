@@ -29,6 +29,8 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class PerceptionDataLoggingTest
 {
+   private static final boolean DEBUG = false;
+
    private HDF5Manager hdf5ManagerReader;
    private HDF5Manager hdf5ManagerWriter;
 
@@ -47,8 +49,11 @@ public class PerceptionDataLoggingTest
       int[] array = new int[intCount];
       intBuffer.get(array, 0, intCount-1);
 
-      LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
-      LogTools.info("Input Array: {}", Arrays.toString(array));
+      if (DEBUG)
+      {
+         LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
+         LogTools.info("Input Array: {}", Arrays.toString(array));
+      }
    }
 
    @Test
@@ -71,8 +76,11 @@ public class PerceptionDataLoggingTest
 
       byte[] outputArray = hdf5Tools.loadByteArray(readGroup, 0);
 
-      LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
-      LogTools.info("Output Array: {}", Arrays.toString(outputArray));
+      if (DEBUG)
+      {
+         LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
+         LogTools.info("Output Array: {}", Arrays.toString(outputArray));
+      }
 
       for (int i = 0; i < dataArrayExtended.length; i++)
       {
@@ -102,7 +110,8 @@ public class PerceptionDataLoggingTest
 
       long size = dataBytePointer.limit();
 
-      LogTools.info("Store Byte Array: Index: {} Size: {}", 0, size);
+      if (DEBUG)
+         LogTools.info("Store Byte Array: Index: {} Size: {}", 0, size);
       long[] dims = {size};
 
       DataType dataType = new DataType(PredType.NATIVE_B8());
@@ -140,7 +149,8 @@ public class PerceptionDataLoggingTest
 
       for (int i = 0; i < dataBytePointer.limit(); i++)
       {
-         LogTools.info("i: {}, data: {}, destination: {}", i, dataBytePointer.get(i), destinationBytePointer.get(i));
+         if (DEBUG)
+            LogTools.info("i: {}, data: {}, destination: {}", i, dataBytePointer.get(i), destinationBytePointer.get(i));
          assertEquals(dataBytePointer.get(i), destinationBytePointer.get(i));
       }
 
@@ -176,7 +186,8 @@ public class PerceptionDataLoggingTest
 
       for (int i = 0; i < compressedDepthPointer.limit(); i++)
       {
-         LogTools.info("i: {}, data: {}, destination: {}", i, compressedDepthPointer.get(i), pngCompressedBytes.get(i));
+         if (DEBUG)
+            LogTools.info("i: {}, data: {}, destination: {}", i, compressedDepthPointer.get(i), pngCompressedBytes.get(i));
          assertEquals(compressedDepthPointer.get(i), pngCompressedBytes.get(i));
       }
 
@@ -199,7 +210,8 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-            LogTools.info(String.format("Depth (%d %d): %d %d", i, j, indexer.get(i*128 + j), indexerActual.get(i*128 + j)));
+            if (DEBUG)
+               LogTools.info(String.format("Depth (%d %d): %d %d", i, j, indexer.get(i*128 + j), indexerActual.get(i*128 + j)));
             //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
@@ -225,7 +237,8 @@ public class PerceptionDataLoggingTest
 
       long begin = System.currentTimeMillis();
 
-      System.out.println(Arrays.toString(dataArray));
+      if (DEBUG)
+         System.out.println(Arrays.toString(dataArray));
 
       hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 
@@ -243,7 +256,8 @@ public class PerceptionDataLoggingTest
       LogTools.info("Logging Took: {} ms", intermediate - begin);
       LogTools.info("Loading Took: {} ms", end - intermediate);
 
-      System.out.println(Arrays.toString(outputArray));
+      if (DEBUG)
+         System.out.println(Arrays.toString(outputArray));
 
       for (int i = 0; i < dataArray.length; i++)
       {
@@ -269,7 +283,8 @@ public class PerceptionDataLoggingTest
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining() + 4];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length - 4);
 
-      LogTools.info("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
+      if (DEBUG)
+         LogTools.info("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
 
       Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
@@ -399,7 +414,8 @@ public class PerceptionDataLoggingTest
       float diff = 0;
       for(int i = 0; i<loadedFloats.length; i++)
       {
-         LogTools.info("Stored: {}, Loaded: {}", floatArray[i], loadedFloats[i]);
+         if (DEBUG)
+            LogTools.info("Stored: {}, Loaded: {}", floatArray[i], loadedFloats[i]);
          diff += Math.abs(loadedFloats[i] - floatArray[i]);
       }
 
@@ -519,8 +535,11 @@ public class PerceptionDataLoggingTest
       perceptionDataLoader.loadQuaternionList(quaternionChannelName, quaternions);
       perceptionDataLoader.closeLogFile();
 
-      LogTools.info("Total Points: {}", points.size());
-      LogTools.info("Total Quaternions: {}", quaternions.size());
+      if (DEBUG)
+      {
+         LogTools.info("Total Points: {}", points.size());
+         LogTools.info("Total Quaternions: {}", quaternions.size());
+      }
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0, 1, 2), points.get(0), 1e-7);
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(0, 1, 2, 3), quaternions.get(0), 1e-7);
