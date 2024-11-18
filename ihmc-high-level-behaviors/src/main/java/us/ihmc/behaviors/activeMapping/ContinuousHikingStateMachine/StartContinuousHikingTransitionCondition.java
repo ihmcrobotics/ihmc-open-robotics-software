@@ -26,6 +26,7 @@ public class StartContinuousHikingTransitionCondition implements StateTransition
    public boolean testCondition(double timeInCurrentState)
    {
       // Both conditions have to be true in order for this to work. The makes things a bit safer to use and can prevent accidentally starting things and having the robot walk
-      return continuousHikingParameters.getEnableContinuousHiking() && commandMessage.get().getEnableContinuousWalking();
+      return continuousHikingParameters.getEnableContinuousHiking() && (commandMessage.get().getEnableContinuousHikingWithKeyboard() || commandMessage.get()
+                                                                                                                                                      .getEnableContinuousHikingWithJoystickController());
    }
 }

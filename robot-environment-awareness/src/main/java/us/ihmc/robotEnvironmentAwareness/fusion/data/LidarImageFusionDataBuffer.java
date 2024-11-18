@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,6 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationPara
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataFactory;
 
+@Deprecated
 public class LidarImageFusionDataBuffer
 {
    private final LidarImageFusionDataFactory lidarImageFusionDataFactory = new LidarImageFusionDataFactory();
@@ -25,7 +25,7 @@ public class LidarImageFusionDataBuffer
 
    private final AtomicReference<Point3D> latestCameraPosition;
    private final AtomicReference<Quaternion> latestCameraOrientation;
-   private final AtomicReference<CameraPinholeBrown> latestCameraIntrinsicParameters;
+   private final AtomicReference<Object> latestCameraIntrinsicParameters = new AtomicReference<>();
 
    private final AtomicReference<Integer> bufferSize;
 
@@ -33,7 +33,7 @@ public class LidarImageFusionDataBuffer
    private final AtomicReference<ImageSegmentationParameters> latestImageSegmentationParaeters;
    private final AtomicReference<LidarImageFusionData> newBuffer = new AtomicReference<>(null);
 
-   public LidarImageFusionDataBuffer(Messager messager, CameraPinholeBrown intrinsic)
+   public LidarImageFusionDataBuffer(Messager messager, Object intrinsic)
    {
       //intrinsicParameters = intrinsic;
       bufferSize = messager.createInput(LidarImageFusionAPI.StereoBufferSize, 50000);
@@ -43,7 +43,7 @@ public class LidarImageFusionDataBuffer
 
       latestCameraPosition = messager.createInput(LidarImageFusionAPI.CameraPositionState, new Point3D());
       latestCameraOrientation = messager.createInput(LidarImageFusionAPI.CameraOrientationState, new Quaternion());
-      latestCameraIntrinsicParameters = messager.createInput(LidarImageFusionAPI.CameraIntrinsicParametersState, MultisenseInformation.CART.getIntrinsicParameters());
+//      latestCameraIntrinsicParameters = messager.createInput(LidarImageFusionAPI.CameraIntrinsicParametersState, MultisenseInformation.CART.getIntrinsicParameters());
    }
 
    public LidarImageFusionData pollNewBuffer()

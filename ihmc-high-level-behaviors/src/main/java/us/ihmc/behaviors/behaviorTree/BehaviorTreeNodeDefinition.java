@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -29,13 +28,13 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
     * i.e. "PickUpObject.json"
     * i.e. "Move left hand"
     */
-   private final CRDTUnidirectionalString name;
+   private final CRDTBidirectionalString name;
    /**
     * Long form notes about the node.
     * Can be in paragraph form and include notes about the current
     * development state.
     */
-   private final CRDTUnidirectionalString notes;
+   private final CRDTBidirectionalString notes;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
@@ -52,8 +51,8 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
       this.saveFileDirectory = saveFileDirectory;
 
-      name = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
-      notes = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
+      name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
+      notes = new CRDTBidirectionalString(this, "");
    }
 
    /** Save as JSON file root node. */

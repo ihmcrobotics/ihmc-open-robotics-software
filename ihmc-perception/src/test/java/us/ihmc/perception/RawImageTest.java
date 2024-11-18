@@ -7,10 +7,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.time.Instant;
 import java.util.Random;
@@ -59,7 +59,7 @@ public class RawImageTest
          threads[i] = new Thread(() ->
          {
             assertNotNull(testImage.get());
-            MissingThreadTools.sleep(random.nextDouble(0.0, 1.0));
+            ThreadTools.park(random.nextDouble(0.0, 1.0));
             testImage.release();
          });
       }

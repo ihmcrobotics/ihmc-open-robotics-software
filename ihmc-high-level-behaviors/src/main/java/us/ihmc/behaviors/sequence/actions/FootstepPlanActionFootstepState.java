@@ -2,7 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class FootstepPlanActionFootstepState
@@ -13,7 +13,7 @@ public class FootstepPlanActionFootstepState
    private int index = -1;
 
    public FootstepPlanActionFootstepState(ReferenceFrameLibrary referenceFrameLibrary,
-                                          CRDTUnidirectionalString parentFrameName,
+                                          CRDTBidirectionalString parentFrameName,
                                           FootstepPlanActionFootstepDefinition definition)
    {
       this.definition = definition;

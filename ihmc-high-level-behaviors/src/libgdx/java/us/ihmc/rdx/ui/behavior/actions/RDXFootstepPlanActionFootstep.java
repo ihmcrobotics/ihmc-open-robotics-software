@@ -9,6 +9,7 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 
@@ -56,17 +57,7 @@ public class RDXFootstepPlanActionFootstep
             getGizmo().changeParentFrameWithoutMoving(state.getSoleFrame().getReferenceFrame().getParent());
          }
 
-         getGizmo().update();
-
-         if (getGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getSoleToPlanFrameTransform().accessValue().set(getGizmo().getTransformToParent()); // Update action data based on user input
-         }
-         else
-         {
-            getGizmo().getTransformToParent().set(definition.getSoleToPlanFrameTransform().getValueReadOnly()); // Update gizmo in case action data changes
-            getGizmo().update();
-         }
+         RDXCRDTTools.syncGizmoWithBidirectionalField(getGizmo(), definition.getSoleToPlanFrameTransform(), definition.getFreezable());
 
          interactableFootstep.update();
 

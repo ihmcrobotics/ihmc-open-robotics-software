@@ -14,7 +14,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.DeprecatedAPIs;
+import us.ihmc.communication.OldHandAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -57,8 +57,8 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -937,7 +937,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
    {
-      ros2ControllerHelper.publish(DeprecatedAPIs::getHandConfigurationTopic,
+      ros2ControllerHelper.publish(robotName -> OldHandAPI.getHandDesiredConfigurationTopic(robotName),
                                    HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, desiredHandConfiguration));
    }
 

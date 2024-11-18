@@ -21,7 +21,6 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -67,9 +66,6 @@ public class RDXSteppableRegionCalculatorDemo
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);
 
-      baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-      baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -77,7 +73,7 @@ public class RDXSteppableRegionCalculatorDemo
          {
             heightMapUI.create();
             steppableRegionsUI.create();
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
             baseUI.create();
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
@@ -93,7 +89,7 @@ public class RDXSteppableRegionCalculatorDemo
 
             steppableRegionsUI.getEnabled().set(true);
 
-            new ROS2Callback<>(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
+            ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
             {
                heightMapVisualizer.acceptHeightMapMessage(message);
                heightMapUI.acceptHeightMapMessage(message);

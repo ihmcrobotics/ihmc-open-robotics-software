@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -39,6 +38,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       executorChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
+
+      for (ActionNodeExecutor<?, ?> actionChild : executorChildren)
+      {
+         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+      }
 
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
@@ -159,18 +163,19 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          return false;
       }
 
-      ActionNodeState<?> nextNodeToExecute = executorChildren.get(state.getExecutionNextIndex()).getState();
+      ActionNodeExecutor<?, ?> nextNodeToExecute = executorChildren.get(state.getExecutionNextIndex());
 
-      if (!nextNodeToExecute.getCanExecute())
+      if (!nextNodeToExecute.getState().getCanExecute())
       {
-         state.getLogger().error("Cannot execute action: %s".formatted(nextNodeToExecute.getDefinition().getName()));
+         state.getLogger().error("Cannot execute action: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
+                                                                           nextNodeToExecute.getCantExecuteMessage()));
          state.setAutomaticExecution(false);
          return false;
       }
 
       if (state.getConcurrencyEnabled())
       {
-         int executeAfterActionIndex = nextNodeToExecute.calculateExecuteAfterActionIndex(getState().getActionChildren());
+         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex(getState().getActionChildren());
 
          if (executeAfterActionIndex < 0) // Execute after beginning
          {

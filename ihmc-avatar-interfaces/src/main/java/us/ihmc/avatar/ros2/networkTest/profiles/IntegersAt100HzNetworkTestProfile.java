@@ -5,7 +5,6 @@ import std_msgs.msg.dds.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -13,7 +12,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -88,7 +87,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         new ROS2Callback<>(ros2Node, TO_OCU, message ->
+         ros2Node.createSubscription2(TO_OCU, message ->
          {
             long messageNumber = message.getData();
             if (messageNumber - 1 != lastReceived)

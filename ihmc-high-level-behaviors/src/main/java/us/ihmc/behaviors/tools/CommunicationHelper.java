@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.tools;
 
-import perception_msgs.msg.dds.DoorLocationPacket;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,19 +11,17 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.ros2.*;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -39,6 +37,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
@@ -264,12 +263,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter)
    {
       return ros2Helper.subscribe(topic, messageFilter);
-   }
-
-   @Override
-   public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
-   {
-      return ros2Helper.subscribeTypeless(topic);
    }
 
    @Override

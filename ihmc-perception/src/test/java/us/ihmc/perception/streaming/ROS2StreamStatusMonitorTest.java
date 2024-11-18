@@ -6,22 +6,22 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.Throttler;
 
 import java.net.InetSocketAddress;
 
+import static java.lang.Thread.interrupted;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ROS2StreamStatusMonitorTest
 {
-   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stream_status_monitor_test_node");
+   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "stream_status_monitor_test_node");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("test");
 
@@ -36,7 +36,7 @@ public class ROS2StreamStatusMonitorTest
    {
       // Messages being sent over ROS2 from previous test may mess up the next test,
       // so we wait a bit after running each test
-      MissingThreadTools.sleep(1.0);
+      ThreadTools.park(1.0);
    }
 
    @Test
@@ -86,8 +86,8 @@ public class ROS2StreamStatusMonitorTest
 
       assertTrue(streamStatusMonitor.isStreaming());
 
-      MissingThreadTools.sleep(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
-      MissingThreadTools.sleep(0.05); // Sleep a little extra
+      ThreadTools.park(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
+      ThreadTools.park(0.05); // Sleep a little extra
 
       assertFalse(streamStatusMonitor.isStreaming());
    }
@@ -107,8 +107,8 @@ public class ROS2StreamStatusMonitorTest
 
       Thread messagePublishThread = ThreadTools.startAsDaemon(() ->
       {
-         // Publish messages for 1 second
-         for (float i = 0.0f; i < messagePublishFrequency; i++)
+         // Publish messages for 3 second
+         while (!interrupted())
          {
             ROS2_HELPER.publish(TEST_TOPIC, statusMessage);
          }
@@ -117,11 +117,12 @@ public class ROS2StreamStatusMonitorTest
          ROS2_HELPER.publish(TEST_TOPIC, statusMessage);
       }, getClass().getSimpleName() + "Thread");
 
-      streamStatusMonitor.waitForStream(1.0);
+      streamStatusMonitor.waitForStream(1.5);
       assertTrue(streamStatusMonitor.isStreaming());
 
+      messagePublishThread.interrupt();
       messagePublishThread.join();
-      MissingThreadTools.sleep(0.01);
+      ThreadTools.park(0.5);
       assertFalse(streamStatusMonitor.isStreaming());
    }
 }

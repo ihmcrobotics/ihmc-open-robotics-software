@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.io.File;
 import java.util.function.Consumer;

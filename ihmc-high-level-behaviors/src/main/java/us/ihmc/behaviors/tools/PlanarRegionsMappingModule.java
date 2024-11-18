@@ -3,7 +3,6 @@ package us.ihmc.behaviors.tools;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.pubsub.DomainFactory;
@@ -37,8 +36,8 @@ public class PlanarRegionsMappingModule
 
       planarRegionPublisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class));
       ROS2Topic realsenseTopic = PerceptionAPI.REA.withOutput().withSuffix("realsense");
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, realsenseTopic, this::process);
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.LIDAR_REA_REGIONS, this::process);
+      ros2Node.createSubscription2(realsenseTopic.withType(PlanarRegionsListMessage.class), this::process);
+      ros2Node.createSubscription2(PerceptionAPI.LIDAR_REA_REGIONS.withType(PlanarRegionsListMessage.class), this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)

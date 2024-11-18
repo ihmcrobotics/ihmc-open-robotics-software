@@ -47,8 +47,8 @@ public class PerceptionDataLoggingTest
       int[] array = new int[intCount];
       intBuffer.get(array, 0, intCount-1);
 
-      LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
-      LogTools.info("Input Array: {}", Arrays.toString(array));
+      LogTools.debug("Input Array: {}", Arrays.toString(dataArrayExtended));
+      LogTools.debug("Input Array: {}", Arrays.toString(array));
    }
 
    @Test
@@ -71,8 +71,8 @@ public class PerceptionDataLoggingTest
 
       byte[] outputArray = hdf5Tools.loadByteArray(readGroup, 0);
 
-      LogTools.info("Input Array: {}", Arrays.toString(dataArrayExtended));
-      LogTools.info("Output Array: {}", Arrays.toString(outputArray));
+      LogTools.debug("Input Array: {}", Arrays.toString(dataArrayExtended));
+      LogTools.debug("Output Array: {}", Arrays.toString(outputArray));
 
       for (int i = 0; i < dataArrayExtended.length; i++)
       {
@@ -102,7 +102,7 @@ public class PerceptionDataLoggingTest
 
       long size = dataBytePointer.limit();
 
-      LogTools.info("Store Byte Array: Index: {} Size: {}", 0, size);
+      LogTools.debug("Store Byte Array: Index: {} Size: {}", 0, size);
       long[] dims = {size};
 
       DataType dataType = new DataType(PredType.NATIVE_B8());
@@ -115,9 +115,9 @@ public class PerceptionDataLoggingTest
 
       writeFile._close();
       //
-      LogTools.info("File closed");
+      LogTools.debug("File closed");
       //
-      LogTools.info("Opening file");
+      LogTools.debug("Opening file");
       H5File readFile = new H5File("hdf5_test_byte_array.hdf5", hdf5.H5F_ACC_RDONLY());
       Group readGroup = readFile.openGroup( "test");
 
@@ -140,7 +140,7 @@ public class PerceptionDataLoggingTest
 
       for (int i = 0; i < dataBytePointer.limit(); i++)
       {
-         LogTools.info("i: {}, data: {}, destination: {}", i, dataBytePointer.get(i), destinationBytePointer.get(i));
+         LogTools.debug("i: {}, data: {}, destination: {}", i, dataBytePointer.get(i), destinationBytePointer.get(i));
          assertEquals(dataBytePointer.get(i), destinationBytePointer.get(i));
       }
 
@@ -176,11 +176,11 @@ public class PerceptionDataLoggingTest
 
       for (int i = 0; i < compressedDepthPointer.limit(); i++)
       {
-         LogTools.info("i: {}, data: {}, destination: {}", i, compressedDepthPointer.get(i), pngCompressedBytes.get(i));
+         LogTools.debug("i: {}, data: {}, destination: {}", i, compressedDepthPointer.get(i), pngCompressedBytes.get(i));
          assertEquals(compressedDepthPointer.get(i), pngCompressedBytes.get(i));
       }
 
-      LogTools.info("Loaded Size: {}", pngCompressedBytes.limit());
+      LogTools.debug("Loaded Size: {}", pngCompressedBytes.limit());
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
       OpenCVTools.decompressDepthPNG(pngCompressedBytes, finalDepth16UC1);
@@ -199,15 +199,15 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-            LogTools.info(String.format("Depth (%d %d): %d %d", i, j, indexer.get(i*128 + j), indexerActual.get(i*128 + j)));
-            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+            LogTools.debug(String.format("Depth (%d %d): %d %d", i, j, indexer.get(i*128 + j), indexerActual.get(i*128 + j)));
+            //LogTools.debug("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
       }
 
       assertEquals(0.0, diff, 1e-5);
 
-      LogTools.info("Finished Test for PNG Raw Bytes");
+      LogTools.debug("Finished Test for PNG Raw Bytes");
    }
 
    @Test
@@ -225,7 +225,7 @@ public class PerceptionDataLoggingTest
 
       long begin = System.currentTimeMillis();
 
-      System.out.println(Arrays.toString(dataArray));
+      LogTools.debug(Arrays.toString(dataArray));
 
       hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 
@@ -240,10 +240,10 @@ public class PerceptionDataLoggingTest
       byte[] outputArray = hdf5Tools.loadByteArray(readGroup, 0);
 
       long end = System.currentTimeMillis();
-      LogTools.info("Logging Took: {} ms", intermediate - begin);
-      LogTools.info("Loading Took: {} ms", end - intermediate);
+      LogTools.debug("Logging Took: {} ms", intermediate - begin);
+      LogTools.debug("Loading Took: {} ms", end - intermediate);
 
-      System.out.println(Arrays.toString(outputArray));
+      LogTools.debug(Arrays.toString(outputArray));
 
       for (int i = 0; i < dataArray.length; i++)
       {
@@ -269,11 +269,11 @@ public class PerceptionDataLoggingTest
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining() + 4];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length - 4);
 
-      LogTools.info("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
+      LogTools.debug("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
 
       Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
-//      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+//      LogTools.debug("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
       hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 
@@ -285,7 +285,7 @@ public class PerceptionDataLoggingTest
 
       byte[] pngCompressedBytes = hdf5Tools.loadByteArray(readGroup, 0);
 
-//      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+//      LogTools.debug("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
 
 
       Mat finalDepthUC4 = new Mat(128, 128, opencv_core.CV_8UC4);
@@ -304,8 +304,8 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-            //LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
-            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+            //LogTools.debug("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+            //LogTools.debug("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
       }
@@ -331,11 +331,11 @@ public class PerceptionDataLoggingTest
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
 
-//      LogTools.info("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
+//      LogTools.debug("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
 
       Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
-//      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+//      LogTools.debug("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
       hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 
@@ -347,7 +347,7 @@ public class PerceptionDataLoggingTest
 
       byte[] pngCompressedBytes = hdf5Tools.loadByteArray(readGroup, 0);
 
-//      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+//      LogTools.debug("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
 
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
@@ -363,8 +363,8 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-            //LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
-            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+            //LogTools.debug("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+            //LogTools.debug("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
       }
@@ -399,7 +399,7 @@ public class PerceptionDataLoggingTest
       float diff = 0;
       for(int i = 0; i<loadedFloats.length; i++)
       {
-         LogTools.info("Stored: {}, Loaded: {}", floatArray[i], loadedFloats[i]);
+         LogTools.debug("Stored: {}, Loaded: {}", floatArray[i], loadedFloats[i]);
          diff += Math.abs(loadedFloats[i] - floatArray[i]);
       }
 
@@ -519,8 +519,8 @@ public class PerceptionDataLoggingTest
       perceptionDataLoader.loadQuaternionList(quaternionChannelName, quaternions);
       perceptionDataLoader.closeLogFile();
 
-      LogTools.info("Total Points: {}", points.size());
-      LogTools.info("Total Quaternions: {}", quaternions.size());
+      LogTools.debug("Total Points: {}", points.size());
+      LogTools.debug("Total Quaternions: {}", quaternions.size());
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0, 1, 2), points.get(0), 1e-7);
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(0, 1, 2, 3), quaternions.get(0), 1e-7);
@@ -541,11 +541,11 @@ public class PerceptionDataLoggingTest
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
 
-//      LogTools.info("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
+//      LogTools.debug("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
 //
 //      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
 //
-//      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+//      LogTools.debug("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 //
 //      hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 //
@@ -557,7 +557,7 @@ public class PerceptionDataLoggingTest
 //
 //      byte[] pngCompressedBytes = hdf5Tools.loadByteArray(readGroup, 0);
 
-//      LogTools.info("PNG Loaded: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+//      LogTools.debug("PNG Loaded: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
@@ -573,8 +573,8 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-//            LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
-//            LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+//            LogTools.debug("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+//            LogTools.debug("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
       }
@@ -595,7 +595,7 @@ public class PerceptionDataLoggingTest
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
 
-//      LogTools.info("PNG Loaded: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+//      LogTools.debug("PNG Loaded: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
       OpenCVTools.decompressJPG(dataArray, finalDepth16UC1);
@@ -610,8 +610,8 @@ public class PerceptionDataLoggingTest
          {
             diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
 
-//            LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
-//            LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+//            LogTools.debug("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+//            LogTools.debug("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
 
          }
       }
@@ -655,7 +655,7 @@ public class PerceptionDataLoggingTest
       long readAttributeId = hdf5.H5Aopen(readDatasetId, "attribute_name", hdf5.H5P_DEFAULT());
       int[] data = new int[1];
       hdf5.H5Aread(readAttributeId, hdf5.H5T_NATIVE_INT, new IntPointer(data));
-      System.out.println("Attribute value: " + data[0]);
+      LogTools.debug("Attribute value: " + data[0]);
       hdf5.H5Aclose(readAttributeId);
       hdf5.H5Dclose(readDatasetId);
       hdf5.H5Fclose(readFileId);

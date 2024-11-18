@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.OldHandAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -40,7 +41,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
       trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
 
-      publisher = createPublisherForController(HandDesiredConfigurationMessage.class);
+      publisher = createPublisher(OldHandAPI.getHandDesiredConfigurationTopic(robotName));
    }
 
    public void setInput(HandDesiredConfigurationMessage handDesiredConfigurationMessage)

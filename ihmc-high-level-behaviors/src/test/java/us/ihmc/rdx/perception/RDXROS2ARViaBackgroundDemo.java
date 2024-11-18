@@ -63,8 +63,7 @@ public class RDXROS2ARViaBackgroundDemo
                                                                                       PerceptionAPI.BIG_VIDEO);
             perceptionVisualizerPanel.addVisualizer(videoVisualizer);
 
-            perceptionVisualizerPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            perceptionVisualizerPanel.create(baseUI);
 
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
             double publishRateHz = 60.0;

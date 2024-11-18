@@ -24,7 +24,6 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonToolsTest;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -376,6 +375,28 @@ public class ConvexPolygonToolsTest
       System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");
       waitForButtonOrPause(testFrame);
       testFrame.dispose();
+   }
+
+   private void plotPolygons(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   {
+      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-1.0, 1.0, -1.0, 1.0);
+      FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+      plotter.setDrawPointsLarge();
+
+      plotter.addPolygon(new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), polygonA), Color.BLUE);
+      plotter.addPolygon(new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), polygonB), Color.RED);
+
+      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), polygonA.getVertex(i)), Color.BLUE);
+      }
+      for (int i = 0; i < polygonB.getNumberOfVertices(); i++)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), polygonB.getVertex(i)), Color.RED);
+      }
+
+      waitForButtonOrPause(testFrame);
+      testFrame.dispose(); // Tip: place breakpoint here and do not wait for button to see graphic and debug data
    }
 
    @Test
@@ -739,8 +760,14 @@ public class ConvexPolygonToolsTest
          }
          else if (expectedIntersectionWithSparePolygon.length == 1)
          {
-            assertTrue(actualIntersectionWithSparePolygon.getNumberOfVertices() == 1);
-            assertTrue(expectedIntersectionWithSparePolygon[0].epsilonEquals(actualIntersectionWithSparePolygon.getVertex(0), epsilon));
+            // EuclidGeometryPolygonTools#intersectionBetweenLineSegment2DAndConvexPolygon2D
+            // will return the one point on the edge, where
+            // ConvexPolygonTools#computeIntersectionOfPolygons will return both
+            // the point on the edge and the point inside
+            assertTrue(actualIntersectionWithSparePolygon.getNumberOfVertices() == 2);
+            assertEqualsAEqualsBOrC(expectedIntersectionWithSparePolygon[0],
+                                    actualIntersectionWithSparePolygon.getVertex(0),
+                                    actualIntersectionWithSparePolygon.getVertex(1));
          }
          else if (expectedIntersectionWithSparePolygon.length == 2)
          {
@@ -797,9 +824,12 @@ public class ConvexPolygonToolsTest
          }
          else if (polygonIntersection.getNumberOfVertices() == 2)
          {
-            assertEqualsInEitherOrder(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0],
-                                      sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[1], polygonIntersection.getVertex(0),
-                                      polygonIntersection.getVertex(1));
+            // EuclidGeometryPolygonTools#intersectionBetweenLineSegment2DAndConvexPolygon2D
+            // will return the one point on the edge, where
+            // ConvexPolygonTools#computeIntersectionOfPolygons will return both
+            // the point on the edge and the point inside
+            Point2DBasics[] intersection = sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon);
+            assertEqualsAEqualsBOrC(intersection[0], polygonIntersection.getVertex(0), polygonIntersection.getVertex(1));
          }
          else
             fail();
@@ -1441,6 +1471,11 @@ public class ConvexPolygonToolsTest
          System.out.println(actual1);
          fail("Doubles are not equal in either order.");
       }
+   }
+
+   private void assertEqualsAEqualsBOrC(Point2DReadOnly a, Point2DReadOnly b, Point2DReadOnly c)
+   {
+      assertTrue(a.epsilonEquals(b, epsilon) || a.epsilonEquals(c, epsilon));
    }
 
    private void assertEqualsInEitherOrder(Point2DReadOnly expected0, Point2DReadOnly expected1, Point2DReadOnly actual0, Point2DReadOnly actual1)

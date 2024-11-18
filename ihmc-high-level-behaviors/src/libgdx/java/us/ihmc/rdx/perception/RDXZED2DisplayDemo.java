@@ -51,10 +51,8 @@ public class RDXZED2DisplayDemo
             zed2ColoredPointCloudVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
          }
 
          @Override

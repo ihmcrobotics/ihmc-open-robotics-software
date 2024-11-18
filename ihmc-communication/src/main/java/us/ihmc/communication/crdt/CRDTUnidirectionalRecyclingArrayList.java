@@ -31,7 +31,7 @@ public class CRDTUnidirectionalRecyclingArrayList<T> extends CRDTUnidirectionalM
    }
 
    /**
-    * Used only for preallocating using {@link us.ihmc.robotics.lists.RecyclingArrayListTools#getUnsafe}.
+    * Used only for preallocating using {@link us.ihmc.commons.lists.RecyclingArrayListTools#getUnsafe}.
     */
    public RecyclingArrayList<T> getValueUnsafe()
    {

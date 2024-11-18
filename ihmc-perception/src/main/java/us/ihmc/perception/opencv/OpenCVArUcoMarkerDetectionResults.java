@@ -18,7 +18,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 
 /**
  * This class provides support for copying the full output from
@@ -27,7 +26,7 @@ import us.ihmc.perception.BytedecoImage;
  */
 public class OpenCVArUcoMarkerDetectionResults
 {
-   private final BytedecoImage inputImage;
+   private final Mat inputImage;
    private final MatVector corners;
    private final Mat ids;
    private final MatVector rejectedImagePoints;
@@ -59,7 +58,7 @@ public class OpenCVArUcoMarkerDetectionResults
 
    public OpenCVArUcoMarkerDetectionResults()
    {
-      inputImage = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
+      inputImage = new Mat();
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
@@ -83,8 +82,7 @@ public class OpenCVArUcoMarkerDetectionResults
     */
    public void copyOutputData(OpenCVArUcoMarkerDetector detector)
    {
-      inputImage.ensureDimensionsMatch(detector.getRGB8ImageForDetection());
-      detector.getRGB8ImageForDetection().getBytedecoOpenCVMat().copyTo(inputImage.getBytedecoOpenCVMat());
+      detector.getRGB8ImageForDetection().copyTo(inputImage);
 
       corners.clear();
       corners.put(detector.getCorners());
@@ -228,7 +226,7 @@ public class OpenCVArUcoMarkerDetectionResults
       opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
-   public BytedecoImage getInputImage()
+   public Mat getInputImage()
    {
       return inputImage;
    }

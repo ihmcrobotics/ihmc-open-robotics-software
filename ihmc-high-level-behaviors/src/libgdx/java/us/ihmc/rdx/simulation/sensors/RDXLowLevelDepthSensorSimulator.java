@@ -31,7 +31,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

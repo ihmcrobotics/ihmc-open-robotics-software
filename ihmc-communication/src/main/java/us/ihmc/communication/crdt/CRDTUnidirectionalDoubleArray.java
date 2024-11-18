@@ -23,7 +23,7 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
    public void setValue(int index, double value)
    {
       if (getValueReadOnly(index) != value)
-         accessValue()[index] = value;
+         getValueAndFreeze()[index] = value;
    }
 
    public int getLength()

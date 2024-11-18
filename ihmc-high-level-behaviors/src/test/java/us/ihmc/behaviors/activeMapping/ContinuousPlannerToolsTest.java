@@ -41,20 +41,19 @@ public class ContinuousPlannerToolsTest
 
    /**
     * This test checks to make sure the goal poses are at the expected distance from the start, and at the expected height from the start, and that the width
-    * is
-    * about as expected (not super strict on the accuracy of the width). Meant to test
-    * {@link ContinuousPlannerTools#setRandomizedStraightGoalPoses(FramePose3D, SideDependentList, float, float, float, float)}
+    * is about as expected (not super strict on the accuracy of the width). Meant to test
+    * {@link ContinuousPlannerTools#setStraightForwardGoalPoses(FramePose3D, SideDependentList, float, float, float, float)}
     */
    @Test
    public void testRandomizedStraightGoalPoses()
    {
       // Pass everything to the tools method to get the forward goal position
-      SideDependentList<FramePose3D> goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
-                                                                                                       stancePose,
-                                                                                                       (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                                       X_RANDOM_MARGIN,
-                                                                                                       (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                                                       NOMINAL_STANCE_WIDTH);
+      SideDependentList<FramePose3D> goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(walkingStartMidPose,
+                                                                                                    stancePose,
+                                                                                                    (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                                    X_RANDOM_MARGIN,
+                                                                                                    NOMINAL_STANCE_WIDTH);
 
       // These are the maximum and minimum values where the goal pose should be able to exist
       double maxForwardGoalDistance = walkingStartMidPose.getX() + continuousHikingParameters.getGoalPoseForwardDistance() + X_RANDOM_MARGIN;
