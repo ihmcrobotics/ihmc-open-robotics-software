@@ -31,7 +31,8 @@ public class ExampleCUDAKernel2D
       CUstream_st stream = CUDAStreamManager.getStream();
 
       // Here we want to maximize the number of threads we can, this helps optimize the kernel for runtime.
-      // By the rules of CUDA, a block cannot have more than 1024 threads.
+      // By the rules of CUDA, a block cannot have more than a certain number of threads.
+      // Older gpus have a limit of 512, while newer gpus have a limit of 1024.
       // So since we are using a matrix, we are going to have a height and a width, so those squared can't be more the 1024.
       // Here we expect a grid of 3x3
       int height = (int) Math.sqrt(9.0);
@@ -55,8 +56,9 @@ public class ExampleCUDAKernel2D
             // This creates objects that will be allocated on the gpu, these will be used in the kernel since that all happens on the gpu
             GpuMat gpuMatA = new GpuMat();
             GpuMat gpuMatB = new GpuMat();
+            // We need to know the size (width and height) to allocate the right amount on one gpu,
+            // the type() returns the data type (e.g., 16 bit unsigned short)
             GpuMat gpuResult = new GpuMat(cpuMatA.size(), cpuMatA.type());
-            // We need to know the size in bytes and the type of the result we expect to get on the gpu
 
             // Create the program and kernel to manage a lot of the over head for you, like creating and destroying. Let these classes handle it.
             CUDAProgram cudaProgram = new CUDAProgram(programPath);
