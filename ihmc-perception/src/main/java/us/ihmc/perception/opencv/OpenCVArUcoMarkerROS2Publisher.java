@@ -10,7 +10,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilter;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.util.function.Function;
 

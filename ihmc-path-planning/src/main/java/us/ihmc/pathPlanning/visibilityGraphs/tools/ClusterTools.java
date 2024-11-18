@@ -38,7 +38,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 public class ClusterTools
 {

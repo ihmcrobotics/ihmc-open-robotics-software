@@ -1,6 +1,5 @@
 package us.ihmc.atlas.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -26,10 +25,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -40,6 +39,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
 {
    private static final double OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
@@ -60,7 +60,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
       int imageHeight = 360;
       double fx = 500.0;
       double fy = 500.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
+      Object depthCameraIntrinsics = new Object();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("ZED2LeftEyeToLeftEyeBridge", true);
 

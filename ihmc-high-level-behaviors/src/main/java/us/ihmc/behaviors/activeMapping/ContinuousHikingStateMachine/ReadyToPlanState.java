@@ -4,10 +4,10 @@ import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.apache.commons.lang3.time.StopWatch;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerTools;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.packets.MessageTools;
@@ -43,7 +43,7 @@ public class ReadyToPlanState implements State
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
-   private final ContinuousPlannerStatistics statistics;
+   private final ContinuousHikingLogger continuousHikingLogger;
    private final List<SideDependentList<FramePose3D>> walkToGoalWayPointPoses = new ArrayList<>();
    private final Point3D robotLocation = new Point3D();
    private final StopWatch stopWatch = new StopWatch();
@@ -66,7 +66,7 @@ public class ReadyToPlanState implements State
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
                            TerrainPlanningDebugger debugger,
-                           ContinuousPlannerStatistics statistics,
+                           ContinuousHikingLogger continuousHikingLogger,
                            PlanningMode planningMode)
    {
       this.referenceFrames = referenceFrames;
@@ -76,7 +76,7 @@ public class ReadyToPlanState implements State
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
-      this.statistics = statistics;
+      this.continuousHikingLogger = continuousHikingLogger;
       this.planningMode = planningMode;
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointPoseToList);
@@ -94,8 +94,6 @@ public class ReadyToPlanState implements State
    @Override
    public void doAction(double timeInState)
    {
-      statistics.setLastAndTotalWaitingTimes();
-
       // These may be null if no steps have been sent to the controller, good to check that here
       if (controllerFootstepQueueMonitor.getFootstepStatusMessage() != null && controllerFootstepQueueMonitor.getControllerFootstepQueue() != null)
       {
@@ -106,8 +104,8 @@ public class ReadyToPlanState implements State
       // Set up the imminent stance and goal poses in which to plan from
       continuousPlanner.setImminentStanceToPlanFrom();
       SideDependentList<FramePose3D> goalPoses = getGoalPosesBasedOnPlanningMode();
+      continuousHikingLogger.appendString("Goal Poses: \n" + goalPoses.toString());
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), goalPoses);
-      debugger.setPlanningMode(planningMode);
 
       // Plan to the goal and log the plan
       continuousPlanner.planToGoal(commandMessage.get(), goalPoses);
@@ -120,12 +118,14 @@ public class ReadyToPlanState implements State
          debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
       }
 
-      // We know that we have a plan, and that only gets set to true when we have at least one step in the plan, so we know it's not empty
+      // We know that we have a plan, and this method only gets set to true when we have at least one step in the plan, so we know it's not empty, let's send it
       if (continuousPlanner.isPlanAvailable())
       {
          FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(continuousPlanner.getLatestFootstepPlan(),
                                                                                                        continuousHikingParameters.getSwingTime(),
                                                                                                        continuousHikingParameters.getTransferTime());
+
+         continuousHikingLogger.appendString("FootstepDataListMessage that got published: \n " + message.toString());
          debugger.publishPlannedFootsteps(message);
       }
    }
@@ -145,30 +145,70 @@ public class ReadyToPlanState implements State
 
    public SideDependentList<FramePose3D> getGoalPosesBasedOnPlanningMode()
    {
+      String message = commandMessage.get().toString();
+      continuousHikingLogger.appendString("Command Message that was published: \n" + message);
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
       switch (this.planningMode)
       {
          case FAST_HIKING ->
          {
-            goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                              continuousPlanner.getStartStancePose(),
-                                                                              (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                              X_RANDOM_MARGIN,
-                                                                              (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                              NOMINAL_STANCE_WIDTH);
+            if (commandMessage.get().getEnableContinuousHikingWithKeyboard())
+            {
+               goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                                 continuousPlanner.getStartStancePose(),
+                                                                                 (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                                 (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                 X_RANDOM_MARGIN,
+                                                                                 NOMINAL_STANCE_WIDTH);
+            }
+            else if (commandMessage.get().getEnableContinuousHikingWithJoystickController())
+            {
+               // Here we assume the joystick isn't being turned at all, so we give a direction of straight forward
+               if (Math.abs(commandMessage.get().getLateralValue()) < 0.1)
+               {
+                  goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                                    continuousPlanner.getStartStancePose(),
+                                                                                    (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                    X_RANDOM_MARGIN,
+                                                                                    NOMINAL_STANCE_WIDTH);
+               }
+               else
+               {
+                  goalPoses = ContinuousPlannerTools.setGoalPoseBasedOnLateralJoystickValue(referenceFrames.getPelvisZUpFrame(),
+                                                                                            referenceFrames.getMidFeetZUpFrame(),
+                                                                                            commandMessage.get().getLateralValue(),
+                                                                                            (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                                            (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                            NOMINAL_STANCE_WIDTH);
+
+                  // We update this pose because when we start walking straight forward again, it's from the point where we are currently
+                  // And not the point from which we were at before we started turning
+                  FramePose3D stanceMidPose = new FramePose3D();
+                  stanceMidPose.interpolate(continuousPlanner.getStartStancePose().get(RobotSide.LEFT),
+                                            continuousPlanner.getStartStancePose().get(RobotSide.RIGHT),
+                                            0.5);
+                  continuousPlanner.setWalkingStartMidPose(stanceMidPose);
+               }
+            }
 
             return goalPoses;
          }
 
-         // This allows for walking to a goal that isn't straight forward, its assumed that if there is no goal we will just resume walking straight forward
+         // This allows for walking to a goal that isn't straight forward; its assumed that if there is no goal we will just resume walking straight forward
          case WALK_TO_GOAL ->
          {
+            // Allow for more planning time with this one, just plan for one-step length
+            continuousHikingParameters.setPlanningWithoutReferenceTimeout(1.0);
+
             // Set the goalPoses here so that we return a good value regardless of what happens next
             goalPoses = walkToGoalWayPointPoses.get(0);
 
+            // Update the current robot location
             Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
             robotLocation.set(robotLocationVector);
+
             double distanceToGoalPose = ContinuousPlannerTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
@@ -181,7 +221,7 @@ public class ReadyToPlanState implements State
                }
                else
                {
-                  // We do this here because as soon as continuous hiking gets set to false we exit this state
+                  // We do this here because as soon as continuous hiking gets set to false, we exit this state
                   planningMode = PlanningMode.FAST_HIKING;
                   debugger.setPlanningMode(planningMode);
                   debugger.resetVisualizationForUIPublisher();

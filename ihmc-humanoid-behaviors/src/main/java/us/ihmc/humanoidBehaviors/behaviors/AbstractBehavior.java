@@ -71,11 +71,9 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final ROS2Topic controllerInputTopic, controllerOutputTopic;
    protected final ROS2Topic behaviorInputTopic, behaviorOutputTopic;
 
    protected final ROS2Topic footstepPlannerInputTopic, footstepPlannerOutputTopic;
-   protected final ROS2Topic kinematicsToolboxInputTopic, kinematicsToolboxOutputTopic;
    protected final ROS2Topic kinematicsPlanningToolboxInputTopic, kinematicsPlanningToolboxOutputTopic;
 
    private static int behaviorUniqID = 0;
@@ -103,13 +101,9 @@ public abstract class AbstractBehavior implements RobotController
 
       footstepPlannerInputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       footstepPlannerOutputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
-      kinematicsToolboxInputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
-      kinematicsToolboxOutputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
       kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
       kinematicsPlanningToolboxOutputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerInputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
-      controllerOutputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
       behaviorInputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withInput();
       behaviorOutputTopic = DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
@@ -124,7 +118,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, controllerInputTopic);
+      return createPublisher(messageType, HumanoidControllerAPI.getTopic(messageType, robotName));
    }
 
    public <T> ROS2PublisherBasics<T> createBehaviorOutputPublisher(Class<T> messageType)
@@ -140,13 +134,17 @@ public abstract class AbstractBehavior implements RobotController
    @SuppressWarnings("unchecked")
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      ROS2Topic<T> typedNamedTopic = topicName.withTypeName(messageType);
-      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(typedNamedTopic);
+      return createPublisher(topicName.withTypeName(messageType));
+   }
+
+   public <T> ROS2PublisherBasics<T> createPublisher(ROS2Topic<T> topic)
+   {
+      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(topic);
 
       if (publisher == null) // !containsKey
       {
-         publisher = ros2Node.createPublisher(messageType, typedNamedTopic.getName(), typedNamedTopic.getQoS());
-         publishers.put(typedNamedTopic, publisher);
+         publisher = ros2Node.createPublisher(topic);
+         publishers.put(topic, publisher);
       }
 
       return publisher;
@@ -154,7 +152,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, controllerOutputTopic, consumer);
+      createSubscriber(messageType, HumanoidControllerAPI.getTopic(messageType, robotName), consumer);
    }
 
    public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
@@ -165,6 +163,11 @@ public abstract class AbstractBehavior implements RobotController
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
       ros2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(messageType), s -> consumer.consumeObject(s.takeNextData()));
+   }
+
+   public <T> void createSubscriber(ROS2Topic<T> topic, ObjectConsumer<T> consumer)
+   {
+      ros2Node.createSubscription(topic, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)

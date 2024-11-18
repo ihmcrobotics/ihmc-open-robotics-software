@@ -1,14 +1,10 @@
 package us.ihmc.perception.cuda;
 
 import org.apache.logging.log4j.Level;
-import org.bytedeco.cuda.cudart.CUfunc_st;
 import org.bytedeco.cuda.cudart.CUmod_st;
-import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaDeviceProp;
-import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.nvrtc._nvrtcProgram;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
@@ -16,27 +12,25 @@ import us.ihmc.log.LogTools;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
-import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
-import static us.ihmc.perception.cuda.CUDATools.checkNVRTCError;
+import static us.ihmc.perception.cuda.CUDATools.*;
 
-class CUDAProgram
+/**
+ * This class is used to compile the CUDA code and retrieve kernels specified by the users.
+ */
+public class CUDAProgram implements AutoCloseable
 {
    private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
                                                     "--dopt=on",                     // Optimize code
                                                     "-G"};                           // More code optimization
 
    private final CUmod_st module = new CUmod_st();
-   private final Map<String, CUfunc_st> kernels = new HashMap<>();
-
-   private int error;
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options
+    *
     * @param programPath {@link Path} to the .cu file.
     * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     */
@@ -47,8 +41,9 @@ class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
-    * @param programPath {@link Path} to the .cu file.
-    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    *
+    * @param programPath        {@link Path} to the .cu file.
+    * @param headerPaths        {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
@@ -82,6 +77,13 @@ class CUDAProgram
       }
    }
 
+   /**
+    * Construct a {@link CUDAProgram} with default compilation options
+    *
+    * @param programName The user-friendly name of the program.
+    *                    There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode The source code (i.e., the contents of the .cu file)
+    */
    public CUDAProgram(String programName, String programCode)
    {
       this(programName, programCode, null, null);
@@ -89,9 +91,11 @@ class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} with default compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
+    *
+    * @param programName    The user-friendly name of the program.
+    *                       There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode    The program code (i.e., the contents of the .cu file).
+    * @param headerNames    List of header names included (with {@code #include}) in the code.
     * @param headerContents Contents of the headers included in the code.
     */
    public CUDAProgram(String programName, String programCode, String[] headerNames, String[] headerContents)
@@ -101,10 +105,12 @@ class CUDAProgram
 
    /**
     * Construct a {@link CUDAProgram} specifying the name, code, header names, header contents, and compilation options.
-    * @param programName The name of the program (usually the file name with a .cu extension).
-    * @param programCode The program code (i.e. the contents of the .cu file).
-    * @param headerNames List of header names included (with {@code #include}) in the code.
-    * @param headerContents Contents of the headers included in the code.
+    *
+    * @param programName        The user-friendly name of the program.
+    *                           There is no relation with this name to the kernel file; however, it's recommended to use the file name to avoid confusion
+    * @param programCode        The program code (i.e., the contents of the .cu file).
+    * @param headerNames        List of header names included (with {@code #include}) in the code.
+    * @param headerContents     Contents of the headers included in the code.
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
@@ -113,36 +119,23 @@ class CUDAProgram
       initialize(programName, programCode, headerNames, headerContents, compilationOptions);
    }
 
-   public void loadKernel(String kernelName)
+   public CUDAKernel loadKernel(String kernelName)
    {
       // Load the kernel from module
-      CUfunc_st kernel = new CUfunc_st();
-      error = cuModuleGetFunction(kernel, module, kernelName);
-      checkCUDAError(error);
-      kernels.put(kernelName, kernel);
+      return new CUDAKernel(kernelName, module);
    }
 
-   public void runKernel(CUstream_st stream, String kernelName, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
+   @Override
+   public void close()
    {
-      if (!kernels.containsKey(kernelName))
-         throw new IllegalStateException("Kernel (" + kernelName + ") requested has not been loaded yet.");
-
-      // Run kernel
-      CUfunc_st kernel = kernels.get(kernelName);
-      launchKernelFunction(stream, kernel, gridSize, blockSize, sharedMemorySize, arguments);
-   }
-
-   public void destroy()
-   {
-      for (CUfunc_st kernel : kernels.values())
-         kernel.close();
-
       cuModuleUnload(module);
       module.close();
    }
 
    private void initialize(String programName, String programCode, String[] headerNames, String[] headerContents, String[] compilationOptions)
    {
+      int error;
+
       // Compile the program
       _nvrtcProgram compiledProgram = new _nvrtcProgram();
       compileProgram(programName, programCode, headerNames, headerContents, compilationOptions, compiledProgram);
@@ -172,13 +165,14 @@ class CUDAProgram
 
    /**
     * Compiles a CUDA program to an {@code _nvrtcProgram}.
-    * @param programName [IN] The name of the program (usually the file name with a .cu extension).
-    * @param programCode [IN] The program code (i.e. the contents of the .cu file).
-    * @param headerNames [IN] List of header names included (with {@code #include}) in the code.
-    * @param headerContents [IN] Contents of the headers included in the code.
+    *
+    * @param programName        [IN] The name of the program (usually the file name with a .cu extension).
+    * @param programCode        [IN] The program code (i.e. the contents of the .cu file).
+    * @param headerNames        [IN] List of header names included (with {@code #include}) in the code.
+    * @param headerContents     [IN] Contents of the headers included in the code.
     * @param compilationOptions [IN] List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
-    * @param compiledProgram [OUT] The compiled program.
+    * @param compiledProgram    [OUT] The compiled program.
     */
    private static void compileProgram(String programName,
                                       String programCode,
@@ -215,9 +209,10 @@ class CUDAProgram
 
    /**
     * Retrieves and logs the compilation log of the compiled {@code program}.
-    * @param program The compiled program.
+    *
+    * @param program     The compiled program.
     * @param programName Name of the compiled program.
-    * @param logLevel Level at which to output the log.
+    * @param logLevel    Level at which to output the log.
     */
    private static void printProgramLog(_nvrtcProgram program, String programName, Level logLevel)
    {
@@ -238,39 +233,16 @@ class CUDAProgram
    }
 
    /**
-    * Launches a CUDA kernel.
-    * @param stream CUDA stream on which the kernel will be synchronized.
-    * @param function The kernel function to launch.
-    * @param gridSize Grid size of the kernel execution.
-    * @param blockSize Block size of the kernel execution. Should not exceed maximum block size of the device.
-    * @param sharedMemorySize Size, in byte, of the memory shared by threads in each block.
-    * @param arguments List of arguments (parameters) being passed into the kernel.
-    */
-   private static void launchKernelFunction(CUstream_st stream, CUfunc_st function, dim3 gridSize, dim3 blockSize, int sharedMemorySize, Pointer... arguments)
-   {
-      PointerPointer<Pointer> argumentsPointer = arguments == null ? new PointerPointer<>() : new PointerPointer<>(arguments);
-
-      int error = cuLaunchKernel(function,
-                                 gridSize.x(),
-                                 gridSize.y(),
-                                 gridSize.z(),
-                                 blockSize.x(),
-                                 blockSize.y(),
-                                 blockSize.z(),
-                                 sharedMemorySize,
-                                 stream,
-                                 argumentsPointer,
-                                 new PointerPointer<>());
-
-      CUDATools.checkCUDAError(error);
-      argumentsPointer.close();
-   }
-
-   /**
     * @return A fairly recent compute version available on the device.
     */
    private static String getComputeVersion()
    {
+      if (!hasCUDA())
+         LogTools.fatal("CUDA Runtime has not been found. To install CUDA Toolkit, follow the instructions in ihmc-perception/README.md.");
+
+      if (!hasCUDADevice())
+         LogTools.fatal("No CUDA device found. An NVIDIA GPU is required to run this code.");
+
       cudaDeviceProp deviceProperties = new cudaDeviceProp();
       cudaGetDeviceProperties(deviceProperties, 0);
       int majorVersion = deviceProperties.major();
