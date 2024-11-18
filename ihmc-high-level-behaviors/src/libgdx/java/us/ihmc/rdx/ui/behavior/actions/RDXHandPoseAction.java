@@ -14,7 +14,7 @@ import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -105,7 +105,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       definition.setName("Hand pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent().accessValue());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent().getValueUnsafe());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
@@ -177,18 +177,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                               {
                                  for (int i = 0; i < state.getPreviewJointAngles().getLength(); i++)
                                  {
-                                    definition.getJointAngles().accessValue()[i] = state.getPreviewJointAngles().getValueReadOnly(i);
+                                    definition.getJointAngles().setValue(i, state.getPreviewJointAngles().getValueReadOnly(i));
                                  }
                               }
                               else // When switching from predefined, keep the desired hand in the same place
                               {
                                  CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
-                                 CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
+                                 CRDTBidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
                                  ReferenceFrame previewPalmFrame = armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame();
                                  FramePose3D previewPalmPose = new FramePose3D();
                                  previewPalmPose.setToZero(previewPalmFrame);
                                  previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-                                 palmTransformToParent.accessValue().set(previewPalmPose);
+                                 palmTransformToParent.getValueAndFreeze().set(previewPalmPose);
                                  actionPalmFrame.update();
                               }
                            }
@@ -303,7 +303,12 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            definition.getPalmTransformToParent().accessValue();
+            definition.getPalmTransformToParent().getValueAndFreeze();
+         }
+         else  // Update gizmo in case action data changes
+         {
+            poseGizmo.getPoseGizmo().getTransformToParent().set(definition.getPalmTransformToParent().getValueReadOnly());
+            poseGizmo.getPoseGizmo().update();
          }
 
          if (poseGizmo.isSelected() || isMouseHovering)
@@ -371,9 +376,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                {
                   OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
                   if (syncedJoint != null)
-                     getDefinition().getJointAngles().accessValue()[i] = syncedJoint.getQ();
+                     getDefinition().getJointAngles().setValue(i, syncedJoint.getQ());
                   else
-                     getDefinition().getJointAngles().accessValue()[i] = 0.0;
+                     getDefinition().getJointAngles().setValue(i, 0.0);
                }
             }
          }
@@ -405,12 +410,12 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          if (ImGui.button(labels.get("Set Pose to Synced Hand")))
          {
             CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
-            CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
+            CRDTBidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
             MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
             FramePose3D syncedPalmPose = new FramePose3D();
             syncedPalmPose.setToZero(syncedPalmFrame);
             syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-            palmTransformToParent.accessValue().set(syncedPalmPose);
+            palmTransformToParent.getValueAndFreeze().set(syncedPalmPose);
             actionPalmFrame.update();
          }
       }

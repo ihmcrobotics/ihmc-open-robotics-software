@@ -69,7 +69,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
       getDefinition().setName("Chest orientation");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().accessValue(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValueUnsafe(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
@@ -127,7 +127,12 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
          if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            getDefinition().getChestToParentTransform().accessValue();
+            getDefinition().getChestToParentTransform().getValueAndFreeze();
+         }
+         else  // Update gizmo in case action data changes
+         {
+            poseGizmo.getPoseGizmo().getTransformToParent().set(getDefinition().getChestToParentTransform().getValueReadOnly());
+            poseGizmo.getPoseGizmo().update();
          }
 
          if (state.getIsNextForExecution() || getSelected())

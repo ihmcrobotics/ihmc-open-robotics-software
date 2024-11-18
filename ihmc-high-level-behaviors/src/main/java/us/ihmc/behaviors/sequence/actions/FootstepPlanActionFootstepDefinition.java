@@ -3,10 +3,9 @@ package us.ihmc.behaviors.sequence.actions;
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
+import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -14,8 +13,8 @@ import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionFootstepDefinition implements SidedObject
 {
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalRigidBodyTransform soleToPlanFrameTransform;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalRigidBodyTransform soleToPlanFrameTransform;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -23,8 +22,8 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
 
    public FootstepPlanActionFootstepDefinition(RequestConfirmFreezable freezable)
    {
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, freezable, RobotSide.LEFT);
-      soleToPlanFrameTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, freezable);
+      side = new CRDTBidirectionalEnumField<>(freezable, RobotSide.LEFT);
+      soleToPlanFrameTransform = new CRDTBidirectionalRigidBodyTransform(freezable);
    }
 
    @Override
@@ -38,7 +37,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
       this.side.setValue(side);
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getSoleToPlanFrameTransform()
+   public CRDTBidirectionalRigidBodyTransform getSoleToPlanFrameTransform()
    {
       return soleToPlanFrameTransform;
    }
@@ -52,7 +51,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void loadFromFile(JsonNode jsonNode)
    {
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.accessValue());
+      JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValueAndFreeze());
    }
 
    public void setOnDiskFields()
@@ -64,7 +63,7 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    public void undoAllNontopologicalChanges()
    {
       side.setValue(onDiskSide);
-      soleToPlanFrameTransform.accessValue().set(onDiskSoleToPlanFrameTransform);
+      soleToPlanFrameTransform.getValueAndFreeze().set(onDiskSoleToPlanFrameTransform);
    }
 
    public boolean hasChanges()

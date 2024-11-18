@@ -118,13 +118,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                {
                   RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
                   RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
-                  RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
+                  RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().getValueAndFreeze());
                }
 
                for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
                {
                   RobotSide side = state.getPreviewFootsteps().getSide(i);
-                  RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
+                  RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().getValueAndFreeze(), state.getManuallyPlacedFootsteps());
                   RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
                   addedFootstep.getDefinition().setSide(side);
                   addedFootstep.update();
@@ -132,7 +132,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   Pose3DReadOnly poseInWorld = state.getPreviewFootsteps().getPoseReadOnly(i);
                   FramePose3D poseInParent = new FramePose3D(poseInWorld);
                   poseInParent.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
-                  addedFootstep.getDefinition().getSoleToPlanFrameTransform().accessValue().set(poseInParent);
+                  addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValueAndFreeze().set(poseInParent);
                }
             }
          }
@@ -150,7 +150,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
-      plannerParametersWidgets.create(definition.accessPlannerParameters(), false);
+      plannerParametersWidgets.create(definition.getPlannerParametersUnsafe(), false);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -158,7 +158,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          state.copyDefinitionToGoalFoostepToGoalTransform(side);
       }
 
-      definition.getGoalFocalPoint().accessValue().set(0.1, 0.0, 0.0);
+      definition.getGoalFocalPoint().getValueAndFreeze().set(0.1, 0.0, 0.0);
 
       goalStancePointGizmo.create(baseUI.getPrimary3DPanel());
       goalStancePointGizmo.getPoseGizmo().getCenterSphereToTorusRatio().set(0.5f);
@@ -196,7 +196,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
+            RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().getValueAndFreeze(), state.getManuallyPlacedFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             addedFootstep.getState().update();
@@ -221,14 +221,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             newFootstepPose.getPosition().addX(aLittleInFront);
 
             newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
-            addedFootstep.getDefinition().getSoleToPlanFrameTransform().accessValue().set(newFootstepPose);
+            addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValueAndFreeze().set(newFootstepPose);
          }
 
          if (userRemovedFootstep.poll())
          {
             RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
             RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
-            RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
+            RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().getValueAndFreeze());
          }
 
          for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
@@ -250,8 +250,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (goalStancePointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
              || goalFocalPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            definition.getGoalStancePoint().accessValue().set(goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-            definition.getGoalFocalPoint().accessValue().set(goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getGoalStancePoint().getValueAndFreeze().set(goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getGoalFocalPoint().getValueAndFreeze().set(goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
          }
          else
          {
@@ -469,7 +469,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
                if (plannerParametersWidgets.renderImGuiWidgetsSimple())
-                  definition.accessPlannerParameters();
+                  definition.getAndFreezePlannerParameters();
          }
       }
    }
@@ -560,8 +560,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          frameFocalPoint = new FramePoint3D(newParent, definition.getGoalFocalPoint().getValueReadOnly());
       }
 
-      definition.getGoalStancePoint().accessValue().set(frameStancePoint);
-      definition.getGoalFocalPoint().accessValue().set(frameFocalPoint);
+      definition.getGoalStancePoint().getValueAndFreeze().set(frameStancePoint);
+      definition.getGoalFocalPoint().getValueAndFreeze().set(frameFocalPoint);
       goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
       goalFocalPointGizmo.getPoseGizmo().setParentFrame(newParent);
       goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());

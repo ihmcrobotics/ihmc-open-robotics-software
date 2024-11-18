@@ -27,6 +27,14 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
       return getValueInternal();
    }
 
+   /**
+    * Used to initialize Pose 3D gizmos.
+    */
+   public RigidBodyTransform getValueUnsafe()
+   {
+      return getValueInternal();
+   }
+
    public void toMessage(Pose3D poseMessage)
    {
       poseMessage.set(getValueReadOnly());
