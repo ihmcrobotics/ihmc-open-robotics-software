@@ -144,19 +144,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = null;
-               try
-               {
-                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
-               }
-               catch (Exception e)
-               {
-                  LogTools.error("""
-                                 Error loading {}.
-                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
-                                 Error: {}
-                                 """, indexedTreeFile.getTreeFile().getFileName(), e.getMessage());
-               }
+               RDXBehaviorTreeNode<?, ?> loadedNode  = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
                if (loadedNode != null)
                {
