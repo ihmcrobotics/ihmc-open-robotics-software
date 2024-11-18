@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * This is an example of using a more complex CUDA kernel that takes in a JavaCV {@link Mat} object. We do this often for kernels, so this example walks you
+ * This is an example of using a more complex CUDA kernel that takes in an OpenCV {@link Mat} object. We do this often for kernels, so this example walks you
  * through how it would work for a simple case.
  * This uses more of the standard approach then the {@link ExampleCUDAKernel} did because we use the {@link CUDAStreamManager} and we are creating objects
  * in the try-with-resources statement.
