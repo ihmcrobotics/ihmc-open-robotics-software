@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
+import org.jetbrains.annotations.NotNull;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -7,28 +8,33 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class IdealStepCalculator implements IdealStepCalculatorInterface
 {
    private enum IdealStepMode
    {
-      GOAL,
-      ON_PATH,
-      TOWARDS_PATH;
+      GOAL, ON_PATH, TOWARDS_PATH;
    }
 
    // TODO extract these to parameters once they're stable
@@ -37,7 +43,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private static final double maxYawAdjustmentTowardsPath = Math.toRadians(20.0);
 
    private final HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
-   private final DefaultFootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final FootstepCheckerInterface nodeChecker;
@@ -52,8 +58,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final YoDouble correctiveDistanceY;
    private final YoDouble correctiveYaw;
    private final YoDouble idealStepYaw;
-   private final YoEnum<IdealStepMode> yawMode;
-   private final YoEnum<IdealStepMode> stepMode;
+   private final YoEnum<IdealStepCalculator.IdealStepMode> yawMode;
+   private final YoEnum<IdealStepCalculator.IdealStepMode> stepMode;
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D stanceFootPose = new Pose2D();
@@ -62,13 +68,21 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final Pose2D idealMidFootPose = new Pose2D();
    private double pathLength;
 
-   public IdealStepCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
+   private final YoBoolean stepSideIncorrect;
+   // This will be used to query what reference alpha to use.
+   private final YoBoolean usingReferenceStep;
+   private FootstepPlan referenceFootstepPlan;
+   private DirectedGraph<FootstepGraphNode> footstepGraph;
+   private DiscreteFootstep nominalIdealStep;
+
+   public IdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                               FootstepPlannerEnvironmentHandler environmentHandler,
                               YoRegistry registry)
    {
-      this.parameters = parameters;
+
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.nodeChecker = nodeChecker;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.environmentHandler = environmentHandler;
@@ -84,9 +98,12 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       correctiveYaw = new YoDouble("correctiveYaw", registry);
 
       idealStepYaw = new YoDouble("idealStepYaw", registry);
-      yawMode = new YoEnum<>("idealStepYawMode", registry, IdealStepMode.class);
-      stepMode = new YoEnum<>("idealStepPositionMode", registry, IdealStepMode.class);
+      yawMode = new YoEnum<>("idealStepYawMode", registry, IdealStepCalculator.IdealStepMode.class);
+      stepMode = new YoEnum<>("idealStepPositionMode", registry, IdealStepCalculator.IdealStepMode.class);
       desiredRelativeHeading = new YoDouble("desiredRelativeHeading", registry);
+
+      stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
+      usingReferenceStep = new YoBoolean("usingReferenceStep", registry);
    }
 
    public void initialize(SideDependentList<DiscreteFootstep> goalSteps)
@@ -137,10 +154,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
       for (RobotSide stanceSide : RobotSide.values)
       {
-         double stepLength0 = getIdealStepLength(parameters, primaryDirection);
-         double stepWidth0 = getIdealStepWidth(parameters, primaryDirection, stanceSide);
-         double stepLength1 = getIdealStepLength(parameters, secondaryDirection);
-         double stepWidth1 = getIdealStepWidth(parameters, secondaryDirection, stanceSide);
+         double stepLength0 = getIdealStepLength(footstepPlannerParameters, primaryDirection);
+         double stepWidth0 = getIdealStepWidth(footstepPlannerParameters, primaryDirection, stanceSide);
+         double stepLength1 = getIdealStepLength(footstepPlannerParameters, secondaryDirection);
+         double stepWidth1 = getIdealStepWidth(footstepPlannerParameters, secondaryDirection, stanceSide);
 
          idealStepLengths.get(stanceSide).set(percentagePrimary * stepLength0 + percentageSecondary * stepLength1);
          idealStepWidths.get(stanceSide).set(percentagePrimary * stepWidth0 + percentageSecondary * stepWidth1);
@@ -149,38 +166,57 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
    private static double getIdealStepLength(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading)
    {
-      switch (heading)
+      return switch (heading)
       {
-         case LEFT:
-         case RIGHT:
-            return 0.0;
-         case BACKWARD:
-            return - parameters.getIdealBackStepLength();
-         case FORWARD:
-         default:
-            return parameters.getIdealFootstepLength();
-      }
+         case LEFT, RIGHT -> 0.0;
+         case BACKWARD -> -parameters.getIdealBackStepLength();
+         default -> parameters.getIdealFootstepLength();
+      };
    }
 
    private static double getIdealStepWidth(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading, RobotSide stanceSide)
    {
-      switch (heading)
+      return switch (heading)
       {
-         case LEFT:
-            return stanceSide == RobotSide.LEFT ? - parameters.getMaxStepWidth() : parameters.getMinStepWidth();
-         case RIGHT:
-            return stanceSide == RobotSide.LEFT ? - parameters.getMinStepWidth() : parameters.getMaxStepWidth();
-         case BACKWARD:
-         case FORWARD:
-         default:
-            return stanceSide.negateIfLeftSide(parameters.getIdealSideStepWidth());
-      }
+         case LEFT -> stanceSide == RobotSide.LEFT ? -parameters.getMaxStepWidth() : parameters.getMinStepWidth();
+         case RIGHT -> stanceSide == RobotSide.LEFT ? -parameters.getMinStepWidth() : parameters.getMaxStepWidth();
+         default -> stanceSide.negateIfLeftSide(parameters.getIdealSideStepWidth());
+      };
    }
 
    @Override
-   public DiscreteFootstep computeIdealStep(DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
+   public DiscreteFootstep computeIdealStep(DiscreteFootstep stanceNode, DiscreteFootstep startOfSwing)
    {
-      return idealStepMap.computeIfAbsent(stanceStep, this::computeIdealStanceInternal);
+      nominalIdealStep = idealStepMap.computeIfAbsent(stanceNode, this::computeIdealStanceInternal);
+
+      double referencePlanAlpha = footstepPlannerParameters.getReferencePlanAlpha();
+      PlannedFootstep referenceFootstep = getReferenceStep(new FootstepGraphNode(startOfSwing, stanceNode));
+      if (referenceFootstep == null || referencePlanAlpha == 0.0)
+      {
+         return nominalIdealStep;
+      }
+      else
+      {
+         return computeIdealStepWithReferencePlan(stanceNode, referenceFootstep, referencePlanAlpha);
+      }
+   }
+
+   @NotNull
+   private DiscreteFootstep computeIdealStepWithReferencePlan(DiscreteFootstep stanceNode, PlannedFootstep referenceFootstep, double referencePlanAlpha)
+   {
+      // TODO: Indexing should match so that referencedStep's side is equal to stance Node's opposite side.
+      // In case this is not true, we will try to find the closest step from either previous or next step in the reference plan.
+      stepSideIncorrect.set(referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide());
+      if (stepSideIncorrect.getBooleanValue())
+      {
+         throw new RuntimeException("Invalid side on reference plan");
+      }
+
+      Pose2D nominalStepPose = new Pose2D(nominalIdealStep.getX(), nominalIdealStep.getY(), nominalIdealStep.getYaw());
+      Pose2D referenceStepPose = new Pose2D(referenceFootstep.getFootstepPose());
+      Pose2D interpolatedPose = new Pose2D(nominalStepPose);
+      interpolatedPose.interpolate(referenceStepPose, referencePlanAlpha);
+      return new DiscreteFootstep(interpolatedPose.getX(), interpolatedPose.getY(), interpolatedPose.getYaw(), referenceFootstep.getRobotSide());
    }
 
    private DiscreteFootstep computeIdealStanceInternal(DiscreteFootstep stanceStep)
@@ -192,7 +228,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          return goalStep;
       }
 
-      Point2D midFootPoint = stanceStep.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
+      Point2D midFootPoint = stanceStep.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth());
       RobotSide stanceSide = stanceStep.getRobotSide();
       double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
       int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
@@ -204,7 +240,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
       double distanceFromGoalSquared = midFootPoint.distanceSquared(goalMidFootPose.getPosition());
       double distanceFromPathSquared = midFootPoint.distanceXYSquared(projectionPose.getPosition());
-      double finalTurnProximity = parameters.getFinalTurnProximity();
+      double finalTurnProximity = footstepPlannerParameters.getFinalTurnProximity();
 
       // Calculate target yaw:
       // 1) Match goal if close to goal
@@ -217,7 +253,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          yawMode.set(IdealStepMode.GOAL);
          desiredYaw = goalMidFootPose.getYaw();
       }
-      else if (distanceFromPathSquared < MathTools.square(parameters.getDistanceFromPathTolerance()))
+      else if (distanceFromPathSquared < MathTools.square(footstepPlannerParameters.getDistanceFromPathTolerance()))
       {
          yawMode.set(IdealStepMode.ON_PATH);
          desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredRelativeHeading.getValue());
@@ -227,7 +263,9 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          yawMode.set(IdealStepMode.TOWARDS_PATH);
 
          int numberOfCorrectiveStepsWhenOffPath = 2;
-         double alphaLookAhead = MathTools.clamp(alphaMidFoot + numberOfCorrectiveStepsWhenOffPath * parameters.getIdealFootstepLength() / pathLength, 0.0, 1.0);
+         double alphaLookAhead = MathTools.clamp(alphaMidFoot + numberOfCorrectiveStepsWhenOffPath * footstepPlannerParameters.getIdealFootstepLength() / pathLength,
+                                                 0.0,
+                                                 1.0);
          bodyPathPlanHolder.getPointAlongPath(alphaLookAhead, projectionPose);
          desiredYaw = Math.atan2(projectionPose.getY() - midFootPoint.getY(), projectionPose.getX() - midFootPoint.getX());
          desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(desiredYaw + desiredRelativeHeading.getValue());
@@ -237,8 +275,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       idealStepYaw.set(desiredYaw);
       double deltaYaw = AngleTools.computeAngleDifferenceMinusPiToPi(desiredYaw, stanceStep.getYaw());
       RobotSide stepSide = stanceSide.getOppositeSide();
-      double yawLowerLimit = stepSide == RobotSide.LEFT ? parameters.getMinStepYaw() : - parameters.getMaxStepYaw();
-      double yawUpperLimit = stepSide == RobotSide.LEFT ? parameters.getMaxStepYaw() : - parameters.getMinStepYaw();
+      double yawLowerLimit = stepSide == RobotSide.LEFT ? footstepPlannerParameters.getMinStepYaw() : -footstepPlannerParameters.getMaxStepYaw();
+      double yawUpperLimit = stepSide == RobotSide.LEFT ? footstepPlannerParameters.getMaxStepYaw() : -footstepPlannerParameters.getMinStepYaw();
       double achievableStepYaw = MathTools.clamp(deltaYaw, yawLowerLimit, yawUpperLimit);
 
       // Calculate step positions:
@@ -251,13 +289,13 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       {
          // turn in place at goal
          stepMode.set(IdealStepMode.GOAL);
-         return turnInPlaceStep(stanceStep, goalMidFootPose.getPosition(), stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
+         return turnInPlaceStep(stanceStep, goalMidFootPose.getPosition(), stanceSide, 0.5 * footstepPlannerParameters.getIdealFootstepWidth(), achievableStepYaw);
       }
-      else if (Math.abs(deltaYaw) > parameters.getDeltaYawFromReferenceTolerance())
+      else if (Math.abs(deltaYaw) > footstepPlannerParameters.getDeltaYawFromReferenceTolerance())
       {
          // turn in place towards goal
          stepMode.set(IdealStepMode.TOWARDS_PATH);
-         return turnInPlaceStep(stanceStep, midFootPoint, stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
+         return turnInPlaceStep(stanceStep, midFootPoint, stanceSide, 0.5 * footstepPlannerParameters.getIdealFootstepWidth(), achievableStepYaw);
       }
       else
       {
@@ -270,7 +308,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          idealStep.appendTranslation(idealStepLength, idealStepWidth);
 
          idealMidFootPose.set(idealStep);
-         idealMidFootPose.appendTranslation(0.0, stepSide.negateIfLeftSide(0.5 * parameters.getIdealFootstepWidth()));
+         idealMidFootPose.appendTranslation(0.0, stepSide.negateIfLeftSide(0.5 * footstepPlannerParameters.getIdealFootstepWidth()));
          calculateCorrectiveValues(idealMidFootPose);
 
          idealStep.getPosition().add(correctiveDistanceX.getDoubleValue(), correctiveDistanceY.getDoubleValue());
@@ -280,7 +318,11 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
    }
 
-   private static DiscreteFootstep turnInPlaceStep(DiscreteFootstep startStep, Point2DBasics midFootPoint, RobotSide stanceSide, double idealFootstepWidth, double turnYaw)
+   private static DiscreteFootstep turnInPlaceStep(DiscreteFootstep startStep,
+                                                   Point2DBasics midFootPoint,
+                                                   RobotSide stanceSide,
+                                                   double idealFootstepWidth,
+                                                   double turnYaw)
    {
       Pose2D idealStep = new Pose2D(midFootPoint, startStep.getYaw());
       idealStep.appendRotation(turnYaw);
@@ -308,5 +350,42 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       double pathYaw = bodyPathPlanHolder.getSegmentYaw(bodyPathPlanHolder.getSegmentIndexFromAlpha(alpha)) + desiredRelativeHeading.getValue();
       double currentYaw = midFootPose.getYaw();
       correctiveYaw.set(MathTools.clamp(AngleTools.computeAngleDifferenceMinusPiToPi(pathYaw, currentYaw), maxYawAdjustmentTowardsPath));
+   }
+
+   public void setReferenceFootstepPlan(FootstepPlan referenceFootstepPlan)
+   {
+      this.referenceFootstepPlan = referenceFootstepPlan;
+   }
+
+   public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)
+   {
+      this.footstepGraph = footstepGraph;
+   }
+
+   public boolean isUsingReferenceStep()
+   {
+      return usingReferenceStep.getBooleanValue();
+   }
+
+   public PlannedFootstep getReferenceStep(FootstepGraphNode graphNode)
+   {
+      if (referenceFootstepPlan == null || referenceFootstepPlan.isEmpty())
+         return null;
+
+      List<FootstepGraphNode> pathFromStart = footstepGraph.getPathFromStart(graphNode);
+      int stepIndexInPlan = pathFromStart.size() - 1;
+      if (stepIndexInPlan < referenceFootstepPlan.getNumberOfSteps())
+      {
+         return referenceFootstepPlan.getFootstep(stepIndexInPlan);
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public DiscreteFootstep getNominalIdealStep()
+   {
+      return nominalIdealStep;
    }
 }

@@ -268,13 +268,13 @@ public class ParameterBasedStepExpansionTest
 
    /**
     * This test is meant to check if the full expansion returns a sorted list or not.
-    * We don't always sort the full expansion, so by default, this test is
-    * disabled.
+    * We don't always sort the full expansion, but by changing {@link ParameterBasedStepExpansion#SORT_FULL_EXPANSION} to true we can sort the expansion
     */
    @Test
-   @Disabled
    public void testFullExpansionReturnsSortedOrder()
    {
+      ParameterBasedStepExpansion.SORT_FULL_EXPANSION = true;
+
       Random random = new Random(329032);
       int numberOfGraphNodes = 5;
       int numberOfChildNodes = 5;

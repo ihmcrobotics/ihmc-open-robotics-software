@@ -19,7 +19,7 @@ import java.util.*;
 
 public class ParameterBasedStepExpansion implements FootstepExpansion
 {
-   private static final boolean SORT_FULL_EXPANSION = false;
+   public static boolean SORT_FULL_EXPANSION = false;
 
    private final List<FootstepGraphNode> fullExpansion = new ArrayList<>();
    private final DefaultFootstepPlannerParametersReadOnly parameters;
