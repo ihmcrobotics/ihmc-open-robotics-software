@@ -84,7 +84,7 @@ public class ExampleCUDAKernel2D
 
          // Synchronize the stream
          // This call waits until all asynchronous functions being executed on this stream finish.
-         // We have to call this to ensure that the above memcpy finished, and we have data back in Java land
+         // We have to call this to ensure that the kernel finished, and the result is ready to be downloaded onto the CPU
          cudart.cudaStreamSynchronize(stream);
 
          // This is where we are pulling the result from the gpu. The download packs the variable being passed in
