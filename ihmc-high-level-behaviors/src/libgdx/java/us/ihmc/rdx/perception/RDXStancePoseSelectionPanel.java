@@ -122,6 +122,20 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
             }
          }
       }
+      else
+      {
+         if (selectionActive)
+         {
+            stancePoses.set(new SideDependentList<>(new FramePose3D(), new FramePose3D()));
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               FramePose3D pose = new FramePose3D(latestPickPoint);
+               pose.appendTranslation(0, robotSide == RobotSide.LEFT ? 0.12 : -0.12, 0);
+               stancePoses.get(robotSide).set(pose);
+               footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
+            }
+         }
+      }
 
       // NOTE: This is very important for making sure that the collision with the height map is correct
       if (selectionActive)
