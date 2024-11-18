@@ -32,9 +32,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
       return loadedNode.getValue();
    }
 
-   private T loadFromFile(JsonNode jsonNode,
-                                                       T parentNode,
-                                                       BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   private T loadFromFile(JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
