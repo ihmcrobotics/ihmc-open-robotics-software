@@ -94,8 +94,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
-      definition.setName("Footstep plan");
-
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new RDXFootstepPlanActionFootstep(baseUI,
                                            robotModel,

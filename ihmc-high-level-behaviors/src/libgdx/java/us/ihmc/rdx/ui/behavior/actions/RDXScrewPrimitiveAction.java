@@ -69,8 +69,6 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       state = getState();
       definition = getDefinition();
 
-      definition.setName("Screw primitive");
-
       this.syncedRobot = syncedRobot;
 
       screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValueAndFreeze(), ReferenceFrame.getWorldFrame());

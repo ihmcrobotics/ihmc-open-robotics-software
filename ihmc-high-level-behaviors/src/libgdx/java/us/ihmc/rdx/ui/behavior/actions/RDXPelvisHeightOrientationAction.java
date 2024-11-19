@@ -70,8 +70,6 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
 
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      getDefinition().setName("Pelvis height and orientation");
-
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValueAndFreeze());
       poseGizmo.create(panel3D);
 

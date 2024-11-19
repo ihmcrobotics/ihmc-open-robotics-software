@@ -103,8 +103,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       this.syncedRobot = syncedRobot;
 
-      definition.setName("Hand pose");
-
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent().getValueUnsafe());
       poseGizmo.create(panel3D);
 

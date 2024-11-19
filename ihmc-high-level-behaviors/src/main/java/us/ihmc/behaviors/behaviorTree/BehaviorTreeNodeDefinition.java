@@ -51,7 +51,7 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
       this.saveFileDirectory = saveFileDirectory;
 
-      name = new CRDTBidirectionalString(this, "");
+      name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
       notes = new CRDTBidirectionalString(this, "");
    }
 
