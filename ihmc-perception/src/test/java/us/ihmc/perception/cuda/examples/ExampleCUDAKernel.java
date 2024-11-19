@@ -1,10 +1,12 @@
-package us.ihmc.perception.cuda;
+package us.ihmc.perception.cuda.examples;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.FloatPointer;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.cuda.CUDAKernel;
+import us.ihmc.perception.cuda.CUDAProgram;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
