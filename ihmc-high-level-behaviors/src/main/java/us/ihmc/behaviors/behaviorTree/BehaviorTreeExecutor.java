@@ -89,11 +89,6 @@ public class BehaviorTreeExecutor
       return crdtInfo;
    }
 
-   public BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> getFileLoader()
-   {
-      return fileLoader;
-   }
-   
    public void loadBehavior(String jsonFileName)
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"), jsonFileName);
