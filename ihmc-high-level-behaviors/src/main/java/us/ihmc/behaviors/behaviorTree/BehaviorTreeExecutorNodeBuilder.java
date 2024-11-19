@@ -24,7 +24,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBuilder
+public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
