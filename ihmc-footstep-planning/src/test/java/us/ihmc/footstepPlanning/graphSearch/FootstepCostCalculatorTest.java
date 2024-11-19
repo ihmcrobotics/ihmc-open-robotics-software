@@ -48,7 +48,6 @@ public class FootstepCostCalculatorTest
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters,
                                                                              snapper,
                                                                              idealStepCalculator,
-                                                                             defaultFootPolygons,
                                                                              registry);
       int numberOfTests = 1000;
 

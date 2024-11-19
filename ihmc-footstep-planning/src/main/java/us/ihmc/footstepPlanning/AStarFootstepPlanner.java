@@ -89,10 +89,10 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
-      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
+      this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
+      this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
 
       this.heightMapFootstepChecker = new HeightMapFootstepChecker(footstepPlannerParameters,
                                                                    footPolygons,
@@ -105,9 +105,9 @@ public class AStarFootstepPlanner
                                                          bodyPathPlanHolder,
                                                          plannerEnvironmentHandler,
                                                          registry);
-      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, footPolygons, registry);
 
       this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
+      this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, registry);
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion, heightMapFootstepChecker, stepCostCalculator, idealStepCalculator);
 
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, idealStepCalculator, snapper);
@@ -165,9 +165,7 @@ public class AStarFootstepPlanner
       snapper.clearSnapData();
       plannerEnvironmentHandler.setHeightMap(heightMapData);
       plannerEnvironmentHandler.setTerrainMapData(terrainMapData);
-
       heightMapFootstepChecker.setHeightMapData(heightMapData);
-      stepCostCalculator.setHeightMapData(heightMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =
