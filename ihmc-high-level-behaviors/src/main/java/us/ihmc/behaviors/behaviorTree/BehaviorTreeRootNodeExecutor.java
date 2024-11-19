@@ -40,6 +40,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
+      for (ActionNodeExecutor<?, ?> actionChild : executorChildren)
+      {
+         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
+      }
+
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {

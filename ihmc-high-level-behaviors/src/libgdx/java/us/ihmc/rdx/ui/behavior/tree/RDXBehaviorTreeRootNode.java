@@ -53,7 +53,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       for (RDXActionNode<?, ?> actionChild : actionChildren)
       {
-         actionChild.updateAndValidateExecuteAfter(state.getActionChildren());
+         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
       }
    }
 
