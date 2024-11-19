@@ -60,14 +60,13 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    public FootstepCostCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
-                                 ToDoubleFunction<FootstepGraphNode> heuristics,
                                  SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons,
                                  YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
-      this.heuristics = heuristics;
+      this.heuristics = idealStepCalculator.getFootstepPlannerHeuristicCalculator()::compute;
 
       /* Scale's by a factor of the foot length/width */
       double polygonScaleFactor = 0.65;

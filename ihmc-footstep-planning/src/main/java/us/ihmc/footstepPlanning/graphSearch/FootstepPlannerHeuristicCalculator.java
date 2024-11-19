@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -18,7 +18,7 @@ public class FootstepPlannerHeuristicCalculator
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final Pose3D projectionPose = new Pose3D();
-   private final Pose3D goalPose = new Pose3D();
+   private final Pose2D goalMidFootPose = new Pose2D();
 
    public FootstepPlannerHeuristicCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
@@ -29,16 +29,16 @@ public class FootstepPlannerHeuristicCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FramePose3DReadOnly goalPose)
+   public void initialize(Pose2DReadOnly goalMidFootPose)
    {
-      this.goalPose.set(goalPose);
+      this.goalMidFootPose.set(goalMidFootPose);
    }
 
    public double compute(FootstepGraphNode node)
    {
       Pose2D midFootPose = node.getOrComputeMidFootPose();
 
-      double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
+      double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalMidFootPose.getX(), midFootPose.getY() - goalMidFootPose.getY());
 
       double initialTurnDistance = 0.0;
       double walkDistance = 0.0;
@@ -46,7 +46,7 @@ public class FootstepPlannerHeuristicCalculator
 
       if(xyDistanceToGoal < parameters.getFinalTurnProximity())
       {
-         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), goalMidFootPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
       }
       else
       {
@@ -58,7 +58,7 @@ public class FootstepPlannerHeuristicCalculator
 
          initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), desiredRobotPostureHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
-         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(finalRobotPostureHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(finalRobotPostureHeading, goalMidFootPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
       return parameters.getAStarHeuristicsWeight() * (initialTurnDistance + walkDistance + finalTurnDistance);

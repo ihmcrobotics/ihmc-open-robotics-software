@@ -5,6 +5,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.FootstepExpansion;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
@@ -39,13 +40,13 @@ public class AStarFootstepPlannerIterationConductor
    public AStarFootstepPlannerIterationConductor(FootstepExpansion nodeExpansion,
                                                  FootstepCheckerInterface edgeChecker,
                                                  FootstepCostCalculatorInterface edgeCostCalculator,
-                                                 ToDoubleFunction<FootstepGraphNode> heuristicsCalculator)
+                                                 IdealStepCalculatorInterface idealStepCalculator)
    {
       this.nodeExpansion = nodeExpansion;
       this.edgeChecker = edgeChecker;
       this.edgeCostCalculator = edgeCostCalculator;
 
-      NodeComparator<FootstepGraphNode> nodeComparator = new NodeComparator<>(graph, heuristicsCalculator);
+      NodeComparator<FootstepGraphNode> nodeComparator = new NodeComparator<>(graph, idealStepCalculator.getFootstepPlannerHeuristicCalculator()::compute);
       this.stack = new PriorityQueue<>(nodeComparator);
    }
 

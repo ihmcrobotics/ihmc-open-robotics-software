@@ -38,10 +38,17 @@ public class FootstepCostCalculatorTest
       PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters);
 
       HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
-      IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStepMap.computeIfAbsent(stance, n -> DiscreteFootstep.generateRandomFootstep(random, 2.0, n.getRobotSide().getOppositeSide()));
+      IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStepMap.computeIfAbsent(stance,
+                                                                                                                n -> DiscreteFootstep.generateRandomFootstep(
+                                                                                                                      random,
+                                                                                                                      2.0,
+                                                                                                                      n.getRobotSide().getOppositeSide()));
 
       YoRegistry registry = new YoRegistry("testRegistry");
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons,
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters,
+                                                                             snapper,
+                                                                             idealStepCalculator,
+                                                                             defaultFootPolygons,
                                                                              registry);
       int numberOfTests = 1000;
 
@@ -68,7 +75,8 @@ public class FootstepCostCalculatorTest
          snapper.addSnapData(step1, new FootstepSnapData(FootstepSnappingTools.computeSnapTransform(step1, stanceFoot), new ConvexPolygon2D()));
          snapper.addSnapData(idealStepNode, new FootstepSnapData(FootstepSnappingTools.computeSnapTransform(idealStepNode, idealStep), new ConvexPolygon2D()));
          double stepCost = stepCostCalculator.computeCost(idealStepNode, step1, step0);
-         Assertions.assertTrue(MathTools.epsilonEquals(stepCost, footstepPlannerParameters.getCostPerStep(), 1e-10), "Ideal step cost does not equal per step cost.");
+         Assertions.assertTrue(MathTools.epsilonEquals(stepCost, footstepPlannerParameters.getCostPerStep(), 1e-10),
+                               "Ideal step cost does not equal per step cost.");
 
          // test partial area cost for ideal step
          ConvexPolygon2D foothold = PlannerTools.createDefaultFootPolygon();

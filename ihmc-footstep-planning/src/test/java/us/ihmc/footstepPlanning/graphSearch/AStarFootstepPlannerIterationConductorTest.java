@@ -8,6 +8,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
+import java.util.Random;
 
 public class AStarFootstepPlannerIterationConductorTest
 {
@@ -15,7 +16,13 @@ public class AStarFootstepPlannerIterationConductorTest
    public void testSimple2DGridSearch()
    {
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
-      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors, (n1, n2, n3) -> true, (n1, n2, n3) -> 1.0, distanceCalculator::getManhattanDistance);
+      Random random = new Random(1738L);
+      DiscreteFootstep stanceStep = DiscreteFootstep.generateRandomFootstep(random, 5.0);
+      DiscreteFootstep idealStep = DiscreteFootstep.generateRandomFootstep(random, 5.0, stanceStep.getRobotSide().getOppositeSide());
+      AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors,
+                                                                                                  (n1, n2, n3) -> true,
+                                                                                                  (n1, n2, n3) -> 1.0,
+                                                                                                  (stance, startOfSwing) -> idealStep);
 
       DiscreteFootstep leftStartStep = new DiscreteFootstep(0, 1, 0, RobotSide.LEFT);
       DiscreteFootstep rightStartStep = new DiscreteFootstep(0, -1, 0, RobotSide.RIGHT);
@@ -32,11 +39,12 @@ public class AStarFootstepPlannerIterationConductorTest
       {
          AStarIterationData<FootstepGraphNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
          Assertions.assertEquals(iterationData.getParentNode().getSecondStep().getXIndex(), i);
-         Assertions.assertEquals(iterationData.getParentNode().getSecondStep().getYIndex(), iterationData.getParentNode().getSecondStepSide() == RobotSide.LEFT ? 1 : -1);
+         Assertions.assertEquals(iterationData.getParentNode().getSecondStep().getYIndex(),
+                                 iterationData.getParentNode().getSecondStepSide() == RobotSide.LEFT ? 1 : -1);
          Assertions.assertEquals(iterationData.getValidChildNodes().size(), 3);
          Assertions.assertTrue(iterationData.getInvalidChildNodes().isEmpty());
 
-         if(i == 3)
+         if (i == 3)
          {
             boolean foundGoalNode = false;
             for (int j = 0; j < iterationData.getValidChildNodes().size(); j++)
@@ -61,7 +69,8 @@ public class AStarFootstepPlannerIterationConductorTest
 
       double getManhattanDistance(FootstepGraphNode other)
       {
-         return goalSteps.get(other.getSecondStepSide()).computeXYManhattanDistance(other.getSecondStep()) + goalSteps.get(other.getFirstStepSide()).computeXYManhattanDistance(other.getFirstStep());
+         return goalSteps.get(other.getSecondStepSide()).computeXYManhattanDistance(other.getSecondStep()) + goalSteps.get(other.getFirstStepSide())
+                                                                                                                      .computeXYManhattanDistance(other.getFirstStep());
       }
    }
 

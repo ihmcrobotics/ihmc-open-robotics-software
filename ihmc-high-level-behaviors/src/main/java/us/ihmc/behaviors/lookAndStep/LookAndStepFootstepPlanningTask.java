@@ -481,8 +481,8 @@ public class LookAndStepFootstepPlanningTask
                                                                  bestPathSize >= lookAndStepParameters.getNumberOfStepsToTryToPlan());
       MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
-      footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
-      footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
+      footstepPlanningModule.getHeightMapFootstepChecker().clearCustomFootstepCheckers();
+      footstepPlanningModule.getHeightMapFootstepChecker().attachCustomFootstepChecker(stepInPlaceChecker);
       int iterations = footstepPlanningModule.getAStarFootstepPlanner().getIterations();
 
       statusLogger.info("Stance side: {}", initialStanceSide.name());

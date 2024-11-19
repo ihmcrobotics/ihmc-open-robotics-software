@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -75,6 +76,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private DirectedGraph<FootstepGraphNode> footstepGraph;
    private DiscreteFootstep nominalIdealStep;
 
+   private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
+
    public IdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
@@ -86,6 +89,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       this.nodeChecker = nodeChecker;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.environmentHandler = environmentHandler;
+
+      this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -116,6 +121,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       Pose2D leftGoalPose = new Pose2D(goalSteps.get(RobotSide.LEFT).getX(), goalSteps.get(RobotSide.LEFT).getY(), goalSteps.get(RobotSide.LEFT).getYaw());
       Pose2D rightGoalPose = new Pose2D(goalSteps.get(RobotSide.RIGHT).getX(), goalSteps.get(RobotSide.RIGHT).getY(), goalSteps.get(RobotSide.RIGHT).getYaw());
       goalMidFootPose.interpolate(leftGoalPose, rightGoalPose, 0.5);
+      distanceAndYawHeuristics.initialize(goalMidFootPose);
       computeAdjustedIdealStepParameters();
    }
 
@@ -387,5 +393,11 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    public DiscreteFootstep getNominalIdealStep()
    {
       return nominalIdealStep;
+   }
+
+   @Override
+   public FootstepPlannerHeuristicCalculator getFootstepPlannerHeuristicCalculator()
+   {
+      return distanceAndYawHeuristics;
    }
 }

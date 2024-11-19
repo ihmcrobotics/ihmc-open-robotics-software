@@ -480,9 +480,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getSnapper();
    }
 
-   public HeightMapFootstepChecker getChecker()
+   public HeightMapFootstepChecker getHeightMapFootstepChecker()
    {
-      return aStarFootstepPlanner.getChecker();
+      return aStarFootstepPlanner.getHeightMapFootstepChecker();
    }
 
    public BodyPathPlan getBodyPathPlan()
