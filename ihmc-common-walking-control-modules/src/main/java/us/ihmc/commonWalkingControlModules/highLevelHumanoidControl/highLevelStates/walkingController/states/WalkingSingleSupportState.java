@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.function.Predicate;
 
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -81,6 +83,10 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleProvider swingFootCoPWeight;
    private final CenterOfPressureCommand copCommand = new CenterOfPressureCommand();
 
+   private boolean haveWeEntered = false;
+
+   private final WalkingMessageHandler.Listener listener = this::test;
+
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
                                     WalkingMessageHandler walkingMessageHandler,
                                     TouchdownErrorCompensator touchdownErrorCompensator,
@@ -132,6 +138,13 @@ public class WalkingSingleSupportState extends SingleSupportState
       copCommand.setContactingRigidBody(contactableSwingFoot.getRigidBody());
       copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
       swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
+
+      walkingMessageHandler.addListener(listener);
+   }
+
+   public void poll()
+   {
+      walkingMessageHandler.poll(nextFootstep, footstepTiming);
    }
 
    int stepsToAdd;
@@ -202,7 +215,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       // delayed for another reason. So we should check before updating step adjustment
       boolean footstepIsBeingAdjusted = false;
       if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
-         footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
+         footstepIsBeingAdjusted = true; //balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
       if (footstepIsBeingAdjusted)
       {
@@ -273,17 +286,19 @@ public class WalkingSingleSupportState extends SingleSupportState
       return finishWhenICPPlannerIsDone.getValue() && balanceManager.isICPPlanDone();
    }
 
-   @Override
-   public void onEntry()
+   private void test()
    {
-      super.onEntry();
+      walkingMessageHandler.peekFootstep(0, nextFootstep);
 
-      hasSwingFootTouchedDown.set(false);
-      hasTriggeredTouchdown.set(false);
+      if (nextFootstep.getRobotSide() != swingSide || !haveWeEntered)
+         return;
+
+      balanceManager.clearICPPlan();
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       swingTime = walkingMessageHandler.getNextSwingTime();
+
       walkingMessageHandler.poll(nextFootstep, footstepTiming);
       if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
          walkingMessageHandler.peekFootstep(0, nextNextFootstep);
@@ -311,26 +326,39 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
-      balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport();
-
       /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
       walkingMessageHandler.pollStepConstraints(stepConstraints);
-      balanceManager.setCurrentStepConstraints(stepConstraints);
 
       updateHeightManager();
-
-      feetManager.requestSwing(swingSide,
-                               nextFootstep,
-                               swingTime,
-                               balanceManager.getFinalDesiredCoMVelocity(),
-                               balanceManager.getFinalDesiredCoMAcceleration());
 
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
+   }
+
+   @Override
+   public void onEntry()
+   {
+      super.onEntry();
+
+      haveWeEntered = true;
+
+      hasSwingFootTouchedDown.set(false);
+      hasTriggeredTouchdown.set(false);
+
+      test();
+
+      balanceManager.setICPPlanSupportSide(supportSide);
+      balanceManager.initializeICPPlanForSingleSupport();
+      balanceManager.setCurrentStepConstraints(stepConstraints);
+
+      feetManager.requestSwing(swingSide,
+                               nextFootstep,
+                               swingTime,
+                               balanceManager.getFinalDesiredCoMVelocity(),
+                               balanceManager.getFinalDesiredCoMAcceleration());
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
 
@@ -345,6 +373,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    public void onExit(double timeInState)
    {
       super.onExit(timeInState);
+
+      haveWeEntered = false;
 
       triggerTouchdown();
    }

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.dy
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -40,7 +41,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
    private final YoFrameVector2D predictedVelocityAtTouchdown;
 
    // This is the desired touchdown position to be used by the robot
-   private final YoFramePoint3D desiredTouchdownPosition;
+   private final YoFramePoint3D desiredTouchdownPositionInWorld3D;
    private final FramePoint2D desiredTouchdownPosition2D;
 
    // This is the desired lateral offset from the touchdown location returned by the TD;LO and capture point laws to achieve stable walking at the desired
@@ -123,7 +124,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
       desiredALIPTouchdownPositionWithDS = new YoFramePoint2D(prefix + "DesiredALIPTouchdownPositionWithDS", centerOfMassControlZUpFrame, registry);
 
       // Final touchdown position and predicted velocity. These are populated by the touchdown calculator currently in use
-      desiredTouchdownPosition = new YoFramePoint3D(prefix + "DesiredTouchdownPosition", centerOfMassControlZUpFrame, registry);
+      desiredTouchdownPositionInWorld3D = new YoFramePoint3D(prefix + "DesiredTouchdownPositionInWorld", ReferenceFrame.getWorldFrame(), registry);
       desiredTouchdownPosition2D = new FramePoint2D(centerOfMassControlZUpFrame);
       predictedVelocityAtTouchdown = new YoFrameVector2D(prefix + "PredictedVelocityAtTouchdown", centerOfMassControlZUpFrame, registry);
 
@@ -165,7 +166,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
    {
       desiredALIPTouchdownPositionWithoutDS.setToNaN();
       desiredALIPTouchdownPositionWithDS.setToNaN();
-      desiredTouchdownPosition.setToNaN();
+      desiredTouchdownPositionInWorld3D.setToNaN();
 
       isInitialStanceValid.set(false);
    }
@@ -204,12 +205,12 @@ public class DynamicsBasedFootstepTouchdownCalculator
 //      desiredTouchdownPosition2D.addY(supportSide.negateIfLeftSide(fastWalkingParameters.getFixedWidthOffset()));
 
       // determine touchdown z position from x position, y position, and ground plane
-      desiredTouchdownPosition.setMatchingFrame(desiredTouchdownPosition2D, 0.0);
+      desiredTouchdownPositionInWorld3D.setMatchingFrame(desiredTouchdownPosition2D, 0.0);
    }
 
-   public FramePoint3DReadOnly getDesiredTouchdownPosition()
+   public FramePoint3DReadOnly getDesiredTouchdownPositionInWorld3D()
    {
-      return desiredTouchdownPosition;
+      return desiredTouchdownPositionInWorld3D;
    }
 
    public FramePoint2DReadOnly getDesiredTouchdownPosition2D()

@@ -181,12 +181,31 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       public void onEntry()
       {
          pendulumBase.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleZUpFrame(robotSide));
+
+         if (inDoubleSupport.getBooleanValue())
+            calculate(touchdownCalculator.get(robotSide),
+                      robotSide,
+                      getTransferDuration(robotSide),
+                      pendulumBase.get(robotSide.getOppositeSide()),
+                      netPendulumBase,
+                      inDoubleSupport.getBooleanValue(),
+                      desiredTouchdownPositions.get(robotSide));
       }
 
       @Override
       public void doAction(double timeInState)
       {
+         double timeToReachGoal = getTransferDuration(robotSide) - timeInState;
+         timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getTransferDuration(robotSide));
 
+         if (inDoubleSupport.getBooleanValue() && footStateMachines.get(robotSide.getOppositeSide()).getTimeInCurrentState() > timeInState)
+            calculate(touchdownCalculator.get(robotSide),
+                      robotSide,
+                      timeToReachGoal,
+                      pendulumBase.get(robotSide.getOppositeSide()),
+                      netPendulumBase,
+                      inDoubleSupport.getBooleanValue(),
+                      desiredTouchdownPositions.get(robotSide));
       }
 
       @Override
