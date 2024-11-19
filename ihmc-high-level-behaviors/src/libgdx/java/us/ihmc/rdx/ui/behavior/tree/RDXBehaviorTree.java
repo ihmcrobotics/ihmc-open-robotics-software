@@ -8,6 +8,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeFileLoader;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeLayer;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
@@ -46,7 +47,7 @@ public class RDXBehaviorTree
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
-   private final RDXBehaviorTreeFileLoader fileLoader;
+   private final BehaviorTreeFileLoader<RDXBehaviorTreeNode<?, ?>> fileLoader;
    private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
@@ -73,7 +74,7 @@ public class RDXBehaviorTree
       fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
-      fileLoader = new RDXBehaviorTreeFileLoader(behaviorTreeState, nodeBuilder);
+      fileLoader = new BehaviorTreeFileLoader<>(behaviorTreeState, nodeBuilder);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
@@ -363,7 +364,7 @@ public class RDXBehaviorTree
       return rootNode;
    }
 
-   public RDXBehaviorTreeFileLoader getFileLoader()
+   public BehaviorTreeFileLoader<RDXBehaviorTreeNode<?, ?>> getFileLoader()
    {
       return fileLoader;
    }
