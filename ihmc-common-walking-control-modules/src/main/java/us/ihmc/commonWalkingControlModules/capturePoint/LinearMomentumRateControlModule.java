@@ -110,6 +110,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
+   private final FramePoint3D desiredPendulumBase = new FramePoint3D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -385,7 +386,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoCenterOfMassVelocity.set(capturePointCalculator.getCenterOfMassVelocity());
       yoCapturePoint.set(capturePoint);
 
-      success = success && computeDesiredLinearMomentumRateOfChange();
+      success = success && computeDesiredLinearMomentumRateOfChangeNew();
 
       selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearX(!useCenterOfPressureCommandOnly.getValue());
@@ -561,6 +562,24 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       linearMomentumRateOfChange.changeFrame(worldFrame);
 
       return success;
+   }
+
+   private boolean computeDesiredLinearMomentumRateOfChangeNew()
+   {
+      double totalMass = totalMassProvider.getValue();
+      double desiredVerticalRateOfChange = totalMass * desiredCoMHeightAcceleration;
+
+      desiredPendulumBase.setIncludingFrame(desiredCoP, 0.0);
+      desiredPendulumBase.changeFrame(centerOfMassFrame);
+      linearMomentumRateOfChange.setToZero();
+      linearMomentumRateOfChange.setMatchingFrame(desiredPendulumBase);
+      double weight = totalMass * Math.abs(gravityZ);
+      double expectedVerticalForce = desiredVerticalRateOfChange + weight;
+      linearMomentumRateOfChange.scale(expectedVerticalForce / linearMomentumRateOfChange.getZ());
+      linearMomentumRateOfChange.subZ(weight);
+      linearMomentumRateOfChange.changeFrame(worldFrame);
+
+      return true;
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint,

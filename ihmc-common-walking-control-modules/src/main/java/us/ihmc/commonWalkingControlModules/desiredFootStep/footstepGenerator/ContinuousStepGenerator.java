@@ -68,7 +68,7 @@ import us.ihmc.yoVariables.variable.YoLong;
  * <li><u>This generator needs to be informed when footsteps are started/completed:</u><br>
  * The can be handle automatically by setting it up with
  * {@link #setFootstepStatusListener(StatusMessageOutputManager)}. Otherwise, the notifications
- * should be done <b>every step</b> via {@link #notifyFootstepStarted()} and
+ * should be done <b>every step</b> via {@link #notifyFootstepStarted(RobotSide side)} and
  * {@link #notifyFootstepCompleted(RobotSide)}, or
  * {@link #consumeFootstepStatus(FootstepStatusMessage)}.
  * <li><u>Protocol for submitting footsteps to the controller:</u><br>
