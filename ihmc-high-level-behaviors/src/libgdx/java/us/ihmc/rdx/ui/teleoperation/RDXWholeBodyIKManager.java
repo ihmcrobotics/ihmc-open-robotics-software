@@ -18,13 +18,13 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -40,7 +40,6 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -198,7 +197,7 @@ public class RDXWholeBodyIKManager
             }
 
             // We solve on a thread because the solver can take some milliseconds
-            MissingThreadTools.startAThread(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            ThreadTools.startAThread(() ->
             {
                try
                {
@@ -208,7 +207,7 @@ public class RDXWholeBodyIKManager
                {
                   readyToCopySolution = true;
                }
-            });
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, getClass().getSimpleName());
          }
       }
 
