@@ -46,9 +46,9 @@ public class MissingThreadToolsTest
       double before = Conversions.nanosecondsToSeconds(System.nanoTime());
 
       if (atLeast)
-         MissingThreadTools.sleepAtLeast(sleepDuration);
+         ThreadTools.parkAtLeast(sleepDuration);
       else
-         MissingThreadTools.sleep(sleepDuration);
+         ThreadTools.park(sleepDuration);
 
       double after = Conversions.nanosecondsToSeconds(System.nanoTime());
 
@@ -111,7 +111,7 @@ public class MissingThreadToolsTest
       AtomicInteger numberOfThingsThatHappened = new AtomicInteger();
       executor.execute(() ->
       {
-         MissingThreadTools.sleepAtLeast(0.01);
+         ThreadTools.parkAtLeast(0.01);
 
          ints.add(0);
          LogTools.info("ints = {}", ints);
@@ -126,7 +126,7 @@ public class MissingThreadToolsTest
 
       executor.submit(() ->
       {
-         MissingThreadTools.sleepAtLeast(0.01);
+         ThreadTools.parkAtLeast(0.01);
 
          ints.add(1);
          LogTools.info("ints = {}", ints);
@@ -141,7 +141,7 @@ public class MissingThreadToolsTest
 
       executor.submit(() ->
       {
-         MissingThreadTools.sleepAtLeast(0.01);
+         ThreadTools.parkAtLeast(0.01);
 
          ints.add(2);
          LogTools.info("ints = {}", ints);
@@ -158,7 +158,7 @@ public class MissingThreadToolsTest
 
       executor.submit(() ->
       {
-         MissingThreadTools.sleepAtLeast(0.01);
+         ThreadTools.parkAtLeast(0.01);
 
          ints.add(3);
          LogTools.info("ints = {}", ints);
@@ -183,7 +183,7 @@ public class MissingThreadToolsTest
       double timeout = 2.0;
       while (executor.isExecuting() && timeSlept < timeout)
       {
-         timeSlept += MissingThreadTools.sleepAtLeast(0.2);
+         timeSlept += ThreadTools.parkAtLeast(0.2);
       }
 
       assertTrue(timeSlept < timeout, "Timed out");

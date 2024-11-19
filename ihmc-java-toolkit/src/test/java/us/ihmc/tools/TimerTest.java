@@ -2,8 +2,8 @@ package us.ihmc.tools;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,7 +56,7 @@ public class TimerTest
       assertTrue(timer.isRunning(expirationTime));
       assertFalse(timer.isExpired(expirationTime));
 
-      MissingThreadTools.sleepAtLeast(expirationTime);
+      ThreadTools.parkAtLeast(expirationTime);
 
       assertFalse(timer.isRunning(expirationTime));
       assertTrue(timer.isExpired(expirationTime));
