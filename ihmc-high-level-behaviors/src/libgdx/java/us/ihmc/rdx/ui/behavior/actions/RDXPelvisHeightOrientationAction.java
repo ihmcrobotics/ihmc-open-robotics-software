@@ -36,6 +36,7 @@ import java.util.List;
 
 public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
+   private final PelvisHeightOrientationActionDefinition definition;
    private final PelvisHeightOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
@@ -66,29 +67,30 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
+      definition = getDefinition();
       state = getState();
 
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValueAndFreeze());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPelvisToParentTransform().getValueUnsafe());
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                definition::getParentFrameName,
                                                                 getState().getPelvisFrame()::changeFrame);
-      heightWidget = new ImDoubleWrapper(getDefinition()::getHeight,
-                                         getDefinition()::setHeight,
+      heightWidget = new ImDoubleWrapper(definition::getHeight,
+                                         definition::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
-      yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
+      yawWidget = new ImDoubleWrapper(definition.getRotation()::getYaw, definition::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(getDefinition()::getPitch,
-                                        getDefinition()::setPitch,
+      pitchWidget = new ImDoubleWrapper(definition::getPitch,
+                                        definition::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(getDefinition().getRotation()::getRoll, getDefinition()::setRoll,
+      rollWidget = new ImDoubleWrapper(definition.getRotation()::getRoll, definition::setRoll,
                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
-                                                     getDefinition()::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
@@ -128,7 +130,12 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
 
          if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            getDefinition().getPelvisToParentTransform().getValueAndFreeze();
+            definition.getPelvisToParentTransform().getValueAndFreeze();
+         }
+         else  // Update gizmo in case action data changes
+         {
+            poseGizmo.getPoseGizmo().getTransformToParent().set(definition.getPelvisToParentTransform().getValueReadOnly());
+            poseGizmo.getPoseGizmo().update();
          }
 
          if (state.getIsNextForExecution() || getSelected())
@@ -150,7 +157,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
             currentRobotPelvisPose.changeFrame(state.getPelvisFrame().getReferenceFrame().getParent());
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
-         getDefinition().getPelvisToParentTransform().getValueReadOnly().transform(transformVariation);
+         definition.getPelvisToParentTransform().getValueReadOnly().transform(transformVariation);
       }
    }
 
@@ -174,7 +181,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
       }
    }
 

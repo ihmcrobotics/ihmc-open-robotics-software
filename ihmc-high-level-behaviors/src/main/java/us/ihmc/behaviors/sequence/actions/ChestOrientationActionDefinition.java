@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
@@ -132,6 +133,11 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    public RotationMatrixBasics getRotation()
    {
       return chestToParentTransform.getValueAndFreeze().getRotation();
+   }
+
+   public RotationMatrixReadOnly getRotationReadOnly()
+   {
+      return (RotationMatrixReadOnly) chestToParentTransform.getValueReadOnly().getRotation();
    }
 
    public double getTrajectoryDuration()

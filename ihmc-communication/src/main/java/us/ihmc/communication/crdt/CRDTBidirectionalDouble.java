@@ -21,6 +21,12 @@ public class CRDTBidirectionalDouble
       value = initialValue;
    }
 
+   /** For use when the initial value requires special calulation. */
+   public void setInitialValue(double initialValue)
+   {
+      value = initialValue;
+   }
+
    public double getValue()
    {
       return value;

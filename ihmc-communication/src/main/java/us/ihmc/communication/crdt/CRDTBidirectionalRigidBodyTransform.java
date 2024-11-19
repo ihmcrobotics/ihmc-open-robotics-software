@@ -28,7 +28,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
    }
 
    /**
-    * Used to initialize Pose 3D gizmos.
+    * Used to initialize Pose 3D gizmos. This implementation should be reconsidered.
     */
    public RigidBodyTransform getValueUnsafe()
    {

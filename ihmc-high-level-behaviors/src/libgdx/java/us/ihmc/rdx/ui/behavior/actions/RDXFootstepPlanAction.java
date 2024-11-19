@@ -152,11 +152,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       for (RobotSide side : RobotSide.values)
       {
-         definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(definition.getPlannerParametersReadOnly().getIdealFootstepWidth()));
+         definition.getGoalFootstepToGoalY(side).setInitialValue(0.5 * side.negateIfRightSide(definition.getPlannerParametersReadOnly().getIdealFootstepWidth()));
          state.copyDefinitionToGoalFoostepToGoalTransform(side);
       }
 
-      definition.getGoalFocalPoint().getValueAndFreeze().set(0.1, 0.0, 0.0);
+      definition.getGoalFocalPoint().getValueToInitialize().set(0.1, 0.0, 0.0);
 
       goalStancePointGizmo.create(baseUI.getPrimary3DPanel());
       goalStancePointGizmo.getPoseGizmo().getCenterSphereToTorusRatio().set(0.5f);

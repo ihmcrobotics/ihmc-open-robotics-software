@@ -35,6 +35,7 @@ import java.util.List;
 
 public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
+   private final ChestOrientationActionDefinition definition;
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean adjustGoalPose = new ImBoolean();
@@ -65,27 +66,28 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
+      definition = getDefinition();
       state = getState();
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getChestToParentTransform().getValueUnsafe(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform().getValueUnsafe(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
-                                                         getDefinition()::setHoldPoseInWorldLater,
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
+                                                         definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                definition::getParentFrameName,
                                                                 getState().getChestFrame()::changeFrame);
-      yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
+      yawWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getYaw, definition::setYaw,
                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
-      pitchWidget = new ImDoubleWrapper(getDefinition().getRotation()::getPitch, getDefinition()::setPitch,
+      pitchWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getPitch, definition::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
-      rollWidget = new ImDoubleWrapper(getDefinition().getRotation()::getRoll, getDefinition()::setRoll,
+      rollWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getRoll, definition::setRoll,
                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
-      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
-                                                     getDefinition()::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
       String chestBodyName = syncedFullRobotModel.getChest().getName();
@@ -125,11 +127,11 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
 
          if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            getDefinition().getChestToParentTransform().getValueAndFreeze();
+            definition.getChestToParentTransform().getValueAndFreeze();
          }
          else  // Update gizmo in case action data changes
          {
-            poseGizmo.getPoseGizmo().getTransformToParent().set(getDefinition().getChestToParentTransform().getValueReadOnly());
+            poseGizmo.getPoseGizmo().getTransformToParent().set(definition.getChestToParentTransform().getValueReadOnly());
             poseGizmo.getPoseGizmo().update();
          }
 
@@ -168,7 +170,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
       }
    }
 
