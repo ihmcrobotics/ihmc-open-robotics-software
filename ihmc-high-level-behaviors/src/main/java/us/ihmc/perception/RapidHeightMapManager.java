@@ -6,6 +6,8 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
@@ -23,6 +25,8 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMap;
+import org.opencv.core.Scalar;
 
 import java.time.Instant;
 
@@ -38,7 +42,7 @@ public class RapidHeightMapManager
    private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
 //   private final GpuMat heightMapImage;
-   private final Mat heightmapMat;
+   private final GpuMat heightmapMat;
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
@@ -52,9 +56,7 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor = new RapidHeightMapExtractorCuda(leftFootSoleFrame, rightFootSoleFrame);
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
-//      heightMapImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      heightmapMat = new Mat();
-//      heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      heightmapMat = new GpuMat();
       rapidHeightMapExtractor.create(heightmapMat, 1);
 
       // We use a notification in order to only call resetting the height map in one place
@@ -77,14 +79,13 @@ public class RapidHeightMapManager
 
 
    {
-//      heightMapImage.download(heightmapMat);
-
+      Mat result = new Mat(latestDepthImage.rows(),latestDepthImage.cols(),opencv_core.CV_16UC1);
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
-         OpenCVTools.convertFloatToShort(latestDepthImage, heightmapMat, 1000.0, 0.0);
+         OpenCVTools.convertFloatToShort(latestDepthImage, result, 1000.0, 0.0);
       else
-         latestDepthImage.convertTo(heightmapMat, opencv_core.CV_16UC1);
+         latestDepthImage.convertTo(result, opencv_core.CV_16UC1);
+      heightmapMat.upload(result);
 
-//      heightMapImage.upload(heightmapMat);
 
       if (resetHeightMapRequested.poll())
       {
