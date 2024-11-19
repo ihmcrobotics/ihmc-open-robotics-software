@@ -19,6 +19,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,7 +36,6 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.function.BooleanSupplier;
 
@@ -182,7 +182,7 @@ public class RDXArmManager
                armIKSolvers.get(side).copySourceToWork();
             }
 
-            MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            ThreadTools.startAThread(() ->
             {
                try
                {
@@ -195,7 +195,7 @@ public class RDXArmManager
                {
                   readyToCopySolution = true;
                }
-            });
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "IKSolver");
          }
 
          if (readyToCopySolution)

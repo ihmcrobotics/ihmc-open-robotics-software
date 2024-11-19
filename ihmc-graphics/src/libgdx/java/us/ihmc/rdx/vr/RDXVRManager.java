@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -19,12 +20,9 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RDXVRManager
@@ -101,7 +99,7 @@ public class RDXVRManager
          {
             initializing = true;
             contextCreatedNotification = new Notification();
-            MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            ThreadTools.startAsDaemon(() ->
             {
                synchronized (syncObject)
                {
@@ -109,7 +107,7 @@ public class RDXVRManager
                   context.initSystem();
                }
                contextCreatedNotification.set();
-            });
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, getClass().getSimpleName() + "-initSystem");
          }
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {

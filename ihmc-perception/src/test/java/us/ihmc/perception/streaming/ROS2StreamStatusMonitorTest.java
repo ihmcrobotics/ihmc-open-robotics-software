@@ -6,14 +6,13 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.commons.thread.Throttler;
 
 import java.net.InetSocketAddress;
 
@@ -37,7 +36,7 @@ public class ROS2StreamStatusMonitorTest
    {
       // Messages being sent over ROS2 from previous test may mess up the next test,
       // so we wait a bit after running each test
-      MissingThreadTools.sleep(1.0);
+      ThreadTools.park(1.0);
    }
 
    @Test
@@ -87,8 +86,8 @@ public class ROS2StreamStatusMonitorTest
 
       assertTrue(streamStatusMonitor.isStreaming());
 
-      MissingThreadTools.sleep(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
-      MissingThreadTools.sleep(0.05); // Sleep a little extra
+      ThreadTools.park(ROS2StreamStatusMonitor.MESSAGE_EXPIRATION_MULTIPLIER * messagePublishPeriod);
+      ThreadTools.park(0.05); // Sleep a little extra
 
       assertFalse(streamStatusMonitor.isStreaming());
    }
@@ -123,7 +122,7 @@ public class ROS2StreamStatusMonitorTest
 
       messagePublishThread.interrupt();
       messagePublishThread.join();
-      MissingThreadTools.sleep(0.5);
+      ThreadTools.park(0.5);
       assertFalse(streamStatusMonitor.isStreaming());
    }
 }
