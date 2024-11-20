@@ -89,19 +89,19 @@ public class RapidHeightMapExtractorCuda
    private float[] sensorToGroundTransformArray = new float[16];
 
    private FloatPointer groundToSensorTransformHostPointer;
-   private Pointer groundToSensorTransformDevicePointer;
+   private FloatPointer groundToSensorTransformDevicePointer;
 
    private FloatPointer sensorToGroundTransformHostPointer;
-   private Pointer sensorToGroundTransformDevicePointer;
+   private FloatPointer sensorToGroundTransformDevicePointer;
 
    private FloatPointer worldToGroundTransformHostPointer;
-   private Pointer worldToGroundTransformDevicePointer;
+   private FloatPointer worldToGroundTransformDevicePointer;
 
    private FloatPointer groundToWorldTransformHostPointer;
-   private Pointer groundToWorldTransformDevicePointer;
+   private FloatPointer groundToWorldTransformDevicePointer;
 
    private FloatPointer parametersHostPointer;
-   private Pointer parametersDevicePointer;
+   private FloatPointer parametersDevicePointer;
 
    private CUDAKernel updateKernel;
    private CUDAKernel registerKernel;
@@ -334,19 +334,19 @@ public class RapidHeightMapExtractorCuda
 
       // Initialize transformation pointers
       groundToSensorTransformHostPointer = new FloatPointer(16);
-      groundToSensorTransformDevicePointer = new Pointer();
+      groundToSensorTransformDevicePointer = new FloatPointer();
 
       sensorToGroundTransformHostPointer = new FloatPointer(16);
-      sensorToGroundTransformDevicePointer = new Pointer();
+      sensorToGroundTransformDevicePointer = new FloatPointer();
 
       worldToGroundTransformHostPointer = new FloatPointer(16);
-      worldToGroundTransformDevicePointer = new Pointer();
+      worldToGroundTransformDevicePointer = new FloatPointer();
 
       groundToWorldTransformHostPointer = new FloatPointer(16);
-      groundToWorldTransformDevicePointer = new Pointer();
+      groundToWorldTransformDevicePointer = new FloatPointer();
 
       parametersHostPointer = new FloatPointer(37);
-      parametersDevicePointer = new Pointer();
+      parametersDevicePointer = new FloatPointer();
    }
 
    public void reset()
@@ -419,21 +419,21 @@ public class RapidHeightMapExtractorCuda
 
       //      Allocate memory on the GPU for each of the transforms and images
       //      This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
-      allocateCudaMemory(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length * Float.BYTES, "groundToSensorTransformDevicePointer");
-      allocateCudaMemory(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length * Float.BYTES, "sensorToGroundTransformDevicePointer");
-      allocateCudaMemory(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length * Float.BYTES, "worldToGroundTransformDevicePointer");
-      allocateCudaMemory(groundToWorldTransformDevicePointer, groundToWorldTransformArray.length * Float.BYTES, "groundToWorldTransformDevicePointer");
-      allocateCudaMemory(parametersDevicePointer, paramsArray.length * Float.BYTES, "parametersDevicePointer");
+      CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
+      CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(groundToWorldTransformDevicePointer, groundToWorldTransformArray.length, stream);
+      CUDATools.mallocAsync(parametersDevicePointer, paramsArray.length, stream);
 
       cudaStreamSynchronize(stream);
 
       //Copy the data from host memory to device memory asynchronously
       // This ensures the device has the latest data available for kernel processing
-      copyToDeviceMemory(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, "groundToSensorTransformDevicePointer");
-      copyToDeviceMemory(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, "sensorToGroundTransformDevicePointer");
-      copyToDeviceMemory(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, "worldToGroundTransformDevicePointer");
-      copyToDeviceMemory(groundToWorldTransformDevicePointer, groundToWorldTransformHostPointer, "groundToWorldTransformDevicePointer");
-      copyToDeviceMemory(parametersDevicePointer, parametersHostPointer, "parametersDevicePointer");
+      CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
+      CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(groundToWorldTransformDevicePointer, groundToWorldTransformHostPointer, groundToWorldTransformArray.length, stream);
+      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, paramsArray.length, stream);
 
       cudaStreamSynchronize(stream);
 

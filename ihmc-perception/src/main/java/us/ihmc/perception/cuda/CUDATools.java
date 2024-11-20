@@ -1,10 +1,12 @@
 package us.ihmc.perception.cuda;
 
+import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -55,6 +57,41 @@ public class CUDATools
    public static boolean hasCUDADevice()
    {
       return getCUDADeviceCount() > 0;
+   }
+
+   /**
+    * Allocate GPU memory for {@code elementCount} elements of the {@code cudaPointer}'s type.
+    * <p>
+    * THE TYPE OF THE PASSED IN POINTER MATTERS.
+    * <p>
+    * The size of the memory to allocate is determined by {@code cudaPointer.sizeof() * elementCount}.
+    * As such, to allocate memory for 10 {@code floats}, the {@code cudaPointer} must be a {@link org.bytedeco.javacpp.FloatPointer}.
+    *
+    * @param cudaPointer  CUDA pointer that will point to the allocated GPU memory. THE TYPE OF THIS POINTER MATTERS.
+    * @param elementCount Number of elements to allocate.
+    * @param stream       The CUDA stream to use for asynchronous allocation.
+    */
+   public static void mallocAsync(Pointer cudaPointer, long elementCount, CUstream_st stream)
+   {
+      checkCUDAError(cudaMallocAsync(cudaPointer, cudaPointer.sizeof() * elementCount, stream));
+   }
+
+   /**
+    * Performs default memory copy (as in, {@link cudart#cudaMemcpyDefault}) from {@code source} to {@code destination}.
+    * <p>
+    * THE POINTER TYPE OF {@code source} MATTERS.
+    * <p>
+    * The number of bytes to copy is determined by {@code source.sizeof() * elementCount}.
+    * As such, to copy 10 {@code floats}, the {@code source} pointer must be a {@link org.bytedeco.javacpp.FloatPointer}.
+    *
+    * @param destination  Pointer to which memory is copied.
+    * @param source       Pointer from which memory is copied.
+    * @param elementCount Number of elements to copy.
+    * @param stream       The CUDA stream to use for asynchronous allocation.
+    */
+   public static void memcpyAsync(Pointer destination, Pointer source, long elementCount, CUstream_st stream)
+   {
+      checkCUDAError(cudaMemcpyAsync(destination, source, source.sizeof() * elementCount, cudaMemcpyDefault, stream));
    }
 
    /**
