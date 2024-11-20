@@ -195,22 +195,32 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 
    private static double getIdealStepLength(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading)
    {
-      return switch (heading)
+      switch (heading)
       {
-         case LEFT, RIGHT -> 0.0;
-         case BACKWARD -> -parameters.getIdealBackStepLength();
-         default -> parameters.getIdealFootstepLength();
-      };
+         case LEFT:
+         case RIGHT:
+            return 0.0;
+         case BACKWARD:
+            return - parameters.getIdealBackStepLength();
+         case FORWARD:
+         default:
+            return parameters.getIdealFootstepLength();
+      }
    }
 
    private static double getIdealStepWidth(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading, RobotSide stanceSide)
    {
-      return switch (heading)
+      switch (heading)
       {
-         case LEFT -> stanceSide == RobotSide.LEFT ? -parameters.getMaxStepWidth() : parameters.getMinStepWidth();
-         case RIGHT -> stanceSide == RobotSide.LEFT ? -parameters.getMinStepWidth() : parameters.getMaxStepWidth();
-         default -> stanceSide.negateIfLeftSide(parameters.getIdealSideStepWidth());
-      };
+         case LEFT:
+            return stanceSide == RobotSide.LEFT ? - parameters.getMaxStepWidth() : parameters.getMinStepWidth();
+         case RIGHT:
+            return stanceSide == RobotSide.LEFT ? - parameters.getMinStepWidth() : parameters.getMaxStepWidth();
+         case BACKWARD:
+         case FORWARD:
+         default:
+            return stanceSide.negateIfLeftSide(parameters.getIdealSideStepWidth());
+      }
    }
 
    @Override
