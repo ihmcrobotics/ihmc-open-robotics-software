@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
@@ -20,6 +19,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -38,7 +38,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final ChestOrientationActionDefinition definition;
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean adjustGoalPose = new ImBoolean();
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper yawWidget;
@@ -69,7 +68,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       definition = getDefinition();
       state = getState();
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getChestToParentTransform().getValueUnsafe(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
@@ -120,20 +119,10 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
             collisionShapeFrame.setParentFrame(state.getChestFrame().getReferenceFrame());
          }
 
-         poseGizmo.getPoseGizmo().update();
-
          if (!getSelected())
             poseGizmo.setSelected(false);
 
-         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getChestToParentTransform().getValueAndFreeze();
-         }
-         else  // Update gizmo in case action data changes
-         {
-            poseGizmo.getPoseGizmo().getTransformToParent().set(definition.getChestToParentTransform().getValueReadOnly());
-            poseGizmo.getPoseGizmo().update();
-         }
+         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getChestToParentTransform(), definition);
 
          if (state.getIsNextForExecution() || getSelected())
          {
@@ -153,7 +142,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
@@ -198,7 +187,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         adjustGoalPose.set(true);
+         poseGizmo.setSelected(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);

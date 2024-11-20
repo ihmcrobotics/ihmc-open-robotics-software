@@ -14,13 +14,13 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXDashedLineMesh;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
@@ -71,7 +71,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
       this.syncedRobot = syncedRobot;
 
-      screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValueAndFreeze(), ReferenceFrame.getWorldFrame());
+      screwAxisGizmo = new RDXSelectablePose3DGizmo();
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
@@ -143,11 +143,15 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
-         screwAxisGizmo.getPoseGizmo().update();
+         if (screwAxisGizmo.getPoseGizmo().getGizmoFrame() != state.getScrewFrame().getReferenceFrame())
+         {
+            screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
+         }
 
-         if (screwAxisGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-            definition.getScrewAxisPoseInObjectFrame().getValueAndFreeze();
+         if (!getSelected())
+            screwAxisGizmo.setSelected(false);
+
+         RDXCRDTTools.syncGizmoWithBidirectionalField(screwAxisGizmo.getPoseGizmo(), definition.getScrewAxisPoseInObjectFrame(), definition);
 
          double screwAxisLineWidth = 0.005;
          screwAxisGraphic.update(screwAxisGizmo.getPoseGizmo().getPose(), screwAxisLineWidth, 1.0);

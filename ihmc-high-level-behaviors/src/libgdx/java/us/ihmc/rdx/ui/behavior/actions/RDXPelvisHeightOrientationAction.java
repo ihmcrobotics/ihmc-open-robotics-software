@@ -21,6 +21,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -72,7 +73,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
 
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPelvisToParentTransform().getValueUnsafe());
+      poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -123,20 +124,10 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
             collisionShapeFrame.setParentFrame(state.getPelvisFrame().getReferenceFrame());
          }
 
-         poseGizmo.getPoseGizmo().update();
-
          if (!getSelected())
             poseGizmo.setSelected(false);
 
-         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getPelvisToParentTransform().getValueAndFreeze();
-         }
-         else  // Update gizmo in case action data changes
-         {
-            poseGizmo.getPoseGizmo().getTransformToParent().set(definition.getPelvisToParentTransform().getValueReadOnly());
-            poseGizmo.getPoseGizmo().update();
-         }
+         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getPelvisToParentTransform(), definition);
 
          if (state.getIsNextForExecution() || getSelected())
          {

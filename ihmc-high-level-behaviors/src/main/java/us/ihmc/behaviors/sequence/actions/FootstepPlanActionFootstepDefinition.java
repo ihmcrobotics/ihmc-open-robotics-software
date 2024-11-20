@@ -13,6 +13,7 @@ import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionFootstepDefinition implements SidedObject
 {
+   private final RequestConfirmFreezable freezable;
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalRigidBodyTransform soleToPlanFrameTransform;
 
@@ -22,6 +23,8 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
 
    public FootstepPlanActionFootstepDefinition(RequestConfirmFreezable freezable)
    {
+      this.freezable = freezable;
+
       side = new CRDTBidirectionalEnumField<>(freezable, RobotSide.LEFT);
       soleToPlanFrameTransform = new CRDTBidirectionalRigidBodyTransform(freezable);
    }
@@ -86,5 +89,10 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    {
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       soleToPlanFrameTransform.fromMessage(message.getSolePose());
+   }
+
+   public RequestConfirmFreezable getFreezable()
+   {
+      return freezable;
    }
 }

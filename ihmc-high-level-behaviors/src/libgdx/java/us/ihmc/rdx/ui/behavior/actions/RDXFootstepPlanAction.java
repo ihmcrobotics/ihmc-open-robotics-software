@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -241,21 +242,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          for (RobotSide side : RobotSide.values)
             goalFeetGizmos.get(side).getPoseGizmo().setParentFrame(state.getGoalFrame().getReferenceFrame());
 
-         // In this section, we want to update the definition when the gizmos are moved
-         // and/or the parent frame is changed. However, on loading and otherwise we want
-         // to make sure the current state reflects the definition because the definition
-         // can change. We do this by freezing the node so user changes can propagate.
-         if (goalStancePointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
-             || goalFocalPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getGoalStancePoint().getValueAndFreeze().set(goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-            definition.getGoalFocalPoint().getValueAndFreeze().set(goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-         }
-         else
-         {
-            goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
-            goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
-         }
+         RDXCRDTTools.syncGizmoWithBidirectionalField(goalStancePointGizmo.getPoseGizmo(), definition.getGoalStancePoint(), definition);
+         RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
          for (RobotSide side : RobotSide.values)
             if (goalFeetGizmos.get(side).getPoseGizmo().getGizmoModifiedByUser().poll())

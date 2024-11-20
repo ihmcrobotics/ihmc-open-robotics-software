@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootPoseActionState;
@@ -20,6 +19,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -40,7 +40,6 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    private final FootPoseActionState state;
    private final FootPoseActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean adjustGoalPose = new ImBoolean();
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
@@ -67,7 +66,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
       state = getState();
       definition = getDefinition();
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getFootToParentTransform().getValueAndFreeze(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
@@ -111,14 +110,9 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
             collisionShapeFrame.setParentFrame(state.getFootFrame().getReferenceFrame());
          }
 
-         poseGizmo.getPoseGizmo().update();
+         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getFootToParentTransform(), definition);
+
          highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
-
-         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getFootToParentTransform().getValueAndFreeze();
-         }
-
          if (poseGizmo.isSelected() || isMouseHovering)
          {
             highlightModels.get(definition.getSide()).setTransparency(0.7);
@@ -133,7 +127,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
+      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
@@ -172,7 +166,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       if (isClickedOn)
       {
-         adjustGoalPose.set(true);
+         poseGizmo.setSelected(true);
       }
 
       poseGizmo.process3DViewInput(input, isMouseHovering);
