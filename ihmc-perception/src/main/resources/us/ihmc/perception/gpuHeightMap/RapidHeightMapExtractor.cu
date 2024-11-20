@@ -75,7 +75,7 @@ extern "C"
 {
 return make_float2 (index_to_coordinate(index.x, center.x, resolution, center_index), index_to_coordinate(index.y, center.y, resolution, center_index));
 }
- __device__ float dot(const float3 &a, const float3 &b)
+ __device__ float dot(const float3 a, const float3 b)
  {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -243,9 +243,9 @@ int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 // Grid dimensions (from params)
 int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
 int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
-
+//
 // Bounds check
-if (xIndex >= depthWidth || yIndex >= depthHeight) return;
+if (xIndex >= 151 || yIndex >= 151) return; // TODO: pass in the bounds
 
 // Initialize variables
 float currentAverageHeight = 0.0f;
@@ -310,9 +310,9 @@ for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
 
         if (yawIdx >= 0 && yawIdx < depthWidth && pitchIdx >= 0 && pitchIdx < depthHeight)
         {
-            // Read depth value using pitched memory
+//             Read depth value using pitched memory
 
-             unsigned short *inRow = (unsigned short*)((char*)in + pitchIdx * pitchIn);
+             unsigned short *inRow = (unsigned short*)((char*)in + (pitchIdx * pitchIn));
              unsigned short depthValue = *(inRow + yawIdx);
 
             // Convert depth value to meters (if necessary)
@@ -320,12 +320,14 @@ for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
 
             // Back-project depth to 3D point
             float3 queryPointInSensor;
-            if (params[MODE] == 0) { // Spherical
-                queryPointInSensor = back_project_spherical(yawIdx, pitchIdx, depth, params);
-            }
-            else if (params[MODE] == 1) { // Perspective
-                queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
-            }
+//             if (params[MODE] == 0) { // Spherical
+//                 queryPointInSensor = back_project_spherical(yawIdx, pitchIdx, depth, params);
+//             }
+//             else if (params[MODE] == 1) { // Perspective
+//                 queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
+//             }
+
+             queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
 
             // Transform back to Z-Up frame
             float3 queryPointInZUp = transformPoint3D32_2(
@@ -370,10 +372,14 @@ averageHeightZ = fminf(fmaxf(averageHeightZ, params[MIN_CLAMP_HEIGHT]), params[M
 averageHeightZ += params[HEIGHT_OFFSET];
 
 // Scale to the appropriate range
-unsigned short heightValue = static_cast<unsigned short>(averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
+float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
- unsigned short *outRow = (unsigned short*)((char*)out + yIndex * pitchOut);
-    *(outRow + xIndex) = heightValue;
+
+
+
+ unsigned short *outRow = (unsigned short*)((char*)out + (yIndex * pitchOut));
+//     *(outRow + xIndex) = (unsigned short )(heightValue);
+     *(outRow + xIndex) = 10;
 }
 
 

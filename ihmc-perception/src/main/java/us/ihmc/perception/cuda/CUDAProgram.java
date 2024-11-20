@@ -28,8 +28,8 @@ import static us.ihmc.perception.cuda.CUDATools.*;
 public class CUDAProgram implements AutoCloseable
 {
    private static final String[] DEFAULT_OPTIONS = {"-arch=" + getComputeVersion(),  // Target fairly recent GPU architecture
-                                                    "--dopt=on",                     // Optimize code
-                                                    "-G"};                           // More code optimization
+                                                    /*"--dopt=on",                     // Optimize code
+                                                    "-G"*/};                           // More code optimization
 
    private final CUmod_st module = new CUmod_st();
 
