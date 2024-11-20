@@ -370,9 +370,11 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Scale to the appropriate range
     float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
+//     printf("%f: (%d, %d)\n", heightValue, xIndex, yIndex);
+
     unsigned short *outRow = (unsigned short *)((char *)out + (yIndex * pitchOut));
-    //     *(outRow + xIndex) = (unsigned short )(heightValue);
-    *(outRow + xIndex) = 10;
+        *(outRow + xIndex) = (unsigned short )(heightValue);
+//     *(outRow + xIndex) = 10;
 }
 
 extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
@@ -483,22 +485,15 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     if (xIndex >= croppedMapXY || yIndex >= croppedMapXY)
         return;
 
-    int globalSensorIndexX = coordinate_to_indices(
+    int2 globalSensorIndex = coordinate_to_indices(
                                  make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
                                  make_float2(0.0f, 0.0f),
                                  params[GLOBAL_CELL_SIZE],
-                                 static_cast<int>(params[GLOBAL_CENTER_INDEX]))
-                                 .x;
+                                 static_cast<int>(params[GLOBAL_CENTER_INDEX]));
 
-    int globalSensorIndexY = coordinate_to_indices(
-                                 make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
-                                 make_float2(0.0f, 0.0f),
-                                 params[GLOBAL_CELL_SIZE],
-                                 static_cast<int>(params[GLOBAL_CENTER_INDEX]))
-                                 .y;
 
-    int globalCellIndexX = globalSensorIndexX + xIndex - static_cast<int>(params[CROPPED_WINDOW_CENTER_INDEX]);
-    int globalCellIndexY = globalSensorIndexY + yIndex - static_cast<int>(params[CROPPED_WINDOW_CENTER_INDEX]);
+    int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
+    int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
 
     // Check if global cell index is within bounds
     if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&

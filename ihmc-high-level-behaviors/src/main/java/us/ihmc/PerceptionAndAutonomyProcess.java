@@ -429,7 +429,7 @@ public class PerceptionAndAutonomyProcess
 
    private void processAndPublishRealsense()
    {
-      if (realsenseDemandNode.isDemanded())
+      if (/*realsenseDemandNode.isDemanded()*/ true) // FIXME: Height Map UNDO
       {
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
@@ -437,10 +437,10 @@ public class PerceptionAndAutonomyProcess
          if (yoloRealsenseDemandNode.isDemanded())
             yolov8DetectionExecutor.runYOLODetectionOnAllModels(realsenseColorImage, realsenseDepthImage);
 
-         overlapRemover.setHighQualityImage(realsenseDepthImage.get());
+//         overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
-         sensorStreamer.sendFrame(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, realsenseColorImage);
+//         sensorStreamer.sendFrame(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, realsenseColorImage);
 
          realsenseDepthImage.release();
          realsenseColorImage.release();
