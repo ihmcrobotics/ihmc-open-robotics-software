@@ -437,13 +437,16 @@ unsigned short heightValue = static_cast<unsigned short>(averageHeightZ * params
 
         // Retrieve local height and global height
         float sensorHeight = sensorToGroundTf[11] - 1.5f;
-        float previousHeight = *(unsigned short*)((char*)globalMap + yIndex * pitchGlobal) / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+
+        unsigned short* heightValue = (unsigned short*) ((char*) globalMap + yIndex * pitchGlobal) + xIndex;
+        float previousHeight = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
         float localHeight = previousHeight;
 
         if (localCellIndex.x >= 0 && localCellIndex.x < localCellsPerAxis &&
             localCellIndex.y >= 0 && localCellIndex.y < localCellsPerAxis) {
-            localHeight = (*(unsigned short*)((char*)localMap + localCellIndex.y * pitchLocal + localCellIndex.x * sizeof(unsigned short))
-                          / params[HEIGHT_SCALING_FACTOR]) - params[HEIGHT_OFFSET];
+
+            unsigned short* newHeightValue = (unsigned short*) ((char*) localMap + localCellIndex.y * pitchLocal) + localCellIndex.x;
+            localHeight = *newHeightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
         }
 
         float finalHeight = previousHeight;
@@ -464,15 +467,15 @@ unsigned short heightValue = static_cast<unsigned short>(averageHeightZ * params
         finalHeight += params[HEIGHT_OFFSET];
 
         // Store the final height in the global map
-        *(unsigned short*)((char*)globalMap + yIndex * pitchGlobal + xIndex * sizeof(unsigned short)) =
-            static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
+        unsigned short* globalMapElement = (unsigned short*) ((char*) globalMap + yIndex * pitchGlobal) + xIndex;
+        *globalMapElement = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
     }
-
-
+//
+//
 extern "C"
 __global__ void croppingKernel(unsigned short * inputMap, size_t pitchInput,
                                 unsigned short * croppedMap, size_t pitchCropped,
-                                float * params)
+                                float * params, int croppedMapXY)
    {
 
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -481,7 +484,9 @@ __global__ void croppingKernel(unsigned short * inputMap, size_t pitchInput,
     int globalMapSizeX = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
     int globalMapSizeY = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
-    if (xIndex >= croppedMapWidth || yIndex >= croppedMapHeight) return;
+
+
+    if (xIndex >= croppedMapXY || yIndex >= croppedMapXY) return;
 
     int globalSensorIndexX = coordinate_to_indices(
         make_float2(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
@@ -505,7 +510,7 @@ __global__ void croppingKernel(unsigned short * inputMap, size_t pitchInput,
         globalCellIndexY >= 0 && globalCellIndexY < globalMapSizeY) {
         unsigned short* inputRow = (unsigned short*)((char*)inputMap + globalCellIndexY * pitchInput);
         unsigned short* croppedRow = (unsigned short*)((char*)croppedMap + yIndex * pitchCropped);
-        croppedRow[xIndex] = *(inputRow + globalCellIndexX);
+        croppedRow[xIndex] = inputRow[globalCellIndexX];
     } else {
         unsigned short* croppedRow = (unsigned short*)((char*)croppedMap + yIndex * pitchCropped);
         croppedRow[xIndex] = 0; // Assign 0 for out-of-bounds cells
