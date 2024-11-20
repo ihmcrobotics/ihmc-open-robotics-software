@@ -70,6 +70,7 @@ public class AStarFootstepPlanner
    private final List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
    /** Called at the status publish frequency. Post-processes the plan and publishes it */
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
+   private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
 
    private double planningStartTime;
    private final Stopwatch stopwatch;
@@ -100,9 +101,7 @@ public class AStarFootstepPlanner
                                                                    stepReachabilityData,
                                                                    registry);
 
-      FootstepPlannerHeuristicCalculator distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters,
-                                                                                                           bodyPathPlanHolder,
-                                                                                                           registry);
+      distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
 
       this.stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters,
                                                            snapper,
@@ -195,6 +194,7 @@ public class AStarFootstepPlanner
       FootstepGraphNode startNode = createStartNode(request);
       addFootPosesToSnapper(request);
       iterationConductor.initialize(startNode);
+      distanceAndYawHeuristics.initialize(goalMidFootPose);
       stepCostCalculator.initialize(goalSteps);
       completionChecker.initialize(startNode, goalSteps, request.getGoalDistanceProximity(), request.getGoalYawProximity());
       nominalExpansion.initialize();
