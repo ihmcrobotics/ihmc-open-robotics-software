@@ -360,8 +360,8 @@ public class RapidHeightMapExtractorCuda
       }
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
-      localHeightMapImage.put(new Scalar(offset));
-      globalHeightMapImage.put(new Scalar(offset));
+      localHeightMapImage.setTo(new Scalar(offset));
+      globalHeightMapImage.setTo(new Scalar(offset));
 
       sequenceNumber = 0;
    }
@@ -450,8 +450,6 @@ public class RapidHeightMapExtractorCuda
       gridSizeKernel2 = new dim3(gridSizeKernel2XY, gridSizeKernel2XY, 1);
       gridSizeKernel3 = new dim3(gridSizeKernel3XY, gridSizeKernel3XY, 1);
 
-      System.out.println();
-
       updateKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
       updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       updateKernel.withPointer(parametersDevicePointer);
@@ -467,22 +465,27 @@ public class RapidHeightMapExtractorCuda
       croppingKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
       croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
+      croppingKernel.withInt( heightMapParameters.getCropWindowSize());
+
+
 
       updateKernel.run(stream, gridSizeKernel1, blockSize, 0);
       registerKernel.run(stream, gridSizeKernel2, blockSize, 0);
-      croppingKernel.run(stream, gridSizeKernel3, blockSize, 0);
+//      croppingKernel.run(stream, gridSizeKernel3, blockSize, 0);
 
       //Update the terrain map data with the new results
       terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
 
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
+//      inputDepthImage.download(finalCroppedHeightMap);
 
+      PerceptionDebugTools.display("Local Height Map", finalCroppedHeightMap, 1);
+
+//      Rect roi = new Rect(0, 0, 151, 151);
+//      Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      //      Rect roi = new Rect(0, 0, 201, 201);
-      //       Download the final height map image into a OpenCV Mat object for further processing
-      //      Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
    }
 
    public void destroy()
