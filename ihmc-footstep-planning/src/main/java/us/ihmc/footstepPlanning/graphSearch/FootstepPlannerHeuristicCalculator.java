@@ -18,7 +18,7 @@ public class FootstepPlannerHeuristicCalculator
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final Pose3D projectionPose = new Pose3D();
-   private final Pose2D goalMidFootPose = new Pose2D();
+   private final Pose3D goalMidFootPose = new Pose3D();
 
    public FootstepPlannerHeuristicCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,

@@ -3,23 +3,34 @@ package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.parameters.TestFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,13 +38,48 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ParameterBasedStepExpansionTest
 {
    private static final double epsilon = 1e-6;
-   private TestFootstepPlannerParameters parameters;
+   private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
+
+   private FootstepSnapAndWiggler snapper;
+   private FootstepCostCalculator stepCostCalculator;
+   private FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
+
+   private final SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+
+   private final YoRegistry registry = new YoRegistry("ParameterBasedStepExpansionTest");
 
    @BeforeEach
    public void setupParameters()
    {
       // We create default parameters for the tests
-      parameters = new TestFootstepPlannerParameters();
+      footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+
+      snapper = new FootstepSnapAndWiggler(defaultFootPolygons, footstepPlannerParameters, environmentHandler);
+
+      distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
+
+      // NOTE: This may affect new tests that are added, be careful when setting up future tests
+      FootstepCheckerInterface footstepChecker = (candidateStep, stanceStep, startOfSwing) -> true;
+
+      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters,
+                                                      snapper,
+                                                      distanceAndYawHeuristics::compute,
+                                                      registry,
+                                                      footstepChecker,
+                                                      bodyPathPlanHolder,
+                                                      environmentHandler);
+
+      // We set up these foot poses to get passed into the bodyPathPlanHolder; however, the value of these doesn't affect the test
+      Pose3D startMidFootPose = new Pose3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      Pose3D goalMidFootPose = new Pose3D(10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      bodyPathPlanHolder.setPoseWaypoints(Arrays.asList(startMidFootPose, goalMidFootPose));
+
+      SideDependentList<Pose3D> goalStepPoses = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
+      SideDependentList<DiscreteFootstep> goalSteps = createGoalSteps(goalStepPoses::get);
+
+      stepCostCalculator.initialize(goalSteps);
    }
 
    @Test
@@ -42,19 +88,19 @@ public class ParameterBasedStepExpansionTest
       // Here we set the minimum step yaw to the yaw size of the lattice point multiplied by the number of offsets we want per side
       double numberOfYawOffsetsForASide = 2;
       double latticePointYaw = LatticePoint.gridSizeYaw;
-      parameters.setMinStepYaw(latticePointYaw * -numberOfYawOffsetsForASide);
-      parameters.setMaxStepYaw(latticePointYaw * numberOfYawOffsetsForASide);
+      footstepPlannerParameters.setMinStepYaw(latticePointYaw * -numberOfYawOffsetsForASide);
+      footstepPlannerParameters.setMaxStepYaw(latticePointYaw * numberOfYawOffsetsForASide);
 
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, null, defaultFootPolygons);
       expansion.initialize();
 
       // Here is the expected number of yaw offsets we are trying to plan with
-      double minYaw = parameters.getMinStepYaw();
-      double maxYaw = parameters.getMaxStepYaw();
+      double minYaw = footstepPlannerParameters.getMinStepYaw();
+      double maxYaw = footstepPlannerParameters.getMaxStepYaw();
       double totalYawOffset = Math.abs(maxYaw) + Math.abs(minYaw);
 
       int expectedYawOffsets = 0;
-      for (double i = 0; i <= totalYawOffset;)
+      for (double i = 0; i <= totalYawOffset; )
       {
          expectedYawOffsets++;
          i += LatticePoint.gridSizeYaw;
@@ -75,7 +121,7 @@ public class ParameterBasedStepExpansionTest
    @Test
    public void testExpansionAlongBoundsFromOriginWithRight()
    {
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, null, defaultFootPolygons);
       expansion.initialize();
 
       // Set up the feet to test moving a right foot
@@ -92,10 +138,10 @@ public class ParameterBasedStepExpansionTest
       DiscreteFootstep mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
       DiscreteFootstep mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
 
-      assertTrue(mostForward.getX() <= parameters.getMaxStepReach());
-      assertTrue(mostBackward.getX() >= parameters.getMinStepLength());
-      assertTrue(mostInward.getY() <= -parameters.getMinStepWidth());
-      assertTrue(mostOutward.getY() >= -parameters.getMaxStepWidth());
+      assertTrue(mostForward.getX() <= footstepPlannerParameters.getMaxStepReach());
+      assertTrue(mostBackward.getX() >= footstepPlannerParameters.getMinStepLength());
+      assertTrue(mostInward.getY() <= -footstepPlannerParameters.getMinStepWidth());
+      assertTrue(mostOutward.getY() >= -footstepPlannerParameters.getMaxStepWidth());
 
       // Check the min and max a step can yaw
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
@@ -105,18 +151,20 @@ public class ParameterBasedStepExpansionTest
       // So if the yaw is clockwise (which should be negative) it will be ~5.7 or something just less then 2 PI radians
       // To account for this, we need to subtract the yaw we got from 2 PI.
       double outwardYawFromZero = Math.PI * 2 - mostOutwardYawed.getYaw();
-      assertTrue(outwardYawFromZero <= parameters.getMaxStepYaw());
-      assertTrue(mostInwardYawed.getYaw() >= parameters.getMinStepYaw());
+      assertTrue(outwardYawFromZero <= footstepPlannerParameters.getMaxStepYaw());
+      assertTrue(mostInwardYawed.getYaw() >= footstepPlannerParameters.getMinStepYaw());
 
       // Get the footstep closest to the ideal step and ensure that it's less than the max reach
-      DiscreteFootstep idealReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
-      assertTrue(getReachAtNode(idealReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
+      DiscreteFootstep idealReach = getExtremumNode(childNodes,
+                                                    Comparator.comparingDouble(node -> getReachAtNode(node,
+                                                                                                      footstepPlannerParameters.getIdealFootstepWidth())));
+      assertTrue(getReachAtNode(idealReach, footstepPlannerParameters.getIdealFootstepWidth()) < footstepPlannerParameters.getMaxStepReach());
    }
 
    @Test
    public void testExpansionAlongBoundsFromOriginWithLeft()
    {
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, null, defaultFootPolygons);
       expansion.initialize();
 
       // Set up the feet to test moving a right foot
@@ -133,10 +181,10 @@ public class ParameterBasedStepExpansionTest
       DiscreteFootstep mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
       DiscreteFootstep mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
 
-      assertTrue(mostForward.getX() <= parameters.getMaxStepReach());
-      assertTrue(mostBackward.getX() >= parameters.getMinStepLength());
-      assertTrue(mostInward.getY() >= parameters.getMinStepWidth());
-      assertTrue(mostOutward.getY() <= parameters.getMaxStepWidth());
+      assertTrue(mostForward.getX() <= footstepPlannerParameters.getMaxStepReach());
+      assertTrue(mostBackward.getX() >= footstepPlannerParameters.getMinStepLength());
+      assertTrue(mostInward.getY() >= footstepPlannerParameters.getMinStepWidth());
+      assertTrue(mostOutward.getY() <= footstepPlannerParameters.getMaxStepWidth());
 
       // Check the min and max a step can yaw
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
@@ -146,25 +194,27 @@ public class ParameterBasedStepExpansionTest
       // So if the yaw is clockwise (which should be negative) it will be ~5.7 or something just less then 2 PI radians
       // To account for this, we need to subtract the yaw we got from 2 PI.
       double outwardYawFromZero = Math.PI * 2 - mostOutwardYawed.getYaw();
-      assertTrue(outwardYawFromZero <= parameters.getMaxStepYaw());
-      assertTrue(mostInwardYawed.getYaw() >= parameters.getMinStepYaw());
+      assertTrue(outwardYawFromZero <= footstepPlannerParameters.getMaxStepYaw());
+      assertTrue(mostInwardYawed.getYaw() >= footstepPlannerParameters.getMinStepYaw());
 
       // Get the footstep closest to the ideal step and ensure that it's less than the max reach
-      DiscreteFootstep idealReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
-      assertTrue(getReachAtNode(idealReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
+      DiscreteFootstep idealReach = getExtremumNode(childNodes,
+                                                    Comparator.comparingDouble(node -> getReachAtNode(node,
+                                                                                                      footstepPlannerParameters.getIdealFootstepWidth())));
+      assertTrue(getReachAtNode(idealReach, footstepPlannerParameters.getIdealFootstepWidth()) < footstepPlannerParameters.getMaxStepReach());
    }
 
    @Test
    public void testExpansionAlongBoundsFromOrigin()
    {
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, null, defaultFootPolygons);
       expansion.initialize();
 
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaxStepYaw(maxYaw);
-      parameters.setMinStepYaw(minYaw);
+      footstepPlannerParameters.setMaxStepYaw(maxYaw);
+      footstepPlannerParameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
@@ -176,27 +226,32 @@ public class ParameterBasedStepExpansionTest
       expansion.doFullExpansion(new FootstepGraphNode(startOfSwingStep, stanceStep), childNodes);
       DiscreteFootstep mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       DiscreteFootstep furthestReach = getExtremumNode(childNodes,
-                                                       Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
+                                                       Comparator.comparingDouble(node -> getReachAtNode(node,
+                                                                                                         footstepPlannerParameters.getIdealFootstepWidth())));
       DiscreteFootstep mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
       DiscreteFootstep mostInward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getY()));
       DiscreteFootstep mostOutward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getY()));
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
       DiscreteFootstep mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
 
-      assertTrue(mostForward.getX() < parameters.getMaxStepReach() + epsilon);
-      assertTrue(mostBackward.getX() > parameters.getMinStepLength() - epsilon);
-      assertTrue(mostInward.getY() < -parameters.getMinStepWidth() + epsilon);
-      assertTrue(mostOutward.getY() > -parameters.getMaxStepWidth() - epsilon);
+      assertTrue(mostForward.getX() < footstepPlannerParameters.getMaxStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > footstepPlannerParameters.getMinStepLength() - epsilon);
+      assertTrue(mostInward.getY() < -footstepPlannerParameters.getMinStepWidth() + epsilon);
+      assertTrue(mostOutward.getY() > -footstepPlannerParameters.getMaxStepWidth() - epsilon);
 
-      double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
+      double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, footstepPlannerParameters.getIdealFootstepWidth());
+      double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, footstepPlannerParameters.getIdealFootstepWidth());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw,
+                                                                      maxYawAtFullLength,
+                                                                      mostOutwardYawedReach / footstepPlannerParameters.getMaxStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw,
+                                                                     minYawAtFullLength,
+                                                                     mostInwardYawedReach / footstepPlannerParameters.getMaxStepReach());
       double minOutwardYaw = snapToYawGrid(-mostOutwardYawMax - epsilon);
       double maxInwardYaw = snapToYawGrid(-mostInwardYawMin + epsilon);
       assertTrue(mostOutwardYawed.getYaw() > minOutwardYaw);
       assertTrue(mostInwardYawed.getYaw() < maxInwardYaw + epsilon);
-      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
+      assertTrue(getReachAtNode(furthestReach, footstepPlannerParameters.getIdealFootstepWidth()) < footstepPlannerParameters.getMaxStepReach());
    }
 
    private static double getReachAtNode(DiscreteFootstep node, double idealWidth)
@@ -236,11 +291,9 @@ public class ParameterBasedStepExpansionTest
    public void testPartialExpansionSize()
    {
       int branchFactor = 100;
-      parameters.setMaxBranchFactor(branchFactor);
+      footstepPlannerParameters.setMaxBranchFactor(branchFactor);
 
-      IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> new DiscreteFootstep(stance.getLatticePoint(),
-                                                                                                        stance.getRobotSide().getOppositeSide());
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, stepCostCalculator, defaultFootPolygons);
 
       expansion.initialize();
 
@@ -266,6 +319,8 @@ public class ParameterBasedStepExpansionTest
       Assertions.assertTrue(expansionList.isEmpty());
    }
 
+   public static DiscreteFootstep idealStep;
+
    /**
     * This test is meant to check if the full expansion returns a sorted list or not.
     * We don't always sort the full expansion, but by changing {@link ParameterBasedStepExpansion#SORT_FULL_EXPANSION} to true we can sort the expansion
@@ -273,14 +328,12 @@ public class ParameterBasedStepExpansionTest
    @Test
    public void testFullExpansionReturnsSortedOrder()
    {
-      ParameterBasedStepExpansion.SORT_FULL_EXPANSION = true;
-
       Random random = new Random(329032);
       int numberOfGraphNodes = 5;
       int numberOfChildNodes = 5;
 
       int branchFactor = 100;
-      parameters.setMaxBranchFactor(branchFactor);
+      footstepPlannerParameters.setMaxBranchFactor(branchFactor);
 
       for (int i = 0; i < numberOfGraphNodes; i++)
       {
@@ -290,23 +343,31 @@ public class ParameterBasedStepExpansionTest
 
          for (int j = 0; j < numberOfChildNodes; j++)
          {
-            DiscreteFootstep idealStep = DiscreteFootstep.generateRandomFootstep(random, 5.0, stanceStep.getRobotSide().getOppositeSide());
-            IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStep;
-            ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
+            ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, stepCostCalculator, defaultFootPolygons);
             expansion.initialize();
 
-            List<FootstepGraphNode> fullExpansion = new ArrayList<>();
-            expansion.doFullExpansion(node, fullExpansion);
-            List<FootstepGraphNode> fullExpansionSorted = new ArrayList<>(fullExpansion);
+            //Get the full expansion without sorting it
+            ParameterBasedStepExpansion.SORT_FULL_EXPANSION = false;
+            List<FootstepGraphNode> unsortedFullExpansion = new ArrayList<>();
+            expansion.doFullExpansion(node, unsortedFullExpansion);
+
+            // Because we set a field to true, this gets sorted inside the doFullExpansion method
+            ParameterBasedStepExpansion.SORT_FULL_EXPANSION = true;
+            List<FootstepGraphNode> actualFullExpansion = new ArrayList<>();
+            expansion.doFullExpansion(node, actualFullExpansion);
+
+            DiscreteFootstep idealStep = stepCostCalculator.computeIdealStep(node.getSecondStep(), node.getFirstStep());
 
             ToDoubleFunction<FootstepGraphNode> stepDistance = step -> ParameterBasedStepExpansion.IdealStepProximityComparator.calculateStepProximity(step.getSecondStep(),
                                                                                                                                                        idealStep);
-            Comparator<FootstepGraphNode> sorter = Comparator.comparingDouble(stepDistance);
-            fullExpansionSorted.sort(sorter);
 
-            for (int k = 0; k < fullExpansion.size(); k++)
+            List<FootstepGraphNode> expectedExpansionSorted = new ArrayList<>(unsortedFullExpansion);
+            Comparator<FootstepGraphNode> sorter = Comparator.comparingDouble(stepDistance);
+            expectedExpansionSorted.sort(sorter);
+
+            for (int k = 0; k < actualFullExpansion.size(); k++)
             {
-               Assertions.assertTrue(fullExpansion.get(i).getSecondStep().equalPosition(fullExpansionSorted.get(i).getSecondStep()));
+               Assertions.assertTrue(actualFullExpansion.get(i).getSecondStep().equalPosition(expectedExpansionSorted.get(i).getSecondStep()));
             }
          }
       }
@@ -320,7 +381,7 @@ public class ParameterBasedStepExpansionTest
       int numberOfChildNodes = 5;
 
       int branchFactor = 100;
-      parameters.setMaxBranchFactor(branchFactor);
+      footstepPlannerParameters.setMaxBranchFactor(branchFactor);
 
       for (int i = 0; i < numberOfGraphNodes; i++)
       {
@@ -330,9 +391,7 @@ public class ParameterBasedStepExpansionTest
 
          for (int j = 0; j < numberOfChildNodes; j++)
          {
-            DiscreteFootstep idealStep = DiscreteFootstep.generateRandomFootstep(random, 5.0, stanceStep.getRobotSide().getOppositeSide());
-            IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> idealStep;
-            ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
+            ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, stepCostCalculator, defaultFootPolygons);
             expansion.initialize();
 
             List<FootstepGraphNode> fullExpansion = new ArrayList<>();
@@ -361,14 +420,14 @@ public class ParameterBasedStepExpansionTest
       double clearance = 0.01;
 
       // Set width so expansion will step on stance foot if not prevented
-      parameters.setMinStepWidth(0.0);
-      parameters.setMinStepLength(-0.2);
-      parameters.setEnableExpansionMask(false);
-      parameters.setMinClearanceFromStance(clearance);
-      parameters.setMaxBranchFactor(Integer.MAX_VALUE);
+      footstepPlannerParameters.setMinStepWidth(0.0);
+      footstepPlannerParameters.setMinStepLength(-0.2);
+      footstepPlannerParameters.setEnableExpansionMask(false);
+      footstepPlannerParameters.setMinClearanceFromStance(clearance);
+      footstepPlannerParameters.setMaxBranchFactor(Integer.MAX_VALUE);
 
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, footPolygons);
+      SideDependentList<ConvexPolygon2D> footPolygons = defaultFootPolygons;
+      ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, null, footPolygons);
       expansion.initialize();
 
       List<FootstepGraphNode> expansionList = new ArrayList<>();
@@ -399,5 +458,14 @@ public class ParameterBasedStepExpansionTest
          double distance = pointA.distance(pointB);
          Assertions.assertTrue(distance >= clearance, "Intersection detected in footstep node expansion");
       }
+   }
+
+   private SideDependentList<DiscreteFootstep> createGoalSteps(Function<RobotSide, Pose3D> poses)
+   {
+      return new SideDependentList<>(side ->
+                                     {
+                                        Pose3DReadOnly goalFootPose = poses.apply(side);
+                                        return new DiscreteFootstep(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
+                                     });
    }
 }

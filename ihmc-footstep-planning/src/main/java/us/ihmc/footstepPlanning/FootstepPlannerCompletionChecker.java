@@ -5,11 +5,11 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -20,7 +20,7 @@ public class FootstepPlannerCompletionChecker
 {
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarFootstepPlannerIterationConductor iterationConductor;
-   private final IdealStepCalculatorInterface idealStepCalculator;
+   private final FootstepPlannerHeuristicCalculator heuristics;
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private double goalDistanceProximity;
@@ -37,12 +37,12 @@ public class FootstepPlannerCompletionChecker
 
    public FootstepPlannerCompletionChecker(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                            AStarFootstepPlannerIterationConductor iterationConductor,
-                                           IdealStepCalculatorInterface idealStepCalculator,
+                                           FootstepPlannerHeuristicCalculator heuristics,
                                            FootstepSnapperReadOnly snapper)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.iterationConductor = iterationConductor;
-      this.idealStepCalculator = idealStepCalculator;
+      this.heuristics = heuristics;
       this.snapper = snapper;
 
       endNodeEndStepTransform = new RigidBodyTransform();
@@ -59,7 +59,7 @@ public class FootstepPlannerCompletionChecker
       this.goalYawProximity = goalYawProximity;
 
       endNode = startNode;
-      endNodeCost = idealStepCalculator.getFootstepPlannerHeuristicCalculator().compute(startNode);
+      endNodeCost = heuristics.compute(startNode);
 
       goalMidFootPose.setX(0.5 * (goalNodes.get(RobotSide.LEFT).getX() + goalNodes.get(RobotSide.RIGHT).getX()));
       goalMidFootPose.setY(0.5 * (goalNodes.get(RobotSide.LEFT).getY() + goalNodes.get(RobotSide.RIGHT).getY()));
@@ -108,7 +108,7 @@ public class FootstepPlannerCompletionChecker
       {
          FootstepGraphNode childNode = iterationData.getValidChildNodes().get(i);
 
-         double cost = iterationConductor.getCostFromStart(childNode) + idealStepCalculator.getFootstepPlannerHeuristicCalculator().compute(childNode);
+         double cost = iterationConductor.getCostFromStart(childNode) + heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -12,17 +13,21 @@ import java.util.Random;
 
 public class AStarFootstepPlannerIterationConductorTest
 {
+   public static DiscreteFootstep idealStep;
+
    @Test
    public void testSimple2DGridSearch()
    {
       ManhattanDistanceCalculator distanceCalculator = new ManhattanDistanceCalculator();
       Random random = new Random(1738L);
       DiscreteFootstep stanceStep = DiscreteFootstep.generateRandomFootstep(random, 5.0);
-      DiscreteFootstep idealStep = DiscreteFootstep.generateRandomFootstep(random, 5.0, stanceStep.getRobotSide().getOppositeSide());
+      idealStep = DiscreteFootstep.generateRandomFootstep(random, 5.0, stanceStep.getRobotSide().getOppositeSide());
+
+      FootstepCostCalculatorForTest stepCostCalculator = new FootstepCostCalculatorForTest();
       AStarFootstepPlannerIterationConductor planner = new AStarFootstepPlannerIterationConductor(this::getNeighbors,
                                                                                                   (n1, n2, n3) -> true,
-                                                                                                  (n1, n2, n3) -> 1.0,
-                                                                                                  (stance, startOfSwing) -> idealStep);
+                                                                                                  stepCostCalculator,
+                                                                                                  distanceCalculator::getManhattanDistance);
 
       DiscreteFootstep leftStartStep = new DiscreteFootstep(0, 1, 0, RobotSide.LEFT);
       DiscreteFootstep rightStartStep = new DiscreteFootstep(0, -1, 0, RobotSide.RIGHT);
@@ -85,6 +90,22 @@ public class AStarFootstepPlannerIterationConductorTest
       expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX - 1, nextStepY, nextStepYaw, node.getFirstStepSide())));
       expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX + 0, nextStepY, nextStepYaw, node.getFirstStepSide())));
       expansionToPack.add(new FootstepGraphNode(node.getSecondStep(), new DiscreteFootstep(stanceNodeX + 1, nextStepY, nextStepYaw, node.getFirstStepSide())));
+   }
+
+   private static class FootstepCostCalculatorForTest implements FootstepCostCalculatorInterface
+   {
+
+      @Override
+      public double computeCost(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
+      {
+         return 0;
+      }
+
+      @Override
+      public DiscreteFootstep computeIdealStep(DiscreteFootstep stanceNode, DiscreteFootstep startOfSwing)
+      {
+         return idealStep;
+      }
    }
 }
 

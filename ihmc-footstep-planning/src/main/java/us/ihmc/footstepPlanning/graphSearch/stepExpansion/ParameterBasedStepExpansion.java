@@ -12,6 +12,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -23,7 +25,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
 
    private final List<FootstepGraphNode> fullExpansion = new ArrayList<>();
    private final DefaultFootstepPlannerParametersReadOnly parameters;
-   private final IdealStepCalculatorInterface idealStepCalculator;
+   private final FootstepCostCalculatorInterface footstepCostCalculator;
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
    private final HashMap<FootstepGraphNode, PartialExpansionManager> expansionManagers = new HashMap<>();
 
@@ -40,11 +42,11 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    private final TIntArrayList yawExpansionMask = new TIntArrayList();
 
    public ParameterBasedStepExpansion(DefaultFootstepPlannerParametersReadOnly parameters,
-                                      IdealStepCalculatorInterface idealStepCalculator,
+                                      FootstepCostCalculatorInterface footstepCostCalculator,
                                       SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
-      this.idealStepCalculator = idealStepCalculator;
+      this.footstepCostCalculator = footstepCostCalculator;
       this.footPolygons = footPolygons;
 
       fillExpansionMask();
@@ -145,7 +147,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             fullExpansionToPack.add(childNode);
       }
 
-      if (idealStepCalculator != null && parameters.getEnableExpansionMask())
+      if (footstepCostCalculator != null && parameters.getEnableExpansionMask())
       {
          applyMask(fullExpansionToPack, nodeToExpand);
       }
@@ -153,9 +155,9 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       // Sorting is primarily a debug tool for checking proximity to the ideal step
       if (SORT_FULL_EXPANSION)
       {
-         if (idealStepCalculator != null)
+         if (footstepCostCalculator != null)
          {
-            idealStepProximityComparator.update(nodeToExpand, idealStepCalculator);
+            idealStepProximityComparator.update(nodeToExpand, footstepCostCalculator);
             fullExpansionToPack.sort(idealStepProximityComparator);
          }
       }
@@ -163,7 +165,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
 
    private void applyMask(List<FootstepGraphNode> listToFilter, FootstepGraphNode stanceNode)
    {
-      DiscreteFootstep idealStep = idealStepCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
+      DiscreteFootstep idealStep = footstepCostCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
 
       int minXYManhattanDistance = computeMinXYManhattanDistance(listToFilter, idealStep);
       int minYawDistance = computeMinYawDistance(listToFilter, idealStep);
@@ -209,9 +211,9 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    {
       private DiscreteFootstep idealStep = null;
 
-      void update(FootstepGraphNode stanceNode, IdealStepCalculatorInterface idealStepCalculator)
+      void update(FootstepGraphNode stanceNode, FootstepCostCalculatorInterface footstepCostCalculator)
       {
-         idealStep = idealStepCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
+         idealStep = footstepCostCalculator.computeIdealStep(stanceNode.getSecondStep(), stanceNode.getFirstStep());
       }
 
       @Override
@@ -219,12 +221,12 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       {
          Objects.requireNonNull(idealStep);
 
-         double d1 = calculateStepProximity(node1.getSecondStep(), idealStep);
-         double d2 = calculateStepProximity(node2.getSecondStep(), idealStep);
-         return Double.compare(d1, d2);
+         int d1 = calculateStepProximity(node1.getSecondStep(), idealStep);
+         int d2 = calculateStepProximity(node2.getSecondStep(), idealStep);
+         return Integer.compare(d1, d2);
       }
 
-      static double calculateStepProximity(DiscreteFootstep step1, DiscreteFootstep step2)
+      static int calculateStepProximity(DiscreteFootstep step1, DiscreteFootstep step2)
       {
          int dX = step1.getXIndex() - step2.getXIndex();
          int dY = step1.getYIndex() - step2.getYIndex();
