@@ -11,9 +11,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.Objects;
+import java.net.URL;
 
 /**
  * This is an example of using a more complex CUDA kernel that takes in an OpenCV {@link Mat} object. We do this often for kernels, so this example walks you
@@ -23,10 +21,10 @@ import java.util.Objects;
  */
 public class ExampleCUDAKernel2D
 {
-   public ExampleCUDAKernel2D() throws URISyntaxException
+   public ExampleCUDAKernel2D()
    {
       // We load the kernel from resources; this is a good place to store kernels to separate them from the Java classes
-      Path programPath = Path.of(Objects.requireNonNull(getClass().getResource("matrix_element_wise_addition.cu")).toURI());
+      URL programPath = getClass().getResource("matrix_element_wise_addition.cu");
       // Create the stream
       CUstream_st stream = CUDAStreamManager.getStream();
 
@@ -119,7 +117,7 @@ public class ExampleCUDAKernel2D
       }
    }
 
-   public static void main(String[] args) throws URISyntaxException
+   public static void main(String[] args)
    {
       new ExampleCUDAKernel2D();
    }

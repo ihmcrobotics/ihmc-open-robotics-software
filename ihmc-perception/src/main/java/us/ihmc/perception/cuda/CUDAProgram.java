@@ -10,7 +10,8 @@ import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -34,7 +35,7 @@ public class CUDAProgram implements AutoCloseable
     * @param programPath {@link Path} to the .cu file.
     * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
     */
-   public CUDAProgram(Path programPath, Path... headerPaths)
+   public CUDAProgram(URL programPath, URL... headerPaths)
    {
       this(programPath, headerPaths, DEFAULT_OPTIONS);
    }
@@ -47,12 +48,15 @@ public class CUDAProgram implements AutoCloseable
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
-   public CUDAProgram(Path programPath, Path[] headerPaths, String... compilationOptions)
+   public CUDAProgram(URL programPath, URL[] headerPaths, String... compilationOptions)
    {
       try
       {
-         String programName = programPath.getFileName().toString();
-         String programContents = new String(Files.readAllBytes(programPath));
+         String programName = programPath.getFile();
+
+         InputStream programContentsStream = programPath.openStream();
+         String programContents = new String(programContentsStream.readAllBytes());
+         programContentsStream.close();
 
          String[] headerNames = null;
          String[] headerContents = null;
@@ -64,8 +68,11 @@ public class CUDAProgram implements AutoCloseable
 
             for (int i = 0; i < headerPaths.length; i++)
             {
-               headerNames[i] = headerPaths[i].getFileName().toString();
-               headerContents[i] = new String(Files.readAllBytes(headerPaths[i]));
+               headerNames[i] = headerPaths[i].getFile();
+
+               InputStream headerInputStream = headerPaths[i].openStream();
+               headerContents[i] = new String(headerInputStream.readAllBytes());
+               headerInputStream.close();
             }
          }
 

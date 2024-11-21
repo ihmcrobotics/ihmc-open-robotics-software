@@ -6,8 +6,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.Objects;
+import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -146,8 +145,8 @@ public class CUDAProgramTest
       CUstream_st stream = CUDAStreamManager.getStream();
 
       // Create a CUDA program with files
-      Path kernelPath = Path.of(Objects.requireNonNull(getClass().getResource("test_add_values.cu")).toURI());
-      Path headerPath = Path.of(Objects.requireNonNull(getClass().getResource("test_values.cuh")).toURI());
+      URL kernelPath = getClass().getResource("test_add_values.cu");
+      URL headerPath = getClass().getResource("test_values.cuh");
 
       try (CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
