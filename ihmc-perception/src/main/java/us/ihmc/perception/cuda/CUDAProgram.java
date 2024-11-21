@@ -12,7 +12,6 @@ import us.ihmc.log.LogTools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Path;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
@@ -32,8 +31,8 @@ public class CUDAProgram implements AutoCloseable
    /**
     * Construct a {@link CUDAProgram} with default compilation options
     *
-    * @param programPath {@link Path} to the .cu file.
-    * @param headerPaths {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    * @param programPath {@link URL} to the .cu file.
+    * @param headerPaths {@link URL}s to the header files included (with {@code #include}) in the .cu file.
     */
    public CUDAProgram(URL programPath, URL... headerPaths)
    {
@@ -43,8 +42,8 @@ public class CUDAProgram implements AutoCloseable
    /**
     * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
     *
-    * @param programPath        {@link Path} to the .cu file.
-    * @param headerPaths        {@link Path}s to the header files included (with {@code #include}) in the .cu file.
+    * @param programPath        {@link URL} to the .cu file.
+    * @param headerPaths        {@link URL}s to the header files included (with {@code #include}) in the .cu file.
     * @param compilationOptions List of compilation options
     *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
     */
