@@ -10,8 +10,6 @@ import us.ihmc.behaviors.sequence.actions.*;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private record RegistryRecord(Class<?> typeClass, byte messageByte) { }
-
    private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
    {
       new RegistryRecord(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
@@ -37,8 +35,8 @@ public class BehaviorTreeDefinitionRegistry
    {
       for (RegistryRecord definitionEntry : DEFINITIONS)
       {
-         if (typeName.equals(definitionEntry.typeClass().getSimpleName()))
-            return definitionEntry.typeClass();
+         if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
+            return definitionEntry.getTypeClass();
       }
 
       return null;
@@ -48,10 +46,78 @@ public class BehaviorTreeDefinitionRegistry
    {
       for (RegistryRecord definitionEntry : DEFINITIONS)
       {
-         if (nodeType == definitionEntry.messageByte())
-            return definitionEntry.typeClass();
+         if (nodeType == definitionEntry.getMessageByte())
+            return definitionEntry.getTypeClass();
       }
 
       return null;
+   }
+
+   public static String getInitialName(Class<?> definitionClass)
+   {
+      for (RegistryRecord definitionEntry : DEFINITIONS)
+      {
+         if (definitionClass == definitionEntry.getTypeClass())
+            return definitionEntry.getInitialName();
+      }
+
+      return null;
+   }
+
+   private static class RegistryRecord
+   {
+      private final String initialName;
+      private final Class<?> typeClass;
+      private final byte messageByte;
+
+      private RegistryRecord(Class<?> typeClass, byte messageByte)
+      {
+         this.typeClass = typeClass;
+         this.messageByte = messageByte;
+
+         if (typeClass == BehaviorTreeNodeDefinition.class)
+         {
+            this.initialName = "Basic node";
+         }
+         else
+         {
+            // Convert "PascalCase" to "Sentence case"
+            String initialName = typeClass.getSimpleName();
+            initialName = initialName.replaceFirst("^BehaviorTree", "");
+            initialName = initialName.replaceFirst("Definition$", "");
+            initialName = initialName.replaceFirst("Node$", " Node");
+            initialName = initialName.replaceAll("([a-z])([A-Z]+)", "$1 $2");
+
+            // Undercase words after first
+            String[] words = initialName.split(" ");
+            if (words.length > 1)
+            {
+               StringBuilder modifiedName = new StringBuilder();
+               modifiedName.append(words[0]);
+               for (int i = 1; i < words.length; i++)
+               {
+                  modifiedName.append(" ").append(words[i].toLowerCase());
+               }
+               initialName = modifiedName.toString();
+            }
+
+            this.initialName = initialName;
+         }
+      }
+
+      public String getInitialName()
+      {
+         return initialName;
+      }
+
+      public Class<?> getTypeClass()
+      {
+         return typeClass;
+      }
+
+      public byte getMessageByte()
+      {
+         return messageByte;
+      }
    }
 }

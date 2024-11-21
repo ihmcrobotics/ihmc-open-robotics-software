@@ -36,7 +36,6 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
 
       this.syncedRobot = syncedRobot;
 
-      getDefinition().setName("Door traversal");
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       lostGraspDetectionHandOpenAngleSlider = new ImGuiSliderDoubleWrapper("Lost grasp detection hand open angle", "",
                                                                            0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES),

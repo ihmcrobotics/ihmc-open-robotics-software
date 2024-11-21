@@ -8,34 +8,32 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.communication.crdt.CRDTUnidirectionalStoredPropertySet;
+import us.ihmc.communication.crdt.CRDTBidirectionalStoredPropertySet;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-public class BehaviorStoredPropertySetDefinition extends CRDTUnidirectionalStoredPropertySet
+public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStoredPropertySet
 {
-   private final StoredPropertySetBasics storedPropertySet;
    private final TDoubleArrayList onDiskDoubleValues = new TDoubleArrayList();
    private final TIntArrayList onDiskIntegerValues = new TIntArrayList();
    private final TByteArrayList onDiskBooleanValues = new TByteArrayList();
 
-   public BehaviorStoredPropertySetDefinition(ROS2ActorDesignation sideThatCanModify,
-                                              RequestConfirmFreezable requestConfirmFreezable,
+   public BehaviorStoredPropertySetDefinition(RequestConfirmFreezable requestConfirmFreezable,
                                               StoredPropertySetBasics storedPropertySet)
    {
-      super(sideThatCanModify, requestConfirmFreezable, storedPropertySet);
+      super(requestConfirmFreezable, storedPropertySet);
 
-      this.storedPropertySet = storedPropertySet;
       setOnDiskFields();
    }
 
    public void toJSON(ObjectNode jsonNode)
    {
+      StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
       ObjectNode objectNode = jsonNode.putObject(storedPropertySet.getTitle());
 
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
@@ -57,6 +55,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTUnidirectionalStore
 
    public void fromJSON(JsonNode jsonNode)
    {
+      StoredPropertySetBasics storedPropertySet = getValueAndFreeze();
       if (jsonNode.get(storedPropertySet.getTitle()) instanceof ObjectNode objectNode)
       {
          for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
@@ -83,6 +82,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTUnidirectionalStore
       onDiskIntegerValues.clear();
       onDiskBooleanValues.clear();
 
+      StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
          if (key instanceof DoubleStoredPropertyKey doubleKey)
@@ -106,6 +106,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTUnidirectionalStore
       int integerIndex = 0;
       int booleanIndex = 0;
 
+      StoredPropertySetBasics storedPropertySet = getValueAndFreeze();
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
          if (key instanceof DoubleStoredPropertyKey doubleKey)
@@ -134,6 +135,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTUnidirectionalStore
       int integerIndex = 0;
       int booleanIndex = 0;
 
+      StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
          if (key instanceof DoubleStoredPropertyKey doubleKey)

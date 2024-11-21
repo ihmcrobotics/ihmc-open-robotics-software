@@ -58,6 +58,49 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       orientationDistanceToGoalTolerance = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
+   /**
+    * Updates the definition executeAfterActionName string for
+    * saving an up to date human readable name in the JSON.
+    * It also finds the correct node upon loading the name from JSON.
+    */
+   public void updateAndValidateExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   {
+      String executeAfterActionName = null;
+
+      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
+      {
+         // We need to find the node by name
+         // This happens when we load from JSON
+         if (definition.getExecuteAfterNodeID().getValue() == 0)
+         {
+            for (int j = actionIndex - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  definition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
+                  break;
+               }
+            }
+         }
+         else // Update the node's name for saving in human readable format
+         {
+            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+            for (int j = actionIndex - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getID() == executeAfterID)
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+               }
+            }
+         }
+      }
+
+      definition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
+   }
+
    @Override
    public boolean hasStatus()
    {

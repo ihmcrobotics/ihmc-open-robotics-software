@@ -66,7 +66,7 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void addTrajectoryPoint(RigidBodyTransformReadOnly pose, double time)
    {
-      SE3TrajectoryPoint point = accessValue().add();
+      SE3TrajectoryPoint point = getValueAndFreeze().add();
       point.setTime(time);
       point.getPosition().set(pose.getTranslation());
       point.getOrientation().set(pose.getRotation());
@@ -74,12 +74,12 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void setSingleSegmentTrajectory(RigidBodyTransformReadOnly startPose, RigidBodyTransformReadOnly endPose, double trajectoryDuration)
    {
-      accessValue().clear();
-      SE3TrajectoryPoint start = accessValue().add();
+      getValueAndFreeze().clear();
+      SE3TrajectoryPoint start = getValueAndFreeze().add();
       start.setTime(0.0);
       start.getPosition().set(startPose.getTranslation());
       start.getOrientation().set(startPose.getRotation());
-      SE3TrajectoryPoint end = accessValue().add();
+      SE3TrajectoryPoint end = getValueAndFreeze().add();
       end.setTime(trajectoryDuration);
       end.getPosition().set(endPose.getTranslation());
       end.getOrientation().set(endPose.getRotation());

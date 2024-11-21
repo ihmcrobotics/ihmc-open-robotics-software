@@ -33,8 +33,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
 
       definition = getDefinition();
 
-      definition.setName("Hand configuration");
-
       sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       handOpenAngleSlider = new ImGuiSliderDoubleWrapper("Hand Open Angle", "", 0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES),

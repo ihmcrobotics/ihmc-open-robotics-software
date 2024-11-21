@@ -27,7 +27,7 @@ public abstract class CRDTUnidirectionalMutableField<T> extends CRDTUnidirection
     * Accessing this freezes the node and assumes a modification will be made.
     * Only use this if modifying the value.
     */
-   public T accessValue()
+   public T getValueAndFreeze()
    {
       checkActorCanModifyAndFreeze();
       return value;

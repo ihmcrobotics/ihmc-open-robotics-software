@@ -8,6 +8,10 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final BehaviorTreeState behaviorTreeState;
@@ -23,11 +27,33 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
    {
       MutableObject<T> loadedNode = new MutableObject<>();
 
-      LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
-      JSONFileTools.load(fileToLoad, jsonNode ->
+      try
       {
-         loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue));
-      });
+         // Try loading from file first, since maybe the user saved a new version
+         Path file = fileToLoad.getFilesystemFile();
+         if (file != null && Files.exists(file))
+         {
+            LogTools.info("Loading from file: {}", file);
+            JSONFileTools.load(fileToLoad, jsonNode -> loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue)));
+         }
+         else
+         {
+            URL classpathResource = fileToLoad.getClasspathResource();
+            if (classpathResource != null)
+            {
+               LogTools.info("Loading from resource: {}", classpathResource);
+               JSONFileTools.load(classpathResource, jsonNode -> loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue)));
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         LogTools.error("""
+                        Error loading {}.
+                        Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
+                        Error: {}
+                        """, fileToLoad.getFileName(), e.getMessage());
+      }
 
       return loadedNode.getValue();
    }

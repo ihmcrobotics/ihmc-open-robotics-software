@@ -13,7 +13,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -26,20 +25,20 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
-   private final CRDTUnidirectionalDouble swingDuration;
-   private final CRDTUnidirectionalDouble transferDuration;
-   private final CRDTUnidirectionalEnumField<ExecutionMode> executionMode;
-   private final CRDTUnidirectionalString parentFrameName;
-   private final CRDTUnidirectionalBoolean isManuallyPlaced;
-   private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> manuallyPlacedFootsteps;
-   private final CRDTUnidirectionalPoint3D goalStancePoint;
-   private final CRDTUnidirectionalPoint3D goalFocalPoint;
-   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalXs;
-   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYs;
-   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYaws;
-   private final CRDTUnidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
-   private final CRDTUnidirectionalBoolean plannerPerformAStarSearch;
-   private final CRDTUnidirectionalBoolean plannerWalkWithGoalOrientation;
+   private final CRDTBidirectionalDouble swingDuration;
+   private final CRDTBidirectionalDouble transferDuration;
+   private final CRDTBidirectionalEnumField<ExecutionMode> executionMode;
+   private final CRDTBidirectionalString parentFrameName;
+   private final CRDTBidirectionalBoolean isManuallyPlaced;
+   private final CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> manuallyPlacedFootsteps;
+   private final CRDTBidirectionalPoint3D goalStancePoint;
+   private final CRDTBidirectionalPoint3D goalFocalPoint;
+   private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalXs;
+   private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalYs;
+   private final SideDependentList<CRDTBidirectionalDouble> goalFootstepToGoalYaws;
+   private final CRDTBidirectionalImmutableField<InitialStanceSide> plannerInitialStanceSide;
+   private final CRDTBidirectionalBoolean plannerPerformAStarSearch;
+   private final CRDTBidirectionalBoolean plannerWalkWithGoalOrientation;
    private final BehaviorStoredPropertySetDefinition plannerParameters;
 
    // On disk fields
@@ -64,23 +63,21 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 1.2);
-      transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.8);
-      executionMode = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, ExecutionMode.OVERRIDE);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      isManuallyPlaced = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
-      manuallyPlacedFootsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
-                                                                           this,
-                                                                           () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
-      goalStancePoint = new CRDTUnidirectionalPoint3D(ROS2ActorDesignation.OPERATOR, this);
-      goalFocalPoint = new CRDTUnidirectionalPoint3D(ROS2ActorDesignation.OPERATOR, this);
-      goalFootstepToGoalXs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0));
-      goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0));
-      goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0));
-      plannerInitialStanceSide = new CRDTUnidirectionalImmutableField<>(ROS2ActorDesignation.OPERATOR, this, InitialStanceSide.AUTO);
-      plannerPerformAStarSearch = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true);
-      plannerWalkWithGoalOrientation = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true);
-      plannerParameters = new BehaviorStoredPropertySetDefinition(ROS2ActorDesignation.OPERATOR, this, initialPlannerParameters);
+      swingDuration = new CRDTBidirectionalDouble(this, 1.2);
+      transferDuration = new CRDTBidirectionalDouble(this, 0.8);
+      executionMode = new CRDTBidirectionalEnumField<>(this, ExecutionMode.OVERRIDE);
+      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      isManuallyPlaced = new CRDTBidirectionalBoolean(this, false);
+      manuallyPlacedFootsteps = new CRDTBidirectionalRecyclingArrayList<>(this, new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(this)));
+      goalStancePoint = new CRDTBidirectionalPoint3D(this);
+      goalFocalPoint = new CRDTBidirectionalPoint3D(this);
+      goalFootstepToGoalXs = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
+      goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
+      goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTBidirectionalDouble(this, 0.0));
+      plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
+      plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, true);
+      plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
+      plannerParameters = new BehaviorStoredPropertySetDefinition(this, initialPlannerParameters);
    }
 
    @Override
@@ -133,15 +130,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       isManuallyPlaced.setValue(jsonNode.get("footsteps") != null);
 
-      manuallyPlacedFootsteps.accessValue().clear();
+      manuallyPlacedFootsteps.getValueAndFreeze().clear();
       if (isManuallyPlaced.getValue())
       {
-         JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> manuallyPlacedFootsteps.accessValue().add().loadFromFile(footstepNode));
+         JSONTools.forEachArrayElement(jsonNode, "footsteps", footstepNode -> manuallyPlacedFootsteps.getValueAndFreeze().add().loadFromFile(footstepNode));
       }
       else
       {
-         JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.accessValue());
-         JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.accessValue());
+         JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValueAndFreeze());
+         JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValueAndFreeze());
 
          for (RobotSide side : RobotSide.values)
          {
@@ -198,11 +195,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       executionMode.setValue(onDiskExecutionMode);
       parentFrameName.setValue(onDiskParentFrameName);
       isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
-      manuallyPlacedFootsteps.accessValue().clear();
+      manuallyPlacedFootsteps.getValueAndFreeze().clear();
       for (int i = 0; i < onDiskNumberOfFootsteps; i++)
-         manuallyPlacedFootsteps.accessValue().add();
-      goalStancePoint.accessValue().set(onDiskGoalStancePoint);
-      goalFocalPoint.accessValue().set(onDiskGoalFocalPoint);
+         manuallyPlacedFootsteps.getValueAndFreeze().add();
+      goalStancePoint.getValueAndFreeze().set(onDiskGoalStancePoint);
+      goalFocalPoint.getValueAndFreeze().set(onDiskGoalFocalPoint);
       for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
       {
          goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
@@ -211,7 +208,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
 
       for (int i = 0; i < manuallyPlacedFootsteps.getSize(); i++)
-         manuallyPlacedFootsteps.accessValue().get(i).undoAllNontopologicalChanges();
+         manuallyPlacedFootsteps.getValueAndFreeze().get(i).undoAllNontopologicalChanges();
       plannerInitialStanceSide.setValue(onDiskPlannerInitialStanceSide);
       plannerPerformAStarSearch.setValue(onDiskPlannerPerformAStarSearch);
       plannerWalkWithGoalOrientation.setValue(onDiskPlannerWalkWithGoalOrientation);
@@ -332,7 +329,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       this.transferDuration.setValue(transferDuration);
    }
 
-   public CRDTUnidirectionalEnumField<ExecutionMode> getExecutionMode()
+   public CRDTBidirectionalEnumField<ExecutionMode> getExecutionMode()
    {
       return executionMode;
    }
@@ -357,63 +354,68 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       this.isManuallyPlaced.setValue(isManuallyPlaced);
    }
 
-   public CRDTUnidirectionalString getCRDTParentFrameName()
+   public CRDTBidirectionalString getCRDTParentFrameName()
    {
       return parentFrameName;
    }
 
-   public CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getManuallyPlacedFootsteps()
+   public CRDTBidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> getManuallyPlacedFootsteps()
    {
       return manuallyPlacedFootsteps;
    }
 
-   public CRDTUnidirectionalPoint3D getGoalStancePoint()
+   public CRDTBidirectionalPoint3D getGoalStancePoint()
    {
       return goalStancePoint;
    }
 
-   public CRDTUnidirectionalPoint3D getGoalFocalPoint()
+   public CRDTBidirectionalPoint3D getGoalFocalPoint()
    {
       return goalFocalPoint;
    }
 
-   public CRDTUnidirectionalDouble getGoalFootstepToGoalX(RobotSide side)
+   public CRDTBidirectionalDouble getGoalFootstepToGoalX(RobotSide side)
    {
       return goalFootstepToGoalXs.get(side);
    }
 
-   public CRDTUnidirectionalDouble getGoalFootstepToGoalY(RobotSide side)
+   public CRDTBidirectionalDouble getGoalFootstepToGoalY(RobotSide side)
    {
       return goalFootstepToGoalYs.get(side);
    }
 
-   public CRDTUnidirectionalDouble getGoalFootstepToGoalYaw(RobotSide side)
+   public CRDTBidirectionalDouble getGoalFootstepToGoalYaw(RobotSide side)
    {
       return goalFootstepToGoalYaws.get(side);
    }
 
-   public CRDTUnidirectionalImmutableField<InitialStanceSide> getPlannerInitialStanceSide()
+   public CRDTBidirectionalImmutableField<InitialStanceSide> getPlannerInitialStanceSide()
    {
       return plannerInitialStanceSide;
    }
 
-   public CRDTUnidirectionalBoolean getPlannerPerformAStarSearch()
+   public CRDTBidirectionalBoolean getPlannerPerformAStarSearch()
    {
       return plannerPerformAStarSearch;
    }
 
-   public CRDTUnidirectionalBoolean getPlannerWalkWithGoalOrientation()
+   public CRDTBidirectionalBoolean getPlannerWalkWithGoalOrientation()
    {
       return plannerWalkWithGoalOrientation;
    }
 
    public DefaultFootstepPlannerParametersReadOnly getPlannerParametersReadOnly()
    {
-      return (DefaultFootstepPlannerParametersReadOnly) plannerParameters.getStoredPropertySetReadOnly();
+      return (DefaultFootstepPlannerParametersReadOnly) plannerParameters.getValueReadOnly();
    }
 
-   public DefaultFootstepPlannerParametersBasics accessPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getAndFreezePlannerParameters()
    {
-      return (DefaultFootstepPlannerParametersBasics) plannerParameters.accessValue();
+      return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueAndFreeze();
+   }
+
+   public DefaultFootstepPlannerParametersBasics getPlannerParametersUnsafe()
+   {
+      return (DefaultFootstepPlannerParametersBasics) plannerParameters.getValueUnsafe();
    }
 }

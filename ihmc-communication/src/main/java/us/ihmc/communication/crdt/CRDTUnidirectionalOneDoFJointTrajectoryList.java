@@ -83,30 +83,30 @@ public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectio
 
    public void clear(int numberOfJoints)
    {
-      for (RecyclingArrayList<OneDoFTrajectoryPoint> oneDoFTrajectoryPoints : accessValue())
+      for (RecyclingArrayList<OneDoFTrajectoryPoint> oneDoFTrajectoryPoints : getValueAndFreeze())
       {
          oneDoFTrajectoryPoints.clear();
       }
 
-      accessValue().clear();
+      getValueAndFreeze().clear();
       for (int i = 0; i < numberOfJoints; i++)
-         accessValue().add();
+         getValueAndFreeze().add();
    }
 
    public void addTrajectoryPoint(int jointIndex, double position, double time)
    {
-      OneDoFTrajectoryPoint point = accessValue().get(jointIndex).add();
+      OneDoFTrajectoryPoint point = getValueAndFreeze().get(jointIndex).add();
       point.setTime(time);
       point.setPosition(position);
    }
 
    public void setSingleSegmentTrajectory(int jointIndex, double startPosition, double endPosition, double trajectoryDuration)
    {
-      accessValue().clear();
-      OneDoFTrajectoryPoint start = accessValue().get(jointIndex).add();
+      getValueAndFreeze().clear();
+      OneDoFTrajectoryPoint start = getValueAndFreeze().get(jointIndex).add();
       start.setTime(0.0);
       start.setPosition(startPosition);
-      OneDoFTrajectoryPoint end = accessValue().get(jointIndex).add();
+      OneDoFTrajectoryPoint end = getValueAndFreeze().get(jointIndex).add();
       end.setTime(trajectoryDuration);
       end.setPosition(endPosition);
    }

@@ -1,17 +1,19 @@
 package us.ihmc.communication.crdt;
 
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
-
 /**
- * Represents a double array that should only be modified by one actor type
- * and read-only for the others. The internal writeable instance is kept protected
+ * Represents a double array that can be modified by both the
+ * robot and the operator. The internal writeable instance is kept protected
  * from unchecked modifications.
+ *
+ * Warning: With this type, the data should not be continuously modified
+ *   tick after tick, as that will mean the value is essentially never
+ *   synced properly to the other side.
  */
-public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableField<double[]>
+public class CRDTBidirectionalDoubleArray extends CRDTBidirectionalMutableField<double[]>
 {
-   public CRDTUnidirectionalDoubleArray(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, int arraySize)
+   public CRDTBidirectionalDoubleArray(RequestConfirmFreezable requestConfirmFreezable, int arraySize)
    {
-      super(sideThatCanModify, requestConfirmFreezable, () -> new double[arraySize]);
+      super(requestConfirmFreezable, new double[arraySize]);
    }
 
    public double getValueReadOnly(int index)
@@ -41,7 +43,7 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
 
    public void fromMessage(double[] messageArray)
    {
-      if (isNotFrozen())
+      if (!isFrozen())
       {
          for (int i = 0; i < getValueInternal().length; i++)
          {

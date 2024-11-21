@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -18,21 +17,21 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
    public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
 
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalString objectFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalString objectFrameName;
+   private final CRDTBidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
    /** The magnitude of the translation component */
-   private final CRDTUnidirectionalDouble translation;
+   private final CRDTBidirectionalDouble translation;
    /** The magnitude of the rotation component */
-   private final CRDTUnidirectionalDouble rotation;
-   private final CRDTUnidirectionalDouble maxLinearVelocity;
-   private final CRDTUnidirectionalDouble maxAngularVelocity;
-   private final CRDTUnidirectionalBoolean jointspaceOnly;
-   private final CRDTUnidirectionalDouble linearPositionWeight;
-   private final CRDTUnidirectionalDouble angularPositionWeight;
-   private final CRDTUnidirectionalDouble jointspaceWeight;
-   private final CRDTUnidirectionalDouble positionErrorTolerance;
-   private final CRDTUnidirectionalDouble orientationErrorTolerance;
+   private final CRDTBidirectionalDouble rotation;
+   private final CRDTBidirectionalDouble maxLinearVelocity;
+   private final CRDTBidirectionalDouble maxAngularVelocity;
+   private final CRDTBidirectionalBoolean jointspaceOnly;
+   private final CRDTBidirectionalDouble linearPositionWeight;
+   private final CRDTBidirectionalDouble angularPositionWeight;
+   private final CRDTBidirectionalDouble jointspaceWeight;
+   private final CRDTBidirectionalDouble positionErrorTolerance;
+   private final CRDTBidirectionalDouble orientationErrorTolerance;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -53,19 +52,19 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
-      objectFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      screwAxisPoseInObjectFrame = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
-      translation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.1);
-      rotation = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.0);
-      maxLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.1);
-      maxAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 0.6);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true); // Jointspace only works best for now
-      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
-      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
-      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, -1.0);
-      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_POSITION_ERROR_TOLERANCE);
-      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
+      side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      objectFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      screwAxisPoseInObjectFrame = new CRDTBidirectionalRigidBodyTransform(this);
+      translation = new CRDTBidirectionalDouble(this, 0.1);
+      rotation = new CRDTBidirectionalDouble(this, 0.0);
+      maxLinearVelocity = new CRDTBidirectionalDouble(this, 0.1);
+      maxAngularVelocity = new CRDTBidirectionalDouble(this, 0.6);
+      jointspaceOnly = new CRDTBidirectionalBoolean(this, true); // Jointspace only works best for now
+      linearPositionWeight = new CRDTBidirectionalDouble(this, -1.0);
+      angularPositionWeight = new CRDTBidirectionalDouble(this, -1.0);
+      jointspaceWeight = new CRDTBidirectionalDouble(this, -1.0);
+      positionErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
    }
 
    @Override
@@ -95,7 +94,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       objectFrameName.setValue(jsonNode.get("objectFrame").textValue());
-      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.accessValue());
+      JSONTools.toEuclid(jsonNode, "screwAxisPose", screwAxisPoseInObjectFrame.getValueAndFreeze());
       translation.setValue(jsonNode.get("translation").asDouble());
       rotation.setValue(jsonNode.get("rotation").asDouble());
       maxLinearVelocity.setValue(jsonNode.get("maxLinearVelocity").asDouble());
@@ -135,7 +134,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
 
       side.setValue(onDiskSide);
       objectFrameName.setValue(onDiskObjectFrameName);
-      screwAxisPoseInObjectFrame.accessValue().set(onDiskScrewAxisPoseInObjectFrame);
+      screwAxisPoseInObjectFrame.getValueAndFreeze().set(onDiskScrewAxisPoseInObjectFrame);
       translation.setValue(onDiskTranslation);
       rotation.setValue(onDiskRotation);
       maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
@@ -229,7 +228,7 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       this.objectFrameName.setValue(objectFrameName);
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getScrewAxisPoseInObjectFrame()
+   public CRDTBidirectionalRigidBodyTransform getScrewAxisPoseInObjectFrame()
    {
       return screwAxisPoseInObjectFrame;
    }

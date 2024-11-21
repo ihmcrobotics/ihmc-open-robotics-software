@@ -27,7 +27,6 @@ public class RDXTrashCanInteraction extends RDXBehaviorTreeNode<TrashCanInteract
       state = getState();
       this.syncedRobot = syncedRobot;
 
-      getDefinition().setName("Trash can interaction");
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       obstructNodeName = new ImGuiInputText("Obstructed Node: ");
       obstructNodeName.addWidgetAligner(widgetAligner);

@@ -18,8 +18,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
-
-      getDefinition().setName("Action sequence");
    }
 
    @Override

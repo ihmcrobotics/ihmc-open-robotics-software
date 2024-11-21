@@ -19,7 +19,7 @@ public class CRDTUnidirectionalStoredPropertySet extends CRDTUnidirectionalMutab
       this.storedPropertySet = storedPropertySet;
    }
 
-   public StoredPropertySetReadOnly getStoredPropertySetReadOnly()
+   public StoredPropertySetReadOnly getValueReadOnly()
    {
       return storedPropertySet;
    }

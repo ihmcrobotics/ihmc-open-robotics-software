@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalLong;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
@@ -26,9 +25,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
    public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
 
-   private final CRDTUnidirectionalBoolean executeAfterPrevious;
-   private final CRDTUnidirectionalBoolean executeAfterBeginning;
-   private final CRDTUnidirectionalLong executeAfterNodeID;
+   private final CRDTBidirectionalBoolean executeAfterPrevious;
+   private final CRDTBidirectionalBoolean executeAfterBeginning;
+   private final CRDTBidirectionalLong executeAfterNodeID;
    /** We use this to save the action name to file instead of the number for human readability. */
    private String executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
 
@@ -39,9 +38,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterPrevious = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, true);
-      executeAfterBeginning = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
-      executeAfterNodeID = new CRDTUnidirectionalLong(ROS2ActorDesignation.OPERATOR, this, 0);
+      executeAfterPrevious = new CRDTBidirectionalBoolean(this, true);
+      executeAfterBeginning = new CRDTBidirectionalBoolean(this, false);
+      executeAfterNodeID = new CRDTBidirectionalLong(this, 0);
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -108,17 +107,17 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
-   public CRDTUnidirectionalBoolean getExecuteAfterPrevious()
+   public CRDTBidirectionalBoolean getExecuteAfterPrevious()
    {
       return executeAfterPrevious;
    }
 
-   public CRDTUnidirectionalBoolean getExecuteAfterBeginning()
+   public CRDTBidirectionalBoolean getExecuteAfterBeginning()
    {
       return executeAfterBeginning;
    }
 
-   public CRDTUnidirectionalLong getExecuteAfterNodeID()
+   public CRDTBidirectionalLong getExecuteAfterNodeID()
    {
       return executeAfterNodeID;
    }
