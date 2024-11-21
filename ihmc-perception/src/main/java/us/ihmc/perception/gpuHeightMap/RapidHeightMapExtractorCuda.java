@@ -349,7 +349,7 @@ public class RapidHeightMapExtractorCuda
       //       Execute the CUDA kernels with the provided stream
       //       Each kernel performs a specific task related to the height map update, registration, and cropping
 
-      int blockSizeXY = 32;
+      int blockSizeXY = 16;
       int gridSizeKernel1XY = (localCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel2XY = (globalCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel3XY = (heightMapParameters.getCropWindowSize() + blockSizeXY - 1) / blockSizeXY;
@@ -376,7 +376,6 @@ public class RapidHeightMapExtractorCuda
       croppingKernel.withPointer(parametersDevicePointer);
       croppingKernel.withInt(heightMapParameters.getCropWindowSize());
 
-      cudaStreamSynchronize(stream);
 
       updateKernel.run(stream, gridSizeKernel1, blockSize, 0);
       registerKernel.run(stream, gridSizeKernel2, blockSize, 0);
@@ -393,26 +392,29 @@ public class RapidHeightMapExtractorCuda
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
 
-      cudaStreamSynchronize(stream);
-
-      Mat inputMat = new Mat();
-      inputDepthImage.download(inputMat);
-      Mat localMat = new Mat();
-      localHeightMapImage.download(localMat);
-      Mat globalMat = new Mat();
-      globalHeightMapImage.download(globalMat);
-
-
-      PerceptionDebugTools.display("Input Height Map", inputMat , 1);
-      PerceptionDebugTools.display("Local Height Map", localMat, 1);
-      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
-      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
-
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      //globalHeightMapImage.download(finalCroppedHeightMap);
-      //Rect roi = new Rect(0, 0, 151, 151);
-      //Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
+
+//      Mat inputMat = new Mat();
+//      inputDepthImage.download(inputMat);
+//      Mat localMat = new Mat();
+//      localHeightMapImage.download(localMat);
+//      Mat globalMat = new Mat();
+//      globalHeightMapImage.download(globalMat);
+
+
+//      PerceptionDebugTools.display("Input Height Map", inputMat , 1);
+//      PerceptionDebugTools.display("Local Height Map", localMat, 1);
+//      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
+//      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
+
+
+
+//      localHeightMapImage.download(finalCroppedHeightMap);
+//      Rect roi = new Rect(0, 0, 151, 151);
+//      Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
+
+
 
    }
 
