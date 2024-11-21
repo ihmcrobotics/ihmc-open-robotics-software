@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
@@ -32,12 +33,11 @@ import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class RDXFootstepPlanGraphic implements RenderableProvider
@@ -59,7 +59,11 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    private ModelInstance modelInstance;
    private Model lastModel;
 
-   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final RepeatingTaskThread thread = new RepeatingTaskThread(getClass().getSimpleName(), this::taskThread);
+   {
+      thread.start();
+   }
+   private final AtomicReference<ArrayList<MinimalFootstep>> footsteps = new AtomicReference<>();
    private final ArrayList<RDX3DSituatedText> textRenderables = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame footstepFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstepFrame",
@@ -135,7 +139,15 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)
    {
-      executorService.clearQueueAndExecute(() -> generateMeshes(footsteps));
+      this.footsteps.set(footsteps);
+      thread.addScheduled(1);
+   }
+
+   private void taskThread()
+   {
+      ArrayList<MinimalFootstep> footsteps = this.footsteps.getAndSet(null);
+      if (footsteps != null)
+         generateMeshes(footsteps);
    }
 
    public void clear()
@@ -278,6 +290,6 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void destroy()
    {
-      executorService.destroy();
+      thread.kill();
    }
 }
