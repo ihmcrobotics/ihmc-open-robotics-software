@@ -9,9 +9,14 @@ import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.log.LogTools;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.bytedeco.cuda.global.nvrtc.*;
@@ -52,6 +57,7 @@ public class CUDAProgram implements AutoCloseable
       try
       {
          String programName = programPath.getFileName().toString();
+
          String programContents = new String(Files.readAllBytes(programPath));
 
          String[] headerNames = null;
@@ -66,6 +72,61 @@ public class CUDAProgram implements AutoCloseable
             {
                headerNames[i] = headerPaths[i].getFileName().toString();
                headerContents[i] = new String(Files.readAllBytes(headerPaths[i]));
+            }
+         }
+
+         initialize(programName, programContents, headerNames, headerContents, compilationOptions);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /**
+    * Construct a {@link CUDAProgram} with default compilation options
+    *
+    * @param programPath {@link URL} to the .cu file.
+    * @param headerPaths {@link URL}s to the header files included (with {@code #include}) in the .cu file.
+    */
+   public CUDAProgram(URL programPath, URL... headerPaths)
+   {
+      this(programPath, headerPaths, DEFAULT_OPTIONS);
+   }
+
+   /**
+    * Construct a {@link CUDAProgram} specifying the path to the .cu file, paths to the header files, and compilation options.
+    *
+    * @param programPath        {@link URL} to the .cu file.
+    * @param headerPaths        {@link URL}s to the header files included (with {@code #include}) in the .cu file.
+    * @param compilationOptions List of compilation options
+    *                           (You can see the available options <a href="https://docs.nvidia.com/cuda/nvrtc/index.html#supported-compile-options">here</a>)
+    */
+   public CUDAProgram(URL programPath, URL[] headerPaths, String... compilationOptions)
+   {
+      try
+      {
+         String programName = programPath.getFile();
+
+         InputStream programContentsStream = programPath.openStream();
+         String programContents = new String(programContentsStream.readAllBytes());
+         programContentsStream.close();
+
+         String[] headerNames = null;
+         String[] headerContents = null;
+
+         if (headerPaths != null && headerPaths.length > 0)
+         {
+            headerNames = new String[headerPaths.length];
+            headerContents = new String[headerPaths.length];
+
+            for (int i = 0; i < headerPaths.length; i++)
+            {
+               headerNames[i] = headerPaths[i].getFile();
+
+               InputStream headerInputStream = headerPaths[i].openStream();
+               headerContents[i] = new String(headerInputStream.readAllBytes());
+               headerInputStream.close();
             }
          }
 
