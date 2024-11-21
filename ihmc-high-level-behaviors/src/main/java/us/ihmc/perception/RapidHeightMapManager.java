@@ -54,7 +54,6 @@ public class RapidHeightMapManager
 
       heightMapImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
       heightmapMat = new Mat();
-//      heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       rapidHeightMapExtractor.create(heightMapImage, 1);
 
       // We use a notification in order to only call resetting the height map in one place
@@ -77,11 +76,12 @@ public class RapidHeightMapManager
 
 
    {
-      heightMapImage.download(new Mat(heightmapMat));
       if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
          OpenCVTools.convertFloatToShort(latestDepthImage, heightmapMat, 1000.0, 0.0);
       else
          latestDepthImage.convertTo(heightmapMat, opencv_core.CV_16UC1);
+
+      heightMapImage.upload(heightmapMat);
 
       if (resetHeightMapRequested.poll())
       {
