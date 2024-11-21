@@ -426,7 +426,6 @@ public class RDXPose3DGizmo implements RenderableProvider
             }
 
             frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
-            frameBasedGizmoModification.afterRotationAdjustment(FrameBasedGizmoModification.PREPEND);
             frameBasedGizmoModification.setAdjustmentNeedsToBeApplied();
          }
       }

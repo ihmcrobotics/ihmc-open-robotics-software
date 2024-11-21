@@ -6,13 +6,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class CRDTDetachableReferenceFrame
 {
-   private final CRDTUnidirectionalString parentFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform transformToParent;
+   private final CRDTBidirectionalString parentFrameName;
+   private final CRDTBidirectionalRigidBodyTransform transformToParent;
    private final DetachableReferenceFrame detachableReferenceFrame;
 
    public CRDTDetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary,
-                                       CRDTUnidirectionalString parentFrameName,
-                                       CRDTUnidirectionalRigidBodyTransform transformToParent)
+                                       CRDTBidirectionalString parentFrameName,
+                                       CRDTBidirectionalRigidBodyTransform transformToParent)
    {
       this.parentFrameName = parentFrameName;
       this.transformToParent = transformToParent;
@@ -28,7 +28,7 @@ public class CRDTDetachableReferenceFrame
    public void changeFrame(String newParentFrameName)
    {
       parentFrameName.setValue(newParentFrameName);
-      detachableReferenceFrame.changeFrame(newParentFrameName, transformToParent.accessValue());
+      detachableReferenceFrame.changeFrame(newParentFrameName, transformToParent.getValueAndFreeze());
    }
 
    public boolean isChildOfWorld()

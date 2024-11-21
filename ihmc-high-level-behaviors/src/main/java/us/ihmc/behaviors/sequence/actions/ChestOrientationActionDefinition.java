@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
@@ -14,10 +14,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionDefinition extends ActionNodeDefinition
 {
-   private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
-   private final CRDTUnidirectionalString parentFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform chestToParentTransform;
+   private final CRDTBidirectionalDouble trajectoryDuration;
+   private final CRDTBidirectionalBoolean holdPoseInWorldLater;
+   private final CRDTBidirectionalString parentFrameName;
+   private final CRDTBidirectionalRigidBodyTransform chestToParentTransform;
 
    // On disk fields
    private double onDiskTrajectoryDuration;
@@ -29,10 +29,10 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, false);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      chestToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
+      trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
+      holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, false);
+      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      chestToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 
    @Override
@@ -54,7 +54,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, chestToParentTransform.accessValue());
+      JSONTools.toEuclid(jsonNode, chestToParentTransform.getValueAndFreeze());
    }
 
    @Override
@@ -76,7 +76,7 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       holdPoseInWorldLater.setValue(onDiskHoldPoseInWorldLater);
       parentFrameName.setValue(onDiskParentFrameName);
-      chestToParentTransform.accessValue().set(onDiskChestToParentTransform);
+      chestToParentTransform.getValueAndFreeze().set(onDiskChestToParentTransform);
    }
 
    @Override
@@ -114,25 +114,30 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
-      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
+      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
-      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
+      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = chestToParentTransform.accessValue().getRotation();
-      chestToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = chestToParentTransform.getValueAndFreeze().getRotation();
+      chestToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public RotationMatrixBasics getRotation()
    {
-      return chestToParentTransform.accessValue().getRotation();
+      return chestToParentTransform.getValueAndFreeze().getRotation();
+   }
+
+   public RotationMatrixReadOnly getRotationReadOnly()
+   {
+      return (RotationMatrixReadOnly) chestToParentTransform.getValueReadOnly().getRotation();
    }
 
    public double getTrajectoryDuration()
@@ -165,12 +170,12 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
       this.parentFrameName.setValue(parentFrameName);
    }
 
-   public CRDTUnidirectionalString getCRDTParentFrameName()
+   public CRDTBidirectionalString getCRDTParentFrameName()
    {
       return parentFrameName;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getChestToParentTransform()
+   public CRDTBidirectionalRigidBodyTransform getChestToParentTransform()
    {
       return chestToParentTransform;
    }
