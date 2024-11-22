@@ -51,6 +51,7 @@ public class AStarFootstepPlanner
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
    private final HeightMapFootstepChecker heightMapFootstepChecker;
+   private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final FootstepPlannerCompletionChecker completionChecker;
    private final FootstepCostCalculator stepCostCalculator;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
@@ -70,7 +71,6 @@ public class AStarFootstepPlanner
    private final List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
    /** Called at the status publish frequency. Post-processes the plan and publishes it */
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
-   private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
 
    private double planningStartTime;
    private final Stopwatch stopwatch;
@@ -89,10 +89,10 @@ public class AStarFootstepPlanner
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
-      this.stopwatch = stopwatch;
-      this.statusCallbacks = statusCallbacks;
       this.plannerEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, plannerEnvironmentHandler);
+      this.stopwatch = stopwatch;
+      this.statusCallbacks = statusCallbacks;
 
       this.heightMapFootstepChecker = new HeightMapFootstepChecker(footstepPlannerParameters,
                                                                    footPolygons,
