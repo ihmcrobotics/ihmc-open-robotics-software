@@ -42,6 +42,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
 
    // This is the desired touchdown position to be used by the robot
    private final YoFramePoint3D desiredTouchdownPositionInWorld3D;
+   private final YoFramePoint2D desiredTouchdownPositionInCOM2D;
    private final FramePoint2D desiredTouchdownPosition2D;
 
    // This is the desired lateral offset from the touchdown location returned by the TD;LO and capture point laws to achieve stable walking at the desired
@@ -125,8 +126,9 @@ public class DynamicsBasedFootstepTouchdownCalculator
 
       // Final touchdown position and predicted velocity. These are populated by the touchdown calculator currently in use
       desiredTouchdownPositionInWorld3D = new YoFramePoint3D(prefix + "DesiredTouchdownPositionInWorld", ReferenceFrame.getWorldFrame(), registry);
+      desiredTouchdownPositionInCOM2D = new YoFramePoint2D(prefix + "DesiredTouchdownPositionInCOM2D", centerOfMassControlZUpFrame, registry);
       desiredTouchdownPosition2D = new FramePoint2D(centerOfMassControlZUpFrame);
-      predictedVelocityAtTouchdown = new YoFrameVector2D(prefix + "PredictedVelocityAtTouchdown", centerOfMassControlZUpFrame, registry);
+      predictedVelocityAtTouchdown = new YoFrameVector2D(prefix + "PredictedVelocityAtTouchdownInWorld", ReferenceFrame.getWorldFrame(), registry);
 
       // Step position offsets for desired walking speed and stance width
       touchdownPositionOffsetForDesiredStanceWidth = new YoDouble(prefix + "TouchdownPositionOffsetForDesiredStanceWidth", registry);
@@ -188,7 +190,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
       computeDesiredALIPTouchdownPositionWithDS(timeToReachGoal, pendulumBase, netPendulumBase, isInDoubleSupport);
 
       desiredTouchdownPosition2D.set(desiredALIPTouchdownPositionWithDS);
-      predictedVelocityAtTouchdown.set(predictedALIPVelocityAtTouchdownWithDS);
+      predictedVelocityAtTouchdown.setMatchingFrame(predictedALIPVelocityAtTouchdownWithDS);
 
       // compute offsets for desired walking speed and stance width
       computeDesiredTouchdownOffsetForVelocity(supportSide);
@@ -206,6 +208,7 @@ public class DynamicsBasedFootstepTouchdownCalculator
 
       // determine touchdown z position from x position, y position, and ground plane
       desiredTouchdownPositionInWorld3D.setMatchingFrame(desiredTouchdownPosition2D, 0.0);
+      desiredTouchdownPositionInCOM2D.setMatchingFrame(desiredTouchdownPosition2D);
    }
 
    public FramePoint3DReadOnly getDesiredTouchdownPositionInWorld3D()

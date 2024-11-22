@@ -15,7 +15,7 @@ public class DynamicsBasedFootstepParameters
    private static final double DOUBLE_SUPPORT_FRACTION = 0.1;
    private static final double STANCE_WIDTH = 0.2;
    private static final double SWING_HEIGHT = 0.07;
-   private static final double COM_HEIGHT = 0.8;
+   private static final double COM_HEIGHT = 0.9;
    private static final double POLE = 0.275;
 
    // YoVariables
@@ -66,7 +66,7 @@ public class DynamicsBasedFootstepParameters
 
          swingDurationCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "swingDuration", suffix + suffix2, swingDuration, registry));
          doubleSupportFractionCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "doubleSupportFraction", suffix + suffix2, doubleSupportFraction, registry));
-         stanceWidthCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "stanceWidthCurrentStep", suffix + suffix2, doubleSupportFraction, registry));
+         stanceWidthCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "stanceWidthCurrentStep", suffix + suffix2, stanceWidth, registry));
          swingHeightCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "desiredSwingHeight", suffix + suffix2, swingHeight, registry));
          comHeightCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "desiredComHeight", suffix + suffix2, comHeight, registry));
          poleCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "pole", suffix + suffix2, pole, registry));

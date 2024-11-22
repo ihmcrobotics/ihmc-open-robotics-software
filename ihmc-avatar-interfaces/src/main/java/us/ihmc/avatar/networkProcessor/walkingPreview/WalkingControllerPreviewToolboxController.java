@@ -183,6 +183,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
+                                                                            controllerToolbox.getWalkingMessageHandler(),
                                                                             controllerToolbox.getTotalMassProvider(),
                                                                             gravityZ,
                                                                             controlDT,

@@ -367,7 +367,7 @@ public class ICPController implements ICPControllerInterface
 
       // run a temporary computation here to get what the  unconstrained CMP would be with none of the scaling
       computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset, unconstrainedFeedbackNoScaling, unconstrainedFeedbackCMPNoScaling);
-      //computeFeedForwardAndFeedBackAlphas();
+      computeFeedForwardAndFeedBackAlphas();
 
       referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
       referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());

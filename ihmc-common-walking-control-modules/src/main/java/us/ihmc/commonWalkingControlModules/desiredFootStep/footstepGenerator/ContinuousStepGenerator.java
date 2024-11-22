@@ -186,7 +186,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          parentRegistry.addChild(registry);
 
       parameters.clear();
-      numberOfTicksBeforeSubmittingFootsteps.set(2);
+      numberOfTicksBeforeSubmittingFootsteps.set(0);
       currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
 
       setSupportFootBasedFootstepAdjustment(true);

@@ -70,6 +70,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -181,6 +182,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final ExecutionTimer multiContactRegionLPSolveTimer = new ExecutionTimer("multiContactRegionLPSolveTimer", registry);
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
+
+   private final YoBoolean alterEndConditionOfTransfer = new YoBoolean("alterEndConditionOfTransfer", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                              CenterOfMassStateProvider centerOfMassStateProvider,
@@ -914,6 +917,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public YoBoolean getControllerFailedBoolean()
    {
       return controllerFailed;
+   }
+
+   public BooleanProvider getAlterEndConditionOfTransfer()
+   {
+      return alterEndConditionOfTransfer;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

@@ -215,7 +215,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       // delayed for another reason. So we should check before updating step adjustment
       boolean footstepIsBeingAdjusted = false;
       if (!feetManager.getCurrentConstraintType(swingSide).isLoadBearing())
-         footstepIsBeingAdjusted = true; //balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
+         footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
       if (footstepIsBeingAdjusted)
       {
@@ -264,6 +264,14 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public boolean isDone(double timeInState)
    {
+      if (controllerToolbox.getAlterEndConditionOfTransfer().getValue())
+      {
+         if (!hasSwingFootTouchedDown.getValue() && super.isDone(timeInState))
+            hasSwingFootTouchedDown.set(true);
+
+         return super.isDone(timeInState);
+      }
+
       if (!hasSwingFootTouchedDown.getValue() && super.isDone(timeInState))
          hasSwingFootTouchedDown.set(true);
 
@@ -288,21 +296,35 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void test()
    {
-      walkingMessageHandler.peekFootstep(0, nextFootstep);
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+      {
+         walkingMessageHandler.peekFootstep(0, nextFootstep);
 
-      if (nextFootstep.getRobotSide() != swingSide || !haveWeEntered)
-         return;
+         if (nextFootstep.getRobotSide() != swingSide || !haveWeEntered)
+            return;
 
-      balanceManager.clearICPPlan();
+         balanceManager.clearICPPlan();
+
+         swingTime = walkingMessageHandler.getNextSwingTime();
+
+         walkingMessageHandler.poll(nextFootstep, footstepTiming);
+
+
+         if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+            walkingMessageHandler.peekFootstep(0, nextNextFootstep);
+
+         balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+      }
+
+
+
+
+
+
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      swingTime = walkingMessageHandler.getNextSwingTime();
-
-      walkingMessageHandler.poll(nextFootstep, footstepTiming);
-      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
-         walkingMessageHandler.peekFootstep(0, nextNextFootstep);
-
+      feetManager.adjustHeightIfNeeded(nextFootstep);
       desiredFootPoseInWorld.set(nextFootstep.getFootstepPose());
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
@@ -316,7 +338,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       for (int i = 0; i < stepsToAdd; i++)
@@ -326,16 +347,17 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
-      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
-      walkingMessageHandler.pollStepConstraints(stepConstraints);
+      walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+      failureDetectionControlModule.setNextFootstep(nextFootstep);
+
+      feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+
+      balanceManager.adjustFootstepInCoPPlan(nextFootstep);
+
+      // FIXME I don't need to be computing this again
+      balanceManager.computeICPPlan();
 
       updateHeightManager();
-
-      if (feetManager.adjustHeightIfNeeded(nextFootstep))
-      {
-         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-      }
    }
 
    @Override
@@ -352,6 +374,9 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
+      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+         walkingMessageHandler.pollStepConstraints(stepConstraints);
       balanceManager.setCurrentStepConstraints(stepConstraints);
 
       feetManager.requestSwing(swingSide,

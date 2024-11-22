@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -20,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightControll
 import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.PelvisHeightController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -59,6 +61,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
@@ -156,6 +159,15 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
+   ////
+   private final SideDependentList<ContactableFoot> contactableFeet;
+   private final WalkingControllerParameters walkingControllerParameters;
+   private final double controlDt;
+   private final FramePoint2D leadingPendulumBase = new FramePoint2D();
+   private final FramePoint2D trailingPendulumBase = new FramePoint2D();
+   private final FramePoint2D alternateCoP = new FramePoint2D();
+   private final WalkingMessageHandler walkingMessageHandler;
+
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
                                           WalkingControllerParameters walkingControllerParameters,
                                           YoRegistry parentRegistry)
@@ -165,6 +177,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
            controllerToolbox.getContactableFeet(),
            controllerToolbox.getFullRobotModel().getElevator(),
            walkingControllerParameters,
+           controllerToolbox.getWalkingMessageHandler(),
            controllerToolbox.getTotalMassProvider(),
            controllerToolbox.getGravityZ(),
            controllerToolbox.getControlDT(),
@@ -177,6 +190,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
                                           WalkingControllerParameters walkingControllerParameters,
+                                          WalkingMessageHandler walkingMessageHandler,
                                           DoubleProvider totalMassProvider,
                                           double gravityZ,
                                           double controlDT,
@@ -185,6 +199,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       this.totalMassProvider = totalMassProvider;
       this.gravityZ = gravityZ;
+      this.contactableFeet = contactableFeet;
+      this.walkingControllerParameters = walkingControllerParameters;
+      this.walkingMessageHandler = walkingMessageHandler;
+      this.controlDt = controlDT;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -257,7 +275,72 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
 
+      useAlternateCoP = new YoBoolean("useAlternateCoP", registry);
+
       parentRegistry.addChild(registry);
+   }
+
+   private double leftTimeInContact = 0.0;
+   private double rightTimeInContact = 0.0;
+   private double leadingTimeInContact = 0.0;
+   private final YoBoolean useAlternateCoP;
+
+   private void computeAlternateCoP()
+   {
+      boolean leftInContact = contactStateCommands.get(RobotSide.LEFT).getNumberOfContactPoints() > 0;
+      boolean rightInContact = contactStateCommands.get(RobotSide.RIGHT).getNumberOfContactPoints() > 0;
+
+      RobotSide leadingSide = RobotSide.RIGHT;
+      RobotSide trailingSide = RobotSide.LEFT;
+
+      if (leftInContact && !rightInContact)
+      {
+         leftTimeInContact += controlDt;
+         rightTimeInContact = 0.0;
+         leadingTimeInContact = leftTimeInContact;
+         leadingSide = RobotSide.LEFT;
+         trailingSide = RobotSide.LEFT;
+      }
+      else if (rightInContact && !leftInContact)
+      {
+         rightTimeInContact += controlDt;
+         leftTimeInContact = 0.0;
+         leadingTimeInContact = rightTimeInContact;
+         leadingSide = RobotSide.RIGHT;
+         trailingSide = RobotSide.RIGHT;
+      }
+      else if (leftInContact && rightInContact)
+      {
+         leftTimeInContact += controlDt;
+         rightTimeInContact += controlDt;
+
+         if (leftTimeInContact > rightTimeInContact)
+         {
+            leadingSide = RobotSide.RIGHT;
+            trailingSide = RobotSide.LEFT;
+            leadingTimeInContact = rightTimeInContact;
+         }
+         else
+         {
+            leadingSide = RobotSide.LEFT;
+            trailingSide = RobotSide.RIGHT;
+            leadingTimeInContact = leftTimeInContact;
+         }
+      }
+
+      leadingPendulumBase.setToZero(contactableFeet.get(leadingSide).getSoleFrame());
+      trailingPendulumBase.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
+
+
+      double transferDuration = walkingMessageHandler.getNextTransferTime();
+      double alpha = 1.0;
+      if (transferDuration > 0.0)
+         alpha = MathTools.clamp(leadingTimeInContact / transferDuration, 0.0, 1.0);
+
+      leadingPendulumBase.changeFrameAndProjectToXYPlane(worldFrame);
+      trailingPendulumBase.changeFrameAndProjectToXYPlane(worldFrame);
+      alternateCoP.changeFrameAndProjectToXYPlane(worldFrame);
+      alternateCoP.interpolate(trailingPendulumBase, leadingPendulumBase, alpha);
    }
 
    public void reset()
@@ -380,8 +463,14 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       else
          desiredLinearMomentumRateWeight.update(linearMomentumRateWeight);
 
+      computeAlternateCoP();
+      FixedFramePoint2DBasics desiredCoPToUse = desiredCoP;
+
+      if (useAlternateCoP.getBooleanValue())
+         desiredCoPToUse.setMatchingFrame(alternateCoP);
+
       yoDesiredCMP.set(desiredCMP);
-      yoDesiredCoP.set(desiredCoP);
+      yoDesiredCoP.set(desiredCoPToUse);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
       yoCenterOfMassVelocity.set(capturePointCalculator.getCenterOfMassVelocity());
       yoCapturePoint.set(capturePoint);
@@ -397,7 +486,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
-      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoP, contactStateCommands, bipedSupportPolygons.getFootPolygonsInSoleFrame());
+      centerOfPressureCommandCalculator.computeCenterOfPressureCommand(desiredCoPToUse, contactStateCommands, bipedSupportPolygons.getFootPolygonsInSoleFrame());
 
       return success;
    }

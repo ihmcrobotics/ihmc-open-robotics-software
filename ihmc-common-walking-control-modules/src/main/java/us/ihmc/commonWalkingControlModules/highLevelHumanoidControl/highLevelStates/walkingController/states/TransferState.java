@@ -45,6 +45,7 @@ public abstract class TransferState extends WalkingState
    private final DoubleProvider unloadFraction;
    private final DoubleProvider rhoMin;
 
+
    public TransferState(WalkingStateEnum transferStateEnum,
                         WalkingMessageHandler walkingMessageHandler,
                         HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -107,6 +108,8 @@ public abstract class TransferState extends WalkingState
             double nominalPercentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
             double icpBasedPercentInUnloading = 1.0 - MathTools.clamp(balanceManager.getNormalizedEllipticICPError() - 1.0, 0.0, 1.0);
             double percentInUnloading = Math.min(nominalPercentInUnloading, icpBasedPercentInUnloading);
+            if (controllerToolbox.getAlterEndConditionOfTransfer().getValue())
+               percentInUnloading = 0.0;
             feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading, rhoMin.getValue());
          }
       }
@@ -118,6 +121,9 @@ public abstract class TransferState extends WalkingState
    @Override
    public boolean isDone(double timeInState)
    {
+      if (controllerToolbox.getAlterEndConditionOfTransfer().getValue())
+         return timeInState > stepTiming.getTransferTime();
+
       //If we're using a precomputed icp trajectory we can't rely on the icp planner's state to dictate when to exit transfer.
       boolean transferTimeElapsedUnderPrecomputedICPPlan = false;
       if (balanceManager.isPrecomputedICPPlannerActive())

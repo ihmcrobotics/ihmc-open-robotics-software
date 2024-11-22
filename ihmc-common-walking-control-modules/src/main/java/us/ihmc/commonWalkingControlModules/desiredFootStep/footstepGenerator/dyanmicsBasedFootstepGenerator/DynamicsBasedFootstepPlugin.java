@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -85,6 +87,11 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    //
    private final SideDependentList<FramePoint2D> pendulumBase = new SideDependentList<>();
    private final FramePoint2D netPendulumBase = new FramePoint2D();
+   private final SideDependentList<YoFramePoint3D> pendulumBase3DInWorld = new SideDependentList<>();
+   private final YoFramePoint3D netPendulumBase3DInWorld = new YoFramePoint3D("netPendulumBase3DInWorld" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
+   private final SideDependentList<YoGraphicPosition> pendulumBaseViz = new SideDependentList<>();
+   private final YoGraphicPosition netPendulumBaseViz;
+
 
    //
    private final static Vector2DReadOnly zero2D = new Vector2D();
@@ -134,6 +141,13 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
 
+      netPendulumBaseViz = new YoGraphicPosition("netPendulumBase" + variableNameSuffix,
+                                                 netPendulumBase3DInWorld,
+                                                 0.015,
+                                                 YoAppearance.Red(),
+                                                 YoGraphicPosition.GraphicType.SQUARE);
+
+
       //groundPlaneEstimator = new FootSoleBasedGroundPlaneEstimator(centerOfMassControlZUpFrame, referenceFrames, yoGraphicsListRegistry, registry);
 
       // Side-dependant stuff, most of the desired-related things
@@ -142,6 +156,19 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          footStates.put(robotSide, new YoEnum<>(robotSide.getLowerCaseName() + "FootStates" + variableNameSuffix, registry, FootState.class));
 
          pendulumBase.put(robotSide, new FramePoint2D(centerOfMassControlZUpFrame));
+
+         pendulumBase3DInWorld.put(robotSide, new YoFramePoint3D(robotSide.getLowerCaseName() + "PendulumBase3DInWorld" + variableNameSuffix,
+                                                                 ReferenceFrame.getWorldFrame(),
+                                                                 registry));
+
+         pendulumBaseViz.put(robotSide, new YoGraphicPosition(robotSide.getLowerCaseName() + "PendulumBase" + variableNameSuffix,
+                                                              pendulumBase3DInWorld.get(robotSide),
+                                                              0.015,
+                                                              YoAppearance.Black(),
+                                                              YoGraphicPosition.GraphicType.SQUARE));
+
+         yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, pendulumBaseViz.get(robotSide));
+         yoGraphicsListRegistry.registerArtifact(variableNameSuffix, pendulumBaseViz.get(robotSide).createArtifact());
 
          touchdownCalculator.put(robotSide, new DynamicsBasedFootstepTouchdownCalculator(robotSide,
                                                                                          centerOfMassControlZUpFrame,
@@ -165,7 +192,11 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          stateMachineFactory.addDoneTransition(FootState.SWING, FootState.SUPPORT);
 
          footStateMachines.put(robotSide, stateMachineFactory.build(FootState.SUPPORT));
+         footStateMachines.get(robotSide).resetToInitialState();
       }
+
+      yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, netPendulumBaseViz);
+      yoGraphicsListRegistry.registerArtifact(variableNameSuffix, netPendulumBaseViz.createArtifact());
    }
 
    private class SupportFootState implements State
@@ -180,7 +211,9 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       @Override
       public void onEntry()
       {
-         pendulumBase.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleZUpFrame(robotSide));
+         pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
+         pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+         calculateNetPendulumBase();
 
          if (inDoubleSupport.getBooleanValue())
             calculate(touchdownCalculator.get(robotSide),
@@ -195,6 +228,10 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       @Override
       public void doAction(double timeInState)
       {
+         pendulumBase.get(robotSide).setToZero(referenceFrames.getSoleZUpFrame(robotSide));
+         pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
+         calculateNetPendulumBase();
+
          double timeToReachGoal = getTransferDuration(robotSide) - timeInState;
          timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getTransferDuration(robotSide));
 
@@ -297,7 +334,12 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       calculateNetPendulumBase();
 
       for (RobotSide robotSide : RobotSide.values)
+      {
          footStateMachines.get(robotSide).doActionAndTransition();
+         pendulumBase3DInWorld.get(robotSide).setMatchingFrame(pendulumBase.get(robotSide), 0.0);
+      }
+
+      netPendulumBase3DInWorld.setMatchingFrame(netPendulumBase, 0.0);
    }
 
    public void calculate(RobotSide swingSide,
@@ -315,7 +357,7 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
    }
 
    private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
-   private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();;
+   private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();
 
    public void calculate(DynamicsBasedFootstepTouchdownCalculator touchdownCalculator,
                                 RobotSide swingSide,
@@ -342,13 +384,15 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       {
          if (footStates.get(RobotSide.LEFT).getEnumValue() == FootState.SUPPORT)
          {
-            netPendulumBase.setMatchingFrame(pendulumBase.get(RobotSide.LEFT));
+            netPendulumBase.setIncludingFrame(pendulumBase.get(RobotSide.LEFT));
+            netPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(RobotSide.LEFT));
             setTrailingSide(RobotSide.LEFT);
          }
 
          else
          {
-            netPendulumBase.setMatchingFrame(pendulumBase.get(RobotSide.RIGHT));
+            netPendulumBase.setIncludingFrame(pendulumBase.get(RobotSide.RIGHT));
+            netPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(RobotSide.RIGHT));
             setTrailingSide(RobotSide.RIGHT);
          }
 
@@ -375,7 +419,7 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       // interpolate between the two pendulum bases based on the percentage through double support
       netPendulumBase.changeFrameAndProjectToXYPlane(pendulumBase.get(trailingSide).getReferenceFrame());
       netPendulumBase.interpolate(pendulumBase.get(trailingSide), pendulumBase.get(trailingSide.getOppositeSide()), alpha);
-      netPendulumBase.changeFrame(referenceFrames.getSoleZUpFrame(trailingSide));
+      netPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(trailingSide));
    }
 
    private void handleDesiredsFromProviders()
@@ -550,13 +594,23 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       return trailingSide;
    }
 
+   private final FramePoint2D tempTouchdownPosition = new FramePoint2D();
    public void getDesiredTouchdownPosition2D(RobotSide robotSide, FixedFramePoint2DBasics touchdownPositionToPack)
    {
-      touchdownPositionToPack.setMatchingFrame(getDesiredTouchdownPosition2D(robotSide));
+      tempTouchdownPosition.setIncludingFrame(getDesiredTouchdownPosition2D(robotSide));
+      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
+      touchdownPositionToPack.set(tempTouchdownPosition);
    }
 
    public FramePoint2DReadOnly getDesiredTouchdownPosition2D(RobotSide robotSide)
    {
+      if (desiredTouchdownPositions.get(robotSide).containsNaN())
+      {
+         footStates.get(robotSide).set(FootState.SWING);
+         footStateMachines.get(robotSide).performTransition(FootState.SWING);
+         footStateMachines.get(robotSide).doAction();
+      }
+
       return desiredTouchdownPositions.get(robotSide);
    }
 

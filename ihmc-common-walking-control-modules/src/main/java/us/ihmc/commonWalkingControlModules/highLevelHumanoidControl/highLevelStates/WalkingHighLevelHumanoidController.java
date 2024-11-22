@@ -749,7 +749,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
 
-      if (failureDetectionControlModule.isRobotFalling())
+      if (false)//failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
          walkingMessageHandler.clearFlamingoCommands();

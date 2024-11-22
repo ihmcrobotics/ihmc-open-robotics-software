@@ -479,11 +479,11 @@ public class SwingState extends AbstractFootControlState
       yoReferenceSolePosition.setMatchingFrame(desiredPosition);
       yoReferenceSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
 
-      if (!isInTouchdown)
-      { // we're still in swing, so update the desired setpoints using the smoother
-         swingTrajectorySmoother.compute(time);
-         swingTrajectorySmoother.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      }
+//      if (!isInTouchdown)
+//      { // we're still in swing, so update the desired setpoints using the smoother
+//         swingTrajectorySmoother.compute(time);
+//         swingTrajectorySmoother.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+//      }
 
       if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
       {

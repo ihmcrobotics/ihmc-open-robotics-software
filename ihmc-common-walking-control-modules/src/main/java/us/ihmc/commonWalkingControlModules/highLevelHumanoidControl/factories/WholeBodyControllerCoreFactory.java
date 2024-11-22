@@ -175,6 +175,7 @@ public class WholeBodyControllerCoreFactory
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
+                                                                            controllerToolbox.getWalkingMessageHandler(),
                                                                             totalMassProvider,
                                                                             gravityZ,
                                                                             controlDT,
