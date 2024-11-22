@@ -38,8 +38,8 @@ extern "C"
 #define VERTICAL_SEARCH_RESOLUTION 35
 #define FAST_SEARCH_SIZE 36
 
-#define VERTICAL_FOV 1.57079632679f
-#define HORIZONTAL_FOV 6.28318530718f
+#define VERTICAL_FOV 1.5707963267948966f
+#define HORIZONTAL_FOV 6.2831853f
 
 #define SNAP_HEIGHT_MAP_CENTER_X 0
 #define SNAP_HEIGHT_MAP_CENTER_Y 1
@@ -177,7 +177,8 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
             }
         }
     }
-    return (count > 0) ? heightSum / (float)count : 0.0f;
+    float heightAverage = heightSum / (float) count;
+    return heightAverage;
 }
 
 __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalMap, float *params)
@@ -202,8 +203,9 @@ __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsig
             }
         }
     }
+float heightStddev = sqrt(totalDeviation / (float)count);
+   return heightStddev;
 
-    return (count > 0) ? sqrt(totalDeviation / (float)count) : 0.0f;
 }
 
 __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalMap, float *params)
@@ -293,12 +295,12 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 
     // Search within the window in the depth image
     for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
-         pitchOffset <= static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2); pitchOffset += skip)
+         pitchOffset < static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2+1); pitchOffset += skip)
     {
         int pitchIdx = projectedPoint.y + pitchOffset;
 
         for (int yawOffset = -static_cast<int>(params[SEARCH_WINDOW_WIDTH] / 2);
-             yawOffset <= static_cast<int>(params[SEARCH_WINDOW_WIDTH] / 2); yawOffset += skip)
+             yawOffset < static_cast<int>(params[SEARCH_WINDOW_WIDTH] / 2)+ 1; yawOffset += skip)
         {
             int yawIdx = projectedPoint.x + yawOffset;
 
@@ -399,7 +401,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         make_int2(xIndex, yIndex),
         make_float2(0.0f, 0.0f),
         params[GLOBAL_CELL_SIZE],
-        static_cast<int>(params[GLOBAL_CENTER_INDEX]));
+       params[GLOBAL_CENTER_INDEX]);
 
     cellCenterInWorld.x = tempCoord.x;
     cellCenterInWorld.y = tempCoord.y;
@@ -414,6 +416,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
 
     // Check collision
     float2 cellCenterInZUpFrameXY = make_float2(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y);
+
     bool isColliding = length2D(cellCenterInZUpFrameXY) < params[ROBOT_COLLISION_RADIUS];
     if (isColliding)
         return;
@@ -425,7 +428,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
         make_float2(cellCenterInZUpFrame.x, cellCenterInZUpFrame.y),
         make_float2(0.0f, 0.0f),
         params[LOCAL_CELL_SIZE],
-        static_cast<int>(params[LOCAL_CENTER_INDEX]));
+       params[LOCAL_CENTER_INDEX]);
 
     int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
 
@@ -494,6 +497,22 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
 
     int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
     int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
+
+    int rotate90clock = 1;
+    int verticalflip = 1;
+
+     // Apply rotation (90 degrees clockwise)
+        if (rotate90clock == 1) {
+            int temp = globalCellIndexX;
+            globalCellIndexX = globalCellIndexY;
+            globalCellIndexY = globalMapSizeY - 1 - temp;  // Mirror around center after rotation
+        }
+
+        // Apply vertical flip (flip along y-axis)
+        if (verticalflip == 1) {
+            globalCellIndexY = globalMapSizeY - 1 - globalCellIndexY;
+        }
+
 
     // Check if global cell index is within bounds
     if (globalCellIndexX >= 0 && globalCellIndexX < globalMapSizeX &&
