@@ -20,6 +20,10 @@ module behavior_msgs
          */
         boolean enable_continuous_hiking_with_joystick_controller;
         /**
+         * flag to walk backwards with the continuous hiking state machine
+         */
+        boolean walk_backwards;
+        /**
          * forward joystick value
          */
         double forward_value;

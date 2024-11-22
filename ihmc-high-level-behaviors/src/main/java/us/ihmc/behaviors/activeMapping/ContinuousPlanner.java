@@ -130,7 +130,6 @@ public class ContinuousPlanner
    public void planToGoal(ContinuousWalkingCommandMessage command, SideDependentList<FramePose3D> goalPoses)
    {
       this.command = command;
-      long startTimeForStatistics = System.currentTimeMillis();
 
       if (command.getUseAstarFootstepPlanner())
       {
@@ -179,6 +178,22 @@ public class ContinuousPlanner
       request.setTerrainMapData(terrainMapData);
       request.setSnapGoalSteps(true);
       request.setAbortIfGoalStepSnappingFails(true);
+
+      // When walking backwards, we want to keep the body facing in the same direction, otherwise the robot will turn as it tries to step backwards
+      if (command.getWalkBackwards())
+      {
+         FramePose3D bodyMidGoalPose = new FramePose3D();
+         bodyMidGoalPose.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
+         request.getBodyPathWaypoints().add(walkingStartMidPose);
+         request.getBodyPathWaypoints().add(bodyMidGoalPose);
+
+         // To allow walking backwards, we need to change the minimum step length, but this affects other walking, so we only do it when going backwards
+         footstepPlannerParameters.setMinStepLength(-0.3);
+      }
+      else
+      {
+         footstepPlannerParameters.setMinStepLength(0.1);
+      }
 
       if (useMonteCarloPlanAsReference && monteCarloFootstepPlan.get() != null && monteCarloFootstepPlan.get().getNumberOfSteps() > 0)
       {
@@ -310,7 +325,7 @@ public class ContinuousPlanner
       long timeEnd = System.nanoTime();
 
       continuousHikingLogger.appendString(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d, Layer Counts: %s",
-                                            (timeEnd - timeStart) / 1e6,
+                                                        (timeEnd - timeStart) / 1e6,
                                                         latestMonteCarloPlan.getNumberOfSteps(),
                                                         monteCarloFootstepPlanner.getVisitedNodes().size(),
                                                         MonteCarloPlannerTools.getLayerCountsString(monteCarloFootstepPlanner.getRoot())));

@@ -36,12 +36,13 @@ public class ContinuousPlannerTools
     * This method takes in a reference frame on the robot
     * and computes a desired goal that's rotated around the reference frame by the lateral value in radians.
     * And the goal is shifted forward by the x distance provided.
-    * @param pelvisFrame is the current location of the robot
-    * @param midFeetZUpFrame is used to get the height above the feet on the robot to set the goal pose from
+    *
+    * @param pelvisFrame           is the current location of the robot
+    * @param midFeetZUpFrame       is used to get the height above the feet on the robot to set the goal pose from
     * @param lateralValueInRadians in the value the goal will be rotated (in radians)
-    * @param xDistance the distance away from the robot the goal will be placed in the X-axis (in meters)
-    * @param zDistance the distance away from the robot the goal win be placed in the Z-axis (in meters)
-    * @param nominalStanceWidth is the default width we want the feet to be apart when we set the goal poses
+    * @param xDistance             the distance away from the robot the goal will be placed in the X-axis (in meters)
+    * @param zDistance             the distance away from the robot the goal win be placed in the Z-axis (in meters)
+    * @param nominalStanceWidth    is the default width we want the feet to be apart when we set the goal poses
     * @return the goal poses in which to attempt to plan towards.
     */
    public static SideDependentList<FramePose3D> setGoalPoseBasedOnLateralJoystickValue(ReferenceFrame pelvisFrame,
@@ -85,12 +86,12 @@ public class ContinuousPlannerTools
       return goalPose;
    }
 
-   public static SideDependentList<FramePose3D> setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
-                                                                               SideDependentList<FramePose3D> stancePose,
-                                                                               float xDistance,
-                                                                               float zDistance,
-                                                                               float xRandomMargin,
-                                                                               float nominalStanceWidth)
+   public static SideDependentList<FramePose3D> setStraightForwardGoalPoses(FramePose3D walkingStartPose,
+                                                                            SideDependentList<FramePose3D> stancePose,
+                                                                            float xDistance,
+                                                                            float zDistance,
+                                                                            float xRandomMargin,
+                                                                            float nominalStanceWidth)
    {
       float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 
@@ -113,6 +114,43 @@ public class ContinuousPlannerTools
          goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
          goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
          goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
+      }
+
+      // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
+
+      return goalPose;
+   }
+
+   public static SideDependentList<FramePose3D> setStraightBackwardGoalPoses(FramePose3D walkingStartPose,
+                                                                             SideDependentList<FramePose3D> stancePose,
+                                                                             float xDistance,
+                                                                             float zDistance,
+                                                                             float xRandomMargin,
+                                                                             float nominalStanceWidth)
+   {
+      float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
+
+      FramePose3D stanceMidPose = new FramePose3D();
+      stanceMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
+
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         goalPose.put(side, new FramePose3D());
+         RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
+         RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
+
+         stanceToWalkingFrameTransform.set(stanceMidPose);
+         worldToWalkingFrameTransform.set(walkingStartPose);
+         worldToWalkingFrameTransform.invert();
+         stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
+
+         double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
+         goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
+         goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
+         goalPose.get(side).appendTranslation(-xWalkDistance - xDistance - offsetX, 0, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
       // These are done after the for loop because of the ( - ) or ( + ) for the nominal stance

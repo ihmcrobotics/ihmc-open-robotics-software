@@ -155,24 +155,33 @@ public class ReadyToPlanState implements State
          {
             if (commandMessage.get().getEnableContinuousHikingWithKeyboard())
             {
-               goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+               goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                              continuousPlanner.getStartStancePose(),
+                                                                              (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                              (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                              X_RANDOM_MARGIN,
+                                                                              NOMINAL_STANCE_WIDTH);
+            }
+            else if (commandMessage.get().getEnableContinuousHikingWithJoystickController())
+            {
+               if (commandMessage.get().getWalkBackwards())
+               {
+                  goalPoses = ContinuousPlannerTools.setStraightBackwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                                  continuousPlanner.getStartStancePose(),
+                                                                                  (float) continuousHikingParameters.getGoalPoseBackwardDistance(),
+                                                                                  (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                                  X_RANDOM_MARGIN,
+                                                                                  NOMINAL_STANCE_WIDTH);
+               }
+               // Here we assume the joystick isn't being turned at all, so we give a direction of straight forward
+               else if (Math.abs(commandMessage.get().getLateralValue()) < 0.1)
+               {
+                  goalPoses = ContinuousPlannerTools.setStraightForwardGoalPoses(continuousPlanner.getWalkingStartMidPose(),
                                                                                  continuousPlanner.getStartStancePose(),
                                                                                  (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                                  (float) continuousHikingParameters.getGoalPoseUpDistance(),
                                                                                  X_RANDOM_MARGIN,
                                                                                  NOMINAL_STANCE_WIDTH);
-            }
-            else if (commandMessage.get().getEnableContinuousHikingWithJoystickController())
-            {
-               // Here we assume the joystick isn't being turned at all, so we give a direction of straight forward
-               if (Math.abs(commandMessage.get().getLateralValue()) < 0.1)
-               {
-                  goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                                    continuousPlanner.getStartStancePose(),
-                                                                                    (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                                    X_RANDOM_MARGIN,
-                                                                                    NOMINAL_STANCE_WIDTH);
                }
                else
                {
