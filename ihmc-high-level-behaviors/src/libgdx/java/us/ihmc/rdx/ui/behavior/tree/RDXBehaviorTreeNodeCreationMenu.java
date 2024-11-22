@@ -248,14 +248,17 @@ public class RDXBehaviorTreeNodeCreationMenu
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
-         RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
-         if (treeFile.getName() != null && treeFile.getNotes() != null)
+         if (queryContainedFile.getFileName().endsWith(".json"))
          {
-            indexedTreeFiles.add(treeFile);
-         }
-         else
-         {
-            LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+            RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+            if (treeFile.getName() != null && treeFile.getNotes() != null)
+            {
+               indexedTreeFiles.add(treeFile);
+            }
+            else
+            {
+               LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+            }
          }
       }
    }
