@@ -205,6 +205,9 @@ public class ReadyToPlanState implements State
       FramePose3D leftFootPose = new FramePose3D();
       FramePose3D rightFootPose = new FramePose3D();
 
+      //TODO remove later or fix for long term, this is temporary fix for Tufts
+      continuousHikingParameters.setEnableContinuousHiking(true);
+
       leftFootPose.set(poses.get(0));
       rightFootPose.set(poses.get(1));
 
