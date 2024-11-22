@@ -4,6 +4,9 @@ bool enable_continuous_hiking_with_keyboard
 # flag to enable/disable continuous hiking state machine with joystick controller
 bool enable_continuous_hiking_with_joystick_controller
 
+# flag to walk backwards with the continuous hiking state machine
+bool walk_backwards
+
 # forward joystick value
 float64 forward_value
 

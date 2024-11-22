@@ -17,6 +17,10 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
             */
    public boolean enable_continuous_hiking_with_joystick_controller_;
    /**
+            * flag to walk backwards with the continuous hiking state machine
+            */
+   public boolean walk_backwards_;
+   /**
             * forward joystick value
             */
    public double forward_value_;
@@ -65,6 +69,8 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       enable_continuous_hiking_with_joystick_controller_ = other.enable_continuous_hiking_with_joystick_controller_;
 
+      walk_backwards_ = other.walk_backwards_;
+
       forward_value_ = other.forward_value_;
 
       lateral_value_ = other.lateral_value_;
@@ -111,6 +117,21 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
    public boolean getEnableContinuousHikingWithJoystickController()
    {
       return enable_continuous_hiking_with_joystick_controller_;
+   }
+
+   /**
+            * flag to walk backwards with the continuous hiking state machine
+            */
+   public void setWalkBackwards(boolean walk_backwards)
+   {
+      walk_backwards_ = walk_backwards;
+   }
+   /**
+            * flag to walk backwards with the continuous hiking state machine
+            */
+   public boolean getWalkBackwards()
+   {
+      return walk_backwards_;
    }
 
    /**
@@ -255,6 +276,8 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_continuous_hiking_with_joystick_controller_, other.enable_continuous_hiking_with_joystick_controller_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.walk_backwards_, other.walk_backwards_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.forward_value_, other.forward_value_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lateral_value_, other.lateral_value_, epsilon)) return false;
@@ -288,6 +311,8 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
 
       if(this.enable_continuous_hiking_with_joystick_controller_ != otherMyClass.enable_continuous_hiking_with_joystick_controller_) return false;
 
+      if(this.walk_backwards_ != otherMyClass.walk_backwards_) return false;
+
       if(this.forward_value_ != otherMyClass.forward_value_) return false;
 
       if(this.lateral_value_ != otherMyClass.lateral_value_) return false;
@@ -318,6 +343,8 @@ public class ContinuousWalkingCommandMessage extends Packet<ContinuousWalkingCom
       builder.append(this.enable_continuous_hiking_with_keyboard_);      builder.append(", ");
       builder.append("enable_continuous_hiking_with_joystick_controller=");
       builder.append(this.enable_continuous_hiking_with_joystick_controller_);      builder.append(", ");
+      builder.append("walk_backwards=");
+      builder.append(this.walk_backwards_);      builder.append(", ");
       builder.append("forward_value=");
       builder.append(this.forward_value_);      builder.append(", ");
       builder.append("lateral_value=");
