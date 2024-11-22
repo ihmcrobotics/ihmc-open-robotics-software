@@ -133,7 +133,7 @@ public class WalkingFailureDetectionControlModule
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getValue();
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getValue();
 
-      isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
+//      isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
 
       if (isRobotFalling.getBooleanValue())
       {
