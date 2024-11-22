@@ -349,7 +349,7 @@ public class RapidHeightMapExtractorCuda
       //       Execute the CUDA kernels with the provided stream
       //       Each kernel performs a specific task related to the height map update, registration, and cropping
 
-      int blockSizeXY = 16;
+      int blockSizeXY = 32;
       int gridSizeKernel1XY = (localCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel2XY = (globalCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel3XY = (heightMapParameters.getCropWindowSize() + blockSizeXY - 1) / blockSizeXY;
@@ -375,9 +375,11 @@ public class RapidHeightMapExtractorCuda
       croppingKernel.withPointer(sensorCroppedHeightMapImage.data()).withLong(sensorCroppedHeightMapImage.step());
       croppingKernel.withPointer(parametersDevicePointer);
       croppingKernel.withInt(heightMapParameters.getCropWindowSize());
+      cudaStreamSynchronize(stream);
 
 
       updateKernel.run(stream, gridSizeKernel1, blockSize, 0);
+      cudaStreamSynchronize(stream);
       registerKernel.run(stream, gridSizeKernel2, blockSize, 0);
 
       cudaStreamSynchronize(stream);
@@ -391,7 +393,7 @@ public class RapidHeightMapExtractorCuda
 
       Mat finalCroppedHeightMap = new Mat();  // Assuming the height map is 201x201
       sensorCroppedHeightMapImage.download(finalCroppedHeightMap);  // Download the image from the GPU to the Mat object
-
+      cudaStreamSynchronize(stream);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
 
