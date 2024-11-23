@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import atlas_msgs.msg.dds.*;
-import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacketPubSubType;
-import exoskeleton_msgs.msg.dds.PilotAlarmPacketPubSubType;
-import exoskeleton_msgs.msg.dds.PilotInterfaceActionPacketPubSubType;
-import exoskeleton_msgs.msg.dds.PilotInterfacePacketPubSubType;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import ihmc_common_msgs.msg.dds.*;
@@ -16,7 +12,6 @@ import org.ejml.data.DMatrixRMaj;
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusArrayPubSubType;
 import actionlib_msgs.msg.dds.GoalStatusPubSubType;
-import boofcv.struct.calib.CameraPinholeBrown;
 import builtin_interfaces.msg.dds.DurationPubSubType;
 import builtin_interfaces.msg.dds.TimePubSubType;
 import controller_msgs.msg.dds.*;
@@ -307,7 +302,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(AtlasDesiredPumpPSIPacketPubSubType.class);
       registerPacketField(RequestStereoPointCloudMessagePubSubType.class);
       registerPacketField(Int64PubSubType.class);
-      registerPacketField(ExoskeletonBehaviorStatePacketPubSubType.class);
       registerPacketField(Float64MultiArrayPubSubType.class);
       registerPacketField(HighLevelStateChangeStatusMessagePubSubType.class);
       registerPacketField(JoyFeedbackPubSubType.class);
@@ -356,7 +350,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType.class);
       registerPacketField(PoseWithCovarianceStampedPubSubType.class);
       registerPacketField(ChestHybridJointspaceTaskspaceTrajectoryMessagePubSubType.class);
-      registerPacketField(PilotAlarmPacketPubSubType.class);
       registerPacketField(PoseWithCovariancePubSubType.class);
       registerPacketField(VideoPacketPubSubType.class);
       registerPacketField(Int32PubSubType.class);
@@ -367,12 +360,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(JointStatePubSubType.class);
       registerPacketField(QuaternionStampedPubSubType.class);
       registerPacketField(SimulatedLidarScanPacketPubSubType.class);
-      registerPacketField(PilotInterfacePacketPubSubType.class);
       registerPacketField(JointspaceTrajectoryMessagePubSubType.class);
       registerPacketField(QueueableMessagePubSubType.class);
       registerPacketField(IlluminancePubSubType.class);
       registerPacketField(NeckDesiredAccelerationsMessagePubSubType.class);
-      registerPacketField(PilotInterfaceActionPacketPubSubType.class);
       registerPacketField(Int8PubSubType.class);
       registerPacketField(Float32PubSubType.class);
       registerPacketField(WalkToGoalBehaviorPacketPubSubType.class);
@@ -766,7 +757,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BDIBehaviorStatusPacket.class);
 
       // Camera information related
-      registerPacketField(CameraPinholeBrown.class);
+//      registerPacketField(CameraPinholeBrown.class);
 
       registerPacketClass(FisheyePacket.class);
 

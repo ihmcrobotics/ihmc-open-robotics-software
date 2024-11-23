@@ -14,6 +14,11 @@ public class CameraIntrinsics
    {
    }
 
+   public CameraIntrinsics(CameraIntrinsics other)
+   {
+      this(other.getHeight(), other.getWidth(), other.getFx(), other.getFy(), other.getCx(), other.getCy());
+   }
+
    public CameraIntrinsics(int height, int width, double fx, double fy, double cx, double cy)
    {
       this.fx = fx;

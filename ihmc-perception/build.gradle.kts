@@ -6,8 +6,6 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -26,11 +24,6 @@ mainDependencies {
 
    api("org.georegression:georegression:0.22")
    api("net.java.dev.jna:jna:4.1.0")
-   api("org.boofcv:boofcv-ip:0.36")
-   api("org.boofcv:boofcv-swing:0.36")
-   api("org.boofcv:boofcv-io:0.36")
-   api("org.boofcv:boofcv-recognition:0.36")
-   api("org.boofcv:boofcv-calibration:0.36")
 
    api("org.bytedeco:javacpp:1.5.9")
    val openblasVersion = "0.3.23-1.5.9"
@@ -70,7 +63,7 @@ mainDependencies {
    api("org.bytedeco:spinnaker:$spinnakerVersion:windows-x86_64") {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
-   api("us.ihmc:zed-java-api:4.1.4") {
+   api("us.ihmc:zed-java-api:4.2.0_1") {
       exclude(group = "org.bytedeco")
    }
    val hdf5Version = "1.14.1-1.5.9"
@@ -92,11 +85,13 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:ihmc-whole-body-controller:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:robot-environment-awareness:source")
 
-   api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
-   api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
+   // Previously used for HeightMapAutoencoder and FootstepPredictor
+   // This is a very large dependency, only uncomment for testing purposes
+   // api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   // api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
 }
 
 testDependencies {

@@ -35,6 +35,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
    private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
 
+   private boolean hasX1KnuckleJoint;
+   private boolean hasX2KnuckleJoint;
+   private boolean isCalibrated;
+   private boolean needsReset;
+
    public SakeHandCommandActionExecutor(long id,
                                         CRDTInfo crdtInfo,
                                         WorkspaceResourceDirectory saveFileDirectory,
@@ -67,11 +72,28 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
 
-      boolean canExecute = x1KnuckleJoints.get(definition.getSide()) != null;
-      canExecute &= x2KnuckleJoints.get(definition.getSide()) != null;
-      canExecute &= syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
-      canExecute &= !syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
+      hasX1KnuckleJoint = x1KnuckleJoints.get(definition.getSide()) != null;
+      hasX2KnuckleJoint = x2KnuckleJoints.get(definition.getSide()) != null;
+      isCalibrated = syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
+      needsReset = syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
+
+      boolean canExecute = hasX1KnuckleJoint;
+      canExecute &= hasX2KnuckleJoint;
+      canExecute &= isCalibrated;
+      canExecute &= !needsReset;
+
       state.setCanExecute(canExecute);
+   }
+
+   @Override
+   public String getCantExecuteMessage()
+   {
+      return """
+             Has X1 knuckle joint: %b
+             Has X2 knuckle joint: %b
+             Is calibrated: %b
+             Needs reset: %b
+             """.formatted(hasX1KnuckleJoint, hasX2KnuckleJoint, isCalibrated, needsReset);
    }
 
    @Override

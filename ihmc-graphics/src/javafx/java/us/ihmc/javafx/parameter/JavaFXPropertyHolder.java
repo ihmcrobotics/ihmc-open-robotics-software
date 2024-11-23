@@ -44,7 +44,7 @@ public abstract class JavaFXPropertyHolder<T>
       }
    }
 
-   protected void setValue(T value, boolean notifyListeners)
+   public void setValue(T value, boolean notifyListeners)
    {
       if (!notifyListeners)
          skipNextChange = true;

@@ -1,24 +1,22 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.imageMessage.PixelFormat;
 
 import java.time.Instant;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.perception.imageMessage.PixelFormat.*;
 
 public class RawImageTest
 {
@@ -61,7 +59,7 @@ public class RawImageTest
          threads[i] = new Thread(() ->
          {
             assertNotNull(testImage.get());
-            MissingThreadTools.sleep(random.nextDouble(0.0, 1.0));
+            ThreadTools.park(random.nextDouble(0.0, 1.0));
             testImage.release();
          });
       }
@@ -106,7 +104,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(mat8UC1);
          RawImage replacedImage = originalImage.replaceImage(gpuMat8UC1);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
@@ -121,7 +119,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(gpuMat8UC1);
          RawImage replacedImage = originalImage.replaceImage(mat8UC1);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
@@ -137,7 +135,7 @@ public class RawImageTest
          RawImage originalImage = createRawImage(mat8UC1);
          RawImage replacedImage = originalImage.replaceImage(mat8UC3);
          assertNotEquals(originalImage, replacedImage);
-         assertTrue(dataEquals(originalImage.getCpuImageMat().data(), replacedImage.getCpuImageMat().data()));
+         assertTrue(dataEquals(originalImage.getDataPointer(), replacedImage.getDataPointer()));
          originalImage.release();
          replacedImage.release();
       });
@@ -177,31 +175,39 @@ public class RawImageTest
 
    private RawImage createRawImage(Mat mat)
    {
-      return new RawImage(0,
-                          Instant.now(),
-                          0.0f,
-                          mat,
+      return new RawImage(mat,
                           null,
-                          10.0f,
-                          10.0f,
-                          mat.cols() / 2.0f,
-                          mat.rows() / 2.0f,
-                          new FramePoint3D(ReferenceFrame.getWorldFrame()),
-                          new FrameQuaternion(ReferenceFrame.getWorldFrame()));
+                          opencvTypeToPixelFormat(mat.type()),
+                          new CameraIntrinsics(mat.rows(), mat.cols(), 10.0f, 10.0f, mat.cols() / 2.0f, mat.rows() / 2.0f),
+                          CameraModel.PINHOLE,
+                          new FramePose3D(),
+                          Instant.now(),
+                          0,
+                          0.0f);
    }
 
    private RawImage createRawImage(GpuMat mat)
    {
-      return new RawImage(0,
+      return new RawImage(null,
+                          mat,
+                          opencvTypeToPixelFormat(mat.type()),
+                          new CameraIntrinsics(mat.rows(), mat.cols(), 10.0f, 10.0f, mat.cols() / 2.0f, mat.rows() / 2.0f),
+                          CameraModel.PINHOLE,
+                          new FramePose3D(),
                           Instant.now(),
-                          0.0f,
-                          null,
-                          gpuMat8UC1,
-                          10.0f,
-                          10.0f,
-                          mat.cols() / 2.0f,
-                          mat.rows() / 2.0f,
-                          new FramePoint3D(ReferenceFrame.getWorldFrame()),
-                          new FrameQuaternion(ReferenceFrame.getWorldFrame()));
+                          0,
+                          0.0f);
+   }
+
+   private PixelFormat opencvTypeToPixelFormat(int type)
+   {
+      if (type == opencv_core.CV_8UC1)
+         return GRAY8;
+      else if (type == opencv_core.CV_8UC3)
+         return BGR8;
+      else if (type == opencv_core.CV_16UC1)
+         return GRAY16;
+
+      return null;
    }
 }

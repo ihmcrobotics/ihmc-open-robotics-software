@@ -149,9 +149,12 @@ public interface ControllerCoreOptimizationSettings
     */
    public enum JointTorqueLimitEnforcementMethod
    {
-
       NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER, CONSTRAINTS_IN_QP_AND_CONTROLLER;
 
+      boolean isConstrainedInQP()
+      {
+         return this == CONSTRAINTS_IN_QP || this == CONSTRAINTS_IN_QP_AND_CONTROLLER;
+      }
    }
 
    /**
@@ -187,9 +190,12 @@ public interface ControllerCoreOptimizationSettings
     */
    public enum JointPowerLimitEnforcementMethod
    {
-
       NO_CONSTRAINTS, CONSTRAINTS_IN_QP, CONSTRAINTS_IN_CONTROLLER, CONSTRAINTS_IN_QP_AND_CONTROLLER;
 
+      boolean isConstrainedInQP()
+      {
+         return this == CONSTRAINTS_IN_QP || this == CONSTRAINTS_IN_QP_AND_CONTROLLER;
+      }
    }
 
    /**
@@ -514,6 +520,7 @@ public interface ControllerCoreOptimizationSettings
     */
    default boolean updateDynamicMatrixCalculator()
    {
-      return useDynamicMatrixCalculatorForInverseDynamics() || areJointTorquesMinimized();
+      return useDynamicMatrixCalculatorForInverseDynamics() || areJointTorquesMinimized() || getJointTorqueLimitEnforcementMethod().isConstrainedInQP()
+             || getJointPowerLimitEnforcementMethod().isConstrainedInQP();
    }
 }

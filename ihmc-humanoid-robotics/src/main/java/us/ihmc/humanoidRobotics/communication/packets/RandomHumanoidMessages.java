@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
-import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
 import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
@@ -578,18 +577,6 @@ public final class RandomHumanoidMessages
       next.getEuclideanTrajectory().set(nextEuclideanTrajectoryMessage(random));
       next.setEnableUserPelvisControl(random.nextBoolean());
       next.setEnableUserPelvisControlDuringWalking(random.nextBoolean());
-      next.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-      next.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-      next.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-      return next;
-   }
-
-   public static QuadrupedBodyHeightMessage nextQuadrupedBodyHeightMessage(Random random)
-   {
-      QuadrupedBodyHeightMessage next = new QuadrupedBodyHeightMessage();
-      next.getEuclideanTrajectory().set(nextEuclideanTrajectoryMessage(random));
-      next.setControlBodyHeight(random.nextBoolean());
-      next.setIsExpressedInAbsoluteTime(random.nextBoolean());
       next.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       next.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
       next.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);

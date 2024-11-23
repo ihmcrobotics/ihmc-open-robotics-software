@@ -41,8 +41,6 @@ public interface ROS2PublishSubscribeAPI
 
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter);
 
-   public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic);
-
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic);
 
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic);

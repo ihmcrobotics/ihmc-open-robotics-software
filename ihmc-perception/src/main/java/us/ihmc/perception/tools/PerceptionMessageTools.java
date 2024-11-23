@@ -1,6 +1,5 @@
 package us.ihmc.perception.tools;
 
-import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.LongPointer;
@@ -21,6 +20,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.CameraModel;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.imageMessage.CompressionType;
@@ -33,6 +34,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 
@@ -54,20 +56,22 @@ public class PerceptionMessageTools
       imageMessageToPack.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessageToPack)
+   @Deprecated
+   public static void copyToMessage(Object cameraPinhole, ImageMessage imageMessageToPack)
    {
-      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
-      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
-      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
-      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
+//      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
+//      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
+//      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
+//      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
    }
 
-   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinholeToPack)
+   @Deprecated
+   public static void toBoofCV(ImageMessage imageMessage, Object cameraPinholeToPack)
    {
-      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
-      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
-      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
-      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
+//      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
+//      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
+//      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
+//      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
@@ -173,6 +177,30 @@ public class PerceptionMessageTools
       imageMessage.setSequenceNumber(sequenceNumber);
       MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
       imageMessage.setDepthDiscretization(depthToMetersRatio);
+   }
+
+   public static void packImageMessage(RawImage originalImage,
+                                       BytePointer compressedData,
+                                       CompressionType compressionType,
+                                       ImageMessage imageMessageToPack)
+   {
+      packImageMessage(originalImage, compressedData, compressionType, null, null, imageMessageToPack);
+   }
+
+   public static void packImageMessage(RawImage originalImage,
+                                       BytePointer compressedData,
+                                       CompressionType compressionType,
+                                       @Nullable ByteBuffer ousterBeamAltitudeAngles,
+                                       @Nullable ByteBuffer ousterBeamAzimuthAngles,
+                                       ImageMessage imageMessageToPack)
+   {
+      originalImage.packImageMessageMetaData(imageMessageToPack);
+      packImageMessageData(imageMessageToPack, compressedData);
+      imageMessageToPack.setCompressionType(compressionType.toByte());
+      if (ousterBeamAltitudeAngles != null)
+         MessageTools.packIDLSequence(ousterBeamAltitudeAngles, imageMessageToPack.getOusterBeamAltitudeAngles());
+      if (ousterBeamAzimuthAngles != null)
+         MessageTools.packIDLSequence(ousterBeamAzimuthAngles, imageMessageToPack.getOusterBeamAzimuthAngles());
    }
 
    public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)

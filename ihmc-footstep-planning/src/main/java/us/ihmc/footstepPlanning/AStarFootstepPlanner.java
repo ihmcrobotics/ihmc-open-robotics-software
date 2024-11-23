@@ -23,7 +23,6 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedStepExpansion;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -53,7 +52,6 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEnvironmentHandler plannerEnvironmentHandler;
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
-   private final ReferenceBasedStepExpansion referenceBasedExpansion;
    private final HeightMapFootstepChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
@@ -74,7 +72,7 @@ public class AStarFootstepPlanner
    private final SwingPlanningModule swingPlanningModule;
 
    /** Called each iteration. Should be very lightweight, mainly used for variable copying for the logger */
-   private List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
+   private final List<Consumer<AStarIterationData<FootstepGraphNode>>> iterationCallbacks = new ArrayList<>();
    /** Called at the status publish frequency. Post-processes the plan and publishes it */
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
 
@@ -105,12 +103,11 @@ public class AStarFootstepPlanner
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
       this.nominalExpansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
-      this.referenceBasedExpansion = new ReferenceBasedStepExpansion(referenceBasedIdealStepCalculator, nominalExpansion);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
       stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
-      this.iterationConductor = new AStarFootstepPlannerIterationConductor(referenceBasedExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
+      this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
 
       referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
@@ -205,17 +202,15 @@ public class AStarFootstepPlanner
          reportStatus(request, outputToPack);
          return;
       }
-
-      // Start planning loop
-      if (request.getReferencePlan() == null)
-      {
-         referenceBasedIdealStepCalculator.clearReferencePlan();
-      }
       else
       {
-         referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
+         outputToPack.setGoalPose(goalMidFootPose);
       }
 
+      // Either the request has a null reference plan, or a plan we can use
+      referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
+
+      // Start planning loop
       while (true)
       {
          iterations++;
@@ -310,13 +305,10 @@ public class AStarFootstepPlanner
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
-      if (!request.getAssumeFlatGround())
-      {
-         swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
-                                                   outputToPack.getFootstepPlan(),
-                                                   request.getStartFootPoses(),
-                                                   request.getSwingPlannerType());
-      }
+      swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
+                                                outputToPack.getFootstepPlan(),
+                                                request.getStartFootPoses(),
+                                                request.getSwingPlannerType());
 
       outputToPack.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.totalElapsed() - planningStartTime);
       outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());

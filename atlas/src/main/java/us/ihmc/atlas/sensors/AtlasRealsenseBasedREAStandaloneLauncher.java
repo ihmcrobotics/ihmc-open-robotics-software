@@ -7,7 +7,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.RealSenseREANetworkProvider;

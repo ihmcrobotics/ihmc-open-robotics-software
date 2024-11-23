@@ -74,7 +74,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
             {
                case NONE:
                {
-                  variables[row][column] = new YoDouble(name  + "_" + row  + "_" + column, description, registry);  // names are simply the row and column indices
+                  variables[row][column] = new YoDouble(getFieldName(name, row, column), description, registry);  // names are simply the row and column indices
                   variables[row][column].setToNaN();
                   break;
                }
@@ -84,19 +84,29 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
                      throw new IllegalArgumentException(
                            "The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
 
-                  variables[row][column] = new YoDouble(name + rowNames[row], description, registry);  // names are the row names, no column identifier
+                  variables[row][column] = new YoDouble(getFieldName(name, rowNames[row], ""), description, registry);  // names are the row names, no column identifier
                   variables[row][column].setToNaN();
                   break;
                }
                case ROWS_AND_COLUMNS:
                {
-                  variables[row][column] = new YoDouble(name + rowNames[row] + columnNames[column], description, registry);  // names are the row and column names
+                  variables[row][column] = new YoDouble(getFieldName(name, rowNames[row], columnNames[column]), description, registry);  // names are the row and column names
                   variables[row][column].setToNaN();
                   break;
                }
             }
          }
       }
+   }
+
+   public static String getFieldName(String prefix, int row, int column)
+   {
+      return getFieldName(prefix, "_" + row, "_" + column);
+   }
+
+   public static String getFieldName(String prefix, String rowName, String columName)
+   {
+      return prefix + rowName + columName;
    }
 
    private enum NamesProvided

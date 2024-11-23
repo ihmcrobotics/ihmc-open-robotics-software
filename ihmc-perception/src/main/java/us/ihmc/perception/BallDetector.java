@@ -73,8 +73,8 @@ public class BallDetector
 
       double radius;
 
-      int scaledWidth = (int) Math.round(colorImage.getImageWidth() * scaleFactor);
-      int scaledHeight = (int) Math.round(colorImage.getImageHeight() * scaleFactor);
+      int scaledWidth = (int) Math.round(colorImage.getWidth() * scaleFactor);
+      int scaledHeight = (int) Math.round(colorImage.getHeight() * scaleFactor);
 
       GpuMat imageMat = colorImage.getGpuImageMat();
 

@@ -10,10 +10,10 @@ import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-import us.ihmc.javafx.ApplicationNoModule;
 
 public class IntersectionPlaneBoxCalculatorVisualizer extends ApplicationNoModule
 {

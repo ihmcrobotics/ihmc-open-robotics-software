@@ -35,12 +35,13 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.lists.RecyclingArrayListTools;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -94,8 +95,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
-      definition.setName("Footstep plan");
-
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new RDXFootstepPlanActionFootstep(baseUI,
                                            robotModel,
@@ -118,13 +117,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                {
                   RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
                   RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
-                  RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
+                  RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().getValueAndFreeze());
                }
 
                for (int i = 0; i < state.getPreviewFootsteps().getSize(); i++)
                {
                   RobotSide side = state.getPreviewFootsteps().getSide(i);
-                  RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
+                  RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().getValueAndFreeze(), state.getManuallyPlacedFootsteps());
                   RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
                   addedFootstep.getDefinition().setSide(side);
                   addedFootstep.update();
@@ -132,7 +131,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                   Pose3DReadOnly poseInWorld = state.getPreviewFootsteps().getPoseReadOnly(i);
                   FramePose3D poseInParent = new FramePose3D(poseInWorld);
                   poseInParent.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
-                  addedFootstep.getDefinition().getSoleToPlanFrameTransform().accessValue().set(poseInParent);
+                  addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValueAndFreeze().set(poseInParent);
                }
             }
          }
@@ -150,15 +149,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                                            definition.getPlannerWalkWithGoalOrientation()::setValue,
                                                            imBoolean -> ImGui.checkbox(labels.get("Walk with goal orientation"), imBoolean));
       plannerParametersWidgets = new RDXStoredPropertySetTuner("Planner Parameters");
-      plannerParametersWidgets.create(definition.accessPlannerParameters(), false);
+      plannerParametersWidgets.create(definition.getPlannerParametersUnsafe(), false);
 
       for (RobotSide side : RobotSide.values)
       {
-         definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(definition.getPlannerParametersReadOnly().getIdealFootstepWidth()));
+         definition.getGoalFootstepToGoalY(side).setInitialValue(0.5 * side.negateIfRightSide(definition.getPlannerParametersReadOnly().getIdealFootstepWidth()));
          state.copyDefinitionToGoalFoostepToGoalTransform(side);
       }
 
-      definition.getGoalFocalPoint().accessValue().set(0.1, 0.0, 0.0);
+      definition.getGoalFocalPoint().getValueToInitialize().set(0.1, 0.0, 0.0);
 
       goalStancePointGizmo.create(baseUI.getPrimary3DPanel());
       goalStancePointGizmo.getPoseGizmo().getCenterSphereToTorusRatio().set(0.5f);
@@ -196,7 +195,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().accessValue(), state.getManuallyPlacedFootsteps());
+            RecyclingArrayListTools.addToAll(definition.getManuallyPlacedFootsteps().getValueAndFreeze(), state.getManuallyPlacedFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             addedFootstep.getState().update();
@@ -221,14 +220,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             newFootstepPose.getPosition().addX(aLittleInFront);
 
             newFootstepPose.changeFrame(addedFootstep.getState().getSoleFrame().getReferenceFrame().getParent());
-            addedFootstep.getDefinition().getSoleToPlanFrameTransform().accessValue().set(newFootstepPose);
+            addedFootstep.getDefinition().getSoleToPlanFrameTransform().getValueAndFreeze().set(newFootstepPose);
          }
 
          if (userRemovedFootstep.poll())
          {
             RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
             RecyclingArrayListTools.removeLast(state.getManuallyPlacedFootsteps());
-            RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().accessValue());
+            RecyclingArrayListTools.removeLast(definition.getManuallyPlacedFootsteps().getValueAndFreeze());
          }
 
          for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
@@ -243,21 +242,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          for (RobotSide side : RobotSide.values)
             goalFeetGizmos.get(side).getPoseGizmo().setParentFrame(state.getGoalFrame().getReferenceFrame());
 
-         // In this section, we want to update the definition when the gizmos are moved
-         // and/or the parent frame is changed. However, on loading and otherwise we want
-         // to make sure the current state reflects the definition because the definition
-         // can change. We do this by freezing the node so user changes can propagate.
-         if (goalStancePointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
-             || goalFocalPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         {
-            definition.getGoalStancePoint().accessValue().set(goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-            definition.getGoalFocalPoint().accessValue().set(goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-         }
-         else
-         {
-            goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
-            goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
-         }
+         RDXCRDTTools.syncGizmoWithBidirectionalField(goalStancePointGizmo.getPoseGizmo(), definition.getGoalStancePoint(), definition);
+         RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
          for (RobotSide side : RobotSide.values)
             if (goalFeetGizmos.get(side).getPoseGizmo().getGizmoModifiedByUser().poll())
@@ -469,7 +455,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
             if (ImGui.collapsingHeader(labels.get("Planner Parameters")))
                if (plannerParametersWidgets.renderImGuiWidgetsSimple())
-                  definition.accessPlannerParameters();
+                  definition.getAndFreezePlannerParameters();
          }
       }
    }
@@ -560,8 +546,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          frameFocalPoint = new FramePoint3D(newParent, definition.getGoalFocalPoint().getValueReadOnly());
       }
 
-      definition.getGoalStancePoint().accessValue().set(frameStancePoint);
-      definition.getGoalFocalPoint().accessValue().set(frameFocalPoint);
+      definition.getGoalStancePoint().getValueAndFreeze().set(frameStancePoint);
+      definition.getGoalFocalPoint().getValueAndFreeze().set(frameFocalPoint);
       goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
       goalFocalPointGizmo.getPoseGizmo().setParentFrame(newParent);
       goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());

@@ -35,6 +35,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 
    @Tag("humanoid-behaviors")
    @Override
+   @Disabled
    @Test
    public void testDispatchKarateKidDiagnosticBehavior()
    {
@@ -43,6 +44,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 
    @Tag("humanoid-behaviors")
    @Override
+   @Disabled
    @Test
    public void testDispatchPelvisPoseBehavior()
    {

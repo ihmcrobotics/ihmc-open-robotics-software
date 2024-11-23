@@ -13,7 +13,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
@@ -51,7 +50,7 @@ public class RDXZEDArUcoMarkerDemo
    private final ImFloat markerSize = new ImFloat(0.02975f);
 
    private final OpenCVArUcoMarkerDetector arUcoDetector;
-   private BytedecoImage detectionImage;
+   private Mat detectionImage;
    private final OpenCVArUcoMarkerDetectionResults arUcoResults;
    private final SwapReference<List<FramePose3D>> arUcoMarkerPoses = new SwapReference<>(new ArrayList<>(), new ArrayList<>());
 
@@ -61,7 +60,7 @@ public class RDXZEDArUcoMarkerDemo
 
    public RDXZEDArUcoMarkerDemo()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "-ROS2Node");
+      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName() + "_ROS2Node");
 
       imageRetriever = new ZEDColorDepthImageRetriever(0, ReferenceFrame::getWorldFrame, () -> true, () -> true, true);
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
@@ -102,7 +101,7 @@ public class RDXZEDArUcoMarkerDemo
       if (detectionImage == null)
          initializeDetection(colorImage);
 
-      colorImage.getCpuImageMat().copyTo(detectionImage.getBytedecoOpenCVMat());
+      colorImage.getCpuImageMat().copyTo(detectionImage);
       arUcoDetector.update();
       arUcoResults.copyOutputData(arUcoDetector);
       TIntArrayList detectedIDs = arUcoResults.getDetectedIDs();
@@ -133,9 +132,8 @@ public class RDXZEDArUcoMarkerDemo
 
    private void initializeDetection(RawImage colorImage)
    {
-      Mat image = new Mat();
-      colorImage.getCpuImageMat().copyTo(image);
-      detectionImage = new BytedecoImage(image);
+      detectionImage = new Mat();
+      colorImage.getCpuImageMat().copyTo(detectionImage);
       arUcoDetector.setSourceImageForDetection(detectionImage);
       arUcoDetector.setCameraIntrinsics(imageRetriever.getCameraIntrinsics(RobotSide.LEFT));
    }
@@ -157,12 +155,10 @@ public class RDXZEDArUcoMarkerDemo
          {
             arUcoDetectionImagePanel = new RDXMatImagePanel("ArUco Detections", 1280, 720, false);
             perceptionVisualizersPanel.addVisualizer(pointCloudVisualizer);
-            perceptionVisualizersPanel.create();
+            perceptionVisualizersPanel.create(baseUI);
 
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizersPanel);
             baseUI.getImGuiPanelManager().addPanel(arUcoDetectionImagePanel.getImagePanel());
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(markerPoseGraphics);
             baseUI.create();
          }

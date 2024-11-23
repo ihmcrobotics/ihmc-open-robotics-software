@@ -5,13 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionDefinition extends ActionNodeDefinition
 {
-   private final CRDTUnidirectionalDouble waitDuration;
+   private final CRDTBidirectionalDouble waitDuration;
 
    // On disk fields
    private double onDiskWaitDuration;
@@ -20,7 +19,7 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      waitDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
+      waitDuration = new CRDTBidirectionalDouble(this, 4.0);
    }
 
    @Override

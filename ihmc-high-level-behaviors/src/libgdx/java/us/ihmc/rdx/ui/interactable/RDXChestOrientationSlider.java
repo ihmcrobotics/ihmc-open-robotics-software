@@ -15,8 +15,8 @@ import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 
 public class RDXChestOrientationSlider
 {

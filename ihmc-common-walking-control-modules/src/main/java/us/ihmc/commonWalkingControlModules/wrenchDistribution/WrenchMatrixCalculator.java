@@ -110,9 +110,9 @@ public class WrenchMatrixCalculator implements SCS2YoGraphicHolder
    private final DMatrixRMaj fullWrenchJacobian = new DMatrixRMaj(0, 0);
    private final FrameVector2D weight = new FrameVector2D();
 
-   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
+   public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
-      this(toolbox.getCenterOfMassFrame(),
+      this(referenceFrame,
            toolbox.getContactablePlaneBodies(),
            toolbox.getOptimizationSettings(),
            toolbox.getControlDT(),

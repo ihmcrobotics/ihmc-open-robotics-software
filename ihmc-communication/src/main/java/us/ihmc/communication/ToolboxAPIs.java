@@ -2,11 +2,11 @@ package us.ihmc.communication;
 
 import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2Topic;
 
 public final class ToolboxAPIs
 {
-   public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
    public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "toolbox/footstep_postprocessing";
    public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "toolbox/ik";
    public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/ik_planning";
@@ -18,7 +18,6 @@ public final class ToolboxAPIs
    public static final String STEP_TELEOP_TOOLBOX_MODULE_NAME = "toolbox/teleop/step_teleop";
    public static final String DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME = "/toolbox/directional_control";
 
-   public static final ROS2Topic<?> CONTINUOUS_PLANNING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FOOTSTEP_POSTPROCESSING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> KINEMATICS_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(KINEMATICS_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> KINEMATICS_PLANNING_TOOLBOX = ROS2Tools.IHMC_ROOT.withModule(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);
@@ -38,5 +37,10 @@ public final class ToolboxAPIs
    public static ROS2Topic<WalkingControllerPreviewOutputMessage> getControllerPreviewOutputTopic(String robotName)
    {
       return WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput().withTypeName(WalkingControllerPreviewOutputMessage.class);
+   }
+
+   public static <T> ROS2Topic<T> getIKToolboxTopic(Class<T> messageClass, String robotName)
+   {
+      return ControllerAPI.getTopic(ControllerAPI.getBaseTopic(KINEMATICS_TOOLBOX_MODULE_NAME, robotName), messageClass);
    }
 }

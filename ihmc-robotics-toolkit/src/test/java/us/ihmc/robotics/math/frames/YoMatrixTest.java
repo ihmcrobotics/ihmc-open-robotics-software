@@ -25,6 +25,8 @@ public class YoMatrixTest
       assertEquals(maxNumberOfColumns, yoMatrix.getNumCols());
 
       DMatrixRMaj denseMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
+      yoMatrix.reshape(maxNumberOfRows, maxNumberOfColumns);
+      yoMatrix.zero();
       yoMatrix.get(denseMatrix);
 
       MatrixTestTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
@@ -39,7 +41,7 @@ public class YoMatrixTest
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      assertEquals(registry.findVariable("testMatrix00").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
+      assertEquals(registry.findVariable(YoMatrix.getFieldName("testMatrix", 0, 0)).getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
    @Test
@@ -65,6 +67,8 @@ public class YoMatrixTest
       {
       }
 
+      yoMatrix.reshape(maxNumberOfRows, maxNumberOfColumns);
+      yoMatrix.zero();
       yoMatrix.getAndReshape(denseMatrix);
       MatrixTestTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
       assertEquals(maxNumberOfRows, denseMatrix.getNumRows());
@@ -117,6 +121,7 @@ public class YoMatrixTest
       
       int numberOfRows = 2;
       int numberOfColumns = 6;
+      yoMatrix.reshape(numberOfRows, numberOfColumns);
       yoMatrix.zero();
       
       DMatrixRMaj zeroMatrix = new DMatrixRMaj(numberOfRows, numberOfColumns);
@@ -191,7 +196,7 @@ public class YoMatrixTest
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.findVariable(name +  row +  column);
+            YoDouble variable = (YoDouble) registry.findVariable(YoMatrix.getFieldName(name, row, column));
 
             if ((row < smallerRows) && (column < smallerColumns))
             {
@@ -199,20 +204,20 @@ public class YoMatrixTest
             }
             else
             {
-               assertTrue(Double.isNaN(variable.getDoubleValue()));
+               assertTrue(Double.isNaN(variable.getDoubleValue()), "Values outside aren't NaN, instead are " + variable.getDoubleValue());
             }
 
          }
       }
    }
-   
+
    private void assertMatrixYoVariablesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
    {
       for (int row = 0; row < maxNumberOfRows; row++)
       {
          for (int column = 0; column < maxNumberOfColumns; column++)
          {
-            YoDouble variable = (YoDouble) registry.findVariable(name + row + column);
+            YoDouble variable = (YoDouble) registry.findVariable(YoMatrix.getFieldName(name, row, column));
             assertTrue(Double.isNaN(variable.getDoubleValue()));
          }
       }

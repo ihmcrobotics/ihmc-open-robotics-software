@@ -7,7 +7,7 @@ public class KinematicsToolboxPrivilegedConfigurationParameters extends JointPri
    @Override
    public double getNullspaceProjectionAlpha()
    {
-      return 0.05;
+      return 0.005;
    }
 
    @Override
@@ -19,7 +19,7 @@ public class KinematicsToolboxPrivilegedConfigurationParameters extends JointPri
    @Override
    public double getDefaultConfigurationGain()
    {
-      return 50.0;
+      return 40.0;
    }
 
    @Override

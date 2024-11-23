@@ -1,12 +1,19 @@
 package us.ihmc.footstepPlanning.log;
 
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
-import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacketPubSubType;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatusPubSubType;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacketPubSubType;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,13 +28,15 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -36,15 +45,32 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+/**
+ * The {@link FootstepPlannerLogger} logs the data for a footstep plan to a folder. The parameters used for planning,
+ * what is being requested by the planner, the output of the planner, and the iteration data of the planner is being logged.
+ * By logging these footstep plans, we can attempt to understand what the planner was trying to do. This is vital to debugging
+ */
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat directoryDateFormat = new SimpleDateFormat("yyyyMMdd");
@@ -76,7 +102,7 @@ public class FootstepPlannerLogger
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
    static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
-   static final String statusPacketFileName = "StatusPacket.json";
+   static final String outputStatusPacketFileName = "OutputStatusPacket.json";
    static final String headerFileName = "Header.txt";
    static final String bodyPathHeaderFileName = "BodyPathHeader.txt";
    static final String dataFileName = "PlannerIterationData.log";
@@ -91,13 +117,13 @@ public class FootstepPlannerLogger
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
-   private final PrimitiveDataVectorMessage bodyPathParametersPacket = new PrimitiveDataVectorMessage();
+   private final AStarBodyPathPlannerParametersPacket bodyPathParametersPacket = new AStarBodyPathPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
-   private final JSONSerializer<PrimitiveDataVectorMessage> bodyPathParametersPacketSerializer = new JSONSerializer<>(new PrimitiveDataVectorMessagePubSubType());
+   private final JSONSerializer<AStarBodyPathPlannerParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new AStarBodyPathPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -114,7 +140,7 @@ public class FootstepPlannerLogger
 
    /**
     * It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging.
-    * This method expects the folder to exist or it will throw an exception
+    * This method expects the folder to exist, or it will throw an exception
     */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {
@@ -144,7 +170,7 @@ public class FootstepPlannerLogger
       {
          Path earliestLogDirectory = sortedLogFolderPaths.first();
          LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
+         FileUtils.deleteQuietly(earliestLogDirectory.toFile());
          sortedLogFolderPaths.remove(earliestLogDirectory);
       }
 
@@ -224,13 +250,13 @@ public class FootstepPlannerLogger
 
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
-         FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
+         footstepParametersPacket.set(planner.getFootstepPlannerParameters().getAsPacket());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
 
          // log body path planner parameters packet
          String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
-         StoredPropertySetMessageTools.toMessage(bodyPathParametersPacket, planner.getAStarBodyPathPlannerParameters());
+         bodyPathParametersPacket.set(planner.getAStarBodyPathPlannerParameters().getAsPacket());
          byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
          writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
@@ -241,7 +267,7 @@ public class FootstepPlannerLogger
          writeToFile(swingParametersPacketFile, serializedSwingParameters);
 
          // log status packet
-         String statusPacketFile = sessionDirectory + statusPacketFileName;
+         String statusPacketFile = sessionDirectory + outputStatusPacketFileName;
          planner.getOutput().setPacket(outputStatus);
          byte[] serializedStatus = statusPacketSerializer.serializeToBytes(outputStatus);
          writeToFile(statusPacketFile, serializedStatus);
@@ -270,6 +296,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -290,6 +317,7 @@ public class FootstepPlannerLogger
 
          logVariableDescriptors(planner.getBodyPathPlannerRegistry());
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -346,6 +374,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {
@@ -402,6 +431,7 @@ public class FootstepPlannerLogger
          }
 
          fileWriter.flush();
+         fileWriter.close();
       }
       catch (Exception e)
       {

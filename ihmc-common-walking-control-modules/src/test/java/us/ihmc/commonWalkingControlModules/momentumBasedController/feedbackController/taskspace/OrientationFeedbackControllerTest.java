@@ -1,29 +1,27 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Random;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.NormOps_DDRM;
-import org.junit.jupiter.api.Disabled;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -38,9 +36,106 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.List;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class OrientationFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @Test
+   public void testConvergence()
+   {
+      Random random = new Random(456789L);
+
+      YoRegistry registry = new YoRegistry("Dummy");
+      int numberOfJoint = 10;
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfJoint);
+      List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
+      FrameOrientation3DReadOnly bodyFixedOrientationToControl = EuclidFrameRandomTools.nextFrameQuaternion(random, endEffector.getBodyFixedFrame());
+
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      joints.get(0).getPredecessor().updateFramesRecursively();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
+      desiredOrientation.setIncludingFrame(bodyFixedOrientationToControl);
+      desiredOrientation.changeFrame(worldFrame);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      joints.get(0).getPredecessor().updateFramesRecursively();
+
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
+      double controlDT = 0.004;
+
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      toolbox.setupForInverseDynamicsSolver(null);
+
+      FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector,
+                                                                                                      toolbox,
+                                                                                                      feedbackControllerToolbox,
+                                                                                                      registry);
+
+      OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+      orientationFeedbackControlCommand.set(elevator, endEffector);
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(100.0);
+      gains.setDerivativeGains(50.0);
+      orientationFeedbackControlCommand.setGains(gains);
+      orientationFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedOrientationToControl);
+      orientationFeedbackControlCommand.setInverseDynamics(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      orientationFeedbackController.submitFeedbackControlCommand(orientationFeedbackControlCommand);
+      orientationFeedbackController.setEnabled(true);
+
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
+      LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
+      DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
+      DMatrixRMaj jointAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+
+      FrameQuaternion currentOrientation = new FrameQuaternion();
+      FrameQuaternion errorOrientation = new FrameQuaternion();
+
+      double previousErrorMagnitude = Double.POSITIVE_INFINITY;
+      double errorMagnitude = previousErrorMagnitude;
+
+      FrameVector3D rotationError = new FrameVector3D();
+
+      for (int i = 0; i < 100; i++)
+      {
+         orientationFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand output = orientationFeedbackController.getInverseDynamicsOutput();
+
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
+         pseudoInverseSolver.invert(jInverse);
+         CommonOps_DDRM.mult(jInverse, new DMatrixRMaj(motionQPInput.taskObjective), jointAccelerations);
+
+         integrator.integrateJointAccelerations(jointsToOptimizeFor, jointAccelerations);
+         integrator.integrateJointVelocities(jointsToOptimizeFor, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.VELOCITY, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
+         elevator.updateFramesRecursively();
+
+         currentOrientation.setIncludingFrame(bodyFixedOrientationToControl);
+         currentOrientation.changeFrame(worldFrame);
+         errorOrientation.difference(desiredOrientation, currentOrientation);
+         errorOrientation.normalizeAndLimitToPi();
+         errorOrientation.getRotationVector(rotationError);
+
+         errorMagnitude = rotationError.norm();
+         boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
+         Assertions.assertTrue(isErrorReducing);
+         previousErrorMagnitude = errorMagnitude;
+      }
+   }
 
    @Test
    public void testCompareAgainstSpatialController() throws Exception
@@ -58,12 +153,17 @@ public class OrientationFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
-                                                                            registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      OrientationFeedbackController orientationFeedbackController = new OrientationFeedbackController(endEffector,
+                                                                                                      toolbox,
+                                                                                                      new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                                      registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector,
+                                                                                          toolbox,
+                                                                                          new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                          registry);
       orientationFeedbackController.setEnabled(true);
       spatialFeedbackController.setEnabled(true);
 

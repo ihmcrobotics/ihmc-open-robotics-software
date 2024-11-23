@@ -1,7 +1,5 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -23,7 +21,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.10")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
@@ -45,7 +43,8 @@ jmonkeyengineTestDependencies {
 }
 
 libgdxDependencies {
-   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-robotics-toolkit:source")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")

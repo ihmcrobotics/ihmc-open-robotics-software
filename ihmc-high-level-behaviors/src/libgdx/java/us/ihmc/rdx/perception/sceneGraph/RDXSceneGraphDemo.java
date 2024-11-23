@@ -118,10 +118,8 @@ public class RDXSceneGraphDemo
 
             // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
             createVisualizers();
-            perceptionVisualizerPanel.create();
+            perceptionVisualizerPanel.create(baseUI);
 
             // Setup sensors
             if (SENSOR_MODE == SensorMode.SIMULATED)
@@ -173,8 +171,8 @@ public class RDXSceneGraphDemo
                {
                   if (planarRegionsExtractor == null)
                   {
-                     int imageHeight = zedDepthImage.getImageHeight();
-                     int imageWidth = zedDepthImage.getImageWidth();
+                     int imageHeight = zedDepthImage.getHeight();
+                     int imageWidth = zedDepthImage.getWidth();
                      double fx = zedDepthImage.getFocalLengthX();
                      double fy = zedDepthImage.getFocalLengthY();
                      double cx = zedDepthImage.getPrincipalPointX();

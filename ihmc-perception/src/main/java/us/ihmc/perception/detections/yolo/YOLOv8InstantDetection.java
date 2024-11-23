@@ -1,15 +1,12 @@
 package us.ihmc.perception.detections.yolo;
 
 import perception_msgs.msg.dds.InstantDetectionMessage;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -85,21 +82,6 @@ public class YOLOv8InstantDetection extends InstantDetection
          point.set(objectPointCloud.get(i));
       }
       // TODO: Should pack images into message
-   }
-
-   public static YOLOv8InstantDetection fromMessage(InstantDetectionMessage message)
-   {
-      List<Point3D32> objectPointCloud = new ArrayList<>(message.getYoloObjectPointCloud());
-
-      return new YOLOv8InstantDetection(message.getDetectedObjectClassAsString(),
-                                        message.getDetectedObjectNameAsString(),
-                                        message.getConfidence(),
-                                        message.getObjectPose(),
-                                        MessageTools.toInstant(message.getDetectionTime()),
-                                        RawImage.fromMessage(message.getYoloColorImage()),
-                                        RawImage.fromMessage(message.getYoloDepthImage()),
-                                        RawImage.fromMessage(message.getYoloObjectMask()),
-                                        objectPointCloud);
    }
 
    @Override

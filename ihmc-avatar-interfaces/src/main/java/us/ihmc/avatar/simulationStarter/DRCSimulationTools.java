@@ -11,7 +11,7 @@ import javafx.fxml.FXMLLoader;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -103,9 +103,9 @@ public abstract class DRCSimulationTools
                                                                                                             T... possibleStartingLocations)
    {
       Platform.setImplicitExit(false);
-      JavaFXMissingTools.startup();
+      JavaFXTools.startup();
 
-      return JavaFXMissingTools.runAndWait(() ->
+      return JavaFXTools.runAndWait(() ->
       {
          SimulationSelectorStageController controller;
          try

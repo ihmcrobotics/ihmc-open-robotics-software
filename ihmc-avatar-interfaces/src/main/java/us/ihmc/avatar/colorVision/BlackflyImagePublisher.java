@@ -94,8 +94,8 @@ public class BlackflyImagePublisher
          // Scale image by publishedImageScaleFactor to reduce size over the network
          GpuMat scaledImageMat = new GpuMat();
 
-         int scaledWidth = Math.round(imageToPublish.getImageWidth() * publishedImageScaleFactor);
-         int scaledHeight = Math.round(imageToPublish.getImageHeight() * publishedImageScaleFactor);
+         int scaledWidth = Math.round(imageToPublish.getWidth() * publishedImageScaleFactor);
+         int scaledHeight = Math.round(imageToPublish.getHeight() * publishedImageScaleFactor);
 
          opencv_cudawarping.resize(imageToPublish.getGpuImageMat(), scaledImageMat, new Size(scaledWidth, scaledHeight));
 

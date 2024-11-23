@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.RegionInWorldInterface;

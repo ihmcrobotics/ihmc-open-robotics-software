@@ -4,7 +4,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
@@ -523,6 +523,7 @@ public class RigidBodyControlManagerTest
                                                                     null,
                                                                     false,
                                                                     nominalRhoWeight,
+                                                                    WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     0.0,
                                                                     null,

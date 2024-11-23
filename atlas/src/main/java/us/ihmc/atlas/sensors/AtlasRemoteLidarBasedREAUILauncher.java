@@ -4,16 +4,12 @@ import com.esotericsoftware.minlog.Log;
 import javafx.stage.Stage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
-
-import static us.ihmc.commons.exception.DefaultExceptionHandler.RUNTIME_EXCEPTION;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.getPrivateNetClassList;
 
 public class AtlasRemoteLidarBasedREAUILauncher
 {

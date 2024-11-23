@@ -8,8 +8,6 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -29,8 +27,8 @@ mainDependencies {
 
    api("us.ihmc:joctomap:1.12.5")
    api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.29.8")
+   api("us.ihmc:ihmc-messager-javafx:0.2.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.29.9")
    api("us.ihmc:ihmc-ros-tools:source")
 
    val openblasVersion = "0.3.23-1.5.9"

@@ -269,6 +269,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     momentumOptimizationSettings.getRhoWeight(),
+                                                                    controllerToolbox.getPostureAdjustmentProvider(),
                                                                     yoTime,
                                                                     controlDT,
                                                                     graphicsListRegistry,

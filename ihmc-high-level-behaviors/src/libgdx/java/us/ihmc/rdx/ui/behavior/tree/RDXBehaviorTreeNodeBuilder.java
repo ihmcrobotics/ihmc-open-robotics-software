@@ -29,7 +29,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
-public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
+public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder<RDXBehaviorTreeNode<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
