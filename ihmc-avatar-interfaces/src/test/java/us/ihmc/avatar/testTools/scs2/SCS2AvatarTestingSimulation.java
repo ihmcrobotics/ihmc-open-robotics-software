@@ -574,8 +574,8 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void publishToController(Object message)
    {
-      ROS2PublisherBasics ROS2PublisherBasics = defaultControllerPublishers.get(message.getClass());
-      ROS2PublisherBasics.publish(message);
+      ROS2PublisherBasics publisher = defaultControllerPublishers.get(message.getClass());
+      publisher.publish(message);
    }
 
    public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
