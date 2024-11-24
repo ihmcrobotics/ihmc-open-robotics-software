@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
-import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
+import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -33,19 +33,9 @@ public class ContinuousPlannerSchedulingTask
     * This is the delay between each tick of the state machine. Set based on perception update rate.
     */
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
-
-   public enum PlanningMode
-   {
-      FAST_HIKING, WALK_TO_GOAL
-   }
-
-   // The default mode for when things start up
-   private PlanningMode planningMode = PlanningMode.FAST_HIKING;
-
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-
    private final ContinuousPlanner continuousPlanner;
    public StateMachine<ContinuousHikingState, State> stateMachine;
    private TerrainMapData terrainMap;
@@ -61,13 +51,14 @@ public class ContinuousPlannerSchedulingTask
       String simpleRobotName = robotModel.getSimpleRobotName();
 
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
+      AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
-      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters, planningMode);
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloFootstepPlannerParameters);
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       continuousPlanner = new ContinuousPlanner(robotModel,
                                                 referenceFrames,
+                                                commandMessage,
                                                 continuousHikingParameters,
                                                 monteCarloFootstepPlannerParameters,
                                                 footstepPlannerParameters,
@@ -96,10 +87,10 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousHikingParameters,
                                                     terrainMap,
                                                     debugger,
-                                                    continuousHikingLogger,
-                                                    planningMode);
+                                                    continuousHikingLogger);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
+                                                        commandMessage,
                                                         continuousPlanner,
                                                         controllerFootstepQueueMonitor,
                                                         continuousHikingParameters,
@@ -111,10 +102,8 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
 
       // Create different conditions
-      StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage,
-                                                                                                                                       continuousHikingParameters);
-      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage,
-                                                                                                                                    continuousHikingParameters);
+      StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage);
+      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.
@@ -139,11 +128,10 @@ public class ContinuousPlannerSchedulingTask
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) ->
                                                   {
-                                                     String message ="STATE CHANGED: (" + from +  " -> "  + to + ")";
+                                                     String message = "STATE CHANGED: (" + from + " -> " + to + ")";
                                                      LogTools.warn(message);
                                                      continuousHikingLogger.appendString(message);
                                                   });
-      stateMachineFactory.addStateChangedListener((from, to) -> planningMode = debugger.getPlanningMode());
       stateMachineFactory.addStateChangedListener((from, to) -> continuousHikingLogger.logToFile(true, false));
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
