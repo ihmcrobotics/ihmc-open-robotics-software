@@ -91,14 +91,14 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
       return files;
    }
 
-   public List<WorkspaceResourceDirectory> queryContainedFolders(Class<?> classForLoading, String parentFolder)
+   public List<WorkspaceResourceDirectory> queryContainedDirectories()
    {
       ArrayList<WorkspaceResourceDirectory> directories = new ArrayList<>();
       ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, (fileName, pathType) ->
       {
          if (pathType == PathType.DIRECTORY)
          {
-            directories.add(new WorkspaceResourceDirectory(classForLoading, parentFolder + fileName));
+            directories.add(new WorkspaceResourceDirectory(classForLoading, pathNecessaryForClasspathLoadingString + "/" + fileName));
          }
       });
       return directories;
