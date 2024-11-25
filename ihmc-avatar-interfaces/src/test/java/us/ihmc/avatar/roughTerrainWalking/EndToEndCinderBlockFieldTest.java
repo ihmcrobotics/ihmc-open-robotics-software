@@ -1,17 +1,10 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -41,6 +34,12 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
@@ -419,16 +418,22 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(6), 0.0, 0.08, zOffset, yawOffset);
       yawOffset = 0.25 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(5), 0.0, 0.0, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(6), 0.0, 0.0, zOffset, yawOffset); // adding right step to keep the balance. It is temporary measure.
       yawOffset = 0.50 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(4), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(3), 0.0, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(2), 0.0, 0.08, zOffset, yawOffset);
       yawOffset = 0.75 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.04, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(0), 0.0, 0.04, zOffset, yawOffset);
       yawOffset = Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(7).get(1), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(0), 0.0, 0.08, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);
-
-      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.05, 0.12, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(4).get(1), 0.0, -0.15, zOffset, yawOffset);
       yawOffset = 0.85 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.12, zOffset, yawOffset);
