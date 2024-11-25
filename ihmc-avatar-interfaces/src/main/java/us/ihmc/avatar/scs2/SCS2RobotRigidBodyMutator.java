@@ -13,8 +13,7 @@ import java.util.List;
 
 /**
  * This class is used to mutate the mass, center of mass offset, and moment of inertia of a robot's rigid bodies in SCS2, simulating the effects of
- * time-varying
- * inertial parameters.
+ * time-varying inertial parameters.
  * <p>
  * The mutators are themselves thin wrappers around {@link YoFunctionGenerator}s, which provide a simple way to mutate the inertial parameters during a
  * simulation.
