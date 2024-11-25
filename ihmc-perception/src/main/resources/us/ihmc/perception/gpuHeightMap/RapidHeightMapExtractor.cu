@@ -233,6 +233,30 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
 
+
+extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut)
+{
+    // Thread indices
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // Ensure within bounds
+    if (xIndex >= 720 || yIndex >= 1280) {
+        return;
+    }
+    // Apply rotation (90 degrees clockwise) and vertical flip
+    int rotatedX = yIndex;                             // Rotate (x, y) -> (y, x)
+    int rotatedY = height - 1 - xIndex;                // Flip vertically
+
+    // Read depth value using the input pitch
+    unsigned short *inRow = (unsigned short *)((char *)in + (xIndex * pitchIn));
+    unsigned short depthValue = *(inRow + yIndex);
+
+    // Write to the output buffer (after flipping and rotating)
+    unsigned short *outRow = (unsigned short *)((char *)out + (rotatedY * pitchOut));
+    *(outRow + rotatedX) = depthValue;
+}
+
 extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf)
 {
 
@@ -243,7 +267,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Grid dimensions (from params)
     int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
     int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
-    //
+
     // Bounds check
     if (xIndex >= 151 || yIndex >= 151)
         return; // TODO: pass in the bounds
@@ -498,8 +522,8 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
     int globalCellIndexX = globalSensorIndex.x + xIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
     int globalCellIndexY = globalSensorIndex.y + yIndex - (params[CROPPED_WINDOW_CENTER_INDEX]);
 
-    int rotate90clock = 1;
-    int verticalflip = 1;
+    int rotate90clock = 0;
+    int verticalflip = 0;
 
      // Apply rotation (90 degrees clockwise)
         if (rotate90clock == 1) {
