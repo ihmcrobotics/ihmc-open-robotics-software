@@ -23,6 +23,11 @@ public class RDXActionProgressWidgetsManager
    private int emptyPlotIndex;
    private int numberOfLines;
 
+   public RDXActionProgressWidgetsManager()
+   {
+      ImPlotTools.ensureImPlotInitialized();
+   }
+
    public void render()
    {
       emptyPlotIndex = 0;
