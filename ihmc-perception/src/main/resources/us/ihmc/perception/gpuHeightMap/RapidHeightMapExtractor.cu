@@ -236,27 +236,30 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
 
 extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut)
 {
-    // Thread indices
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x; // Output dimension x
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y; // Output dimension y
+    // Thread indices for output image
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x; // Output dimension x (new cols)
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y; // Output dimension y (new rows)
 
-    // Ensure within bounds
-    if (xIndex >= 720 || yIndex >= 1280) {
+    // Ensure within bounds of the output image (1280 rows and 720 columns)
+    if (xIndex >= 1280 || yIndex >= 720) {
         return;
     }
 
-    // Calculate corresponding input indices based on 90-degree clockwise rotation
-    int inputX = 1280 - 1 - yIndex; // Rotate and flip
-    int inputY = xIndex;           // Swap x and y for rotation
+     unsigned short *inRow = (unsigned short *)((char *)in + (yIndex * pitchIn));
+     unsigned short depthValue = *(inRow + xIndex);
 
-    // Read depth value from the input buffer
-    unsigned short *inRow = (unsigned short *)((char *)in + (inputX * pitchIn));
-    unsigned short depthValue = *(inRow + inputY);
 
-    // Write to the output buffer
-    unsigned short *outRow = (unsigned short *)((char *)out + (xIndex * pitchOut));
-    *(outRow + yIndex) = depthValue;
+
+
+     int outRow = xIndex;  // Flipping and rotation (yIndex becomes the new row)
+    int outCol = 720 - 1 - yIndex;
+
+     unsigned short *outRowPtr = (unsigned short *)((char *)out + (outRow * pitchOut));
+       *(outRowPtr + outCol) = depthValue;
+
+
 }
+
 
 
 extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf)

@@ -358,8 +358,8 @@ public class RapidHeightMapExtractorCuda
       //       Each kernel performs a specific task related to the height map update, registration, and cropping
 
       int blockSizeXY = 32;
-      int gridSizeKernel0X = (inputDepthImage.rows() + blockSizeXY - 1) / blockSizeXY;
-      int gridSizeKernel0Y = (inputDepthImage.cols() + blockSizeXY - 1) / blockSizeXY;
+      int gridSizeKernel0X = (1280 + blockSizeXY - 1) / blockSizeXY;
+      int gridSizeKernel0Y = (720 + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel1XY = (localCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel2XY = (globalCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel3XY = (heightMapParameters.getCropWindowSize() + blockSizeXY - 1) / blockSizeXY;
@@ -410,22 +410,22 @@ public class RapidHeightMapExtractorCuda
       cudaStreamSynchronize(stream);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      Mat inputMat = new Mat();
-      inputDepthImage.download(inputMat);
+//      Mat inputMat = new Mat();
+      //      inputDepthImage.download(inputMat);
+      //
+      //      Mat transformedMat = new Mat();
+      //      transformedInputDepthImage.download(transformedMat);
+      //
+      //      Mat localMat = new Mat();
+      //      localHeightMapImage.download(localMat);
+      //      Mat globalMat = new Mat();
+      //      globalHeightMapImage.download(globalMat);
 
-      Mat transformedMat = new Mat();
-      transformedInputDepthImage.download(transformedMat);
-
-      Mat localMat = new Mat();
-      localHeightMapImage.download(localMat);
-      Mat globalMat = new Mat();
-      globalHeightMapImage.download(globalMat);
-
-      PerceptionDebugTools.display("Input Height Map", inputMat, 1);
-      PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
-      PerceptionDebugTools.display("Local Height Map", localMat, 1);
-      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
-      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
+//      PerceptionDebugTools.display("Input Height Map", inputMat, 1);
+//      PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
+//      PerceptionDebugTools.display("Local Height Map", localMat, 1);
+//      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
+//      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
 
       //      inputDepthImage.download(finalCroppedHeightMap);
       //      Rect roi = new Rect(0, 0, 151, 151);
