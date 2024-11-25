@@ -232,7 +232,7 @@ public class RapidHeightMapExtractorCuda
 
       localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
 
-      transformedInputDepthImage = new GpuMat(720, 1280, opencv_core.CV_16UC1);
+      transformedInputDepthImage = new GpuMat(inputDepthImage.cols(), inputDepthImage.rows(), opencv_core.CV_16UC1);
 
       globalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
 
@@ -353,12 +353,13 @@ public class RapidHeightMapExtractorCuda
 
       cudaStreamSynchronize(stream);
 
+
       //       Execute the CUDA kernels with the provided stream
       //       Each kernel performs a specific task related to the height map update, registration, and cropping
 
       int blockSizeXY = 32;
-      int gridSizeKernel0X = (720 + blockSizeXY - 1) / blockSizeXY;
-      int gridSizeKernel0Y = (1280 + blockSizeXY - 1) / blockSizeXY;
+      int gridSizeKernel0X = (inputDepthImage.rows() + blockSizeXY - 1) / blockSizeXY;
+      int gridSizeKernel0Y = (inputDepthImage.cols() + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel1XY = (localCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel2XY = (globalCellsPerAxis + blockSizeXY - 1) / blockSizeXY;
       int gridSizeKernel3XY = (heightMapParameters.getCropWindowSize() + blockSizeXY - 1) / blockSizeXY;
@@ -372,7 +373,7 @@ public class RapidHeightMapExtractorCuda
       preprocessKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
       preprocessKernel.withPointer(transformedInputDepthImage.data()).withLong(transformedInputDepthImage.step());
 
-      updateKernel.withPointer(transformedInputDepthImage.data()).withLong(transformedInputDepthImage.step());
+      updateKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
       updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       updateKernel.withPointer(parametersDevicePointer);
       updateKernel.withPointer(sensorToGroundTransformDevicePointer);
@@ -409,17 +410,22 @@ public class RapidHeightMapExtractorCuda
       cudaStreamSynchronize(stream);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      //      Mat inputMat = new Mat();
-      //      inputDepthImage.download(inputMat);
-      //      Mat localMat = new Mat();
-      //      localHeightMapImage.download(localMat);
-      //      Mat globalMat = new Mat();
-      //      globalHeightMapImage.download(globalMat);
+      Mat inputMat = new Mat();
+      inputDepthImage.download(inputMat);
 
-      //      PerceptionDebugTools.display("Input Height Map", inputMat , 1);
-      //      PerceptionDebugTools.display("Local Height Map", localMat, 1);
-      //      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
-      //      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
+      Mat transformedMat = new Mat();
+      transformedInputDepthImage.download(transformedMat);
+
+      Mat localMat = new Mat();
+      localHeightMapImage.download(localMat);
+      Mat globalMat = new Mat();
+      globalHeightMapImage.download(globalMat);
+
+      PerceptionDebugTools.display("Input Height Map", inputMat, 1);
+      PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
+      PerceptionDebugTools.display("Local Height Map", localMat, 1);
+      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
+      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
 
       //      inputDepthImage.download(finalCroppedHeightMap);
       //      Rect roi = new Rect(0, 0, 151, 151);
