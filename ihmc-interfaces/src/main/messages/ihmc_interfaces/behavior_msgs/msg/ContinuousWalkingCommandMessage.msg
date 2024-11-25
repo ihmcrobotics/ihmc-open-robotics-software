@@ -1,3 +1,7 @@
+# DEPRECATED: This message is replaced by ContinuousHikingCommandMessage.msg
+# This message was left in code to prevent issues with users who rely on this message.
+# Please switch to using the ContinuousHikingCommandMessage as it supports the latest features with Continuous Hiking
+
 # flag to enable/disable continuous hiking state machine with keyboard
 bool enable_continuous_hiking_with_keyboard
 
