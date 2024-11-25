@@ -7,16 +7,17 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is used to mutate the mass, center of mass offset, and moment of inertia of a robot's rigid bodies in SCS2, simulating the effects of time-varying
+ * This class is used to mutate the mass, center of mass offset, and moment of inertia of a robot's rigid bodies in SCS2, simulating the effects of
+ * time-varying
  * inertial parameters.
  * <p>
- * The mutators are themselves thin wrappers around {@link YoFunctionGenerator}s, which provide a simple way to mutate the inertial parameters during a simulation.
+ * The mutators are themselves thin wrappers around {@link YoFunctionGenerator}s, which provide a simple way to mutate the inertial parameters during a
+ * simulation.
  * </p>
  *
  * @author James Foster
@@ -26,7 +27,7 @@ public class SCS2RobotRigidBodyMutator implements Controller
    private final List<RigidBodyMutator> rigidBodyMutators = new ArrayList<>();
    private final YoRegistry registry;
 
-   SCS2RobotRigidBodyMutator(Robot robot, DoubleProvider time, double dt)
+   public SCS2RobotRigidBodyMutator(Robot robot, DoubleProvider time, double dt)
    {
       registry = new YoRegistry(getClass().getSimpleName());
 
@@ -62,7 +63,7 @@ public class SCS2RobotRigidBodyMutator implements Controller
       private final YoFunctionGenerator[] comOffsetMutators;
       private final YoFunctionGenerator[] momentOfInertiaMutators;
 
-      RigidBodyMutator(RigidBodyBasics rigidBody, DoubleProvider time, YoRegistry registry, double dt)
+      public RigidBodyMutator(RigidBodyBasics rigidBody, DoubleProvider time, YoRegistry registry, double dt)
       {
          this.rigidBody = rigidBody;
 
@@ -72,9 +73,21 @@ public class SCS2RobotRigidBodyMutator implements Controller
          massMutator.setAmplitude(defaultMass * DEFAULT_MASS_PERCENTAGE_MIN_MAX);
 
          comOffsetMutators = new YoFunctionGenerator[3];
-         comOffsetMutators[0] = new YoFunctionGenerator(YoGeometryNameTools.createXName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
-         comOffsetMutators[1] = new YoFunctionGenerator(YoGeometryNameTools.createYName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
-         comOffsetMutators[2] = new YoFunctionGenerator(YoGeometryNameTools.createZName(rigidBody.getName() + "_CoMOffset", "Mutator"), time, registry, false, dt);
+         comOffsetMutators[0] = new YoFunctionGenerator(YoGeometryNameTools.createXName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
+         comOffsetMutators[1] = new YoFunctionGenerator(YoGeometryNameTools.createYName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
+         comOffsetMutators[2] = new YoFunctionGenerator(YoGeometryNameTools.createZName(rigidBody.getName() + "_CoMOffset", "Mutator"),
+                                                        time,
+                                                        registry,
+                                                        false,
+                                                        dt);
          for (YoFunctionGenerator mutator : comOffsetMutators)
          {
             mutator.setOffset(0.0);  // CoM offsets are nearly always default zero
@@ -99,18 +112,15 @@ public class SCS2RobotRigidBodyMutator implements Controller
          }
       }
 
-      void mutate()
+      public void mutate()
       {
          rigidBody.getInertia().setMass(massMutator.getValue());
 
-         rigidBody.getInertia().setCenterOfMassOffset(comOffsetMutators[0].getValue(),
-                                                      comOffsetMutators[1].getValue(),
-                                                      comOffsetMutators[2].getValue());
+         rigidBody.getInertia().setCenterOfMassOffset(comOffsetMutators[0].getValue(), comOffsetMutators[1].getValue(), comOffsetMutators[2].getValue());
 
          // Only mutating the diagonals of the moment of inertia: Ixx, Iyy, Izz
-         rigidBody.getInertia().setMomentOfInertia(momentOfInertiaMutators[0].getValue(),
-                                                   momentOfInertiaMutators[1].getValue(),
-                                                   momentOfInertiaMutators[2].getValue());
+         rigidBody.getInertia()
+                  .setMomentOfInertia(momentOfInertiaMutators[0].getValue(), momentOfInertiaMutators[1].getValue(), momentOfInertiaMutators[2].getValue());
       }
    }
 }
