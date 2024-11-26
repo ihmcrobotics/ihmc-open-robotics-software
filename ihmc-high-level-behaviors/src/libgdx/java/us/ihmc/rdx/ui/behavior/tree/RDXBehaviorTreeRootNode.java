@@ -31,8 +31,6 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       state = getState();
 
-      getDefinition().setName("Root");
-
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
                                                         imBoolean -> ImGui.checkbox(labels.get("Autonomously"), imBoolean));
@@ -53,7 +51,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       for (RDXActionNode<?, ?> actionChild : actionChildren)
       {
-         actionChild.updateAndValidateExecuteAfter(state.getActionChildren());
+         actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
       }
    }
 

@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,9 +17,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinition
 {
-   private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalString parentFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform pelvisToParentTransform;
+   private final CRDTBidirectionalDouble trajectoryDuration;
+   private final CRDTBidirectionalString parentFrameName;
+   private final CRDTBidirectionalRigidBodyTransform pelvisToParentTransform;
 
    // On disk fields
    private double onDiskTrajectoryDuration;
@@ -32,9 +30,9 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
    {
       super(crdtInfo, saveFileDirectory);
 
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      pelvisToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
+      trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
+      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      pelvisToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 
    @Override
@@ -54,7 +52,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, pelvisToParentTransform.accessValue());
+      JSONTools.toEuclid(jsonNode, pelvisToParentTransform.getValueAndFreeze());
    }
 
    @Override
@@ -74,7 +72,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
       parentFrameName.setValue(onDiskParentFrameName);
-      pelvisToParentTransform.accessValue().set(onDiskPelvisToParentTransform);
+      pelvisToParentTransform.getValueAndFreeze().set(onDiskPelvisToParentTransform);
    }
 
    @Override
@@ -109,27 +107,27 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
 
    public void setHeight(double height)
    {
-      pelvisToParentTransform.accessValue().getTranslation().set(pelvisToParentTransform.accessValue().getTranslationX(),
-                                                                 pelvisToParentTransform.accessValue().getTranslationY(),
-                                                                 height);
+      pelvisToParentTransform.getValueAndFreeze().getTranslation().set(pelvisToParentTransform.getValueAndFreeze().getTranslationX(),
+                                                                       pelvisToParentTransform.getValueAndFreeze().getTranslationY(),
+                                                                       height);
    }
 
    public void setYaw(double yaw)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.accessValue().getRotation();
-      pelvisToParentTransform.accessValue().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
+      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
    }
 
    public void setPitch(double pitch)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.accessValue().getRotation();
-      pelvisToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
+      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
    }
 
    public void setRoll(double roll)
    {
-      RotationMatrixBasics rotation = pelvisToParentTransform.accessValue().getRotation();
-      pelvisToParentTransform.accessValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValueAndFreeze().getRotation();
+      pelvisToParentTransform.getValueAndFreeze().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
    }
 
    public Orientation3DReadOnly getRotation()
@@ -167,12 +165,12 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       this.parentFrameName.setValue(parentFrameName);
    }
 
-   public CRDTUnidirectionalString getCRDTParentFrameName()
+   public CRDTBidirectionalString getCRDTParentFrameName()
    {
       return parentFrameName;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getPelvisToParentTransform()
+   public CRDTBidirectionalRigidBodyTransform getPelvisToParentTransform()
    {
       return pelvisToParentTransform;
    }

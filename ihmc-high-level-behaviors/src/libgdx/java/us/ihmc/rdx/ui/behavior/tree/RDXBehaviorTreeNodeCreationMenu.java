@@ -140,26 +140,11 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
-                                                                       indexedTreeFile.getNumberOfFramesInWorld(),
-                                                                       indexedTreeFile.getReferenceFrameNames().size());
-         if (ImGuiTools.textWithUnderlineOnHover(textToDisplay))
+         if (ImGuiTools.textWithUnderlineOnHover(indexedTreeFile.getTreeFile().getFileName()))
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = null;
-               try
-               {
-                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
-               }
-               catch (Exception e)
-               {
-                  LogTools.error("""
-                                 Error loading {}.
-                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
-                                 Error: {}
-                                 """, textToDisplay, e.getMessage());
-               }
+               RDXBehaviorTreeNode<?, ?> loadedNode  = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
                if (loadedNode != null)
                {
@@ -263,14 +248,17 @@ public class RDXBehaviorTreeNodeCreationMenu
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
-         RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
-         if (treeFile.getName() != null && treeFile.getNotes() != null)
+         if (queryContainedFile.getFileName().endsWith(".json"))
          {
-            indexedTreeFiles.add(treeFile);
-         }
-         else
-         {
-            LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+            RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+            if (treeFile.getName() != null && treeFile.getNotes() != null)
+            {
+               indexedTreeFiles.add(treeFile);
+            }
+            else
+            {
+               LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+            }
          }
       }
    }

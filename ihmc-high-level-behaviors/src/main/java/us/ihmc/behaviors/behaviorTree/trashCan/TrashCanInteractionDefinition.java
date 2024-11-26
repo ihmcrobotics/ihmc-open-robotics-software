@@ -3,19 +3,19 @@ package us.ihmc.behaviors.behaviorTree.trashCan;
 import behavior_msgs.msg.dds.TrashCanInteractionDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class TrashCanInteractionDefinition extends BehaviorTreeNodeDefinition
 {
-   private final CRDTUnidirectionalString obstructedNode;
+   private final CRDTBidirectionalString obstructedNode;
 
    public TrashCanInteractionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      obstructedNode = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
+      obstructedNode = new CRDTBidirectionalString(this, "");
    }
 
    public void toMessage(TrashCanInteractionDefinitionMessage message)
@@ -32,7 +32,7 @@ public class TrashCanInteractionDefinition extends BehaviorTreeNodeDefinition
       obstructedNode.fromMessage(message.getObstructedNodeNameAsString());
    }
 
-   public CRDTUnidirectionalString getObstructedNode()
+   public CRDTBidirectionalString getObstructedNode()
    {
       return obstructedNode;
    }

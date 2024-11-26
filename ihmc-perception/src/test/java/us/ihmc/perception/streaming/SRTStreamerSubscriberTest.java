@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -24,8 +25,6 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.commons.thread.Throttler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -208,7 +207,7 @@ public class SRTStreamerSubscriberTest
       streamerConnectThread.join();
 
       // Wait until timeout occurs
-      MissingThreadTools.sleep(3.0);
+      ThreadTools.park(3.0);
 
       // We should not be connected anymore
       assertEquals(0, streamer.connectedCallerCount());
@@ -325,7 +324,7 @@ public class SRTStreamerSubscriberTest
 
       // Try subscribing
       subscriber.subscribe();
-      MissingThreadTools.sleep(StreamingTools.CONNECTION_TIMEOUT);
+      ThreadTools.park(StreamingTools.CONNECTION_TIMEOUT);
 
       // Should be communicating now
       assertTrue(subscriber.isConnected());

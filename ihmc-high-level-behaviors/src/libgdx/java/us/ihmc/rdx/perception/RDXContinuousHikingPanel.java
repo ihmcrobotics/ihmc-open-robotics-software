@@ -337,13 +337,16 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Setup a bunch of variables to be published in the message
       boolean walkWithKeyboard = ImGui.getIO().getKeyCtrl();
       boolean walkWithController = false;
+      boolean walkBackwards = false;
       double lateralJoystickValue = 0.0;
       double forwardJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
 
       if (controllerConnected)
       {
+         walkBackwards = joystickController.getButton(joystickController.getMapping().buttonB);
          walkWithController = joystickController.getButton(joystickController.getMapping().buttonA);
+         walkWithController |= walkBackwards;
          forwardJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftY);
          lateralJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftX);
          turningJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisRightX);
@@ -355,6 +358,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          commandMessage.setEnableContinuousHikingWithKeyboard(walkWithKeyboard);
          commandMessage.setEnableContinuousHikingWithJoystickController(walkWithController);
+         commandMessage.setWalkBackwards(walkBackwards);
          commandMessage.setForwardValue(forwardJoystickValue);
          commandMessage.setLateralValue(lateralJoystickValue);
          commandMessage.setTurningValue(turningJoystickValue);

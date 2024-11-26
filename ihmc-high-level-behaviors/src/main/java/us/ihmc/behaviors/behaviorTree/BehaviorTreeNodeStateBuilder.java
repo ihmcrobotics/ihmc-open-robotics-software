@@ -6,7 +6,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 /**
  * States won't be built directly. They'll be Executors or UI types.
  */
-public interface BehaviorTreeNodeStateBuilder
+public interface BehaviorTreeNodeStateBuilder<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
-   BehaviorTreeNodeLayer createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
+   T createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory);
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -30,21 +29,21 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
    public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
 
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
-   private final CRDTUnidirectionalBoolean jointspaceOnly;
-   private final CRDTUnidirectionalBoolean usePredefinedJointAngles;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalDouble trajectoryDuration;
+   private final CRDTBidirectionalBoolean holdPoseInWorldLater;
+   private final CRDTBidirectionalBoolean jointspaceOnly;
+   private final CRDTBidirectionalBoolean usePredefinedJointAngles;
    /** Preset is null when using explicitly specified custom joint angles */
-   private final CRDTUnidirectionalEnumField<PresetArmConfiguration> preset;
-   private final CRDTUnidirectionalDoubleArray jointAngles;
-   private final CRDTUnidirectionalString palmParentFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform palmTransformToParent;
-   private final CRDTUnidirectionalDouble linearPositionWeight;
-   private final CRDTUnidirectionalDouble angularPositionWeight;
-   private final CRDTUnidirectionalDouble jointspaceWeight;
-   private final CRDTUnidirectionalDouble positionErrorTolerance;
-   private final CRDTUnidirectionalDouble orientationErrorTolerance;
+   private final CRDTBidirectionalEnumField<PresetArmConfiguration> preset;
+   private final CRDTBidirectionalDoubleArray jointAngles;
+   private final CRDTBidirectionalString palmParentFrameName;
+   private final CRDTBidirectionalRigidBodyTransform palmTransformToParent;
+   private final CRDTBidirectionalDouble linearPositionWeight;
+   private final CRDTBidirectionalDouble angularPositionWeight;
+   private final CRDTBidirectionalDouble jointspaceWeight;
+   private final CRDTBidirectionalDouble positionErrorTolerance;
+   private final CRDTBidirectionalDouble orientationErrorTolerance;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -66,20 +65,20 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_TRAJECTORY_DURATION);
-      holdPoseInWorldLater = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_HOLD_POSE);
-      jointspaceOnly = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_IS_JOINTSPACE_MODE);
-      usePredefinedJointAngles = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
-      preset = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, PresetArmConfiguration.HOME);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.OPERATOR, this, MAX_NUMBER_OF_JOINTS);
-      palmParentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      palmTransformToParent = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
-      linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_LINEAR_POSITION_WEIGHT);
-      angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ANGULAR_POSITION_WEIGHT);
-      jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_JOINTSPACE_WEIGHT);
-      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_POSITION_ERROR_TOLERANCE);
-      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
+      side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTBidirectionalDouble(this, DEFAULT_TRAJECTORY_DURATION);
+      holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, DEFAULT_HOLD_POSE);
+      jointspaceOnly = new CRDTBidirectionalBoolean(this, DEFAULT_IS_JOINTSPACE_MODE);
+      usePredefinedJointAngles = new CRDTBidirectionalBoolean(this, DEFAULT_USE_PREDEFINED_JOINT_ANGLES);
+      preset = new CRDTBidirectionalEnumField<>(this, PresetArmConfiguration.HOME);
+      jointAngles = new CRDTBidirectionalDoubleArray(this, MAX_NUMBER_OF_JOINTS);
+      palmParentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      palmTransformToParent = new CRDTBidirectionalRigidBodyTransform(this);
+      linearPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_LINEAR_POSITION_WEIGHT);
+      angularPositionWeight = new CRDTBidirectionalDouble(this, DEFAULT_ANGULAR_POSITION_WEIGHT);
+      jointspaceWeight = new CRDTBidirectionalDouble(this, DEFAULT_JOINTSPACE_WEIGHT);
+      positionErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTBidirectionalDouble(this, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
 
    }
 
@@ -135,14 +134,14 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          {
             for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
             {
-               jointAngles.accessValue()[i] = jsonNode.get("j" + i).asDouble();
+               jointAngles.setValue(i, jsonNode.get("j" + i).asDouble());
             }
          }
       }
       else
       {
          palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-         JSONTools.toEuclid(jsonNode, palmTransformToParent.accessValue());
+         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValueAndFreeze());
          holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
          jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
          linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
@@ -188,9 +187,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       usePredefinedJointAngles.setValue(onDiskUsePredefinedJointAngles);
       preset.setValue(onDiskPreset);
       for (int i = 0; i < jointAngles.getLength(); i++)
-         jointAngles.accessValue()[i] = onDiskJointAngles[i];
+         jointAngles.setValue(i, onDiskJointAngles[i]);
       palmParentFrameName.setValue(onDiskPalmParentFrameName);
-      palmTransformToParent.accessValue().set(onDiskPalmTransformToParent);
+      palmTransformToParent.getValueAndFreeze().set(onDiskPalmTransformToParent);
       linearPositionWeight.setValue(onDiskLinearPositionWeight);
       angularPositionWeight.setValue(onDiskAngularPositionWeight);
       jointspaceWeight.setValue(onDiskJointspaceWeight);
@@ -333,7 +332,7 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       this.preset.setValue(preset);
    }
 
-   public CRDTUnidirectionalDoubleArray getJointAngles()
+   public CRDTBidirectionalDoubleArray getJointAngles()
    {
       return jointAngles;
    }
@@ -348,12 +347,12 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
       this.palmParentFrameName.setValue(palmParentFrameName);
    }
 
-   public CRDTUnidirectionalString getCRDTPalmParentFrameName()
+   public CRDTBidirectionalString getCRDTPalmParentFrameName()
    {
       return palmParentFrameName;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getPalmTransformToParent()
+   public CRDTBidirectionalRigidBodyTransform getPalmTransformToParent()
    {
       return palmTransformToParent;
    }

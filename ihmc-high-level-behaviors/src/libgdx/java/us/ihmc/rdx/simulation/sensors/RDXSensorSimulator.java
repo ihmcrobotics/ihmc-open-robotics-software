@@ -54,12 +54,11 @@ public class RDXSensorSimulator
 
    // Images
    private Mat colorImage = null;
-   private Instant colorGrabTime = Instant.EPOCH;
 
    private Mat depthImage = null;
    private Mat depthData = null;
-   private Instant depthGrabTime = Instant.EPOCH;
 
+   private Instant grabTime = Instant.EPOCH;
    private long sequenceNumber = 0L;
 
    public RDXSensorSimulator(int imageWidth, int imageHeight, float verticalFOV, float minRange, float maxRange)
@@ -135,6 +134,9 @@ public class RDXSensorSimulator
 
    public void render(RigidBodyTransform cameraTransformToWorld)
    {
+      if (colorImage == null && depthImage == null) // Ensure we actually want to render
+         return;
+
       // Update camera pose
       LibGDXTools.toLibGDX(cameraTransformToWorld, cameraTransform);
       camera.position.setZero();
@@ -154,17 +156,17 @@ public class RDXSensorSimulator
       // Update viewport to match camera pose
       viewport.update(imageWidth, imageHeight);
 
-      if (colorImage != null) // If color is enabled
+      // Render and "grab" the images
+      simulationScene.preRender(camera);
+      GL41.glViewport(0, 0, imageWidth, imageHeight);
+      simulationScene.render(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
+      simulationScene.postRender();
+
+      // Save the grab time
+      grabTime = Instant.now();
+
+      if (colorImage != null)
       {
-         // Render and "grab" the color image
-         simulationScene.preRender(camera);
-         GL41.glViewport(0, 0, imageWidth, imageHeight);
-         simulationScene.render(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
-         simulationScene.postRender();
-
-         // Save the grab time
-         colorGrabTime = Instant.now();
-
          // Read the grabbed color image
          GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
          GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, colorImage.data().address());
@@ -173,19 +175,9 @@ public class RDXSensorSimulator
          opencv_core.flip(colorImage, colorImage, OpenCVTools.FLIP_Y);
       }
 
-      if (depthImage != null) // If depth is enabled
+      if (depthImage != null)
       {
-         // Render and "grab" the color image
-         simulationScene.preRenderDepth(camera);
-         GL41.glViewport(0, 0, imageWidth, imageHeight);
-         simulationScene.renderDepth(RDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
-         simulationScene.postRenderDepth();
-
-         // Save the grab time
-         depthGrabTime = Instant.now();
-
-         // Read the depth buffer
-         GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
+         // Read the grabbed depth image
          GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, depthData.data().address());
 
          // Linearizing Depth Buffer Data: https://learnopengl.com/Advanced-OpenGL/Depth-testing
@@ -219,7 +211,7 @@ public class RDXSensorSimulator
       if (colorImage == null)
          throw new IllegalStateException("No color image has been rendered.");
 
-      return new RawImage(colorImage.clone(), null, PixelFormat.RGBA8, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, colorGrabTime, sequenceNumber, 0.0f);
+      return new RawImage(colorImage.clone(), null, PixelFormat.RGBA8, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, grabTime, sequenceNumber, 0.0f);
    }
 
    public RawImage getDepthImage()
@@ -227,7 +219,7 @@ public class RDXSensorSimulator
       if (depthImage == null)
          throw new IllegalStateException("No depth image has been rendered.");
 
-      return new RawImage(depthImage.clone(), null, PixelFormat.GRAY16, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, depthGrabTime, sequenceNumber, 0.001f);
+      return new RawImage(depthImage.clone(), null, PixelFormat.GRAY16, cameraIntrinsics, CameraModel.PINHOLE, cameraPose, grabTime, sequenceNumber, 0.001f);
    }
 
    public void destroy()
