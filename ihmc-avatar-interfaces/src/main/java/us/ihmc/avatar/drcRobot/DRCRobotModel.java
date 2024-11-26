@@ -220,11 +220,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   default LookAndStepBehaviorParameters getLookAndStepParameters()
-   {
-      return null;
-   }
-
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;

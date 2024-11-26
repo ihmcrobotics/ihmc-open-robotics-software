@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import com.jme3.math.Transform;
-import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
@@ -638,12 +637,6 @@ public class AtlasRobotModel implements DRCRobotModel
    public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
-   }
-
-   @Override
-   public LookAndStepBehaviorParameters getLookAndStepParameters()
-   {
-      return new AtlasLookAndStepParameters();
    }
 
    @Override
