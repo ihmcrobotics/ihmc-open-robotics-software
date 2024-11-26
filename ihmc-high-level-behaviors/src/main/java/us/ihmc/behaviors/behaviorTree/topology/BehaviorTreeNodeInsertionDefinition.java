@@ -15,14 +15,14 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
    private T sibling;
    private T parent;
    private Freezable freezableRootNodeHolder;
-   private Consumer<T> rootNodeSetter;
+   private Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter;
    private BehaviorTreeNodeInsertionType insertionType;
    private int insertionIndex;
 
    public static <R extends BehaviorTreeNodeLayer<R, ?, ?, ?>>
    BehaviorTreeNodeInsertionDefinition<R> build(R nodeToInsert,
                                                 Freezable freezableRootNodeHolder,
-                                                Consumer<R> rootNodeSetter,
+                                                Consumer<BehaviorTreeNodeLayer<R, ?, ?, ?>> rootNodeSetter,
                                                 R relativeNode,
                                                 BehaviorTreeNodeInsertionType insertionType)
    {
@@ -56,7 +56,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
 
    private void setupInsertRoot(T newRoot,
                                 Freezable freezableRootNodeHolder,
-                                Consumer<T> rootNodeSetter)
+                                Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> rootNodeSetter)
    {
       this.nodeToInsert = newRoot;
       this.freezableRootNodeHolder = freezableRootNodeHolder;
@@ -121,7 +121,7 @@ public class BehaviorTreeNodeInsertionDefinition<T extends BehaviorTreeNodeLayer
       return parent;
    }
 
-   public Consumer<T> getRootNodeSetter()
+   public Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> getRootNodeSetter()
    {
       return rootNodeSetter;
    }
