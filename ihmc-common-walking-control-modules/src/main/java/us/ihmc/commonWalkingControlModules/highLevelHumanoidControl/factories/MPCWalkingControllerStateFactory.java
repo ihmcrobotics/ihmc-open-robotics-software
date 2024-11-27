@@ -1,0 +1,34 @@
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCWalkingControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+
+public class MPCWalkingControllerStateFactory implements HighLevelControllerStateFactory
+{
+   private MPCWalkingControllerState walkingControllerState;
+
+   @Override
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   {
+      if (walkingControllerState == null)
+      {
+         walkingControllerState = new MPCWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
+                                                                controllerFactoryHelper.getManagerFactory(),
+                                                                controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
+                                                                controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                controllerFactoryHelper.getWalkingControllerParameters(),
+                                                                controllerFactoryHelper.getControllerCoreOutputDataHolder());
+      }
+
+      return walkingControllerState;
+   }
+
+   @Override
+   public HighLevelControllerName getStateEnum()
+   {
+      return HighLevelControllerName.WALKING;
+   }
+}

@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.EnumMap;
 
-public class HighLevelControllerFactoryHelper
+public class HighLevelMPCControllerFactoryHelper
 {
    private EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -51,7 +51,7 @@ public class HighLevelControllerFactoryHelper
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-}
+   }
 
    public void setHighLevelControlManagerFactory(HighLevelControlManagerFactory managerFactory)
    {
@@ -83,14 +83,16 @@ public class HighLevelControllerFactoryHelper
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
 
-   public EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> getControllerFactories()
-   {
-      return controllerFactories;
-   }
    public void setControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder controllerCoreOutputDataHolder)
    {
       this.controllerCoreOutputDataHolder = controllerCoreOutputDataHolder;
    }
+
+   public EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> getControllerFactories()
+   {
+      return controllerFactories;
+   }
+
    public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
       return controllerToolbox;
@@ -140,5 +142,6 @@ public class HighLevelControllerFactoryHelper
    {
       return forceSensorDataHolder;
    }
+
    public ControllerCoreOutputDataHolder getControllerCoreOutputDataHolder() {return controllerCoreOutputDataHolder;}
 }
