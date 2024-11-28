@@ -12,9 +12,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCHighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidMPCControllerPlugin;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidMPCControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -58,7 +58,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
-   private final StateMachine<HighLevelControllerName, HighLevelControllerState> stateMachine;
+   private final StateMachine<HighLevelControllerName, MPCHighLevelControllerState> stateMachine;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
@@ -72,10 +72,10 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
-   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
+   private final HighLevelMPCControllerFactoryHelper controllerFactoryHelper;
 
-   private final EnumMap<HighLevelControllerName, HighLevelControllerState> highLevelControllerStates = new EnumMap<>(HighLevelControllerName.class);
-   private final List<HighLevelHumanoidControllerPlugin> controllerPlugins = new ArrayList<>();
+   private final EnumMap<HighLevelControllerName, MPCHighLevelControllerState> highLevelControllerStates = new EnumMap<>(HighLevelControllerName.class);
+   private final List<HighLevelHumanoidMPCControllerPlugin> controllerPlugins = new ArrayList<>();
 
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
@@ -87,22 +87,22 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
    private final InertialParameterManager inertialParameterManager;
 
    public HumanoidHighLevelMPCControllerManager(CommandInputManager commandInputManager,
-                                             StatusMessageOutputManager statusMessageOutputManager,
-                                             HighLevelControllerName initialControllerState,
-                                             HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters,
-                                             YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
-                                             EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
-                                             ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                             List<HighLevelHumanoidControllerPluginFactory> pluginFactories,
-                                             HighLevelControlManagerFactory managerFactory,
-                                             WholeBodyControllerCoreFactory controllerCoreFactory,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox,
-                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                             JointDesiredOutputListBasics lowLevelControllerOutput,
-                                             ControllerCoreOutputDataHolder controllercoreOutputDataHolder,
-                                             ControllerCoreCommandDataHolder controllerCoreCommandDataHolder)
+                                                StatusMessageOutputManager statusMessageOutputManager,
+                                                HighLevelControllerName initialControllerState,
+                                                HighLevelControllerParameters highLevelControllerParameters,
+                                                WalkingControllerParameters walkingControllerParameters,
+                                                YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
+                                                EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerStateFactories,
+                                                ArrayList<MPCControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
+                                                List<HighLevelHumanoidMPCControllerPluginFactory> pluginFactories,
+                                                HighLevelControlManagerFactory managerFactory,
+                                                WholeBodyControllerCoreFactory controllerCoreFactory,
+                                                HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                ControllerCoreOutputDataHolder controllercoreOutputDataHolder,
+                                                ControllerCoreCommandDataHolder controllerCoreCommandDataHolder)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -116,7 +116,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
 
-      controllerFactoryHelper = new HighLevelControllerFactoryHelper();
+      controllerFactoryHelper = new HighLevelMPCControllerFactoryHelper();
       controllerFactoryHelper.setCommandInputManager(commandInputManager);
       controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
       controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters);
@@ -134,7 +134,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
                                        controllerToolbox.getYoTime(),
                                        registry);
       isListeningToHighLevelStateMessage.set(true);
-      for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
+      for (MPCHighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
          this.registry.addChild(highLevelControllerState.getYoRegistry());
       }
@@ -157,7 +157,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
     *
     * @param pluginFactory the factory used to create the new plugin to be registered.
     */
-   public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   public void addControllerPluginFactory(HighLevelHumanoidMPCControllerPluginFactory pluginFactory)
    {
       addControllerPlugin(pluginFactory.buildPlugin(controllerFactoryHelper));
    }
@@ -172,7 +172,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
     *
     * @param plugin the plugin to be registered.
     */
-   public void addControllerPlugin(HighLevelHumanoidControllerPlugin plugin)
+   public void addControllerPlugin(HighLevelHumanoidMPCControllerPlugin plugin)
    {
       addYoVariableRegistry(plugin.getRegistry());
       controllerPlugins.add(plugin);
@@ -265,26 +265,26 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       return getName();
    }
 
-   private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState,
-                                                                                             EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
-                                                                                             ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                                                                             HighLevelControlManagerFactory managerFactory,
-                                                                                             WholeBodyControllerCoreFactory controllerCoreFactory,
-                                                                                             YoDouble yoTime,
-                                                                                             YoRegistry registry)
+   private StateMachine<HighLevelControllerName, MPCHighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState,
+                                                                                                EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerStateFactories,
+                                                                                                ArrayList<MPCControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
+                                                                                                HighLevelControlManagerFactory managerFactory,
+                                                                                                WholeBodyControllerCoreFactory controllerCoreFactory,
+                                                                                                YoDouble yoTime,
+                                                                                                YoRegistry registry)
    {
       controllerFactoryHelper.setControllerFactories(controllerStateFactories);
       controllerFactoryHelper.setHighLevelControlManagerFactory(managerFactory);
       controllerFactoryHelper.setWholeBodyControllerCoreFactory(controllerCoreFactory);
 
-      StateMachineFactory<HighLevelControllerName, HighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
+      StateMachineFactory<HighLevelControllerName, MPCHighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
       factory.setNamePrefix("highLevelControllerName").setRegistry(registry).buildYoClock(yoTime);
 
       // create controller states
-      for (HighLevelControllerStateFactory controllerStateFactory : controllerStateFactories.values())
+      for (MPCHighLevelControllerStateFactory controllerStateFactory : controllerStateFactories.values())
       {
          // create the individual state
-         HighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
+         MPCHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
 
          // add the controller to the state machine
          factory.addState(highLevelControllerState.getHighLevelControllerName(), highLevelControllerState);
@@ -296,7 +296,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       }
 
       // create controller transitions
-      for (ControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory : controllerTransitionFactories)
+      for (MPCControllerStateTransitionFactory<HighLevelControllerName> controllerStateTransitionFactory : controllerTransitionFactories)
       {
          StateTransition<HighLevelControllerName> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates,
                                                                                                                                 controllerFactoryHelper,
@@ -337,11 +337,11 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       }
    }
 
-//   private void reportControllerCoreOutputDataForWholeBodyControllerCore()
-//   {
-//      controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
-//
-//   }
+   //   private void reportControllerCoreOutputDataForWholeBodyControllerCore()
+   //   {
+   //      controllerCoreOutPutDataHolder.setControllerCoreOutputDataHolder(stateMachine.getCurrentState().getControllerCoreOutput());
+   //
+   //   }
    private void reportControllerCoreCommandDataForWholeBodyControllerCore()
    {
       controllerCoreCommandDataHolder.setControllerCoreMode(stateMachine.getCurrentState().getControllerCoreCommandData().getControllerCoreMode());
@@ -365,8 +365,10 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       //      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       //      lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
-//            RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getOutputForRootJoint();
-      RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getControllerCoreOutput().getRootJointDesiredConfigurationData();
+      //            RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getOutputForRootJoint();
+      RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState()
+                                                                                            .getControllerCoreOutput()
+                                                                                            .getRootJointDesiredConfigurationData();
       if (rootJointDesiredConfiguration != null)
       {
          this.rootJointDesiredConfiguration.set(rootJointDesiredConfiguration);
@@ -383,7 +385,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
 
       lowLevelControllerOutput.copyToMessage(robotDesiredConfigurationData);
 
-      HighLevelControllerState currentState = stateMachine.getCurrentState();
+      MPCHighLevelControllerState currentState = stateMachine.getCurrentState();
       if (currentState == null || currentState.getOutputForRootJoint() == null)
          return;
 
@@ -422,11 +424,11 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
          group.addChild(inertialParameterManager.getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
-      for (HighLevelControllerState controllerState : highLevelControllerStates.values())
+      for (MPCHighLevelControllerState controllerState : highLevelControllerStates.values())
       {
          group.addChild(controllerState.getSCS2YoGraphics());
       }
-      for (HighLevelHumanoidControllerPlugin controllerPlugin : controllerPlugins)
+      for (HighLevelHumanoidMPCControllerPlugin controllerPlugin : controllerPlugins)
       {
          group.addChild(controllerPlugin.getSCS2YoGraphics());
       }

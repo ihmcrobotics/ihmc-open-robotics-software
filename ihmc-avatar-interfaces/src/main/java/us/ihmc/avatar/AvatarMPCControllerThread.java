@@ -3,13 +3,16 @@ package us.ihmc.avatar;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.*;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelMPCControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
@@ -92,7 +95,7 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
                                  DRCRobotModel robotModel,
                                  RobotInitialSetup<?> robotInitialSetup,
                                  HumanoidRobotSensorInformation sensorInformation,
-                                 HighLevelHumanoidControllerFactory controllerFactory,
+                                 MPCHighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotMPCContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
@@ -206,7 +209,7 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
       return arrayOfJointsToIgnore;
    }
 
-   private void createControllerRobotMotionStatusUpdater(HighLevelHumanoidControllerFactory controllerFactory,
+   private void createControllerRobotMotionStatusUpdater(MPCHighLevelHumanoidControllerFactory controllerFactory,
                                                          final RobotMotionStatusHolder controllerRobotMotionStatusHolder)
    {
       RobotMotionStatusChangedListener controllerRobotMotionStatusUpdater = new RobotMotionStatusChangedListener()
@@ -227,7 +230,7 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
    }
 
    private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel,
-                                                            HighLevelHumanoidControllerFactory controllerFactory,
+                                                            MPCHighLevelHumanoidControllerFactory controllerFactory,
                                                             YoDouble yoTime,
                                                             double controlDT,
                                                             double gravity,

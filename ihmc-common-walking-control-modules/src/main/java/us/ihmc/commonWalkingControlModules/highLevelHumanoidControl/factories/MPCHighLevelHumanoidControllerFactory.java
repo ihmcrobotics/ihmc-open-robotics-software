@@ -9,17 +9,18 @@ import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationPara
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelMPCControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidMPCControllerPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.MPCControllerComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
@@ -72,17 +73,17 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
+public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
-   private final ArrayList<HighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
-   private final EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
+   private final ArrayList<MPCHighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
+   private final EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
 
-   private final ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> stateTransitionFactories = new ArrayList<>();
+   private final ArrayList<MPCControllerStateTransitionFactory<HighLevelControllerName>> stateTransitionFactories = new ArrayList<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
@@ -103,7 +104,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
-   private final List<HighLevelHumanoidControllerPluginFactory> pluginFactories = new ArrayList<>();
+   private final List<HighLevelHumanoidMPCControllerPluginFactory> pluginFactories = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
    private final SideDependentList<String> wristSensorNames;
@@ -119,12 +120,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
    private HumanoidHighLevelMPCControllerManager humanoidHighLevelMPCControllerManager;
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
-                                             SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> wristSensorNames,
-                                             HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters,
-                                             CoPTrajectoryParameters copTrajectoryParameters)
+   public MPCHighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                                SideDependentList<String> footForceSensorNames,
+                                                SideDependentList<String> wristSensorNames,
+                                                HighLevelControllerParameters highLevelControllerParameters,
+                                                WalkingControllerParameters walkingControllerParameters,
+                                                CoPTrajectoryParameters copTrajectoryParameters)
    {
       this(contactableBodiesFactory,
            footForceSensorNames,
@@ -135,13 +136,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
            new DefaultSplitFractionCalculatorParameters());
    }
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
-                                             SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> wristSensorNames,
-                                             HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters,
-                                             CoPTrajectoryParameters copTrajectoryParameters,
-                                             SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
+   public MPCHighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                                SideDependentList<String> footForceSensorNames,
+                                                SideDependentList<String> wristSensorNames,
+                                                HighLevelControllerParameters highLevelControllerParameters,
+                                                WalkingControllerParameters walkingControllerParameters,
+                                                CoPTrajectoryParameters copTrajectoryParameters,
+                                                SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -175,7 +176,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setInertialEstimationParameters(parameters);
    }
 
-   private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
+   private MPCControllerComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
 
    public void createComponentBasedFootstepDataMessageGenerator()
    {
@@ -195,19 +196,19 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (componentBasedFootstepDataMessageGeneratorFactory != null)
          return;
 
-      componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+      componentBasedFootstepDataMessageGeneratorFactory = new MPCControllerComponentBasedFootstepDataMessageGeneratorFactory();
       componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
       componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
       componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
       componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
 
-      if (humanoidHighLevelControllerManager != null)
-         humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
+      if (humanoidHighLevelMPCControllerManager != null)
+         humanoidHighLevelMPCControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
       else
          pluginFactories.add(componentBasedFootstepDataMessageGeneratorFactory);
    }
 
-   public void addControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   public void addControllerPlugin(HighLevelHumanoidMPCControllerPluginFactory pluginFactory)
    {
       pluginFactories.add(pluginFactory);
    }
@@ -281,7 +282,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       //TODO
    }
 
-   public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
+   public void replaceControllerFactory(HighLevelControllerName controllerName, MPCHighLevelControllerStateFactory controllerFactory)
    {
       if (controllerFactoriesMap.containsKey(controllerName))
          controllerStateFactories.remove(controllerFactoriesMap.get(controllerName));
@@ -292,78 +293,86 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void useDefaultDoNothingControlState()
    {
-      DoNothingControllerStateFactory controllerStateFactory = new DoNothingControllerStateFactory();
+      DoNothingMPCControllerStateFactory controllerStateFactory = new DoNothingMPCControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, controllerStateFactory);
    }
 
-   public void useDefaultStandPrepControlState()
-   {
-      StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
+   // seems not be used.
+//   public void useDefaultStandPrepControlState()
+//   {
+//      StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.STAND_PREP_STATE, controllerStateFactory);
+//   }
 
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.STAND_PREP_STATE, controllerStateFactory);
-   }
+   // seems not be used
+//   public void useDefaultStandReadyControlState()
+//   {
+//      StandReadyControllerStateFactory controllerStateFactory = new StandReadyControllerStateFactory();
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.STAND_READY, controllerStateFactory);
+//   }
 
-   public void useDefaultStandReadyControlState()
-   {
-      StandReadyControllerStateFactory controllerStateFactory = new StandReadyControllerStateFactory();
-
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.STAND_READY, controllerStateFactory);
-   }
-
-   public void useDefaultStandTransitionControlState()
-   {
-      useDefaultStandTransitionControlState(HighLevelControllerName.STAND_READY, HighLevelControllerName.WALKING);
-   }
-
-   public void useDefaultStandTransitionControlState(HighLevelControllerName startState, HighLevelControllerName endState)
-   {
-      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory(startState, endState);
-
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
-   }
+   // seems not to be used
+//   public void useDefaultStandTransitionControlState()
+//   {
+//      useDefaultStandTransitionControlState(HighLevelControllerName.STAND_READY, HighLevelControllerName.WALKING);
+//   }
+   // seems not to be used
+//   public void useDefaultStandTransitionControlState(HighLevelControllerName startState, HighLevelControllerName endState)
+//   {
+//      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory(startState, endState);
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
+//   }
 
    public void useDefaultWalkingControlState()
    {
-      WalkingControllerStateFactory controllerStateFactory = new WalkingControllerStateFactory();
+      MPCWalkingControllerStateFactory controllerStateFactory = new MPCWalkingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.WALKING, controllerStateFactory);
    }
 
-   public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
-   {
-      HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
+   // seems not to be used
+//   public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
+//   {
+//      HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.EXIT_WALKING, controllerStateFactory);
+//   }
 
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.EXIT_WALKING, controllerStateFactory);
-   }
+   // seems not to be used
 
-   public void useDefaultFreezeControlState()
-   {
-      FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
+   //   public void useDefaultFreezeControlState()
+//   {
+//      FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
+//   }
 
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
-   }
+   // seems not to be used
+//   public void useDefaultFallingControlState()
+//   {
+//      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
+//
+//      controllerStateFactories.add(controllerStateFactory);
+//      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
+//   }
 
-   public void useDefaultFallingControlState()
-   {
-      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
-
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
-   }
-
-   public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
+   public void addCustomControlState(MPCHighLevelControllerStateFactory customControllerStateFactory)
    {
       controllerStateFactories.add(customControllerStateFactory);
       controllerFactoriesMap.put(customControllerStateFactory.getStateEnum(), customControllerStateFactory);
    }
+
 
    /**
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
@@ -375,7 +384,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     */
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
+      stateTransitionFactories.add(new FinishedMPCControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
    }
 
    /**
@@ -393,22 +402,22 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                      HighLevelControllerName nextControlStateEnum,
                                      boolean performNextStateOnEntry)
    {
-      stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry));
+      stateTransitionFactories.add(new FinishedMPCControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry));
    }
 
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      stateTransitionFactories.add(new RequestedControllerStateTransitionFactory<>(requestedHighLevelControllerState,
+      stateTransitionFactories.add(new RequestedMPCControllerStateTransitionFactory<>(requestedHighLevelControllerState,
                                                                                    currentControlStateEnum,
                                                                                    nextControlStateEnum));
    }
 
    public void addControllerFailureTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName fallbackControlStateEnum)
    {
-      stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
+      stateTransitionFactories.add(new MPCControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
    }
 
-   public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
+   public void addCustomStateTransition(MPCControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
    {
       stateTransitionFactories.add(stateTransitionFactory);
    }
@@ -422,18 +431,20 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       return requestedHighLevelControllerState;
    }
-
-   public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
+   public HumanoidHighLevelMPCControllerManager getMPCController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
-                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
+                                                           boolean kinematicsSimulation,
+                                                           // For fast non-physics preview simulations
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                           ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
+                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                            JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
@@ -527,7 +538,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       if (walkingControllerParameters.createMultiContactPostureAdjustmentCalculator())
          controllerToolbox.setupMultiContactPostureAdjustmentProvider();
-      
+
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -550,26 +561,28 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager,
-                                                                                  statusMessageOutputManager,
-                                                                                  initialControllerState,
-                                                                                  highLevelControllerParameters,
-                                                                                  walkingControllerParameters,
-                                                                                  requestedHighLevelControllerState,
-                                                                                  controllerFactoriesMap,
-                                                                                  stateTransitionFactories,
-                                                                                  pluginFactories,
-                                                                                  managerFactory,
-                                                                                  controllerCoreFactory,
-                                                                                  controllerToolbox,
-                                                                                  centerOfPressureDataHolderForEstimator,
-                                                                                  forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
-      humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
-      humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+      humanoidHighLevelMPCControllerManager = new HumanoidHighLevelMPCControllerManager(commandInputManager,
+                                                                                     statusMessageOutputManager,
+                                                                                     initialControllerState,
+                                                                                     highLevelControllerParameters,
+                                                                                     walkingControllerParameters,
+                                                                                     requestedHighLevelControllerState,
+                                                                                     controllerFactoriesMap,
+                                                                                     stateTransitionFactories,
+                                                                                     pluginFactories,
+                                                                                     managerFactory,
+                                                                                     controllerCoreFactory,
+                                                                                     controllerToolbox,
+                                                                                     centerOfPressureDataHolderForEstimator,
+                                                                                     forceSensorDataHolder,
+                                                                                     wholeBodyControllerCoreOutput,
+                                                                                     controllerCoreOutPutDataHolder,
+                                                                                     controllerCoreCommandDataHolder);
+      humanoidHighLevelMPCControllerManager.addYoVariableRegistry(registry);
+      humanoidHighLevelMPCControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
-         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
-      return humanoidHighLevelControllerManager;
+         humanoidHighLevelMPCControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
+      return humanoidHighLevelMPCControllerManager;
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,

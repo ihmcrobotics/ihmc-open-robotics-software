@@ -1,8 +1,8 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.avatar.factory.HumanoidRobotMPCControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -10,12 +10,12 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCEstimatorTask extends HumanoidRobotControlTask
+public class MPCEstimatorTask extends HumanoidRobotMPCControlTask
 {
-   private final CrossRobotCommandResolver estimatorResolver;
-   private final CrossRobotCommandResolver masterResolver;
+   private final MPCCrossRobotCommandResolver estimatorResolver;
+   private final MPCCrossRobotCommandResolver masterResolver;
 
-   private final AvatarEstimatorThread estimatorThread;
+   private final AvatarMPCEstimatorThread estimatorThread;
 
    private final long divisor;
    private final ThreadTimer timer;
@@ -28,14 +28,14 @@ public class MPCEstimatorTask extends HumanoidRobotControlTask
    // This is needed for the single threaded mode as the master context will be updated after the first execute call.
    private boolean masterContextUpdated = false;
 
-   public MPCEstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public MPCEstimatorTask(AvatarMPCEstimatorThread estimatorThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
       this.estimatorThread = estimatorThread;
 
-      estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
-      masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
+      estimatorResolver = new MPCCrossRobotCommandResolver(estimatorThread.getFullRobotModel());
+      masterResolver = new MPCCrossRobotCommandResolver(masterFullRobotModel);
 
       String prefix = "Estimator";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, estimatorThread.getYoRegistry());
@@ -67,7 +67,7 @@ public class MPCEstimatorTask extends HumanoidRobotControlTask
    }
 
    @Override
-   protected void updateMasterContext(HumanoidRobotContextData masterContext)
+   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
@@ -75,7 +75,7 @@ public class MPCEstimatorTask extends HumanoidRobotControlTask
    }
 
    @Override
-   protected void updateLocalContext(HumanoidRobotContextData masterContext)
+   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
       estimatorResolver.resolveHumanoidRobotContextDataScheduler(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());

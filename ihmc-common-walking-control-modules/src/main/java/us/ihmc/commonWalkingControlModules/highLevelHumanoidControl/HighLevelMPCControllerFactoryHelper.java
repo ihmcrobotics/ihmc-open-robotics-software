@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -19,7 +19,7 @@ import java.util.EnumMap;
 
 public class HighLevelMPCControllerFactoryHelper
 {
-   private EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories;
+   private EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerFactories;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private HighLevelControlManagerFactory managerFactory;
    private WholeBodyControllerCoreFactory controllerCoreFactory;
@@ -37,7 +37,7 @@ public class HighLevelMPCControllerFactoryHelper
       this.lowLevelControllerOutput = lowLevelControllerOutput;
    }
 
-   public void setControllerFactories(EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories)
+   public void setControllerFactories(EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerFactories)
    {
       this.controllerFactories = controllerFactories;
    }
@@ -88,7 +88,7 @@ public class HighLevelMPCControllerFactoryHelper
       this.controllerCoreOutputDataHolder = controllerCoreOutputDataHolder;
    }
 
-   public EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> getControllerFactories()
+   public EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> getControllerFactories()
    {
       return controllerFactories;
    }

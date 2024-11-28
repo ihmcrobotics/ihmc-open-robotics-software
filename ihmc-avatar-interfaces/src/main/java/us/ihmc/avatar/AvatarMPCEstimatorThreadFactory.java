@@ -5,14 +5,15 @@ import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
@@ -54,7 +55,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.Kinematic
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.commons.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -75,7 +75,7 @@ public class AvatarMPCEstimatorThreadFactory
 
    // Required fields -----------------------------------------------
    private final RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravity");
-   private final RequiredFactoryField<HumanoidRobotContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>("humanoidRobotContextDataFactory");
+   private final RequiredFactoryField<HumanoidRobotMPCContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>("humanoidRobotContextDataFactory");
    private final RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField = new RequiredFactoryField<>("estimatorFullRobotModel");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<SensorReaderFactory> sensorReaderFactoryField = new RequiredFactoryField<>("sensorReaderFactory");
@@ -98,7 +98,7 @@ public class AvatarMPCEstimatorThreadFactory
    private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
-   private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
+   private final OptionalFactoryField<HumanoidRobotMPCContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
    private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>("humanoidRobotContextJointData");
    private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> desiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
    private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccDesiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
@@ -304,7 +304,7 @@ public class AvatarMPCEstimatorThreadFactory
     *
     * @param contextDataFactory the context factory.
     */
-   public void setHumanoidRobotContextDataFactory(HumanoidRobotContextDataFactory contextDataFactory)
+   public void setHumanoidRobotContextDataFactory(HumanoidRobotMPCContextDataFactory contextDataFactory)
    {
       humanoidRobotContextDataFactoryField.set(contextDataFactory);
    }
@@ -426,7 +426,7 @@ public class AvatarMPCEstimatorThreadFactory
       yoGraphicsListRegistryField.set(yoGraphicsListRegistry);
    }
 
-   public AvatarEstimatorThread createAvatarEstimatorThread()
+   public AvatarMPCEstimatorThread createAvatarEstimatorThread()
    {
       if (jointDesiredOutputWriterField.hasValue())
       {
@@ -439,7 +439,7 @@ public class AvatarMPCEstimatorThreadFactory
             addSecondaryStateEstimator(stateEstimatorControllerFactory.createStateEstimator(getEstimatorFullRobotModel(), getSensorReader()));
       }
 
-      AvatarEstimatorThread avatarEstimatorThread = new AvatarEstimatorThread(getSensorReader(),
+      AvatarMPCEstimatorThread avatarEstimatorThread = new AvatarMPCEstimatorThread(getSensorReader(),
                                                                               getEstimatorFullRobotModel(),
                                                                               getHumanoidRobotContextData(),
                                                                               getMainStateEstimator(),
@@ -557,7 +557,7 @@ public class AvatarMPCEstimatorThreadFactory
       return gravityField.get();
    }
 
-   public HumanoidRobotContextDataFactory getHumanoidRobotContextDataFactory()
+   public HumanoidRobotMPCContextDataFactory getHumanoidRobotContextDataFactory()
    {
       return humanoidRobotContextDataFactoryField.get();
    }
@@ -576,11 +576,11 @@ public class AvatarMPCEstimatorThreadFactory
       return sensorDataContextField.get();
    }
 
-   public HumanoidRobotContextData getHumanoidRobotContextData()
+   public HumanoidRobotMPCContextData getHumanoidRobotContextData()
    {
       if (!humanoidRobotContextDataField.hasValue())
       {
-         HumanoidRobotContextDataFactory contextDataFactory = getHumanoidRobotContextDataFactory();
+         HumanoidRobotMPCContextDataFactory contextDataFactory = getHumanoidRobotContextDataFactory();
          contextDataFactory.setForceSensorDataHolder(getForceSensorDataHolder());
          contextDataFactory.setCenterOfMassDataHolder(getCenterOfMassDataHolder());
          contextDataFactory.setCenterOfPressureDataHolder(getCenterOfPressureDataHolderFromController());

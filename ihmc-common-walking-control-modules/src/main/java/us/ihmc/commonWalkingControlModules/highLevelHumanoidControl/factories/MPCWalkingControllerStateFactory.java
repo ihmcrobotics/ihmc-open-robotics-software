@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelMPCControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCWalkingControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
-public class MPCWalkingControllerStateFactory implements HighLevelControllerStateFactory
+public class MPCWalkingControllerStateFactory implements MPCHighLevelControllerStateFactory
 {
    private MPCWalkingControllerState walkingControllerState;
 
    @Override
-   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   public MPCHighLevelControllerState getOrCreateControllerState(HighLevelMPCControllerFactoryHelper controllerFactoryHelper)
    {
       if (walkingControllerState == null)
       {

@@ -29,7 +29,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class MPCWalkingControllerState extends HighLevelControllerState
+public class MPCWalkingControllerState extends MPCHighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
    private final static FrameVector2D emptyVector = new FrameVector2D();

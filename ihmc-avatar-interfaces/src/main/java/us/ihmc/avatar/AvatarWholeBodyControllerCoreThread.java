@@ -1,15 +1,15 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidWholeBodyControllerCoreManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MPCHighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -53,7 +53,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
    private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
    private final YoLong timeStamp = new YoLong("TimeStampWholeBodyControllerCore", registry);
    private final YoLong timeStampOffset = new YoLong("TimestampOffsetWholeBodyControllerCore", registry);
-   private final HumanoidRobotContextData humanoidRobotContextData;
+   private final HumanoidRobotMPCContextData humanoidRobotContextData;
    private final YoBoolean runWholeBodyControllerCore = new YoBoolean("RunWholeBodyControllerCore", registry);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final List<Supplier<YoGraphicDefinition>> scs2YoGraphicHolders = new ArrayList<>();
@@ -61,11 +61,11 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
    private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
 
    public AvatarWholeBodyControllerCoreThread(String robotName,
-                                              HumanoidRobotContextDataFactory contextDataFactory,
+                                              HumanoidRobotMPCContextDataFactory contextDataFactory,
                                               StatusMessageOutputManager walkingOutputManager,
                                               DRCRobotModel robotModel,
                                               HumanoidRobotSensorInformation sensorInformation,
-                                              HighLevelHumanoidControllerFactory controllerFactory,
+                                              MPCHighLevelHumanoidControllerFactory controllerFactory,
                                               DRCOutputProcessor outputProcessor,
                                               RealtimeROS2Node realtimeROS2Node,
                                               double gravity,
@@ -136,7 +136,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
    }
 
    private ModularRobotController createWholeBodyControllerCoreCalculator(FullHumanoidRobotModel controllerCoreModel,
-                                                                          HighLevelHumanoidControllerFactory controllerFactory,
+                                                                          MPCHighLevelHumanoidControllerFactory controllerFactory,
                                                                           YoDouble yoTime,
                                                                           double controllerCoreDT,
                                                                           double gravity,
@@ -293,7 +293,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
    }
 
    @Override
-   public HumanoidRobotContextData getHumanoidRobotContextData()
+   public HumanoidRobotMPCContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;
    }

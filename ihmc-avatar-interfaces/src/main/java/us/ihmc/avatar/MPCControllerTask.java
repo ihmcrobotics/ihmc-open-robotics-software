@@ -1,7 +1,6 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.avatar.factory.HumanoidRobotMPCControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -11,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MPCControllerTask extends HumanoidRobotControlTask
+public class MPCControllerTask extends HumanoidRobotMPCControlTask
 {
    private final MPCCrossRobotCommandResolver controllerResolver;
    private final MPCCrossRobotCommandResolver masterResolver;

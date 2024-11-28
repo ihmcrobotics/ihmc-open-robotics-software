@@ -1,0 +1,8 @@
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelMPCControllerFactoryHelper;
+
+public interface HighLevelHumanoidMPCControllerPluginFactory
+{
+   HighLevelHumanoidMPCControllerPlugin buildPlugin(HighLevelMPCControllerFactoryHelper controllerFactoryHelper);
+}

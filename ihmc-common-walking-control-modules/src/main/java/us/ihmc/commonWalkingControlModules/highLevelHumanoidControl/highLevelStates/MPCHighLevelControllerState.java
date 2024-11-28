@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -12,7 +15,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public abstract class HighLevelControllerState implements State, JointLoadStatusProvider, SCS2YoGraphicHolder
+public abstract class MPCHighLevelControllerState implements State, JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    protected final YoRegistry registry;
 
@@ -22,15 +25,15 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    protected final OneDoFJointBasics[] controlledJoints;
    private HighLevelControllerName previousHighLevelControllerName = null;
 
-   public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters, OneDoFJointBasics[] controlledJoints)
+   public MPCHighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters, OneDoFJointBasics[] controlledJoints)
    {
       this("", stateEnum, parameters, controlledJoints);
    }
 
-   public HighLevelControllerState(String namePrefix,
-                                   HighLevelControllerName stateEnum,
-                                   HighLevelControllerParameters parameters,
-                                   OneDoFJointBasics[] controlledJoints)
+   public MPCHighLevelControllerState(String namePrefix,
+                                      HighLevelControllerName stateEnum,
+                                      HighLevelControllerParameters parameters,
+                                      OneDoFJointBasics[] controlledJoints)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
@@ -38,7 +41,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
    }
 
-   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints)
+   public MPCHighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, OneDoFJointBasics[] controlledJoints)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
@@ -67,6 +70,10 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    }
 
    public abstract JointDesiredOutputListReadOnly getOutputForLowLevelController();
+
+   public abstract ControllerCoreOutput getControllerCoreOutput();
+   public abstract ControllerCoreCommand getControllerCoreCommandData();
+   public abstract WholeBodyControllerCore getControllerCore();
 
    public RootJointDesiredConfigurationDataReadOnly getOutputForRootJoint()
    {
