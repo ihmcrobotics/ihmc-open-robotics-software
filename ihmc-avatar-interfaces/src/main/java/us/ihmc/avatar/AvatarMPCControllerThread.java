@@ -278,7 +278,7 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
                                                                                               jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
-      ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
+      ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedMPCController");
       modularRobotController.addRobotController(robotController);
 
       if (yoGraphicsListRegistry != null)

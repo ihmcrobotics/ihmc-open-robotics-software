@@ -46,7 +46,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    private final RootJointDesiredConfigurationDataBasics rootJointDesiredConfigurationData;
    private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   private OneDoFJointBasics[] controlledOneDoFJoints;
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreFeedbackControlTimer = new ExecutionTimer("controllerCoreFeedbackControlTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmissionTimer = new ExecutionTimer("controllerCoreSubmissionTimer", 1.0, registry);

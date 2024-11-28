@@ -164,7 +164,8 @@ public class MPCWalkingControllerState extends MPCHighLevelControllerState
       // TODO This should be saved into some parameters which will be delivered to the highlevelHumanoidManager.
       controllerCoreCommandData.set(controllerCoreCommand);
 
-      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+//      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.setInputFromControllerCore(controllerCoreOutputFromControllerCoreThread);
       linearMomentumRateControlModule.computeAchievedCMP();
    }
 
