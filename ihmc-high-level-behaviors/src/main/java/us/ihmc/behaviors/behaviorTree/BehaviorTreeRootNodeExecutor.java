@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
