@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
@@ -15,38 +14,29 @@ import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
+import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeDirectory;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Comparator;
 
 public class RDXBehaviorTreeNodeCreationMenu
 {
    private final RDXBehaviorTree tree;
-   private final WorkspaceResourceDirectory treeFilesDirectory;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final BehaviorTreeTopologyOperationQueue topologyOperationQueue;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ArrayList<RDXAvailableBehaviorTreeFile> indexedTreeFiles = new ArrayList<>();
+   private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
    public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree tree, WorkspaceResourceDirectory treeFilesDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.tree = tree;
-      this.treeFilesDirectory = treeFilesDirectory;
-      this.referenceFrameLibrary = referenceFrameLibrary;
 
       topologyOperationQueue = tree.getBehaviorTreeState().getTopologyChangeQueue();
 
-      reindexDirectory();
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, tree, topologyOperationQueue, referenceFrameLibrary, this::complete);
+      behaviorTreesDirectory.reindexDirectory();
    }
 
    /**
@@ -130,75 +120,9 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.text("Load existing tree from file:");
       ImGui.popFont();
 
-      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
-      {
-         indexedTreeFile.update();
-      }
-
-      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
-
+      ImGui.unindent();
+      behaviorTreesDirectory.renderImGuiWidgets(relativeNode, insertionType, true);
       ImGui.indent();
-      for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
-      {
-         if (ImGuiTools.textWithUnderlineOnHover(indexedTreeFile.getTreeFile().getFileName()))
-         {
-            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
-            {
-               RDXBehaviorTreeNode<?, ?> loadedNode  = tree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
-
-               if (loadedNode != null)
-               {
-                  RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
-
-                  if (tree.getRootNode() == null) // Automatically add a root node if there isn't one
-                  {
-                     nodeToInsert = new RDXBehaviorTreeRootNode(tree.getBehaviorTreeState().getAndIncrementNextID(),
-                                                                tree.getBehaviorTreeState().getCRDTInfo(),
-                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
-                     topologyOperationQueue.queueAddAndFreezeNode(loadedNode, nodeToInsert);
-                  }
-
-                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                        = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-                  complete(insertionDefinition);
-               }
-            }
-         }
-
-         if (ImGui.isItemHovered())
-         {
-            ImGui.beginTooltip();
-
-            if (!indexedTreeFile.getNotes().isEmpty())
-            {
-               ImGui.text(indexedTreeFile.getNotes());
-               ImGui.spacing();
-            }
-
-            ImGui.text("Reference frames:");
-
-            if (indexedTreeFile.getReferenceFrameNames().isEmpty())
-            {
-               ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-               ImGui.text("\t(Contains no reference frames.)");
-               ImGui.popStyleColor();
-            }
-
-            for (String referenceFrameName : indexedTreeFile.getReferenceFrameNames())
-            {
-               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                  ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-
-               ImGui.text("\t" + referenceFrameName);
-
-               if (!indexedTreeFile.getReferenceFramesInWorld().contains(referenceFrameName))
-                  ImGui.popStyleColor();
-            }
-
-            ImGui.endTooltip();
-         }
-      }
    }
 
    private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
@@ -245,21 +169,6 @@ public class RDXBehaviorTreeNodeCreationMenu
 
    public void reindexDirectory()
    {
-      indexedTreeFiles.clear();
-      for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
-      {
-         if (queryContainedFile.getFileName().endsWith(".json"))
-         {
-            RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
-            if (treeFile.getName() != null && treeFile.getNotes() != null)
-            {
-               indexedTreeFiles.add(treeFile);
-            }
-            else
-            {
-               LogTools.error("Failed to load {}", queryContainedFile.getFileName());
-            }
-         }
-      }
+      behaviorTreesDirectory.reindexDirectory();
    }
 }
