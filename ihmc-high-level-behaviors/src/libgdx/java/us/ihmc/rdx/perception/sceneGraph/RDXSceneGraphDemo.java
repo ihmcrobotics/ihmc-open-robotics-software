@@ -83,7 +83,6 @@ public class RDXSceneGraphDemo
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
    private final MutableReferenceFrame sensorFrame = new MutableReferenceFrame();
-   private RDXZEDSVORecorderPanel zedSVORecorderPanel;
 
    public RDXSceneGraphDemo()
    {
@@ -156,7 +155,8 @@ public class RDXSceneGraphDemo
                                                                           PerceptionAPI.ZED2_DEPTH,
                                                                           PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
-            zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
+            RDXZEDSVORecorderPanel zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
+            zedSVORecorderPanel.createWithRegularPanel(baseUI);
 
             // Setup scene graph
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
@@ -251,8 +251,6 @@ public class RDXSceneGraphDemo
          @Override
          public void render()
          {
-            zedSVORecorderPanel.update();
-
             sceneGraphUI.update();
             perceptionVisualizerPanel.update();
 
