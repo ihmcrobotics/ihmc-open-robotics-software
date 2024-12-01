@@ -139,7 +139,8 @@ public class RDXSceneGraphDemo
             RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer
                   = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
             planarRegionsVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_PLANAR_REGIONS);
-            planarRegionsVisualizer.setActive(false);
+            planarRegionsVisualizer.setActive(true);
+            planarRegionsVisualizer.setOpacity(0.25);
             perceptionVisualizerPanel.addVisualizer(planarRegionsVisualizer);
 
             perceptionVisualizerPanel.create(baseUI);
