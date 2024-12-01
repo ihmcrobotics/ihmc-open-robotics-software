@@ -160,9 +160,7 @@ public class RDXSceneGraphDemo
 
             // Setup scene graph
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
-            baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
+            sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI);
 
             // Add rapid region parameters panel
             ImGuiRemoteROS2StoredPropertySet rapidRegionsParameterPanel
