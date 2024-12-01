@@ -1,9 +1,9 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import org.bytedeco.opencl.global.OpenCL;
-import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -29,7 +29,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -46,7 +45,6 @@ import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.RestartableThrottledThread;
 
 /**
  * A self contained demo and development environment for our scene graph functionality.
@@ -69,7 +67,7 @@ public class RDXSceneGraphDemo
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
 
-   private RestartableThrottledThread perceptionUpdateThread;
+   private RepeatingTaskThread perceptionUpdateThread;
 
    // Planar regions stuff
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
@@ -169,81 +167,77 @@ public class RDXSceneGraphDemo
                                                          PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsParameterPanel.createPanel());
 
-            perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
+            perceptionUpdateThread = new RepeatingTaskThread("PerceptionUpdateThread", () ->
             {
-               // Main perception thread loop
-               @Override
-               public void run() throws Throwable
+               zedDepthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
+               for (RobotSide side : RobotSide.values)
+                  zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
+
+               zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+               for (RobotSide side : RobotSide.values)
+                  zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
+
+               sensorFrame.update(transform -> transform.set(zedColorDepthImageRetrieverSVO.getLatestSensorPose()));
+               LibGDXTools.toLibGDX(sensorFrame.getTransformToParent(), sensorPoseGraphic.transform);
+
+               if (planarRegionsExtractor == null)
                {
-                  zedDepthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
-                  for (RobotSide side : RobotSide.values)
-                     zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
+                  int imageHeight = zedDepthImage.getHeight();
+                  int imageWidth = zedDepthImage.getWidth();
+                  double fx = zedDepthImage.getFocalLengthX();
+                  double fy = zedDepthImage.getFocalLengthY();
+                  double cx = zedDepthImage.getPrincipalPointX();
+                  double cy = zedDepthImage.getPrincipalPointY();
+                  planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
+                  planarRegionsExtractor.getDebugger().setEnabled(false);
 
-                  zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
-                  for (RobotSide side : RobotSide.values)
-                     zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
-
-                  sensorFrame.update(transform -> transform.set(zedColorDepthImageRetrieverSVO.getLatestSensorPose()));
-                  LibGDXTools.toLibGDX(sensorFrame.getTransformToParent(), sensorPoseGraphic.transform);
-
-                  if (planarRegionsExtractor == null)
-                  {
-                     int imageHeight = zedDepthImage.getHeight();
-                     int imageWidth = zedDepthImage.getWidth();
-                     double fx = zedDepthImage.getFocalLengthX();
-                     double fy = zedDepthImage.getFocalLengthY();
-                     double cx = zedDepthImage.getPrincipalPointX();
-                     double cy = zedDepthImage.getPrincipalPointY();
-                     planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
-                     planarRegionsExtractor.getDebugger().setEnabled(false);
-
-                     planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
-                                                                                       PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
-                                                                                       planarRegionsExtractor.getParameters());
-                  }
-
-                  planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
-
-                  FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-
-                  // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-                  BytedecoImage bytedecoImage = new BytedecoImage(zedDepthImage.getCpuImageMat().clone());
-                  bytedecoImage.createOpenCLImage(planarRegionsOpenCLManager, OpenCL.CL_MEM_READ_WRITE);
-                  planarRegionsExtractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
-                  planarRegionsExtractor.setProcessing(false);
-                  bytedecoImage.destroy(planarRegionsOpenCLManager);
-
-                  PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
-                  planarRegionsInWorldFrame.applyTransform(sensorFrame.getReferenceFrame().getTransformToWorldFrame());
-
-                  newPlanarRegions.set(planarRegionsInWorldFrame);
-
-                  PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
-
-                  zedDepthImage.release();
-
-                  if (yolov8DetectionExecutor == null)
-                  {
-                     yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
-                     yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
-                  }
-
-                  yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
-
-                  // TODO: finish
-                  onRobotSceneGraph.updateSubscription();
-                  onRobotSceneGraph.updateDetections(detectionManager);
-
-                  if (newPlanarRegions.poll())
-                     for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
-                        if (sceneNode instanceof DoorNode doorNode)
-                           doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
-
-                  onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
-                  onRobotSceneGraph.updatePublication();
+                  planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
+                                                                                    PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
+                                                                                    planarRegionsExtractor.getParameters());
                }
-            });
-            perceptionUpdateThread.start();
+
+               planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
+
+               FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+
+               // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
+               BytedecoImage bytedecoImage = new BytedecoImage(zedDepthImage.getCpuImageMat().clone());
+               bytedecoImage.createOpenCLImage(planarRegionsOpenCLManager, OpenCL.CL_MEM_READ_WRITE);
+               planarRegionsExtractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
+               planarRegionsExtractor.setProcessing(false);
+               bytedecoImage.destroy(planarRegionsOpenCLManager);
+
+               PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
+               planarRegionsInWorldFrame.applyTransform(sensorFrame.getReferenceFrame().getTransformToWorldFrame());
+
+               newPlanarRegions.set(planarRegionsInWorldFrame);
+
+               PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+
+               zedDepthImage.release();
+
+               if (yolov8DetectionExecutor == null)
+               {
+                  yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                  yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
+               }
+
+               yolov8DetectionExecutor.runYOLODetectionOnAllModels(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+
+               // TODO: finish
+               onRobotSceneGraph.updateSubscription();
+               onRobotSceneGraph.updateDetections(detectionManager);
+
+               if (newPlanarRegions.poll())
+                  for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
+                     if (sceneNode instanceof DoorNode doorNode)
+                        doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
+
+               onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
+               onRobotSceneGraph.updatePublication();
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            perceptionUpdateThread.setFrequencyLimit(30.0);
+            perceptionUpdateThread.startRepeating();
          }
 
          @Override
@@ -259,7 +253,7 @@ public class RDXSceneGraphDemo
          @Override
          public void dispose()
          {
-            perceptionUpdateThread.stop();
+            perceptionUpdateThread.blockingKill();
 
             yolov8DetectionExecutor.destroy();
 
