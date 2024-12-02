@@ -5,6 +5,7 @@ import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -25,6 +26,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == ActionSequenceDefinition.class)
       {
          return new ActionSequenceDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == FallbackNodeDefinition.class)
+      {
+         return new FallbackNodeDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == DoorTraversalDefinition.class)
       {

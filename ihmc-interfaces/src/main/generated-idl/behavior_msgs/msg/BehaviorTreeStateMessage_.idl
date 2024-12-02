@@ -8,6 +8,7 @@
 #include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
+#include "behavior_msgs/msg/./FallbackNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./FootPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
@@ -36,14 +37,17 @@ module behavior_msgs
       const octet ACTION_SEQUENCE =
       3;
 
-      const octet DOOR_TRAVERSAL =
+      const octet FALLBACK_NODE =
       4;
 
-      const octet TRASH_CAN_INTERACTION =
+      const octet DOOR_TRAVERSAL =
       5;
 
-      const octet BUILDING_EXPLORATION =
+      const octet TRASH_CAN_INTERACTION =
       6;
+
+      const octet BUILDING_EXPLORATION =
+      7;
 
       const octet CHEST_ORIENTATION_ACTION =
       10;
@@ -108,6 +112,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::AI2RNodeStateMessage, 1> ai2r_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
+        sequence<behavior_msgs::msg::dds::FallbackNodeStateMessage, 200> fallback_nodes;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
         sequence<behavior_msgs::msg::dds::TrashCanInteractionStateMessage, 200> trash_can_interactions;
         sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 200> building_explorations;

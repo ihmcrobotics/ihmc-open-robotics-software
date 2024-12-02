@@ -14,6 +14,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
+   private FallbackNodeStateMessage fallbackNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
@@ -37,6 +38,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeRootNodeStateMessage = null;
       ai2rNodeStateMessage = null;
       actionSequenceStateMessage = null;
+      fallbackNodeStateMessage = null;
       doorTraversalStateMessage = null;
       trashCanInteractionStateMessage = null;
       buildingExplorationStateMessage = null;
@@ -121,6 +123,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setActionSequenceStateMessage(ActionSequenceStateMessage actionSequenceStateMessage)
    {
       this.actionSequenceStateMessage = actionSequenceStateMessage;
+   }
+
+   public FallbackNodeStateMessage getFallbackNodeStateMessage()
+   {
+      return fallbackNodeStateMessage;
+   }
+
+   public void setFallbackNodeStateMessage(FallbackNodeStateMessage fallbackNodeStateMessage)
+   {
+      this.fallbackNodeStateMessage = fallbackNodeStateMessage;
    }
 
    public DoorTraversalStateMessage getDoorTraversalStateMessage()
