@@ -1,4 +1,4 @@
-package us.ihmc.perception.headless;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;

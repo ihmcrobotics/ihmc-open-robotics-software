@@ -85,7 +85,7 @@ mainDependencies {
       exclude(group = "org.bytedeco", module = "javacpp")
    }
 
-   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
 
    // Previously used for HeightMapAutoencoder and FootstepPredictor

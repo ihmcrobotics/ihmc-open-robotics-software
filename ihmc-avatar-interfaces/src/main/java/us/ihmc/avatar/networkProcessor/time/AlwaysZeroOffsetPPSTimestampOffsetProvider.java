@@ -1,4 +1,4 @@
-package us.ihmc.perception.time;
+package us.ihmc.avatar.networkProcessor.time;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;

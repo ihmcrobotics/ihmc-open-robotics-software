@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense.example;
+package us.ihmc.perception.footstepSnapping;
 
 import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;

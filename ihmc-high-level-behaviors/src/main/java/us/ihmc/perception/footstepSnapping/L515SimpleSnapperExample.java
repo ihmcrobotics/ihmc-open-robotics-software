@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense.example;
+package us.ihmc.perception.footstepSnapping;
 
 import static org.bytedeco.librealsense2.global.realsense2.RS2_EXTENSION_DEPTH_FRAME;
 import static org.bytedeco.librealsense2.global.realsense2.rs2_is_frame_extendable_to;

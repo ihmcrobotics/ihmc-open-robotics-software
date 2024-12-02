@@ -11,7 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.headless.HumanoidPerceptionModule;
+import us.ihmc.perception.HumanoidPerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
