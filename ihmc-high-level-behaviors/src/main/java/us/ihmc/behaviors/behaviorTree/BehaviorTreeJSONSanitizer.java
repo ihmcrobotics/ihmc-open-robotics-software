@@ -30,15 +30,18 @@ public class BehaviorTreeJSONSanitizer
 
          for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
          {
-            MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
-
-            LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
-            JSONFileTools.load(fileToLoad, jsonNode ->
+            if (fileToLoad.getFileName().endsWith(".json"))
             {
-               loadedRootNode.setValue(loadFromFile(jsonNode, null));
-            });
+               MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
 
-            loadedRootNode.getValue().saveToFile();
+               LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
+               JSONFileTools.load(fileToLoad, jsonNode ->
+               {
+                  loadedRootNode.setValue(loadFromFile(jsonNode, null));
+               });
+
+               loadedRootNode.getValue().saveToFile();
+            }
          }
       }
    }
