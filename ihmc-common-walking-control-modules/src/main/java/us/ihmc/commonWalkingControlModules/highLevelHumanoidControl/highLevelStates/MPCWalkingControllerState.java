@@ -158,9 +158,9 @@ public class MPCWalkingControllerState extends MPCHighLevelControllerState
       }
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
-      //      controllerCoreTimer.startMeasurement();
-      //      controllerCore.compute(controllerCoreCommand);
-      //      controllerCoreTimer.stopMeasurement();
+            controllerCoreTimer.startMeasurement();
+            controllerCore.compute(controllerCoreCommand);
+            controllerCoreTimer.stopMeasurement();
       // TODO This should be saved into some parameters which will be delivered to the highlevelHumanoidManager.
       controllerCoreCommandData.set(controllerCoreCommand);
 

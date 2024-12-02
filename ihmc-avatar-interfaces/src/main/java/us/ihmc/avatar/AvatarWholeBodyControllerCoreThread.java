@@ -186,6 +186,7 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
                                                                                                                 forceSensorDataHolderForControllerCore,
                                                                                                                 centerOfMassDataHolderForControllerCore,
                                                                                                                 lowLevelControllerOutput,
+                                                                                                                wholeBodyControllerCoreOutput,
                                                                                                                 controllerCoreOutPutDataHolder,
                                                                                                                 controllerCoreCommandDataHolder,
                                                                                                                 controllerFactory.getWholeBodyControllerCoreFactory(),
