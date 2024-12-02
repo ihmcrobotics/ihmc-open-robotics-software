@@ -43,6 +43,26 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       executeAfterNodeID = new CRDTBidirectionalLong(this, 0);
    }
 
+   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
+   {
+      if (executeAfterBeginning.getValue())
+      {
+         this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
+         executeAfterNodeID.setValue(0);
+      }
+      else if (executeAfterActionName != null)
+      {
+         this.executeAfterActionName = executeAfterActionName;
+      }
+      else // Default to previous
+      {
+         executeAfterPrevious.setValue(true);
+         this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+         executeAfterNodeID.setValue(0);
+      }
+   }
+
+   @Override
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);
@@ -50,6 +70,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       jsonNode.put("executeAfterAction", executeAfterActionName);
    }
 
+   @Override
    public void loadFromFile(JsonNode jsonNode)
    {
       super.loadFromFile(jsonNode);
@@ -120,26 +141,6 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    public CRDTBidirectionalLong getExecuteAfterNodeID()
    {
       return executeAfterNodeID;
-   }
-
-   /** Needs to be updated every tick on the operator side only. */
-   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
-   {
-      if (executeAfterBeginning.getValue())
-      {
-         this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
-         executeAfterNodeID.setValue(0);
-      }
-      else if (executeAfterActionName != null)
-      {
-         this.executeAfterActionName = executeAfterActionName;
-      }
-      else // Default to previous
-      {
-         executeAfterPrevious.setValue(true);
-         this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
-         executeAfterNodeID.setValue(0);
-      }
    }
 
    /** Only used for finding the ID after loading */
