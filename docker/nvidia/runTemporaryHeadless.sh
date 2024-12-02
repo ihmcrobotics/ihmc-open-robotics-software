@@ -13,4 +13,5 @@ docker run \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/nvidia:0.5 bash
+    --volume ~/dockershared:/home/robotlab/shared \
+    ihmcrobotics/nvidia:0.6 bash
