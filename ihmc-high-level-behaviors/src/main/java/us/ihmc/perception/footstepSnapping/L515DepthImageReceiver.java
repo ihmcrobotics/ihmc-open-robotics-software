@@ -1,4 +1,4 @@
-package us.ihmc.perception.realsense.example;
+package us.ihmc.perception.footstepSnapping;
 
 import java.nio.ShortBuffer;
 
