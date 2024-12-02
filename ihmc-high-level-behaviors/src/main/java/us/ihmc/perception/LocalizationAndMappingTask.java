@@ -1,4 +1,4 @@
-package us.ihmc.perception.headless;
+package us.ihmc.perception;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
