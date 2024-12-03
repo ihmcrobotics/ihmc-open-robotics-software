@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.ui.behavior.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
