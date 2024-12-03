@@ -114,7 +114,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
          {
             if (childJsonNode.has("file"))
             {
-               WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), childJsonNode.get("file").asText());
+               WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, childJsonNode.get("file").asText());
                loadFromFile(childFile, null, node, topologyOperationQueue);
             }
             else
