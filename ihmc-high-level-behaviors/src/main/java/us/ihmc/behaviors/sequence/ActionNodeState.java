@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -297,29 +298,21 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       {
          return -1;
       }
-      else if (definition.getExecuteAfterPrevious().getValue())
+      else if (!definition.getExecuteAfterPrevious().getValue())
       {
-         return actionIndex - 1;
-      }
-      else
-      {
-         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
-      }
-   }
-
-   /** Assumes execute after node ID matches a valid action. */
-   public ActionNodeState<?> findActionToExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
-   {
-      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-      for (int j = actionIndex - 1; j >= 0; j--)
-      {
-         ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-         if (actionStateToCompare.getID() == executeAfterID)
+         long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+         for (int j = actionIndex - 1; j >= 0; j--)
          {
-            return actionStateToCompare;
+            ActionNodeState<?> action = actionStateChildren.get(j);
+            if (action.getID() == executeAfterID)
+            {
+               return action.getActionIndex();
+            }
          }
+
+         LogTools.error("Action ID not found: {}", executeAfterID);
       }
 
-      return null;
+      return actionIndex - 1; // previous
    }
 }
