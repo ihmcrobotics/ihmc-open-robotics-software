@@ -201,7 +201,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (!hasSwingFootTouchedDown.getValue())
          balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
-      balanceManager.computeICPPlan(isFootInContact);
+      balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
 
       // call this here, too, so that the time in state is updated properly for all the swing speed up stuff, so it doesn't get out of sequence. This is
@@ -534,7 +534,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.computeICPPlan(isFootInContact);
+      balanceManager.computeICPPlan();
    }
 
    @Override
