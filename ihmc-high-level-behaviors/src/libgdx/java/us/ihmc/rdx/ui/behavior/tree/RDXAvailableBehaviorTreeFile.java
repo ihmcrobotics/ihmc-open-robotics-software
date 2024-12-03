@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
