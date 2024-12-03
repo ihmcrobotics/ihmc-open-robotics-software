@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
@@ -22,10 +23,13 @@ import java.nio.file.Path;
 public class BehaviorTreeJSONSanitizer
 {
    private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
+   private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory)
+   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
    {
+      this.defaultFootstepPlannerParameters = defaultFootstepPlannerParameters;
+
       treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, "/behaviorTrees");
 
       processDirectory(treeFilesDirectory);
@@ -89,7 +93,10 @@ public class BehaviorTreeJSONSanitizer
 
          Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
-         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, crdtInfo, treeFilesDirectory);
+         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType,
+                                                                                    crdtInfo,
+                                                                                    treeFilesDirectory,
+                                                                                    defaultFootstepPlannerParameters);
 
          node.loadFromFile(jsonNode);
 
