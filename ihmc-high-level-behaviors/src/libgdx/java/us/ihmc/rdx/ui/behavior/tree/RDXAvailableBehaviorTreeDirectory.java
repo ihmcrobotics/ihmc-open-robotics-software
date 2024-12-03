@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -9,9 +9,6 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTree;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeRootNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
