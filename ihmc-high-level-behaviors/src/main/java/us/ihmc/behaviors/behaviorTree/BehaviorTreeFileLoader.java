@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueu
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.net.URL;
@@ -16,11 +17,15 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
 {
    private final BehaviorTreeState behaviorTreeState;
    private final BehaviorTreeNodeStateBuilder<T> nodeBuilder;
+   private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState, BehaviorTreeNodeStateBuilder<T> nodeBuilder)
+   public BehaviorTreeFileLoader(BehaviorTreeState behaviorTreeState,
+                                 BehaviorTreeNodeStateBuilder<T> nodeBuilder,
+                                 WorkspaceResourceDirectory treeFilesDirectory)
    {
       this.behaviorTreeState = behaviorTreeState;
       this.nodeBuilder = nodeBuilder;
+      this.treeFilesDirectory = treeFilesDirectory;
    }
 
    public T loadFromFile(WorkspaceResourceFile fileToLoad, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
@@ -34,7 +39,8 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
          if (file != null && Files.exists(file))
          {
             LogTools.info("Loading from file: {}", file);
-            JSONFileTools.load(fileToLoad, jsonNode -> loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue)));
+            String relativePath = treeFilesDirectory.getFilesystemDirectory().relativize(file).toString();
+            JSONFileTools.load(fileToLoad, jsonNode -> loadedNode.setValue(loadFromFile(relativePath, jsonNode, null, topologyOperationQueue)));
          }
          else
          {
@@ -42,7 +48,8 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
             if (classpathResource != null)
             {
                LogTools.info("Loading from resource: {}", classpathResource);
-               JSONFileTools.load(classpathResource, jsonNode -> loadedNode.setValue(loadFromFile(jsonNode, null, topologyOperationQueue)));
+               String relativePath = classpathResource.toString().replaceAll(treeFilesDirectory.getPathNecessaryForClasspathLoading(), "");
+               JSONFileTools.load(classpathResource, jsonNode -> loadedNode.setValue(loadFromFile(relativePath, jsonNode, null, topologyOperationQueue)));
             }
          }
       }
@@ -58,7 +65,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
       return loadedNode.getValue();
    }
 
-   private T loadFromFile(JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
+   private T loadFromFile(String filePath, JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue topologyOperationQueue)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -67,6 +74,13 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
                                       behaviorTreeState.getCRDTInfo(),
                                       behaviorTreeState.getSaveFileDirectory());
       node.getDefinition().loadFromFile(jsonNode);
+
+      if (node.getDefinition().isJSONRoot() && !node.getDefinition().getName().equals(filePath))
+      {
+         LogTools.warn("Renaming node to match file name: {} -> {}", node.getDefinition().getName(), filePath);
+         node.getDefinition().setName(filePath);
+      }
+
       LogTools.info("Creating node: {}:{}", node.getDefinition().getName(), node.getState().getID());
 
       if (parentNode != null)
@@ -79,15 +93,16 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNodeLayer<T, ?, ?, ?>>
          JsonNode fileNode = childJsonNode.get("file");
          if (fileNode == null)
          {
-            loadFromFile(childJsonNode, node, topologyOperationQueue);
+            loadFromFile(filePath, childJsonNode, node, topologyOperationQueue);
          }
          else
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(behaviorTreeState.getSaveFileDirectory(), fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
+            String relativePath = treeFilesDirectory.getFilesystemDirectory().relativize(childFile.getFilesystemFile()).toString();
             JSONFileTools.load(childFile, childJSONNode ->
             {
-               loadFromFile(childJSONNode, node, topologyOperationQueue);
+               loadFromFile(relativePath, childJSONNode, node, topologyOperationQueue);
             });
          }
       });
