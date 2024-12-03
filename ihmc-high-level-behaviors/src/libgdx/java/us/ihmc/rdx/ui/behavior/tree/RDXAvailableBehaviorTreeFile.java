@@ -50,9 +50,6 @@ public class RDXAvailableBehaviorTreeFile
       name = jsonNode.get("name").asText();
       notes = jsonNode.get("notes").asText();
 
-      if (!name.equals(treeFile.getFileName()))
-         LogTools.error("Root node in tree does not match file name: File name: {} Root node name: {}", treeFile.getFileName(), name);
-
       loadChildrenData(jsonNode);
    }
 
