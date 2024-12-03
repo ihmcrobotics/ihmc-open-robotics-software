@@ -28,7 +28,15 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void setValue(T value)
    {
-      if (!this.value.equals(value)) // Don't want to do anything in the case nothing changed
+      boolean nullValuePresent = this.value == null || value == null;
+
+      boolean equals;
+      if (nullValuePresent)
+         equals = this.value == value;
+      else
+         equals = this.value.equals(value);
+
+      if (!equals) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
          requestConfirmFreezable.freeze();

@@ -24,7 +24,15 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 
    public void setValue(T value)
    {
-      if (this.value != value)
+      boolean nullValuePresent = this.value == null || value == null;
+
+      boolean equals;
+      if (nullValuePresent)
+         equals = this.value == value;
+      else
+         equals = this.value.equals(value);
+
+      if (!equals) // Don't want to do anything in the case nothing changed
       {
          checkActorCanModifyAndFreeze();
 
