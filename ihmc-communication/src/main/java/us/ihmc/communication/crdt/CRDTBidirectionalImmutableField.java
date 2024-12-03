@@ -1,5 +1,7 @@
 package us.ihmc.communication.crdt;
 
+import java.util.Objects;
+
 /**
  * Represents a data field that can be modified by both the
  * robot and the operator.
@@ -28,15 +30,7 @@ public class CRDTBidirectionalImmutableField<T>
 
    public void setValue(T value)
    {
-      boolean nullValuePresent = this.value == null || value == null;
-
-      boolean equals;
-      if (nullValuePresent)
-         equals = this.value == value;
-      else
-         equals = this.value.equals(value);
-
-      if (!equals) // Don't want to do anything in the case nothing changed
+      if (!Objects.equals(this.value, value)) // Don't want to do anything in the case nothing changed
       {
          this.value = value;
          requestConfirmFreezable.freeze();
