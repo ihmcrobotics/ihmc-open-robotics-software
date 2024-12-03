@@ -15,7 +15,7 @@ public class FallbackNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "24e413272f81e80dab766a7f9b72617448a7a4d4b7e7ab7277fb962c8cebdc46";
+   		return "3c6311ce6f239ea71498a54868ba17eeb3a57e922c69778ac028eaa5c7aee0ce";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class FallbackNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -69,17 +71,25 @@ public class FallbackNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.FallbackNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_4(data.getGotoActionId());
+
+   }
 
    public static void read(behavior_msgs.msg.dds.FallbackNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setGotoActionId(cdr.read_type_4());
+      	
 
    }
 
@@ -88,12 +98,15 @@ public class FallbackNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_4("goto_action_id", data.getGotoActionId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.FallbackNodeDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
+
+      data.setGotoActionId(ser.read_type_4("goto_action_id"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FallbackNodeDefinitionMessage src, behavior_msgs.msg.dds.FallbackNodeDefinitionMessage dest)

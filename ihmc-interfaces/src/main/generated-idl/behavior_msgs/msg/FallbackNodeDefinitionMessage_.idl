@@ -16,6 +16,10 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * The ID of the action to retry
+         */
+        unsigned long goto_action_id;
       };
     };
   };
