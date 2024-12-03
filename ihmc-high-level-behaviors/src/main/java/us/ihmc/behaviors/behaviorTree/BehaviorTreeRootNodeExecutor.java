@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -11,6 +12,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 {
    private final BehaviorTreeRootNodeState state;
    private final BehaviorTreeRootNodeDefinition definition;
+   private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
 
@@ -35,6 +37,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
+      idToNodeMap.clear();
       actionChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
@@ -127,6 +130,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
+      idToNodeMap.put(node.getState().getID(), node);
+
       for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
          if (child instanceof ActionNodeExecutor<?, ?> actionNode)
@@ -200,6 +205,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private boolean isEndOfSequence()
    {
       return state.getExecutionNextIndex() >= actionChildren.size();
+   }
+   
+   public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 
    public List<ActionNodeExecutor<?, ?>> getActionChildren()

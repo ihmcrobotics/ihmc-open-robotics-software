@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
@@ -23,7 +24,8 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final CRDTBidirectionalNotification manualExecutionRequested;
    private final CRDTBidirectionalBoolean concurrencyEnabled;
 
-   private transient final MutableInt actionIndex = new MutableInt();
+   private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
+   private transient final MutableInt actionIndexAssignment = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
 
    public BehaviorTreeRootNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -43,13 +45,16 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super.update();
 
-      actionIndex.setValue(0);
+      idToNodeMap.clear();
+      actionIndexAssignment.setValue(0);
       actionChildren.clear();
-      updateActionSubtree(this, actionIndex);
+      updateActionSubtree(this, actionIndexAssignment);
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)
    {
+      idToNodeMap.put(node.getState().getID(), node);
+
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
