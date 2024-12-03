@@ -710,10 +710,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      createControllerNetworkSubscriber(robotName, realtimeROS2Node, null, null);
+      createControllerNetworkSubscriber(robotName, realtimeROS2Node, null, null, null);
    }
 
-   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node, DoubleConsumer postureConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
+   public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node, DoubleConsumer postureConsumer, DoubleConsumer activationAlphaConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
    {
       ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
@@ -728,7 +728,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
                                                                        9,
-                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker(postureConsumer, stabilityStateConsumer));
+                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker(postureConsumer, activationAlphaConsumer, stabilityStateConsumer));
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
    }

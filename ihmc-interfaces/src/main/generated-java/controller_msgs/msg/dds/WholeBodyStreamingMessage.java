@@ -84,6 +84,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
             * Whether the optimizer is enabled
             */
    public boolean optimizer_enabled_;
+   public double activation_alpha_;
 
    public WholeBodyStreamingMessage()
    {
@@ -144,6 +145,8 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       log_timestamp_ = other.log_timestamp_;
 
       optimizer_enabled_ = other.optimizer_enabled_;
+
+      activation_alpha_ = other.activation_alpha_;
 
    }
 
@@ -429,6 +432,15 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       return optimizer_enabled_;
    }
 
+   public void setActivationAlpha(double activation_alpha)
+   {
+      activation_alpha_ = activation_alpha;
+   }
+   public double getActivationAlpha()
+   {
+      return activation_alpha_;
+   }
+
 
    public static Supplier<WholeBodyStreamingMessagePubSubType> getPubSubType()
    {
@@ -487,6 +499,8 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.optimizer_enabled_, other.optimizer_enabled_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.activation_alpha_, other.activation_alpha_, epsilon)) return false;
+
 
       return true;
    }
@@ -539,6 +553,8 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if(this.log_timestamp_ != otherMyClass.log_timestamp_) return false;
 
       if(this.optimizer_enabled_ != otherMyClass.optimizer_enabled_) return false;
+
+      if(this.activation_alpha_ != otherMyClass.activation_alpha_) return false;
 
 
       return true;
@@ -597,7 +613,9 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       builder.append("log_timestamp=");
       builder.append(this.log_timestamp_);      builder.append(", ");
       builder.append("optimizer_enabled=");
-      builder.append(this.optimizer_enabled_);
+      builder.append(this.optimizer_enabled_);      builder.append(", ");
+      builder.append("activation_alpha=");
+      builder.append(this.activation_alpha_);
       builder.append("}");
       return builder.toString();
    }

@@ -4,11 +4,14 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -82,6 +85,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
 
    /* YoVariablized CoM for margin visualization */
    private final YoFramePoint2D yoCenterOfMass;
+   private final YoFramePoint2D yoStabilityMarginPoint;
 
    /* Fields to monitor the nearest constraint edge */
    private final DMatrixRMaj[] resolvedForces = new DMatrixRMaj[DIRECTIONS_TO_OPTIMIZE];
@@ -142,6 +146,7 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       stabilityMargin.set(Double.POSITIVE_INFINITY);
 
       yoCenterOfMass = new YoFramePoint2D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+      yoStabilityMarginPoint = new YoFramePoint2D("stabilityMarginPoint", ReferenceFrame.getWorldFrame(), registry);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -428,6 +433,10 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
       lowestMarginEdgeIndex.set(isQueryOutsidePolygon ? outsideIndex : insideIndex);
       stabilityMargin.set(Math.sqrt(isQueryOutsidePolygon ? minOutsideDistanceSquared : minInsideDistanceSquared));
 
+      FramePoint2DReadOnly v1 = feasibleRegion.getVertex(lowestMarginEdgeIndex.getValue());
+      FramePoint2DReadOnly v2 = feasibleRegion.getNextVertex(lowestMarginEdgeIndex.getValue());
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(comX, comY, v1.getX(), v1.getY(), v2.getX(), v2.getY(), yoStabilityMarginPoint);
+
       for (int vertex_idx = 0; vertex_idx < DIRECTIONS_TO_OPTIMIZE; vertex_idx++)
       {
          nearestConstraintVertexA[vertex_idx].setToNaN();
@@ -656,6 +665,13 @@ public class StabilityMarginRegionCalculator implements SCS2YoGraphicHolder
             group.addChild(vertexGraphic);
          }
       }
+
+      YoGraphicPoint2DDefinition vertexGraphic = YoGraphicDefinitionFactory.newYoGraphicPoint2D(namePrefix + "StabilityMarginPoint",
+                                                                                                yoStabilityMarginPoint,
+                                                                                                0.003,
+                                                                                                ColorDefinitions.Blue(),
+                                                                                                DefaultPoint2DGraphic.CIRCLE_FILLED);
+      group.addChild(vertexGraphic);
 
       if (StabilityMarginOptimizationModule.DEBUG)
       {

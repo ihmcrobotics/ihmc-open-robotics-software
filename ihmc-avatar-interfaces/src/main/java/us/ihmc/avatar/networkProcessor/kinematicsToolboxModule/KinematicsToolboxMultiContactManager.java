@@ -471,4 +471,9 @@ public class KinematicsToolboxMultiContactManager
    {
       return postureOptimizer.getPostureSensitivity();
    }
+
+   public double getAlphaEnabled()
+   {
+      return activationAlpha.getValue();
+   }
 }

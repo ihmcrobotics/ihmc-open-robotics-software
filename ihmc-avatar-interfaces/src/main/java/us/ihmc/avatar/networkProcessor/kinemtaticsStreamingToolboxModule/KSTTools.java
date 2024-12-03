@@ -474,6 +474,7 @@ public class KSTTools
          WholeBodyStreamingMessage messageToPublish = setupStreamingMessage(outputToPublish);
          messageToPublish.setPostureSensitivity(ikController.getPostureSensitivity());
          messageToPublish.setPostureOptimizerMode(ikController.getMode().toByte());
+         messageToPublish.setActivationAlpha(ikController.getActivationAlpha());
          streamingMessagePublisher.publish(messageToPublish);
       }
    }

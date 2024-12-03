@@ -221,7 +221,7 @@ public class CommandInputManager
       Command nextCommand = (Command) buffer.next();
       if (nextCommand == null)
       {
-         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
+//         LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
 

@@ -118,10 +118,10 @@ public final class MessageUnpackingTools
 
    public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker()
    {
-      return createWholeBodyStreamingMessageUnpacker(null, null);
+      return createWholeBodyStreamingMessageUnpacker(null, null, null);
    }
 
-   public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker(DoubleConsumer postureConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
+   public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker(DoubleConsumer postureConsumer, DoubleConsumer activationAlphaConsumer, Consumer<PostureOptimizerState> stabilityStateConsumer)
    {
       return new MessageUnpacker<>()
       {
@@ -272,6 +272,12 @@ public final class MessageUnpackingTools
                {
                   PostureOptimizerState postureOptimizerState = PostureOptimizerState.fromByte(message.getPostureOptimizerMode());
                   stabilityStateConsumer.accept(postureOptimizerState);
+               }
+
+               if (activationAlphaConsumer != null)
+               {
+                  double activationAlpha = message.getActivationAlpha();
+                  activationAlphaConsumer.accept(activationAlpha);
                }
             }
          }

@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a52fa8a084f4612d4f28892a3e3044f01afd7887bdbadf701f76e854dd273611";
+   		return "c234985f160b78d13de0206eda6cbf10ffc1948a1ee07b0f949ec6be41b2c753";
    }
    
    @Override
@@ -100,6 +100,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -177,6 +179,9 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -223,6 +228,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getOptimizerEnabled());
 
+      cdr.write_type_6(data.getActivationAlpha());
+
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyStreamingMessage data, us.ihmc.idl.CDR cdr)
@@ -267,6 +274,8 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       	
       data.setOptimizerEnabled(cdr.read_type_7());
       	
+      data.setActivationAlpha(cdr.read_type_6());
+      	
 
    }
 
@@ -305,6 +314,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_9("posture_optimizer_mode", data.getPostureOptimizerMode());
       ser.write_type_11("log_timestamp", data.getLogTimestamp());
       ser.write_type_7("optimizer_enabled", data.getOptimizerEnabled());
+      ser.write_type_6("activation_alpha", data.getActivationAlpha());
    }
 
    @Override
@@ -342,6 +352,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setPostureOptimizerMode(ser.read_type_9("posture_optimizer_mode"));
       data.setLogTimestamp(ser.read_type_11("log_timestamp"));
       data.setOptimizerEnabled(ser.read_type_7("optimizer_enabled"));
+      data.setActivationAlpha(ser.read_type_6("activation_alpha"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.WholeBodyStreamingMessage src, controller_msgs.msg.dds.WholeBodyStreamingMessage dest)

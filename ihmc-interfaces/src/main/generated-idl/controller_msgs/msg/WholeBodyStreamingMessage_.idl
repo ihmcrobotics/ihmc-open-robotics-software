@@ -97,6 +97,7 @@ module controller_msgs
          * Whether the optimizer is enabled
          */
         boolean optimizer_enabled;
+        double activation_alpha;
       };
     };
   };

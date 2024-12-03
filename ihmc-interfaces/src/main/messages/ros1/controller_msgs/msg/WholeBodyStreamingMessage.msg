@@ -72,4 +72,6 @@ int64 log_timestamp
 # Whether the optimizer is enabled
 bool optimizer_enabled
 
+float64 activation_alpha
+
 
