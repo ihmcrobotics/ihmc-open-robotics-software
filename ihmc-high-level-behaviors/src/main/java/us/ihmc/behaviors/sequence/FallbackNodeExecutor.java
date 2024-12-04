@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -23,7 +21,5 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
    public void update()
    {
       super.update();
-
-      BehaviorTreeRootNodeExecutor rootNode = BehaviorTreeTools.findRootNode(this);
    }
 }
