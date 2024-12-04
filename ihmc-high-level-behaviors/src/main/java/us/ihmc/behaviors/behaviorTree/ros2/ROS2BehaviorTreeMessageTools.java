@@ -14,6 +14,8 @@ import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeState;
 import us.ihmc.behaviors.sequence.actions.*;
 
 /**
@@ -31,6 +33,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getAi2rNodes().clear();
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
+      treeStateMessage.getFallbackNodes().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getTrashCanInteractions().clear();
       treeStateMessage.getBuildingExplorations().clear();
@@ -69,6 +72,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ACTION_SEQUENCE);
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
             actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
+         }
+         else if (nodeState instanceof FallbackNodeState fallbackNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FALLBACK_NODE);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFallbackNodes().size());
+            fallbackNodeState.toMessage(treeStateMessage.getFallbackNodes().add());
          }
          else if (nodeState instanceof DoorTraversalState doorTraversalState)
          {
@@ -178,6 +187,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
+      else if (subscriptionNode.getType() == FallbackNodeDefinition.class && nodeState instanceof FallbackNodeState fallbackNodeState)
+      {
+         fallbackNodeState.fromMessage(subscriptionNode.getFallbackNodeStateMessage());
+      }
       else if (subscriptionNode.getType() == DoorTraversalDefinition.class && nodeState instanceof DoorTraversalState doorTraversalState)
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
@@ -266,6 +279,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setActionSequenceStateMessage(actionSequenceStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(actionSequenceStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.FALLBACK_NODE ->
+         {
+            FallbackNodeStateMessage fallbackNodeStateMessage = treeStateMessage.getFallbackNodes().get(indexInTypesList);
+            subscriptionNode.setFallbackNodeStateMessage(fallbackNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(fallbackNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(fallbackNodeStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.DOOR_TRAVERSAL ->
          {

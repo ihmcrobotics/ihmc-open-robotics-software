@@ -6,6 +6,7 @@ import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 
 public class BehaviorTreeDefinitionRegistry
@@ -16,6 +17,7 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
       new RegistryRecord(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
+      new RegistryRecord(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
       new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new RegistryRecord(TrashCanInteractionDefinition.class, BehaviorTreeStateMessage.TRASH_CAN_INTERACTION),
       new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
@@ -78,6 +80,10 @@ public class BehaviorTreeDefinitionRegistry
          if (typeClass == BehaviorTreeNodeDefinition.class)
          {
             this.initialName = "Basic node";
+         }
+         else if (typeClass == FallbackNodeDefinition.class)
+         {
+            this.initialName = "Fallback node";
          }
          else
          {
