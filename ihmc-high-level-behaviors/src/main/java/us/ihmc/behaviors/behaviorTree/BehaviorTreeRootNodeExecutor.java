@@ -11,7 +11,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 {
    private final BehaviorTreeRootNodeState state;
    private final BehaviorTreeRootNodeDefinition definition;
-   private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -35,11 +35,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
-      executorChildren.clear();
+      actionChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      for (ActionNodeExecutor<?, ?> actionChild : executorChildren)
+      for (ActionNodeExecutor<?, ?> actionChild : actionChildren)
       {
          actionChild.getState().updateAndValidateExecuteAfter(state.getActionChildren());
       }
@@ -110,7 +110,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          {
             while (shouldExecuteNextAction())
             {
-               state.getLogger().info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+               state.getLogger().info("Automatically executing action: {}", actionChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
          }
@@ -119,7 +119,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          while (shouldExecuteNextAction())
          {
-            state.getLogger().info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+            state.getLogger().info("Manually executing action: {}", actionChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
       }
@@ -131,7 +131,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          if (child instanceof ActionNodeExecutor<?, ?> actionNode)
          {
-            executorChildren.add(actionNode);
+            actionChildren.add(actionNode);
             if (actionNode.getState().getIsExecuting())
             {
                currentlyExecutingActions.add(actionNode);
@@ -146,7 +146,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    private void executeNextAction()
    {
-      ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(state.getExecutionNextIndex());
+      ActionNodeExecutor<?, ?> actionToExecute = actionChildren.get(state.getExecutionNextIndex());
 
       state.getLogger().info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
       actionToExecute.update();
@@ -163,7 +163,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          return false;
       }
 
-      ActionNodeExecutor<?, ?> nextNodeToExecute = executorChildren.get(state.getExecutionNextIndex());
+      ActionNodeExecutor<?, ?> nextNodeToExecute = actionChildren.get(state.getExecutionNextIndex());
 
       if (!nextNodeToExecute.getState().getCanExecute())
       {
@@ -183,13 +183,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
          else
          {
-            return !executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
+            return !actionChildren.get(executeAfterActionIndex).getState().getIsExecuting();
          }
       }
       else
       {
          boolean anyActionExecuting = false;
-         for (ActionNodeExecutor<?, ?> executorChild : executorChildren)
+         for (ActionNodeExecutor<?, ?> executorChild : actionChildren)
          {
             anyActionExecuting |= executorChild.getState().getIsExecuting();
          }
@@ -199,12 +199,12 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    private boolean isEndOfSequence()
    {
-      return state.getExecutionNextIndex() >= executorChildren.size();
+      return state.getExecutionNextIndex() >= actionChildren.size();
    }
 
-   public List<ActionNodeExecutor<?, ?>> getExecutorChildren()
+   public List<ActionNodeExecutor<?, ?>> getActionChildren()
    {
-      return executorChildren;
+      return actionChildren;
    }
 
    public List<ActionNodeExecutor<?, ?>> getCurrentlyExecutingActions()
