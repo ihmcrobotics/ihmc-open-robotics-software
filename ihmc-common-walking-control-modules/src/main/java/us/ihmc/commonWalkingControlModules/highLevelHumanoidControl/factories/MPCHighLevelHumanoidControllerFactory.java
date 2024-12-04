@@ -19,8 +19,8 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelMPCControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidMPCControllerPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.MPCControllerComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
@@ -51,7 +51,11 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.*;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
+import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -80,10 +84,10 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
-   private final ArrayList<MPCHighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
-   private final EnumMap<HighLevelControllerName, MPCHighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
+   private final ArrayList<HighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
+   private final EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
 
-   private final ArrayList<MPCControllerStateTransitionFactory<HighLevelControllerName>> stateTransitionFactories = new ArrayList<>();
+   private final ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> stateTransitionFactories = new ArrayList<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
@@ -104,7 +108,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
-   private final List<HighLevelHumanoidMPCControllerPluginFactory> pluginFactories = new ArrayList<>();
+   private final List<HighLevelHumanoidControllerPluginFactory> pluginFactories = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
    private final SideDependentList<String> wristSensorNames;
@@ -176,7 +180,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       managerFactory.setInertialEstimationParameters(parameters);
    }
 
-   private MPCControllerComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
+   private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
 
    public void createComponentBasedFootstepDataMessageGenerator()
    {
@@ -196,7 +200,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       if (componentBasedFootstepDataMessageGeneratorFactory != null)
          return;
 
-      componentBasedFootstepDataMessageGeneratorFactory = new MPCControllerComponentBasedFootstepDataMessageGeneratorFactory();
+      componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
       componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
       componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
@@ -208,7 +212,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
          pluginFactories.add(componentBasedFootstepDataMessageGeneratorFactory);
    }
 
-   public void addControllerPlugin(HighLevelHumanoidMPCControllerPluginFactory pluginFactory)
+   public void addControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
    {
       pluginFactories.add(pluginFactory);
    }
@@ -282,7 +286,7 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       //TODO
    }
 
-   public void replaceControllerFactory(HighLevelControllerName controllerName, MPCHighLevelControllerStateFactory controllerFactory)
+   public void replaceControllerFactory(HighLevelControllerName controllerName, HighLevelControllerStateFactory controllerFactory)
    {
       if (controllerFactoriesMap.containsKey(controllerName))
          controllerStateFactories.remove(controllerFactoriesMap.get(controllerName));
@@ -293,105 +297,104 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
 
    public void useDefaultDoNothingControlState()
    {
-      DoNothingMPCControllerStateFactory controllerStateFactory = new DoNothingMPCControllerStateFactory();
+      DoNothingControllerStateFactory controllerStateFactory = new DoNothingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, controllerStateFactory);
    }
 
    // seems not be used.
-//   public void useDefaultStandPrepControlState()
-//   {
-//      StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.STAND_PREP_STATE, controllerStateFactory);
-//   }
+   //   public void useDefaultStandPrepControlState()
+   //   {
+   //      StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.STAND_PREP_STATE, controllerStateFactory);
+   //   }
 
    // seems not be used
-//   public void useDefaultStandReadyControlState()
-//   {
-//      StandReadyControllerStateFactory controllerStateFactory = new StandReadyControllerStateFactory();
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.STAND_READY, controllerStateFactory);
-//   }
+   //   public void useDefaultStandReadyControlState()
+   //   {
+   //      StandReadyControllerStateFactory controllerStateFactory = new StandReadyControllerStateFactory();
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.STAND_READY, controllerStateFactory);
+   //   }
 
    // seems not to be used
-//   public void useDefaultStandTransitionControlState()
-//   {
-//      useDefaultStandTransitionControlState(HighLevelControllerName.STAND_READY, HighLevelControllerName.WALKING);
-//   }
+   //   public void useDefaultStandTransitionControlState()
+   //   {
+   //      useDefaultStandTransitionControlState(HighLevelControllerName.STAND_READY, HighLevelControllerName.WALKING);
+   //   }
    // seems not to be used
-//   public void useDefaultStandTransitionControlState(HighLevelControllerName startState, HighLevelControllerName endState)
-//   {
-//      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory(startState, endState);
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
-//   }
+   //   public void useDefaultStandTransitionControlState(HighLevelControllerName startState, HighLevelControllerName endState)
+   //   {
+   //      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory(startState, endState);
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
+   //   }
 
    public void useDefaultWalkingControlState()
    {
-      MPCWalkingControllerStateFactory controllerStateFactory = new MPCWalkingControllerStateFactory();
+      WalkingControllerStateFactory controllerStateFactory = new WalkingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.WALKING, controllerStateFactory);
    }
 
    // seems not to be used
-//   public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
-//   {
-//      HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.EXIT_WALKING, controllerStateFactory);
-//   }
+   //   public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
+   //   {
+   //      HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.EXIT_WALKING, controllerStateFactory);
+   //   }
 
    // seems not to be used
 
    //   public void useDefaultFreezeControlState()
-//   {
-//      FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
-//   }
+   //   {
+   //      FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
+   //   }
 
    // seems not to be used
-//   public void useDefaultFallingControlState()
-//   {
-//      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
-//
-//      controllerStateFactories.add(controllerStateFactory);
-//      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
-//   }
+   //   public void useDefaultFallingControlState()
+   //   {
+   //      FallingControllerStateFactory controllerStateFactory = new FallingControllerStateFactory();
+   //
+   //      controllerStateFactories.add(controllerStateFactory);
+   //      controllerFactoriesMap.put(HighLevelControllerName.FALLING_STATE, controllerStateFactory);
+   //   }
 
-   public void addCustomControlState(MPCHighLevelControllerStateFactory customControllerStateFactory)
+   public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
    {
       controllerStateFactories.add(customControllerStateFactory);
       controllerFactoriesMap.put(customControllerStateFactory.getStateEnum(), customControllerStateFactory);
    }
 
-
    /**
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     */
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      stateTransitionFactories.add(new FinishedMPCControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
+      stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
    }
 
    /**
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
@@ -402,22 +405,22 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
                                      HighLevelControllerName nextControlStateEnum,
                                      boolean performNextStateOnEntry)
    {
-      stateTransitionFactories.add(new FinishedMPCControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry));
+      stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry));
    }
 
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      stateTransitionFactories.add(new RequestedMPCControllerStateTransitionFactory<>(requestedHighLevelControllerState,
+      stateTransitionFactories.add(new RequestedControllerStateTransitionFactory<>(requestedHighLevelControllerState,
                                                                                    currentControlStateEnum,
                                                                                    nextControlStateEnum));
    }
 
    public void addControllerFailureTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName fallbackControlStateEnum)
    {
-      stateTransitionFactories.add(new MPCControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
+      stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
    }
 
-   public void addCustomStateTransition(MPCControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
+   public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
    {
       stateTransitionFactories.add(stateTransitionFactory);
    }
@@ -431,21 +434,22 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
    {
       return requestedHighLevelControllerState;
    }
+
    public HumanoidHighLevelMPCControllerManager getMPCController(FullHumanoidRobotModel fullRobotModel,
-                                                           double controlDT,
-                                                           double gravity,
-                                                           boolean kinematicsSimulation,
-                                                           // For fast non-physics preview simulations
-                                                           YoDouble yoTime,
-                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                           HumanoidRobotSensorInformation sensorInformation,
-                                                           ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                           CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
-                                                           CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
-                                                           ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
-                                                           ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
-                                                           JointBasics... jointsToIgnore)
+                                                                 double controlDT,
+                                                                 double gravity,
+                                                                 boolean kinematicsSimulation,
+                                                                 // For fast non-physics preview simulations
+                                                                 YoDouble yoTime,
+                                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                                 HumanoidRobotSensorInformation sensorInformation,
+                                                                 ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                 CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
+                                                                 CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                                 JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
+                                                                 ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder,
+                                                                 ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
+                                                                 JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
@@ -562,22 +566,22 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
       humanoidHighLevelMPCControllerManager = new HumanoidHighLevelMPCControllerManager(commandInputManager,
-                                                                                     statusMessageOutputManager,
-                                                                                     initialControllerState,
-                                                                                     highLevelControllerParameters,
-                                                                                     walkingControllerParameters,
-                                                                                     requestedHighLevelControllerState,
-                                                                                     controllerFactoriesMap,
-                                                                                     stateTransitionFactories,
-                                                                                     pluginFactories,
-                                                                                     managerFactory,
-                                                                                     controllerCoreFactory,
-                                                                                     controllerToolbox,
-                                                                                     centerOfPressureDataHolderForEstimator,
-                                                                                     forceSensorDataHolder,
-                                                                                     wholeBodyControllerCoreOutput,
-                                                                                     controllerCoreOutPutDataHolder,
-                                                                                     controllerCoreCommandDataHolder);
+                                                                                        statusMessageOutputManager,
+                                                                                        initialControllerState,
+                                                                                        highLevelControllerParameters,
+                                                                                        walkingControllerParameters,
+                                                                                        requestedHighLevelControllerState,
+                                                                                        controllerFactoriesMap,
+                                                                                        stateTransitionFactories,
+                                                                                        pluginFactories,
+                                                                                        managerFactory,
+                                                                                        controllerCoreFactory,
+                                                                                        controllerToolbox,
+                                                                                        centerOfPressureDataHolderForEstimator,
+                                                                                        forceSensorDataHolder,
+                                                                                        wholeBodyControllerCoreOutput,
+                                                                                        controllerCoreOutPutDataHolder,
+                                                                                        controllerCoreCommandDataHolder);
       humanoidHighLevelMPCControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelMPCControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       for (RobotSide robotSide : RobotSide.values)
@@ -758,5 +762,4 @@ public class MPCHighLevelHumanoidControllerFactory implements CloseableAndDispos
       else
          isListeningToHighLevelStatePackets = isListening;
    }
-
 }

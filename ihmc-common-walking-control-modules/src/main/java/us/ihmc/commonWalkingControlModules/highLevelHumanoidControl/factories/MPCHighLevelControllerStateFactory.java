@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelMPC
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MPCHighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
-public interface MPCHighLevelControllerStateFactory
+public interface MPCHighLevelControllerStateFactory extends HighLevelControllerStateFactory
 {
    MPCHighLevelControllerState getOrCreateControllerState(HighLevelMPCControllerFactoryHelper controllerFactoryHelper);
 

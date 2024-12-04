@@ -309,17 +309,8 @@ public class SCS2AvatarMPCSimulationFactory
                                                                         robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
-         // TODO James should look into this Belows should called in that way
           robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT()),
                                                robotModel.getEstimatorDT());
-         // However, the SCS2RobotRigidBodyMutator uses private constructor, so it cannot be called outside of it's package.
-         // The following is a temporary workaround, but I cannot be certain if it works correctly
-         // or if it properly retrieves the information for the center of mass , mass, and moment of inertia of the robot's rigid bodies in SCS2.
-
-//         Constructor<?> constructor = SCS2RobotRigidBodyMutator.class.getDeclaredConstructor(Robot.class, DoubleProvider.class, double.class);
-//         constructor.setAccessible(true);
-//         SCS2RobotRigidBodyMutator mutator = (SCS2RobotRigidBodyMutator) constructor.newInstance(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT());
-//         robot.addThrottledController(mutator, robotModel.getEstimatorDT());
       }
 
       for (Robot secondaryRobot : secondaryRobots.get())
