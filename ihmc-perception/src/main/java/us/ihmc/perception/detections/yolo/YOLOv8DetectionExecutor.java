@@ -79,6 +79,8 @@ public class YOLOv8DetectionExecutor
    private int erosionKernelRadius = 2;
    private double outlierThreshold = 1.0;
 
+   private boolean printNoModelsFoundError = true;
+
    // TODO: add back
 //   private Set<String> targetDetections = new HashSet<>();
 
@@ -127,6 +129,16 @@ public class YOLOv8DetectionExecutor
 
    public void runYOLODetectionOnAllModels(RawImage colorImage, RawImage depthImage)
    {
+      if (yoloObjectDetectors.isEmpty())
+      {
+         if (printNoModelsFoundError)
+         {
+            LogTools.error("No YOLOv8 models were found. Cannot run YOLO.");
+            printNoModelsFoundError = false;
+         }
+         return;
+      }
+
       if (lastRunDetectorIndex + 1 > yoloObjectDetectors.size())
          lastRunDetectorIndex = 0;
 
