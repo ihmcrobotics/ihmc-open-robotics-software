@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.avatar.AvatarControllerThread.createListOfJointsToIgnore;
 
-public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerThreadInterface
+public class AvatarMPCWholeBodyControllerCoreThread implements AvatarControllerThreadInterface
 {
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
 
@@ -60,16 +60,16 @@ public class AvatarWholeBodyControllerCoreThread implements AvatarMPCControllerT
    private ModularRobotController wholeBodyControllerCoreCalculator = new ModularRobotController("WBCC");
    private final ExecutionTimer wholeBodyControllerCoreThreadTimer;
 
-   public AvatarWholeBodyControllerCoreThread(String robotName,
-                                              HumanoidRobotMPCContextDataFactory contextDataFactory,
-                                              StatusMessageOutputManager walkingOutputManager,
-                                              DRCRobotModel robotModel,
-                                              HumanoidRobotSensorInformation sensorInformation,
-                                              MPCHighLevelHumanoidControllerFactory controllerFactory,
-                                              DRCOutputProcessor outputProcessor,
-                                              RealtimeROS2Node realtimeROS2Node,
-                                              double gravity,
-                                              boolean kinematicSimulation)
+   public AvatarMPCWholeBodyControllerCoreThread(String robotName,
+                                                 HumanoidRobotMPCContextDataFactory contextDataFactory,
+                                                 StatusMessageOutputManager walkingOutputManager,
+                                                 DRCRobotModel robotModel,
+                                                 HumanoidRobotSensorInformation sensorInformation,
+                                                 MPCHighLevelHumanoidControllerFactory controllerFactory,
+                                                 DRCOutputProcessor outputProcessor,
+                                                 RealtimeROS2Node realtimeROS2Node,
+                                                 double gravity,
+                                                 boolean kinematicSimulation)
    {
       this.controllerCoreFullRobotModel = robotModel.createFullRobotModel();
 

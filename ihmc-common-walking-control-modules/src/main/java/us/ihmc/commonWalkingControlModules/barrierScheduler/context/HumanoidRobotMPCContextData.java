@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -20,7 +18,7 @@ import java.util.List;
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 @SuppressWarnings("serial")
-public class HumanoidRobotMPCContextData implements InPlaceCopyable<HumanoidRobotMPCContextData>, Settable<HumanoidRobotMPCContextData>
+public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 {
    /**
     * Serves to synchronize the time across threads. Set by the scheduler thread.
@@ -113,15 +111,15 @@ public class HumanoidRobotMPCContextData implements InPlaceCopyable<HumanoidRobo
    }
 
    public HumanoidRobotMPCContextData(HumanoidRobotContextJointData processedJointData,
-                                   ForceSensorDataHolder forceSensorDataHolder,
-                                   CenterOfMassDataHolder centerOfMassDataHolder,
-                                   CenterOfPressureDataHolder centerOfPressureDataHolder,
-                                   RobotMotionStatusHolder robotMotionStatusHolder,
-                                   LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
-                                   SensorDataContext sensorDataContext,
-                                   LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredOutputList,
-                                   ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
-                                   ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder)
+                                      ForceSensorDataHolder forceSensorDataHolder,
+                                      CenterOfMassDataHolder centerOfMassDataHolder,
+                                      CenterOfPressureDataHolder centerOfPressureDataHolder,
+                                      RobotMotionStatusHolder robotMotionStatusHolder,
+                                      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
+                                      SensorDataContext sensorDataContext,
+                                      LowLevelOneDoFJointDesiredDataHolder wbccJointDesiredOutputList,
+                                      ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
+                                      ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
@@ -213,63 +211,25 @@ public class HumanoidRobotMPCContextData implements InPlaceCopyable<HumanoidRobo
       return controllerCoreCommandDataHolder;
    }
 
-
    @Override
-   public void set(HumanoidRobotMPCContextData other)
+   public void set(HumanoidRobotContextData other)
    {
       copyFrom(other);
    }
 
    @Override
-   public void copyFrom(HumanoidRobotMPCContextData src)
+   public void copyFrom(HumanoidRobotContextData src)
    {
-      timestamp = src.timestamp;
-      schedulerTick = src.schedulerTick;
-      controllerRan = src.controllerRan;
-      estimatorRan = src.estimatorRan;
-      perceptionRan = src.perceptionRan;
-      wholeBodyControllerCoreRan = src.wholeBodyControllerCoreRan;
-      processedJointData.set(src.processedJointData);
-      forceSensorDataHolder.set(src.forceSensorDataHolder);
-      centerOfMassDataHolder.set(src.centerOfMassDataHolder);
-      centerOfPressureDataHolder.set(src.centerOfPressureDataHolder);
-      robotMotionStatusHolder.set(src.robotMotionStatusHolder);
-      jointDesiredOutputList.set(src.jointDesiredOutputList);
-      wholeBodyControllerCoreDesiredOutPutList.set(src.wholeBodyControllerCoreDesiredOutPutList);
-      sensorDataContext.set(src.sensorDataContext);
-      controllerCoreOutPutDataHolder.set(src.controllerCoreOutPutDataHolder);
-      controllerCoreCommandDataHolder.setControllerCoreMode(src.controllerCoreCommandDataHolder.getControllerCoreMode());
-      controllerCoreCommandDataHolder.set(src.controllerCoreCommandDataHolder);
-   }
-
-   public long getTimestamp()
-   {
-      return timestamp;
-   }
-
-   public void setTimestamp(long timestamp)
-   {
-      this.timestamp = timestamp;
-   }
-
-   public long getSchedulerTick()
-   {
-      return schedulerTick;
-   }
-
-   public void setSchedulerTick(long schedulerTick)
-   {
-      this.schedulerTick = schedulerTick;
-   }
-
-   public void setControllerRan(boolean controllerRan)
-   {
-      this.controllerRan = controllerRan;
-   }
-
-   public boolean getControllerRan()
-   {
-      return controllerRan;
+      super.copyFrom(src);
+      if (src instanceof HumanoidRobotMPCContextData)
+      {
+         HumanoidRobotMPCContextData srcMPC = (HumanoidRobotMPCContextData) src;
+         wholeBodyControllerCoreRan = srcMPC.wholeBodyControllerCoreRan;
+         wholeBodyControllerCoreDesiredOutPutList.set(srcMPC.wholeBodyControllerCoreDesiredOutPutList);
+         controllerCoreOutPutDataHolder.set(srcMPC.controllerCoreOutPutDataHolder);
+         controllerCoreCommandDataHolder.setControllerCoreMode(srcMPC.controllerCoreCommandDataHolder.getControllerCoreMode());
+         controllerCoreCommandDataHolder.set(srcMPC.controllerCoreCommandDataHolder);
+      }
    }
 
    public boolean getWholeBodyControllerCoreRan()
@@ -280,26 +240,6 @@ public class HumanoidRobotMPCContextData implements InPlaceCopyable<HumanoidRobo
    public void setWholeBodyControllerCoreRan(boolean wholeBodyControllerCoreRan)
    {
       this.wholeBodyControllerCoreRan = wholeBodyControllerCoreRan;
-   }
-
-   public void setPerceptionRan(boolean perceptionRan)
-   {
-      this.perceptionRan = perceptionRan;
-   }
-
-   public boolean getPerceptionRan()
-   {
-      return perceptionRan;
-   }
-
-   public void setEstimatorRan(boolean estimatorRan)
-   {
-      this.estimatorRan = estimatorRan;
-   }
-
-   public boolean getEstimatorRan()
-   {
-      return estimatorRan;
    }
 
    @Override
@@ -339,9 +279,9 @@ public class HumanoidRobotMPCContextData implements InPlaceCopyable<HumanoidRobo
             return false;
          if (!wholeBodyControllerCoreDesiredOutPutList.equals(other.wholeBodyControllerCoreDesiredOutPutList))
             return false;
-         if(!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
+         if (!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
             return false;
-         if(!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
+         if (!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
             return false;
          return true;
       }

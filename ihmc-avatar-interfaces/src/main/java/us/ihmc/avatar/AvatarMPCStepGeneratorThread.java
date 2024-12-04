@@ -1,7 +1,10 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.*;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextDataFactory;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -33,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AvatarMPCStepGeneratorThread implements AvatarMPCControllerThreadInterface
+public class AvatarMPCStepGeneratorThread implements AvatarControllerThreadInterface
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
    private final YoGraphicsListRegistry csgGraphics = new YoGraphicsListRegistry();
@@ -52,12 +55,12 @@ public class AvatarMPCStepGeneratorThread implements AvatarMPCControllerThreadIn
    private final StepGeneratorCommandInputManager csgCommandInputManager;
 
    public AvatarMPCStepGeneratorThread(HumanoidSteppingPluginFactory pluginFactory,
-                                    HumanoidRobotMPCContextDataFactory contextDataFactory,
-                                    StatusMessageOutputManager walkingOutputManager,
-                                    CommandInputManager walkingCommandInputManager,
-                                    DRCRobotModel drcRobotModel,
-                                    HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints,
-                                    RealtimeROS2Node ros2Node)
+                                       HumanoidRobotMPCContextDataFactory contextDataFactory,
+                                       StatusMessageOutputManager walkingOutputManager,
+                                       CommandInputManager walkingCommandInputManager,
+                                       DRCRobotModel drcRobotModel,
+                                       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints,
+                                       RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 

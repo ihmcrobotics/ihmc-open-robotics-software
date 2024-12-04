@@ -1,9 +1,9 @@
 package us.ihmc.avatar.scs2;
 
+import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarMPCControllerThread;
-import us.ihmc.avatar.AvatarMPCEstimatorThread;
-import us.ihmc.avatar.AvatarMPCStepGeneratorThread;
-import us.ihmc.avatar.AvatarWholeBodyControllerCoreThread;
+import us.ihmc.avatar.AvatarMPCWholeBodyControllerCoreThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -47,10 +47,10 @@ public class SCS2AvatarMPCSimulation
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
    private HumanoidRobotMPCContextData masterContext;
-   private AvatarMPCEstimatorThread estimatorThread;
+   private AvatarEstimatorThread estimatorThread;
    private AvatarMPCControllerThread controllerThread;
-   private AvatarMPCStepGeneratorThread stepGeneratorThread;
-   private AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
+   private AvatarStepGeneratorThread stepGeneratorThread;
+   private AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -406,12 +406,12 @@ public class SCS2AvatarMPCSimulation
       this.masterContext = masterContext;
    }
 
-   public void setEstimatorThread(AvatarMPCEstimatorThread estimatorThread)
+   public void setEstimatorThread(AvatarEstimatorThread estimatorThread)
    {
       this.estimatorThread = estimatorThread;
    }
 
-   public AvatarMPCEstimatorThread getEstimatorThread()
+   public AvatarEstimatorThread getEstimatorThread()
    {
       return estimatorThread;
    }
@@ -421,22 +421,27 @@ public class SCS2AvatarMPCSimulation
       this.controllerThread = controllerThread;
    }
 
-   public void setWholeBodyControllerCoreThread(AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread)
+   public void setWholeBodyControllerCoreThread(AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread)
    {
       this.wholeBodyControllerCoreThread = wholeBodyControllerCoreThread;
    }
-   public AvatarWholeBodyControllerCoreThread getWholeBodyControllerCoreThread() { return wholeBodyControllerCoreThread;}
+
+   public AvatarMPCWholeBodyControllerCoreThread getWholeBodyControllerCoreThread()
+   {
+      return wholeBodyControllerCoreThread;
+   }
+
    public AvatarMPCControllerThread getControllerThread()
    {
       return controllerThread;
    }
 
-   public void setStepGeneratorThread(AvatarMPCStepGeneratorThread stepGeneratorThread)
+   public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
    {
       this.stepGeneratorThread = stepGeneratorThread;
    }
 
-   public AvatarMPCStepGeneratorThread getStepGeneratorThread()
+   public AvatarStepGeneratorThread getStepGeneratorThread()
    {
       return stepGeneratorThread;
    }

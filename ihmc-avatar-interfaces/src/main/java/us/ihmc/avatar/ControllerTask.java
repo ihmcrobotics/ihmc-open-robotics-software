@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
@@ -10,21 +7,28 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ControllerTask extends HumanoidRobotControlTask
 {
-   private final CrossRobotCommandResolver controllerResolver;
-   private final CrossRobotCommandResolver masterResolver;
+   protected final CrossRobotCommandResolver controllerResolver;
+   protected final CrossRobotCommandResolver masterResolver;
 
-   private final AvatarControllerThreadInterface controllerThread;
+   protected final AvatarControllerThreadInterface controllerThread;
 
-   private final long divisor;
-   private final ThreadTimer timer;
-   private final YoLong ticksBehindScheduled;
+   protected final long divisor;
+   protected final ThreadTimer timer;
+   protected final YoLong ticksBehindScheduled;
 
    protected final List<Runnable> postControllerCallbacks = new ArrayList<>();
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
+   public ControllerTask(String prefix,
+                         AvatarControllerThreadInterface controllerThread,
+                         long divisor,
+                         double schedulerDt,
+                         FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.divisor = divisor;
@@ -33,7 +37,7 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-//      String prefix = "Controller";
+      //      String prefix = "Controller";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
@@ -83,5 +87,4 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       schedulerThreadRunnables.add(runnable);
    }
-
 }

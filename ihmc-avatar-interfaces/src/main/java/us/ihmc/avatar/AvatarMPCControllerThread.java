@@ -58,7 +58,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInterface
+public class AvatarMPCControllerThread implements AvatarControllerThreadInterface
 {
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
@@ -92,16 +92,16 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
    private final boolean wbccThreadRun;
 
    public AvatarMPCControllerThread(String robotName,
-                                 DRCRobotModel robotModel,
-                                 RobotInitialSetup<?> robotInitialSetup,
-                                 HumanoidRobotSensorInformation sensorInformation,
-                                 MPCHighLevelHumanoidControllerFactory controllerFactory,
-                                 HumanoidRobotMPCContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor,
-                                 RealtimeROS2Node realtimeROS2Node,
-                                 double gravity,
-                                 boolean kinematicsSimulation,
-                                 boolean wbccThreadRun)
+                                    DRCRobotModel robotModel,
+                                    RobotInitialSetup<?> robotInitialSetup,
+                                    HumanoidRobotSensorInformation sensorInformation,
+                                    MPCHighLevelHumanoidControllerFactory controllerFactory,
+                                    HumanoidRobotMPCContextDataFactory contextDataFactory,
+                                    DRCOutputProcessor outputProcessor,
+                                    RealtimeROS2Node realtimeROS2Node,
+                                    double gravity,
+                                    boolean kinematicsSimulation,
+                                    boolean wbccThreadRun)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
       this.wbccThreadRun = wbccThreadRun;
@@ -263,19 +263,19 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
       }
 
       HumanoidHighLevelMPCControllerManager robotController = controllerFactory.getMPCController(controllerModel,
-                                                                                              controlDT,
-                                                                                              gravity,
-                                                                                              kinematicsSimulation,
-                                                                                              yoTime,
-                                                                                              yoGraphicsListRegistry,
-                                                                                              sensorInformation,
-                                                                                              forceSensorDataHolderForController,
-                                                                                              centerOfMassDataHolderForController,
-                                                                                              centerOfPressureDataHolderForEstimator,
-                                                                                              wholeBodyControllerCoreOutput,
-                                                                                              controllerCoreOutPutDataHolder,
-                                                                                              controllerCoreCommandDataHolder,
-                                                                                              jointsToIgnore);
+                                                                                                 controlDT,
+                                                                                                 gravity,
+                                                                                                 kinematicsSimulation,
+                                                                                                 yoTime,
+                                                                                                 yoGraphicsListRegistry,
+                                                                                                 sensorInformation,
+                                                                                                 forceSensorDataHolderForController,
+                                                                                                 centerOfMassDataHolderForController,
+                                                                                                 centerOfPressureDataHolderForEstimator,
+                                                                                                 wholeBodyControllerCoreOutput,
+                                                                                                 controllerCoreOutPutDataHolder,
+                                                                                                 controllerCoreCommandDataHolder,
+                                                                                                 jointsToIgnore);
       scs2YoGraphicHolders.add(() -> robotController.getSCS2YoGraphics());
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedMPCController");
@@ -292,9 +292,10 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
 
          if (SHOW_REFERENCE_FRAMES)
          {
-            InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(controllerModel.getElevator(),
-                                                                                                                                                                     yoGraphicsListRegistry,
-                                                                                                                                                                     0.5);
+            InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
+                  controllerModel.getElevator(),
+                  yoGraphicsListRegistry,
+                  0.5);
             modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
          }
 
@@ -332,7 +333,6 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
       {
          wholeBodyControllerCoreOutPutList.getJointDesiredOutput(i).clear();
       }
-
    }
 
    @Override
@@ -427,5 +427,4 @@ public class AvatarMPCControllerThread implements AvatarMPCControllerThreadInter
    {
       return humanoidRobotContextData.getJointDesiredOutputList();
    }
-
 }

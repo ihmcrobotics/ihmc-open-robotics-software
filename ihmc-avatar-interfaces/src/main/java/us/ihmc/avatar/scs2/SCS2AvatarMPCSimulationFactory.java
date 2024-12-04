@@ -3,10 +3,26 @@ package us.ihmc.avatar.scs2;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarMPCControllerThread;
+import us.ihmc.avatar.AvatarMPCEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarMPCStepGeneratorThread;
+import us.ihmc.avatar.AvatarMPCWholeBodyControllerCoreThread;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
+import us.ihmc.avatar.ControllerTask;
+import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
+import us.ihmc.avatar.StepGeneratorTask;
+import us.ihmc.avatar.WholeBodyControllerCoreTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
-import us.ihmc.avatar.factory.*;
+import us.ihmc.avatar.factory.BarrierScheduledRobotController;
+import us.ihmc.avatar.factory.DisposableRobotController;
+import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
+import us.ihmc.avatar.factory.SimulatedHandSensorReader;
+import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -33,7 +49,11 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
@@ -135,7 +155,6 @@ public class SCS2AvatarMPCSimulationFactory
    protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>("enableSCS2YoGraphics", true);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
 
-
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
    protected Robot robot;
@@ -144,10 +163,10 @@ public class SCS2AvatarMPCSimulationFactory
    protected SimulationConstructionSet2 simulationConstructionSet;
    protected JointDesiredOutputWriter simulationOutputWriter;
    protected HumanoidRobotMPCContextData masterContext;
-   protected AvatarMPCEstimatorThread estimatorThread;
+   protected AvatarEstimatorThread estimatorThread;
    protected AvatarMPCControllerThread controllerThread;
    protected AvatarMPCStepGeneratorThread stepGeneratorThread;
-   protected AvatarWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
+   protected AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread;
    protected IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
@@ -190,7 +209,7 @@ public class SCS2AvatarMPCSimulationFactory
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setWholeBodyControllerCoreThread(wholeBodyControllerCoreThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
-//      avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
+      //      avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
       avatarSimulation.setIKStreamingRTThread(ikStreamingRTThread);
       avatarSimulation.setOutputWriter(simulationOutputWriter);
       avatarSimulation.setRobotController(robotController);
@@ -200,7 +219,7 @@ public class SCS2AvatarMPCSimulationFactory
       avatarSimulation.setShowGUI(showGUI.get());
       avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
 
-//      SCS2AvatarMPCTestingSimulation avatarMPCTestingSimulation = new SCS2AvatarMPCTestingSimulation(avatarSimulation, simulationTestingParametersField.get());
+      //      SCS2AvatarMPCTestingSimulation avatarMPCTestingSimulation = new SCS2AvatarMPCTestingSimulation(avatarSimulation, simulationTestingParametersField.get());
 
       if (realtimeROS2Node.hasBeenSet())
       {
@@ -309,8 +328,8 @@ public class SCS2AvatarMPCSimulationFactory
                                                                         robot.getControllerManager().getControllerInput()), robotModel.getEstimatorDT());
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
-          robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT()),
-                                               robotModel.getEstimatorDT());
+         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot, simulationConstructionSet.getTime(), robotModel.getEstimatorDT()),
+                                      robotModel.getEstimatorDT());
       }
 
       for (Robot secondaryRobot : secondaryRobots.get())
@@ -393,16 +412,16 @@ public class SCS2AvatarMPCSimulationFactory
       }
 
       controllerThread = new AvatarMPCControllerThread(robotName,
-                                                    robotModel.get(),
-                                                    robotInitialSetup.get(),
-                                                    robotModel.get().getSensorInformation(),
-                                                    highLevelHumanoidControllerFactory.get(),
-                                                    contextDataFactory,
-                                                    null,
-                                                    ros2Node,
-                                                    gravity.get(),
-                                                    kinematicsSimulation.get(),
-                                                    true);
+                                                       robotModel.get(),
+                                                       robotInitialSetup.get(),
+                                                       robotModel.get().getSensorInformation(),
+                                                       highLevelHumanoidControllerFactory.get(),
+                                                       contextDataFactory,
+                                                       null,
+                                                       ros2Node,
+                                                       gravity.get(),
+                                                       kinematicsSimulation.get(),
+                                                       true);
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -420,16 +439,16 @@ public class SCS2AvatarMPCSimulationFactory
          ros2Node = realtimeROS2Node.get();
       }
 
-      wholeBodyControllerCoreThread = new AvatarWholeBodyControllerCoreThread(robotName,
-                                                                              contextDataFactory,
-                                                                              null,
-                                                                              robotModel.get(),
-                                                                              robotModel.get().getSensorInformation(),
-                                                                              highLevelHumanoidControllerFactory.get(),
-                                                                              null,
-                                                                              ros2Node,
-                                                                              gravity.get(),
-                                                                              kinematicsSimulation.get());
+      wholeBodyControllerCoreThread = new AvatarMPCWholeBodyControllerCoreThread(robotName,
+                                                                                 contextDataFactory,
+                                                                                 null,
+                                                                                 robotModel.get(),
+                                                                                 robotModel.get().getSensorInformation(),
+                                                                                 highLevelHumanoidControllerFactory.get(),
+                                                                                 null,
+                                                                                 ros2Node,
+                                                                                 gravity.get(),
+                                                                                 kinematicsSimulation.get());
    }
 
    private void setupStepGeneratorThread()
@@ -474,12 +493,12 @@ public class SCS2AvatarMPCSimulationFactory
       if (realtimeROS2Node.hasBeenSet())
          ros2Node = realtimeROS2Node.get();
       stepGeneratorThread = new AvatarMPCStepGeneratorThread(steppingFactory,
-                                                          contextDataFactory,
-                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get(),
-                                                          stepSnapperUpdatable,
-                                                          ros2Node);
+                                                             contextDataFactory,
+                                                             highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                             highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                             robotModel.get(),
+                                                             stepSnapperUpdatable,
+                                                             ros2Node);
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -501,14 +520,14 @@ public class SCS2AvatarMPCSimulationFactory
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       int wholeBodyControllerCoreDivisor = (int) Math.round(robotModel.getWholeBodyControllerCoreDT() / simulationDT.get());
-      HumanoidRobotMPCControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotMPCControlTask controllerTask = new MPCControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotMPCControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
+      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
                                                                          simulationDT.get(),
                                                                          masterFullRobotModel);
-      HumanoidRobotMPCControlTask wholeBodyControllerCoreTask = new WholeBodyControllerCoreTask("WholeBodyController",
+      HumanoidRobotControlTask wholeBodyControllerCoreTask = new WholeBodyControllerCoreTask("WholeBodyController",
                                                                                              wholeBodyControllerCoreThread,
                                                                                              wholeBodyControllerCoreDivisor,
                                                                                              simulationDT.get(),
@@ -561,16 +580,16 @@ public class SCS2AvatarMPCSimulationFactory
                                                     });
       }
 
-      List<HumanoidRobotMPCControlTask> tasks = new ArrayList<>();
+      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       tasks.add(stepGeneratorTask);
       tasks.add(wholeBodyControllerCoreTask);
       // fot testing the MPC, below two lines committed out
-//      if (ikStreamingRTTask != null)
-//         tasks.add(ikStreamingRTTask);
-//      if (handControlTask != null)
-//         tasks.add(handControlTask);
+      //      if (ikStreamingRTTask != null)
+      //         tasks.add(ikStreamingRTTask);
+      //      if (handControlTask != null)
+      //         tasks.add(handControlTask);
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
@@ -582,7 +601,7 @@ public class SCS2AvatarMPCSimulationFactory
       else
       {
          BarrierScheduler.TaskOverrunBehavior overrunBehavior = BarrierScheduler.TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledMPCRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
+         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
@@ -665,9 +684,9 @@ public class SCS2AvatarMPCSimulationFactory
                                                        robotController.getYoRegistry()));
       //temporary commented out
       //      if (ikStreamingRTTask != null)
-//         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
-//      if (handControlThread != null)
-//         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
+      //         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
+      //      if (handControlThread != null)
+      //         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {
@@ -755,7 +774,8 @@ public class SCS2AvatarMPCSimulationFactory
             return new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
       };
    }
-   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotMPCControlTask owner, YoRegistry schedulerRegistry)
+
+   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
    {
       MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
       owner.addRunnableOnSchedulerThread(() ->
@@ -794,12 +814,12 @@ public class SCS2AvatarMPCSimulationFactory
                                                             additionalContactTransforms.get(i));
 
       MPCHighLevelHumanoidControllerFactory controllerFactory = new MPCHighLevelHumanoidControllerFactory(contactableBodiesFactory,
-                                                                                                    feetForceSensorNames,
-                                                                                                    wristForceSensorNames,
-                                                                                                    highLevelControllerParameters,
-                                                                                                    walkingControllerParameters,
-                                                                                                    copTrajectoryParameters,
-                                                                                                    robotModel.getSplitFractionCalculatorParameters());
+                                                                                                          feetForceSensorNames,
+                                                                                                          wristForceSensorNames,
+                                                                                                          highLevelControllerParameters,
+                                                                                                          walkingControllerParameters,
+                                                                                                          copTrajectoryParameters,
+                                                                                                          robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
@@ -842,6 +862,7 @@ public class SCS2AvatarMPCSimulationFactory
 
       return joints;
    }
+
    public void setHighLevelHumanoidControllerFactory(MPCHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
       this.highLevelHumanoidControllerFactory.set(highLevelHumanoidControllerFactory);
