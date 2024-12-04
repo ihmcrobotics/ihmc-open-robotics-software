@@ -59,8 +59,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int j = i - 1;
          for (; j >= 0; j--)
          {
-            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(getState().getActionChildren());
-            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex();
+            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex();
             if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
             {
                state.getActionChildren().get(i).setConcurrencyRank(2);
@@ -80,7 +80,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }
-         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex)
+         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex() < executionNextIndex)
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }
@@ -142,10 +142,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                currentlyExecutingActions.add(actionNode);
             }
          }
-         else
-         {
-            updateActionSubtree(child);
-         }
+
+         updateActionSubtree(child);
       }
    }
 
@@ -180,7 +178,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       if (state.getConcurrencyEnabled())
       {
-         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex(getState().getActionChildren());
+         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex();
 
          if (executeAfterActionIndex < 0) // Execute after beginning
          {

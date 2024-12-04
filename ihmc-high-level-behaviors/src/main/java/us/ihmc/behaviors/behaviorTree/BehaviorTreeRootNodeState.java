@@ -62,10 +62,8 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
             actionNode.setActionIndex(actionIndex.getAndIncrement());
             actionChildren.add(actionNode);
          }
-         else
-         {
-            updateActionSubtree(child, actionIndex);
-         }
+
+         updateActionSubtree(child, actionIndex);
       }
    }
 
@@ -169,6 +167,11 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void setConcurrencyEnabled(boolean concurrencyEnabled)
    {
       this.concurrencyEnabled.setValue(concurrencyEnabled);
+   }
+
+   public TLongObjectHashMap<BehaviorTreeNodeState<?>> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 
    public List<ActionNodeState<?>> getActionChildren()
