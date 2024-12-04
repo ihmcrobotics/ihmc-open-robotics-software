@@ -1,6 +1,7 @@
 package us.ihmc.perception.streaming;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.packets.MessageTools;
@@ -21,14 +22,15 @@ import java.time.Instant;
 
 public class ROS2SRTVideoStreamImageMessageRelayWorker
 {
-   /**
-    * Set to true to enable compression to JPEG (using nvJPEG) before publishing the ImageMessage.
-    * Introduces GPU overhead and more latency, but useful for recording rosbags.
-    */
-   private static final boolean COMPRESS_USING_NVJPEG = false;
-
    private final ROS2PublisherBasics<ImageMessage> publisher;
    private final ROS2SRTVideoSubscriber subscriber;
+
+   /**
+    * Which compression type to use before publishing the ImageMessage.
+    * Anything other than UNCOMPRESSED will incur some performance and latency
+    * penalty but is useful for things such as recording rosbags.
+    */
+   private final CompressionType compressionType;
 
    @Nullable
    private CUDAJPEGProcessor cudajpegProcessor;
@@ -38,11 +40,19 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
    public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
+      this(publisherNode, subscriberNode, streamTopicPair, CompressionType.UNCOMPRESSED);
+   }
+
+   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node publisherNode,
+                                                    ROS2Node subscriberNode,
+                                                    ROS2SRTStreamTopicPair streamTopicPair,
+                                                    CompressionType compressionType)
+   {
       PixelFormat outputPixelFormat = streamTopicPair.isDepth() ? PixelFormat.GRAY16 : PixelFormat.BGR8;
 
       imageMessage = new ImageMessage();
       imageMessage.setPixelFormat(outputPixelFormat.toByte());
-      imageMessage.setCompressionType(COMPRESS_USING_NVJPEG ? CompressionType.NVJPEG.toByte() : CompressionType.UNCOMPRESSED.toByte());
+      imageMessage.setCompressionType(compressionType.toByte());
       imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
@@ -51,42 +61,70 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
 
-      if (COMPRESS_USING_NVJPEG)
-         cudajpegProcessor = new CUDAJPEGProcessor(90);
+      this.compressionType = compressionType;
+
+      switch (compressionType)
+      {
+         case UNCOMPRESSED, JPEG, PNG:
+            break;
+         case NVJPEG:
+            cudajpegProcessor = new CUDAJPEGProcessor(90);
+            break;
+         default:
+            throw new RuntimeException(compressionType.name() + " compression type not supported in " + getClass().getSimpleName());
+      }
    }
 
    public void destroy()
    {
       subscriber.destroy();
       publisher.remove();
-      if (COMPRESS_USING_NVJPEG && cudajpegProcessor != null)
+      if (cudajpegProcessor != null)
          cudajpegProcessor.destroy();
    }
 
    private void republishFrameAsImageMessage(RawImage frame)
    {
+      if (frame.getPixelFormat() == PixelFormat.GRAY16)
+         throw new RuntimeException("Unsupported PixelFormat (trying to republish a depth image?)");
+
       // Set acquisition time as now... this isn't super accurate though
       MessageTools.toMessage(Instant.now(), imageMessage.getAcquisitionTime());
 
       Mat frameMat = frame.getCpuImageMat();
 
-      if (COMPRESS_USING_NVJPEG && cudajpegProcessor != null)
+      switch (compressionType)
       {
-         BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
-         cudajpegProcessor.encodeBGR(frameMat, encodedData);
-         PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
-         encodedData.close();
-      }
-      else
-      {
-         PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
+         case UNCOMPRESSED ->
+         {
+            PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
+         }
+         case JPEG ->
+         {
+            BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
+            opencv_imgcodecs.imencode(".jpg", frameMat, encodedData);
+            PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
+            encodedData.close();
+         }
+         case NVJPEG ->
+         {
+            BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
+            if (cudajpegProcessor != null)
+               cudajpegProcessor.encodeBGR(frameMat, encodedData);
+            PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
+            encodedData.close();
+         }
+         case PNG ->
+         {
+            BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
+            opencv_imgcodecs.imencode(".png", frameMat, encodedData);
+            PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
+            encodedData.close();
+         }
       }
 
       // Pack the image message meta data
       frame.packImageMessageMetaData(imageMessage);
-
-      if (frame.getPixelFormat() == PixelFormat.GRAY16)
-         System.out.println("Publishing depth????");
 
       // Send the message
       publisher.publish(imageMessage);
