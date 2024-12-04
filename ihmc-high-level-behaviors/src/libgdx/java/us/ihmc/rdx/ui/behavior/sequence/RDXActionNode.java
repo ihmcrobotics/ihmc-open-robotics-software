@@ -109,8 +109,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          }
          else
          {
-            int executeAfterActionIndex = state.calculateExecuteAfterActionIndex(actionSequence.getActionChildren());
-            ActionNodeState<?> executeAfterAction = actionSequence.getActionChildren().get(executeAfterActionIndex);
+            ActionNodeState<?> executeAfterAction = state.findExecuteAfterAction();
             selectedText = executeAfterAction.getDefinition().getName();
          }
 

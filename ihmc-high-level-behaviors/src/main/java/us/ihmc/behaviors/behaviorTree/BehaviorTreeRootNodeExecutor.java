@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -11,6 +12,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 {
    private final BehaviorTreeRootNodeState state;
    private final BehaviorTreeRootNodeDefinition definition;
+   private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
 
@@ -35,6 +37,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
+      idToNodeMap.clear();
       actionChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
@@ -56,8 +59,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int j = i - 1;
          for (; j >= 0; j--)
          {
-            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(getState().getActionChildren());
-            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex();
+            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex();
             if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
             {
                state.getActionChildren().get(i).setConcurrencyRank(2);
@@ -77,7 +80,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }
-         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex)
+         else if (state.getActionChildren().get(i).calculateExecuteAfterActionIndex() < executionNextIndex)
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }
@@ -127,6 +130,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    public void updateActionSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
+      idToNodeMap.put(node.getState().getID(), node);
+
       for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
          if (child instanceof ActionNodeExecutor<?, ?> actionNode)
@@ -137,10 +142,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                currentlyExecutingActions.add(actionNode);
             }
          }
-         else
-         {
-            updateActionSubtree(child);
-         }
+
+         updateActionSubtree(child);
       }
    }
 
@@ -175,7 +178,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       if (state.getConcurrencyEnabled())
       {
-         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex(getState().getActionChildren());
+         int executeAfterActionIndex = nextNodeToExecute.getState().calculateExecuteAfterActionIndex();
 
          if (executeAfterActionIndex < 0) // Execute after beginning
          {
@@ -200,6 +203,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private boolean isEndOfSequence()
    {
       return state.getExecutionNextIndex() >= actionChildren.size();
+   }
+   
+   public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 
    public List<ActionNodeExecutor<?, ?>> getActionChildren()
