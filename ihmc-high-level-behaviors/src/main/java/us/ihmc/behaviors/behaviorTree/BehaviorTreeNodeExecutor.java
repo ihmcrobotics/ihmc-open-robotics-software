@@ -38,7 +38,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    {
       getState().setIsActive(false);
 
-      for (BehaviorTreeNodeExecutor child : children)
+      for (BehaviorTreeNodeExecutor<?, ?> child : children)
       {
          child.clock();
       }
