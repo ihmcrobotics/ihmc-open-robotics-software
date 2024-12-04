@@ -17,6 +17,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
@@ -40,6 +41,9 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand();
    private final WholeBodyControllerCore controllerCore;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
+
+   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("WBCCThreadControllerCoreTimer", 1.0, registry);
+
 
    // This constructor has similar role to the getController of @HighLevelHumanoidControllerFactory
 
@@ -108,7 +112,9 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
          // But WholeBodyControllerCore updates the joint input here.
          // So, the output of other highLevelStates should be called in here to be delivered to copyJointDesiredsToJoints
          controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+         controllerCoreTimer.startMeasurement();
          controllerCore.compute();
+         controllerCoreTimer.stopMeasurement();
       }
       catch (Exception e)
       {
