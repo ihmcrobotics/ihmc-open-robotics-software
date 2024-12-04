@@ -12,8 +12,8 @@ import java.util.List;
 
 public class ControllerTask extends HumanoidRobotControlTask
 {
-   protected final CrossRobotCommandResolver controllerResolver;
-   protected final CrossRobotCommandResolver masterResolver;
+   protected CrossRobotCommandResolver controllerResolver;
+   protected CrossRobotCommandResolver masterResolver;
 
    protected final AvatarControllerThreadInterface controllerThread;
 

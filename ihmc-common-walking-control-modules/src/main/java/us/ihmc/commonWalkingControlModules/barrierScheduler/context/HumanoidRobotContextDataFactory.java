@@ -23,11 +23,6 @@ public class HumanoidRobotContextDataFactory
    protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
    protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    protected final RequiredFactoryField<SensorDataContext> sensorDataContext = new RequiredFactoryField<>("sensorDataContext");
-   protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> wbccJointDesiredOutputList = new RequiredFactoryField<>(
-         "wholeBodyControllerCoreJointDesiredOutputList");
-   protected final RequiredFactoryField<ControllerCoreOutputDataHolder> controllerCoreOutputDataHolder = new RequiredFactoryField<>("controllerCoreDataHolder");
-   protected final RequiredFactoryField<ControllerCoreCommandDataHolder> controllerCoreCommandDataHolder = new RequiredFactoryField<>(
-         "controllerCoreCommandDataHolder");
 
    public HumanoidRobotContextData createHumanoidRobotContextData()
    {
@@ -75,20 +70,5 @@ public class HumanoidRobotContextDataFactory
    public void setSensorDataContext(SensorDataContext value)
    {
       sensorDataContext.set(value);
-   }
-
-   public void setWBCCJointDesiredOutputList(LowLevelOneDoFJointDesiredDataHolder value)
-   {
-      wbccJointDesiredOutputList.set(value);
-   }
-
-   public void setControllerCoreOutputDataHolder(ControllerCoreOutputDataHolder value)
-   {
-      controllerCoreOutputDataHolder.set(value);
-   }
-
-   public void setControllerCoreCommandDataHolder(ControllerCoreCommandDataHolder value)
-   {
-      controllerCoreCommandDataHolder.set(value);
    }
 }

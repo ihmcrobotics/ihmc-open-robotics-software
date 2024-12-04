@@ -1,5 +1,6 @@
 package us.ihmc.avatar;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.MPCCrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -9,8 +10,10 @@ import java.util.List;
 
 public class WholeBodyControllerCoreTask extends ControllerTask
 {
-   protected final List<Runnable> postWholeBodyControllerCoreCallbacks = new ArrayList<>();
+   protected MPCCrossRobotCommandResolver controllerResolver;
+   protected MPCCrossRobotCommandResolver masterResolver;
 
+   protected final List<Runnable> postWholeBodyControllerCoreCallbacks = new ArrayList<>();
    protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    public WholeBodyControllerCoreTask(String prefix,
@@ -20,6 +23,8 @@ public class WholeBodyControllerCoreTask extends ControllerTask
                                       FullHumanoidRobotModel masterFullRobotModel)
    {
       super(prefix, wholeBodyControllerThread, divisor, schedulerDt, masterFullRobotModel);
+      controllerResolver = new MPCCrossRobotCommandResolver(wholeBodyControllerThread.getFullRobotModel());
+      masterResolver = new MPCCrossRobotCommandResolver(masterFullRobotModel);
    }
 
    @Override
@@ -42,21 +47,22 @@ public class WholeBodyControllerCoreTask extends ControllerTask
       timer.stop();
    }
 
-   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
+   @Override
+   protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
       AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread = (AvatarMPCWholeBodyControllerCoreThread) controllerThread;
-      MPCCrossRobotCommandResolver masterResolver = (MPCCrossRobotCommandResolver) this.masterResolver;
-      masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(wholeBodyControllerCoreThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataWholeBodyControllerCore(wholeBodyControllerCoreThread.getHumanoidRobotContextData(),
+                                                                            (HumanoidRobotMPCContextData) masterContext);
    }
 
-   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
+   @Override
+   protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
       AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread = (AvatarMPCWholeBodyControllerCoreThread) this.controllerThread;
-      MPCCrossRobotCommandResolver wholeBodyControllerCoreResolver = (MPCCrossRobotCommandResolver) this.controllerResolver;
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataEstimator(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
-      wholeBodyControllerCoreResolver.resolveHumanoidRobotContextDataController(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataController(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
    }
 
    @Override

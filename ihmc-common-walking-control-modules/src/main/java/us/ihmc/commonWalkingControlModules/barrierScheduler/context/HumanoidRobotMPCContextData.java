@@ -11,7 +11,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,64 +20,10 @@ import java.util.List;
 public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 {
    /**
-    * Serves to synchronize the time across threads. Set by the scheduler thread.
-    */
-   private long timestamp = Long.MIN_VALUE;
-
-   /**
-    * Serves to keep track of skipped ticks. Set by the scheduler thread.
-    */
-   private long schedulerTick = Long.MIN_VALUE;
-
-   /**
-    * The robot measurements. Set by the scheduler thread.
-    */
-   private final SensorDataContext sensorDataContext;
-
-   /**
-    * Serves to inform the controller that the estimator ran and populated the estimated values in this
-    * context. Set by the estimator.
-    */
-   private boolean estimatorRan = false;
-
-   /**
-    * Estimated state of the robot. Set by the estimator.
-    */
-   private final HumanoidRobotContextJointData processedJointData;
-
-   /**
-    * The processed force sensor data. Set by the estimator.
-    */
-   private final ForceSensorDataHolder forceSensorDataHolder;
-   /**
-    * The processed center of mass state. Set by the estimator.
-    */
-   private final CenterOfMassDataHolder centerOfMassDataHolder;
-
-   /**
-    * Serves to inform the estimator that the controller ran and populated the desired values in this
-    * context. Set by the controller.
-    */
-   private boolean controllerRan = false;
-   /**
     * Serves to inform the controller and estimator that the wholeBodyControllerCore ran and populated the desired values in
     * this context. Set by the wholeBodyControllerCore
     */
    private boolean wholeBodyControllerCoreRan = false;
-   /**
-    * Serves to inform the estimator and controller that the perception ran. Set by the perception.
-    */
-   private boolean perceptionRan = false;
-
-   /**
-    * The controller desired center of pressure. Set by the controller.
-    */
-   private final CenterOfPressureDataHolder centerOfPressureDataHolder;
-
-   /**
-    * The motion status of the robot. Set by the controller.
-    */
-   private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    /**
     * The output of the wholebodyControllerCore. Set by the wholebodyControllerCore thread.
@@ -86,25 +31,19 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    private final ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder;
 
    /**
-    * The desired joint data to be set on the robot. Set by the controller.
-    */
-   private final LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
-   /**
     * The output joint data from the WBCC. set by the WholeBodyController.
     * TODO This will be deleted after finishing moving WBCC from controllerThread to WBCCThread.
     */
    private final LowLevelOneDoFJointDesiredDataHolder wholeBodyControllerCoreDesiredOutPutList;
+
+   /**
+    * TODO: doc what this is
+    */
    private final ControllerCoreCommandDataHolder controllerCoreCommandDataHolder;
 
    public HumanoidRobotMPCContextData()
    {
-      processedJointData = new HumanoidRobotContextJointData();
-      forceSensorDataHolder = new ForceSensorDataHolder();
-      centerOfMassDataHolder = new CenterOfMassDataHolder();
-      centerOfPressureDataHolder = new CenterOfPressureDataHolder();
-      robotMotionStatusHolder = new RobotMotionStatusHolder();
-      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
-      sensorDataContext = new SensorDataContext();
+      super();
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder();
       controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(null);
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
@@ -121,13 +60,13 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
                                       ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                       ControllerCoreOutputDataHolder controllerCoreOutPutDataHolder)
    {
-      this.processedJointData = processedJointData;
-      this.forceSensorDataHolder = forceSensorDataHolder;
-      this.centerOfMassDataHolder = centerOfMassDataHolder;
-      this.centerOfPressureDataHolder = centerOfPressureDataHolder;
-      this.robotMotionStatusHolder = robotMotionStatusHolder;
-      this.jointDesiredOutputList = jointDesiredOutputList;
-      this.sensorDataContext = sensorDataContext;
+      super(processedJointData,
+            forceSensorDataHolder,
+            centerOfMassDataHolder,
+            centerOfPressureDataHolder,
+            robotMotionStatusHolder,
+            jointDesiredOutputList,
+            sensorDataContext);
       this.wholeBodyControllerCoreDesiredOutPutList = wbccJointDesiredOutputList;
       this.controllerCoreOutPutDataHolder = controllerCoreOutPutDataHolder;
       this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
@@ -135,13 +74,7 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 
    public HumanoidRobotMPCContextData(FullHumanoidRobotModel fullRobotModel)
    {
-      processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
-      centerOfMassDataHolder = new CenterOfMassDataHolder();
-      centerOfPressureDataHolder = new CenterOfPressureDataHolder(fullRobotModel);
-      robotMotionStatusHolder = new RobotMotionStatusHolder();
-      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
-      sensorDataContext = new SensorDataContext(fullRobotModel);
+      super(fullRobotModel);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(fullRobotModel.getControllableOneDoFJoints());
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
@@ -149,46 +82,10 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
 
    public HumanoidRobotMPCContextData(List<OneDoFJointBasics> joints)
    {
-      processedJointData = new HumanoidRobotContextJointData();
-      forceSensorDataHolder = new ForceSensorDataHolder();
-      centerOfMassDataHolder = new CenterOfMassDataHolder();
-      centerOfPressureDataHolder = new CenterOfPressureDataHolder();
-      robotMotionStatusHolder = new RobotMotionStatusHolder();
-      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
-      sensorDataContext = new SensorDataContext(joints);
+      super(joints);
       wholeBodyControllerCoreDesiredOutPutList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       controllerCoreOutPutDataHolder = new ControllerCoreOutputDataHolder(joints.toArray(new OneDoFJointBasics[0]));
       controllerCoreCommandDataHolder = new ControllerCoreCommandDataHolder();
-   }
-
-   public HumanoidRobotContextJointData getProcessedJointData()
-   {
-      return processedJointData;
-   }
-
-   public ForceSensorDataHolder getForceSensorDataHolder()
-   {
-      return forceSensorDataHolder;
-   }
-
-   public CenterOfMassDataHolder getCenterOfMassDataHolder()
-   {
-      return centerOfMassDataHolder;
-   }
-
-   public CenterOfPressureDataHolder getCenterOfPressureDataHolder()
-   {
-      return centerOfPressureDataHolder;
-   }
-
-   public RobotMotionStatusHolder getRobotMotionStatusHolder()
-   {
-      return robotMotionStatusHolder;
-   }
-
-   public LowLevelOneDoFJointDesiredDataHolder getJointDesiredOutputList()
-   {
-      return jointDesiredOutputList;
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getWholeBodyControllerCoreDesiredOutPutList()
@@ -199,11 +96,6 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    public ControllerCoreOutputDataHolder getControllerCoreOutPutDataHolder()
    {
       return controllerCoreOutPutDataHolder;
-   }
-
-   public SensorDataContext getSensorDataContext()
-   {
-      return sensorDataContext;
    }
 
    public ControllerCoreCommandDataHolder getControllerCoreCommandDataHolder()
@@ -221,9 +113,8 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
    public void copyFrom(HumanoidRobotContextData src)
    {
       super.copyFrom(src);
-      if (src instanceof HumanoidRobotMPCContextData)
+      if (src instanceof HumanoidRobotMPCContextData srcMPC)
       {
-         HumanoidRobotMPCContextData srcMPC = (HumanoidRobotMPCContextData) src;
          wholeBodyControllerCoreRan = srcMPC.wholeBodyControllerCoreRan;
          wholeBodyControllerCoreDesiredOutPutList.set(srcMPC.wholeBodyControllerCoreDesiredOutPutList);
          controllerCoreOutPutDataHolder.set(srcMPC.controllerCoreOutPutDataHolder);
@@ -249,41 +140,18 @@ public class HumanoidRobotMPCContextData extends HumanoidRobotContextData
       {
          return true;
       }
-      else if (obj instanceof HumanoidRobotMPCContextData other)
+      else if (obj instanceof HumanoidRobotMPCContextData)
       {
-         if (timestamp != other.timestamp)
-            return false;
-         if (schedulerTick != other.schedulerTick)
-            return false;
-         if (controllerRan ^ other.controllerRan)
-            return false;
-         if (estimatorRan ^ other.estimatorRan)
-            return false;
-         if (perceptionRan ^ other.perceptionRan)
-            return false;
-         if (wholeBodyControllerCoreRan ^ other.wholeBodyControllerCoreRan)
-            return false;
-         if (!processedJointData.equals(other.processedJointData))
-            return false;
-         if (!forceSensorDataHolder.equals(other.forceSensorDataHolder))
-            return false;
-         if (!centerOfMassDataHolder.equals(other.centerOfMassDataHolder))
-            return false;
-         if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
-            return false;
-         if (!robotMotionStatusHolder.equals(other.robotMotionStatusHolder))
-            return false;
-         if (!jointDesiredOutputList.equals(other.jointDesiredOutputList))
-            return false;
-         if (!sensorDataContext.equals(other.sensorDataContext))
+         HumanoidRobotMPCContextData other = (HumanoidRobotMPCContextData) obj;
+         if (wholeBodyControllerCoreRan != other.wholeBodyControllerCoreRan)
             return false;
          if (!wholeBodyControllerCoreDesiredOutPutList.equals(other.wholeBodyControllerCoreDesiredOutPutList))
             return false;
-         if (!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
-            return false;
          if (!controllerCoreOutPutDataHolder.equals(other.controllerCoreOutPutDataHolder))
             return false;
-         return true;
+         if (!controllerCoreCommandDataHolder.equals(other.controllerCoreCommandDataHolder))
+            return false;
+         return super.equals(other);
       }
       else
       {
