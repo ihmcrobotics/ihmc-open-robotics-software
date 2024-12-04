@@ -25,7 +25,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
     * Set to true to enable compression to JPEG (using nvJPEG) before publishing the ImageMessage.
     * Introduces GPU overhead and more latency, but useful for recording rosbags.
     */
-   private static final boolean COMPRESS_USING_NVJPEG = true;
+   private static final boolean COMPRESS_USING_NVJPEG = false;
 
    private final ROS2PublisherBasics<ImageMessage> publisher;
    private final ROS2SRTVideoSubscriber subscriber;
