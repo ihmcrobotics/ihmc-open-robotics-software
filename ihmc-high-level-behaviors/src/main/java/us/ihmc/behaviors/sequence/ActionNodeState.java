@@ -2,6 +2,8 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
@@ -292,7 +294,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return isExecuting.getValue();
    }
 
-   public int calculateExecuteAfterActionIndex(List<ActionNodeState<?>> actionStateChildren)
+   public int calculateExecuteAfterActionIndex()
    {
       if (definition.getExecuteAfterBeginning().getValue())
       {
@@ -300,19 +302,26 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       }
       else if (!definition.getExecuteAfterPrevious().getValue())
       {
-         long executeAfterID = definition.getExecuteAfterNodeID().getValue();
-         for (int j = actionIndex - 1; j >= 0; j--)
-         {
-            ActionNodeState<?> action = actionStateChildren.get(j);
-            if (action.getID() == executeAfterID)
-            {
-               return action.getActionIndex();
-            }
-         }
+         ActionNodeState<?> executeAfterAction = findExecuteAfterAction();
 
-         LogTools.error("Action ID not found: {}", executeAfterID);
+         if (executeAfterAction != null)
+            return executeAfterAction.getActionIndex();
       }
 
       return actionIndex - 1; // previous
+   }
+
+   public ActionNodeState<?> findExecuteAfterAction()
+   {
+      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+
+      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(executeAfterID) instanceof ActionNodeState<?> executeAfterAction)
+      {
+         return executeAfterAction;
+      }
+
+      LogTools.error("Action ID not found: {}", executeAfterID);
+
+      return null;
    }
 }

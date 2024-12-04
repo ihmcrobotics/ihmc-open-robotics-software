@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
@@ -20,6 +21,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final BehaviorTreeRootNodeState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
+   private final TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
@@ -44,6 +46,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       super.update();
 
+      idToNodeMap.clear();
       actionChildren.clear();
       nextForExecutionActions.clear();
       currentlyExecutingActions.clear();
@@ -57,6 +60,8 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
    public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
    {
+      idToNodeMap.put(node.getState().getID(), node);
+
       for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
       {
          if (child instanceof RDXActionNode<?, ?> actionNode)
@@ -72,10 +77,8 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
                currentlyExecutingActions.add(actionNode);
             }
          }
-         else
-         {
-            updateActionSubtree(child);
-         }
+
+         updateActionSubtree(child);
       }
    }
 
@@ -177,5 +180,10 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
       super.renderNodeSettingsWidgets();
+   }
+
+   public TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> getIDToNodeMap()
+   {
+      return idToNodeMap;
    }
 }
