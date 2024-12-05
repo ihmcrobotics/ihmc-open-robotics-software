@@ -6,49 +6,54 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.SwapReference;
 
 public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<ImageMessage>
 {
-   private final String titleBeforeAdditions;
    private final ROS2Topic<ImageMessage> topic;
-   private RealtimeROS2Node realtimeROS2Node;
+   private final ROS2Node ros2Node;
+   @Nullable
+   private ROS2Subscription<ImageMessage> subscription;
    private final ImageMessageDecoder decoder = new ImageMessageDecoder();
    private final SwapReference<ImageMessage> imageMessageSwapReference = new SwapReference<>(new ImageMessage(), new ImageMessage());
-   private final SampleInfo sampleInfo = new SampleInfo();
    private final Mat decompressedImage = new Mat();
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
 
-   public RDXROS2ImageMessageVisualizer(String title, ROS2Topic<ImageMessage> topic)
+   public RDXROS2ImageMessageVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
    {
       super(title, topic.getName(), false);
-      titleBeforeAdditions = title;
       this.topic = topic;
+
+      this.ros2Node = ros2Node;
 
       setActivenessChangeCallback(isActive ->
       {
-         if (isActive && realtimeROS2Node == null)
+         if (isActive && subscription == null)
             subscribe();
-         else if (!isActive && realtimeROS2Node != null)
+         else if (!isActive && subscription != null)
             unsubscribe();
       });
    }
 
    private void subscribe()
    {
-      this.realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
-      realtimeROS2Node.createSubscription(topic, this::queueRenderImage);
-      realtimeROS2Node.spin();
+      if (subscription != null)
+         subscription.remove();
+      subscription = ros2Node.createSubscription(topic, subscriber -> queueRenderImage(subscriber.takeNextData()));
+   }
+
+   private void unsubscribe()
+   {
+      if (subscription != null)
+         subscription.remove();
+      subscription = null;
    }
 
    @Override
@@ -66,7 +71,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       return getOpenCVVideoVisualizer().getPanel();
    }
 
-   private void queueRenderImage(Subscriber<ImageMessage> subscriber)
+   private void queueRenderImage(ImageMessage imageMessage)
    {
       // A new message arrived, update the receive-frequency text
       getFrequency().ping();
@@ -74,7 +79,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       // Pack the message data into thread 1's image message object
       ImageMessage imageMessageA = imageMessageSwapReference.getForThreadOne();
       imageMessageA.getData().resetQuick();
-      subscriber.takeNextData(imageMessageA, sampleInfo);
+      imageMessageA.set(imageMessage);
 
       // Update some message statistics
       messageSizeReadout.update(imageMessageA.getData().size());
@@ -125,15 +130,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       }
 
       getOpenCVVideoVisualizer().renderImGuiWidgets();
-   }
-
-   private void unsubscribe()
-   {
-      if (realtimeROS2Node != null)
-      {
-         realtimeROS2Node.destroy();
-         realtimeROS2Node = null;
-      }
    }
 
    @Override

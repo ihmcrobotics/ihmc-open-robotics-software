@@ -25,21 +25,25 @@ public class RDXZED2DisplayDemo
          public void create()
          {
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
+                                                                                                           ros2Node,
                                                                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
+                                                                                                            ros2Node,
                                                                                                             PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
             zed2RightColorImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2RightColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth",
+                                                                                                       ros2Node,
                                                                                                        PerceptionAPI.ZED2_DEPTH);
             zed2DepthImageVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+                                                                                                                        ros2Node,
                                                                                                                         ros2Node,
                                                                                                                         PerceptionAPI.ZED2_DEPTH,
                                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(
