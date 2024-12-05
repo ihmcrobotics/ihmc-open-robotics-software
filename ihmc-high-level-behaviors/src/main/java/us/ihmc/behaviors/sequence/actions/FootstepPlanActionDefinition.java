@@ -77,7 +77,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
       plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, true);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
-      plannerParameters = new BehaviorStoredPropertySetDefinition(this, initialPlannerParameters);
+      plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", initialPlannerParameters);
    }
 
    @Override

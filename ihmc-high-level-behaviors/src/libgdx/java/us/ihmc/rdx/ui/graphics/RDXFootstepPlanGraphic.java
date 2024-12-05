@@ -211,6 +211,13 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       }
       buildMeshAndCreateModelInstance = () ->
       {
+         // First, dispose last models
+         for (RDX3DSituatedText textRenderable : textRenderables)
+            textRenderable.dispose();
+
+         if (lastModel != null)
+            lastModel.dispose();
+
          // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
          textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
@@ -239,9 +246,6 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
                textRenderables.add(footstepListDescriptionText);
             }
          }
-
-         if (lastModel != null)
-            lastModel.dispose();
 
          lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
          LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);

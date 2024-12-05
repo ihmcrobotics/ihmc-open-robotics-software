@@ -64,10 +64,6 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    public void create()
    {
       createdYet = true;
-      if (getPanel() != null)
-      {
-         setActive(getPanel().getIsShowing().get());
-      }
    }
 
    protected void renderMenuEntry(boolean collapse, boolean renderRightContext)
