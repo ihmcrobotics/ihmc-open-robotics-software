@@ -7,19 +7,13 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
-import javax.imageio.ImageIO;
-
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.ros.node.NodeConfiguration;
 
 import geometry_msgs.Point;
