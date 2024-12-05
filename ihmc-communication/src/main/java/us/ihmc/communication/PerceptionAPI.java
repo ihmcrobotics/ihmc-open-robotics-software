@@ -20,6 +20,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Set;
+import java.util.UUID;
 
 public final class PerceptionAPI
 {
@@ -292,6 +293,11 @@ public final class PerceptionAPI
    }
 
    /* VIDEO STREAMING STUFF */
+   /**
+    * SRT_RELAY_INSTANCE_ID is a randomly generated ID for SRT image relay topics. The idea is you want each instance of a process to have a unique ID
+    * in the topic names so processes won't ever try to republish to each other.
+    */
+   private static final String SRT_RELAY_INSTANCE_ID = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
    private static final ROS2Topic<?> STREAMING_MODULE = BEST_EFFORT.withModule(STREAMING_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
 
@@ -299,17 +305,22 @@ public final class PerceptionAPI
    private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
    public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix(SRT_RELAY_INSTANCE_ID + "/color");
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix(SRT_RELAY_INSTANCE_ID + "/depth");
 
    // ZED
    private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_RIGHT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_right");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_DEPTH_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("depth");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES_SRT = new SideDependentList<>(ZED2_COLOR_IMAGES.get(RobotSide.LEFT).withSuffix(SRT_RELAY_INSTANCE_ID + "/color_left"),
+                                                                                                                  ZED2_COLOR_IMAGES.get(RobotSide.RIGHT).withSuffix(SRT_RELAY_INSTANCE_ID + "/color_right"));
+   public static final ROS2Topic<ImageMessage> ZED2_DEPTH_SRT = ZED2_DEPTH.withSuffix(SRT_RELAY_INSTANCE_ID + "/depth");
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
-         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE, false),
-                  new ROS2SRTStreamTopicPair(SRT_REALSENSE_DEPTH_STREAM_STATUS, D455_DEPTH_IMAGE, true),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.LEFT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES.get(RobotSide.RIGHT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_DEPTH_STREAM_STATUS, ZED2_DEPTH, true));
+         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
+                  new ROS2SRTStreamTopicPair(SRT_REALSENSE_DEPTH_STREAM_STATUS, D455_DEPTH_IMAGE_SRT, true),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_DEPTH_STREAM_STATUS, ZED2_DEPTH_SRT, true));
 }

@@ -46,10 +46,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    private final ImInt levelOfColorDetail = new ImInt(0);
    private boolean subscribed = false;
 
-   // Separate depth and color ROS2Nodes in-case depth and color need to use different transport modes.
-   // E.g. color may come from a local re-published ImageMessage which derives from a video stream.
-   private final ROS2Node depthROS2Node;
-   private final ROS2Node colorROS2Node;
+   private final ROS2Node ros2Node;
 
    private final RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel;
    private final RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel;
@@ -70,15 +67,13 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
-                                             ROS2Node depthROS2Node,
-                                             ROS2Node colorROS2Node,
+                                             ROS2Node ros2Node,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic)
    {
       super(title);
       titleBeforeAdditions = title;
-      this.depthROS2Node = depthROS2Node;
-      this.colorROS2Node = colorROS2Node;
+      this.ros2Node = ros2Node;
       depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
       colorChannel = new RDXROS2ColoredPointCloudVisualizerColorChannel(colorTopic);
 
@@ -94,8 +89,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    private void subscribe()
    {
       subscribed = true;
-      depthChannel.subscribe(depthROS2Node, imageMessagesSyncObject);
-      colorChannel.subscribe(colorROS2Node, imageMessagesSyncObject);
+      depthChannel.subscribe(ros2Node, imageMessagesSyncObject);
+      colorChannel.subscribe(ros2Node, imageMessagesSyncObject);
    }
 
    @Override

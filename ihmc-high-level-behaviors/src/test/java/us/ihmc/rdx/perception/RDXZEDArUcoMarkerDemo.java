@@ -68,7 +68,6 @@ public class RDXZEDArUcoMarkerDemo
       baseUI = new RDXBaseUI("ArUco Marker Demo");
       pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED Point Cloud",
                                                                     ros2Node,
-                                                                    ros2Node,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
       perceptionVisualizersPanel = new RDXPerceptionVisualizersPanel();

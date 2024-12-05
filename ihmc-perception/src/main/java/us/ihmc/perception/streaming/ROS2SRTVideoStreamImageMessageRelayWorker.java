@@ -38,13 +38,13 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
    private final ImageMessage imageMessage;
    private long frameSequenceNumber = 0L;
 
-   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node visualizerNode, ROS2Node otherNode, ROS2SRTStreamTopicPair streamTopicPair)
+   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node loopbackPublisherNode, ROS2Node subscriberNode, ROS2SRTStreamTopicPair streamTopicPair)
    {
-      this(visualizerNode, otherNode, streamTopicPair, CompressionType.UNCOMPRESSED);
+      this(loopbackPublisherNode, subscriberNode, streamTopicPair, CompressionType.UNCOMPRESSED);
    }
 
-   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node visualizerNode,
-                                                    ROS2Node otherNode,
+   public ROS2SRTVideoStreamImageMessageRelayWorker(ROS2Node loopbackPublisherNode,
+                                                    ROS2Node subscriberNode,
                                                     ROS2SRTStreamTopicPair streamTopicPair,
                                                     CompressionType compressionType)
    {
@@ -56,8 +56,8 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       imageMessage.setCameraModel(CameraModel.PINHOLE.toByte());
 
       // Create publisher and subscriber using two separate nodes as publisher should ideally only publish on loopback.
-      publisher = visualizerNode.createPublisher(streamTopicPair.imageMessageTopic());
-      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(otherNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
+      publisher = loopbackPublisherNode.createPublisher(streamTopicPair.imageMessageTopic());
+      subscriber = new ROS2SRTVideoSubscriber(new ROS2Helper(subscriberNode), streamTopicPair.streamStatusTopic(), outputPixelFormat);
       subscriber.addNewFrameConsumer(this::republishFrameAsImageMessage);
       subscriber.subscribe();
 

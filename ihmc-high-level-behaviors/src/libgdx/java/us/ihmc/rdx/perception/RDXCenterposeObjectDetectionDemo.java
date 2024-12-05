@@ -71,7 +71,6 @@ public class RDXCenterposeObjectDetectionDemo
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         ros2Node,
-                                                                                                                        ros2Node,
                                                                                                                         PerceptionAPI.ZED2_DEPTH,
                                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(
                                                                                                                               RobotSide.LEFT));
