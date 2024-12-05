@@ -14,16 +14,22 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -86,6 +92,13 @@ public class WalkingControllerState extends HighLevelControllerState
       else
          kinematicsSimulationVirtualGroundReactionManager = null;
 
+      /////
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerCoreOutputCoP.put(robotSide, new FramePoint2D());
+         angularMomentumAboutFootInWorld.put(robotSide, new YoFrameVector3D(robotSide.getLowerCaseName() + "AngularMomentumAboutFootInWorldController_CoreOutput", ReferenceFrame.getWorldFrame(), registry));
+      }
+
       registry.addChild(walkingController.getYoVariableRegistry());
    }
 
@@ -100,6 +113,13 @@ public class WalkingControllerState extends HighLevelControllerState
          kinematicsSimulationVirtualGroundReactionManager.initialize();
    }
 
+   private final SideDependentList<FramePoint2D> controllerCoreOutputCoP = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector3D> angularMomentumAboutFootInWorld = new SideDependentList<>();
+   private final FramePoint3D tempVelocity = new FramePoint3D();
+   private final FramePoint3D tempCentroidalMomentum = new FramePoint3D();
+   private final FramePoint3D tempCoP = new FramePoint3D();
+   private final FramePoint3D tempCoM = new FramePoint3D();
+   private final FramePoint3D tempAngularMomentumAboutFoot = new FramePoint3D();
    @Override
    public void doAction(double timeInState)
    {
@@ -151,6 +171,36 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCoreTimer.startMeasurement();
       controllerCore.compute(controllerCoreCommand);
       controllerCoreTimer.stopMeasurement();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFootContactState(robotSide).inContact())
+         {
+            controllerCore.getControllerCoreOutput().getDesiredCenterOfPressure(controllerCoreOutputCoP.get(robotSide), controllerToolbox.getContactableFeet().get(robotSide).getRigidBody());
+
+            controllerCoreOutputCoP.get(robotSide).changeFrameAndProjectToXYPlane(controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide));
+            tempCoP.setIncludingFrame(controllerCoreOutputCoP.get(robotSide), 0.0);
+
+            tempCoM.setToZero(controllerToolbox.getCenterOfMassFrame());
+            tempCoM.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide));
+
+            double height = tempCoM.getZ() - tempCoP.getZ();
+
+            tempVelocity.setIncludingFrame(controllerToolbox.getCenterOfMassVelocity());
+            tempVelocity.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide));
+
+            tempAngularMomentumAboutFoot.setIncludingFrame(tempVelocity);
+            tempAngularMomentumAboutFoot.scale(height * controllerToolbox.getTotalMass(), height * controllerToolbox.getTotalMass(), 1.0);
+            tempAngularMomentumAboutFoot.changeFrame(ReferenceFrame.getWorldFrame());
+
+            tempCentroidalMomentum.setIncludingFrame(controllerToolbox.getAngularMomentum());
+            tempCentroidalMomentum.changeFrame(ReferenceFrame.getWorldFrame());
+
+            angularMomentumAboutFootInWorld.get(robotSide).setToZero();
+            angularMomentumAboutFootInWorld.get(robotSide).add(tempAngularMomentumAboutFoot);
+            angularMomentumAboutFootInWorld.get(robotSide).add(tempCentroidalMomentum);
+         }
+      }
 
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.computeAchievedCMP();

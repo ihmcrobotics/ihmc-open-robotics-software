@@ -215,14 +215,14 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          pendulumBase.get(robotSide).changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
          calculateNetPendulumBase();
 
-         if (inDoubleSupport.getBooleanValue())
-            calculate(touchdownCalculator.get(robotSide),
-                      robotSide,
-                      getTransferDuration(robotSide),
-                      pendulumBase.get(robotSide.getOppositeSide()),
-                      netPendulumBase,
-                      inDoubleSupport.getBooleanValue(),
-                      desiredTouchdownPositions.get(robotSide));
+//         if (inDoubleSupport.getBooleanValue())
+//            calculate(touchdownCalculator.get(robotSide),
+//                      robotSide,
+//                      getTransferDuration(robotSide),
+//                      pendulumBase.get(robotSide.getOppositeSide()),
+//                      netPendulumBase,
+//                      inDoubleSupport.getBooleanValue(),
+//                      desiredTouchdownPositions.get(robotSide));
       }
 
       @Override
@@ -235,14 +235,14 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
          double timeToReachGoal = getTransferDuration(robotSide) - timeInState;
          timeToReachGoal = MathTools.clamp(timeToReachGoal, 0.0, getTransferDuration(robotSide));
 
-         if (inDoubleSupport.getBooleanValue() && footStateMachines.get(robotSide.getOppositeSide()).getTimeInCurrentState() > timeInState)
-            calculate(touchdownCalculator.get(robotSide),
-                      robotSide,
-                      timeToReachGoal,
-                      pendulumBase.get(robotSide.getOppositeSide()),
-                      netPendulumBase,
-                      inDoubleSupport.getBooleanValue(),
-                      desiredTouchdownPositions.get(robotSide));
+//         if (inDoubleSupport.getBooleanValue() && footStateMachines.get(robotSide.getOppositeSide()).getTimeInCurrentState() > timeInState)
+//            calculate(touchdownCalculator.get(robotSide),
+//                      robotSide,
+//                      timeToReachGoal,
+//                      pendulumBase.get(robotSide.getOppositeSide()),
+//                      netPendulumBase,
+//                      inDoubleSupport.getBooleanValue(),
+//                      desiredTouchdownPositions.get(robotSide));
       }
 
       @Override
@@ -358,6 +358,7 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
 
    private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
    private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();
+   private final FramePoint2D tempTouchdownPosition = new FramePoint2D();
 
    public void calculate(DynamicsBasedFootstepTouchdownCalculator touchdownCalculator,
                                 RobotSide swingSide,
@@ -368,13 +369,15 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
                                 FixedFramePoint2DBasics touchdownPositionToPack)
    {
       tempPendulumBase.setIncludingFrame(pendulumBase);
-      tempPendulumBase.changeFrame(centerOfMassControlZUpFrame);
+      tempPendulumBase.changeFrameAndProjectToXYPlane(centerOfMassControlZUpFrame);
 
       tempNetPendulumBase.setIncludingFrame(netPendulumBase);
-      tempNetPendulumBase.changeFrame(referenceFrames.getSoleZUpFrame(getTrailingSide()));
+      tempNetPendulumBase.changeFrameAndProjectToXYPlane(referenceFrames.getSoleZUpFrame(getTrailingSide()));
 
       touchdownCalculator.computeDesiredTouchdownPosition(swingSide.getOppositeSide(), timeToReachGoal, tempPendulumBase, tempNetPendulumBase, isInDoubleSupport);
-      touchdownPositionToPack.setMatchingFrame(touchdownCalculator.getDesiredTouchdownPosition2D());
+      tempTouchdownPosition.setIncludingFrame(touchdownCalculator.getDesiredTouchdownPosition2D());
+      tempTouchdownPosition.changeFrameAndProjectToXYPlane(touchdownPositionToPack.getReferenceFrame());
+      touchdownPositionToPack.set(tempTouchdownPosition);
    }
 
    private void calculateNetPendulumBase()
@@ -594,7 +597,6 @@ public class DynamicsBasedFootstepPlugin implements HumanoidSteppingPlugin
       return trailingSide;
    }
 
-   private final FramePoint2D tempTouchdownPosition = new FramePoint2D();
    public void getDesiredTouchdownPosition2D(RobotSide robotSide, FixedFramePoint2DBasics touchdownPositionToPack)
    {
       tempTouchdownPosition.setIncludingFrame(getDesiredTouchdownPosition2D(robotSide));

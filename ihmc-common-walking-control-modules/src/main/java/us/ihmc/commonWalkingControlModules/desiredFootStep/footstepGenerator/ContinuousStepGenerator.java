@@ -309,7 +309,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       double turnMaxAngleInward = parameters.getTurnMaxAngleInward();
       double turnMaxAngleOutward = parameters.getTurnMaxAngleOutward();
 
-      Vector2DReadOnly desiredVelocity = desiredVelocityProvider.getDesiredVelocity();
+      Vector2DReadOnly desiredVelocity = this.desiredVelocity;//desiredVelocityProvider.getDesiredVelocity();
       double desiredVelocityX = desiredVelocity.getX();
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
@@ -328,8 +328,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
       }
 
-      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+//      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
       this.desiredTurningVelocity.set(turningVelocity);
+
+      dynamicsBasedFootstepPlugin.get().update(time);
 
       int startingIndexToAdjust = footsteps.size();
 
@@ -344,7 +346,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          {
             if (i == startingIndexToAdjust)
             {
-               dynamicsBasedFootstepPlugin.get().update(time);
                dynamicsBasedFootstepPlugin.get().getDesiredTouchdownPosition2D(swingSide, nextFootstepPose2D.getPosition());
             }
             else

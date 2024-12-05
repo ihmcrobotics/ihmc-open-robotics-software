@@ -375,18 +375,18 @@ public class SwingState extends AbstractFootControlState
 
       computeAndPackTrajectory(timeInState);
 
-      if (workspaceLimiterControlModule != null)
-      {
-         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
-         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
-
-         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
-
-         desiredPose.getPosition().set(desiredAnklePosition);
-         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-         desiredPosition.setIncludingFrame(desiredPose.getPosition());
-      }
+//      if (workspaceLimiterControlModule != null)
+//      {
+//         desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
+//         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+//         desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
+//
+//         workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+//
+//         desiredPose.getPosition().set(desiredAnklePosition);
+//         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+//         desiredPosition.setIncludingFrame(desiredPose.getPosition());
+//      }
 
       if (yoSetDesiredVelocityToZero.getBooleanValue())
       {

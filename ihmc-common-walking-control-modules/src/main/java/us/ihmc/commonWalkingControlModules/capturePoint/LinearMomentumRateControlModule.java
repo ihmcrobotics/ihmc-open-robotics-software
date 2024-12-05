@@ -163,9 +163,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final SideDependentList<ContactableFoot> contactableFeet;
    private final WalkingControllerParameters walkingControllerParameters;
    private final double controlDt;
-   private final FramePoint2D leadingPendulumBase = new FramePoint2D();
-   private final FramePoint2D trailingPendulumBase = new FramePoint2D();
-   private final FramePoint2D alternateCoP = new FramePoint2D();
+   private final FramePoint3D leadingPendulumBase = new FramePoint3D();
+   private final FramePoint3D trailingPendulumBase = new FramePoint3D();
+   private final FramePoint3D alternateCoP = new FramePoint3D();
    private final WalkingMessageHandler walkingMessageHandler;
 
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -337,9 +337,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       if (transferDuration > 0.0)
          alpha = MathTools.clamp(leadingTimeInContact / transferDuration, 0.0, 1.0);
 
-      leadingPendulumBase.changeFrameAndProjectToXYPlane(worldFrame);
-      trailingPendulumBase.changeFrameAndProjectToXYPlane(worldFrame);
-      alternateCoP.changeFrameAndProjectToXYPlane(worldFrame);
+      leadingPendulumBase.changeFrame(worldFrame);
+      trailingPendulumBase.changeFrame(worldFrame);
+      alternateCoP.changeFrame(worldFrame);
       alternateCoP.interpolate(trailingPendulumBase, leadingPendulumBase, alpha);
    }
 
@@ -467,7 +467,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       FixedFramePoint2DBasics desiredCoPToUse = desiredCoP;
 
       if (useAlternateCoP.getBooleanValue())
-         desiredCoPToUse.setMatchingFrame(alternateCoP);
+         desiredCoPToUse.set(alternateCoP);
 
       yoDesiredCMP.set(desiredCMP);
       yoDesiredCoP.set(desiredCoPToUse);
@@ -475,7 +475,10 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       yoCenterOfMassVelocity.set(capturePointCalculator.getCenterOfMassVelocity());
       yoCapturePoint.set(capturePoint);
 
-      success = success && computeDesiredLinearMomentumRateOfChangeNew();
+      if (useAlternateCoP.getBooleanValue())
+         success = success && computeDesiredLinearMomentumRateOfChangeNew();
+      else
+         success = success && computeDesiredLinearMomentumRateOfChange();
 
       selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearX(!useCenterOfPressureCommandOnly.getValue());
@@ -658,15 +661,16 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       double totalMass = totalMassProvider.getValue();
       double desiredVerticalRateOfChange = totalMass * desiredCoMHeightAcceleration;
 
-      desiredPendulumBase.setIncludingFrame(desiredCoP, 0.0);
+      desiredPendulumBase.setIncludingFrame(alternateCoP);
       desiredPendulumBase.changeFrame(centerOfMassFrame);
+
       linearMomentumRateOfChange.setToZero();
       linearMomentumRateOfChange.setMatchingFrame(desiredPendulumBase);
       double weight = totalMass * Math.abs(gravityZ);
       double expectedVerticalForce = desiredVerticalRateOfChange + weight;
       linearMomentumRateOfChange.scale(expectedVerticalForce / linearMomentumRateOfChange.getZ());
       linearMomentumRateOfChange.subZ(weight);
-      linearMomentumRateOfChange.changeFrame(worldFrame);
+//      linearMomentumRateOfChange.changeFrame(worldFrame);
 
       return true;
    }
