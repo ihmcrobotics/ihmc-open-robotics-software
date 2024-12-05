@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
@@ -14,6 +15,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -119,6 +121,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
+
+   private final List<Listener<?>> footstepConsumptionListenerList = new ArrayList<>();
 
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
@@ -313,6 +317,10 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       checkForPause();
 
+      if (hasUpcomingFootsteps())
+         for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
+            footstepConsumptionListenerList.get(i).doListenerAction();
+
       updateVisualization();
    }
 
@@ -432,6 +440,16 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 //      }
 
 //      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
+   }
+
+   public void addFoostepConsumptionListener(Listener<?> listener)
+   {
+      footstepConsumptionListenerList.add(listener);
+   }
+
+   public interface Listener<S extends Settable<S>>
+   {
+      void doListenerAction();
    }
 
    public MomentumTrajectoryHandler getMomentumTrajectoryHandler()

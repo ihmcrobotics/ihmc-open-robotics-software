@@ -122,7 +122,7 @@ public class QuicksterFootstepProvider implements Updatable
                                                                  ReferenceFrame.getWorldFrame(),
                                                                  registry));
 
-         AppearanceDefinition pendulumBaseVizColor = robotSide == RobotSide.LEFT ? YoAppearance.DodgerBlue() : YoAppearance.Orange();
+         AppearanceDefinition pendulumBaseVizColor = robotSide == RobotSide.LEFT ? YoAppearance.Magenta() : YoAppearance.Green();
          pendulumBaseViz.put(robotSide, new YoGraphicPosition(robotSide.getLowerCaseName() + "PendulumBase" + variableNameSuffix,
                                                               pendulumBase3DInWorld.get(robotSide),
                                                               0.015,

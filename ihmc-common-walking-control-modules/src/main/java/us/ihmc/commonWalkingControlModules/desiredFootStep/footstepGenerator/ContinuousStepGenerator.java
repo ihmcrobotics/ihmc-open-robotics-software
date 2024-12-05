@@ -163,6 +163,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public enum CSGMode {STANDARD, QFP}
    private final YoEnum<CSGMode> csgMode = new YoEnum<>("csgMode", registry, CSGMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
+   private final YoBoolean updateFootstepContinuouslyThroughoutSwing = new YoBoolean("updateFootstepContinuouslyThroughoutSwingCSG", registry);
+   private final boolean updateFootstepContinuouslyThroughoutSwingDefault = true;
 
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
@@ -184,7 +186,16 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       parameters.clear();
       numberOfTicksBeforeSubmittingFootsteps.set(0);
-      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
+      currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique
+
+      updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
+      csgMode.addListener(change ->
+                          {
+                             if (csgMode.getEnumValue() == CSGMode.QFP)
+                                updateFootstepContinuouslyThroughoutSwing.set(true);
+                             else
+                                updateFootstepContinuouslyThroughoutSwing.set(updateFootstepContinuouslyThroughoutSwingDefault);
+                          });
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -257,6 +268,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
       // Determine swing side
       RobotSide swingSide;
+
+      if (updateFootstepContinuouslyThroughoutSwing.getBooleanValue())
+         footsteps.clear();
 
       if (footsteps.isEmpty())
       {
