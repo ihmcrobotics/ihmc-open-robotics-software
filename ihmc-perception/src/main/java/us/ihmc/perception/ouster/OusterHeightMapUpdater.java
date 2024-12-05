@@ -4,9 +4,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,7 +16,8 @@ import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -35,7 +34,7 @@ public class OusterHeightMapUpdater
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
-   private final ROS2PublisherBasics<HeightMapMessage> heightMapPublisher;
+   private final ROS2Publisher<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
    private final HeightMapUpdater heightMapUpdater;
@@ -46,7 +45,7 @@ public class OusterHeightMapUpdater
 
    public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_height_map_publisher");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ouster_height_map_publisher");
       heightMapPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
       ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);

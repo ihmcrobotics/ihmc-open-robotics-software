@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -19,14 +18,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -64,7 +62,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    protected final FullHumanoidRobotModel fullRobotModel;
 
    private final boolean manageROS2Node;
-   private final ROS2NodeInterface ros2Node;
+   private final ROS2Node ros2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
@@ -88,20 +86,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                         FullHumanoidRobotModel fullRobotModelToLog,
                         LogModelProvider modelProvider,
                         boolean startYoVariableServer,
-                        int updatePeriodMilliseconds,
-                        RealtimeROS2Node realtimeROS2Node)
+                        int updatePeriodMilliseconds)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, realtimeROS2Node, null);
-   }
-
-   public ToolboxModule(String robotName,
-                        FullHumanoidRobotModel fullRobotModelToLog,
-                        LogModelProvider modelProvider,
-                        boolean startYoVariableServer,
-                        int updatePeriodMilliseconds,
-                        PubSubImplementation pubSubImplementation)
-   {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null, pubSubImplementation);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null);
    }
 
    protected ToolboxModule(String robotName,
@@ -109,8 +96,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                            LogModelProvider modelProvider,
                            boolean startYoVariableServer,
                            int updatePeriodMilliseconds,
-                           ROS2NodeInterface ros2Node,
-                           PubSubImplementation pubSubImplementation)
+                           ROS2Node ros2Node)
    {
       this.robotName = robotName;
 
@@ -122,7 +108,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       // We're creating the ROS2 node here, so we need to manage it.
       manageROS2Node = ros2Node == null;
       if (ros2Node == null)
-         ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+         ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       this.ros2Node = ros2Node;
       // Disable the comms to prevent message recival while creating the toolbox.
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
@@ -521,7 +507,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
    }
 
-   abstract public void registerExtraPuSubs(ROS2NodeInterface ros2Node);
+   abstract public void registerExtraPuSubs(ROS2Node ros2Node);
 
    abstract public ToolboxController getToolboxController();
 

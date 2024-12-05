@@ -12,7 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -31,7 +31,7 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisua
    private int numberOfPlanarRegions = 0;
    private final ImDouble opacity = new ImDouble(0.7);
 
-   public RDXROS2FramePlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<FramePlanarRegionsListMessage> topic)
+   public RDXROS2FramePlanarRegionsVisualizer(String title, ROS2Node ros2Node, ROS2Topic<FramePlanarRegionsListMessage> topic)
    {
       super(title);
 

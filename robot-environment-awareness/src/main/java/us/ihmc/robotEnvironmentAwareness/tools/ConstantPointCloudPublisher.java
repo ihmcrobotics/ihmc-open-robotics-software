@@ -2,15 +2,14 @@ package us.ihmc.robotEnvironmentAwareness.tools;
 
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +21,8 @@ public class ConstantPointCloudPublisher
 {
    public ConstantPointCloudPublisher()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
-      ROS2PublisherBasics<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+      ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      ROS2Publisher<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
 
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
       lidarScanMessage.getLidarPosition().set(0.0, 0.0, 0.7);

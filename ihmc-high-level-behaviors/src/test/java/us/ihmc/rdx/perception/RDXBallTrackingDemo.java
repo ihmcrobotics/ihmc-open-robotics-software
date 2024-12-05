@@ -9,7 +9,6 @@ import org.bytedeco.opencv.opencv_core.Point2f;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.BallDetector;
 import us.ihmc.perception.RawImage;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
@@ -28,6 +26,7 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualize
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
@@ -58,7 +57,7 @@ public class RDXBallTrackingDemo
 
    public RDXBallTrackingDemo()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ball_tracker_demo");
+      ros2Node = new ROS2NodeBuilder().build("ball_tracker_demo");
       ros2Helper = new ROS2Helper(ros2Node);
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
@@ -127,7 +126,6 @@ public class RDXBallTrackingDemo
             ballFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
-                                                                                                   PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);

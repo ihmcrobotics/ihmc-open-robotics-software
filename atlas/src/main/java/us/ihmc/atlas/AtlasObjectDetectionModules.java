@@ -6,8 +6,6 @@ import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorT
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasObjectDetectionModules
 {
@@ -21,12 +19,10 @@ public class AtlasObjectDetectionModules
       fiducialDetectorToolboxModule = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                                                         robotModel.getTarget(),
                                                                         robotModel.createFullRobotModel(),
-                                                                        robotModel.getLogModelProvider(),
-                                                                        PubSubImplementation.FAST_RTPS);
+                                                                        robotModel.getLogModelProvider());
       objectDetectorToolboxModule = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                                                     robotModel.createFullRobotModel(),
-                                                                    robotModel.getLogModelProvider(),
-                                                                    PubSubImplementation.FAST_RTPS);
+                                                                    robotModel.getLogModelProvider());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {

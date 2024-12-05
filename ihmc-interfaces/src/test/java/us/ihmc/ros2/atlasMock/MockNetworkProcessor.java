@@ -16,10 +16,8 @@
 package us.ihmc.ros2.atlasMock;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.pubsub.Domain;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 import java.io.IOException;
 
@@ -27,8 +25,7 @@ public class MockNetworkProcessor
 {
    public static void main(String[] args) throws IOException, InterruptedException
    {
-      Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
-      ROS2Node node = new ROS2Node(domain, "MockNetworkProcessor");
+      ROS2Node node = new ROS2NodeBuilder().build("MockNetworkProcessor");
 
       // Preallocate message for packing
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();

@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 public class ROS2InputTest
@@ -15,7 +15,7 @@ public class ROS2InputTest
    @Test
    public void test()
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, "test_input");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("test_input");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       ROS2Topic<Empty> inputTestTopic = ROS2Tools.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
@@ -49,9 +49,6 @@ public class ROS2InputTest
       ROS2Input<?> subscription2 = ros2Helper.subscribe(inputTestTopic);
       Assertions.assertFalse(subscription2.getMessageNotification().poll());
 
-      subscription3.destroy();
-      subscription2.destroy();
-      subscription.destroy();
       ros2Node.destroy();
    }
 }

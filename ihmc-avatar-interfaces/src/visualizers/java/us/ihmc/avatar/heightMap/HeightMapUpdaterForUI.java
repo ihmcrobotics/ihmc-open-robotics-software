@@ -2,19 +2,22 @@ package us.ihmc.avatar.heightMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.perception.heightMap.HeightMapUpdater;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,7 +30,7 @@ public class HeightMapUpdaterForUI
    private final ExecutorService heightMapUpdaterService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean();
 
-   public HeightMapUpdaterForUI(Messager messager, ROS2NodeInterface ros2Node, Stage stage)
+   public HeightMapUpdaterForUI(Messager messager, ROS2Node ros2Node, Stage stage)
    {
       this.stage = stage;
       this.messager = messager;
@@ -53,7 +56,7 @@ public class HeightMapUpdaterForUI
 
       attachMessagerToUpdater();
 
-      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
+      ROS2Publisher<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       heightMapUpdater.attachHeightMapConsumer(heightMap -> messager.submitMessage(HeightMapMessagerAPI.HeightMapData, heightMap));
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 

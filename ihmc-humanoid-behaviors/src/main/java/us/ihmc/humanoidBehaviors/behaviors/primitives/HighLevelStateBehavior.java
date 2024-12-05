@@ -1,16 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class HighLevelStateBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private HighLevelStateMessage outgoingHighLevelStatePacket;
-   private ROS2PublisherBasics<HighLevelStateMessage> publisher;
+   private ROS2Publisher<HighLevelStateMessage> publisher;
 
    public HighLevelStateBehavior(String robotName, ROS2Node ros2Node)
    {

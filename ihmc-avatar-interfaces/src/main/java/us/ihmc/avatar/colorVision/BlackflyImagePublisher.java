@@ -5,7 +5,6 @@ import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -18,9 +17,9 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -32,7 +31,7 @@ public class BlackflyImagePublisher
 {
    private final ROS2Node ros2Node;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
-   private final ROS2PublisherBasics<ImageMessage> ros2DistoredImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2DistoredImagePublisher;
 
    private final CUDAJPEGProcessor imageEncoder = new CUDAJPEGProcessor();
 
@@ -49,7 +48,7 @@ public class BlackflyImagePublisher
    {
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
+      ros2Node = new ROS2NodeBuilder().build("blackfly_publisher");
       ros2DistoredImagePublisher = ros2Node.createPublisher(distortedImageTopic);
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
                                                                         BlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,

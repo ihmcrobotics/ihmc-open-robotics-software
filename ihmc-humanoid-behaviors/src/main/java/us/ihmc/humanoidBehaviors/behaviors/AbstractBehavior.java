@@ -1,21 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.DeprecatedAPIs;
-import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -25,12 +17,20 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Any behavior needs to implement this abstract class. It helps in setting up the communications to
@@ -47,7 +47,7 @@ public abstract class AbstractBehavior implements RobotController
    KryoMessager messager;
 
    protected final ROS2Node ros2Node;
-   private final Map<ROS2Topic<?>, ROS2PublisherBasics<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic<?>, ROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
@@ -66,8 +66,8 @@ public abstract class AbstractBehavior implements RobotController
    protected final YoDouble percentCompleted;
 
    private final List<BehaviorService> behaviorsServices;
-   private final ROS2PublisherBasics<TextToSpeechPacket> textToSpeechPublisher;
-   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   private final ROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
    protected final String robotName;
 
@@ -116,30 +116,30 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, HumanoidControllerAPI.getTopic(messageType, robotName));
    }
 
-   public <T> ROS2PublisherBasics<T> createBehaviorOutputPublisher(Class<T> messageType)
+   public <T> ROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorOutputTopic);
    }
 
-   public <T> ROS2PublisherBasics<T> createBehaviorInputPublisher(Class<T> messageType)
+   public <T> ROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorInputTopic);
    }
 
    @SuppressWarnings("unchecked")
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(topicName.withTypeName(messageType));
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisher(ROS2Topic<T> topic)
+   public <T> ROS2Publisher<T> createPublisher(ROS2Topic<T> topic)
    {
-      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(topic);
+      ROS2Publisher<T> publisher = (ROS2Publisher<T>) publishers.get(topic);
 
       if (publisher == null) // !containsKey
       {

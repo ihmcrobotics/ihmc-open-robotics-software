@@ -4,8 +4,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -15,8 +14,7 @@ public class AtlasFlatGroundWalkingTrackSCS2ImpulseBased
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
-   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS,
-                                                                                      "flat_ground_walking_track_simulation");
+   private final RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("flat_ground_walking_track_simulation");
 
    public AtlasFlatGroundWalkingTrackSCS2ImpulseBased()
    {

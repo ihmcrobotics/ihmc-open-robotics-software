@@ -2,14 +2,12 @@ package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.MocapTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -19,6 +17,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 public class RDXPlanarRegionMappingDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("filtered_map_node");
 
    private static final File regionLogDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY + "/");
 

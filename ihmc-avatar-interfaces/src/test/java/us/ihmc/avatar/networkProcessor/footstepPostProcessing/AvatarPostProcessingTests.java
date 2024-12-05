@@ -1,25 +1,16 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -61,7 +52,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -82,6 +72,14 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
@@ -104,7 +102,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       DRCRobotModel robotModel = getRobotModel();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel());
 
       CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }

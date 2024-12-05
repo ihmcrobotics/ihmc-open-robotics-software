@@ -1,14 +1,17 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import perception_msgs.msg.dds.*;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import perception_msgs.msg.dds.NormalEstimationParametersMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
+import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
@@ -18,6 +21,8 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -25,8 +30,8 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class RealSenseREANetworkProvider implements REANetworkProvider
 {
-   private final ROS2PublisherBasics<PlanarRegionsListMessage> stereoRegionPublisher;
-   private final ROS2PublisherBasics<OcTreeKeyListMessage> ocTreePublisher;
+   private final ROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
+   private final ROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
 
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> inputTopic;
@@ -35,7 +40,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
 
    public RealSenseREANetworkProvider(ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), inputTopic, stereoOutputTopic);
+      this(new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME), inputTopic, stereoOutputTopic);
    }
 
    public RealSenseREANetworkProvider(ROS2Node ros2Node, ROS2Topic inputTopic, ROS2Topic stereoOutputTopic)

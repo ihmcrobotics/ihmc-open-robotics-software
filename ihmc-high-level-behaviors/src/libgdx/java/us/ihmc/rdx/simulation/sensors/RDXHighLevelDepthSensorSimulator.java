@@ -30,7 +30,7 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -46,7 +46,6 @@ import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -56,14 +55,14 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.commons.thread.Throttler;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -108,12 +107,12 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private ROS2Topic<ImageMessage> ros2ColorTopic;
    private Mat rgb8Mat;
 
-   private ROS2NodeInterface ros2Node;
+   private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private Class<?> pointCloudMessageType;
-   private ROS2PublisherBasics<?> publisher;
+   private ROS2Publisher<?> publisher;
    private RealtimeROS2Node realtimeROS2Node;
-   private ROS2PublisherBasics<BigVideoPacket> ros2VideoPublisher;
+   private ROS2Publisher<BigVideoPacket> ros2VideoPublisher;
    private BigVideoPacket videoPacket;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
@@ -230,7 +229,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       publishImagesThread.start();
    }
 
-   public void setupForROS2ImageMessages(ROS2NodeInterface ros2Node, ROS2Topic<ImageMessage> ros2DepthTopic, ROS2Topic<ImageMessage> ros2ColorTopic)
+   public void setupForROS2ImageMessages(ROS2Node ros2Node, ROS2Topic<ImageMessage> ros2DepthTopic, ROS2Topic<ImageMessage> ros2ColorTopic)
    {
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
@@ -241,7 +240,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       this.yuv420Image = new Mat();
    }
 
-   public void setupForROS2PointCloud(ROS2NodeInterface ros2Node, ROS2Topic<?> ros2PointCloudTopic)
+   public void setupForROS2PointCloud(ROS2Node ros2Node, ROS2Topic<?> ros2PointCloudTopic)
    {
       this.ros2Node = ros2Node;
       this.ros2PointCloudTopic = ros2PointCloudTopic;
@@ -274,10 +273,10 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       publisher = ros2Node.createPublisher(ros2PointCloudTopic);
    }
 
-   public void setupForROS2Color(PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> ros2VideoTopic)
+   public void setupForROS2Color(ROS2Topic<BigVideoPacket> ros2VideoTopic)
    {
       // A Realtime ROS 2 node is required for video streaming in order to get stable performance.
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(sensorName) + "_video");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(sensorName) + "_video");
       ros2VideoPublisher = realtimeROS2Node.createPublisher(ros2VideoTopic);
       realtimeROS2Node.spin();
       videoPacket = new BigVideoPacket();
@@ -478,7 +477,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                      LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp,
                                                                                           ros2PointsToPublish,
                                                                                           tempSensorFramePose);
-                     ((ROS2PublisherBasics<LidarScanMessage>) publisher).publish(message);
+                     ((ROS2Publisher<LidarScanMessage>) publisher).publish(message);
                   }
                   else if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
                   {
@@ -496,7 +495,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                      message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
                      message.setIsDataLocalToSensor(false);
                      //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-                     ((ROS2PublisherBasics<StereoVisionPointCloudMessage>) publisher).publish(message);
+                     ((ROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
                   }
                });
             }
@@ -544,7 +543,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             outputFusedROS2Message.setPointsPerSegment(pointsPerSegment);
             outputFusedROS2Message.setSegmentIndex(segmentIndex);
             outputFusedROS2Message.setNumberOfSegments(numberOfSegments);
-            ((ROS2PublisherBasics<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
+            ((ROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
 
             ++segmentIndex;
             if (segmentIndex == numberOfSegments)

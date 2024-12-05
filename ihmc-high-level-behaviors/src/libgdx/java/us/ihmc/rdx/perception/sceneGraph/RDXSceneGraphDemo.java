@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.BytedecoImage;
@@ -20,7 +19,6 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXZEDSVORecorderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -41,6 +39,7 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
@@ -60,7 +59,6 @@ public class RDXSceneGraphDemo
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
-   private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
@@ -111,7 +109,7 @@ public class RDXSceneGraphDemo
          {
             baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
-            ros2Node = ROS2Tools.createROS2Node(PUB_SUB_IMPLEMENTATION, "perception_scene_graph_demo");
+            ros2Node = new ROS2NodeBuilder().build("perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
             detectionManager = new DetectionManager(ros2Helper);
@@ -349,7 +347,6 @@ public class RDXSceneGraphDemo
       // ZED left color visualizer
       {
          RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
-                                                                                                       PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
          zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
          perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
@@ -358,7 +355,6 @@ public class RDXSceneGraphDemo
       // ZED 2 color right image visualizer
       {
          RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
-                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
          zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
          perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
@@ -367,7 +363,6 @@ public class RDXSceneGraphDemo
       // ZED 2 depth image visualizer
       {
          RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
-                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                     PerceptionAPI.ZED2_DEPTH);
          zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
@@ -388,7 +383,7 @@ public class RDXSceneGraphDemo
 
       // Create YOLO annotated image viz
       {
-         yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image", PUB_SUB_IMPLEMENTATION, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+         yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image", PerceptionAPI.YOLO_ANNOTATED_IMAGE);
          yoloAnnotatedImageVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(yoloAnnotatedImageVisualizer);
       }

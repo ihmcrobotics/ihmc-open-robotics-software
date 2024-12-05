@@ -15,18 +15,17 @@ import org.bytedeco.opencv.opencv_video.TrackerNano.Params;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -61,7 +60,7 @@ public class RDXOpenCVTrackerDemo
 
    public RDXOpenCVTrackerDemo()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "kcf_tracker_demo");
+      ros2Node = new ROS2NodeBuilder().build("kcf_tracker_demo");
       ros2Helper = new ROS2Helper(ros2Node);
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
@@ -170,7 +169,6 @@ public class RDXOpenCVTrackerDemo
          public void create()
          {
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
-                                                                                                   PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);

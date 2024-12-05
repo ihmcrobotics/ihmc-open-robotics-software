@@ -15,14 +15,14 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
 
 public class ROS2SRTVideoStreamImageMessageRelayWorker
 {
-   private final ROS2PublisherBasics<ImageMessage> publisher;
+   private final ROS2Publisher<ImageMessage> publisher;
    private final ROS2SRTVideoSubscriber subscriber;
 
    /**

@@ -1,12 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -14,15 +7,22 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 {
@@ -132,8 +132,8 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    }
 
 
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
-   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("stereoVisionPublisherNode");
+   private final ROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher
          = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class));
 
    private void publish()

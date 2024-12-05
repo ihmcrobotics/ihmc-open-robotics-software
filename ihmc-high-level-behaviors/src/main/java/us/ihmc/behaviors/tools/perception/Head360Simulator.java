@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.Supplier;
 
@@ -18,7 +18,7 @@ public class Head360Simulator implements Supplier<PlanarRegionsList>
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
-   public Head360Simulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public Head360Simulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this.map = map;
 

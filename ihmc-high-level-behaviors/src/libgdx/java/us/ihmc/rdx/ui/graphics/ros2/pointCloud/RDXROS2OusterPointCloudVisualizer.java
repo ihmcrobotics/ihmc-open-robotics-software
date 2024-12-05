@@ -11,7 +11,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -19,7 +18,6 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -31,6 +29,7 @@ import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -41,7 +40,6 @@ import java.util.Set;
 public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisualizer<ImageMessage>
 {
    private final String titleBeforeAdditions;
-   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<ImageMessage> topic;
    private RealtimeROS2Node realtimeROS2Node;
    private final ImageMessage imageMessage = new ImageMessage();
@@ -67,11 +65,10 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisuali
    private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
 
-   public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
+   public RDXROS2OusterPointCloudVisualizer(String title, ROS2Topic<ImageMessage> topic)
    {
       super(title);
       titleBeforeAdditions = title;
-      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
       setActivenessChangeCallback(isActive ->
@@ -90,7 +87,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisuali
    private void subscribe()
    {
       subscribed = true;
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      this.realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
       realtimeROS2Node.createSubscription(topic, this::queueRenderImageBasedPointCloud);
       realtimeROS2Node.spin();
    }
