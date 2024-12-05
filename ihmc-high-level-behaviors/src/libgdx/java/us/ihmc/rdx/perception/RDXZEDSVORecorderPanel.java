@@ -8,7 +8,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 import us.ihmc.commons.thread.Throttler;
@@ -31,28 +30,23 @@ public class RDXZEDSVORecorderPanel
    public RDXZEDSVORecorderPanel(ROS2Helper ros2Helper)
    {
       this.ros2Helper = ros2Helper;
-      
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_CURRENT_FILE, message -> this.latestMessage = message);
    }
 
-   public void createWithOverlayPanel(RDX3DPanel panel3D)
+   public void update()
    {
-      panel3D.addOverlayPanel(PANEL_NAME, this::renderImGuiWidgets);
-   }
+      RDXBaseUI baseUI = RDXBaseUI.getInstance();
 
-   public void createWithRegularPanel(RDXBaseUI baseUI)
-   {
-      baseUI.getImGuiPanelManager().addPanel(PANEL_NAME, this::renderImGuiWidgets);
-   }
+      boolean overlayPanelExists = baseUI.getPrimary3DPanel().overlayPanelExists(PANEL_NAME);
 
-   private void renderImGuiWidgets()
-   {
-      if (latestMessage == null)
+      if (!overlayPanelExists && latestMessage != null)
       {
-         ImGui.text("No SVO retriever detected.");
-         return;
+         baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::render);
       }
+   }
 
+   public void render()
+   {
       ImGuiTools.textBold("Current SVO:");
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());

@@ -35,6 +35,7 @@ public class RDXZEDSVORecordingDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ROS2Node ros2Node;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
+   private RDXZEDSVORecorderPanel recorderPanel;
 
    private final ZEDColorDepthImageRetrieverSVO zedColorDepthImageRetrieverSVO;
    private final ZEDColorDepthImagePublisher zedColorDepthImagePublisher;
@@ -76,8 +77,7 @@ public class RDXZEDSVORecordingDemo
 
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
-            RDXZEDSVORecorderPanel recorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
-            recorderPanel.createWithOverlayPanel(baseUI.getPrimary3DPanel());
+            recorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
 
             addZEDVisualizers(perceptionVisualizerPanel);
 
@@ -88,6 +88,8 @@ public class RDXZEDSVORecordingDemo
          public void render()
          {
             perceptionVisualizerPanel.update();
+
+            recorderPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

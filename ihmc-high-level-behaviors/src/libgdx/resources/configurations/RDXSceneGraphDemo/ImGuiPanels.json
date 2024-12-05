@@ -7,8 +7,6 @@
     "/ihmc/zed2/depth###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/depth" : false,
     "/ihmc/zed2/left_color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/left_color" : false,
     "/ihmc/zed2/right_color###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/zed2/right_color" : false,
-    "Rapid region extractor parameters" : false,
-    "Scene Graph" : true,
-    "ZED SVO Recorder" : true
+    "Scene Graph" : true
   }
 }
