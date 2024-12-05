@@ -8,11 +8,13 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -121,7 +123,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    }
 
    @Override
-   public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+   public ComponentBasedFootstepDataMessageGenerator buildPlugin(FullHumanoidRobotModel robotModel,
+                                                                 CommonHumanoidReferenceFrames referenceFrames,
                                                                  double updateDT,
                                                                  WalkingControllerParameters walkingControllerParameters,
                                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
@@ -136,6 +139,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
+      continuousStepGenerator.setQuicksterFootstepProvider(new QuicksterFootstepProvider(robotModel,
+                                                                                         referenceFrames,
+                                                                                         updateDT,
+                                                                                         registryField.get(),
+                                                                                         yoGraphicsListRegistry,
+                                                                                         timeProvider));
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());

@@ -82,7 +82,7 @@ public class QuicksterFootstepProvider implements Updatable
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
 
-   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
+   public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
    {
       this.updateDT = updateDT;
       this.referenceFrames = referenceFrames;
@@ -156,6 +156,8 @@ public class QuicksterFootstepProvider implements Updatable
 
       yoGraphicsListRegistry.registerYoGraphic(variableNameSuffix, netPendulumBaseViz);
       yoGraphicsListRegistry.registerArtifact(variableNameSuffix, netPendulumBaseViz.createArtifact());
+
+      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -283,22 +285,8 @@ public class QuicksterFootstepProvider implements Updatable
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
-      //      if (desiredVelocityProvider.isUnitVelocity())
-      //      {
-      //         double minMaxVelocityX = maxStepLength / stepTime.getValue();
-      //         double minMaxVelocityY = maxStepWidth / stepTime.getValue();
-      //         desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
-      //         desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
-      //      }
-      //
-      //      if (desiredTurningVelocityProvider.isUnitVelocity())
-      //      {
-      //         double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
-      //         turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
-      //      }
-
-      //      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
-      //      this.desiredTurningVelocity.set(turningVelocity);
+      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+      this.desiredTurningVelocity.set(turningVelocity);
    }
 
    /**

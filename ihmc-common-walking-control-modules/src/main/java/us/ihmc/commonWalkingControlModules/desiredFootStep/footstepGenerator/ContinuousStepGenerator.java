@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -36,6 +37,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -157,6 +159,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
    private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
 
+   // All things QFP
+   public enum CSGMode {STANDARD, QFP}
+   private final YoEnum<CSGMode> csgMode = new YoEnum<>("csgMode", registry, CSGMode.class);
+   private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
+
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
     */
@@ -176,7 +183,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          parentRegistry.addChild(registry);
 
       parameters.clear();
-      numberOfTicksBeforeSubmittingFootsteps.set(2);
+      numberOfTicksBeforeSubmittingFootsteps.set(0);
       currentFootstepDataListCommandID.set(new Random().nextLong(0, Long.MAX_VALUE / 2)); // To make this command ID unique 
 
       setSupportFootBasedFootstepAdjustment(true);
@@ -230,7 +237,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
-      { // Processing footstep status
+      // Processing footstep status
+      {
          FootstepStatus statusToProcess = latestStatusReceived.getValue();
 
          if (statusToProcess != null)
@@ -253,6 +261,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          footstepCompletionSide.setValue(null);
       }
 
+      // Determine swing side
       RobotSide swingSide;
 
       if (footsteps.isEmpty())
@@ -510,6 +519,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredTurningVelocityProvider(DesiredTurningVelocityProvider desiredTurningVelocityProvider)
    {
       this.desiredTurningVelocityProvider = desiredTurningVelocityProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setDesiredTurningVelocityProvider(desiredTurningVelocityProvider);
    }
 
    /**
@@ -520,6 +532,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
    {
       this.desiredVelocityProvider = desiredVelocityProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setDesiredVelocityProvider(desiredVelocityProvider);
    }
 
    /**
@@ -601,6 +616,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
    {
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setFootstepStatusListener(statusMessageOutputManager);
    }
 
    /**
@@ -754,6 +772,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setAlternateStepChooser(AlternateStepChooser alternateStepChooser)
    {
       this.alternateStepChooser = alternateStepChooser;
+   }
+
+   public void setQuicksterFootstepProvider(QuicksterFootstepProvider quicksterFootstepProvider)
+   {
+      this.quicksterFootstepProvider.set(quicksterFootstepProvider);
    }
 
    /**

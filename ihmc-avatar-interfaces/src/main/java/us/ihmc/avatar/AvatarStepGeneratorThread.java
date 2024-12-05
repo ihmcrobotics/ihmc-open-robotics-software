@@ -98,7 +98,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
+      continuousStepGeneratorPlugin = pluginFactory.buildPlugin(fullRobotModel,
+                                                                humanoidReferenceFrames,
                                                                 drcRobotModel.getStepGeneratorDT(),
                                                                 drcRobotModel.getWalkingControllerParameters(),
                                                                 walkingOutputManager,
