@@ -10,6 +10,8 @@ import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
+import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.InputMethod;
 
 public class RDXSensorSimulatorDemo
 {
@@ -23,7 +25,7 @@ public class RDXSensorSimulatorDemo
    private final RDXSensorSimulator sensorSimulator;
    private RDXPose3DGizmo sensorPoseGizmo;
 
-   private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer();
+   private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer(InputMethod.DEPTH_IMAGE);
 
    private RDXMatImagePanel imagePanel;
 
@@ -54,6 +56,7 @@ public class RDXSensorSimulatorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
 
             pointCloudRenderer.create(WIDTH * HEIGHT);
+            pointCloudRenderer.setColoringMethod(ColoringMethod.GRADIENT_SENSOR_X);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
          }
 
