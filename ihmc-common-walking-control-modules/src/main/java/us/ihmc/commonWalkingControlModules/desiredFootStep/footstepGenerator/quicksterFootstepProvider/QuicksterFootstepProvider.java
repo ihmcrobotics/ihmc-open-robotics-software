@@ -493,6 +493,8 @@ public class QuicksterFootstepProvider implements Updatable
                                     netPendulumBase,
                                     inDoubleSupport.getBooleanValue(),
                                     desiredTouchdownPositions.get(robotSide));
+
+         parameters.setParametersForUpcomingSwing(robotSide);
       }
 
       @Override

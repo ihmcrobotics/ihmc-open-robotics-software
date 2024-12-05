@@ -12,11 +12,11 @@ public class QuicksterFootstepProviderParameters
 {
    // Static variables
    private static final double SWING_DURATION = 0.55;
-   private static final double DOUBLE_SUPPORT_FRACTION = 0.1;
+   private static final double DOUBLE_SUPPORT_FRACTION = 0.05;
    private static final double STANCE_WIDTH = 0.2;
    private static final double SWING_HEIGHT = 0.07;
    private static final double COM_HEIGHT = 0.9;
-   private static final double POLE = 0.275;
+   private static final double POLE = 0.0;
 
    // YoVariables
    private final YoDouble swingDuration;
@@ -85,6 +85,12 @@ public class QuicksterFootstepProviderParameters
       stageableYoDoubles.get(robotSide).add(stageableYoDouble);
 
       return stageableYoDouble;
+   }
+
+   public void setParametersForUpcomingSwing(RobotSide swingSide)
+   {
+      for (int i = 0; i < stageableYoDoubles.get(swingSide).size(); i++)
+         stageableYoDoubles.get(swingSide).get(i).loadFromStage();
    }
 
    public void setParametersForUpcomingSwing(RobotSide swingSide, double swingHeight, double swingDuration, double doubleSupportFraction)
