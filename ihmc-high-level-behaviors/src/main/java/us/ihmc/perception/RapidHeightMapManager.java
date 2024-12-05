@@ -114,11 +114,11 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                             (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
-//      RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, temp);
+      RapidHeightMapExtractorCuda.packHeightMapData(rapidHeightMapExtractor, temp);
       return temp;
    }
 
