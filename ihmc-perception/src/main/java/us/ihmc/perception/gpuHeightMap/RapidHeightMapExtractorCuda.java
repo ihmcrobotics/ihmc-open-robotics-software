@@ -333,8 +333,8 @@ public class RapidHeightMapExtractorCuda
       groundToWorldTransformHostPointer.put(groundToWorldTransformArray);
       parametersHostPointer.put(paramsArray);
 
-      //      Allocate memory on the GPU for each of the transforms and images
-      //      This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
+      //Allocate memory on the GPU for each of the transforms and images
+      //This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
       CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
       CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
@@ -354,8 +354,8 @@ public class RapidHeightMapExtractorCuda
       cudaStreamSynchronize(stream);
 
 
-      //       Execute the CUDA kernels with the provided stream
-      //       Each kernel performs a specific task related to the height map update, registration, and cropping
+      //Execute the CUDA kernels with the provided stream
+      //Each kernel performs a specific task related to the height map update, registration, and cropping
 
       int blockSizeXY = 32;
       int gridSizeKernel0X = (inputDepthImage.rows() + blockSizeXY - 1) / blockSizeXY;
@@ -410,28 +410,28 @@ public class RapidHeightMapExtractorCuda
       cudaStreamSynchronize(stream);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      Mat inputMat = new Mat();
-            inputDepthImage.download(inputMat);
-
-            Mat transformedMat = new Mat();
-            transformedInputDepthImage.download(transformedMat);
-
-            Mat localMat = new Mat();
-            localHeightMapImage.download(localMat);
-            Mat globalMat = new Mat();
-            globalHeightMapImage.download(globalMat);
-
-      PerceptionDebugTools.display("Input Height Map", inputMat, 1);
-      PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
-      PerceptionDebugTools.display("Local Height Map", localMat, 1);
-      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
-      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
-
-            inputDepthImage.download(finalCroppedHeightMap);
-            Rect roi = new Rect(0, 0, 151, 151);
-            Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
-
-            terrainMapData.setHeightMap(croppedMat);
+//      Mat inputMat = new Mat();
+//            inputDepthImage.download(inputMat);
+//
+//            Mat transformedMat = new Mat();
+//            transformedInputDepthImage.download(transformedMat);
+//
+//            Mat localMat = new Mat();
+//            localHeightMapImage.download(localMat);
+//            Mat globalMat = new Mat();
+//            globalHeightMapImage.download(globalMat);
+//
+//      PerceptionDebugTools.display("Input Height Map", inputMat, 1);
+//      PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
+//      PerceptionDebugTools.display("Local Height Map", localMat, 1);
+//      PerceptionDebugTools.display("Global Height Map", globalMat, 1);
+//      PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
+//
+//            inputDepthImage.download(finalCroppedHeightMap);
+//            Rect roi = new Rect(0, 0, 151, 151);
+//            Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
+//
+//            terrainMapData.setHeightMap(croppedMat);
 
    }
 
