@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__FallbackNodeStateMessage__idl__
+#define __behavior_msgs__msg__FallbackNodeStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./FallbackNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::FallbackNodeStateMessage_")
+      struct FallbackNodeStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::FallbackNodeDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif

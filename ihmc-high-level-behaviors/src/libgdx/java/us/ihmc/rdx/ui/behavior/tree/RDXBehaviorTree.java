@@ -71,10 +71,10 @@ public class RDXBehaviorTree
                                                    panel3D,
                                                    referenceFrameLibrary);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
-      fileMenu = new RDXBehaviorTreeFileMenu(treeFilesDirectory);
+      fileMenu = new RDXBehaviorTreeFileMenu();
 
       state = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, treeFilesDirectory);
-      fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder);
+      fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, treeFilesDirectory);
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
