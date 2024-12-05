@@ -27,6 +27,7 @@ import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNode
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.Map;
 import java.util.Set;
@@ -54,8 +55,10 @@ public class RDXSceneGraphUI
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder predefinedPrimitiveRigidBodySceneNodeBuilder;
 
-   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
+   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDXBaseUI baseUI)
    {
+      panel3D = baseUI.getPrimary3DPanel();
+
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID,
                                                     SceneGraph.ROOT_NODE_NAME,
                                                     new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
@@ -66,16 +69,16 @@ public class RDXSceneGraphUI
          return uiSceneNode.getSceneNode();
       }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);
 
-      this.panel3D = panel3D;
-
-      RDXSceneNode rootNode = new RDXSceneNode(sceneGraph.getRootNode());
-      addUISceneNode(rootNode);
+      addUISceneNode(new RDXSceneNode(sceneGraph.getRootNode()));
 
       sceneGraph.getSceneGraphSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
       primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
       predefinedPrimitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
+
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
    private void addUISceneNode(RDXSceneNode uiSceneNode)

@@ -115,4 +115,10 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXROS2SingleTopicVisua
 
       planarRegionsGraphic.destroy();
    }
+
+   public void setOpacity(double opacity)
+   {
+      this.opacity.set(opacity);
+      planarRegionsGraphic.setBlendOpacity((float) opacity);
+   }
 }
