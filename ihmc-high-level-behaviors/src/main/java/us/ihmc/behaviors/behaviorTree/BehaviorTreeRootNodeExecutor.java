@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -94,7 +95,22 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
       {
          currentlyExecutingAction.updateCurrentlyExecuting();
-         anyActionExecutionFailed |= currentlyExecutingAction.getState().getFailed();
+         boolean failed = currentlyExecutingAction.getState().getFailed();
+         anyActionExecutionFailed |= failed;
+
+         if (!currentlyExecutingAction.getState().getIsExecuting())
+         {
+            String name = currentlyExecutingAction.getDefinition().getName();
+            double elapsedExecutionTime = currentlyExecutingAction.getState().getElapsedExecutionTime();
+            if (failed)
+            {
+               LogTools.error("Action failed after %.2f s: %s".formatted(elapsedExecutionTime, name));
+            }
+            else
+            {
+               LogTools.info("Action completed successfully in %.2f s: %s".formatted(elapsedExecutionTime, name));
+            }
+         }
       }
 
       if (state.getAutomaticExecution())
@@ -154,8 +170,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       state.getLogger().info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
       actionToExecute.update();
       actionToExecute.triggerActionExecution();
-      actionToExecute.updateCurrentlyExecuting();
-      currentlyExecutingActions.add(actionToExecute);
       state.stepForwardNextExecutionIndex();
    }
 
