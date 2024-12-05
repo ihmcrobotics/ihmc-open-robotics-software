@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -15,7 +16,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final BehaviorTreeRootNodeDefinition definition;
    private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
+   private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> failedActions = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> successfulActions = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> failedActionsWithoutFallback = new ArrayList<>();
 
    public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -91,25 +96,41 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
       }
 
-      boolean anyActionExecutionFailed = false;
+      failedActions.clear();
+      successfulActions.clear();
       for (ActionNodeExecutor<?, ?> currentlyExecutingAction : currentlyExecutingActions)
       {
          currentlyExecutingAction.updateCurrentlyExecuting();
-         boolean failed = currentlyExecutingAction.getState().getFailed();
-         anyActionExecutionFailed |= failed;
 
+         // This action has completed on this update
          if (!currentlyExecutingAction.getState().getIsExecuting())
          {
             String name = currentlyExecutingAction.getDefinition().getName();
             double elapsedExecutionTime = currentlyExecutingAction.getState().getElapsedExecutionTime();
-            if (failed)
+            if (currentlyExecutingAction.getState().getFailed())
             {
+               failedActions.add(currentlyExecutingAction);
                LogTools.error("Action failed after %.2f s: %s".formatted(elapsedExecutionTime, name));
             }
             else
             {
+               successfulActions.add(currentlyExecutingAction);
                LogTools.info("Action completed successfully in %.2f s: %s".formatted(elapsedExecutionTime, name));
             }
+         }
+      }
+      currentlyExecutingActions.removeAll(failedActions);
+      currentlyExecutingActions.removeAll(successfulActions);
+
+      failedActionsWithoutFallback.clear();
+      failedActionsWithoutFallback.addAll(failedActions);
+      for (FallbackNodeExecutor fallbackNode : fallbackNodes)
+      {
+         fallbackNode.update();
+
+         if (!fallbackNode.getFallbackActions().isEmpty())
+         {
+            failedActionsWithoutFallback.removeAll(fallbackNode.getTryActions());
          }
       }
 
@@ -120,7 +141,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             state.getLogger().info("End of sequence.");
             state.setAutomaticExecution(false);
          }
-         else if (anyActionExecutionFailed)
+         else if (!failedActionsWithoutFallback.isEmpty())
          {
             state.getLogger().error("An action failed. Disabling automatic execution.");
             state.setAutomaticExecution(false);
@@ -158,6 +179,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                currentlyExecutingActions.add(actionNode);
             }
          }
+         else if (child instanceof FallbackNodeExecutor fallbackNode)
+         {
+            fallbackNodes.add(fallbackNode);
+         }
 
          updateActionSubtree(child);
       }
@@ -182,6 +207,21 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       ActionNodeExecutor<?, ?> nextNodeToExecute = actionChildren.get(state.getExecutionNextIndex());
 
+      // If a fallback sequence is up next, block if any corresponding try actions are executing
+      for (FallbackNodeExecutor fallbackNode : fallbackNodes)
+      {
+         if (fallbackNode.getFallbackActions().indexOf(nextNodeToExecute) == 0) // The first fallback action is next
+         {
+            for (ActionNodeExecutor<?, ?> tryAction : fallbackNode.getTryActions())
+            {
+               if (tryAction.getState().getIsExecuting())
+               {
+                  return false;
+               }
+            }
+         }
+      }
+
       if (!nextNodeToExecute.getState().getCanExecute())
       {
          state.getLogger().error("Cannot execute action: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
@@ -205,12 +245,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
       else
       {
-         boolean anyActionExecuting = false;
-         for (ActionNodeExecutor<?, ?> executorChild : actionChildren)
-         {
-            anyActionExecuting |= executorChild.getState().getIsExecuting();
-         }
-         return  !anyActionExecuting;
+         return !currentlyExecutingActions.isEmpty();
       }
    }
 

@@ -8,15 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * If the first child action of a fallback node succeeds, the rest of the children are skipped.
+ * If the first concurrent action group of a fallback node succeeds, the rest of the children are skipped.
  * If it fails, the rest of the children are executed.
- * Afterwards, the parent sequence proceeds.
  */
 public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeState, FallbackNodeDefinition>
 {
    private final FallbackNodeState state;
    private final FallbackNodeDefinition definition;
    private final List<ActionNodeExecutor<?, ?>> actionChildren = new ArrayList<>();
+
+   // TODO: Add these to state & add UI elements
+   private final List<ActionNodeExecutor<?, ?>> tryActions = new ArrayList<>();
+   private final List<ActionNodeExecutor<?, ?>> fallbackActions = new ArrayList<>();
 
    public FallbackNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -39,10 +42,37 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
             actionChildren.add(actionNode);
          }
       }
+
+      if (!actionChildren.isEmpty())
+      {
+         int firstActionIndex = actionChildren.get(0).getState().getActionIndex();
+
+         for (ActionNodeExecutor<?, ?> child : actionChildren)
+         {
+            if (child.getState().calculateExecuteAfterActionIndex() < firstActionIndex)
+            {
+               tryActions.add(child);
+            }
+            else
+            {
+               fallbackActions.add(child);
+            }
+         }
+      }
    }
 
    public List<ActionNodeExecutor<?, ?>> getActionChildren()
    {
       return actionChildren;
+   }
+
+   public List<ActionNodeExecutor<?, ?>> getTryActions()
+   {
+      return tryActions;
+   }
+
+   public List<ActionNodeExecutor<?, ?>> getFallbackActions()
+   {
+      return fallbackActions;
    }
 }
