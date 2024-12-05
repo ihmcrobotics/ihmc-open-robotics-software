@@ -103,7 +103,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                 drcRobotModel.getWalkingControllerParameters(),
                                                                 walkingOutputManager,
                                                                 walkingCommandInputManager,
-                                                                null,
+                                                                csgGraphics,
                                                                 null,
                                                                 csgTime);
       csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
