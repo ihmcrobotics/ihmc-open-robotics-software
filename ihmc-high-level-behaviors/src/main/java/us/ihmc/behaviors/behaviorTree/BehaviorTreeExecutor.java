@@ -125,4 +125,11 @@ public class BehaviorTreeExecutor
          LogTools.error("Cannot load behavior: {}", jsonFileName);
       }
    }
+
+   public void deleteRootNode()
+   {
+      state.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
+      this.rootNode = null;
+      state.freeze();
+   }
 }

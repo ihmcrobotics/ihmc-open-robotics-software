@@ -285,7 +285,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   private boolean isEndOfSequence()
+   public boolean isEndOfSequence()
    {
       return state.getExecutionNextIndex() >= actionChildren.size();
    }
