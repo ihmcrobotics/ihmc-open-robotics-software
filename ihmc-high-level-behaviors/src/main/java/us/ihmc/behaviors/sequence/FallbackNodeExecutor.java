@@ -35,6 +35,9 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
       super.update();
 
       actionChildren.clear();
+      tryActions.clear();
+      fallbackActions.clear();
+
       for (BehaviorTreeNodeExecutor<?, ?> child : getChildren())
       {
          if (child instanceof ActionNodeExecutor<?, ?> actionNode)

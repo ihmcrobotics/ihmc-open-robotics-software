@@ -134,6 +134,35 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
       }
 
+      // Handle skipping the fallback if try action group is successful
+      boolean actionEnded = !failedActions.isEmpty() || !successfulActions.isEmpty();
+      if (actionEnded && currentlyExecutingActions.isEmpty() && !isEndOfSequence())
+      {
+         ActionNodeExecutor<?, ?> nextNodeToExecute = actionChildren.get(state.getExecutionNextIndex());
+
+         for (FallbackNodeExecutor fallbackNode : fallbackNodes)
+         {
+            if (fallbackNode.getFallbackActions().indexOf(nextNodeToExecute) == 0)
+            {
+               boolean anyFailed = false;
+               for (ActionNodeExecutor<?, ?> tryAction : fallbackNode.getTryActions())
+               {
+                  if (tryAction.getState().getFailed())
+                  {
+                     anyFailed = true;
+                     break;
+                  }
+               }
+
+               if (!anyFailed) // Nothing is executing and none of the try actions failed -- skip fallback
+               {
+                  ActionNodeExecutor<?, ?> lastFallbackAction = fallbackNode.getFallbackActions().get(fallbackNode.getFallbackActions().size() - 1);
+                  state.setExecutionNextIndex(lastFallbackAction.getState().getActionIndex() + 1);
+               }
+            }
+         }
+      }
+
       if (state.getAutomaticExecution())
       {
          if (isEndOfSequence())
