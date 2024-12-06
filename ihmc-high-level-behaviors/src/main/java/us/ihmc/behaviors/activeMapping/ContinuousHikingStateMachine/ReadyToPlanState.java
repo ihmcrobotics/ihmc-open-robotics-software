@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.apache.commons.lang3.time.StopWatch;
+import std_msgs.Empty;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingLogger;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
@@ -80,6 +81,7 @@ public class ReadyToPlanState implements State
       this.planningMode = planningMode;
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointPoseToList);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CLEAR_GOAL_FOOTSTEPS, this::clearWayPointList);
    }
 
    @Override
@@ -262,5 +264,16 @@ public class ReadyToPlanState implements State
       LogTools.info("Added waypoint for WALK_TO_GOAL");
       walkToGoalWayPointPoses.add(latestWayPoint);
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), latestWayPoint);
+   }
+
+   /**
+    * This allows the {@link ReadyToPlanState#walkToGoalWayPointPoses} to be cleared.
+    * This empties the list so the user can place a fresh goal that Continuous Hiking will use.
+    */
+   public void clearWayPointList(Empty emptyMessage)
+   {
+      LogTools.info("Clearing waypoint list for WALK_TO_GOAL");
+      walkToGoalWayPointPoses.clear();
+      continuousHikingParameters.setEnableContinuousHiking(false);
    }
 }
