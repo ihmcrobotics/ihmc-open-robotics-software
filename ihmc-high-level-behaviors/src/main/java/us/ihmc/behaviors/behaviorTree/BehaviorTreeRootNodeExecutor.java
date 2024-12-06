@@ -45,6 +45,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       idToNodeMap.clear();
       actionChildren.clear();
+      fallbackNodes.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
@@ -154,9 +155,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                   }
                }
 
-               if (!anyFailed) // Nothing is executing and none of the try actions failed -- skip fallback
+               if (anyFailed) // Nothing is executing and a tried action failed -- falling back
+               {
+                  LogTools.warn("Actions failed, fallback actions are next for execution.");
+               }
+               else // Nothing is executing and none of the try actions failed -- skip fallback
                {
                   ActionNodeExecutor<?, ?> lastFallbackAction = fallbackNode.getFallbackActions().get(fallbackNode.getFallbackActions().size() - 1);
+                  LogTools.info("Actions successful, skipping fallback actions(s)");
                   state.setExecutionNextIndex(lastFallbackAction.getState().getActionIndex() + 1);
                }
             }
@@ -224,6 +230,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       state.getLogger().info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
       actionToExecute.update();
       actionToExecute.triggerActionExecution();
+      currentlyExecutingActions.add(actionToExecute);
       state.stepForwardNextExecutionIndex();
    }
 
@@ -291,6 +298,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public List<ActionNodeExecutor<?, ?>> getActionChildren()
    {
       return actionChildren;
+   }
+
+   public List<ActionNodeExecutor<?, ?>> getFailedActions()
+   {
+      return failedActions;
+   }
+
+   public List<ActionNodeExecutor<?, ?>> getSuccessfulActions()
+   {
+      return successfulActions;
    }
 
    public List<ActionNodeExecutor<?, ?>> getCurrentlyExecutingActions()
