@@ -54,6 +54,7 @@ public class ICPController implements ICPControllerInterface
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final BooleanProvider useCMPFeedback;
+   private final BooleanProvider useCoPFeedback;
    private final BooleanProvider useAngularMomentum;
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
@@ -160,6 +161,7 @@ public class ICPController implements ICPControllerInterface
       this.controlDTSquare = controlDT * controlDT;
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
+      useCoPFeedback = new BooleanParameter(yoNamePrefix + "UseCoPFeedback", registry, icpOptimizationParameters.useCoPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
 
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
@@ -449,7 +451,9 @@ public class ICPController implements ICPControllerInterface
 
    private void computeFeedForwardAndFeedBackAlphas()
    {
-      if (parameters.getFeedbackAlphaCalculator() != null)
+      if (!useCoPFeedback.getValue())
+         feedbackAlpha.set(1.0);
+      else if (parameters.getFeedbackAlphaCalculator() != null)
          feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
       else
          feedbackAlpha.set(0.0);

@@ -97,6 +97,14 @@ public abstract class ICPControllerParameters
    }
 
    /**
+    * Enabling this boolean allows feedback control of CoP (feedback alpha < 1).
+    */
+   public boolean useCoPFeedback()
+   {
+      return true;
+   }
+
+   /**
     * Enabling this boolean allows the CMP to exit the support polygon. The CoP will still be
     * constrained to lie inside the support polygon, however.
     */
