@@ -260,8 +260,6 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
 
 }
 
-
-
 extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf)
 {
 
