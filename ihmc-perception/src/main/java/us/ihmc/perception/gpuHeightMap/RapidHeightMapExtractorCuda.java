@@ -30,7 +30,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractorCuda {
     private GpuMat inputDepthImage;
@@ -302,21 +302,21 @@ public class RapidHeightMapExtractorCuda {
 
         //Allocate memory on the GPU for each of the transforms and images
         //This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
-        CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
-        CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
-        CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
-        CUDATools.mallocAsync(groundToWorldTransformDevicePointer, groundToWorldTransformArray.length, stream);
-        CUDATools.mallocAsync(parametersDevicePointer, paramsArray.length, stream);
+        cudaMallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
+        cudaMallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
+        cudaMallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
+        cudaMallocAsync(groundToWorldTransformDevicePointer, groundToWorldTransformArray.length, stream);
+        cudaMallocAsync(parametersDevicePointer, paramsArray.length, stream);
 
         cudaStreamSynchronize(stream);
 
         //Copy the data from host memory to device memory asynchronously
         // This ensures the device has the latest data available for kernel processing
-        CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
-        CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
-        CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
-        CUDATools.memcpyAsync(groundToWorldTransformDevicePointer, groundToWorldTransformHostPointer, groundToWorldTransformArray.length, stream);
-        CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, paramsArray.length, stream);
+        cudaMemcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, cudaMemcpyDefault,stream);
+        cudaMemcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, cudaMemcpyDefault,stream);
+        cudaMemcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length,cudaMemcpyDefault, stream);
+        cudaMemcpyAsync(groundToWorldTransformDevicePointer, groundToWorldTransformHostPointer, groundToWorldTransformArray.length, cudaMemcpyDefault,stream);
+        cudaMemcpyAsync(parametersDevicePointer, parametersHostPointer, paramsArray.length, cudaMemcpyDefault,stream);
 
         cudaStreamSynchronize(stream);
 
