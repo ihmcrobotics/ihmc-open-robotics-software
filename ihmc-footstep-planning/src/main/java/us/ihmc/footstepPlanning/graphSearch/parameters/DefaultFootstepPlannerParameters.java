@@ -85,7 +85,10 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
       this(null);
    }
 
-   private DefaultFootstepPlannerParameters(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
+   /**
+    * @param footstepPlannerParameters to copy
+    */
+   public DefaultFootstepPlannerParameters(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       super(keys, DefaultFootstepPlannerParameters.class);
 

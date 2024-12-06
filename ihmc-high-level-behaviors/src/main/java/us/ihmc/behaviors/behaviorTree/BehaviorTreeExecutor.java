@@ -24,6 +24,7 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeState state;
    private BehaviorTreeNodeExecutor<?, ?> rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
+   private final WorkspaceResourceDirectory saveFileDirectory = new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees");
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
@@ -36,7 +37,7 @@ public class BehaviorTreeExecutor
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
       state = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, null);
-      fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder);
+      fileLoader = new BehaviorTreeFileLoader<>(state, nodeBuilder, saveFileDirectory);
    }
 
    public void update()
@@ -91,7 +92,7 @@ public class BehaviorTreeExecutor
 
    public void loadBehavior(String jsonFileName)
    {
-      WorkspaceResourceFile file = new WorkspaceResourceFile(new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"), jsonFileName);
+      WorkspaceResourceFile file = new WorkspaceResourceFile(saveFileDirectory, jsonFileName);
       if (file.getClasspathResource() != null)
       {
          state.modifyTreeTopology(topologyOperationQueue ->

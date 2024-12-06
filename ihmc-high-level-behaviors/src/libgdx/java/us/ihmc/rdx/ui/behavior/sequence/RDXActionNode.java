@@ -17,8 +17,6 @@ import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 
-import java.util.List;
-
 /**
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
@@ -111,8 +109,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          }
          else
          {
-            int executeAfterActionIndex = state.calculateExecuteAfterActionIndex(actionSequence.getActionChildren());
-            ActionNodeState<?> executeAfterAction = actionSequence.getActionChildren().get(executeAfterActionIndex);
+            ActionNodeState<?> executeAfterAction = state.findExecuteAfterAction();
             selectedText = executeAfterAction.getDefinition().getName();
          }
 
