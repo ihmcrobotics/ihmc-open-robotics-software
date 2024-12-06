@@ -93,11 +93,10 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (trackingCalculator.getHitTimeLimit())
+      if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out.");
          return;
       }
 

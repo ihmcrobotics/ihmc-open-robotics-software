@@ -8,6 +8,10 @@ module behavior_msgs
     module dds
     {
 
+      /**
+       * This message sends the current request for the Continuous Hiking process.
+       * This holds parameters on how the Continuous Hiking process will behave.
+       */
       @TypeCode(type="behavior_msgs::msg::dds_::ContinuousHikingCommandMessage_")
       struct ContinuousHikingCommandMessage
       {

@@ -52,13 +52,14 @@ public class BehaviorTreeTopologyOperationQueue
       topologyOperationQueue.add(() -> setter.accept(node));
    }
 
-   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndFreezeRootNode(T node,
-                                                                                       Consumer<T> setter,
+   public <T extends BehaviorTreeNodeLayer<T, ?, ?, ?>> void queueSetAndFreezeRootNode(BehaviorTreeNodeLayer<T, ?, ?, ?> node,
+                                                                                       Consumer<BehaviorTreeNodeLayer<T, ?, ?, ?>> setter,
                                                                                        Freezable freezableRootHolder)
    {
       topologyOperationQueue.add(() ->
       {
          setter.accept(node);
+         node.getDefinition().freeze();
          freezableRootHolder.freeze();
       });
    }

@@ -2,6 +2,8 @@ package us.ihmc.communication.crdt;
 
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 
+import java.util.Objects;
+
 /**
  * Represents a data field that should only be modified by one actor type
  * and read-only for the others.
@@ -24,7 +26,7 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 
    public void setValue(T value)
    {
-      if (this.value != value)
+      if (!Objects.equals(this.value, value)) // Don't want to do anything in the case nothing changed
       {
          checkActorCanModifyAndFreeze();
 

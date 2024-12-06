@@ -162,11 +162,10 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       state.getCurrentJointAngles().accessValue()[0] = x1KnuckleJoints.get(definition.getSide()).getQ();
       state.getCurrentJointAngles().accessValue()[1] = x2KnuckleJoints.get(definition.getSide()).getQ();
 
-      if (trackingCalculator.getHitTimeLimit())
+      if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {
          state.setFailed(true);
          state.setIsExecuting(false);
-         state.getLogger().error("Task execution timed out.");
       }
       else if (!state.getCommandedJointTrajectories().isEmpty())
       {

@@ -1,3 +1,6 @@
+# This message sends the current request for the Continuous Hiking process.
+# This holds parameters on how the Continuous Hiking process will behave.
+
 # Flag to start Continuous Hiking
 bool enable_continuous_hiking
 

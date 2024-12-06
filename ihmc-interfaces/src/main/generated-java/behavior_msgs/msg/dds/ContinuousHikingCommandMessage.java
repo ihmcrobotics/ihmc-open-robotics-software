@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * This message sends the current request for the Continuous Hiking process.
+       * This holds parameters on how the Continuous Hiking process will behave.
+       */
 public class ContinuousHikingCommandMessage extends Packet<ContinuousHikingCommandMessage> implements Settable<ContinuousHikingCommandMessage>, EpsilonComparable<ContinuousHikingCommandMessage>
 {
    /**
