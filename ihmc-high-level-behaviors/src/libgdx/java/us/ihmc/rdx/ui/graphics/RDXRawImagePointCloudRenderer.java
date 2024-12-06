@@ -17,11 +17,15 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.tools.LibGDXTools;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 public class RDXRawImagePointCloudRenderer implements RenderableProvider
 {
@@ -62,7 +66,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       shader.set(inputID, pointScale);
    });
 
-   private Color defaultPointColor = Color.WHITE;
+   private final Color defaultPointColor = new Color(Color.WHITE);
    private final RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
    {
       shader.set(inputID, defaultPointColor);
@@ -192,7 +196,46 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    // TODO: Add method for Depth + Color
 
-   // TODO: Add method for point cloud (array of points)
+   public void updateMesh(Collection<? extends Point3DReadOnly> points)
+   {
+      if (vertices.length != floatsPerVertex * points.size())
+         vertices = new float[floatsPerVertex * points.size()];
+
+      // Copy points over
+      Iterator<? extends Point3DReadOnly> pointIterator = points.iterator();
+      for (int i = 0; i < points.size() && pointIterator.hasNext(); ++i)
+      {
+         Point3DReadOnly point = pointIterator.next();
+         int offset = i * floatsPerVertex;
+
+         vertices[offset] = point.getX32();
+         vertices[offset + 1] = point.getY32();
+         vertices[offset + 2] = point.getZ32();
+      }
+
+      renderable.meshPart.size = points.size();
+      renderable.meshPart.mesh.setVertices(vertices);
+   }
+
+   public void updateMesh(Point3DReadOnly[] points)
+   {
+      // Ensure correct length
+      if (vertices.length != floatsPerVertex * points.length)
+         vertices = new float[floatsPerVertex * points.length];
+
+      // Copy points over
+      for (int i = 0; i < points.length; ++i)
+      {
+         int offset = i * floatsPerVertex;
+
+         vertices[offset] = points[i].getX32();
+         vertices[offset + 1] = points[i].getY32();
+         vertices[offset + 2] = points[i].getZ32();
+      }
+
+      renderable.meshPart.size = points.length;
+      renderable.meshPart.mesh.setVertices(vertices);
+   }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -214,7 +257,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    public void setDefaultPointColor(Color color)
    {
-      defaultPointColor = color;
+      defaultPointColor.set(color);
    }
 
    public void setColoringMethod(ColoringMethod method)
