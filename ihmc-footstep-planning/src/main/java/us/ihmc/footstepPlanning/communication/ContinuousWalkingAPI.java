@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import std_msgs.Empty;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -16,7 +16,7 @@ public class ContinuousWalkingAPI
 
    // Commands supported for the Continuous Hiking Process
    public static final ROS2Topic<ContinuousHikingCommandMessage> CONTINUOUS_WALKING_COMMAND = IHMC_ROOT.withModule("continuous_walking").withType(ContinuousHikingCommandMessage.class).withSuffix("command");
-   public static final ROS2Topic<Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(Empty.class).withSuffix("clear_goal_footsteps");
+   public static final ROS2Topic<std_msgs.msg.dds.Empty> CLEAR_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(Empty.class).withSuffix("clear_goal_footsteps");
    public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");
 
    // Statuses supported from the Continuous Hiking Process
