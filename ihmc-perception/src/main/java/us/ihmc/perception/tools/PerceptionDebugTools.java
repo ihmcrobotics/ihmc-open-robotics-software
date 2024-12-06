@@ -349,8 +349,6 @@ public class PerceptionDebugTools
       display(tag, finalDisplayDepth, delay, finalDisplayDepth.rows());
    }
 
-
-
    public void testProjection(Mat depth)
    {
       double radius = 4.0f;
