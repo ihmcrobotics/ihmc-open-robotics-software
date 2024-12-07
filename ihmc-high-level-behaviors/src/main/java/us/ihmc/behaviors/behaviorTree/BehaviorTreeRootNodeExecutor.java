@@ -178,14 +178,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          }
          else if (!failedActionsWithoutFallback.isEmpty())
          {
-            state.getLogger().error("An action failed. Disabling automatic execution.");
+            state.getLogger().error("An action failed. Disabling automatic execution.\n   Failed: %s".formatted(failedActionsWithoutFallback));
             state.setAutomaticExecution(false);
          }
          else
          {
             while (shouldExecuteNextAction())
             {
-               state.getLogger().info("Automatically executing action: {}", actionChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+               var nextAction = actionChildren.get(state.getExecutionNextIndex());
+               state.getLogger().info("Automatically executing action: %s (%s)".formatted(nextAction.getDefinition().getName(),
+                                                                                          nextAction.getClass().getSimpleName()));
                executeNextAction();
             }
          }
@@ -194,7 +196,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          while (shouldExecuteNextAction())
          {
-            state.getLogger().info("Manually executing action: {}", actionChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+            var nextAction = actionChildren.get(state.getExecutionNextIndex());
+            state.getLogger().info("Manually executing action: %s (%s)".formatted(nextAction.getDefinition().getName(),
+                                                                                  nextAction.getClass().getSimpleName()));
             executeNextAction();
          }
       }
@@ -227,7 +231,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       ActionNodeExecutor<?, ?> actionToExecute = actionChildren.get(state.getExecutionNextIndex());
 
-      state.getLogger().info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
+      state.getLogger().info("Triggering action execution: %s (%s)".formatted(actionToExecute.getDefinition().getName(),
+                                                                              actionToExecute.getClass().getSimpleName()));
       actionToExecute.update();
       actionToExecute.triggerActionExecution();
       currentlyExecutingActions.add(actionToExecute);
