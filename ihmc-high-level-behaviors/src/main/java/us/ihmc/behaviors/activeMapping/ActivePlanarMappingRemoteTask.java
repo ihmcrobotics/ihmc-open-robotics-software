@@ -93,26 +93,23 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (continuousPlanningParameters.getEnableContinuousHiking())
+      if (walkingStatusMessage.get() != null)
       {
-         if (walkingStatusMessage.get() != null)
+         if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !continuousPlanner.isPlanAvailable())
          {
-            if (walkingStatusMessage.get().getWalkingStatus() == WalkingStatusMessage.COMPLETED && !continuousPlanner.isPlanAvailable())
-            {
-               continuousPlanner.planBodyPathWithPlanarRegionMap(planarRegionMap);
-            }
+            continuousPlanner.planBodyPathWithPlanarRegionMap(planarRegionMap);
          }
-
-         if (continuousPlanner.isPlanAvailable())
-         {
-            // Publishing Plan Result
-            FootstepDataListMessage footstepDataList = continuousPlanner.getFootstepDataListMessage();
-            publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
-
-            continuousPlanner.setPlanAvailable(false);
-         }
-//         configurationParameters.setActiveMapping(false);
       }
+
+      if (continuousPlanner.isPlanAvailable())
+      {
+         // Publishing Plan Result
+         FootstepDataListMessage footstepDataList = continuousPlanner.getFootstepDataListMessage();
+         publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
+
+         continuousPlanner.setPlanAvailable(false);
+      }
+      //         configurationParameters.setActiveMapping(false);
    }
 
    public ContinuousPlannerForPlanarRegions getContinuousPlanner()

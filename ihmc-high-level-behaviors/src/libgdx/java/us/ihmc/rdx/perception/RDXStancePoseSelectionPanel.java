@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -263,7 +263,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       PoseListMessage poseListMessage = new PoseListMessage();
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
-      ros2Helper.publish(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, poseListMessage);
+      ros2Helper.publish(ContinuousHikingAPI.PLACED_GOAL_FOOTSTEPS, poseListMessage);
    }
 
    public boolean isSelectionActive()

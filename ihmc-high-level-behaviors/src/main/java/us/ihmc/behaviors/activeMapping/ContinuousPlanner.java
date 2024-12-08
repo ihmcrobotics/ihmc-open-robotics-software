@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.activeMapping;
 
-import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
+import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
@@ -60,7 +60,7 @@ public class ContinuousPlanner
    private final FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
 
-   private ContinuousWalkingCommandMessage command;
+   private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
    private AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private List<QueuedFootstepStatusMessage> controllerQueue = new ArrayList<>();
 
@@ -73,6 +73,7 @@ public class ContinuousPlanner
 
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames referenceFrames,
+                            AtomicReference<ContinuousHikingCommandMessage> commandMessage,
                             ContinuousHikingParameters continuousHikingParameters,
                             MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
                             DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
@@ -81,6 +82,7 @@ public class ContinuousPlanner
                             ContinuousHikingLogger continuousHikingLogger)
    {
       this.referenceFrames = referenceFrames;
+      this.commandMessage = commandMessage;
       this.continuousHikingParameters = continuousHikingParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
@@ -127,26 +129,16 @@ public class ContinuousPlanner
       walkingStartMidPose.getOrientation().setToYawOrientation(startingPose.getRotation().getYaw());
    }
 
-   public void planToGoal(ContinuousWalkingCommandMessage command, SideDependentList<FramePose3D> goalPoses)
+   public void planToGoal(SideDependentList<FramePose3D> goalPoses)
    {
-      this.command = command;
 
-      if (command.getUseAstarFootstepPlanner())
+      if (commandMessage.get().getUseAstarFootstepPlanner())
       {
-         latestFootstepPlan = generateAStarFootstepPlan(latestHeightMapData, latestTerrainMapData, command.getUsePreviousPlanAsReference(), false, goalPoses);
+         latestFootstepPlan = generateAStarFootstepPlan(latestHeightMapData, latestTerrainMapData, commandMessage.get().getUsePreviousPlanAsReference(), false, goalPoses);
       }
-      else if (command.getUseMonteCarloFootstepPlanner())
+      else if (commandMessage.get().getUseMonteCarloFootstepPlanner())
       {
          latestFootstepPlan = generateMonteCarloFootstepPlan(goalPoses);
-      }
-      else if (command.getUseHybridPlanner())
-      {
-         generateMonteCarloFootstepPlan(goalPoses);
-         latestFootstepPlan = generateAStarFootstepPlan(latestHeightMapData,
-                                                        latestTerrainMapData,
-                                                        command.getUsePreviousPlanAsReference(),
-                                                        command.getUseMonteCarloPlanAsReference(),
-                                                        goalPoses);
       }
       else
       {
@@ -180,7 +172,7 @@ public class ContinuousPlanner
       request.setAbortIfGoalStepSnappingFails(true);
 
       // When walking backwards, we want to keep the body facing in the same direction, otherwise the robot will turn as it tries to step backwards
-      if (command.getWalkBackwards())
+      if (commandMessage.get().getWalkBackwards())
       {
          FramePose3D bodyMidGoalPose = new FramePose3D();
          bodyMidGoalPose.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
@@ -473,7 +465,7 @@ public class ContinuousPlanner
       continuousHikingLogger.appendString("[TRANSITION]: Resetting Previous Plan Reference");
       this.previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
 
-      if (command.getUseMonteCarloFootstepPlanner())
+      if (commandMessage.get().getUseMonteCarloFootstepPlanner())
       {
          monteCarloFootstepPlanner.transitionToOptimal();
       }

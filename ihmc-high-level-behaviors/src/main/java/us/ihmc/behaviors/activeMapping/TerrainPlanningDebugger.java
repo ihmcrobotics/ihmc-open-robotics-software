@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -74,11 +74,11 @@ public class TerrainPlanningDebugger
       this.planningMode = planningMode;
       if (ros2Node != null)
       {
-         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
-         statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
-         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 
