@@ -212,6 +212,18 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                            sceneGraph.getCRDTInfo());
             yield new RDXPredefinedRigidBodySceneNode(rightDoorPanel, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "DoorLever" ->
+         {
+            PredefinedRigidBodySceneNode doorLever = new PredefinedRigidBodySceneNode(nextID,
+                                                                                           name,
+                                                                                           sceneGraph.getIDToNodeMap(),
+                                                                                           parent.getID(),
+                                                                                           new RigidBodyTransform(),
+                                                                                           DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                                           new RigidBodyTransform(),
+                                                                                           sceneGraph.getCRDTInfo());
+            yield new RDXPredefinedRigidBodySceneNode(doorLever, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          case "Charge" ->
          {
             PredefinedRigidBodySceneNode charge = new PredefinedRigidBodySceneNode(nextID,
