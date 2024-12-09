@@ -26,6 +26,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.stream.IntStream;
 
 public class RDXRawImagePointCloudRenderer implements RenderableProvider
 {
@@ -160,8 +161,6 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       int width = depthImage.getWidth();
       int height = depthImage.getHeight();
       int pixelCount = width * height;
-      int x = 0;
-      int y = 0;
 
       // Ensure correct length
       if (vertices.length != floatsPerVertex * pixelCount)
@@ -173,20 +172,14 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthPointer.get(depthData);
       depthPointer.close();
 
-      for (int i = 0; i < pixelCount; ++i)
-      {
+      IntStream.range(0, height * width).parallel().unordered().forEach(i -> {
          int offset = i * floatsPerVertex;
-
-         // Depth data
+         int x = i % width;
+         int y = i / width;
          vertices[offset] = depthData[i];
          vertices[offset + 1] = x;
          vertices[offset + 2] = y;
-
-         // Update pixel coordinates
-         x = ++x % width;
-         if (x == 0)
-            y = ++y % height;
-      }
+      });
 
       renderable.meshPart.size = pixelCount;
       renderable.meshPart.mesh.setVertices(vertices);
