@@ -285,17 +285,26 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       // Here we check against null rather then .isConnected() because if the controller is unplugged, that method won't work
       boolean controllerConnected = joystickController != null;
 
-      if (ImGui.getIO().getKeyAlt())
+      if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
       {
-         publishStopContinuousHiking();
+         publishContinuousHikingCommand();
       }
       else if (controllerConnected)
       {
-         publishJoystickStatus(joystickController);
+         if (joystickController.getButton(joystickController.getMapping().buttonA))
+         {
+            publishJoystickStatus(joystickController);
+         }
+
+         if (joystickController.getButton(joystickController.getMapping().buttonX))
+         {
+            publishStopContinuousHiking();
+         }
       }
-      else if (ImGui.getIO().getKeyCtrl() && ImGui.getIO().getKeyShift())
+
+      if (ImGui.getIO().getKeyAlt())
       {
-         publishContinuousHikingCommand();
+         publishStopContinuousHiking();
       }
    }
 
@@ -367,20 +376,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private void publishStopContinuousHiking()
    {
       commandMessage.setEnableContinuousHiking(false);
-      commandMessage.setStepsBeforeSafetyStop(0);
-      commandMessage.setWalkForwards(false);
-      commandMessage.setSquareUpToGoal(false);
-      commandMessage.setUseAstarFootstepPlanner(useAStarFootstepPlanner.get());
-      commandMessage.setUseMonteCarloFootstepPlanner(useMonteCarloFootstepPlanner.get());
-      commandMessage.setUseMonteCarloPlanAsReference(useMonteCarloReference.get());
-      commandMessage.setUsePreviousPlanAsReference(!useMonteCarloReference.get());
-
-      commandMessage.setUseJoystickController(false);
-      commandMessage.setForwardValue(0.0);
-      commandMessage.setWalkBackwards(false);
-      commandMessage.setLateralValue(0.0);
-      commandMessage.setTurningValue(0.0);
-
       commandPublisher.publish(commandMessage);
    }
 
@@ -398,6 +393,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       lateralJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisLeftX);
       turningJoystickValue = -joystickController.getAxis(joystickController.getMapping().axisRightX);
 
+      commandMessage.setEnableContinuousHiking(true);
       commandMessage.setUseJoystickController(true);
       commandMessage.setForwardValue(forwardJoystickValue);
       commandMessage.setWalkBackwards(walkBackwards);
