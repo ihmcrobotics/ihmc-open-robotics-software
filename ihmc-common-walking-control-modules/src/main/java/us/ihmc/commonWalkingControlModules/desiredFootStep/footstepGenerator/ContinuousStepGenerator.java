@@ -349,7 +349,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          {
             if (i == startingIndexToAdjust)
             {
-               quicksterFootstepProvider.get().getDesiredTouchdownPosition2D(swingSide, nextFootstepPose2D.getPosition());
+               quicksterFootstepProvider.get().getDesiredTouchdownPose(swingSide, nextFootstepPose2D);
             }
             else
             {

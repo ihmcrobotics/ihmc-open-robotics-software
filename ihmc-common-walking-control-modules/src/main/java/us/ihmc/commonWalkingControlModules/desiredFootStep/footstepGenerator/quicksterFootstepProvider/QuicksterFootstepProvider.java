@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -40,6 +42,7 @@ public class QuicksterFootstepProvider implements Updatable
 
    private final String variableNameSuffix = "QFP";
 
+   private final FullHumanoidRobotModel robotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
 
    private final double updateDT;
@@ -52,6 +55,7 @@ public class QuicksterFootstepProvider implements Updatable
    // Command/Desired output related stuff
    private final SideDependentList<QuicksterFootstepProviderTouchdownCalculator> touchdownCalculator = new SideDependentList<>();
    private final SideDependentList<FramePoint2D> desiredTouchdownPositions = new SideDependentList<>();
+   private final SideDependentList<FramePose2D> desiredTouchdownPoses = new SideDependentList<>();
 
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
@@ -60,6 +64,7 @@ public class QuicksterFootstepProvider implements Updatable
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
    private final YoFrameQuaternion desiredPelvisOrientation;
+   private final FrameQuaternion chestOrientation = new FrameQuaternion();
 
    // Foot state information
    public enum FootState {SUPPORT, SWING}
@@ -69,13 +74,18 @@ public class QuicksterFootstepProvider implements Updatable
    private final YoBoolean inDoubleSupport = new YoBoolean("inDoubleSupport" + variableNameSuffix, registry);
    private RobotSide trailingSide = RobotSide.LEFT;
 
-   //
+   // Pendulum base information
    private final SideDependentList<FramePoint2D> pendulumBase = new SideDependentList<>();
    private final FramePoint2D netPendulumBase = new FramePoint2D();
    private final SideDependentList<YoFramePoint3D> pendulumBase3DInWorld = new SideDependentList<>();
    private final YoFramePoint3D netPendulumBase3DInWorld = new YoFramePoint3D("netPendulumBase3DInWorld" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoGraphicPosition> pendulumBaseViz = new SideDependentList<>();
    private final YoGraphicPosition netPendulumBaseViz;
+
+   // Temp variables for changing frames and stuff
+   private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
+   private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();
+   private final FramePoint2D tempTouchdownPosition = new FramePoint2D();
 
    // Inputs
    private final static Vector2DReadOnly zero2D = new Vector2D();
@@ -84,8 +94,9 @@ public class QuicksterFootstepProvider implements Updatable
 
    public QuicksterFootstepProvider(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, double updateDT, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, DoubleProvider yoTime)
    {
-      this.updateDT = updateDT;
+      this.robotModel = robotModel;
       this.referenceFrames = referenceFrames;
+      this.updateDT = updateDT;
 
       desiredPelvisOrientation = new YoFrameQuaternion("pelvisDesiredOrientation" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
 
@@ -143,6 +154,7 @@ public class QuicksterFootstepProvider implements Updatable
                                                                                              registry));
 
          desiredTouchdownPositions.put(robotSide, new FramePoint2D());
+         desiredTouchdownPoses.put(robotSide, new FramePose2D());
 
          StateMachineFactory<FootState, State> stateMachineFactory = new StateMachineFactory<>(FootState.class);
          stateMachineFactory.setRegistry(registry).setNamePrefix(robotSide.getLowerCaseName() + variableNameSuffix).buildYoClock(yoTime);
@@ -160,9 +172,25 @@ public class QuicksterFootstepProvider implements Updatable
       parentRegistry.addChild(registry);
    }
 
+   private boolean firstTick = true;
+
+   private void initialize()
+   {
+      chestOrientation.setToZero(robotModel.getChest().getBodyFixedFrame());
+      chestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+      desiredPelvisOrientation.setToZero();
+      desiredPelvisOrientation.setToYawOrientation(chestOrientation.getYaw());
+
+      firstTick = false;
+   }
+
    @Override
    public void update(double time)
    {
+      if (firstTick)
+         initialize();
+
       updateEstimates();
 
       updateDesireds();
@@ -170,8 +198,8 @@ public class QuicksterFootstepProvider implements Updatable
 
    private void updateEstimates()
    {
-      // TODO maybe wrong?
-      desiredPelvisOrientation.setToYawOrientation(referenceFrames.getChestFrame().getTransformToWorldFrame().getRotation().getYaw());
+      // TODO should we set to chest yaw each tick?
+      // desiredPelvisOrientation.setToYawOrientation(referenceFrames.getChestFrame().getTransformToWorldFrame().getRotation().getYaw());
       desiredPelvisOrientation.appendYawRotation(desiredTurningVelocity.getDoubleValue() * updateDT);
 
       estimates.update();
@@ -190,28 +218,13 @@ public class QuicksterFootstepProvider implements Updatable
       {
          footStateMachines.get(robotSide).doActionAndTransition();
          pendulumBase3DInWorld.get(robotSide).setMatchingFrame(pendulumBase.get(robotSide), 0.0);
+
+         desiredTouchdownPoses.get(robotSide).getPosition().set(desiredTouchdownPositions.get(robotSide));
+         desiredTouchdownPoses.get(robotSide).getOrientation().setFromReferenceFrame(centerOfMassControlZUpFrame);
       }
 
       netPendulumBase3DInWorld.setMatchingFrame(netPendulumBase, 0.0);
    }
-
-   public void calculateTouchdownPosition(RobotSide swingSide,
-                                          double timeToReachGoal,
-                                          FramePose2DReadOnly pendulumBase,
-                                          FramePose2DReadOnly netPendulumBase,
-                                          FramePose2DBasics touchdownPositionToPack)
-   {
-      calculateTouchdownPosition(touchdownCalculator.get(swingSide),
-                                 swingSide, timeToReachGoal,
-                                 pendulumBase.getPosition(),
-                                 netPendulumBase.getPosition(),
-                                 inDoubleSupport.getBooleanValue(),
-                                 touchdownPositionToPack.getPosition());
-   }
-
-   private final FramePoint2DBasics tempPendulumBase = new FramePoint2D();
-   private final FramePoint2DBasics tempNetPendulumBase = new FramePoint2D();
-   private final FramePoint2D tempTouchdownPosition = new FramePoint2D();
 
    public void calculateTouchdownPosition(QuicksterFootstepProviderTouchdownCalculator touchdownCalculator,
                                           RobotSide swingSide,
@@ -393,6 +406,12 @@ public class QuicksterFootstepProvider implements Updatable
       }
 
       return desiredTouchdownPositions.get(robotSide);
+   }
+
+   public void getDesiredTouchdownPose(RobotSide robotSide, FramePose2D touchdownPoseToPack)
+   {
+      // TODO 3D transform between two 2D poses?
+      touchdownPoseToPack.setMatchingFrame(desiredTouchdownPoses.get(robotSide));
    }
 
    public double getSwingDuration(RobotSide swingSide)

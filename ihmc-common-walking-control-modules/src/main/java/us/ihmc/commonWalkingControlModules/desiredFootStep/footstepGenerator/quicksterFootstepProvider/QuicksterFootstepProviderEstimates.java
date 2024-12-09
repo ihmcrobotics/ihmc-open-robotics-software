@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
@@ -28,11 +29,18 @@ public class QuicksterFootstepProviderEstimates
    private final MovingReferenceFrame centerOfMassFrame;
    private final MovingReferenceFrame centerOfMassControlFrame;
    private final MovingZUpFrame centerOfMassControlZUpFrame;
+   private final YoGraphicReferenceFrame centerOfMassControlZUpFrameGraphic;
 
    // Calculator for CoM momentum info
    private final AngularExcursionCalculator angularExcursionCalculator;
 
-   public  QuicksterFootstepProviderEstimates(FullHumanoidRobotModel robotModel, CommonHumanoidReferenceFrames referenceFrames, FrameQuaternionReadOnly desiredPelvisOrientation, double updateDT, String variableNameSuffix, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public  QuicksterFootstepProviderEstimates(FullHumanoidRobotModel robotModel,
+                                              CommonHumanoidReferenceFrames referenceFrames,
+                                              FrameQuaternionReadOnly desiredPelvisOrientation,
+                                              double updateDT,
+                                              String variableNameSuffix,
+                                              YoRegistry registry,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       currentCoMPosition = new YoFramePoint3D("currentCoMPosition" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
       currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity" + variableNameSuffix, ReferenceFrame.getWorldFrame(), registry);
@@ -63,6 +71,9 @@ public class QuicksterFootstepProviderEstimates
 
       centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame" + variableNameSuffix);
 
+      centerOfMassControlZUpFrameGraphic = new YoGraphicReferenceFrame(centerOfMassControlZUpFrame, registry, false, 2.0);
+      yoGraphicsListRegistry.registerYoGraphic("QFP", centerOfMassControlZUpFrameGraphic);
+
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, robotModel.getElevator(), updateDT, registry, null);
    }
 
@@ -80,6 +91,7 @@ public class QuicksterFootstepProviderEstimates
       // Update CoM control frames
       centerOfMassControlFrame.update();
       centerOfMassControlZUpFrame.update();
+      centerOfMassControlZUpFrameGraphic.update();
    }
 
    public FramePoint3DReadOnly getCenterOfMassPosition()
