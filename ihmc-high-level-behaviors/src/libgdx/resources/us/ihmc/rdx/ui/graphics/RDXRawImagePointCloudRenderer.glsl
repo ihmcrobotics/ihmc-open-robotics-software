@@ -9,8 +9,18 @@
 #define COLOR_GRADIENT_SENSOR_X 2
 #define COLOR_FROM_IMAGE 3
 
+/*
+ * This attribute can represent different data depending on the input method.
+ * If the input method is a point cloud, the attribute represents
+ * a point in world frame.
+ * (x, y, z) = a_position.xyz
+ * If the input method is a depth image, the attribute represents
+ * the depth value and its pixel coordinates.
+ * depth = a_position.x and (x, y) = a_position.yz
+ */
 layout(location = 0) in vec3 a_position;
 
+// We output the color of the vertex for the fragment shader to use
 out vec4 v_color;
 
 // Generally needed uniforms
@@ -52,11 +62,11 @@ float angle2D(vec2 a, vec2 b)
 }
 
 // COLOR STUFF //
-vec4 calculateSinusoidalGradientColor(float input)
+vec4 calculateSinusoidalGradientColor(float value)
 {
    // maximum depth value
    float m = 3.0f;
-   float a = 5.0f * input * M_PI_F / (3.0f * m) + M_PI_F / 2.0f;
+   float a = 5.0f * value * M_PI_F / (3.0f * m) + M_PI_F / 2.0f;
 
    float r = sin(a) * 192.0f + 128.0f;
    r = max(0.0f, min(255.0f, r));
@@ -76,6 +86,7 @@ void main()
    vec4 pointColor;
    float pointSize;
 
+// We calculate the worldFramePoint depending on the input method
 #ifdef INPUT_DEPTH_IMAGE
    float depthInMeters = a_position.x * u_depthDiscretization;
 
