@@ -429,6 +429,11 @@ public class QuicksterFootstepProvider implements Updatable
       return getSwingDuration(swingSide) + getTransferDuration(swingSide);
    }
 
+   public double getSwingHeight(RobotSide swingSide)
+   {
+      return parameters.getSwingHeight(swingSide).getDoubleValue();
+   }
+
    public YoRegistry getRegistry()
    {
       return registry;

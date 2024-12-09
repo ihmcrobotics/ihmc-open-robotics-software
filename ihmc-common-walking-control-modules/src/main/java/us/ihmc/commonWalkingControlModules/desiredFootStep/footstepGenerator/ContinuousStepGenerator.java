@@ -398,8 +398,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          //         }
 
          footstep.setRobotSide(swingSide.toByte());
-         if (swingHeightInputProvider == null)
+         if (swingHeightInputProvider == null && csgMode.getEnumValue() == CSGMode.STANDARD)
             footstep.setSwingHeight(parameters.getSwingHeight());
+         else if (swingHeightInputProvider == null && csgMode.getEnumValue() == CSGMode.QFP)
+            footstep.setSwingHeight(quicksterFootstepProvider.get().getSwingHeight(swingSide));
          else
             footstep.setSwingHeight(swingHeightInputProvider.getValue());
 

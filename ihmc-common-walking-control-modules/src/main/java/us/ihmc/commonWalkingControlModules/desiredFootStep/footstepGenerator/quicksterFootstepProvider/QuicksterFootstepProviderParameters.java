@@ -14,9 +14,11 @@ public class QuicksterFootstepProviderParameters
    private static final double SWING_DURATION = 0.55;
    private static final double DOUBLE_SUPPORT_FRACTION = 0.05;
    private static final double STANCE_WIDTH = 0.2;
-   private static final double SWING_HEIGHT = 0.07;
+   private static final double SWING_HEIGHT = 0.09;
    private static final double COM_HEIGHT = 0.9;
    private static final double POLE = 0.0;
+   private static final double MAX_ACCELERATION_PER_STEP = 0.075;
+   private static final double MAX_DECELERATION_PER_STEP = -0.2;
 
    // YoVariables
    private final YoDouble swingDuration;
@@ -25,6 +27,8 @@ public class QuicksterFootstepProviderParameters
    private final YoDouble swingHeight;
    private final YoDouble comHeight;
    private final YoDouble pole;
+   private final YoDouble maxAccelerationPerStep;
+   private final YoDouble maxDecelerationPerStep;
    private final YoDouble omega;
 
    // Stageable YoVariables
@@ -34,6 +38,8 @@ public class QuicksterFootstepProviderParameters
    private final SideDependentList<StageableYoDouble> swingHeightCurrentStep = new SideDependentList<>();
    private final SideDependentList<StageableYoDouble> comHeightCurrentStep = new SideDependentList<>();
    private final SideDependentList<StageableYoDouble> poleCurrentStep = new SideDependentList<>();
+   private final SideDependentList<StageableYoDouble> maxAccelerationPerStepCurrentStep = new SideDependentList<>();
+   private final SideDependentList<StageableYoDouble> maxDecelerationPerStepCurrentStep = new SideDependentList<>();
    private final SideDependentList<StageableYoDouble> omegaCurrentStep = new SideDependentList<>();
 
    private final SideDependentList<List<StageableYoDouble>> stageableYoDoubles = new SideDependentList<>();
@@ -49,6 +55,8 @@ public class QuicksterFootstepProviderParameters
       swingHeight = new YoDouble("desiredSwingHeight" + suffix2, registry);
       comHeight = new YoDouble("desiredComHeight" + suffix2, registry);
       pole = new YoDouble("pole" + suffix2, registry);
+      maxAccelerationPerStep = new YoDouble("maxAccelerationPerStep" + suffix2, registry);
+      maxDecelerationPerStep = new YoDouble("maxDecelerationPerStep" + suffix2, registry);
       omega = new YoDouble("omega" + suffix2, registry);
 
       swingDuration.set(SWING_DURATION);
@@ -57,6 +65,8 @@ public class QuicksterFootstepProviderParameters
       swingHeight.set(SWING_HEIGHT);
       comHeight.set(COM_HEIGHT);
       pole.set(POLE);
+      maxAccelerationPerStep.set(MAX_ACCELERATION_PER_STEP);
+      maxDecelerationPerStep.set(MAX_DECELERATION_PER_STEP);
       omega.set(Math.sqrt(Math.abs(gravityZ / comHeight.getDoubleValue())));
 
       for (RobotSide robotSide : RobotSide.values)
@@ -70,6 +80,8 @@ public class QuicksterFootstepProviderParameters
          swingHeightCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "desiredSwingHeight", suffix + suffix2, swingHeight, registry));
          comHeightCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "desiredComHeight", suffix + suffix2, comHeight, registry));
          poleCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "pole", suffix + suffix2, pole, registry));
+         maxAccelerationPerStepCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "maxAccelerationPerStep", suffix + suffix2, maxAccelerationPerStep, registry));
+         maxDecelerationPerStepCurrentStep.put(robotSide, createStageableYoDouble(robotSide, "maxDecelerationPerStep", suffix + suffix2, maxDecelerationPerStep, registry));
          omegaCurrentStep.put(robotSide,  createStageableYoDouble(robotSide, "omega", suffix + suffix2, omega, registry));
 
       }
@@ -121,7 +133,7 @@ public class QuicksterFootstepProviderParameters
       return stanceWidthCurrentStep.get(robotSide);
    }
 
-   public YoDouble getDesiredSwingHeight(RobotSide robotSide)
+   public YoDouble getSwingHeight(RobotSide robotSide)
    {
       return swingHeightCurrentStep.get(robotSide);
    }
@@ -134,6 +146,16 @@ public class QuicksterFootstepProviderParameters
    public YoDouble getPole(RobotSide robotSide)
    {
       return poleCurrentStep.get(robotSide);
+   }
+
+   public YoDouble getMaxAccelerationPerStepCurrentStep(RobotSide robotSide)
+   {
+      return maxAccelerationPerStepCurrentStep.get(robotSide);
+   }
+
+   public YoDouble getMaxDecelerationPerStepCurrentStep(RobotSide robotSide)
+   {
+      return maxDecelerationPerStepCurrentStep.get(robotSide);
    }
 
    public YoDouble getOmega(RobotSide robotSide)
