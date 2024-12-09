@@ -31,8 +31,7 @@ import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.tools.LibGDXTools;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 import java.util.stream.IntStream;
 
 public class RDXRawImagePointCloudRenderer implements RenderableProvider
@@ -209,7 +208,8 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthPointer.get(depthData);
       depthPointer.close();
 
-      IntStream.range(0, height * width).parallel().unordered().forEach(i -> {
+      IntStream.range(0, height * width).parallel().unordered().forEach(i ->
+      {
          int offset = i * floatsPerVertex;
          int x = i % width;
          int y = i / width;
@@ -264,22 +264,21 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       colorImage.release();
    }
 
-   public void updateMesh(Collection<? extends Point3DReadOnly> points)
+   public void updateMesh(List<? extends Point3DReadOnly> points)
    {
       if (vertices.length != floatsPerVertex * points.size())
          vertices = new float[floatsPerVertex * points.size()];
 
       // Copy points over
-      Iterator<? extends Point3DReadOnly> pointIterator = points.iterator();
-      for (int i = 0; i < points.size() && pointIterator.hasNext(); ++i)
+      IntStream.range(0, points.size()).parallel().unordered().forEach(i ->
       {
-         Point3DReadOnly point = pointIterator.next();
+         Point3DReadOnly point = points.get(i);
          int offset = i * floatsPerVertex;
 
          vertices[offset] = point.getX32();
          vertices[offset + 1] = point.getY32();
          vertices[offset + 2] = point.getZ32();
-      }
+      });
 
       renderable.meshPart.size = points.size();
       renderable.meshPart.mesh.setVertices(vertices);
@@ -292,14 +291,15 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
          vertices = new float[floatsPerVertex * points.length];
 
       // Copy points over
-      for (int i = 0; i < points.length; ++i)
+      IntStream.range(0, points.length).parallel().unordered().forEach(i ->
       {
+         Point3DReadOnly point = points[i];
          int offset = i * floatsPerVertex;
 
-         vertices[offset] = points[i].getX32();
-         vertices[offset + 1] = points[i].getY32();
-         vertices[offset + 2] = points[i].getZ32();
-      }
+         vertices[offset] = point.getX32();
+         vertices[offset + 1] = point.getY32();
+         vertices[offset + 2] = point.getZ32();
+      });
 
       renderable.meshPart.size = points.length;
       renderable.meshPart.mesh.setVertices(vertices);
