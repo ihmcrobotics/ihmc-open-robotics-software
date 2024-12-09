@@ -21,10 +21,10 @@ import java.util.List;
 public class RDXPointCloudRendererDemo
 {
    private final String[] inputMethods = Arrays.stream(InputMethod.values()).map(Enum::name).toArray(String[]::new);
-   private final ImInt currentInputMethod = new ImInt(InputMethod.DEPTH_IMAGE.ordinal());
+   private final ImInt currentInputMethod = new ImInt(InputMethod.DEPTH_AND_COLOR_IMAGE.ordinal());
 
    private final String[] coloringMethods = Arrays.stream(ColoringMethod.values()).map(Enum::name).toArray(String[]::new);
-   private final ImInt currentColoringMethod = new ImInt(ColoringMethod.DEFAULT.ordinal());
+   private final ImInt currentColoringMethod = new ImInt(ColoringMethod.COLOR_IMAGE.ordinal());
 
    private final ImFloat pointScale = new ImFloat(0.01f);
    private final float[] defaultColor = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
@@ -80,7 +80,7 @@ public class RDXPointCloudRendererDemo
                }
                else if (inputMethod == InputMethod.DEPTH_AND_COLOR_IMAGE)
                {
-                  // TODO:
+                  pointCloudRenderer.updateMesh(depthImage, colorImage);
                }
                else // inputMethod == InputMethod.POINT_CLOUD
                {

@@ -30,7 +30,7 @@ uniform mat4 u_depthTransform;
 // Color image input is only possible when a depth image is provided
 #ifdef INPUT_COLOR_IMAGE
 // Color image uniforms
-uniform usampler2D u_colorTexture;
+uniform sampler2D u_colorTexture;
 uniform vec4 u_colorIntrinsics; // fx, fy, cx, cy
 uniform mat4 u_depthToColorTransform;
 #endif
@@ -42,6 +42,13 @@ vec3 transformPoint3D(vec3 point, mat4 transform)
    return vec3(dot(vec3(transform[0][0], transform[1][0], transform[2][0]), point) + transform[3][0],
                dot(vec3(transform[0][1], transform[1][1], transform[2][1]), point) + transform[3][1],
                dot(vec3(transform[0][2], transform[1][2], transform[2][2]), point) + transform[3][2]);
+}
+
+float angle2D(vec2 a, vec2 b)
+{
+   float cosTheta = a.x * b.x + a.y * b.y;
+   float sinTheta = a.x * b.y - a.y * b.x;
+   return atan(sinTheta, cosTheta);
 }
 
 // COLOR STUFF //
@@ -94,7 +101,23 @@ void main()
 #ifdef INPUT_COLOR_IMAGE
    else if (u_coloringMethod == COLOR_FROM_IMAGE)
    {
-      // TODO:
+      vec3 colorFramePoint = transformPoint3D(depthFramePoint, u_depthToColorTransform);
+
+      float yaw = -angle2D(vec2(1.0f, 0.0f), colorFramePoint.xy);
+      float pitch = -angle2D(vec2(1.0f, 0.0f), colorFramePoint.xz);
+
+      float pixelX = round(u_colorIntrinsics.z + u_colorIntrinsics.x * tan(yaw));
+      float pixelY = round(u_colorIntrinsics.w + u_colorIntrinsics.y * tan(pitch));
+            
+      ivec2 textureSize = textureSize(u_colorTexture, 0);
+      bool pixelInBounds = pixelX >= 0.0f && pixelX < textureSize.x && pixelY >= 0.0f && pixelY < textureSize.y;
+      if (pixelInBounds)
+      {
+         vec4 colorImagePixel = texture(u_colorTexture, vec2(pixelX / textureSize.x, pixelY / textureSize.y));
+         pointColor = colorImagePixel;
+      }
+      else
+         pointColor = calculateSinusoidalGradientColor(depthInMeters);
    }
 #endif
 #endif
