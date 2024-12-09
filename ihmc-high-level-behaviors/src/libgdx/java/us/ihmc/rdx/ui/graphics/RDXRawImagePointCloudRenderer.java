@@ -2,17 +2,24 @@ package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.ShortPointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
@@ -79,29 +86,21 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       shader.set(inputID, coloringMethod.ordinal());
    });
 
-   // DEPTH IMAGE UNIFORMS
+   // DEPTH IMAGE UNIFORM DATA
    private CameraIntrinsics depthIntrinsics = new CameraIntrinsics();
-   private final RDXUniform depthIntrinsicsUniform = RDXUniform.createGlobalUniform("u_depthIntrinsics", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, (float) depthIntrinsics.getFx(), (float) depthIntrinsics.getFy(), (float) depthIntrinsics.getCx(), (float) depthIntrinsics.getCy());
-   });
-
    private float depthDiscretization = 0.0f;
-   private final RDXUniform depthDiscretizationUniform = RDXUniform.createGlobalUniform("u_depthDiscretization", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, depthDiscretization);
-   });
-
    private final FixedFramePose3DBasics depthPose = new FramePose3D();
    private final Matrix4 libGDXDepthTransform = new Matrix4();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_depthTransform", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      LibGDXTools.toLibGDX(depthPose, tempTransform, libGDXDepthTransform);
-      shader.set(inputID, libGDXDepthTransform);
-   });
+   private final RigidBodyTransform tempDepthTransform = new RigidBodyTransform();
 
-   // TODO: COLOR IMAGE UNIFORMS
+   // COLOR IMAGE UNIFORM DATA
+   private Pixmap colorImagePixmap = new Pixmap(1, 1, Format.RGBA8888);
+   private BytePointer pixmapDataPointer = new BytePointer(colorImagePixmap.getPixels());
+   private final Texture colorImageTexture = new Texture(colorImagePixmap);
+   private CameraIntrinsics colorIntrinsics = new CameraIntrinsics();
+   private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
+   private final Matrix4 libGDXColorTransform = new Matrix4();
+   private final RigidBodyTransform tempColorTransform = new RigidBodyTransform();
 
    public RDXRawImagePointCloudRenderer(InputMethod inputMethod)
    {
@@ -136,17 +135,53 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
          registerDepthImageUniforms(shader);
 
       if (inputMethod == InputMethod.DEPTH_AND_COLOR_IMAGE)
-         ; // TODO: registerColorImageUniforms(shader)
+         registerColorImageUniforms(shader);
 
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
    }
 
-   private void registerDepthImageUniforms(RDXShader shader)
+   private void registerDepthImageUniforms(RDXShader rdxShader)
    {
-      shader.registerUniform(depthIntrinsicsUniform);
-      shader.registerUniform(depthDiscretizationUniform);
-      shader.registerUniform(depthTransformUniform);
+      RDXUniform depthIntrinsicsUniform = RDXUniform.createGlobalUniform("u_depthIntrinsics", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, (float) depthIntrinsics.getFx(), (float) depthIntrinsics.getFy(), (float) depthIntrinsics.getCx(), (float) depthIntrinsics.getCy());
+      });
+      rdxShader.registerUniform(depthIntrinsicsUniform);
+
+      RDXUniform depthDiscretizationUniform = RDXUniform.createGlobalUniform("u_depthDiscretization", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, depthDiscretization);
+      });
+      rdxShader.registerUniform(depthDiscretizationUniform);
+
+      RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_depthTransform", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, libGDXDepthTransform);
+      });
+      rdxShader.registerUniform(depthTransformUniform);
+   }
+
+   private void registerColorImageUniforms(RDXShader rdxShader)
+   {
+      RDXUniform colorImageTextureUniform = RDXUniform.createGlobalUniform("u_colorTexture", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, colorImageTexture);
+      });
+      rdxShader.registerUniform(colorImageTextureUniform);
+
+      RDXUniform colorIntrinsicsUniform = RDXUniform.createGlobalUniform("u_colorIntrinsics", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, (float) colorIntrinsics.getFx(), (float) colorIntrinsics.getFy(), (float) colorIntrinsics.getCx(), (float) colorIntrinsics.getCy());
+      });
+      rdxShader.registerUniform(colorIntrinsicsUniform);
+
+      RDXUniform depthTransformUniform = RDXUniform.createGlobalUniform("u_depthToColorTransform", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
+         shader.set(inputID, libGDXColorTransform);
+      });
+      rdxShader.registerUniform(depthTransformUniform);
    }
 
    public void updateMesh(RawImage depthImage)
@@ -154,9 +189,11 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       if (depthImage.get() == null)
          return;
 
+      // Update depth image uniforms
       depthIntrinsics = depthImage.getIntrinsicsCopy();
       depthDiscretization = depthImage.getDepthDiscretization();
       depthPose.set(depthImage.getPose());
+      LibGDXTools.toLibGDX(depthPose, tempDepthTransform, libGDXDepthTransform);
 
       int width = depthImage.getWidth();
       int height = depthImage.getHeight();
@@ -187,7 +224,45 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthImage.release();
    }
 
-   // TODO: Add method for Depth + Color
+   public void updateMesh(RawImage depthImage, RawImage colorImage)
+   {
+      if (depthImage.get() == null)
+         return;
+
+      if (colorImage.get() == null)
+         return;
+
+      // Update depth image stuff
+      updateMesh(depthImage);
+
+      // Update color image uniforms
+      colorIntrinsics = colorImage.getIntrinsicsCopy();
+      depthPose.getReferenceFrame().getTransformToDesiredFrame(depthToColorTransform, colorImage.getPose().getReferenceFrame());
+      LibGDXTools.toLibGDX(depthToColorTransform, tempColorTransform, libGDXColorTransform);
+
+      // Reallocate pixmap and data pointer if image size changed
+      if (colorImagePixmap.getWidth() != colorImage.getWidth() || colorImagePixmap.getHeight() != colorImage.getHeight())
+      {
+         colorImagePixmap.dispose();
+         colorImagePixmap = new Pixmap(colorImage.getWidth(), colorImage.getHeight(), Format.RGBA8888);
+
+         pixmapDataPointer.close();
+         pixmapDataPointer = new BytePointer(colorImagePixmap.getPixels());
+
+         colorImageTexture.load(new PixmapTextureData(colorImagePixmap, Format.RGBA8888, false, false));
+      }
+
+      // Use a mat to copy RGBA data into the pixmap data
+      Mat rgbaMat = new Mat(colorImage.getHeight(), colorImage.getWidth(), opencv_core.CV_8UC4, pixmapDataPointer);
+      colorImage.getPixelFormat().convertToRGBA(colorImage.getCpuImageMat(), rgbaMat);
+
+      // Draw the new image to the texture
+      colorImageTexture.draw(colorImagePixmap, 0, 0);
+
+      rgbaMat.release();
+      depthImage.release();
+      colorImage.release();
+   }
 
    public void updateMesh(Collection<? extends Point3DReadOnly> points)
    {
