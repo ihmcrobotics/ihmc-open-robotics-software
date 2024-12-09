@@ -10,24 +10,12 @@ find_package(Catch2 2 REQUIRED)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-
-file(GLOB CONTACT_SOURCES
-        "src/main/cpp/contact/*.hpp"
-        "src/main/cpp/contact/*.cpp")
-file(GLOB COST_SOURCES
-        "src/main/cpp/cost/*.hpp"
-        "src/main/cpp/cost/*.cpp")
-file(GLOB PROBLEM_SOURCES
-        "src/main/cpp/problem/*.hpp"
-        "src/main/cpp/problem/*.cpp")
+file(GLOB CONTROL_SOURCES
+        "src/main/cpp/*.hpp"
+        "src/main/cpp/*.cpp")
 set(SOURCES
-        ${CONTACT_SOURCES}
-        ${PROBLEM_SOURCES}
-        ${COST_SOURCES}
-        src/main/cpp/frame.hpp
-        src/main/cpp/stage.hpp
-        src/main/cpp/stage.cpp
-        src/main/cpp/types.hpp)
+        ${CONTROL_SOURCES}
+        )
 
 add_library(external-wrapper SHARED ${SOURCES})
 target_include_directories(external-wrapper PUBLIC

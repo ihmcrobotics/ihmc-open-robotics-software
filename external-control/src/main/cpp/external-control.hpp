@@ -38,17 +38,8 @@ namespace ihmc
                          double* d_gains_to_pack, int d_gain_rows) const;
 
     private:
-        std::string urdf_path_;
-
-        pinocchio::Data data_;
-
-        boost::shared_ptr<crocoddyl::StateMultibody> state_;
-        boost::shared_ptr<crocoddyl::ActuationModelAbstract> actuation_;
 
         Eigen::VectorXd initial_state_;
-
-        boost::shared_ptr<crocoddyl::ShootingProblem> problem_;
-        boost::shared_ptr<crocoddyl::SolverFDDP> solver_;
 
 
 
