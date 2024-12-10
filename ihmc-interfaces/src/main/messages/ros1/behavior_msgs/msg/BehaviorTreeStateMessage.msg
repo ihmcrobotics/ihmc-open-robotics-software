@@ -13,11 +13,15 @@ int8 ACTION_SEQUENCE=3
 
 int8 FALLBACK_NODE=4
 
-int8 DOOR_TRAVERSAL=5
+int8 CONDITION_NODE=5
 
-int8 TRASH_CAN_INTERACTION=6
+int8 GOTO_NODE=6
 
-int8 BUILDING_EXPLORATION=7
+int8 DOOR_TRAVERSAL=7
+
+int8 TRASH_CAN_INTERACTION=8
+
+int8 BUILDING_EXPLORATION=9
 
 int8 CHEST_ORIENTATION_ACTION=10
 
@@ -63,6 +67,10 @@ behavior_msgs/AI2RNodeStateMessage[] ai2r_nodes
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
 behavior_msgs/FallbackNodeStateMessage[] fallback_nodes
+
+behavior_msgs/ConditionNodeStateMessage[] condition_nodes
+
+behavior_msgs/GotoNodeStateMessage[] goto_nodes
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
