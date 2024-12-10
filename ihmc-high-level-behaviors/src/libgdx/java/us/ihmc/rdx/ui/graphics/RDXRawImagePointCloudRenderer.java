@@ -1,12 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -59,7 +54,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(VertexAttribute.Position());
    private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
-   private float[] vertices;
+   private float[] vertices = new float[0];
 
    // GENERALLY NEEDED UNIFORMS
    private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
@@ -109,8 +104,6 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
    public void create(int maxPoints)
    {
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
-
-      vertices = new float[floatsPerVertex * maxPoints];
 
       renderable = new Renderable();
       renderable.meshPart.primitiveType = GL41.GL_POINTS;
@@ -200,7 +193,18 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
       // Ensure correct length
       if (vertices.length != floatsPerVertex * pixelCount)
+      {
          vertices = new float[floatsPerVertex * pixelCount];
+
+         for (int i = 0; i < pixelCount; i++)
+         {
+            int offset = i * floatsPerVertex;
+            int x = i % width;
+            int y = i / width;
+            vertices[offset + 1] = x;
+            vertices[offset + 2] = y;
+         }
+      }
 
       // Get depth data
       short[] depthData = new short[pixelCount];
@@ -208,14 +212,10 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthPointer.get(depthData);
       depthPointer.close();
 
-      IntStream.range(0, height * width).parallel().unordered().forEach(i ->
+      IntStream.range(0, pixelCount).parallel().unordered().forEach(i ->
       {
          int offset = i * floatsPerVertex;
-         int x = i % width;
-         int y = i / width;
          vertices[offset] = depthData[i];
-         vertices[offset + 1] = x;
-         vertices[offset + 2] = y;
       });
 
       renderable.meshPart.size = pixelCount;
@@ -266,18 +266,25 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    public void updateMesh(List<? extends Point3DReadOnly> points)
    {
+      // Ensure correct length
       if (vertices.length != floatsPerVertex * points.size())
+      {
          vertices = new float[floatsPerVertex * points.size()];
+
+         for (int i = 0; i < points.size(); i++) {
+            Point3DReadOnly point = points.get(i);
+            int offset = i * floatsPerVertex;
+            vertices[offset + 1] = point.getY32();
+            vertices[offset + 2] = point.getZ32();
+         }
+      }
 
       // Copy points over
       IntStream.range(0, points.size()).parallel().unordered().forEach(i ->
       {
          Point3DReadOnly point = points.get(i);
          int offset = i * floatsPerVertex;
-
          vertices[offset] = point.getX32();
-         vertices[offset + 1] = point.getY32();
-         vertices[offset + 2] = point.getZ32();
       });
 
       renderable.meshPart.size = points.size();
@@ -295,10 +302,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       {
          Point3DReadOnly point = points[i];
          int offset = i * floatsPerVertex;
-
          vertices[offset] = point.getX32();
-         vertices[offset + 1] = point.getY32();
-         vertices[offset + 2] = point.getZ32();
       });
 
       renderable.meshPart.size = points.length;
