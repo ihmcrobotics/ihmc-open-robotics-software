@@ -157,7 +157,6 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
-   private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
 
    // All things QFP
    public enum CSGMode {STANDARD, QFP}
@@ -248,6 +247,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
          if (statusToProcess != null)
          {
+            currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+
             if (statusToProcess == FootstepStatus.STARTED)
             {
                if (!footsteps.isEmpty())
@@ -255,15 +256,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
-               currentSupportSide.set(footstepCompletionSide.getValue());
-               currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+
                if (parameters.getNumberOfFixedFootsteps() == 0)
                   footsteps.clear();
             }
          }
 
          latestStatusReceived.setValue(null);
-         footstepCompletionSide.setValue(null);
       }
 
       // Determine swing side
@@ -665,7 +664,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void notifyFootstepCompleted(RobotSide robotSide)
    {
       latestStatusReceived.setValue(FootstepStatus.COMPLETED);
-      footstepCompletionSide.setValue(robotSide);
+      currentSupportSide.set(robotSide);
    }
 
    /**
@@ -675,16 +674,16 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     * while the swing foot is targeting it.
     * </p>
     */
-   public void notifyFootstepStarted()
+   public void notifyFootstepStarted(RobotSide robotSide)
    {
       latestStatusReceived.setValue(FootstepStatus.STARTED);
-      footstepCompletionSide.setValue(null);
+      currentSupportSide.set(robotSide.getOppositeSide());
    }
 
    /**
     * Attaches a listener for {@code FootstepStatusMessage} to the manager.
     * <p>
-    * This listener will automatically call {@link #notifyFootstepStarted()} and
+    * This listener will automatically call {@link #notifyFootstepStarted(RobotSide robotSide)} and
     * {@link #notifyFootstepCompleted(RobotSide)}.
     * </p>
     *
@@ -699,7 +698,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    }
 
    /**
-    * Consumes a newly received message and calls {@link #notifyFootstepStarted()} or
+    * Consumes a newly received message and calls {@link #notifyFootstepStarted(RobotSide robotSide)} or
     * {@link #notifyFootstepCompleted(RobotSide)} according to the status.
     *
     * @param statusMessage the newly received footstep status.
@@ -710,7 +709,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       if (status == FootstepStatus.COMPLETED)
          notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
       else if (status == FootstepStatus.STARTED)
-         notifyFootstepStarted();
+         notifyFootstepStarted(RobotSide.fromByte(statusMessage.getRobotSide()));
    }
 
    /**

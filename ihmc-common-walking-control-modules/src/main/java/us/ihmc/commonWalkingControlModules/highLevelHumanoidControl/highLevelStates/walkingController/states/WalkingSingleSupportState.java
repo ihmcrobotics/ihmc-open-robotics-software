@@ -287,16 +287,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (!haveWeEntered)
          return;
 
-      if (walkingMessageHandler.hasUpcomingFootsteps())
-      {
-         walkingMessageHandler.peekFootstep(0, nextFootstep);
-         if(nextFootstep.getRobotSide() != swingSide)
-            return;
-      }
-      else
-      {
+      if (!walkingMessageHandler.isNextFootstepFor(swingSide))
          return;
-      }
 
       //
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
