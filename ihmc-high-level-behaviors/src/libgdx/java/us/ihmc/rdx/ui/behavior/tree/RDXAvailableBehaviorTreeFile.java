@@ -1,8 +1,7 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.ui.behavior.tree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
@@ -49,9 +48,6 @@ public class RDXAvailableBehaviorTreeFile
    {
       name = jsonNode.get("name").asText();
       notes = jsonNode.get("notes").asText();
-
-      if (!name.equals(treeFile.getFileName()))
-         LogTools.error("Root node in tree does not match file name: File name: {} Root node name: {}", treeFile.getFileName(), name);
 
       loadChildrenData(jsonNode);
    }

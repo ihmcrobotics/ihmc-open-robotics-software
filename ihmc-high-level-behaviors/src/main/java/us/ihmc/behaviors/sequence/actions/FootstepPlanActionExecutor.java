@@ -351,7 +351,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          trackingCalculators.get(side).factoryInSO3Errors(ORIENTATION_TOLERANCE);
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculators.get(side).getTimeIsUp();
-         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit();
+         hitTimeLimit |= trackingCalculators.get(side).getHitTimeLimit(state.getLogger());
       }
 
       int incompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
