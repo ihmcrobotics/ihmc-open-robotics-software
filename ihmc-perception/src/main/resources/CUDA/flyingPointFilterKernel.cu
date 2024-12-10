@@ -16,8 +16,7 @@ __device__ float computeMedian(float* window, int size) {
     return window[size / 2];
 }
 
-__global__ void filterFlyingPoints(float* depth, int rows, int cols, int step, float minDepth, float maxDepth, float stdDevThreshold)
- __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut)
+ extern "C" __global__ void filterFlyingPoints(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, int rows, int cols)
  {
     // Get the thread's pixel coordinates
     int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -29,12 +28,8 @@ __global__ void filterFlyingPoints(float* depth, int rows, int cols, int step, f
     unsigned short *inRow = (unsigned short *)((char *)in + (x * pitchIn));
     unsigned short depthValue = *(inRow + y);
 
-
-    // Threshold filtering: remove invalid depths
-    if (depthValue < minDepth || depthValue > maxDepth) {
-        *(inRow + y) = 0.0f;
-        return;
-    }
+     unsigned short *outRow = (unsigned short *)((char *)out + (x * pitchOut));
+     unsigned short newDepthValue = *(outRow + y);
 
     // Neighborhood window for smoothing (e.g., 3x3)
     const int windowSize = 3;
@@ -43,13 +38,14 @@ __global__ void filterFlyingPoints(float* depth, int rows, int cols, int step, f
     int count = 0;
 
     // Collect neighbor values
-    for (int dy = -halfWindow; dy <= halfWindow; ++dy) {
-        for (int dx = -halfWindow; dx <= halfWindow; ++dx) {
+    for (int dx = -halfWindow; dx <= halfWindow; ++dx) {
+        for (int dy = -halfWindow; dy <= halfWindow; ++dy) {
             int nx = x + dx;
             int ny = y + dy;
             if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-                float* neighborPixel = (float*)((char*)depth + ny * step) + nx;
-                window[count++] = *neighborPixel;
+               unsigned short* neighborRow = (unsigned short*)((char*)in + (nx * pitchOut));
+               unsigned short neighborPixelValue = *(neighborRow + ny);
+               window[count++] = neighborPixelValue;
             }
         }
     }
@@ -58,7 +54,7 @@ __global__ void filterFlyingPoints(float* depth, int rows, int cols, int step, f
     float median = computeMedian(window, count);
 
     // Replace current pixel value with the median
-    *pixel = median;
+     *(outRow + y) = median;
 
     // Statistical analysis: compute local mean and standard deviation
     float sum = 0.0f, sumSquared = 0.0f;
@@ -71,7 +67,7 @@ __global__ void filterFlyingPoints(float* depth, int rows, int cols, int step, f
     float stdDev = sqrtf(variance);
 
     // Invalidate pixel if it deviates too much from the local mean
-    if (fabsf(*pixel - mean) > stdDevThreshold * stdDev) {
-        *pixel = 0.0f;
+    if (fabsf(depthValue - mean) > 1.5 * stdDev) {
+        *(outRow + y)= 0.0f;
     }
 }
