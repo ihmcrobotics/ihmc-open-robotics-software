@@ -9,6 +9,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
@@ -21,6 +23,8 @@ import us.ihmc.rdx.ui.behavior.behaviors.RDXAI2RNode;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXTrashCanInteraction;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXBuildingExploration;
+import us.ihmc.rdx.ui.behavior.logic.RDXConditionNode;
+import us.ihmc.rdx.ui.behavior.logic.RDXGotoNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXFallbackNode;
@@ -78,6 +82,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder<
       if (nodeType == FallbackNodeDefinition.class)
       {
          return new RDXFallbackNode(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ConditionNodeDefinition.class)
+      {
+         return new RDXConditionNode(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == GotoNodeDefinition.class)
+      {
+         return new RDXGotoNode(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == DoorTraversalDefinition.class)
       {

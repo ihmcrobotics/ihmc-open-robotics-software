@@ -15,6 +15,8 @@ public class ROS2BehaviorTreeSubscriptionNode
    private AI2RNodeStateMessage ai2rNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private FallbackNodeStateMessage fallbackNodeStateMessage;
+   private ConditionNodeStateMessage conditionNodeStateMessage;
+   private GotoNodeStateMessage gotoNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
@@ -39,6 +41,8 @@ public class ROS2BehaviorTreeSubscriptionNode
       ai2rNodeStateMessage = null;
       actionSequenceStateMessage = null;
       fallbackNodeStateMessage = null;
+      conditionNodeStateMessage = null;
+      gotoNodeStateMessage = null;
       doorTraversalStateMessage = null;
       trashCanInteractionStateMessage = null;
       buildingExplorationStateMessage = null;
@@ -133,6 +137,26 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setFallbackNodeStateMessage(FallbackNodeStateMessage fallbackNodeStateMessage)
    {
       this.fallbackNodeStateMessage = fallbackNodeStateMessage;
+   }
+
+   public ConditionNodeStateMessage getConditionNodeStateMessage()
+   {
+      return conditionNodeStateMessage;
+   }
+
+   public void setConditionNodeStateMessage(ConditionNodeStateMessage conditionNodeStateMessage)
+   {
+      this.conditionNodeStateMessage = conditionNodeStateMessage;
+   }
+
+   public GotoNodeStateMessage getGotoNodeStateMessage()
+   {
+      return gotoNodeStateMessage;
+   }
+
+   public void setGotoNodeStateMessage(GotoNodeStateMessage gotoNodeStateMessage)
+   {
+      this.gotoNodeStateMessage = gotoNodeStateMessage;
    }
 
    public DoorTraversalStateMessage getDoorTraversalStateMessage()

@@ -11,6 +11,8 @@ import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -65,6 +67,8 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Fallback Node", FallbackNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Condition Node", ConditionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Goto Node", GotoNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
