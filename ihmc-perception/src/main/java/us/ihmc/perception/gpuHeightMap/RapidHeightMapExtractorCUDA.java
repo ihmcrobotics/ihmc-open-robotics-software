@@ -32,7 +32,7 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class RapidHeightMapExtractorCuda
+public class RapidHeightMapExtractorCUDA
 {
    private GpuMat inputDepthImage;
    private GpuMat transformedInputDepthImage;
@@ -120,7 +120,7 @@ public class RapidHeightMapExtractorCuda
       mode = 1;
    }
 
-   public RapidHeightMapExtractorCuda(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
+   public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
    {
       footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
       footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
@@ -509,22 +509,22 @@ public class RapidHeightMapExtractorCuda
       initialized = true;
    }
 
-   public static HeightMapData packHeightMapData(RapidHeightMapExtractorCuda heightMapExtractor, HeightMapData heightMapDataToPack)
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractorCUDA heightMapExtractor, HeightMapData heightMapDataToPack)
    {
       Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
       HeightMapData latestHeightMapData = heightMapDataToPack;
       if (latestHeightMapData == null)
       {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalWidthInMeters(),
+         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                 (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
                                                  heightMapExtractor.getSensorOrigin().getX(),
                                                  heightMapExtractor.getSensorOrigin().getY());
       }
       PerceptionMessageTools.convertToHeightMapData(heightMapMat,
                                                     latestHeightMapData,
                                                     heightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalCellSizeInMeters());
+                                                    (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters());
 
       return latestHeightMapData;
    }

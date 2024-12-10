@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCuda;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -30,7 +30,7 @@ import java.time.Instant;
  */
 public class RapidHeightMapManager
 {
-   private final RapidHeightMapExtractorCuda rapidHeightMapExtractor;
+   private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
    private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
@@ -48,7 +48,7 @@ public class RapidHeightMapManager
                                 CameraIntrinsics depthImageIntrinsics,
                                 ROS2PublishSubscribeAPI ros2)
    {
-      rapidHeightMapExtractor = new RapidHeightMapExtractorCuda(leftFootSoleFrame, rightFootSoleFrame);
+      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(leftFootSoleFrame, rightFootSoleFrame);
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
@@ -111,11 +111,11 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                             (float) RapidHeightMapExtractorCuda.getHeightMapParameters().getGlobalWidthInMeters(),
+      HeightMapData temp = new HeightMapData((float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                             (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
-      RapidHeightMapExtractorCuda.packHeightMapData(rapidHeightMapExtractor, temp);
+       RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor, temp);
       return temp;
    }
 
