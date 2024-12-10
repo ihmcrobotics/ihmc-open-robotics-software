@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.ShortPointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
@@ -31,7 +31,6 @@ import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.nio.FloatBuffer;
-import java.util.stream.IntStream;
 
 public class RDXRawImagePointCloudRenderer implements RenderableProvider
 {
@@ -197,21 +196,28 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthPose.set(depthImage.getPose());
       LibGDXTools.toLibGDX(depthPose, tempDepthTransform, libGDXDepthTransform);
 
-      // Ensure correct length and initialize vertices buffer
-      int pixelCount = depthImage.getWidth() * depthImage.getHeight();
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != pixelCount)
-      {
-         renderable.meshPart.mesh.setVertices(new float[pixelCount]);
-         renderable.meshPart.size = pixelCount;
-      }
+      int width = depthImage.getWidth();
+      int height = depthImage.getHeight();
+      int pixelCount = width * height;
 
       FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
-      ShortPointer depthPointer = new ShortPointer(depthImage.getCpuImageMat().data());
 
-      // Copy each short depth value to the vertices buffer
-      IntStream.range(0, pixelCount).parallel().forEach(i -> verticesBuffer.put(i, depthPointer.get(i)));
+      // Ensure correct length and initialize vertices buffer
+      if (renderable.meshPart.size != pixelCount)
+      {
+         renderable.meshPart.size = pixelCount;
+         verticesBuffer.limit(pixelCount);
+      }
 
-      depthPointer.close();
+      // Wrap the vertices buffer into a pointer, than into a Mat
+      FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
+      Mat verticesMat = new Mat(height, width, opencv_core.CV_32FC1, verticesPointer);
+
+      // Convert the depth data to float, and put it into the vertex buffer
+      depthImage.getCpuImageMat().convertTo(verticesMat, opencv_core.CV_32FC1);
+
+      verticesMat.close();
+      verticesPointer.close();
       depthImage.release();
    }
 
