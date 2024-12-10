@@ -1,8 +1,6 @@
 package us.ihmc.sensors;
 
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_cudaimgproc;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -94,8 +92,6 @@ public class RealsenseColorDepthImageRetriever
             if (depthMat16UC1 != null)
                depthMat16UC1.close();
             depthMat16UC1 = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, realsense.getDepthFrameData());
-
-            opencv_imgproc.medianBlur(depthMat16UC1, depthMat16UC1, 5);
 
             newDepthImageLock.lock();
             try

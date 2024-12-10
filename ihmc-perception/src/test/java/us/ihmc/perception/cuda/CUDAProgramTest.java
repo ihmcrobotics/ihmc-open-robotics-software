@@ -29,7 +29,7 @@ public class CUDAProgramTest
 
    private static final String KERNEL_WITH_HEADER = """
          #include "test_values.cuh"
-
+         
          extern "C"
          __global__
          void add(int * sum)
@@ -46,8 +46,7 @@ public class CUDAProgramTest
 
       try (CUDAProgram additionProgram = new CUDAProgram("add.cu", ADD_KERNEL); // Construct the program
            CUDAKernel additionKernel = additionProgram.loadKernel("add");         // Load the kernel
-           IntPointer sum = new IntPointer(1L);
-           IntPointer deviceSum = new IntPointer())
+           IntPointer sum = new IntPointer(1L); IntPointer deviceSum = new IntPointer())
       {
          cudaMallocAsync(deviceSum, deviceSum.sizeof(), stream);
 
@@ -78,8 +77,7 @@ public class CUDAProgramTest
 
       try (CUDAProgram additionProgram = new CUDAProgram("add.cu", ADD_KERNEL); // Construct the program
            CUDAKernel additionKernel = additionProgram.loadKernel("add");         // Load the kernel
-           IntPointer sum = new IntPointer(1L);
-           IntPointer deviceSum = new IntPointer())
+           IntPointer sum = new IntPointer(1L); IntPointer deviceSum = new IntPointer())
       {
          cudaMallocAsync(deviceSum, deviceSum.sizeof(), stream);
 
@@ -117,7 +115,8 @@ public class CUDAProgramTest
       String[] headerName = {"test_values.cuh"};
       String[] headerContents = {KERNEL_HEADER};
       try (CUDAProgram additionProgram = new CUDAProgram("add_header.cu", KERNEL_WITH_HEADER, headerName, headerContents);
-           CUDAKernel additionKernel = additionProgram.loadKernel("add"); // Load the kernel
+           CUDAKernel additionKernel = additionProgram.loadKernel("add");
+           // Load the kernel
            IntPointer sum = new IntPointer(1L);
            IntPointer deviceSum = new IntPointer())
       {
@@ -151,15 +150,12 @@ public class CUDAProgramTest
       try (CUDAProgram program = new CUDAProgram(kernelPath, headerPath);
 
            // Load the kernels
-           CUDAKernel additionKernel = program.loadKernel("add");
-           CUDAKernel subtractionKernel = program.loadKernel("subtract");
+           CUDAKernel additionKernel = program.loadKernel("add"); CUDAKernel subtractionKernel = program.loadKernel("subtract");
 
            // Create pointers
-           IntPointer sum = new IntPointer(1L);
-           IntPointer deviceSum = new IntPointer();
+           IntPointer sum = new IntPointer(1L); IntPointer deviceSum = new IntPointer();
 
-           IntPointer difference = new IntPointer(1L);
-           IntPointer deviceDifference = new IntPointer())
+           IntPointer difference = new IntPointer(1L); IntPointer deviceDifference = new IntPointer())
       {
          cudaMallocAsync(deviceSum, sum.sizeof(), stream);
          cudaMallocAsync(deviceDifference, difference.sizeof(), stream);
