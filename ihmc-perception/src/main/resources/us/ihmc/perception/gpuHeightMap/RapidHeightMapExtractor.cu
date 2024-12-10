@@ -216,7 +216,7 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
 
     if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
     {
-        //      finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+        //finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
     }
     else
     {
@@ -251,7 +251,7 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
 
 
 
-     int outRow = xIndex;  // Flipping and rotation (yIndex becomes the new row)
+    int outRow = xIndex;  // Flipping and rotation (yIndex becomes the new row)
     int outCol = 720 - 1 - yIndex;
 
      unsigned short *outRowPtr = (unsigned short *)((char *)out + (outRow * pitchOut));
@@ -335,7 +335,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 
             if (yawIdx >= 0 && yawIdx < depthWidth && pitchIdx >= 0 && pitchIdx < depthHeight)
             {
-                //             Read depth value using pitched memory
+                //Read depth value using pitched memory
 
                 unsigned short *inRow = (unsigned short *)((char *)in + (pitchIdx * pitchIn));
                 unsigned short depthValue = *(inRow + yawIdx);
@@ -390,20 +390,20 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
         averageHeightZ = -params[HEIGHT_OFFSET]; // Set to the negative height offset if no valid points
     }
 
-    // Clamp height to the specified range
+    //Clamp height to the specified range
     averageHeightZ = fminf(fmaxf(averageHeightZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
 
-    // Apply height offset
+    //Apply height offset
     averageHeightZ += params[HEIGHT_OFFSET];
 
-    // Scale to the appropriate range
+    //Scale to the appropriate range
     float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
-//     printf("%f: (%d, %d)\n", heightValue, xIndex, yIndex);
+    //printf("%f: (%d, %d)\n", heightValue, xIndex, yIndex);
 
     unsigned short *outRow = (unsigned short *)((char *)out + (yIndex * pitchOut));
         *(outRow + xIndex) = (unsigned short )(heightValue);
-//     *(outRow + xIndex) = 10;
+    //*(outRow + xIndex) = 10;
 }
 
 extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
@@ -499,8 +499,7 @@ extern "C" __global__ void heightMapRegistrationKernel(unsigned short *localMap,
     unsigned short *globalMapElement = (unsigned short *)((char *)globalMap + yIndex * pitchGlobal) + xIndex;
     *globalMapElement = static_cast<unsigned short>(finalHeight * params[HEIGHT_SCALING_FACTOR]);
 }
-//
-//
+
 extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitchInput,
                                           unsigned short *croppedMap, size_t pitchCropped,
                                           float *params, int croppedMapXY)

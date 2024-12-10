@@ -90,11 +90,11 @@ public class RealsenseColorDepthImagePublisher
             compressionTools = new CUDACompressionTools();
 
          // Encode depth image to png
-         BytePointer depthPNGPointer = compressionTools.compressDepth(depthImageToPublish.getGpuImageMat());
+         BytePointer depthPNGPointer = compressionTools.compress(depthImageToPublish.getGpuImageMat());
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
-         PerceptionMessageTools.packImageMessage(depthImageToPublish, depthPNGPointer, CompressionType.ZSTD_NVJPEG_HYBRID, depthImageMessage);
+         PerceptionMessageTools.packImageMessage(depthImageToPublish, depthPNGPointer, CompressionType.NVCOMP, depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
          lastDepthSequenceNumber = depthImageToPublish.getSequenceNumber();
