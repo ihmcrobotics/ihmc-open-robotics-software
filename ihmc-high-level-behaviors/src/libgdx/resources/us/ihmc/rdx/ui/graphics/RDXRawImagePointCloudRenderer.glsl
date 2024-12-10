@@ -18,7 +18,7 @@
  * the depth value and its pixel coordinates.
  * depth = a_position.x and (x, y) = a_position.yz
  */
-layout(location = 0) in vec3 a_position;
+layout(location = 0) in vec3 a_depthData;
 
 // We output the color of the vertex for the fragment shader to use
 out vec4 v_color;
@@ -88,20 +88,20 @@ void main()
 
 // We calculate the worldFramePoint depending on the input method
 #ifdef INPUT_DEPTH_IMAGE
-   float depthInMeters = a_position.x * u_depthDiscretization;
+   float depthInMeters = a_depthData.x * u_depthDiscretization;
 
    if (depthInMeters == 0.0f)
       return;
 
-   uint x = uint(a_position.y);
-   uint y = uint(a_position.z);
+   uint x = gl_VertexID % 1280;
+   uint y = gl_VertexID / 1280;
 
    vec3 depthFramePoint = vec3(depthInMeters,
                                -(x - u_depthIntrinsics.z) / u_depthIntrinsics.x * depthInMeters,
                                -(y - u_depthIntrinsics.w) / u_depthIntrinsics.y * depthInMeters);
    worldFramePoint = transformPoint3D(depthFramePoint, u_depthTransform);
 #else
-   worldFramePoint = a_position;
+   worldFramePoint = a_depthData;
 #endif
 
    if (u_coloringMethod == COLOR_GRADIENT_WORLD_Z)
