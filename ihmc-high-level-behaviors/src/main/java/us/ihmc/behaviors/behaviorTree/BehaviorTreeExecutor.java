@@ -22,7 +22,7 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeExecutorNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState state;
-   private BehaviorTreeNodeExecutor<?, ?> rootNode;
+   private BehaviorTreeRootNodeExecutor rootNode;
    private final BehaviorTreeFileLoader<BehaviorTreeNodeExecutor<?, ?>> fileLoader;
    private final WorkspaceResourceDirectory saveFileDirectory = new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees");
 
@@ -72,10 +72,10 @@ public class BehaviorTreeExecutor
 
    public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
    {
-      this.rootNode = (BehaviorTreeNodeExecutor<?, ?>) rootNode;
+      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
    }
 
-   public BehaviorTreeNodeExecutor<?, ?> getRootNode()
+   public BehaviorTreeRootNodeExecutor getRootNode()
    {
       return rootNode;
    }
@@ -124,5 +124,12 @@ public class BehaviorTreeExecutor
       {
          LogTools.error("Cannot load behavior: {}", jsonFileName);
       }
+   }
+
+   public void deleteRootNode()
+   {
+      state.modifyTreeTopology(topologyOperationQueue -> topologyOperationQueue.queueDestroySubtree(rootNode));
+      this.rootNode = null;
+      state.freeze();
    }
 }

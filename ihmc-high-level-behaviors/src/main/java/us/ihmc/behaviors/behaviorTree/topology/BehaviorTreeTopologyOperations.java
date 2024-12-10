@@ -116,12 +116,14 @@ public class BehaviorTreeTopologyOperations
    public static <T extends BehaviorTreeNode<T>> void addChildAndFreezeBasic(T nodeToAdd, T parent)
    {
       addChildBasic(nodeToAdd, parent);
+      attemptFreeze(nodeToAdd);
       attemptFreeze(parent);
    }
 
    public static <T extends BehaviorTreeNode<T>> void insertChildAndFreezeBasic(T nodeToAdd, T parent, int insertionIndex)
    {
       insertBasic(nodeToAdd, parent, insertionIndex);
+      attemptFreeze(nodeToAdd);
       attemptFreeze(parent);
    }
 
