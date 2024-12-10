@@ -20,7 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class RDXPointCloudRenderer implements RenderableProvider
+/**
+ * @deprecated due to extremely poor performance (significantly drops FPS of UI).
+ */
+@Deprecated
+public class RDXPointCloudRendererOld implements RenderableProvider
 {
    private Renderable renderable;
    private float[] vertices;

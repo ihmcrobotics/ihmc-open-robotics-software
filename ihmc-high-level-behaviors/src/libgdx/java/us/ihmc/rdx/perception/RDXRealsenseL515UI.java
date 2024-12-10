@@ -22,7 +22,7 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -54,7 +54,7 @@ public class RDXRealsenseL515UI
    private final ImInt digitalGain = new ImInt(realsense2.RS2_DIGITAL_GAIN_LOW);
    private final String[] digitalGains = new String[] {"AUTO", "LOW", "HIGH"};
    private static final int RGBA8888_WHITE = (255 << 24) | (255 << 16) | (255 << 8) | 255;
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private RDXPointCloudRendererOld pointCloudRenderer;
    private OpenCLManager openCLManager;
    private final FramePoint3D framePoint = new FramePoint3D();
    private final ImFloat focalLength = new ImFloat();
@@ -87,7 +87,7 @@ public class RDXRealsenseL515UI
             l515.initialize();
 
             openCLManager = new OpenCLManager();
-            pointCloudRenderer = new RDXPointCloudRenderer();
+            pointCloudRenderer = new RDXPointCloudRendererOld();
          }
 
          @Override

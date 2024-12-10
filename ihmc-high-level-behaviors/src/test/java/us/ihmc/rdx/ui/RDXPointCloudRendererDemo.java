@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
@@ -16,7 +16,7 @@ public class RDXPointCloudRendererDemo
    public RDXPointCloudRendererDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
-      RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+      RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
