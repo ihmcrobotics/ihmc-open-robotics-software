@@ -266,25 +266,18 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    public void updateMesh(List<? extends Point3DReadOnly> points)
    {
-      // Ensure correct length
       if (vertices.length != floatsPerVertex * points.size())
-      {
          vertices = new float[floatsPerVertex * points.size()];
-
-         for (int i = 0; i < points.size(); i++) {
-            Point3DReadOnly point = points.get(i);
-            int offset = i * floatsPerVertex;
-            vertices[offset + 1] = point.getY32();
-            vertices[offset + 2] = point.getZ32();
-         }
-      }
 
       // Copy points over
       IntStream.range(0, points.size()).parallel().unordered().forEach(i ->
       {
          Point3DReadOnly point = points.get(i);
          int offset = i * floatsPerVertex;
+
          vertices[offset] = point.getX32();
+         vertices[offset + 1] = point.getY32();
+         vertices[offset + 2] = point.getZ32();
       });
 
       renderable.meshPart.size = points.size();
@@ -302,7 +295,10 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       {
          Point3DReadOnly point = points[i];
          int offset = i * floatsPerVertex;
+
          vertices[offset] = point.getX32();
+         vertices[offset + 1] = point.getY32();
+         vertices[offset + 2] = point.getZ32();
       });
 
       renderable.meshPart.size = points.length;
