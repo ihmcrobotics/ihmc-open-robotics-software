@@ -22,6 +22,7 @@ import java.util.function.Function;
 
 /**
  * @deprecated due to extremely poor performance (significantly drops FPS of UI).
+ * To render a point cloud stored as a list of points, use {@link RDXPointCloudRenderer} instead.
  */
 @Deprecated
 public class RDXPointCloudRendererOld implements RenderableProvider
