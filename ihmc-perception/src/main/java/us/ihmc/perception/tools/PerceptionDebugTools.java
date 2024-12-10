@@ -420,9 +420,7 @@ public class PerceptionDebugTools
 
    public static void plotRectangle(Mat displayImage, Point2D point, int nodesPerMeter, int size, Scalar color)
    {
-      LogTools.info("Plotting Node: Footstep: {} {}",
-                    (int) (point.getY() * nodesPerMeter + displayImage.rows() / 2),
-                    (int) (point.getX() * nodesPerMeter + displayImage.cols() / 2));
+      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * nodesPerMeter + displayImage.rows() / 2), (int) (point.getX() * nodesPerMeter + displayImage.cols() / 2));
 
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() * nodesPerMeter + displayImage.rows() / 2, point.getX() * nodesPerMeter + displayImage.cols() / 2);

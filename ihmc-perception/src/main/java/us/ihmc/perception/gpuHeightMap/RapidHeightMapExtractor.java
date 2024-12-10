@@ -65,7 +65,7 @@ public class RapidHeightMapExtractor
    private final Point3D sensorOrigin = new Point3D();
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
-   //   private HeightMapAutoencoder denoiser;
+//   private HeightMapAutoencoder denoiser;
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -302,9 +302,9 @@ public class RapidHeightMapExtractor
             terrainMapData.setSnapNormalZImage(snapNormalZImage.getBytedecoOpenCVMat());
             terrainMapData.setSnappedAreaFractionImage(snappedAreaFractionImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppabilityImage(steppabilityImage.getBytedecoOpenCVMat());
-            //            terrainMapData.setSteppabilityConnectionsImage(steppabilityConnectionsImage.getBytedecoOpenCVMat());
+//            terrainMapData.setSteppabilityConnectionsImage(steppabilityConnectionsImage.getBytedecoOpenCVMat());
             terrainMapData.setSteppableRegionAssignmentMat(steppableRegionAssignmentMat);
-            //            terrainMapData.setSteppableRegionRingMat(steppableRegionRingMat);
+//            terrainMapData.setSteppableRegionRingMat(steppableRegionRingMat);
          }
 
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
@@ -313,7 +313,7 @@ public class RapidHeightMapExtractor
 
          if (heightMapParameters.getDenoiserEnabled())
          {
-            //            denoisedHeightMapImage = denoiser.denoiseHeightMap(croppedHeightMapImage, heightMapParameters.getHeightOffset());
+//            denoisedHeightMapImage = denoiser.denoiseHeightMap(croppedHeightMapImage, heightMapParameters.getHeightOffset());
          }
          terrainMapStatistics.endGPUProcessingTime();
 
@@ -724,10 +724,10 @@ public class RapidHeightMapExtractor
       return steppabilityConnectionsImage;
    }
 
-   //   public Mat getDenoisedHeightMap()
-   //   {
-   //      return denoisedHeightMap;
-   //   }
+//   public Mat getDenoisedHeightMap()
+//   {
+//      return denoisedHeightMap;
+//   }
 
    public Mat getGlobalContactImage()
    {

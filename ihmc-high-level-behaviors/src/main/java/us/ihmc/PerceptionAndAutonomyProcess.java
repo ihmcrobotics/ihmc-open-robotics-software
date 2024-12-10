@@ -20,7 +20,11 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.BallDetectionManager;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.IterativeClosestPointManager;
+import us.ihmc.perception.RapidHeightMapManager;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
@@ -64,24 +68,24 @@ import java.util.function.Supplier;
 
 /**
  * <p>
- * This class holds all sensor drivers and publishers, as well as some algorithms which consume the images
- * produced by the sensors. In general, each sensor has "Retriever" and "Publisher" classes. The retriever
- * is responsible for grabbing images from the sensor and providing them to this class. Then, any kind of
- * processing can be performed on the images, which are then given to the publisher or any algorithm which
- * requires the images.
+ *    This class holds all sensor drivers and publishers, as well as some algorithms which consume the images
+ *    produced by the sensors. In general, each sensor has "Retriever" and "Publisher" classes. The retriever
+ *    is responsible for grabbing images from the sensor and providing them to this class. Then, any kind of
+ *    processing can be performed on the images, which are then given to the publisher or any algorithm which
+ *    requires the images.
  * </p>
  * <p>
- * In general, the retrievers have a thread in which images are grabbed from the sensors.
- * The publishers have threads which wait for new images to arrive, and once given an image they publish it
- * and wait again.
- * Within this class, each sensor has a thread which takes the most recent image from a retriever, performs
- * any processing, and passes the image on to the publisher.
+ *    In general, the retrievers have a thread in which images are grabbed from the sensors.
+ *    The publishers have threads which wait for new images to arrive, and once given an image they publish it
+ *    and wait again.
+ *    Within this class, each sensor has a thread which takes the most recent image from a retriever, performs
+ *    any processing, and passes the image on to the publisher.
  * </p>
  * <p>
- * To launch the Nadia specific sensor configuration, see: {@code NadiaPerceptionAndAutonomyProcess}
- * To launch the process with no specific configuration, uncomment the call to {@code forceEnableAllSensors}
- * in the {@code main} method. When launching only one sensor, comment out the other sensor heartbeats in the
- * {@code forceEnableAllSensors} method.
+ *    To launch the Nadia specific sensor configuration, see: {@code NadiaPerceptionAndAutonomyProcess}
+ *    To launch the process with no specific configuration, uncomment the call to {@code forceEnableAllSensors}
+ *    in the {@code main} method. When launching only one sensor, comment out the other sensor heartbeats in the
+ *    {@code forceEnableAllSensors} method.
  * </p>
  */
 public class PerceptionAndAutonomyProcess
@@ -226,19 +230,17 @@ public class PerceptionAndAutonomyProcess
 
       realsenseImageRetriever = new RealsenseColorDepthImageRetriever(new RealsenseDeviceManager(),
                                                                       RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                                      realsenseFrameSupplier,
-                                                                      realsenseDemandNode::isDemanded);
+                                                                      realsenseFrameSupplier, realsenseDemandNode::isDemanded);
       realsenseImagePublisher = new RealsenseColorDepthImagePublisher(REALSENSE_DEPTH_TOPIC, REALSENSE_COLOR_TOPIC);
       realsenseProcessAndPublishThread = new RestartableThread("RealsenseProcessAndPublish", this::processAndPublishRealsense);
       realsenseProcessAndPublishThread.start();
 
       ouster = new OusterNetServer();
-      //      ouster.start();
+//      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
                                                                 ousterFrameSupplier,
                                                                 ousterLidarScanDemandNode::isDemanded,
-                                                                ousterHeightMapDemandNode::isDemanded,
-                                                                ousterDepthDemandNode);
+                                                                ousterHeightMapDemandNode::isDemanded, ousterDepthDemandNode);
       ousterDepthImagePublisher = new OusterDepthImagePublisher(ouster, OUSTER_DEPTH_TOPIC);
       ousterProcessAndPublishThread = new RestartableThread("OusterProcessAndPublish", this::processAndPublishOuster);
       ousterProcessAndPublishThread.start();
@@ -270,9 +272,7 @@ public class PerceptionAndAutonomyProcess
       heightMapExtractorThread.start();
    }
 
-   /**
-    * Needs to be a separate method to allow constructing test bench version.
-    */
+   /** Needs to be a separate method to allow constructing test bench version. */
    public void addBehaviorTree(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
@@ -355,7 +355,7 @@ public class PerceptionAndAutonomyProcess
       ballDetectionManager.destroy();
 
       // TODO: Why does this result in a native crash?
-      //      openCLManager.destroy();
+//      openCLManager.destroy();
 
       overlapRemover.destroy();
       sensorStreamer.destroy();
@@ -453,7 +453,7 @@ public class PerceptionAndAutonomyProcess
    {
       if (ousterDepthDemandNode.isDemanded())
       {
-         //         ouster.start();
+//         ouster.start();
          ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
          if (ousterDepthImage == null)
             return;
@@ -564,12 +564,16 @@ public class PerceptionAndAutonomyProcess
             double fy = latestZEDDepthImage.getFocalLengthY();
             double cx = latestZEDDepthImage.getPrincipalPointX();
             double cy = latestZEDDepthImage.getPrincipalPointY();
-            planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
+            planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                     imageHeight,
+                                                                     imageWidth,
+                                                                     fx,
+                                                                     fy,
+                                                                     cx,
+                                                                     cy);
             planarRegionsExtractor.getDebugger().setEnabled(false);
 
-            planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
-                                                                              PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
-                                                                              planarRegionsExtractor.getParameters());
+            planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, planarRegionsExtractor.getParameters());
          }
 
          planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
