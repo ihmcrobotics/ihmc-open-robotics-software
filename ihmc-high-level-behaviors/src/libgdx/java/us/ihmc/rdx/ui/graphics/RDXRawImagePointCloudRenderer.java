@@ -59,6 +59,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
    private final InputMethod inputMethod;
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(1, 3, "a_depthData"));
+   private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
 
    // GENERALLY NEEDED UNIFORMS
    private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
@@ -195,25 +196,22 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       int height = depthImage.getHeight();
       int pixelCount = width * height;
 
-      // Ensure correct length
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != pixelCount)
+      // Ensure correct length and initialize vertices buffer
+      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * pixelCount))
       {
-         float[] depthVertices = new float[pixelCount];
-
+         float[] depthVertices = new float[floatsPerVertex * pixelCount];
          renderable.meshPart.mesh.setVertices(depthVertices);
          renderable.meshPart.size = pixelCount;
       }
 
       // Mark dirty
-      FloatBuffer writeBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
       ShortPointer depthPointer = new ShortPointer(depthImage.getCpuImageMat().data());
 
-      IntStream.range(0, pixelCount).parallel().forEach(i -> writeBuffer.put(i, depthPointer.get(i)));
+      // Copy each short depth value to the vertices buffer
+      IntStream.range(0, pixelCount).parallel().forEach(i -> verticesBuffer.put(i * floatsPerVertex, depthPointer.get(i)));
 
       depthPointer.close();
-
-      renderable.meshPart.mesh.getVerticesBuffer(true);
-
       depthImage.release();
    }
 
