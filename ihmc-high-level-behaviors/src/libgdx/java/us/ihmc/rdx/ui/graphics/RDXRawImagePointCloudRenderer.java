@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -24,7 +24,6 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.rdx.shader.RDXShader;
@@ -32,58 +31,24 @@ import us.ihmc.rdx.shader.RDXUniform;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.nio.FloatBuffer;
-import java.util.List;
 import java.util.stream.IntStream;
 
 public class RDXRawImagePointCloudRenderer implements RenderableProvider
 {
-   public enum InputMethod
-   {
-      POINT_CLOUD(),
-      DEPTH_IMAGE("INPUT_DEPTH_IMAGE"),
-      DEPTH_AND_COLOR_IMAGE("INPUT_DEPTH_IMAGE", "INPUT_COLOR_IMAGE");
-
-      private final String[] vertexFlags;
-      InputMethod(String... vertexFlags)
-      {
-         this.vertexFlags = vertexFlags;
-      }
-   }
-
    public enum ColoringMethod
    {
       DEFAULT, GRADIENT_WORLD_Z, GRADIENT_SENSOR_X, COLOR_IMAGE
    }
 
    private Renderable renderable;
-   private final InputMethod inputMethod;
 
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(1, 3, "a_depthData"));
-   private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
+   private final VertexAttribute depthDataAttribute = new VertexAttribute(Usage.Generic, 1, "a_depthData");
 
    // GENERALLY NEEDED UNIFORMS
-   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, shader.camera.viewportWidth);
-   });
-
    private float pointScale = 0.01f;
-   private final RDXUniform pointScaleUniform = RDXUniform.createGlobalUniform("u_pointScale", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, pointScale);
-   });
 
    private final Color defaultPointColor = new Color(Color.WHITE);
-   private final RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, defaultPointColor);
-   });
-
    private ColoringMethod coloringMethod = ColoringMethod.DEFAULT;
-   private final RDXUniform coloringMethodUniform = RDXUniform.createGlobalUniform("u_coloringMethod", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, coloringMethod.ordinal());
-   });
 
    // DEPTH IMAGE UNIFORM DATA
    private CameraIntrinsics depthIntrinsics = new CameraIntrinsics();
@@ -93,17 +58,19 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
    private final RigidBodyTransform tempDepthTransform = new RigidBodyTransform();
 
    // COLOR IMAGE UNIFORM DATA
-   private Pixmap colorImagePixmap = new Pixmap(1, 1, Format.RGBA8888);
-   private BytePointer pixmapDataPointer = new BytePointer(colorImagePixmap.getPixels());
-   private final Texture colorImageTexture = new Texture(colorImagePixmap);
+   private Pixmap colorImagePixmap;
+   private BytePointer pixmapDataPointer;
+   private Texture colorImageTexture;
    private CameraIntrinsics colorIntrinsics = new CameraIntrinsics();
    private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
    private final Matrix4 libGDXColorTransform = new Matrix4();
    private final RigidBodyTransform tempColorTransform = new RigidBodyTransform();
 
-   public RDXRawImagePointCloudRenderer(InputMethod inputMethod)
+   private final boolean enableColorImageInput;
+
+   public RDXRawImagePointCloudRenderer(boolean enableColorImageInput)
    {
-      this.inputMethod = inputMethod;
+      this.enableColorImageInput = enableColorImageInput;
    }
 
    public void create(int maxPoints)
@@ -117,25 +84,53 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
       boolean isStatic = false;
       int maxIndices = 0;
-      renderable.meshPart.mesh = new Mesh(isStatic, maxPoints, maxIndices, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(isStatic, maxPoints, maxIndices, depthDataAttribute);
+
+      String[] vertexFlags = { "INPUT_COLOR_IMAGE" };
+      if (!enableColorImageInput)
+         vertexFlags = null;
 
       RDXShader shader = new RDXShader(getClass());
-      shader.create(inputMethod.vertexFlags, null);
-      shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
-      shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-      shader.registerUniform(screenWidthUniform);
-      shader.registerUniform(pointScaleUniform);
-      shader.registerUniform(defaultPointColorUniform);
-      shader.registerUniform(coloringMethodUniform);
+      shader.create(vertexFlags, null);
+      registerGeneralUniforms(shader);
+      registerDepthImageUniforms(shader);
 
-      if (inputMethod == InputMethod.DEPTH_IMAGE || inputMethod == InputMethod.DEPTH_AND_COLOR_IMAGE)
-         registerDepthImageUniforms(shader);
-
-      if (inputMethod == InputMethod.DEPTH_AND_COLOR_IMAGE)
+      if (enableColorImageInput)
          registerColorImageUniforms(shader);
 
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
+   }
+
+   private void registerGeneralUniforms(RDXShader rdxShader)
+   {
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
+
+      RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, shader.camera.viewportWidth);
+      });
+      rdxShader.registerUniform(screenWidthUniform);
+
+      RDXUniform pointScaleUniform = RDXUniform.createGlobalUniform("u_pointScale", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, pointScale);
+      });
+      rdxShader.registerUniform(pointScaleUniform);
+
+      RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, defaultPointColor);
+      });
+      rdxShader.registerUniform(defaultPointColorUniform);
+
+      RDXUniform coloringMethodUniform = RDXUniform.createGlobalUniform("u_coloringMethod", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, coloringMethod.ordinal());
+      });
+
+      rdxShader.registerUniform(coloringMethodUniform);
    }
 
    private void registerDepthImageUniforms(RDXShader rdxShader)
@@ -145,6 +140,12 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
          shader.set(inputID, (float) depthIntrinsics.getFx(), (float) depthIntrinsics.getFy(), (float) depthIntrinsics.getCx(), (float) depthIntrinsics.getCy());
       });
       rdxShader.registerUniform(depthIntrinsicsUniform);
+
+      RDXUniform depthImageWidthUniform = RDXUniform.createGlobalUniform("u_depthImageWidth", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, depthIntrinsics.getWidth());
+      });
+      rdxShader.registerUniform(depthImageWidthUniform);
 
       RDXUniform depthDiscretizationUniform = RDXUniform.createGlobalUniform("u_depthDiscretization", (shader, inputID, renderable, combinedAttributes) ->
       {
@@ -161,6 +162,10 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    private void registerColorImageUniforms(RDXShader rdxShader)
    {
+      colorImagePixmap = new Pixmap(1, 1, Format.RGBA8888);
+      pixmapDataPointer = new BytePointer(colorImagePixmap.getPixels());
+      colorImageTexture = new Texture(colorImagePixmap);
+
       RDXUniform colorImageTextureUniform = RDXUniform.createGlobalUniform("u_colorTexture", (shader, inputID, renderable, combinedAttributes) ->
       {
          shader.set(inputID, colorImageTexture);
@@ -192,14 +197,11 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       depthPose.set(depthImage.getPose());
       LibGDXTools.toLibGDX(depthPose, tempDepthTransform, libGDXDepthTransform);
 
-      int width = depthImage.getWidth();
-      int height = depthImage.getHeight();
-      int pixelCount = width * height;
-
       // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * pixelCount))
+      int pixelCount = depthImage.getWidth() * depthImage.getHeight();
+      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != pixelCount)
       {
-         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * pixelCount]);
+         renderable.meshPart.mesh.setVertices(new float[pixelCount]);
          renderable.meshPart.size = pixelCount;
       }
 
@@ -207,7 +209,7 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       ShortPointer depthPointer = new ShortPointer(depthImage.getCpuImageMat().data());
 
       // Copy each short depth value to the vertices buffer
-      IntStream.range(0, pixelCount).parallel().forEach(i -> verticesBuffer.put(i * floatsPerVertex, depthPointer.get(i)));
+      IntStream.range(0, pixelCount).parallel().forEach(i -> verticesBuffer.put(i, depthPointer.get(i)));
 
       depthPointer.close();
       depthImage.release();
@@ -251,34 +253,6 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       rgbaMat.release();
       depthImage.release();
       colorImage.release();
-   }
-
-   public void updateMesh(List<? extends Point3DReadOnly> points)
-   {
-      // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.size()))
-      {
-         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.size()]);
-         renderable.meshPart.size = points.size();
-      }
-
-      // Copy points over
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
-      IntStream.range(0, points.size()).parallel().unordered().forEach(i -> verticesBuffer.put(i * floatsPerVertex, points.get(i).getX32()));
-   }
-
-   public void updateMesh(Point3DReadOnly[] points)
-   {
-      // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.length))
-      {
-         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.length]);
-         renderable.meshPart.size = points.length;
-      }
-
-      // Copy points over
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
-      IntStream.range(0, points.length).parallel().unordered().forEach(i -> verticesBuffer.put(i * floatsPerVertex, points[i].getX32()));
    }
 
    @Override

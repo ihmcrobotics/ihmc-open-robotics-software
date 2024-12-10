@@ -10,15 +10,10 @@
 #define COLOR_FROM_IMAGE 3
 
 /*
- * This attribute can represent different data depending on the input method.
- * If the input method is a point cloud, the attribute represents
- * a point in world frame.
- * (x, y, z) = a_position.xyz
- * If the input method is a depth image, the attribute represents
- * the depth value and its pixel coordinates.
- * depth = a_position.x and (x, y) = a_position.yz
+ * This attribute can represents the depth value
+ * stored in the pixel that's being rendered as a point. 
  */
-layout(location = 0) in vec3 a_depthData;
+layout(location = 0) in float a_depthData;
 
 // We output the color of the vertex for the fragment shader to use
 out vec4 v_color;
@@ -31,19 +26,17 @@ uniform float u_pointScale;
 uniform vec4 u_defaultPointColor;
 uniform int u_coloringMethod;
 
-#ifdef INPUT_DEPTH_IMAGE
 // Depth image uniforms
 uniform vec4 u_depthIntrinsics; // fx, fy, cx, cy
+uniform int u_depthImageWidth;
 uniform float u_depthDiscretization;
 uniform mat4 u_depthTransform;
 
-// Color image input is only possible when a depth image is provided
 #ifdef INPUT_COLOR_IMAGE
 // Color image uniforms
 uniform sampler2D u_colorTexture;
 uniform vec4 u_colorIntrinsics; // fx, fy, cx, cy
 uniform mat4 u_depthToColorTransform;
-#endif
 #endif
 
 // EUCLID STUFF //
@@ -86,27 +79,23 @@ void main()
    vec4 pointColor;
    float pointSize;
 
-// We calculate the worldFramePoint depending on the input method
-#ifdef INPUT_DEPTH_IMAGE
-   float depthInMeters = a_depthData.x * u_depthDiscretization;
+   // We calculate the worldFramePoint using the depth image
+   float depthInMeters = a_depthData * u_depthDiscretization;
 
+   // No need to render if depth is zero (would be inside the sensor depth sensor)
    if (depthInMeters == 0.0f)
       return;
 
-   uint x = gl_VertexID % 1280;
-   uint y = gl_VertexID / 1280;
+   uint x = gl_VertexID % u_depthImageWidth;
+   uint y = gl_VertexID / u_depthImageWidth;
 
    vec3 depthFramePoint = vec3(depthInMeters,
                                -(x - u_depthIntrinsics.z) / u_depthIntrinsics.x * depthInMeters,
                                -(y - u_depthIntrinsics.w) / u_depthIntrinsics.y * depthInMeters);
    worldFramePoint = transformPoint3D(depthFramePoint, u_depthTransform);
-#else
-   worldFramePoint = a_depthData;
-#endif
 
    if (u_coloringMethod == COLOR_GRADIENT_WORLD_Z)
       pointColor = calculateSinusoidalGradientColor(worldFramePoint.z);
-#ifdef INPUT_DEPTH_IMAGE
    else if (u_coloringMethod == COLOR_GRADIENT_SENSOR_X)
       pointColor = calculateSinusoidalGradientColor(depthInMeters);
 #ifdef INPUT_COLOR_IMAGE
@@ -131,15 +120,10 @@ void main()
          pointColor = calculateSinusoidalGradientColor(depthInMeters);
    }
 #endif
-#endif
    else
       pointColor = u_defaultPointColor;
 
-#ifdef INPUT_DEPTH_IMAGE
    pointSize = depthInMeters * u_pointScale;
-#else
-   pointSize = u_pointScale;
-#endif
 
    vec4 pointInCameraFrame = u_viewTrans * vec4(worldFramePoint, 1);
    vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);

@@ -2,26 +2,23 @@ package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.ColoringMethod;
-import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.InputMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
 import java.util.Arrays;
-import java.util.List;
 
-public class RDXPointCloudRendererDemo
+public class RDXRawImagePointCloudRendererDemo
 {
-   private final String[] inputMethods = Arrays.stream(InputMethod.values()).map(Enum::name).toArray(String[]::new);
-   private final ImInt currentInputMethod = new ImInt(InputMethod.DEPTH_AND_COLOR_IMAGE.ordinal());
+   private final ImBoolean enableColorInput = new ImBoolean(true);
 
    private final String[] coloringMethods = Arrays.stream(ColoringMethod.values()).map(Enum::name).toArray(String[]::new);
    private final ImInt currentColoringMethod = new ImInt(ColoringMethod.COLOR_IMAGE.ordinal());
@@ -36,7 +33,7 @@ public class RDXPointCloudRendererDemo
    private ZEDColorDepthImageRetriever zed;
    private RDXPose3DGizmo sensorPoseGizmo;
 
-   private RDXPointCloudRendererDemo()
+   private RDXRawImagePointCloudRendererDemo()
    {
       RDXBaseUI baseUI = new RDXBaseUI();
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -55,7 +52,7 @@ public class RDXPointCloudRendererDemo
             zed = new ZEDColorDepthImageRetriever(0, sensorPoseGizmo::getGizmoFrame, () -> true, () -> true);
             zed.start();
 
-            pointCloudRenderer = new RDXRawImagePointCloudRenderer(InputMethod.values()[currentInputMethod.get()]);
+            pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorInput.get());
             pointCloudRenderer.create(1280 * 720);
             pointCloudRenderer.setColoringMethod(ColoringMethod.values()[currentColoringMethod.get()]);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
@@ -73,19 +70,13 @@ public class RDXPointCloudRendererDemo
                RawImage colorImage = zed.getLatestRawColorImage(RobotSide.LEFT);
                RawImage depthImage = zed.getLatestRawDepthImage();
 
-               InputMethod inputMethod = InputMethod.values()[currentInputMethod.get()];
-               if (inputMethod == InputMethod.DEPTH_IMAGE)
-               {
-                  pointCloudRenderer.updateMesh(depthImage);
-               }
-               else if (inputMethod == InputMethod.DEPTH_AND_COLOR_IMAGE)
+               if (enableColorInput.get())
                {
                   pointCloudRenderer.updateMesh(depthImage, colorImage);
                }
                else // inputMethod == InputMethod.POINT_CLOUD
                {
-                  List<Point3D32> pointCloud = pointCloudExtractor.extractPointCloud(depthImage);
-                  pointCloudRenderer.updateMesh(pointCloud);
+                  pointCloudRenderer.updateMesh(depthImage);
                }
 
                colorImage.release();
@@ -98,7 +89,7 @@ public class RDXPointCloudRendererDemo
 
          private void renderOptions()
          {
-            if (ImGui.combo("Input Method", currentInputMethod, inputMethods))
+            if (ImGui.checkbox("Input Color", enableColorInput))
                reinitializePointCloudRenderer();
             if (ImGui.combo("Coloring Method", currentColoringMethod, coloringMethods))
                reinitializePointCloudRenderer();
@@ -115,7 +106,7 @@ public class RDXPointCloudRendererDemo
             if (pointCloudRenderer != null)
                pointCloudRenderer.dispose();
 
-            pointCloudRenderer = new RDXRawImagePointCloudRenderer(InputMethod.values()[currentInputMethod.get()]);
+            pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorInput.get());
             pointCloudRenderer.create(1280 * 720);
             pointCloudRenderer.setColoringMethod(ColoringMethod.values()[currentColoringMethod.get()]);
             pointCloudRenderer.setPointScale(pointScale.get());
@@ -136,6 +127,6 @@ public class RDXPointCloudRendererDemo
 
    public static void main(String[] args)
    {
-      new RDXPointCloudRendererDemo();
+      new RDXRawImagePointCloudRendererDemo();
    }
 }

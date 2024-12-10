@@ -33,28 +33,9 @@ public class RDXPointCloudRenderer implements RenderableProvider
    private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
 
    // GENERALLY NEEDED UNIFORMS
-   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, shader.camera.viewportWidth);
-   });
-
    private float pointScale = 0.01f;
-   private final RDXUniform pointScaleUniform = RDXUniform.createGlobalUniform("u_pointScale", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, pointScale);
-   });
-
    private final Color defaultPointColor = new Color(Color.WHITE);
-   private final RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, defaultPointColor);
-   });
-
    private ColoringMethod coloringMethod = ColoringMethod.DEFAULT;
-   private final RDXUniform coloringMethodUniform = RDXUniform.createGlobalUniform("u_coloringMethod", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, coloringMethod.ordinal());
-   });
 
    public void create(int maxPoints)
    {
@@ -71,15 +52,41 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
       RDXShader shader = new RDXShader(getClass());
       shader.create();
-      shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
-      shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-      shader.registerUniform(screenWidthUniform);
-      shader.registerUniform(pointScaleUniform);
-      shader.registerUniform(defaultPointColorUniform);
-      shader.registerUniform(coloringMethodUniform);
+      registerGeneralUniforms(shader);
 
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
+   }
+
+   private void registerGeneralUniforms(RDXShader rdxShader)
+   {
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
+      rdxShader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
+
+      RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, shader.camera.viewportWidth);
+      });
+      rdxShader.registerUniform(screenWidthUniform);
+
+      RDXUniform pointScaleUniform = RDXUniform.createGlobalUniform("u_pointScale", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, pointScale);
+      });
+      rdxShader.registerUniform(pointScaleUniform);
+
+      RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, defaultPointColor);
+      });
+      rdxShader.registerUniform(defaultPointColorUniform);
+
+      RDXUniform coloringMethodUniform = RDXUniform.createGlobalUniform("u_coloringMethod", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, coloringMethod.ordinal());
+      });
+
+      rdxShader.registerUniform(coloringMethodUniform);
    }
 
    public void updateMesh(List<? extends Point3DReadOnly> points)

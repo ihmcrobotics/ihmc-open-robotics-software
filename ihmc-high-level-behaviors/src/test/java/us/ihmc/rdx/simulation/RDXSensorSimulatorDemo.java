@@ -11,7 +11,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.ColoringMethod;
-import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.InputMethod;
 
 public class RDXSensorSimulatorDemo
 {
@@ -25,7 +24,7 @@ public class RDXSensorSimulatorDemo
    private final RDXSensorSimulator sensorSimulator;
    private RDXPose3DGizmo sensorPoseGizmo;
 
-   private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer(InputMethod.DEPTH_IMAGE);
+   private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer(false);
 
    private RDXMatImagePanel imagePanel;
 
