@@ -199,13 +199,11 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
       // Ensure correct length and initialize vertices buffer
       if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * pixelCount))
       {
-         float[] depthVertices = new float[floatsPerVertex * pixelCount];
-         renderable.meshPart.mesh.setVertices(depthVertices);
+         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * pixelCount]);
          renderable.meshPart.size = pixelCount;
       }
 
-      // Mark dirty
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
       ShortPointer depthPointer = new ShortPointer(depthImage.getCpuImageMat().data());
 
       // Copy each short depth value to the vertices buffer
@@ -257,43 +255,30 @@ public class RDXRawImagePointCloudRenderer implements RenderableProvider
 
    public void updateMesh(List<? extends Point3DReadOnly> points)
    {
-//      if (vertices.length != floatsPerVertex * points.size())
-//         vertices = new float[floatsPerVertex * points.size()];
-//
-//      // Copy points over
-//      IntStream.range(0, points.size()).parallel().unordered().forEach(i ->
-//      {
-//         Point3DReadOnly point = points.get(i);
-//         int offset = i * floatsPerVertex;
-//
-//         vertices[offset] = point.getX32();
-//         vertices[offset + 1] = point.getY32();
-//         vertices[offset + 2] = point.getZ32();
-//      });
-//
-//      renderable.meshPart.size = points.size();
-//      renderable.meshPart.mesh.setVertices(vertices);
+      // Ensure correct length and initialize vertices buffer
+      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.size()))
+      {
+         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.size()]);
+         renderable.meshPart.size = points.size();
+      }
+
+      // Copy points over
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
+      IntStream.range(0, points.size()).parallel().unordered().forEach(i -> verticesBuffer.put(i * floatsPerVertex, points.get(i).getX32()));
    }
 
    public void updateMesh(Point3DReadOnly[] points)
    {
-//      // Ensure correct length
-//      if (vertices.length != floatsPerVertex * points.length)
-//         vertices = new float[floatsPerVertex * points.length];
-//
-//      // Copy points over
-//      IntStream.range(0, points.length).parallel().unordered().forEach(i ->
-//      {
-//         Point3DReadOnly point = points[i];
-//         int offset = i * floatsPerVertex;
-//
-//         vertices[offset] = point.getX32();
-//         vertices[offset + 1] = point.getY32();
-//         vertices[offset + 2] = point.getZ32();
-//      });
-//
-//      renderable.meshPart.size = points.length;
-//      renderable.meshPart.mesh.setVertices(vertices);
+      // Ensure correct length and initialize vertices buffer
+      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.length))
+      {
+         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.length]);
+         renderable.meshPart.size = points.length;
+      }
+
+      // Copy points over
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
+      IntStream.range(0, points.length).parallel().unordered().forEach(i -> verticesBuffer.put(i * floatsPerVertex, points[i].getX32()));
    }
 
    @Override
