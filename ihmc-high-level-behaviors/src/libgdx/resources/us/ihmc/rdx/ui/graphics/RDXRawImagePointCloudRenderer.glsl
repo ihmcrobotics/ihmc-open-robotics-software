@@ -10,7 +10,7 @@
 #define COLOR_FROM_IMAGE 3
 
 /*
- * This attribute can represents the depth value
+ * This attribute represents the depth value
  * stored in the pixel that's being rendered as a point. 
  */
 layout(location = 0) in float a_depthData;
