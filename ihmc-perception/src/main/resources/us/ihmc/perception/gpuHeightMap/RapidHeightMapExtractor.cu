@@ -248,9 +248,6 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
      unsigned short *inRow = (unsigned short *)((char *)in + (yIndex * pitchIn));
      unsigned short depthValue = *(inRow + xIndex);
 
-
-
-
     int outRow = xIndex;  // Flipping and rotation (yIndex becomes the new row)
     int outCol = 720 - 1 - yIndex;
 
@@ -554,24 +551,3 @@ extern "C" __global__ void croppingKernel(unsigned short *inputMap, size_t pitch
         croppedRow[xIndex] = 0; // Assign 0 for out-of-bounds cells
     }
 }
-
-// extern "C"
-// __global__
-//  void heightMapUpdateKernel(int * sum)
-//  {
-//      *sum = 7 + 3;
-//  }
-//
-// extern "C"
-//  __global__
-//  void heightMapRegistrationKernel(int * in, int * out)
-//  {
-//      *out = *in + 3;
-//  }
-//
-// extern "C"
-//  __global__
-//  void croppingKernel(int * inn, int * outt)
-//  {
-//     *outt = *inn + 4;
-//  }

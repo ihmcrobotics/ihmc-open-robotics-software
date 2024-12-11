@@ -18,10 +18,8 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.filters.FlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.neural.HeightMapAutoencoder;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,7 +30,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.*;
+import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class RapidHeightMapExtractorCUDA
 {
@@ -62,7 +60,7 @@ public class RapidHeightMapExtractorCUDA
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
 
    private Rect cropWindowRectangle;
-   //   private static final boolean computeSteppability = true;
+   private static final boolean computeSteppability = true;
    private CUDAProgram heightMapCUDAProgram;
    private CUstream_st stream;
 
@@ -400,29 +398,24 @@ public class RapidHeightMapExtractorCUDA
       cudaStreamSynchronize(stream);
       terrainMapData.setHeightMap(finalCroppedHeightMap);
 
-      //        Tools to visualize
-
+      // Tools to visualize
+      // Does not work on the OCU so commented it out
       //        Mat inputMat = new Mat();
       //        inputDepthImage.download(inputMat);
-      //
       //        Mat transformedMat = new Mat();
       //        transformedInputDepthImage.download(transformedMat);
-      //
       //        Mat localMat = new Mat();
       //        localHeightMapImage.download(localMat);
       //        Mat globalMat = new Mat();
       //        globalHeightMapImage.download(globalMat);
-      //
       //        PerceptionDebugTools.display("Input Height Map", inputMat, 1);
       //        PerceptionDebugTools.display(" Transfomed Input Height Map", transformedMat, 1);
       //        PerceptionDebugTools.display("Local Height Map", localMat, 1);
       //        PerceptionDebugTools.display("Global Height Map", globalMat, 1);
       //        PerceptionDebugTools.display("Cropped Height Map", finalCroppedHeightMap, 1);
-      //
       //        inputDepthImage.download(finalCroppedHeightMap);
       //        Rect roi = new Rect(0, 0, 151, 151);
       //        Mat croppedMat = new Mat(finalCroppedHeightMap, roi);
-      //
       //        terrainMapData.setHeightMap(croppedMat);
 
    }
