@@ -1,93 +1,21 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.shader.RDXShader;
-import us.ihmc.rdx.shader.RDXUniform;
 
+import javax.annotation.Nullable;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class RDXPointCloudRenderer implements RenderableProvider
+import static us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod.DEFAULT;
+import static us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod.GRADIENT_WORLD_Z;
+
+public class RDXPointCloudRenderer extends AbstractRDXPointCloudRenderer
 {
-   public enum ColoringMethod
-   {
-      DEFAULT, GRADIENT_WORLD_Z
-   }
-
-   private Renderable renderable;
-
    private final VertexAttributes vertexAttributes = new VertexAttributes(VertexAttribute.Position());
-   private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
-
-   // GENERALLY NEEDED UNIFORMS
-   private float pointScale = 0.01f;
-   private final Color defaultPointColor = new Color(Color.WHITE);
-   private ColoringMethod coloringMethod = ColoringMethod.DEFAULT;
-
-   public void create(int maxPoints)
-   {
-      GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
-
-      renderable = new Renderable();
-      renderable.meshPart.primitiveType = GL41.GL_POINTS;
-      renderable.meshPart.offset = 0;
-      renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
-
-      boolean isStatic = false;
-      int maxIndices = 0;
-      renderable.meshPart.mesh = new Mesh(isStatic, maxPoints, maxIndices, vertexAttributes);
-
-      RDXShader shader = new RDXShader(getClass());
-      shader.create();
-      registerGeneralUniforms(shader);
-
-      shader.init(renderable);
-      renderable.shader = shader.getBaseShader();
-   }
-
-   private void registerGeneralUniforms(RDXShader rdxShader)
-   {
-      rdxShader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
-      rdxShader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-
-      RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, shader.camera.viewportWidth);
-      });
-      rdxShader.registerUniform(screenWidthUniform);
-
-      RDXUniform pointScaleUniform = RDXUniform.createGlobalUniform("u_pointScale", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, pointScale);
-      });
-      rdxShader.registerUniform(pointScaleUniform);
-
-      RDXUniform defaultPointColorUniform = RDXUniform.createGlobalUniform("u_defaultPointColor", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, defaultPointColor);
-      });
-      rdxShader.registerUniform(defaultPointColorUniform);
-
-      RDXUniform coloringMethodUniform = RDXUniform.createGlobalUniform("u_coloringMethod", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, coloringMethod.ordinal());
-      });
-
-      rdxShader.registerUniform(coloringMethodUniform);
-   }
 
    public void updateMesh(List<? extends Point3DReadOnly> points)
    {
@@ -130,30 +58,34 @@ public class RDXPointCloudRenderer implements RenderableProvider
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public ColoringMethod[] getAvailableColoringMethods()
    {
-      if (renderable != null)
-         renderables.add(renderable);
+      return new ColoringMethod[] {DEFAULT, GRADIENT_WORLD_Z};
    }
 
-   public void dispose()
+   @Nullable
+   @Override
+   protected String[] getFragmentShaderFlags()
    {
-      if (renderable.meshPart.mesh != null)
-         renderable.meshPart.mesh.dispose();
+      return null;
    }
 
-   public void setPointScale(float size)
+   @Nullable
+   @Override
+   protected String[] getVertexShaderFlags()
    {
-      pointScale = size;
+      return null;
    }
 
-   public void setDefaultPointColor(Color color)
+   @Override
+   protected VertexAttributes getVertexAttributes()
    {
-      defaultPointColor.set(color);
+      return vertexAttributes;
    }
 
-   public void setColoringMethod(ColoringMethod method)
+   @Override
+   protected void registerUniforms(RDXShader rdxShader)
    {
-      coloringMethod = method;
+      registerGeneralUniforms(rdxShader);
    }
 }

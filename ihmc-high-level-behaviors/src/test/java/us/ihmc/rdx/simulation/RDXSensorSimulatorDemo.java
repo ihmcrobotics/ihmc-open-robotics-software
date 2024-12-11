@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation;
 
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.perception.RawImage;
+import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.DepthSensorDemoObjectsModel;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXMatImagePanel;
@@ -10,7 +11,6 @@ import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
-import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.ColoringMethod;
 
 public class RDXSensorSimulatorDemo
 {

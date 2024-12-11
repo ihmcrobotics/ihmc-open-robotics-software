@@ -7,10 +7,10 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
-import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer.ColoringMethod;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
@@ -53,7 +53,7 @@ public class RDXRawImagePointCloudRendererDemo
             zed.start();
 
             pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorInput.get());
-            pointCloudRenderer.create(1280 * 720);
+            pointCloudRenderer.create(1920 * 1080);
             pointCloudRenderer.setColoringMethod(ColoringMethod.values()[currentColoringMethod.get()]);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
 
@@ -107,7 +107,7 @@ public class RDXRawImagePointCloudRendererDemo
                pointCloudRenderer.dispose();
 
             pointCloudRenderer = new RDXRawImagePointCloudRenderer(enableColorInput.get());
-            pointCloudRenderer.create(1280 * 720);
+            pointCloudRenderer.create(1920 * 1080);
             pointCloudRenderer.setColoringMethod(ColoringMethod.values()[currentColoringMethod.get()]);
             pointCloudRenderer.setPointScale(pointScale.get());
             pointCloudRenderer.setDefaultPointColor(new Color(defaultColor[0], defaultColor[1], defaultColor[2], defaultColor[3]));
