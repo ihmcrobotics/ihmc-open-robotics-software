@@ -3,26 +3,10 @@ package us.ihmc.avatar.scs2;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.AvatarMPCControllerThread;
-import us.ihmc.avatar.AvatarMPCEstimatorThreadFactory;
-import us.ihmc.avatar.AvatarMPCStepGeneratorThread;
-import us.ihmc.avatar.AvatarMPCWholeBodyControllerCoreThread;
-import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.ControllerTask;
-import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
-import us.ihmc.avatar.StepGeneratorTask;
-import us.ihmc.avatar.WholeBodyControllerCoreTask;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
-import us.ihmc.avatar.factory.BarrierScheduledRobotController;
-import us.ihmc.avatar.factory.DisposableRobotController;
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
-import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
-import us.ihmc.avatar.factory.SimulatedHandSensorReader;
-import us.ihmc.avatar.factory.SingleThreadedRobotController;
+import us.ihmc.avatar.factory.*;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -520,14 +504,14 @@ public class SCS2AvatarMPCSimulationFactory
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       int wholeBodyControllerCoreDivisor = (int) Math.round(robotModel.getWholeBodyControllerCoreDT() / simulationDT.get());
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
+      MPCHumanoidRobotControlTask estimatorTask = new MPCEstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
+      MPCHumanoidRobotControlTask controllerTask = new MPCControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      MPCHumanoidRobotControlTask stepGeneratorTask = new MPCStepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
                                                                          simulationDT.get(),
                                                                          masterFullRobotModel);
-      HumanoidRobotControlTask wholeBodyControllerCoreTask = new WholeBodyControllerCoreTask("WholeBodyController",
+      MPCHumanoidRobotControlTask wholeBodyControllerCoreTask = new WholeBodyControllerCoreTask("WholeBodyController",
                                                                                              wholeBodyControllerCoreThread,
                                                                                              wholeBodyControllerCoreDivisor,
                                                                                              simulationDT.get(),
@@ -580,7 +564,7 @@ public class SCS2AvatarMPCSimulationFactory
                                                     });
       }
 
-      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
+      List<MPCHumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       tasks.add(stepGeneratorTask);
@@ -601,7 +585,7 @@ public class SCS2AvatarMPCSimulationFactory
       else
       {
          BarrierScheduler.TaskOverrunBehavior overrunBehavior = BarrierScheduler.TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
+         robotController = new MPCBarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
@@ -775,7 +759,7 @@ public class SCS2AvatarMPCSimulationFactory
       };
    }
 
-   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
+   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, MPCHumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
    {
       MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
       owner.addRunnableOnSchedulerThread(() ->

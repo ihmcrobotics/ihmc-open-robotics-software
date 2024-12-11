@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotMPCContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.ControllerCoreOutputDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -81,6 +82,15 @@ public class MPCCrossRobotCommandResolver extends CrossRobotCommandResolver
       resolveControllerCoreCommandDataHolder(in.getControllerCoreCommandDataHolder(), out.getControllerCoreCommandDataHolder());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
 
+      out.setControllerRan(in.getControllerRan());
+   }
+
+   @Override
+   public void resolveHumanoidRobotContextDataController(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
+      resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
       out.setControllerRan(in.getControllerRan());
    }
 

@@ -248,7 +248,7 @@ public class HumanoidHighLevelMPCControllerManager implements RobotController, S
       // new Thread will update the joint with desired values
       copyJointDesiredsToJoints();
       reportDesiredCenterOfPressureForEstimator();
-      reportRobotDesiredConfigurationData();
+//      reportRobotDesiredConfigurationData();
       //      reportControllerCoreOutputDataForWholeBodyControllerCore();
       reportControllerCoreCommandDataForWholeBodyControllerCore();
 

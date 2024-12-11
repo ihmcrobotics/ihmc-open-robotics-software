@@ -8,7 +8,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WholeBodyControllerCoreTask extends ControllerTask
+public class WholeBodyControllerCoreTask extends MPCControllerTask
 {
    protected MPCCrossRobotCommandResolver controllerResolver;
    protected MPCCrossRobotCommandResolver masterResolver;
@@ -48,7 +48,7 @@ public class WholeBodyControllerCoreTask extends ControllerTask
    }
 
    @Override
-   protected void updateMasterContext(HumanoidRobotContextData masterContext)
+   protected void updateMasterContext(HumanoidRobotMPCContextData masterContext)
    {
       runAll(schedulerThreadRunnables);
       AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread = (AvatarMPCWholeBodyControllerCoreThread) controllerThread;
@@ -57,7 +57,7 @@ public class WholeBodyControllerCoreTask extends ControllerTask
    }
 
    @Override
-   protected void updateLocalContext(HumanoidRobotContextData masterContext)
+   protected void updateLocalContext(HumanoidRobotMPCContextData masterContext)
    {
       AvatarMPCWholeBodyControllerCoreThread wholeBodyControllerCoreThread = (AvatarMPCWholeBodyControllerCoreThread) this.controllerThread;
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, wholeBodyControllerCoreThread.getHumanoidRobotContextData());
