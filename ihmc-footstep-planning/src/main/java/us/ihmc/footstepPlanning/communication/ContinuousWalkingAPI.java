@@ -5,7 +5,7 @@ import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
-import std_msgs.Empty;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
