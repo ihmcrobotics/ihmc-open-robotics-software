@@ -24,7 +24,7 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -48,7 +48,7 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
    private int pointsPerSegment;
    private int numberOfSegments;
    private int totalNumberOfPoints;
@@ -175,7 +175,7 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
                decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
                if (pointCloudVertexBuffer != null)
                   pointCloudVertexBuffer.destroy(openCLManager);
-               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRendererOld.FLOATS_PER_VERTEX,
                                                               pointCloudRenderer.getVertexBuffer());
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
                LogTools.info("Allocated new buffers. {} points per segment. {} segments.", pointsPerSegment, numberOfSegments);

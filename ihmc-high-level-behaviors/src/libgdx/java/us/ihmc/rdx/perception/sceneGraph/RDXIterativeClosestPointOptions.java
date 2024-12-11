@@ -21,7 +21,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -55,9 +55,9 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final Timer useICPPoseTimer = new Timer();
 
    private final RecyclingArrayList<Point3D32> icpObjectPointCloud = new RecyclingArrayList<>(ICP_MAX_POINTS, Point3D32::new);
-   private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld objectPointCloudRenderer = new RDXPointCloudRendererOld();
    private final RecyclingArrayList<Point3D32> icpSegmentedPointCloud = new RecyclingArrayList<>(ICP_MAX_POINTS, Point3D32::new);
-   private final RDXPointCloudRenderer segmentationRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld segmentationRenderer = new RDXPointCloudRendererOld();
    private final RDXReferenceFrameGraphic icpFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXIterativeClosestPointOptions(RDXPrimitiveRigidBodySceneNode requestingNode, ImGuiUniqueLabelMap labels)
