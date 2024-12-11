@@ -1,13 +1,5 @@
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <crocoddyl/core/integrator/euler.hpp>
-#include <crocoddyl/core/solvers/fddp.hpp>
-#include <crocoddyl/core/utils/callbacks.hpp>
-#include <crocoddyl/multibody/fwd.hpp>
-#include <pinocchio/multibody/data.hpp>
-#include <pinocchio/multibody/fwd.hpp>
-
 namespace ihmc
 {
     class ExternalControlImpl
@@ -36,12 +28,5 @@ namespace ihmc
                          double* control_data_to_pack, int control_rows,
                          double* p_gains_to_pack, int p_gain_rows,
                          double* d_gains_to_pack, int d_gain_rows) const;
-
-    private:
-
-        Eigen::VectorXd initial_state_;
-
-
-
     };
 }
