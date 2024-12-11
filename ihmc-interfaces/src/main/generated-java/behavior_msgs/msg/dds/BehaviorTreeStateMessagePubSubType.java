@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d296496df2b561c0c0f126052808de9cc6b2f3d43707dc1cb6aa90a5fdb08d4";
+   		return "7209f90a58b2a4948db884ddf526779b083614b3b561c87c72d8ac4af6de1c6f";
    }
    
    @Override
@@ -77,6 +77,12 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -166,6 +172,16 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getFallbackNodes().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getCdrSerializedSize(data.getFallbackNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getConditionNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getCdrSerializedSize(data.getConditionNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getGotoNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getCdrSerializedSize(data.getGotoNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
@@ -266,6 +282,14 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getFallbackNodes());else
           throw new RuntimeException("fallback_nodes field exceeds the maximum length");
 
+      if(data.getConditionNodes().size() <= 200)
+      cdr.write_type_e(data.getConditionNodes());else
+          throw new RuntimeException("condition_nodes field exceeds the maximum length");
+
+      if(data.getGotoNodes().size() <= 200)
+      cdr.write_type_e(data.getGotoNodes());else
+          throw new RuntimeException("goto_nodes field exceeds the maximum length");
+
       if(data.getDoorTraversals().size() <= 200)
       cdr.write_type_e(data.getDoorTraversals());else
           throw new RuntimeException("door_traversals field exceeds the maximum length");
@@ -330,6 +354,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getAi2rNodes());	
       cdr.read_type_e(data.getActionSequences());	
       cdr.read_type_e(data.getFallbackNodes());	
+      cdr.read_type_e(data.getConditionNodes());	
+      cdr.read_type_e(data.getGotoNodes());	
       cdr.read_type_e(data.getDoorTraversals());	
       cdr.read_type_e(data.getTrashCanInteractions());	
       cdr.read_type_e(data.getBuildingExplorations());	
@@ -359,6 +385,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
       ser.write_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.write_type_e("condition_nodes", data.getConditionNodes());
+      ser.write_type_e("goto_nodes", data.getGotoNodes());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
       ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.write_type_e("building_explorations", data.getBuildingExplorations());
@@ -387,6 +415,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
       ser.read_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.read_type_e("condition_nodes", data.getConditionNodes());
+      ser.read_type_e("goto_nodes", data.getGotoNodes());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
       ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.read_type_e("building_explorations", data.getBuildingExplorations());
