@@ -5,9 +5,9 @@
 
 namespace ihmc
 {
-    ExternalControlImpl::ExternalControlImpl(const double default_position, const double default_damping, const int number_of_joints)
+    ExternalControlImpl::ExternalControlImpl(const double default_stiffness, const double default_damping, const int number_of_joints)
     {
-        constant_position_controller_ = ConstantPositionController(default_position, default_damping, number_of_joints);
+        constant_position_controller_ = ConstantPositionController(default_stiffness, default_damping, number_of_joints);
         desired_state_data_ = Eigen::VectorXd(13 + 2 * number_of_joints);
         desired_control_data_ = Eigen::VectorXd(number_of_joints);
         p_gains_ = Eigen::VectorXd(number_of_joints);

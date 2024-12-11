@@ -19,8 +19,8 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.presets.Exte
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
         public ExternalControlImpl(Pointer p) { super(p); }
     
-        public ExternalControlImpl(double default_position, double default_damping, int number_of_joints) { super((Pointer)null); allocate(default_position, default_damping, number_of_joints); }
-        private native void allocate(double default_position, double default_damping, int number_of_joints);
+        public ExternalControlImpl(double default_stiffness, double default_damping, int number_of_joints) { super((Pointer)null); allocate(default_stiffness, default_damping, number_of_joints); }
+        private native void allocate(double default_stiffness, double default_damping, int number_of_joints);
 
         
 

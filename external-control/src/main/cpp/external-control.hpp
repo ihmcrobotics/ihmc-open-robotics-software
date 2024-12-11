@@ -7,7 +7,7 @@ namespace ihmc
     class ExternalControlImpl
     {
     public:
-        explicit ExternalControlImpl(const double default_position, const double default_damping, const int number_of_joints);
+        explicit ExternalControlImpl(const double default_stiffness, const double default_damping, const int number_of_joints);
 
         virtual ~ExternalControlImpl() = default;
 
