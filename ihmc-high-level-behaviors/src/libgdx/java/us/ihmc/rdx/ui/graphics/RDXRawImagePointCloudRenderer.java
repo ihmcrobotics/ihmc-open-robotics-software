@@ -78,6 +78,12 @@ public class RDXRawImagePointCloudRenderer extends AbstractRDXPointCloudRenderer
          verticesBuffer.limit(pixelCount);
       }
 
+      /* NOTE:
+       * We need to copy the short values from the depth image (Mat) to the vertices buffer (FloatBuffer) as floats.
+       * In both objects, the data is in native memory. Copying native -> java -> native is slow,
+       * so we use the Mat#convertTo() method which performs the short to float conversion and memory copy natively.
+       */
+
       // Wrap the vertices buffer into a pointer, than into a Mat
       FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
       Mat verticesMat = new Mat(height, width, opencv_core.CV_32FC1, verticesPointer);
