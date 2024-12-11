@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.BipedTimedStepCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalBasics;
@@ -30,6 +31,14 @@ public class BipedTimedStep extends BipedStep implements TimeIntervalProvider
    {
       super(robotSide, goalPose, groundClearance, predictedContactPoints);
       setTimeInterval(timeInterval);
+   }
+
+   public void set(BipedTimedStepCommand command)
+   {
+      setTimeInterval(command.getTimeInterval());
+      setGoalPose(command.getGoalPose());
+      setRobotSide(command.getRobotSide());
+      setSwingHeight(command.getSwingHeight());
    }
 
    @Override
