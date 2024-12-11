@@ -18,9 +18,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte BASIC_NODE = (byte) 1;
    public static final byte AI2R_NODE = (byte) 2;
    public static final byte ACTION_SEQUENCE = (byte) 3;
-   public static final byte DOOR_TRAVERSAL = (byte) 4;
-   public static final byte TRASH_CAN_INTERACTION = (byte) 5;
-   public static final byte BUILDING_EXPLORATION = (byte) 6;
+   public static final byte FALLBACK_NODE = (byte) 4;
+   public static final byte CONDITION_NODE = (byte) 5;
+   public static final byte GOTO_NODE = (byte) 6;
+   public static final byte DOOR_TRAVERSAL = (byte) 7;
+   public static final byte TRASH_CAN_INTERACTION = (byte) 8;
+   public static final byte BUILDING_EXPLORATION = (byte) 9;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
@@ -56,6 +59,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  basic_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage>  ai2r_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  action_sequences_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage>  fallback_nodes_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage>  condition_nodes_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage>  goto_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.TrashCanInteractionStateMessage>  trash_can_interactions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage>  building_explorations_;
@@ -80,6 +86,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       ai2r_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RNodeStateMessage> (1, new behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType());
       action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (200, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
+      fallback_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage> (200, new behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType());
+      condition_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage> (200, new behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType());
+      goto_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage> (200, new behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType());
       door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (200, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
       trash_can_interactions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.TrashCanInteractionStateMessage> (200, new behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType());
       building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (200, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
@@ -114,6 +123,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       basic_nodes_.set(other.basic_nodes_);
       ai2r_nodes_.set(other.ai2r_nodes_);
       action_sequences_.set(other.action_sequences_);
+      fallback_nodes_.set(other.fallback_nodes_);
+      condition_nodes_.set(other.condition_nodes_);
+      goto_nodes_.set(other.goto_nodes_);
       door_traversals_.set(other.door_traversals_);
       trash_can_interactions_.set(other.trash_can_interactions_);
       building_explorations_.set(other.building_explorations_);
@@ -209,6 +221,24 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  getActionSequences()
    {
       return action_sequences_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FallbackNodeStateMessage>  getFallbackNodes()
+   {
+      return fallback_nodes_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ConditionNodeStateMessage>  getConditionNodes()
+   {
+      return condition_nodes_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.GotoNodeStateMessage>  getGotoNodes()
+   {
+      return goto_nodes_;
    }
 
 
@@ -338,6 +368,27 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.action_sequences_.get(i).epsilonEquals(other.action_sequences_.get(i), epsilon)) return false; }
       }
 
+      if (this.fallback_nodes_.size() != other.fallback_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.fallback_nodes_.size(); i++)
+         {  if (!this.fallback_nodes_.get(i).epsilonEquals(other.fallback_nodes_.get(i), epsilon)) return false; }
+      }
+
+      if (this.condition_nodes_.size() != other.condition_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.condition_nodes_.size(); i++)
+         {  if (!this.condition_nodes_.get(i).epsilonEquals(other.condition_nodes_.get(i), epsilon)) return false; }
+      }
+
+      if (this.goto_nodes_.size() != other.goto_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.goto_nodes_.size(); i++)
+         {  if (!this.goto_nodes_.get(i).epsilonEquals(other.goto_nodes_.get(i), epsilon)) return false; }
+      }
+
       if (this.door_traversals_.size() != other.door_traversals_.size()) { return false; }
       else
       {
@@ -446,6 +497,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.basic_nodes_.equals(otherMyClass.basic_nodes_)) return false;
       if (!this.ai2r_nodes_.equals(otherMyClass.ai2r_nodes_)) return false;
       if (!this.action_sequences_.equals(otherMyClass.action_sequences_)) return false;
+      if (!this.fallback_nodes_.equals(otherMyClass.fallback_nodes_)) return false;
+      if (!this.condition_nodes_.equals(otherMyClass.condition_nodes_)) return false;
+      if (!this.goto_nodes_.equals(otherMyClass.goto_nodes_)) return false;
       if (!this.door_traversals_.equals(otherMyClass.door_traversals_)) return false;
       if (!this.trash_can_interactions_.equals(otherMyClass.trash_can_interactions_)) return false;
       if (!this.building_explorations_.equals(otherMyClass.building_explorations_)) return false;
@@ -486,6 +540,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.ai2r_nodes_);      builder.append(", ");
       builder.append("action_sequences=");
       builder.append(this.action_sequences_);      builder.append(", ");
+      builder.append("fallback_nodes=");
+      builder.append(this.fallback_nodes_);      builder.append(", ");
+      builder.append("condition_nodes=");
+      builder.append(this.condition_nodes_);      builder.append(", ");
+      builder.append("goto_nodes=");
+      builder.append(this.goto_nodes_);      builder.append(", ");
       builder.append("door_traversals=");
       builder.append(this.door_traversals_);      builder.append(", ");
       builder.append("trash_can_interactions=");

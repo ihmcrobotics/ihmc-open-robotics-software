@@ -1,13 +1,14 @@
 package us.ihmc.behaviors.tools;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TObjectByteHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.communication.crdt.CRDTBidirectionalStoredPropertySet;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
@@ -19,14 +20,37 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStoredPropertySet
 {
+   private final String name;
+   private final TObjectDoubleHashMap<DoubleStoredPropertyKey> defaultDoubleValues = new TObjectDoubleHashMap<>();
+   private final TObjectIntHashMap<IntegerStoredPropertyKey> defaultIntegerValues = new TObjectIntHashMap<>();
+   private final TObjectByteHashMap<BooleanStoredPropertyKey> defaultBooleanValues = new TObjectByteHashMap<>();
    private final TDoubleArrayList onDiskDoubleValues = new TDoubleArrayList();
    private final TIntArrayList onDiskIntegerValues = new TIntArrayList();
    private final TByteArrayList onDiskBooleanValues = new TByteArrayList();
 
    public BehaviorStoredPropertySetDefinition(RequestConfirmFreezable requestConfirmFreezable,
+                                              String name,
                                               StoredPropertySetBasics storedPropertySet)
    {
       super(requestConfirmFreezable, storedPropertySet);
+
+      this.name = name;
+
+      storedPropertySet.getKeyList().keys().forEach(key ->
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            defaultDoubleValues.put(doubleKey, storedPropertySet.get(doubleKey));
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            defaultIntegerValues.put(integerKey, storedPropertySet.get(integerKey));
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            defaultBooleanValues.put(booleanKey, booleanToByte(storedPropertySet.get(booleanKey)));
+         }
+      });
 
       setOnDiskFields();
    }
@@ -34,21 +58,27 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
    public void toJSON(ObjectNode jsonNode)
    {
       StoredPropertySetReadOnly storedPropertySet = getValueReadOnly();
-      ObjectNode objectNode = jsonNode.putObject(storedPropertySet.getTitle());
+      ObjectNode objectNode = jsonNode.putObject(name);
 
       for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
       {
-         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         if (key instanceof DoubleStoredPropertyKey doubleKey
+             && !(defaultDoubleValues.get(doubleKey) == storedPropertySet.get(doubleKey)))
          {
-            objectNode.put(doubleKey.getTitleCasedName(), storedPropertySet.get(doubleKey));
+            objectNode.put(doubleKey.getTitleCasedName(), "%s -> %s".formatted(defaultDoubleValues.get(doubleKey),
+                                                                               storedPropertySet.get(doubleKey)));
          }
-         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         else if (key instanceof IntegerStoredPropertyKey integerKey
+                  && !(defaultIntegerValues.get(integerKey) == storedPropertySet.get(integerKey)))
          {
-            objectNode.put(integerKey.getTitleCasedName(), storedPropertySet.get(integerKey));
+            objectNode.put(integerKey.getTitleCasedName(), "%s -> %s".formatted(defaultIntegerValues.get(integerKey),
+                                                                                storedPropertySet.get(integerKey)));
          }
-         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         else if (key instanceof BooleanStoredPropertyKey booleanKey
+                  && !(byteToBoolean(defaultBooleanValues.get(booleanKey)) == storedPropertySet.get(booleanKey)))
          {
-            objectNode.put(booleanKey.getTitleCasedName(), storedPropertySet.get(booleanKey));
+            objectNode.put(booleanKey.getTitleCasedName(), "%s -> %s".formatted(byteToBoolean(defaultBooleanValues.get(booleanKey)),
+                                                                                storedPropertySet.get(booleanKey)));
          }
       }
    }
@@ -56,21 +86,25 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
    public void fromJSON(JsonNode jsonNode)
    {
       StoredPropertySetBasics storedPropertySet = getValueAndFreeze();
-      if (jsonNode.get(storedPropertySet.getTitle()) instanceof ObjectNode objectNode)
+      if (jsonNode.get(name) instanceof ObjectNode objectNode)
       {
          for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
          {
-            if (key instanceof DoubleStoredPropertyKey doubleKey && objectNode.get(key.getTitleCasedName()) instanceof DoubleNode doubleNode)
+            if (objectNode.get(key.getTitleCasedName()) instanceof TextNode textNode)
             {
-               storedPropertySet.set(doubleKey, doubleNode.doubleValue());
-            }
-            else if (key instanceof IntegerStoredPropertyKey integerKey && objectNode.get(key.getTitleCasedName()) instanceof LongNode longNode)
-            {
-               storedPropertySet.set(integerKey, longNode.intValue());
-            }
-            else if (key instanceof BooleanStoredPropertyKey booleanKey && objectNode.get(key.getTitleCasedName()) instanceof BooleanNode booleanNode)
-            {
-               storedPropertySet.set(booleanKey, booleanNode.booleanValue());
+               String valueText = textNode.asText().substring(textNode.asText().indexOf("-> ") + 3);
+               if (key instanceof DoubleStoredPropertyKey doubleKey)
+               {
+                  storedPropertySet.set(doubleKey, Double.parseDouble(valueText));
+               }
+               else if (key instanceof IntegerStoredPropertyKey integerKey)
+               {
+                  storedPropertySet.set(integerKey, Integer.parseInt(valueText));
+               }
+               else if (key instanceof BooleanStoredPropertyKey booleanKey)
+               {
+                  storedPropertySet.set(booleanKey, Boolean.parseBoolean(valueText));
+               }
             }
          }
       }
@@ -95,7 +129,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
          }
          else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            onDiskBooleanValues.add(storedPropertySet.get(booleanKey) ? (byte) 1 : (byte) 0);
+            onDiskBooleanValues.add(booleanToByte(storedPropertySet.get(booleanKey)));
          }
       }
    }
@@ -121,7 +155,7 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
          }
          else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            storedPropertySet.set(booleanKey, onDiskBooleanValues.get(booleanIndex) == (byte) 1);
+            storedPropertySet.set(booleanKey, byteToBoolean(onDiskBooleanValues.get(booleanIndex)));
             ++booleanIndex;
          }
       }
@@ -150,11 +184,21 @@ public class BehaviorStoredPropertySetDefinition extends CRDTBidirectionalStored
          }
          else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            unchanged &= storedPropertySet.get(booleanKey) == (onDiskBooleanValues.get(booleanIndex) == (byte) 1);
+            unchanged &= storedPropertySet.get(booleanKey) == byteToBoolean(onDiskBooleanValues.get(booleanIndex));
             ++booleanIndex;
          }
       }
 
       return unchanged;
+   }
+
+   private boolean byteToBoolean(byte b)
+   {
+      return b == (byte) 1;
+   }
+
+   private byte booleanToByte(boolean b)
+   {
+      return b ? (byte) 1 : (byte) 0;
    }
 }

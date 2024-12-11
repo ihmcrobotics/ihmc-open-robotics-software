@@ -11,8 +11,14 @@ import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeExecutor;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -74,6 +80,18 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == ActionSequenceDefinition.class)
       {
          return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == FallbackNodeDefinition.class)
+      {
+         return new FallbackNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ConditionNodeDefinition.class)
+      {
+         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == GotoNodeDefinition.class)
+      {
+         return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == DoorTraversalDefinition.class)
       {

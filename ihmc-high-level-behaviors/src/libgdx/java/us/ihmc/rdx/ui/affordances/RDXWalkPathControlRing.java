@@ -7,10 +7,10 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -236,8 +236,15 @@ public class RDXWalkPathControlRing
 
    public void clearGraphics()
    {
-      leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
-      rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      leftGoalFootstepGraphic.setPose(createNaNPose());
+      rightGoalFootstepGraphic.setPose(createNaNPose());
+   }
+
+   private static Pose3D createNaNPose()
+   {
+      Pose3D nanPose = new Pose3D();
+      nanPose.setToNaN();
+      return nanPose;
    }
 
    public boolean isSelected()
