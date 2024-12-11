@@ -16,7 +16,7 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -40,7 +40,7 @@ public class RDXNettyOusterUI
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OusterDepthExtractionKernel depthExtractionKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private RDXPointCloudRendererOld pointCloudRenderer;
    private final ImFloat pointSize = new ImFloat(0.01f);
    private MutableReferenceFrame sensorFrame;
    private RDXInteractableOuster ousterInteractable;
@@ -102,16 +102,16 @@ public class RDXNettyOusterUI
                                                                                                  levelOfColorDetail.get());
 
       if (pointCloudVertexBuffer == null
-          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
+          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRendererOld.FLOATS_PER_VERTEX != totalNumberOfPoints)
       {
          LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
 
          if (pointCloudRenderer != null)
             pointCloudRenderer.dispose();
-         pointCloudRenderer = new RDXPointCloudRenderer();
+         pointCloudRenderer = new RDXPointCloudRendererOld();
          pointCloudRenderer.create(totalNumberOfPoints);
 
-         pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+         pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRendererOld.FLOATS_PER_VERTEX,
                                                         pointCloudRenderer.getVertexBuffer());
          pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
       }
