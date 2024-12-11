@@ -21,6 +21,7 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.filters.FlyingPointsFilter;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.neural.HeightMapAutoencoder;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -275,8 +276,7 @@ public class RapidHeightMapExtractorCUDA
 
    public void create(GpuMat depthImage, int mode)
    {
-      FlyingPointsFilter flyingPointsFilter = new FlyingPointsFilter(depthImage);
-      inputDepthImage = flyingPointsFilter.getOutputFilteredImage();
+      inputDepthImage = depthImage;
 
       this.mode = mode;
       try

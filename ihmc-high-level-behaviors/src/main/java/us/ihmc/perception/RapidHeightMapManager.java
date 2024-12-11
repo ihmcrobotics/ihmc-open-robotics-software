@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.filters.FlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractorCUDA;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -37,9 +38,10 @@ public class RapidHeightMapManager
    private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
    private final GpuMat deviceDepthImage;
-   private final Mat hostDepthImage;
+   private final Mat hostDepthImage = new Mat();
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
+   private Mat filteredMat = new Mat();
 
    public RapidHeightMapManager(OpenCLManager openCLManager,
                                 DRCRobotModel robotModel,
@@ -52,7 +54,6 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
-      hostDepthImage = new Mat();
       rapidHeightMapExtractor.create(deviceDepthImage, 1);
 
       // We use a notification in order to only call resetting the height map in one place
@@ -73,10 +74,14 @@ public class RapidHeightMapManager
                       ReferenceFrame d455ZUpSensorFrame,
                       ROS2PublishSubscribeAPI ros2)
    {
-      if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
-         OpenCVTools.convertFloatToShort(latestDepthImage, hostDepthImage, 1000.0, 0.0);
+
+      FlyingPointsFilter flyingPointsFilter = new FlyingPointsFilter(latestDepthImage);
+      filteredMat = flyingPointsFilter.getOutputFilteredMat();
+
+      if (filteredMat.type() == opencv_core.CV_32FC1) // Support our simulated sensors
+         OpenCVTools.convertFloatToShort(filteredMat, hostDepthImage, 1000.0, 0.0);
       else
-         latestDepthImage.convertTo(hostDepthImage, opencv_core.CV_16UC1);
+         filteredMat.convertTo(hostDepthImage, opencv_core.CV_16UC1);
 
       deviceDepthImage.upload(hostDepthImage);
 
@@ -115,7 +120,7 @@ public class RapidHeightMapManager
                                              (float) RapidHeightMapExtractorCUDA.getHeightMapParameters().getGlobalWidthInMeters(),
                                              rapidHeightMapExtractor.getSensorOrigin().getX(),
                                              rapidHeightMapExtractor.getSensorOrigin().getY());
-       RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor, temp);
+      RapidHeightMapExtractorCUDA.packHeightMapData(rapidHeightMapExtractor, temp);
       return temp;
    }
 

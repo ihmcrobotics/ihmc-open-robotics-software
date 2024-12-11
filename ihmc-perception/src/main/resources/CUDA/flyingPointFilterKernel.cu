@@ -22,14 +22,13 @@ __device__ float computeMedian(float* window, int size) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (x >= rows || y >= cols) return;
+    if (x >= cols || y >= rows) return;
 
     // Pointer to this thread's pixel in the depth map
-    unsigned short *inRow = (unsigned short *)((char *)in + (x * pitchIn));
-    unsigned short depthValue = *(inRow + y);
+    unsigned short *inRow = (unsigned short *)((char *)in + (y * pitchIn));
+    unsigned short depthValue = *(inRow + x);
 
-     unsigned short *outRow = (unsigned short *)((char *)out + (x * pitchOut));
-     unsigned short newDepthValue = *(outRow + y);
+    unsigned short *outRow = (unsigned short *)((char *)out + (y * pitchOut));
 
     // Neighborhood window for smoothing (e.g., 3x3)
     const int windowSize = 3;
@@ -43,8 +42,8 @@ __device__ float computeMedian(float* window, int size) {
             int nx = x + dx;
             int ny = y + dy;
             if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
-               unsigned short* neighborRow = (unsigned short*)((char*)in + (nx * pitchOut));
-               unsigned short neighborPixelValue = *(neighborRow + ny);
+               unsigned short* neighborRow = (unsigned short*)((char*)in + (ny * pitchIn));
+               unsigned short neighborPixelValue = *(neighborRow + nx);
                window[count++] = neighborPixelValue;
             }
         }
@@ -54,7 +53,7 @@ __device__ float computeMedian(float* window, int size) {
     float median = computeMedian(window, count);
 
     // Replace current pixel value with the median
-     *(outRow + y) = median;
+     *(outRow + x) = static_cast<unsigned short>(median);
 
     // Statistical analysis: compute local mean and standard deviation
     float sum = 0.0f, sumSquared = 0.0f;
@@ -68,6 +67,6 @@ __device__ float computeMedian(float* window, int size) {
 
     // Invalidate pixel if it deviates too much from the local mean
     if (fabsf(depthValue - mean) > 1.5 * stdDev) {
-        *(outRow + y)= 0.0f;
+        *(outRow + y)= static_cast<unsigned short>(0.0f);
     }
 }
