@@ -15,7 +15,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1c46d3548addd4a8b7eb27e4e41b837b6d3d643683f5eff8e132583ea6d8d1fd";
+   		return "4692b85e73564c422e9d5b3e6151ad2056ac3c4e386800a0790a4e5335aa85c8";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -75,7 +75,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -96,7 +96,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(ihmc_common_msgs.msg.dds.WeightMatrix3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getWeightFrameId());
 
@@ -110,7 +110,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(ihmc_common_msgs.msg.dds.WeightMatrix3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWeightFrameId(cdr.read_type_11());
       	
@@ -126,7 +126,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.WeightMatrix3DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("weight_frame_id", data.getWeightFrameId());
       ser.write_type_6("x_weight", data.getXWeight());
       ser.write_type_6("y_weight", data.getYWeight());
@@ -136,7 +136,7 @@ public class WeightMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.WeightMatrix3DMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWeightFrameId(ser.read_type_11("weight_frame_id"));
       data.setXWeight(ser.read_type_6("x_weight"));
       data.setYWeight(ser.read_type_6("y_weight"));

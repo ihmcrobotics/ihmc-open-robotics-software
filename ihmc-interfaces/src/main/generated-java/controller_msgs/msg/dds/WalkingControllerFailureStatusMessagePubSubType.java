@@ -15,7 +15,7 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "37a7db8a1a681d1fabc807652c23be36c59439f7faca5324da3ab72e411cc7de";
+   		return "4bc9626e56c46811ad2cd266717003984b23f1ccc0282270bbba759efcaa13d8";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getFallingDirection(), current_alignment);
@@ -80,14 +80,14 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getFallingDirection(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getFallingDirection(), cdr);	
 
@@ -96,7 +96,7 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("falling_direction", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getFallingDirection());
 
    }
@@ -104,7 +104,7 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("falling_direction", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getFallingDirection());
 
    }

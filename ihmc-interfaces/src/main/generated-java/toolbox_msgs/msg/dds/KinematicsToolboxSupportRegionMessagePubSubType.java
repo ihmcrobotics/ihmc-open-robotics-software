@@ -15,7 +15,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "871c5f0dfd09c0a4e52410ab3ce8cb63589b5a35e265a68bd1d418d4c0cf233b";
+   		return "53e6545f2e8e0eac45957dff313b19b94c62c0a6ff36a13b074a391ae81c689d";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -74,7 +74,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -95,7 +95,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getCenterOfMassMargin());
 
@@ -111,7 +111,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCenterOfMassMargin(cdr.read_type_6());
       	
@@ -123,7 +123,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("center_of_mass_margin", data.getCenterOfMassMargin());
       ser.write_type_e("support_region_vertices", data.getSupportRegionVertices());
       ser.write_type_e("support_region_vertex_frames", data.getSupportRegionVertexFrames());
@@ -132,7 +132,7 @@ public class KinematicsToolboxSupportRegionMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCenterOfMassMargin(ser.read_type_6("center_of_mass_margin"));
       ser.read_type_e("support_region_vertices", data.getSupportRegionVertices());
       ser.read_type_e("support_region_vertex_frames", data.getSupportRegionVertexFrames());

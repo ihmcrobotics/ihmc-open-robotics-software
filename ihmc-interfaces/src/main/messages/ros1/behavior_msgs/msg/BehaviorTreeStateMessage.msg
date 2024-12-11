@@ -38,7 +38,7 @@ int8 WAIT_DURATION_ACTION=17
 int8 FOOT_POSE_ACTION=18
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
-uint32 sequence_id
+uint64 sequence_id
 
 # The ID to assign to the next instantiated node
 uint32 next_id

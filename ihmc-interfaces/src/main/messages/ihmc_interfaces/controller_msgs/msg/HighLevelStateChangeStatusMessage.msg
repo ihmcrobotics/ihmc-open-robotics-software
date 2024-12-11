@@ -16,7 +16,7 @@ byte FALLING_STATE = 10
 byte PUSH_RECOVERY = 11
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the controller's state prior to transition.
 byte initial_high_level_controller_name 255

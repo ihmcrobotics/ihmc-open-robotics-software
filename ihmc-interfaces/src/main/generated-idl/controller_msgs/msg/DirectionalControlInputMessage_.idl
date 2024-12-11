@@ -24,7 +24,7 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::DirectionalControlInputMessage_")
       struct DirectionalControlInputMessage
       {
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         double forward;
         double right;
         double clockwise;

@@ -15,7 +15,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0ebd8b9922c7fe452c5c2d30ea52160eb6d2e608230f8305cf04ee12238fdb12";
+   		return "366598d70414c7e87d0dbc39882346b130f69adf5c4749f60a99cf90ea0b2587";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.HighLevelStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getHighLevelControllerName());
 
@@ -89,7 +89,7 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.HighLevelStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setHighLevelControllerName(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class HighLevelStateMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.HighLevelStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("high_level_controller_name", data.getHighLevelControllerName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HighLevelStateMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setHighLevelControllerName(ser.read_type_9("high_level_controller_name"));
    }
 

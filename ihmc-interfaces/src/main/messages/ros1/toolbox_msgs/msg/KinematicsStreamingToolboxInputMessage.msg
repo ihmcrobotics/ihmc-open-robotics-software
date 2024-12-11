@@ -1,7 +1,7 @@
 # This message is part of the KinematicsStreamingToolbox API.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The timestamp (in nanoseconds) at which this message was generated.
 # This is used on the toolbox side to estimate things such as desired end-effector velocities.

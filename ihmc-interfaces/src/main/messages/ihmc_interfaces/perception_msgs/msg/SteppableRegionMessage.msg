@@ -4,7 +4,7 @@
 # For easier processing, a set of convex polygons approximating the concave hull are also provided.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Approximate last update time
 ihmc_common_msgs/InstantMessage last_updated

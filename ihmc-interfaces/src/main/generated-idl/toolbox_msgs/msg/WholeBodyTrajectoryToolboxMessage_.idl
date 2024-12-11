@@ -22,7 +22,7 @@ module toolbox_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         toolbox_msgs::msg::dds::WholeBodyTrajectoryToolboxConfigurationMessage configuration;
         sequence<toolbox_msgs::msg::dds::WaypointBasedTrajectoryMessage, 10> end_effector_trajectories;
         sequence<toolbox_msgs::msg::dds::RigidBodyExplorationConfigurationMessage, 10> exploration_configurations;

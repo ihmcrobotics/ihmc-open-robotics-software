@@ -16,7 +16,7 @@ int8 CONFIGURATION_SPACE_NAME_YAW=5
 int8 CONFIGURATION_SPACE_NAME_SO3=6
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 int32 end_effector_hash_code
 

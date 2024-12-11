@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ea819530b3daf557f1360f413573d2c548c15649b6ce802bbdd0ff3957d493e1";
+   		return "b7150431167c7d4df1ade321a9c59b1dee99ad51a43599253eeddead54fa96fc";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -78,7 +78,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -104,7 +104,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getPlanId());
 
@@ -123,7 +123,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
    public static void read(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setPlanId(cdr.read_type_2());
       	
@@ -138,7 +138,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
@@ -150,7 +150,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());

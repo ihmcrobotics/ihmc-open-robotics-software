@@ -15,7 +15,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "15eaba202ed9261a5fdf5e1e01a6a248719bca36a9ef63bab17cd7e69748df79";
+   		return "5dac04ecfc8e66c13267837eb6c74b538e7d42c76ab901e218d37d79ba972558";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -83,7 +83,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -112,7 +112,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.FootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getFootstepStatus());
 
@@ -130,7 +130,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.FootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setFootstepStatus(cdr.read_type_9());
       	
@@ -150,7 +150,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("footstep_status", data.getFootstepStatus());
       ser.write_type_2("footstep_index", data.getFootstepIndex());
       ser.write_type_9("robot_side", data.getRobotSide());
@@ -168,7 +168,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setFootstepStatus(ser.read_type_9("footstep_status"));
       data.setFootstepIndex(ser.read_type_2("footstep_index"));
       data.setRobotSide(ser.read_type_9("robot_side"));

@@ -15,7 +15,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ba41e017e756f4afab86b25c7ce435761a0a4700c9d1e3e05471dbd9980e637e";
+   		return "3e76b23f70164cc7f9d4ff997b5a7bdb9555bf18694ee6659faf9829cab1dbff";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -73,7 +73,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorTransformToWorld(), current_alignment);
@@ -90,7 +90,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(perception_msgs.msg.dds.DoorLocationPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorTransformToWorld(), cdr);
       cdr.write_type_9(data.getDetectedDoorType());
@@ -101,7 +101,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void read(perception_msgs.msg.dds.DoorLocationPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorTransformToWorld(), cdr);	
       data.setDetectedDoorType(cdr.read_type_9());
@@ -114,7 +114,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(perception_msgs.msg.dds.DoorLocationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("door_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorTransformToWorld());
 
       ser.write_type_9("detected_door_type", data.getDetectedDoorType());
@@ -124,7 +124,7 @@ public class DoorLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DoorLocationPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("door_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorTransformToWorld());
 
       data.setDetectedDoorType(ser.read_type_9("detected_door_type"));

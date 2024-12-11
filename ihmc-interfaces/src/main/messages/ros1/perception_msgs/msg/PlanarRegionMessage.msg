@@ -6,7 +6,7 @@
 int32 NO_REGION_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value -1
 int32 region_id

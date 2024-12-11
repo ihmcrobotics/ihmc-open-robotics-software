@@ -15,7 +15,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "284a196eb06c22c2872f0d4f5ba911c2ec134e7192d43288f21f236b5e9acbfc";
+   		return "9bfdfaf52179c41c2d09ea4856db57f7df7236f135da8a4aca022dffce4d4735";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -87,7 +87,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.LegCompliancePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getMaxVelocityDeltas().size() <= 100)
       cdr.write_type_e(data.getMaxVelocityDeltas());else
@@ -99,7 +99,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(controller_msgs.msg.dds.LegCompliancePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getMaxVelocityDeltas());	
       data.setRobotSide(cdr.read_type_9());
@@ -110,7 +110,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.LegCompliancePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("max_velocity_deltas", data.getMaxVelocityDeltas());
       ser.write_type_9("robot_side", data.getRobotSide());
    }
@@ -118,7 +118,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LegCompliancePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("max_velocity_deltas", data.getMaxVelocityDeltas());
       data.setRobotSide(ser.read_type_9("robot_side"));
    }

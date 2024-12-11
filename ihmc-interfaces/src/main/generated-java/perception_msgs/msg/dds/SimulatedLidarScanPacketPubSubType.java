@@ -15,7 +15,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "17d8dc0fdc243da2b10928a0b732b44e0b8ca979975fd46f9442c62ed3418a7b";
+   		return "de914624d90246ec5856681529bcb2f74138d3a1c50f99c0312a7dfae9a0547b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,7 +73,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -91,7 +91,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(perception_msgs.msg.dds.SimulatedLidarScanPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getRanges().size() <= 100)
       cdr.write_type_e(data.getRanges());else
@@ -104,7 +104,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(perception_msgs.msg.dds.SimulatedLidarScanPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getRanges());	
       data.setSensorId(cdr.read_type_2());
@@ -116,7 +116,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(perception_msgs.msg.dds.SimulatedLidarScanPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("ranges", data.getRanges());
       ser.write_type_2("sensor_id", data.getSensorId());
       ser.write_type_a("lidar_scan_parameters", new perception_msgs.msg.dds.LidarScanParametersMessagePubSubType(), data.getLidarScanParameters());
@@ -126,7 +126,7 @@ public class SimulatedLidarScanPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SimulatedLidarScanPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("ranges", data.getRanges());
       data.setSensorId(ser.read_type_2("sensor_id"));
       ser.read_type_a("lidar_scan_parameters", new perception_msgs.msg.dds.LidarScanParametersMessagePubSubType(), data.getLidarScanParameters());

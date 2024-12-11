@@ -15,7 +15,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02d0a78df2a5ea7c2bc6e9da81dd87dca368258fbeaca813f3702a1e561b2a93";
+   		return "878775510467e450d2cf87caa321607bbfb2bd85e66bb21954c862508279f907";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -90,7 +90,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
@@ -137,7 +137,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       cdr.write_type_6(data.getFootYaw());
@@ -174,7 +174,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastUpdated(), cdr);	
       data.setFootYaw(cdr.read_type_6());
@@ -192,7 +192,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       ser.write_type_6("foot_yaw", data.getFootYaw());
@@ -208,7 +208,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SteppableRegionsListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       data.setFootYaw(ser.read_type_6("foot_yaw"));

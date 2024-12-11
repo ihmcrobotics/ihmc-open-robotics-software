@@ -15,7 +15,7 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bd89dee037898c230033efbd5b7865731e8d0d2584b984ca4459cd25f76f75e9";
+   		return "69d648f3c62856a192e2e26b2138a4500046a3085ea555fbd52f532085fc052f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -67,7 +67,7 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -76,13 +76,13 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(perception_msgs.msg.dds.RequestStereoPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
    }
 
    public static void read(perception_msgs.msg.dds.RequestStereoPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
 
    }
@@ -90,13 +90,13 @@ public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(perception_msgs.msg.dds.RequestStereoPointCloudMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.RequestStereoPointCloudMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));   }
+      data.setSequenceId(ser.read_type_12("sequence_id"));   }
 
    public static void staticCopy(perception_msgs.msg.dds.RequestStereoPointCloudMessage src, perception_msgs.msg.dds.RequestStereoPointCloudMessage dest)
    {

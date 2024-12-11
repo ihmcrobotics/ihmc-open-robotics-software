@@ -15,7 +15,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d07cdee0553c23b74e3d9614a6ed76ebd4f2de15146adf9870dff3bea7245d3";
+   		return "f86a578d6bcd9a80f35c1d0d56d664c77f86086670cb0650bb08f6d60f1dd2b3";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRequestedStateEstimatorMode());
 
@@ -89,7 +89,7 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRequestedStateEstimatorMode(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class StateEstimatorModePacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.StateEstimatorModePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("requested_state_estimator_mode", data.getRequestedStateEstimatorMode());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StateEstimatorModePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRequestedStateEstimatorMode(ser.read_type_9("requested_state_estimator_mode"));
    }
 
