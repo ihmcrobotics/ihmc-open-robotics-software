@@ -12,22 +12,15 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.presets.Exte
 // Parsed from external-control.hpp
 
 // #pragma once
-    @Namespace("ihmc") public static class ExternalControlImpl extends Pointer {
+
+// #include "controllers/constant-position-controller.hpp"
+    @Namespace("ihmc") @NoOffset public static class ExternalControlImpl extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
         public ExternalControlImpl(Pointer p) { super(p); }
-        /** Native array allocator. Access with {@link Pointer#position(long)}. */
-        public ExternalControlImpl(long size) { super((Pointer)null); allocateArray(size); }
-        private native void allocateArray(long size);
-        @Override public ExternalControlImpl position(long position) {
-            return (ExternalControlImpl)super.position(position);
-        }
-        @Override public ExternalControlImpl getPointer(long i) {
-            return new ExternalControlImpl((Pointer)this).offsetAddress(i);
-        }
     
-        public ExternalControlImpl() { super((Pointer)null); allocate(); }
-        private native void allocate();
+        public ExternalControlImpl(double default_position, double default_damping, int number_of_joints) { super((Pointer)null); allocate(default_position, default_damping, number_of_joints); }
+        private native void allocate(double default_position, double default_damping, int number_of_joints);
 
         
 
@@ -36,6 +29,10 @@ public class ExternalControlWrapper extends us.ihmc.externalControl.presets.Exte
         
 
         
+
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const DoublePointer configuration_data, int rows);
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const DoubleBuffer configuration_data, int rows);
+        public native @Cast("bool") boolean setHomeJointConfiguration(@Const double[] configuration_data, int rows);
 
         public native @Cast("bool") boolean updateRobotState(double current_time,
                                       @Const DoublePointer x_data, int x_rows,

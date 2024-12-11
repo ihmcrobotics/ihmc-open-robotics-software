@@ -11,11 +11,13 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 file(GLOB CONTROL_SOURCES
-        "src/main/cpp/*.hpp"
-        "src/main/cpp/*.cpp")
+        "src/main/cpp/controllers/*.hpp"
+        "src/main/cpp/controllers/*.cpp")
 set(SOURCES
         ${CONTROL_SOURCES}
-        )
+        src/main/cpp/external-control.hpp
+        src/main/cpp/external-control.cpp
+        src/main/cpp/types.hpp)
 
 add_library(external-wrapper SHARED ${SOURCES})
 target_include_directories(external-wrapper PUBLIC
