@@ -19,15 +19,17 @@ public class RDXPointCloudRenderer extends AbstractRDXPointCloudRenderer
 
    public void updateMesh(List<? extends Point3DReadOnly> points)
    {
-      // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.size()))
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
+
+      // Ensure correct length
+      int pointCloudSize = points.size();
+      if (renderable.meshPart.size != pointCloudSize)
       {
-         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.size()]);
-         renderable.meshPart.size = points.size();
+         renderable.meshPart.size = pointCloudSize;
+         verticesBuffer.limit(floatsPerVertex * pointCloudSize);
       }
 
       // Copy points over
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
       IntStream.range(0, points.size()).parallel().unordered().forEach(i ->
       {
          int offset = i * floatsPerVertex;
@@ -39,15 +41,17 @@ public class RDXPointCloudRenderer extends AbstractRDXPointCloudRenderer
 
    public void updateMesh(Point3DReadOnly[] points)
    {
-      // Ensure correct length and initialize vertices buffer
-      if (renderable.meshPart.mesh.getVerticesBuffer(false).limit() != (floatsPerVertex * points.length))
+      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
+
+      // Ensure correct length
+      int pointCloudSize = points.length;
+      if (renderable.meshPart.size != pointCloudSize)
       {
-         renderable.meshPart.mesh.setVertices(new float[floatsPerVertex * points.length]);
-         renderable.meshPart.size = points.length;
+         renderable.meshPart.size = pointCloudSize;
+         verticesBuffer.limit(floatsPerVertex * pointCloudSize);
       }
 
       // Copy points over
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true); // Mark dirty
       IntStream.range(0, points.length).parallel().unordered().forEach(i ->
       {
          int offset = i * floatsPerVertex;
