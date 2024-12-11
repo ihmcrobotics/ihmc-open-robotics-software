@@ -33,6 +33,11 @@ public abstract class AbstractRDXPointCloudRenderer implements RenderableProvide
    private final Color defaultPointColor = new Color(Color.WHITE);
    private ColoringMethod coloringMethod = ColoringMethod.DEFAULT;
 
+   /**
+    * Creates and initializes everything needed for rendering point clouds.
+    *
+    * @param maxPoints Maximum number of points this renderer will be able to render.
+    */
    public void create(int maxPoints)
    {
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -70,9 +75,9 @@ public abstract class AbstractRDXPointCloudRenderer implements RenderableProvide
          renderable.meshPart.mesh.dispose();
    }
 
-   public void setPointScale(float size)
+   public void setPointScale(float scale)
    {
-      pointScale = size;
+      pointScale = scale;
    }
 
    public void setDefaultPointColor(Color color)
@@ -85,16 +90,37 @@ public abstract class AbstractRDXPointCloudRenderer implements RenderableProvide
       coloringMethod = method;
    }
 
+   /**
+    * @return The {@link ColoringMethod}s that the super class can use.
+    */
    public abstract ColoringMethod[] getAvailableColoringMethods();
 
+   /**
+    * Called when initializing the shader.
+    *
+    * @return #define flags that should be added to the fragment shader.
+    */
    @Nullable
    protected abstract String[] getFragmentShaderFlags();
 
+   /**
+    * Called when initializing the shader.
+    *
+    * @return #define flags that should be added to the vertex shader
+    */
    @Nullable
    protected abstract String[] getVertexShaderFlags();
 
+   /**
+    * @return The vertex attributes of the shader
+    */
    protected abstract VertexAttributes getVertexAttributes();
 
+   /**
+    * Registers all required uniforms to the passed in shader.
+    *
+    * @param rdxShader The shader to which uniforms are registered.
+    */
    protected abstract void registerUniforms(RDXShader rdxShader);
 
    protected void registerGeneralUniforms(RDXShader rdxShader)
