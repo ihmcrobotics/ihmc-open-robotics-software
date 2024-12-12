@@ -34,6 +34,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -459,6 +460,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    @Override
    public void setEnabled(boolean isEnabled)
+   {
+      this.isEnabled.set(isEnabled);
+   }
 
    @Override
    public void setImpedanceEnabled(boolean isImpedanceEnabled)
@@ -1168,7 +1172,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private void computeInverseInertiaMatrix()
    {
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(bodyBase, endEffector);
+      jacobianCalculator.setKinematicChain(base.getChildrenJoints().get(0).getSuccessor(), endEffector);
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.reset();
 
