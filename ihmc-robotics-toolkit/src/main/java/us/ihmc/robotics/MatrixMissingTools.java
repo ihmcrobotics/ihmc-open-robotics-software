@@ -1,11 +1,15 @@
 package us.ihmc.robotics;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.linsol.lu.LinearSolverLu_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -99,6 +103,23 @@ public class MatrixMissingTools
             else
                mat.unsafe_set(row, col, 0.0);
          }
+      }
+   }
+
+   public static void diagonal(DMatrixRMaj matrix, DMatrixRMaj diagMatrixToPack) {
+      if (matrix.getNumRows() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The input matrix must be square.");
+      }
+      if (diagMatrixToPack.getNumRows() != matrix.getNumRows() || diagMatrixToPack.getNumCols() != matrix.getNumCols()) {
+         throw new IllegalArgumentException("The diagonal matrix must have the same dimensions as the input matrix.");
+      }
+
+      // Set all elements to zero
+      CommonOps_DDRM.fill(diagMatrixToPack, 0.0);
+
+      // Set the diagonal elements
+      for (int i = 0; i < matrix.getNumRows(); i++) {
+         diagMatrixToPack.set(i, i, matrix.get(i, i));
       }
    }
 
@@ -233,6 +254,31 @@ public class MatrixMissingTools
             throw new IllegalArgumentException("index must be between 0 and " + (indices.length - 1) + ", was: " + index);
 
          matrix.unsafe_set(index, index, value);
+      }
+   }
+
+   public static void extractRows(DMatrixRMaj src, TIntArrayList rows, DMatrixRMaj dst)
+   {
+      if (rows.isEmpty())
+         return;
+
+      if (src.getNumCols() != dst.getNumCols())
+         throw new IllegalArgumentException(
+               "src and dst must have the same number of columns, was: [src cols: " + src.getNumCols() + ", dst cols: " + dst.getNumCols() + "]");
+      if (src.getNumRows() < rows.get(rows.size() - 1) + 1)
+         throw new IllegalArgumentException(
+               "src is too small, min size: [rows: " + (rows.get(rows.size() - 1) + 1) + "], was: [rows: " + src.getNumRows() + "]");
+      if (dst.getNumRows() < rows.size())
+         throw new IllegalArgumentException(
+               "dst is too small, min size: [rows: " + rows.size() + "], was: [rows: " + dst.getNumRows() + "]");
+
+      for (int i = 0; i < rows.size(); i++)
+      {
+         int srcRow = rows.get(i);
+         for (int j = 0; j < src.getNumCols(); j++)
+         {
+            dst.unsafe_set(i, j, src.unsafe_get(srcRow, j));
+         }
       }
    }
 
@@ -508,6 +554,48 @@ public class MatrixMissingTools
    }
 
    /**
+    * Computes the square root of a positive definite matrix using the Eigenvalue decomposition.
+    * The result is stored in the provided resultToPack matrix.
+    *
+    * Form: resultToPack*resultToPack = input (NO TRANSPOSES: Cholesky is not used)
+    *
+    * @param input the matrix to compute the square root of. Not modified.
+    * @param resultToPack the matrix to store the result in. Modified.
+    * @throws IllegalArgumentException if the input and resultToPack matrices have incompatible sizes.
+    * @throws RuntimeException if the input matrix is not positive definite.
+    */
+   public static void sqrt(DMatrixRMaj input, DMatrixRMaj resultToPack, DMatrixRMaj temp, DMatrixRMaj U, DMatrixRMaj W, DMatrixRMaj Vt, SingularValueDecomposition_F64<DMatrixRMaj> svd)
+   {
+      if (input.numCols != resultToPack.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
+      if (input.numRows != resultToPack.numRows)
+         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
+
+      if (!svd.decompose(input))
+      {
+         throw new RuntimeException("Singular Value Decomposition failed.");
+      }
+
+      U.reshape(input.numRows, input.numCols);
+      W.reshape(input.numCols, input.numCols);
+      Vt.reshape(input.numCols, input.numCols);
+
+      svd.getU(U, false);
+      svd.getW(W);
+      svd.getV(Vt, true);
+
+      // Compute the square root of the sinDoes the sqrt of the singular values
+      for (int i = 0; i < W.numRows; i++)
+      {
+         W.set(i, i, Math.sqrt(W.get(i, i)));
+      }
+
+      temp.reshape(input.numCols, input.numCols);
+      CommonOps_DDRM.mult(U, W, temp);
+      CommonOps_DDRM.mult(temp, Vt, resultToPack);
+   }
+
+   /**
     * Comparing elements of two matrices.
     * This method results true when all elements in a is less than b. <br>
     *
@@ -531,6 +619,116 @@ public class MatrixMissingTools
             double valB = b.get(i, j);
             if (valA >= valB)
                return false;
+         }
+      }
+      return true;
+   }
+
+   /**
+    * Extract function of CommonOps_DDRM.extract with TIntArrayList
+    *
+    * @param src source matrix
+    * @param rows row indices to extract
+    * @param cols column indices to extract
+    * @param dst destination matrix
+    */
+   public static void extract(DMatrixRMaj src, TIntArrayList rows, TIntArrayList cols, DMatrixRMaj dst)
+   {
+      if (rows.size() == 0 || cols.size() == 0)
+         return;
+
+      if (src.getNumRows() < rows.get(rows.size() - 1) + 1)
+         throw new IllegalArgumentException(
+               "src is too small, min size: [rows: " + (rows.get(rows.size() - 1) + 1) + "], was: [rows: " + src.getNumRows() + "]");
+      if (src.getNumCols() < cols.get(cols.size() - 1) + 1)
+         throw new IllegalArgumentException(
+               "src is too small, min size: [cols: " + (cols.get(cols.size() - 1) + 1) + "], was: [cols: " + src.getNumCols() + "]");
+
+      if (dst.getNumRows() < rows.size() || dst.getNumCols() < cols.size())
+         throw new IllegalArgumentException(
+               "dst is too small, min size: [rows: " + rows.size() + ", cols: " + cols.size() + "], was: [rows: " + dst.getNumRows() + ", cols: "
+               + dst.getNumCols() + "]");
+
+      for (int i = 0; i < rows.size(); i++)
+      {
+         for (int j = 0; j < cols.size(); j++)
+         {
+            dst.unsafe_set(i, j, src.unsafe_get(rows.get(i), cols.get(j)));
+         }
+      }
+   }
+
+   /**
+    * insert function of CommonOps_DDRM.insert with TIntArrayList.
+    *
+    * @param src source matrix
+    * @param rows row indices to insert
+    * @param cols column indices to insert
+    * @param dst destination matrix
+    */
+   public static void insert( DMatrixRMaj src ,
+                              DMatrixRMaj dst ,
+                              TIntArrayList rows ,
+                              TIntArrayList cols ) {
+      if ( rows.size() == 0 || cols.size() == 0 ) return;
+
+      if (dst.getNumRows() < rows.get(rows.size() - 1) + 1)
+         throw new IllegalArgumentException(
+               "dst is too small, min size: [rows: " + (rows.get(rows.size() - 1) + 1) + "], was: [rows: " + dst.getNumRows() + "]");
+      if (dst.getNumCols() < cols.get(cols.size() - 1) + 1)
+         throw new IllegalArgumentException(
+               "dst is too small, min size: [cols: " + (cols.get(cols.size() - 1) + 1) + "], was: [cols: " + dst.getNumCols() + "]");
+
+      if (src.getNumRows() < rows.size() || src.getNumCols() < cols.size())
+         throw new IllegalArgumentException(
+               "src is too small, min size: [rows: " + rows.size() + ", cols: " + cols.size() + "], was: [rows: " + src.getNumRows() + ", cols: "
+               + src.getNumCols() + "]");
+
+      for (int i = 0; i < rows.size(); i++)
+      {
+         for (int j = 0; j < cols.size(); j++)
+         {
+            dst.unsafe_set(rows.get(i), cols.get(j), src.unsafe_get(i, j));
+         }
+      }
+   }
+
+   /**
+    * This is the invert function of CommonOps_DDRM.invert but garbage free by providing the solver.
+    *
+    * <p>
+    * Performs a matrix inversion operation on the specified matrix and stores the results
+    * in the same matrix.<br>
+    * <br>
+    * a = a<sup>-1</sup>
+    * </p>
+    *
+    * <p>
+    * If the algorithm could not invert the matrix then false is returned.  If it returns true
+    * that just means the algorithm finished.  The results could still be bad
+    * because the matrix is singular or nearly singular.
+    * </p>
+    *
+    * @param mat The matrix that is to be inverted.  Results are stored here.  Modified.
+    * @param solver Invertion algorithm that is used.  Should be preconfigured.
+    * @return true if it could invert the matrix false if it could not.
+    */
+   public static boolean invert( DMatrixRMaj mat, LinearSolverLu_DDRM solver) {
+      if(mat.numCols <= UnrolledInverseFromMinor_DDRM.MAX ) {
+         if( mat.numCols != mat.numRows ) {
+            throw new MatrixDimensionException("Must be a square matrix.");
+         }
+
+         if( mat.numCols >= 2 ) {
+            UnrolledInverseFromMinor_DDRM.inv(mat,mat);
+         } else {
+            mat.set(0, 1.0/mat.get(0));
+         }
+      } else {
+         if( solver.setA(mat) ) {
+            solver.invert(mat);
+         } else {
+            return false;
          }
       }
       return true;

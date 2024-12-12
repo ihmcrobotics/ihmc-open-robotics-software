@@ -56,6 +56,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajec
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -452,7 +453,36 @@ public class WalkingCommandConsumer
             JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
             taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
             jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+            WrenchTrajectoryControllerCommand feedForwardCommand = command.getFeedForwardTrajectoryCommand();
+            SE3PIDGainsTrajectoryControllerCommand gainsCommand = command.getPIDGainsTrajectoryCommand();
+            if (feedForwardCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
+            {
+               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
+               {
+                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+               }
+               else
+               {
+                  gainsCommand.setSequenceId(command.getSequenceId());
+                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, gainsCommand);
+               }
+            }
+            else
+            {
+               LogTools.info("Hybrid message with feedForward activated");
+               feedForwardCommand.setSequenceId(command.getSequenceId());
+
+               if (gainsCommand.getNumberOfTrajectoryPoints() != taskspaceTrajectoryCommand.getNumberOfTrajectoryPoints())
+               {
+                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand);
+               }
+               else
+               {
+                  LogTools.info("Hybrid message with feedForward and gains activated");
+                  gainsCommand.setSequenceId(command.getSequenceId());
+                  handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand, feedForwardCommand, gainsCommand);
+               }
+            }
          }
       }
 

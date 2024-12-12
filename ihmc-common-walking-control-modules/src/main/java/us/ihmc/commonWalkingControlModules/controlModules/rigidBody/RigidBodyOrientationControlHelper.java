@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -19,11 +21,13 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3PIDGainsTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -31,6 +35,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -79,12 +84,19 @@ public class RigidBodyOrientationControlHelper
 
    private Vector3DReadOnly defaultWeight;
    private PID3DGainsReadOnly gains;
+   private PID3DGainsReadOnly impedanceGains;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAcceleration = new FrameVector3D();
 
+   TDoubleArrayList feedForwardTrajectoryTimes = new TDoubleArrayList();
+   RecyclingArrayList<SpatialVector> feedForwardTrajectoryList = new RecyclingArrayList<>(200, SpatialVector.class);
+   RecyclingArrayList<SE3PIDGainsTrajectoryPoint> gainsTrajectoryPoints;
+
    private final BooleanProvider useBaseFrameForControl;
+   private final YoBoolean isImpedanceEnabled;
+   private final YoBoolean isFeedforwardEnabled;
 
    private final FixedFrameQuaternionBasics previousControlFrameOrientation;
    private final FixedFrameQuaternionBasics controlFrameOrientation;
@@ -109,6 +121,7 @@ public class RigidBodyOrientationControlHelper
                                             BooleanProvider useBaseFrameForControl,
                                             BooleanProvider useWeightFromMessage,
                                             boolean enableFunctionGenerators,
+                                            YoBoolean enableImpedanceControl,
                                             DoubleProvider time,
                                             YoRegistry registry)
    {
@@ -131,6 +144,12 @@ public class RigidBodyOrientationControlHelper
 
       feedbackControlCommand.set(elevator, bodyToControl);
       feedbackControlCommand.setPrimaryBase(baseBody);
+      feedbackControlCommand.setImpedanceEnabled(enableImpedanceControl.getBooleanValue());
+      isImpedanceEnabled = enableImpedanceControl;
+      isFeedforwardEnabled = new YoBoolean(prefix + "FeedforwardEnabled", registry);
+      isFeedforwardEnabled.set(true);
+
+      gainsTrajectoryPoints = new RecyclingArrayList<>(200, SE3PIDGainsTrajectoryPoint.class);
 
       defaultControlFrame = controlFrame;
       bodyFrame = bodyToControl.getBodyFixedFrame();
@@ -163,6 +182,16 @@ public class RigidBodyOrientationControlHelper
    public PID3DGainsReadOnly getGains()
    {
       return gains;
+   }
+
+   public void setImpedanceGains(PID3DGainsReadOnly impedanceGains)
+   {
+      this.impedanceGains = impedanceGains;
+   }
+
+   public PID3DGainsReadOnly getImpedanceGains()
+   {
+      return impedanceGains;
    }
 
    public void setWeights(Vector3DReadOnly weights)
@@ -268,12 +297,45 @@ public class RigidBodyOrientationControlHelper
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
       updateFunctionGenerators();
 
+      if (!feedForwardTrajectoryList.isEmpty())
+      {
+         feedForwardAcceleration.set(feedForwardTrajectoryList.get(Math.max(
+               feedForwardTrajectoryList.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
+               + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getAngularPart());
+      }
+
+      if (!gainsTrajectoryPoints.isEmpty())
+      {
+         gains = gainsTrajectoryPoints.get(Math.max(gainsTrajectoryPoints.size() - pointQueue.size() - trajectoryGenerator.getCurrentNumberOfWaypoints()
+                                                    + trajectoryGenerator.getCurrentWaypointIndex(), 0)).getAngular();
+         feedbackControlCommand.setGains(gains);
+      }
+      else if (!isImpedanceEnabled.getBooleanValue())
+      {
+         feedbackControlCommand.setGains(gains);
+      }
+      else
+      {
+         if (impedanceGains != null)
+         {
+            feedbackControlCommand.setGains(impedanceGains);
+         }
+         else
+         {
+            isImpedanceEnabled.set(false);
+            LogTools.warn(warningPrefix + "Impedance gains are not set, impedance control is disabled.");
+         }
+      }
+
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
 
+      if (!isFeedforwardEnabled.getBooleanValue())
+         feedForwardAcceleration.set(0.0, 0.0, 0.0);
+
       feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredVelocity, feedForwardAcceleration);
-      feedbackControlCommand.setGains(gains);
+      feedbackControlCommand.setImpedanceEnabled(isImpedanceEnabled.getBooleanValue());
 
       // This will improve the tracking with respect to moving trajectory frames.
       if (useBaseFrameForControl.getValue())
@@ -618,6 +680,21 @@ public class RigidBodyOrientationControlHelper
       {
          return pointQueue.peekLast().getTime();
       }
+   }
+
+   public TDoubleArrayList getFeedForwardTrajectoryTimes()
+   {
+      return feedForwardTrajectoryTimes;
+   }
+
+   public RecyclingArrayList<SpatialVector> getFeedForwardTrajectoryList()
+   {
+      return feedForwardTrajectoryList;
+   }
+
+   public RecyclingArrayList<SE3PIDGainsTrajectoryPoint> getGainsTrajectoryPoints()
+   {
+      return gainsTrajectoryPoints;
    }
 
    public void clear()

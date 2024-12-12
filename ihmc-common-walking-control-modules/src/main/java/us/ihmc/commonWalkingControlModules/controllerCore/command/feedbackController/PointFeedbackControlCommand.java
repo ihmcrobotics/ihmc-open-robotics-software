@@ -81,6 +81,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    private ReferenceFrame controlBaseFrame = null;
 
    /**
+    * Whether to enable impedance control. If true, the controller will use impedance control
+    * to compute the desired acceleration.
+    */
+   private boolean isImpedanceEnabled = false;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -106,6 +112,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       linearGainsFrame = other.linearGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
+      isImpedanceEnabled = other.isImpedanceEnabled;
    }
 
    /**
@@ -216,6 +223,17 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
       this.controlMode = controlMode;
+   }
+
+   /**
+    * Sets the impedance control mode to be used for this command.
+    *
+    *    @param isImpedanceEnabled whether to enable impedance control
+    */
+
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    /**
@@ -552,6 +570,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   public boolean getIsImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public PID3DGains getGains()
