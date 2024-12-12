@@ -366,6 +366,7 @@ public class RapidHeightMapExtractorCUDA
       updateKernel.withPointer(parametersDevicePointer);
       updateKernel.withPointer(sensorToGroundTransformDevicePointer);
       updateKernel.withPointer(groundToSensorTransformDevicePointer);
+      updateKernel.withInt(localCellsPerAxis);
 
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());

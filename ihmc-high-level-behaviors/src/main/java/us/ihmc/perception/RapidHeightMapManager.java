@@ -42,10 +42,9 @@ public class RapidHeightMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
    private Mat filteredDepthMat = new Mat();
-   private  CUDAFlyingPointsFilter FlyingPointsFilter;
+   private CUDAFlyingPointsFilter FlyingPointsFilter;
 
-   public RapidHeightMapManager(OpenCLManager openCLManager,
-                                DRCRobotModel robotModel,
+   public RapidHeightMapManager(DRCRobotModel robotModel,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 CameraIntrinsics depthImageIntrinsics,
@@ -57,7 +56,7 @@ public class RapidHeightMapManager
       deviceDepthImage = new GpuMat(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
       rapidHeightMapExtractor.create(deviceDepthImage, 1);
 
-       FlyingPointsFilter = new CUDAFlyingPointsFilter();
+      FlyingPointsFilter = new CUDAFlyingPointsFilter();
 
       // We use a notification in order to only call resetting the height map in one place
       ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
@@ -136,6 +135,5 @@ public class RapidHeightMapManager
    {
       rapidHeightMapExtractor.destroy();
       FlyingPointsFilter.destroy();
-
    }
 }

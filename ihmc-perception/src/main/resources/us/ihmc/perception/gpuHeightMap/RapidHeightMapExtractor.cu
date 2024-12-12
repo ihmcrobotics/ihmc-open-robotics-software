@@ -257,9 +257,8 @@ extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitc
 
 }
 
-extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf)
+extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf, int bounds )
 {
-
     // Thread indices
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -269,8 +268,8 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
 
     // Bounds check
-    if (xIndex >= 151 || yIndex >= 151)
-        return; // TODO: pass in the bounds
+    if (xIndex >= bounds || yIndex >= bounds)
+        return;
 
     // Initialize variables
     float currentAverageHeight = 0.0f;
