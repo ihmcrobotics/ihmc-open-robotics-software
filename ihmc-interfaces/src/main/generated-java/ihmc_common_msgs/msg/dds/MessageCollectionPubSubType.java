@@ -15,7 +15,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "539ba3bd7996534a788a9a164e3b2bc1cfa847c4fae7ffcef5184551f8c71dec";
+   		return "649ea84c85dcbb1d5d5d2ce976d97ded3d917215f61f7a62a1668af96d0eaf5f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -69,7 +69,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -82,7 +82,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(ihmc_common_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getSequences().size() <= 100)
       cdr.write_type_e(data.getSequences());else
@@ -92,7 +92,7 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(ihmc_common_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getSequences());	
 
@@ -101,14 +101,14 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.MessageCollection data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("sequences", data.getSequences());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.MessageCollection data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("sequences", data.getSequences());
    }
 

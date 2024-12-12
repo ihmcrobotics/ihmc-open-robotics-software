@@ -1,17 +1,14 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -21,6 +18,9 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
@@ -34,7 +34,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
-   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
 
    private final long publishPeriod;
    private long lastPublishTime = -1;

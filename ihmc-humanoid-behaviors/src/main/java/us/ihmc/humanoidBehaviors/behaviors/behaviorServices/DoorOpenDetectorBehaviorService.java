@@ -1,11 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-
-import perception_msgs.msg.dds.DoorLocationPacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -16,6 +12,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.kinematics.AverageQuaternionCalculator;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//FiducialDetectorBehaviorService
 {
@@ -36,7 +36,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    
    private long lastUpdateTime = -1;
 
-   private final ROS2PublisherBasics<TextToSpeechPacket> textToSpeechPublisher;
+   private final ROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
 
    
    protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();

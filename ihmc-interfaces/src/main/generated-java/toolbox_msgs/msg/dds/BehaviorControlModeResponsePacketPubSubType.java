@@ -15,7 +15,7 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9640c278bac9356ad6a08e3ad699d9c17cba78f409245ba478008b451f7d50dd";
+   		return "baa4360a2a12bc4a8ac51cddb05d4b9f8e0d4eb0e3b68c4f7673405c4e37de0c";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
 
    public static void write(toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getBehaviorControlModeEnumRequest());
 
@@ -89,7 +89,7 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
 
    public static void read(toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setBehaviorControlModeEnumRequest(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class BehaviorControlModeResponsePacketPubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("behavior_control_mode_enum_request", data.getBehaviorControlModeEnumRequest());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setBehaviorControlModeEnumRequest(ser.read_type_9("behavior_control_mode_enum_request"));
    }
 

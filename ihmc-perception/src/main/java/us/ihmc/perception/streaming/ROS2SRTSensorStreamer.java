@@ -2,11 +2,10 @@ package us.ihmc.perception.streaming;
 
 import org.apache.logging.log4j.core.util.ExecutorServices;
 import perception_msgs.msg.dds.SRTStreamStatus;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
@@ -28,7 +27,7 @@ public class ROS2SRTSensorStreamer
 
    public ROS2SRTSensorStreamer()
    {
-      ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName().toLowerCase() + "_node");
+      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase() + "_node");
    }
 
    public void addStream(ROS2Topic<SRTStreamStatus> streamTopic,

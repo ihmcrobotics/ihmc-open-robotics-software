@@ -1,14 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,11 +13,17 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
@@ -48,7 +48,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
-   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
 
    public RepeatedlyWalkFootstepListBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry)
    {

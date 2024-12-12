@@ -15,7 +15,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a850b95e1a21eb88741f024cd8f24d7b073d17d7552df0b7331a2215067bcbda";
+   		return "35d03b46d36fe5d3956c3017c45020cdec4f24bed7147635567152c30d5bebdf";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -75,7 +75,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -98,7 +98,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(perception_msgs.msg.dds.PointCloudWorldPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getTimestamp());
 
@@ -116,7 +116,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(perception_msgs.msg.dds.PointCloudWorldPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTimestamp(cdr.read_type_11());
       	
@@ -130,7 +130,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(perception_msgs.msg.dds.PointCloudWorldPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_e("ground_quad_tree_support", data.getGroundQuadTreeSupport());
       ser.write_type_e("decaying_world_scan", data.getDecayingWorldScan());
@@ -140,7 +140,7 @@ public class PointCloudWorldPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PointCloudWorldPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_e("ground_quad_tree_support", data.getGroundQuadTreeSupport());
       ser.read_type_e("decaying_world_scan", data.getDecayingWorldScan());

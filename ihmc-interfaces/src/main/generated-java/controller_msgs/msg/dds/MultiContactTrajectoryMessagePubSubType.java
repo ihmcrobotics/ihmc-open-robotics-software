@@ -15,7 +15,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "823d7868422bc76a1459b13e63ab91f4d471d7f3fed4c7fca4abd2b26a5d28e7";
+   		return "f620242e502e492ace882f4e7502e4d1238145e35662de32ca764a392e8cf323";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -75,7 +75,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -96,7 +96,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.MultiContactTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getTrajectoryDuration());
 
@@ -111,7 +111,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.MultiContactTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
@@ -125,7 +125,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.MultiContactTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_e("joint_angles", data.getJointAngles());
       ser.write_type_a("root_joint_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRootJointPose());
@@ -136,7 +136,7 @@ public class MultiContactTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultiContactTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       ser.read_type_e("joint_angles", data.getJointAngles());
       ser.read_type_a("root_joint_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRootJointPose());

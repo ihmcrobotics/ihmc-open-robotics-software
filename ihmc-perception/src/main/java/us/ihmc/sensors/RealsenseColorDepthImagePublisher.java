@@ -2,19 +2,14 @@ package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -25,8 +20,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class RealsenseColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
-   private final ROS2PublisherBasics<ImageMessage> ros2ColorImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2ColorImagePublisher;
 
    private CUDAJPEGProcessor imageEncoder;
    private CUDACompressionTools compressionTools;
@@ -47,7 +42,7 @@ public class RealsenseColorDepthImagePublisher
    public RealsenseColorDepthImagePublisher(ROS2Topic<ImageMessage> depthTopic,
                                             ROS2Topic<ImageMessage> colorTopic)
    {
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_publisher");
+      ros2Node = new ROS2NodeBuilder().build("realsense_color_depth_publisher");
       ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
       ros2ColorImagePublisher = ros2Node.createPublisher(colorTopic);
 

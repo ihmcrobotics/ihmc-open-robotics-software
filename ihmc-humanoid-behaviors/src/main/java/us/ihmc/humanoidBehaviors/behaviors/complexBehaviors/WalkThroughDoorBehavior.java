@@ -1,18 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import toolbox_msgs.msg.dds.BehaviorStatusPacket;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -48,6 +45,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -111,10 +109,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
 
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
-   private final ROS2PublisherBasics<HeadTrajectoryMessage> headTrajectoryPublisher;
+   private final ROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final ROS2PublisherBasics<BehaviorStatusPacket> behaviorStatusPublisher;
+   private final ROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
 
    private WalkToLocationPlannedBehavior walkThroughDoorPlannedBehavior;
 

@@ -15,7 +15,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "53fdde5b39d13d9984937a383e810a44bc8212d5d5014cf6c641f10988c67069";
+   		return "b6ecde4d020f8c0e15090651b241b39e81b8d844d9d69182d9e657c4e4454716";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(toolbox_msgs.msg.dds.ToolboxStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRequestedToolboxState());
 
@@ -96,7 +96,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(toolbox_msgs.msg.dds.ToolboxStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRequestedToolboxState(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(toolbox_msgs.msg.dds.ToolboxStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("requested_toolbox_state", data.getRequestedToolboxState());
       ser.write_type_7("request_logging", data.getRequestLogging());
    }
@@ -116,7 +116,7 @@ public class ToolboxStateMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.ToolboxStateMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRequestedToolboxState(ser.read_type_9("requested_toolbox_state"));
       data.setRequestLogging(ser.read_type_7("request_logging"));
    }

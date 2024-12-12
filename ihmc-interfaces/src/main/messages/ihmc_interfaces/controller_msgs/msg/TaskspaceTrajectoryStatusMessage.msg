@@ -7,7 +7,7 @@ byte TRAJECTORY_EXECUTION_STATUS_STARTED = 0
 byte TRAJECTORY_EXECUTION_STATUS_COMPLETED = 1
 
 # Unique ID of the trajectory message this status refers to.
-uint32 sequence_id
+uint64 sequence_id
 
 # Refers to the name of the end-effector that executed the trajectory.
 string end_effector_name

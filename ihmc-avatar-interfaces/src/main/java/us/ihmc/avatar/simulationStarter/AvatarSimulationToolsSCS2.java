@@ -1,34 +1,29 @@
 package us.ihmc.avatar.simulationStarter;
 
-import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.createNetworkProcessorParameters;
-import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.showSelectorWithStartingLocation;
-import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.startOpertorInterface;
-import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.startOpertorInterfaceUsingProcessSpawner;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
-import us.ihmc.avatar.simulationStarter.DRCSimulationTools.Modules;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.sensors.SimCameraSensor;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static us.ihmc.avatar.simulationStarter.DRCSimulationTools.*;
 
 public class AvatarSimulationToolsSCS2
 {
@@ -64,8 +59,7 @@ public class AvatarSimulationToolsSCS2
          boolean automaticallyStartSimulation = true;
          avatarSimulationEnvironment.avatarSimulationFactory = new SCS2AvatarSimulationFactory();
          avatarSimulationEnvironment.avatarSimulationFactory.setRobotModel(robotModel);
-         avatarSimulationEnvironment.avatarSimulationFactory.setRealtimeROS2Node(ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS,
-                                                                                                                  "ihmc_simulation"));
+         avatarSimulationEnvironment.avatarSimulationFactory.setRealtimeROS2Node(new ROS2NodeBuilder().buildRealtime("ihmc_simulation"));
          avatarSimulationEnvironment.avatarSimulationFactory.setDefaultHighLevelHumanoidControllerFactory();
          avatarSimulationEnvironment.avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
          avatarSimulationEnvironment.avatarSimulationFactory.setSimulationDataRecordTimePeriod(robotModel.getControllerDT());
@@ -135,7 +129,7 @@ public class AvatarSimulationToolsSCS2
                networkProcessorParameters.setSimulatedSensorCommunicator(createSimulatedSensorsPacketCommunicator());
             }
 
-            networkProcessor = HumanoidNetworkProcessor.newFromParameters(robotModel, PubSubImplementation.FAST_RTPS, networkProcessorParameters);
+            networkProcessor = HumanoidNetworkProcessor.newFromParameters(robotModel, networkProcessorParameters);
          }
       }
 

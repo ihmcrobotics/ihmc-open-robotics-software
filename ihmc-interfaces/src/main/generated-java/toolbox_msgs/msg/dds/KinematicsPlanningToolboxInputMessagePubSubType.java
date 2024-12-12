@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1a59e98e660640b2e778f9ba1611365445bb83a97f8c34d95c5a6e52605054a9";
+   		return "d0d7f95e4bb86cd0bcd2cde07b765e6a1bf9b0e258c757dcd545f5a960c4c479";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
@@ -74,7 +74,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -92,7 +92,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getRigidBodyMessages().size() <= 100)
       cdr.write_type_e(data.getRigidBodyMessages());else
@@ -104,7 +104,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
 
    public static void read(toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getRigidBodyMessages());	
       toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.read(data.getCenterOfMassMessage(), cdr);	
@@ -115,7 +115,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("rigid_body_messages", data.getRigidBodyMessages());
       ser.write_type_a("center_of_mass_message", new toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassMessage());
 
@@ -126,7 +126,7 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("rigid_body_messages", data.getRigidBodyMessages());
       ser.read_type_a("center_of_mass_message", new toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassMessage());
 

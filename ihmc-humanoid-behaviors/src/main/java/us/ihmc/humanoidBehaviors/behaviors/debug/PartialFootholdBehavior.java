@@ -1,10 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
-import java.util.ArrayList;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -12,10 +9,13 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
+
+import java.util.ArrayList;
 
 public class PartialFootholdBehavior extends AbstractBehavior
 {
-   private final ROS2PublisherBasics<FootstepDataListMessage> publisher;
+   private final ROS2Publisher<FootstepDataListMessage> publisher;
 
    public PartialFootholdBehavior(String robotName, ROS2Node ros2Node)
    {

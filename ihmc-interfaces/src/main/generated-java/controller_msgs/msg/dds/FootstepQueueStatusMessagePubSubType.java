@@ -15,7 +15,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "81d01e161604e18e5f4e3fec9f95d2d64e0ea7ab76379fcaa554a1e289816d8c";
+   		return "3146d9de4c14f0fced31e9bcd778d15fe3d85a1a6328519380dd486eb6ab5f72";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -74,7 +74,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -94,7 +94,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.FootstepQueueStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getIsFirstStepInSwing());
 
@@ -108,7 +108,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.FootstepQueueStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setIsFirstStepInSwing(cdr.read_type_7());
       	
@@ -121,7 +121,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepQueueStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("is_first_step_in_swing", data.getIsFirstStepInSwing());
       ser.write_type_6("time_in_support_sequence", data.getTimeInSupportSequence());
       ser.write_type_e("queued_footstep_list", data.getQueuedFootstepList());
@@ -130,7 +130,7 @@ public class FootstepQueueStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepQueueStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setIsFirstStepInSwing(ser.read_type_7("is_first_step_in_swing"));
       data.setTimeInSupportSequence(ser.read_type_6("time_in_support_sequence"));
       ser.read_type_e("queued_footstep_list", data.getQueuedFootstepList());

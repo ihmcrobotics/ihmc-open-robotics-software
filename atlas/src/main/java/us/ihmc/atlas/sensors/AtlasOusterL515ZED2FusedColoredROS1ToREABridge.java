@@ -1,30 +1,29 @@
 package us.ihmc.atlas.sensors;
 
-import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.jboss.netty.buffer.ChannelBuffer;
+import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -41,7 +40,7 @@ public class AtlasOusterL515ZED2FusedColoredROS1ToREABridge
    public AtlasOusterL515ZED2FusedColoredROS1ToREABridge()
    {
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "ousterl515_to_rea");
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ousterl515_to_rea");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("ousterl515_to_rea");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
       CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
       ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();

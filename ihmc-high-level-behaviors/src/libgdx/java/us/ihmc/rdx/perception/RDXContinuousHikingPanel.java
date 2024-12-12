@@ -50,7 +50,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -65,7 +65,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ROS2Node ros2Node;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobotModel;
-   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
+   private final ROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
    private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
@@ -102,7 +102,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
 
-      commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
+      commandPublisher = ros2Helper.getROS2Node().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();

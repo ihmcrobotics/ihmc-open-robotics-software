@@ -3,20 +3,25 @@ package us.ihmc.communication.ros2;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.ImageMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.QueuedROS2Subscription;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 public class RealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
-   private ROS2PublisherBasics<ImageMessage> publisher;
+   private ROS2Publisher<ImageMessage> publisher;
 
    public RealtimeROS2PublisherSubscriberTest()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videotest");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("videotest");
       String topic = "/ihmc/image/test";
       LogTools.info("Publishing to {}", topic);
       ImageMessagePubSubType topicDataType = ImageMessage.getPubSubType().get();
@@ -62,7 +67,7 @@ public class RealtimeROS2PublisherSubscriberTest
       ROS2Topic<?> typedTopic = new ROS2Topic<>().withPrefix("/ihmc/image/test").withType(ImageMessage.class).withQoS(ROS2QosProfile.BEST_EFFORT());
       LogTools.info("Subscribing to {}", typedTopic.toString());
       FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
-      ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "hz");
+      ROS2Node node = new ROS2NodeBuilder().build("hz");
       node.createSubscription2(typedTopic, message -> hz.ping());
 
       ThreadTools.sleepForever();

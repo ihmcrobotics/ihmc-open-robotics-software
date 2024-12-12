@@ -1,28 +1,5 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.StepsAreAdjustable;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonBState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonLeftBumperState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonRightBumperState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonSelectState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonStartState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonXState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonYState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.DPadDownState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.DPadLeftState;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.LeftStickXAxis;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.LeftStickYAxis;
-import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.RightStickXAxis;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -43,7 +20,6 @@ import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -63,9 +39,20 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.*;
+import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.*;
 
 public class StepGeneratorJavaFXController
 {
@@ -103,9 +90,9 @@ public class StepGeneratorJavaFXController
    private final HumanoidRobotKickMessenger kickMessenger;
    private final HumanoidRobotPunchMessenger punchMessenger;
 
-   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
-   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
-   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
@@ -114,7 +101,7 @@ public class StepGeneratorJavaFXController
    public StepGeneratorJavaFXController(String robotName,
                                         JavaFXMessager messager,
                                         WalkingControllerParameters walkingControllerParameters,
-                                        ROS2NodeInterface ros2Node,
+                                        ROS2Node ros2Node,
                                         JavaFXRobotVisualizer javaFXRobotVisualizer,
                                         HumanoidRobotKickMessenger kickMessenger,
                                         HumanoidRobotPunchMessenger punchMessenger,

@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -22,14 +22,14 @@ public class MapsenseTools
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
    }
 
-   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2Node ros2Node,
                                                                                                    DRCRobotModel robotModel,
                                                                                                    Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       return subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS, callback);
    }
 
-   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2Node ros2Node,
                                                                                                    DRCRobotModel robotModel,
                                                                                                    String topic,
                                                                                                    Consumer<Pair<Long, PlanarRegionsList>> callback)

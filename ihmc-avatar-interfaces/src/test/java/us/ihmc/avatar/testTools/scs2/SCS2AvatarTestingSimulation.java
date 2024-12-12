@@ -24,7 +24,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -69,7 +69,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    private ROS2Node ros2Node;
    @SuppressWarnings("rawtypes")
-   private Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers;
+   private Map<Class<?>, ROS2Publisher> defaultControllerPublishers;
 
    private final AtomicReference<Throwable> lastThrowable = new AtomicReference<>();
 
@@ -574,21 +574,21 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void publishToController(Object message)
    {
-      ROS2PublisherBasics publisher = defaultControllerPublishers.get(message.getClass());
+      ROS2Publisher publisher = defaultControllerPublishers.get(message.getClass());
       publisher.publish(message);
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, HumanoidControllerAPI.getInputTopic(getRobotModel().getSimpleRobotName()));
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
       return ros2Node.createPublisher(generator.withTypeName(messageType));
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
    {
       return ros2Node.createPublisher(messageType, topicName);
    }
@@ -633,7 +633,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    @SuppressWarnings("rawtypes")
-   public void setDefaultControllerPublishers(Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers)
+   public void setDefaultControllerPublishers(Map<Class<?>, ROS2Publisher> defaultControllerPublishers)
    {
       this.defaultControllerPublishers = defaultControllerPublishers;
    }

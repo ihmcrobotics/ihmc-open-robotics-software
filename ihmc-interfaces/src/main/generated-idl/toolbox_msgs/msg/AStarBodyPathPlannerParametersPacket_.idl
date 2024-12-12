@@ -21,7 +21,7 @@ module toolbox_msgs
         /**
          * Unique ID used to identify this message.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Whether or not the planner checks for collisions.
          */

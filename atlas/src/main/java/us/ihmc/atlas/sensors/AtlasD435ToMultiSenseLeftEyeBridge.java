@@ -9,20 +9,19 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.commons.UnitConversions;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -40,7 +39,7 @@ public class AtlasD435ToMultiSenseLeftEyeBridge
    public AtlasD435ToMultiSenseLeftEyeBridge()
    {
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "d435_to_left_eye");
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "d435_to_left_eye");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("d435_to_left_eye");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
       CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
       ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();

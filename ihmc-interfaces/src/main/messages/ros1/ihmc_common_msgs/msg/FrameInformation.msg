@@ -19,7 +19,7 @@ int64 LEFT_SOLE_FRAME=-105
 int64 RIGHT_SOLE_FRAME=-106
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
 # Field default value 83766130

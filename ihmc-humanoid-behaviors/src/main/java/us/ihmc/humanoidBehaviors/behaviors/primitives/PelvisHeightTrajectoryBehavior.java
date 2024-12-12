@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,7 +17,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    private final YoDouble yoTime;
    private final YoDouble startTime;
    private final YoDouble trajectoryTime;
-   private final ROS2PublisherBasics<PelvisHeightTrajectoryMessage> publisher;
+   private final ROS2Publisher<PelvisHeightTrajectoryMessage> publisher;
 
    public PelvisHeightTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

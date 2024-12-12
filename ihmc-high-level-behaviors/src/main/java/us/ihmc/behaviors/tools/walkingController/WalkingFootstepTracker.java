@@ -1,6 +1,10 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -8,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Subscription;
 
 import java.util.ArrayList;
@@ -38,7 +42,7 @@ public class WalkingFootstepTracker
 
    private final List<TypedNotification<FootstepQueueStatusMessage>> footstepQueueListeners = new ArrayList<>();
 
-   public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
+   public WalkingFootstepTracker(ROS2Node ros2Node, String robotName)
    {
       footstepDataListSubscriber = ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, robotName),
                                                                 this::interceptFootstepDataListMessage);

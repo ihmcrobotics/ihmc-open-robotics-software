@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "443abdd5def709ca0f81420d0a8d5fc23c95c455ba185951a6ed16a1e73c394f";
+   		return "624cc92872f1d8473b47e098815669b6fb9c0a5c2459a80441afc9913a518f73";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -88,7 +88,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -127,7 +127,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getCurrentToolboxState());
 
@@ -155,7 +155,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setCurrentToolboxState(cdr.read_type_9());
       	
@@ -176,7 +176,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("current_toolbox_state", data.getCurrentToolboxState());
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
       ser.write_type_e("desired_joint_angles", data.getDesiredJointAngles());
@@ -196,7 +196,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCurrentToolboxState(ser.read_type_9("current_toolbox_state"));
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
       ser.read_type_e("desired_joint_angles", data.getDesiredJointAngles());

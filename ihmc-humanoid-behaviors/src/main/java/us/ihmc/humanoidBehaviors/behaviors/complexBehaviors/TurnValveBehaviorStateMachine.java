@@ -2,9 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import perception_msgs.msg.dds.ValveLocationPacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +24,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,7 +60,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final GetUserValidationBehavior userValidationExampleBehavior;
 
    RobotSide side = RobotSide.RIGHT;
-   private final ROS2PublisherBasics<ValveLocationPacket> publisher;
+   private final ROS2Publisher<ValveLocationPacket> publisher;
 
    public TurnValveBehaviorStateMachine(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                                         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,

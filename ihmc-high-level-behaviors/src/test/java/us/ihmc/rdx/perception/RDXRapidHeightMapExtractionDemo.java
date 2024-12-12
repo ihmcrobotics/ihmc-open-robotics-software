@@ -4,8 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +23,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -78,7 +77,7 @@ public class RDXRapidHeightMapExtractionDemo
    {
       perceptionDataLoader = new PerceptionDataLoader();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "simulation_ui");
+      ROS2Node ros2Node = new ROS2NodeBuilder().build("simulation_ui");
       ros2Helper = new ROS2Helper(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

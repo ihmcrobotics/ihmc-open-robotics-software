@@ -6,18 +6,14 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,16 +24,26 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.simulationConstructionSetTools.util.environments.*;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.FiducialEnvironmentForDoorBehavior;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationconstructionset.CameraMount;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GimbalJoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.gui.AWTTools;
@@ -64,14 +70,14 @@ public class SCSLidarAndCameraSimulator
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
    {
-      this(pubSubImplementation, environment.getTerrainObject3D(), robotModel);
+      this(environment.getTerrainObject3D(), robotModel);
    }
 
-   public SCSLidarAndCameraSimulator(PubSubImplementation pubSubImplementation, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
+   public SCSLidarAndCameraSimulator(TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
+      ros2Node = new ROS2NodeBuilder().build("lidar_and_camera");
 
       robotConfigurationData = new ROS2Input<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
@@ -115,7 +121,7 @@ public class SCSLidarAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
-      ROS2PublisherBasics<VideoPacket> scsCameraPublisher = ros2Node.createPublisher(PerceptionAPI.VIDEO);
+      ROS2Publisher<VideoPacket> scsCameraPublisher = ros2Node.createPublisher(PerceptionAPI.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);
@@ -228,6 +234,6 @@ public class SCSLidarAndCameraSimulator
 
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
-      new SCSLidarAndCameraSimulator(PubSubImplementation.INTRAPROCESS, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
+      new SCSLidarAndCameraSimulator(new FiducialEnvironmentForDoorBehavior(), createRobotModel());
    }
 }

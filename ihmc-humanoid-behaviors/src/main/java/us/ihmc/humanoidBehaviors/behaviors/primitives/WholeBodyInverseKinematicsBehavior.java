@@ -1,11 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -25,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -63,9 +63,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final YoDouble yoTime;
    private final YoDouble timeSolutionSentToController;
 
-   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
-   private final ROS2PublisherBasics<KinematicsToolboxRigidBodyMessage> kinematicsToolboxRigidBodyPublisher;
-   private final ROS2PublisherBasics<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2Publisher<KinematicsToolboxRigidBodyMessage> kinematicsToolboxRigidBodyPublisher;
+   private final ROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
    public WholeBodyInverseKinematicsBehavior(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, YoDouble yoTime,
                                              ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)

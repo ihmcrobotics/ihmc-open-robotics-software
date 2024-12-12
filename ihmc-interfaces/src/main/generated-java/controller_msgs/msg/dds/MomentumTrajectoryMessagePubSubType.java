@@ -15,7 +15,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ea80a12c0a03a434c6cc6075ac6655284bad57ce5d6b0e763615a414e4f1a2f3";
+   		return "533535d41a92f1fcc0eca9c1eeb02bab6ad499e262f16eb7de5f60f310631b7f";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,7 +69,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getAngularMomentumTrajectory(), current_alignment);
@@ -80,14 +80,14 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getAngularMomentumTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getAngularMomentumTrajectory(), cdr);	
 
@@ -96,7 +96,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("angular_momentum_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getAngularMomentumTrajectory());
 
    }
@@ -104,7 +104,7 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MomentumTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("angular_momentum_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getAngularMomentumTrajectory());
 
    }

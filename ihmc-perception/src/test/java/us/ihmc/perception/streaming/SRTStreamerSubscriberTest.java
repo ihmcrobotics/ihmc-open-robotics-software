@@ -11,7 +11,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -22,8 +21,8 @@ import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.io.IOException;
@@ -48,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SRTStreamerSubscriberTest
 {
-   private static final ROS2Node ROS2_NODE = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "srt_streaming_test");
+   private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("srt_streaming_test");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
    private static final double FPS = 30.0;
    private static final double TEST_TIMEOUT = 5.0;

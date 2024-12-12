@@ -4,14 +4,13 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -21,6 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.geometry.PlanarLandmarkList;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -30,10 +30,10 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
-import us.ihmc.perception.geometry.PlanarLandmarkList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -61,7 +61,7 @@ public class PlanarRegionMappingHandler
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
-   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),

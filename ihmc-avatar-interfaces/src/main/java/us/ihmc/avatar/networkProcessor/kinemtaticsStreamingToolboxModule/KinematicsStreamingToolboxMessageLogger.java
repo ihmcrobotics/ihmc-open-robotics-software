@@ -1,5 +1,27 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import com.google.common.base.CaseFormat;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatusPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,23 +33,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.google.common.base.CaseFormat;
-
-import controller_msgs.msg.dds.*;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import toolbox_msgs.msg.dds.*;
-import us.ihmc.commons.Conversions;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisposable
 {
@@ -69,11 +74,10 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
    private Runnable loggerRunnable = null;
    private ScheduledFuture<?> loggerTaskScheduled = null;
 
-   public KinematicsStreamingToolboxMessageLogger(String robotName, PubSubImplementation pubSubImplementation)
+   public KinematicsStreamingToolboxMessageLogger(String robotName)
    {
       this.robotName = robotName;
-      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
-                                                  "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
+      ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                   s -> robotConfigurationData.set(s.takeNextData()));
@@ -238,6 +242,6 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
    {
       String robotName = "Valkyrie"; // "Atlas"; //
 
-      new KinematicsStreamingToolboxMessageLogger(robotName, PubSubImplementation.FAST_RTPS);
+      new KinematicsStreamingToolboxMessageLogger(robotName);
    }
 }

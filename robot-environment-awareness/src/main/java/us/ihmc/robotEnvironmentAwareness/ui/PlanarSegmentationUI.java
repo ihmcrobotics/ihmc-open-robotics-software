@@ -9,23 +9,28 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.BoundingBoxAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeEssentialsAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SegmentationDataExporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.io.File;
 import java.io.IOException;
-
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
 
 public class PlanarSegmentationUI implements PerceptionUI
 {
@@ -107,8 +112,8 @@ public class PlanarSegmentationUI implements PerceptionUI
 
       primaryStage.setScene(mainScene);
 
-      ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "planar_segmentation_ui");
-      ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
+      ros2Node = new ROS2NodeBuilder().build("planar_segmentation_ui");
+      ROS2Publisher<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
       ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)

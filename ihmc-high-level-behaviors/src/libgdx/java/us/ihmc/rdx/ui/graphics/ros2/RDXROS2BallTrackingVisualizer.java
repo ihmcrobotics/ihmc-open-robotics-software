@@ -9,22 +9,20 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.BallDetectionParametersMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.commons.thread.Throttler;
 
 import java.time.Instant;
 import java.util.Set;
@@ -35,7 +33,6 @@ public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
    private final String titleBeforeAdditions;
-   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<RigidBodyTransformMessage> ballPositionTopic;
    private RealtimeROS2Node realtimeROS2Node;
    private final ROS2PublishSubscribeAPI ros2;
@@ -70,15 +67,9 @@ public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<
 
    public RDXROS2BallTrackingVisualizer(String title, ROS2Topic<RigidBodyTransformMessage> ballPositionTopic, ROS2PublishSubscribeAPI ros2PubSubAPI)
    {
-      this(title, PubSubImplementation.FAST_RTPS, ballPositionTopic, ros2PubSubAPI);
-   }
-
-   public RDXROS2BallTrackingVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<RigidBodyTransformMessage> ballPositionTopic, ROS2PublishSubscribeAPI ros2PubSubAPI)
-   {
       super(title);
 
       this.titleBeforeAdditions = title;
-      this.pubSubImplementation = pubSubImplementation;
       this.ballPositionTopic = ballPositionTopic;
       this.ros2 = ros2PubSubAPI;
 
@@ -98,7 +89,7 @@ public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<
          unsubscribe();
 
       // subscribe
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
       realtimeROS2Node.createSubscription(ballPositionTopic, this::updateGraphic);
       realtimeROS2Node.spin();
    }

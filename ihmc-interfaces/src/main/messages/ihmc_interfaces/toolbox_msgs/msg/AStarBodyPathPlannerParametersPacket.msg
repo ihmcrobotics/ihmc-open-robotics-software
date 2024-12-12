@@ -5,7 +5,7 @@ float64 DEFAULT_NO_VALUE = -11.1
 # This message defines the parameters for the A* body path planner.
 
 # Unique ID used to identify this message.
-uint32 sequence_id
+uint64 sequence_id
 
 # Whether or not the planner checks for collisions.
 bool check_for_collisions

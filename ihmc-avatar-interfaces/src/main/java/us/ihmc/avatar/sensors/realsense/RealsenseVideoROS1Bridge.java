@@ -5,12 +5,12 @@ import sensor_msgs.msg.dds.CompressedImage;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -26,7 +26,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
    private static final boolean THROTTLE = true;
    private final double outputFrequenct;
 
-   private final ROS2PublisherBasics<VideoPacket> publisher;
+   private final ROS2Publisher<VideoPacket> publisher;
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 

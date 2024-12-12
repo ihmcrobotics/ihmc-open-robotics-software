@@ -17,7 +17,7 @@ int8 MIDDLE_FINGER_MOTOR_PITCH1=4
 int8 PINKY_MOTOR_PITCH1=5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the side of the robot that will execute the trajectory.
 # Field default value 255

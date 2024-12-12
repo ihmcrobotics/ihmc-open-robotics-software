@@ -15,7 +15,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "63c5f509f74604a10b703187cfc8be5dda793a6a96333b9751e2c0079b530257";
+   		return "cd629fd592e157d5c76ccc7c90011b9e09f4b47e45ff1fe6d08fd69cce656486";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -71,7 +71,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularPart(), current_alignment);
@@ -84,7 +84,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.SpatialVectorMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularPart(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearPart(), cdr);
@@ -92,7 +92,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.SpatialVectorMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularPart(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearPart(), cdr);	
@@ -102,7 +102,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.SpatialVectorMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("angular_part", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularPart());
 
       ser.write_type_a("linear_part", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearPart());
@@ -112,7 +112,7 @@ public class SpatialVectorMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SpatialVectorMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("angular_part", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularPart());
 
       ser.read_type_a("linear_part", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearPart());

@@ -3,7 +3,7 @@
 # This trajectory will be used for ICP planning.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # List of angular momentum trajectory waypoints.
 # Each waypoint contains the angular momentum and the angular momentum rate at a given time.

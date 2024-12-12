@@ -6,11 +6,9 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.idl.IDLSequence;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -18,7 +16,6 @@ import us.ihmc.tools.string.StringTools;
 public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
-   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<BigVideoPacket> topic;
    private RealtimeROS2Node realtimeROS2Node = null;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
@@ -30,11 +27,10 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
    //   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
+   public RDXROS2BigVideoVisualizer(String title, ROS2Topic<BigVideoPacket> topic)
    {
       super(title, topic.getName(), false);
       titleBeforeAdditions = title;
-      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
       setActivenessChangeCallback(isAlive ->
@@ -52,7 +48,7 @@ public class RDXROS2BigVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigV
 
    private void subscribe()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(StringTools.titleToSnakeCase(titleBeforeAdditions));
       // imdecode takes the longest by far out of all this stuff
       // synchronize with the update method
       // YUV I420 has 1.5 times the height of the image

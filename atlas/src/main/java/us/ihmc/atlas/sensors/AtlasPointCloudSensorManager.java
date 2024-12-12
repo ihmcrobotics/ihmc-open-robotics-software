@@ -12,11 +12,11 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasPointCloudSensorManager
@@ -30,7 +30,7 @@ public class AtlasPointCloudSensorManager
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
 
    public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory,
-                                       ROS2NodeInterface ros2Node,
+                                       ROS2Node ros2Node,
                                        RobotROSClockCalculator rosClockCalculator,
                                        boolean useTrackingData)
    {

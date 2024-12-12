@@ -4,7 +4,7 @@
 # As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.  
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Position of sensor when the planar region list was generated
 geometry_msgs/Point sensor_position

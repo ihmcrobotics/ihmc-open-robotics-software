@@ -15,7 +15,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fc5dde07484e99beb698ccb01f53fc525a3a1938ace7213b3d664bc692319468";
+   		return "99a6e9111954d0de30489c5864d8cb9641b0ca82985fb7c71dbc3fade27941bd";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -77,7 +77,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -101,7 +101,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getWalkToGoalAction());
 
@@ -117,7 +117,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWalkToGoalAction(cdr.read_type_9());
       	
@@ -135,7 +135,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("walk_to_goal_action", data.getWalkToGoalAction());
       ser.write_type_6("x_goal", data.getXGoal());
       ser.write_type_6("y_goal", data.getYGoal());
@@ -146,7 +146,7 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWalkToGoalAction(ser.read_type_9("walk_to_goal_action"));
       data.setXGoal(ser.read_type_6("x_goal"));
       data.setYGoal(ser.read_type_6("y_goal"));

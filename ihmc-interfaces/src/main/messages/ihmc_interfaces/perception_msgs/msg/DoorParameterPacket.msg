@@ -1,7 +1,7 @@
 # This message is part of the IHMC humanoid behavior module.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 geometry_msgs/Point hinged_point_on_ground
 geometry_msgs/Point end_point_on_ground

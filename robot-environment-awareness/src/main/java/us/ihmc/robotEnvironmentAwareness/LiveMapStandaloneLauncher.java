@@ -3,15 +3,14 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 public class LiveMapStandaloneLauncher extends ApplicationNoModule
 {
@@ -23,17 +22,10 @@ public class LiveMapStandaloneLauncher extends ApplicationNoModule
    private ROS2Node ros2Node;
 
    private final boolean launchUI;
-   private final PubSubImplementation pubSubImplementation;
 
-   public LiveMapStandaloneLauncher()
-   {
-      this(true, PubSubImplementation.FAST_RTPS);
-   }
-
-   public LiveMapStandaloneLauncher(boolean launchUIs, PubSubImplementation pubSubImplementation)
+   public LiveMapStandaloneLauncher(boolean launchUIs)
    {
       this.launchUI = launchUIs;
-      this.pubSubImplementation = pubSubImplementation;
    }
 
 
@@ -43,7 +35,7 @@ public class LiveMapStandaloneLauncher extends ApplicationNoModule
       messager = new SharedMemoryJavaFXMessager(LiveMapModuleAPI.API);
       messager.startMessager();
       
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
+      ros2Node = new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME);
 
       if (launchUI)
          ui = LiveMapUI.createIntraprocessUI(messager, primaryStage);

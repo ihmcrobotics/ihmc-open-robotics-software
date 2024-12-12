@@ -15,7 +15,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "45212f140cbd4641b0ffe5ced31cbaed79c8a72aa6fde2badc2cf26648bf11b9";
+   		return "e07572fc68e1734738b0b561129857a06edee967a995eca9d9a441b67ebb39c4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -70,7 +70,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getKey().length() + 1;
@@ -84,7 +84,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
 
    public static void write(toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getKey().length() <= 255)
       cdr.write_type_d(data.getKey());else
@@ -96,7 +96,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
 
    public static void read(toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_d(data.getKey());	
       data.setValue(cdr.read_type_6());
@@ -107,7 +107,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_d("key", data.getKey());
       ser.write_type_6("value", data.getValue());
    }
@@ -115,7 +115,7 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_d("key", data.getKey());
       data.setValue(ser.read_type_6("value"));
    }

@@ -6,12 +6,12 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.Consumer;
 
@@ -22,12 +22,12 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    private final SideDependentList<ROS2Input<HandJointAnglePacket>> handJointAnglePacketInputs = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
 
-   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(robotModel, ros2Node, robotModel.createFullRobotModel());
    }
 
-   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
+   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
 
@@ -93,6 +93,5 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 
    public void destroy()
    {
-      robotConfigurationDataInput.destroy();
    }
 }

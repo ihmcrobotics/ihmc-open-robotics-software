@@ -1,21 +1,21 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BehaviorService
 {
    private final ROS2Node ros2Node;
-   private final Map<ROS2Topic, ROS2PublisherBasics<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic, ROS2Publisher<?>> publishers = new HashMap<>();
    private final YoRegistry registry;
    protected final String robotName;
    private final ROS2Topic controllerInputTopic, controllerOutputTopic;
@@ -40,21 +40,21 @@ public abstract class BehaviorService
       return null;
    }
    
-   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       ROS2Topic topicName = controllerInputTopic.withTypeName(messageType);
       return createPublisher(messageType, topicName);
    }
 
-   public <T> ROS2PublisherBasics<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
+   public <T> ROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
    {
       return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).withSuffix(topicName));
    }
 
    @SuppressWarnings("unchecked")
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic topicName)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic topicName)
    {
-      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(topicName);
+      ROS2Publisher<T> publisher = (ROS2Publisher<T>) publishers.get(topicName);
 
       if (publisher == null)
       {

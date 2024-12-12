@@ -15,7 +15,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "457a491b05d17c1dc4e40cb7d06a8fe5e7d85350354cf5aeb52dbad8cac0df0d";
+   		return "0a4c9f4a04628c630a4b0e274e25e7a6fc9510dd5a87991a663b3ab771b73ac1";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -84,7 +84,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -117,7 +117,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(perception_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getRegionId());
 
@@ -140,7 +140,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(perception_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRegionId(cdr.read_type_2());
       	
@@ -159,7 +159,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(perception_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("region_id", data.getRegionId());
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
@@ -176,7 +176,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PlanarRegionMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRegionId(ser.read_type_2("region_id"));
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 

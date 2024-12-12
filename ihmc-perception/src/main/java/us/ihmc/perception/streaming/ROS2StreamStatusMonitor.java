@@ -7,13 +7,13 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
-import us.ihmc.commons.thread.Throttler;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -123,7 +123,6 @@ public class ROS2StreamStatusMonitor
    {
       running = false;
       messageMonitor.interrupt();
-      messageSubscription.destroy();
    }
 
    private void receiveMessage(SRTStreamStatus statusMessage)

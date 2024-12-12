@@ -4,7 +4,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -16,7 +15,7 @@ public class AtlasBipedalSupportPlanarRegionPublisher
 
    public AtlasBipedalSupportPlanarRegionPublisher()
    {
-      new BipedalSupportPlanarRegionPublisher(createRobotModel(), DomainFactory.PubSubImplementation.FAST_RTPS).start();
+      new BipedalSupportPlanarRegionPublisher(createRobotModel()).start();
    }
 
    private AtlasRobotModel createRobotModel()

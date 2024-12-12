@@ -8,10 +8,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.tools.thread.SwapReference;
@@ -22,45 +22,46 @@ import java.util.function.Consumer;
  * Supports:
  * - Publishing on the fly without having to first create publishers
  * - Disabling and enabling all the publishers and subscribers created here
+ * TODO: Remove this class and combine into ROS2Node directly
  */
 public class ROS2Helper implements ROS2PublishSubscribeAPI
 {
-   protected final ROS2NodeInterface ros2NodeInterface;
+   protected final ROS2Node ros2Node;
    protected final ROS2PublisherMap ros2PublisherMap;
 
-   public ROS2Helper(PubSubImplementation pubSubImplementation, String nodeName)
+   public ROS2Helper(String nodeName)
    {
-      this(ROS2Tools.createROS2Node(pubSubImplementation, nodeName));
+      this(new ROS2NodeBuilder().build(nodeName));
    }
 
-   public ROS2Helper(ROS2NodeInterface ros2Node)
+   public ROS2Helper(ROS2Node ros2Node)
    {
-      this.ros2NodeInterface = ros2Node;
+      this.ros2Node = ros2Node;
       ros2PublisherMap = new ROS2PublisherMap(ros2Node);
    }
 
    @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ros2NodeInterface.createSubscription2(topic, callback);
+      ros2Node.createSubscription2(topic, callback);
    }
 
    @Override
    public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2NodeInterface, topic, callback);
+      ROS2Tools.createVolatileCallbackSubscription(ros2Node, topic, callback);
    }
 
    @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      return ROS2Tools.createSwapReferenceSubscription(ros2NodeInterface, topic, callback);
+      return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
    }
 
    @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
-      return ROS2Tools.createSwapReferenceSubscription(ros2NodeInterface, topic, callback);
+      return ROS2Tools.createSwapReferenceSubscription(ros2Node, topic, callback);
    }
 
    @Override
@@ -69,7 +70,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
       int queueSize = 16;
       ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
-      ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+      ros2Node.createSubscription(topicDataType, subscriber ->
       {
          T nextData = concurrentQueue.next();
          if (nextData != null)
@@ -90,26 +91,26 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      ros2NodeInterface.createSubscription2(topic, message -> callback.run());
+      ros2Node.createSubscription2(topic, message -> callback.run());
    }
 
    @Override
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
-      return new ROS2Input<>(ros2NodeInterface, topic.getType(), topic);
+      return new ROS2Input<>(ros2Node, topic.getType(), topic);
    }
 
    @Override
    public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter)
    {
-      return new ROS2Input<>(ros2NodeInterface, topic.getType(), topic, messageFilter);
+      return new ROS2Input<>(ros2Node, topic.getType(), topic, messageFilter);
    }
 
    @Override
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
-      ros2NodeInterface.createSubscription2(topic.withType(Empty.class), message -> notification.set());
+      ros2Node.createSubscription2(topic.withType(Empty.class), message -> notification.set());
       return notification;
    }
 
@@ -117,7 +118,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ros2NodeInterface.createSubscription2(topic, typedNotification::set);
+      ros2Node.createSubscription2(topic, typedNotification::set);
       return typedNotification;
    }
 
@@ -125,7 +126,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ros2NodeInterface.createSubscription2(topic, message -> typedNotification.set(message.getData()));
+      ros2Node.createSubscription2(topic, message -> typedNotification.set(message.getData()));
       return typedNotification;
    }
 
@@ -167,8 +168,8 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       ros2PublisherMap.publish(topic, message);
    }
 
-   public ROS2NodeInterface getROS2NodeInterface()
+   public ROS2Node getROS2Node()
    {
-      return ros2NodeInterface;
+      return ros2Node;
    }
 }

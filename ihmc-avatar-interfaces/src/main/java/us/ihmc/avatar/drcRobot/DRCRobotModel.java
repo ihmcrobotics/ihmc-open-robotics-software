@@ -1,8 +1,5 @@
 package us.ihmc.avatar.drcRobot;
 
-import java.nio.file.Path;
-import java.util.List;
-
 import com.jme3.math.Transform;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
@@ -14,8 +11,8 @@ import us.ihmc.avatar.factory.DefaultSimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
@@ -31,9 +28,9 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -42,7 +39,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -54,6 +51,9 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.nio.file.Path;
+import java.util.List;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -129,7 +129,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return getSensorSuiteManager(null);
    }
 
-   public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
+   public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2Node ros2Node);
 
    public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
@@ -298,7 +298,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2Node ros2Node)
    {
       return null;
    }

@@ -1,19 +1,13 @@
 package us.ihmc.avatar;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.commons.lists.PairList;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,13 +19,18 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
-import us.ihmc.commons.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BooleanSupplier;
 
 public class AvatarEstimatorThread extends ModularRobotController implements SCS2YoGraphicHolder
 {
@@ -48,7 +47,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    private final List<Runnable> runnables = new ArrayList<>();
-   private final ROS2PublisherBasics<ControllerCrashNotificationPacket> controllerCrashPublisher;
+   private final ROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final ExecutionTimer estimatorThreadTimer;
@@ -58,7 +57,7 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
                                 HumanoidRobotContextData humanoidRobotContextData,
                                 StateEstimatorController mainStateEstimator,
                                 PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                ROS2PublisherBasics<ControllerCrashNotificationPacket> controllerCrashPublisher,
+                                ROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
                                 YoRegistry estimatorRegistry,
                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {

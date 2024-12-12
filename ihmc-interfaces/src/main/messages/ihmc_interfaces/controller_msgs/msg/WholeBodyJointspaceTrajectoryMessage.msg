@@ -2,7 +2,7 @@
 # Allows to send joint-space trajectory to either part of the joints or for all the joints.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The is the unique hash code of each of the joints to be controlled.
 # It is used on the controller side to retrieve the desired joint to be controlled.

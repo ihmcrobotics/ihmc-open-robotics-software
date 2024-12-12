@@ -15,7 +15,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3696638deebce87ef704540712dc06d65947710b4a4a7b2910023c1eda36b107";
+   		return "6357e869892e9124bd9b7752f2c79705f37c3d4300c1b57033d51cd836abf7e5";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,7 +71,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -86,7 +86,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getDesiredJointAccelerations().size() <= 100)
       cdr.write_type_e(data.getDesiredJointAccelerations());else
@@ -97,7 +97,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getDesiredJointAccelerations());	
       ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
@@ -107,7 +107,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(controller_msgs.msg.dds.DesiredAccelerationsMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("desired_joint_accelerations", data.getDesiredJointAccelerations());
       ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
@@ -116,7 +116,7 @@ public class DesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DesiredAccelerationsMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("desired_joint_accelerations", data.getDesiredJointAccelerations());
       ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 

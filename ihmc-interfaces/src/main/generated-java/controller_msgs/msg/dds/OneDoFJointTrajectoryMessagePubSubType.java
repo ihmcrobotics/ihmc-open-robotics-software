@@ -15,7 +15,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "906a241c529d5f4d4e0a47ba01e65d50152118ec79f67fca45823b510a60e2d8";
+   		return "a46fa6f4789fbe6577ec65235e2a35db1e0c4017aa5080cc5c921cecd15d43d4";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -72,7 +72,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -89,7 +89,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getTrajectoryPoints().size() <= 50)
       cdr.write_type_e(data.getTrajectoryPoints());else
@@ -101,7 +101,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getTrajectoryPoints());	
       data.setWeight(cdr.read_type_6());
@@ -112,7 +112,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("trajectory_points", data.getTrajectoryPoints());
       ser.write_type_6("weight", data.getWeight());
    }
@@ -120,7 +120,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.OneDoFJointTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("trajectory_points", data.getTrajectoryPoints());
       data.setWeight(ser.read_type_6("weight"));
    }

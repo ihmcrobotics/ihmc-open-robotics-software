@@ -64,7 +64,6 @@ import nav_msgs.msg.dds.OccupancyGridPubSubType;
 import nav_msgs.msg.dds.OdometryPubSubType;
 import nav_msgs.msg.dds.PathPubSubType;
 import perception_msgs.msg.dds.*;
-import rcl_interfaces.msg.dds.IntraProcessMessagePubSubType;
 import rcl_interfaces.msg.dds.ListParametersResultPubSubType;
 import rcl_interfaces.msg.dds.ParameterDescriptorPubSubType;
 import rcl_interfaces.msg.dds.ParameterEventDescriptorsPubSubType;
@@ -404,7 +403,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DisparityImagePubSubType.class);
       registerPacketField(AtlasAuxiliaryRobotDataPubSubType.class);
       registerPacketField(TemperaturePubSubType.class);
-      registerPacketField(IntraProcessMessagePubSubType.class);
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);

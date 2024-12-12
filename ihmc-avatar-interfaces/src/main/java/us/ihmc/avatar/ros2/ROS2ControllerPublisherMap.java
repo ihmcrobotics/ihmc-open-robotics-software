@@ -2,8 +2,8 @@ package us.ihmc.avatar.ros2;
 
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.HashMap;
 
@@ -13,7 +13,7 @@ public class ROS2ControllerPublisherMap
    private final ROS2PublisherMap publisherMap;
    private final HashMap<Class, ROS2Topic> topicMap = new HashMap<>();
 
-   public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName)
+   public ROS2ControllerPublisherMap(ROS2Node ros2Node, String robotName)
    {
       this(robotName, new ROS2PublisherMap(ros2Node));
    }

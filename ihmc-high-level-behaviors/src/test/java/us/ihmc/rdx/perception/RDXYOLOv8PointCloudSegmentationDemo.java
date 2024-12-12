@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,15 +13,15 @@ import us.ihmc.perception.detections.yolo.YOLOv8DetectionResults;
 import us.ihmc.perception.detections.yolo.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
@@ -41,7 +40,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "yolo_demo");
+   private final ROS2Node node = new ROS2NodeBuilder().build("yolo_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
@@ -116,7 +115,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
             baseUI.getPrimaryScene().addRenderableProvider(segmentedPointCloudRenderer);
 
             RDXROS2ImageMessageVisualizer zedColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Color Image",
-                                                                                                      DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                                      node,
                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zedColorImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer);

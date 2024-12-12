@@ -15,7 +15,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1ca57855c4c5f9317209bb038ab9a7f37e59eca015611e11fdcc91cbff42de66";
+   		return "5fccae3ef138c8d9a5aa2aa34e1b447fb0a74432fa1eae392c1111c5c2d7b904";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getHumanoidBehaviorType());
 
@@ -89,7 +89,7 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setHumanoidBehaviorType(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class HumanoidBehaviorTypePacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("humanoid_behavior_type", data.getHumanoidBehaviorType());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setHumanoidBehaviorType(ser.read_type_9("humanoid_behavior_type"));
    }
 

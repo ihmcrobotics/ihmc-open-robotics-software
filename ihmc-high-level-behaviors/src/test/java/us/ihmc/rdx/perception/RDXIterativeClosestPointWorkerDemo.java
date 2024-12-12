@@ -9,7 +9,6 @@ import imgui.type.ImInt;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -24,7 +23,6 @@ import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -33,10 +31,11 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import us.ihmc.tools.thread.RestartableThread;
@@ -54,7 +53,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
    private final Random random = new Random(System.nanoTime());
 
-   private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
+   private final ROS2Node node = new ROS2NodeBuilder().build("icp_worker_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
    private final ZEDColorDepthImageRetriever zedImageRetriever;
    private final ZEDColorDepthImagePublisher zedImagePublisher;
@@ -219,7 +218,7 @@ public class RDXIterativeClosestPointWorkerDemo
             baseUI.getPrimaryScene().addRenderableProvider(correspondingObjectPointCloudRenderer);
 
             RDXROS2ImageMessageVisualizer zedDepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Depth Image",
-                                                                                                      DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                                      node,
                                                                                                       PerceptionAPI.ZED2_DEPTH);
             zedDepthImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_COLOR);
             perceptionVisualizerPanel.addVisualizer(zedDepthImageVisualizer);
