@@ -22,7 +22,7 @@ import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -51,7 +51,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisuali
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean subscribed = false;
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private int totalNumberOfPoints;
    private OpenCLManager openCLManager;
@@ -135,7 +135,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisuali
                MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
                totalNumberOfPoints = depthWidth * depthHeight;
                pointCloudRenderer.create(totalNumberOfPoints);
-               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRendererOld.FLOATS_PER_VERTEX,
                                                               pointCloudRenderer.getVertexBuffer());
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
                decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * Short.BYTES);

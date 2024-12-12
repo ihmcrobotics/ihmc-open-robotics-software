@@ -1,20 +1,16 @@
 package us.ihmc.rdx.simulation;
 
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.DepthSensorDemoObjectsModel;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.perception.RDXMatImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudRenderer;
 
 public class RDXSensorSimulatorDemo
 {
@@ -28,9 +24,7 @@ public class RDXSensorSimulatorDemo
    private final RDXSensorSimulator sensorSimulator;
    private RDXPose3DGizmo sensorPoseGizmo;
 
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private List<Point3D32> pointCloud = new ArrayList<>();
+   private final RDXRawImagePointCloudRenderer pointCloudRenderer = new RDXRawImagePointCloudRenderer(false);
 
    private RDXMatImagePanel imagePanel;
 
@@ -61,6 +55,7 @@ public class RDXSensorSimulatorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
 
             pointCloudRenderer.create(WIDTH * HEIGHT);
+            pointCloudRenderer.setColoringMethod(ColoringMethod.GRADIENT_SENSOR_X);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
          }
 
@@ -77,8 +72,7 @@ public class RDXSensorSimulatorDemo
                RawImage depthImage = sensorSimulator.getDepthImage();
 
                // Set point cloud to render
-               pointCloud = pointCloudExtractor.extractPointCloud(depthImage);
-               pointCloudRenderer.setPointsToRender(pointCloud);
+               pointCloudRenderer.updateMesh(depthImage);
 
                // Set color image to render
                imagePanel.ensureDimensionsMatch(colorImage.getWidth(), colorImage.getHeight());
@@ -90,7 +84,6 @@ public class RDXSensorSimulatorDemo
                depthImage.release();
             }
 
-            pointCloudRenderer.updateMesh();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -99,7 +92,6 @@ public class RDXSensorSimulatorDemo
          public void dispose()
          {
             baseUI.dispose();
-            pointCloudExtractor.destroy();
             pointCloudRenderer.dispose();
          }
       });

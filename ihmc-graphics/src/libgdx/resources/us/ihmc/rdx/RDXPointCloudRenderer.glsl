@@ -1,51 +1,77 @@
 #type vertex
 #version 410
 
-layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec4 a_color;
-layout(location = 2) in float a_size;
+#define M_PI_F 3.1415927f
 
+// Coloring methods
+#define COLOR_DEFAULT 0
+#define COLOR_GRADIENT_WORLD_Z 1
+
+/*
+ * This attribute represents the (x, y, z) position 
+ * of the point being rendered, in world frame. 
+ */
+layout(location = 0) in vec3 a_position;
+
+// We output the color of the vertex for the fragment shader to use
 out vec4 v_color;
 
+// Needed uniforms
 uniform mat4 u_viewTrans;
 uniform mat4 u_projTrans;
 uniform float u_screenWidth;
-uniform sampler2D u_diffuseTexture;
-uniform int u_multiColor;
+uniform float u_pointScale;
+uniform vec4 u_defaultPointColor;
+uniform int u_coloringMethod;
+
+// COLOR STUFF //
+vec4 calculateSinusoidalGradientColor(float value)
+{
+   // maximum depth value
+   float m = 3.0f;
+   float a = 5.0f * value * M_PI_F / (3.0f * m) + M_PI_F / 2.0f;
+
+   float r = sin(a) * 192.0f + 128.0f;
+   r = max(0.0f, min(255.0f, r));
+
+   float g = sin(a - 2.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
+   g = max(0.0f, min(255.0f, g));
+
+   float b = sin(a - 4.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
+   b = max(0.0f, min(255.0f, b));
+
+   return vec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0);
+}
 
 void main()
 {
-//	float halfSize = 0.5 * a_size;
-//	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
-//	vec4 cornerPositionInScreen = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);
-////	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
-////	gl_PointSize = u_screenWidth / 100.0;
-//	gl_PointSize = cornerPositionInScreen.x;
-////	gl_PointSize = cornerPositionInScreen.x / cornerPositionInScreen.w;
+   vec4 pointColor;
 
-	//	vec2 projectedSize = u_screenWidth * projectedSpriteCorner.xy / projectedSpriteCorner.w;
-	//	gl_PointSize = 0.25 * (projectedSize.x + projectedSize.y);
+   if (u_coloringMethod == COLOR_GRADIENT_WORLD_Z)
+      pointColor = calculateSinusoidalGradientColor(a_position.z);
+   else // u_coloringMethod == COLOR_DEFAULT, or invalid value
+      pointColor = u_defaultPointColor;
 
-	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
-	vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);
-	// In VR, this value should be 0 but isn't for either the right or left eyes. Smoking gun. Not sure yet. TODO: Fix
-	float shouldBeZeroButIsntSometimes = u_screenWidth * projectedSpriteCornerZero.x / projectedSpriteCornerZero.w;
+   vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
+   vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);
 
-	vec4 projectedSpriteCorner = u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w);
-	float projectedSize = u_screenWidth * projectedSpriteCorner.x / projectedSpriteCorner.w;
-	if (shouldBeZeroButIsntSometimes >= 0.0)
-	{
-		gl_PointSize = 0.5 * (projectedSize - shouldBeZeroButIsntSometimes);
-	}
-    else // in VR right eye
-	{
-		gl_PointSize = 0.5 * abs(shouldBeZeroButIsntSometimes - projectedSize);
-	}
+   // In VR, this value should be 0 but isn't for either the right or left eyes. Smoking gun. Not sure yet. TODO: Fix
+   float shouldBeZeroButIsntSometimes = u_screenWidth * projectedSpriteCornerZero.x / projectedSpriteCornerZero.w;
 
-	gl_Position = u_projTrans * pointInCameraFrame;
-//	gl_Position = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);;
+   vec4 projectedSpriteCorner = u_projTrans * vec4(u_pointScale, u_pointScale, pointInCameraFrame.z, pointInCameraFrame.w);
+   float projectedSize = u_screenWidth * projectedSpriteCorner.x / projectedSpriteCorner.w;
+   if (shouldBeZeroButIsntSometimes >= 0.0)
+   {
+      gl_PointSize = 0.5 * (projectedSize - shouldBeZeroButIsntSometimes);
+   }
+   else // in VR right eye
+   {
+      gl_PointSize = 0.5 * abs(shouldBeZeroButIsntSometimes - projectedSize);
+   }
 
-	v_color = a_color;
+   gl_Position = u_projTrans * pointInCameraFrame;
+
+   v_color = pointColor;
 }
 
 #type fragment
@@ -58,8 +84,8 @@ out float out_processedDepth;
 
 void main()
 {
-	color = v_color;
+   color = v_color;
 
-	// This is so the points can be detected by the depth sensors
-	out_processedDepth = 2.0 * gl_FragCoord.z - 1.0; // Normalized to -1.0 to 1.0
+   // This is so the points can be detected by the depth sensors
+   out_processedDepth = 2.0 * gl_FragCoord.z - 1.0; // Normalized to -1.0 to 1.0
 }

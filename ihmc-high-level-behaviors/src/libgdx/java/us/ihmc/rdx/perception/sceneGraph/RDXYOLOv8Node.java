@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -25,7 +25,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
    private final ImGuiPlot confidencePlot;
 
-   private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld objectPointCloudRenderer = new RDXPointCloudRendererOld();
 
    public RDXYOLOv8Node(YOLOv8Node yoloNode, ImGuiUniqueLabelMap labels)
    {
