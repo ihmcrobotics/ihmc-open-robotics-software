@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 
 import java.time.Duration;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,6 +57,23 @@ public class TimeToolsTest
 
          assertEquals(trueSeconds, durationSeconds);
          assertEquals(trueNanos, durationNanos);
+      }
+   }
+
+   @Test
+   public void testSecondsBetween()
+   {
+      Instant start = Instant.now();
+
+      for (int i = 0; i < 100; ++i)
+      {
+         Instant secondsAfter = start.plusSeconds(i);
+
+         double startToAfter = TimeTools.secondsBetween(start, secondsAfter);
+         assertEquals(i, startToAfter, 1E-6);
+
+         double afterToStart = TimeTools.secondsBetween(secondsAfter, start);
+         assertEquals(-i, afterToStart, 1E-6);
       }
    }
 }

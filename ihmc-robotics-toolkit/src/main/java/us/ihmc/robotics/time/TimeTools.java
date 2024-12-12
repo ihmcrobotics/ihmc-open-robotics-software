@@ -4,6 +4,7 @@ import us.ihmc.commons.Conversions;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.Temporal;
 
 /**
  * This class is to assist with calulating delays and timings
@@ -40,6 +41,11 @@ public class TimeTools
       long seconds = now.getEpochSecond() - eventSecondsSinceEpoch;
       long nano = now.getNano() - eventAdditionalNanos;
       return seconds + Conversions.nanosecondsToSeconds(nano);
+   }
+
+   public static double secondsBetween(Temporal startInclusive, Temporal endExclusive)
+   {
+      return toDoubleSeconds(Duration.between(startInclusive, endExclusive));
    }
 
    public static double toDoubleSeconds(Duration duration)
