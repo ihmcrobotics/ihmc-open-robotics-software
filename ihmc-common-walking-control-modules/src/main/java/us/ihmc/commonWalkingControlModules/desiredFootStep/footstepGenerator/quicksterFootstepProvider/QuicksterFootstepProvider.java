@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,9 +61,7 @@ public class QuicksterFootstepProvider implements Updatable
    // Desired inputs
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
-   private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
-   private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
    private final YoFrameQuaternion desiredPelvisOrientation;
    private final FrameQuaternion chestOrientation = new FrameQuaternion();
 
@@ -89,6 +88,7 @@ public class QuicksterFootstepProvider implements Updatable
 
    // Inputs
    private final static Vector2DReadOnly zero2D = new Vector2D();
+   private BooleanProvider walkInputProvider;
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
 
@@ -298,6 +298,7 @@ public class QuicksterFootstepProvider implements Updatable
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
+      this.walk.set(walkInputProvider.getValue());
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
       this.desiredTurningVelocity.set(turningVelocity);
    }
@@ -377,6 +378,17 @@ public class QuicksterFootstepProvider implements Updatable
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
    {
       this.desiredVelocityProvider = desiredVelocityProvider;
+   }
+
+   /**
+    * Sets a provider that is to be used to update the state of {@link #walk} internally on each call
+    * to {@link #update(double)}.
+    *
+    * @param walkInputProvider the provider used to determine whether to walk or not walk.
+    */
+   public void setWalkInputProvider(BooleanProvider walkInputProvider)
+   {
+      this.walkInputProvider = walkInputProvider;
    }
 
    private void setTrailingSide(RobotSide robotSide)

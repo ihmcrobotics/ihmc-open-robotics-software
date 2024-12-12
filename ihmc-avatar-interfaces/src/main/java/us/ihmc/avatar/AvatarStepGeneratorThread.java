@@ -78,6 +78,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
+      csgRegistry.addChild(csgCommandInputManager.getRegistry());
 
       if (environmentalConstraints != null)
       {

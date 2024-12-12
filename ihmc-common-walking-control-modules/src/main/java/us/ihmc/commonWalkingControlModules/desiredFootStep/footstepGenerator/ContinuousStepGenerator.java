@@ -904,6 +904,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    public void setWalkInputProvider(BooleanProvider walkInputProvider)
    {
       this.walkInputProvider = walkInputProvider;
+
+      if (quicksterFootstepProvider.hasValue())
+         quicksterFootstepProvider.get().setWalkInputProvider(walkInputProvider);
    }
 
    /**
