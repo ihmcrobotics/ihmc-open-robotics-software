@@ -15,7 +15,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1eefbc849a1f1c0a3eaa79e752df219edabaaa2aabcc7630cba1b34762a247a3";
+   		return "2705f7c3e4da3dd1d34f26ebf7cbd675ca31340846960635793577338ad00486";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -88,6 +90,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectoryMessage(), current_alignment);
@@ -106,6 +111,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
 
       cdr.write_type_7(data.getForceExecution());
 
+      cdr.write_type_7(data.getImpedanceEnabled());
+
       cdr.write_type_9(data.getRobotSide());
 
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
@@ -119,6 +126,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
       data.setSequenceId(cdr.read_type_12());
       	
       data.setForceExecution(cdr.read_type_7());
+      	
+      data.setImpedanceEnabled(cdr.read_type_7());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -134,6 +143,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
+      ser.write_type_7("impedance_enabled", data.getImpedanceEnabled());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("taskspace_trajectory_message", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
@@ -150,6 +160,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
+      data.setImpedanceEnabled(ser.read_type_7("impedance_enabled"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("taskspace_trajectory_message", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 

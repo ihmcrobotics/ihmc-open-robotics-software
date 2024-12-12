@@ -36,6 +36,10 @@ module controller_msgs
          */
         boolean force_execution;
         /**
+         * Whether impedance control should be enabled or not.
+         */
+        boolean impedance_enabled;
+        /**
          * Specifies the side of the robot that will execute the trajectory.
          */
         @defaultValue(value=255)
