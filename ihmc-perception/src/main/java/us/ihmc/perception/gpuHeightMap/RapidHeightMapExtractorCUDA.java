@@ -2,7 +2,6 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
-import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -39,9 +38,7 @@ public class RapidHeightMapExtractorCUDA
    private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
    private static final boolean computeSteppability = true;
 
-
    private GpuMat inputDepthImage;
-   private GpuMat transformedInputDepthImage;
    private GpuMat localHeightMapImage;
    private GpuMat globalHeightMapImage;
    private GpuMat globalHeightVarianceImage;
@@ -207,7 +204,6 @@ public class RapidHeightMapExtractorCUDA
       steppableRegionAssignmentMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       steppableRegionRingMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
       localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
-      transformedInputDepthImage = new GpuMat(inputDepthImage.cols(), inputDepthImage.rows(), opencv_core.CV_16UC1);
       globalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
       globalHeightVarianceImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       terrainCostImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
@@ -327,22 +323,14 @@ public class RapidHeightMapExtractorCUDA
 
       //Execute the CUDA kernels with the provided stream
       //Each kernel performs a specific task related to the height map update, registration, and cropping
-
-      int preprocessKernelGridSizeX = (inputDepthImage.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int preprocessKernelGridSizeY = (inputDepthImage.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int updateKernelGridSizeXY = (localCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int registerKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
       int croppingKernelGridSizeXY = (heightMapParameters.getCropWindowSize() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
 
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
-      preprocessKernelGridDim = new dim3(preprocessKernelGridSizeX, preprocessKernelGridSizeY, 1);
       updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
       registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
       croppingKernelGridDim = new dim3(croppingKernelGridSizeXY, croppingKernelGridSizeXY, 1);
-
-      preprocessKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
-      preprocessKernel.withPointer(transformedInputDepthImage.data()).withLong(transformedInputDepthImage.step());
-      preprocessKernel.withInt(inputDepthImage.rows()).withInt(inputDepthImage.cols());
 
       updateKernel.withPointer(inputDepthImage.data()).withLong(inputDepthImage.step());
       updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
@@ -364,7 +352,6 @@ public class RapidHeightMapExtractorCUDA
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      preprocessKernel.run(stream, preprocessKernelGridDim, blockSize, 0);
       updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
@@ -486,7 +473,6 @@ public class RapidHeightMapExtractorCUDA
                                  (float) parameters.getVerticalSearchSize(),
                                  (float) parameters.getVerticalSearchResolution(),
                                  (float) parameters.getFastSearchSize()};
-
    }
 
    public static HeightMapData packHeightMapData(RapidHeightMapExtractorCUDA heightMapExtractor, HeightMapData heightMapDataToPack)

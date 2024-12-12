@@ -98,8 +98,6 @@ public class StandAloneRealsenseProcess
                                  realsenseZUpFrameSupplier.get(),
                                  ros2Helper);
 
-//         PerceptionDebugTools.printHeightMap("Your mom", latestHeightMapData, 10);
-
          latestRealsenseDepthImage.release();
       }
    }
