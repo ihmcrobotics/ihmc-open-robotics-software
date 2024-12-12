@@ -32,6 +32,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final JointDesiredOutputListBasics wholeBodyControllerCoreJointLevelOutput;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
    private final JointBasics[] controlledJoint;
    //   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
@@ -51,6 +52,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
                                                  ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                  CenterOfMassDataHolderReadOnly centerOfMassDataHolderForControllerCore,
                                                  JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                 JointDesiredOutputListBasics wholeBodyControllerCoreOutput,
                                                  ControllerCoreOutputDataHolder controllerCoreOutputDataHolder,
                                                  ControllerCoreCommandDataHolder controllerCoreCommandDataHolder,
                                                  WholeBodyControllerCoreFactory controllerCoreFactory,
@@ -63,6 +65,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       this.lowLevelControllerOutput = lowLevelControllerOutput;
       this.controllerCoreOutPutDataHolder = controllerCoreOutputDataHolder;
       this.controllerCoreCommandDataHolder = controllerCoreCommandDataHolder;
+      this.wholeBodyControllerCoreJointLevelOutput = wholeBodyControllerCoreOutput;
 
       controlledJoint = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
@@ -108,7 +111,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
          // But WholeBodyControllerCore updates the joint input here.
          // So, the output of other highLevelStates should be called in here to be delivered to copyJointDesiredsToJoints
          controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-         controllerCore.compute();
+//         controllerCore.compute();
       }
       catch (Exception e)
       {
@@ -120,7 +123,7 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
       }
 
       copyJointDesiredsToJoints();
-      reportControllerCoreOutputDataHolderForController();
+//      reportControllerCoreOutputDataHolderForController();
    }
 
    @Override
@@ -141,7 +144,8 @@ public class HumanoidWholeBodyControllerCoreManager implements RobotController, 
 
       // The output of the controllCore in this Manager will be saved into loweLevelControllerOutput,
       // which is written to the joints
-      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
+//      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
+      JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = wholeBodyControllerCoreJointLevelOutput;
       //      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 

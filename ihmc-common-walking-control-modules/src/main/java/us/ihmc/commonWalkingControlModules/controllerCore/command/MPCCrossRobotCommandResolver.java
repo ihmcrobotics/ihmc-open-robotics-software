@@ -114,6 +114,7 @@ public class MPCCrossRobotCommandResolver
       out.setControllerCoreOutputDataHolder(in);
    }
 
+
    public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
    {
       out.clear();
@@ -196,6 +197,8 @@ public class MPCCrossRobotCommandResolver
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
       resolveControllerCoreCommandDataHolder(in.getControllerCoreCommandDataHolder(), out.getControllerCoreCommandDataHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
+
       out.setControllerRan(in.getControllerRan());
    }
 
@@ -206,10 +209,10 @@ public class MPCCrossRobotCommandResolver
    public void resolveHumanoidRobotContextDataWholeBodyControllerCore(HumanoidRobotMPCContextData in, HumanoidRobotMPCContextData out)
    {
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+//      resolveLowLevelOneDoFJointDesiredDataHolder(in.getWholeBodyControllerCoreDesiredOutPutList(), out.getWholeBodyControllerCoreDesiredOutPutList());
       resolveControllerCoreOutputDataHolder(in.getControllerCoreOutPutDataHolder(), out.getControllerCoreOutPutDataHolder());
       out.setWholeBodyControllerCoreRan(in.getWholeBodyControllerCoreRan());
    }
-
    /**
     * Resolves only the part of the context data that is updated by the perception thread.
     */
