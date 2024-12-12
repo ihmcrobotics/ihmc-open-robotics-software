@@ -67,6 +67,6 @@ __device__ float computeMedian(float* window, int size) {
 
     // Invalidate pixel if it deviates too much from the local mean
     if (fabsf(depthValue - mean) > 1.5 * stdDev) {
-        *(outRow + y)= static_cast<unsigned short>(0.0f);
+        *(outRow + x)= static_cast<unsigned short>(0.0f);
     }
 }
