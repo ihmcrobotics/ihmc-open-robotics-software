@@ -79,6 +79,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private ReferenceFrame controlBaseFrame = null;
 
    /**
+    * Whether to enable impedance control. If true, the controller will use impedance control
+    * to compute the desired acceleration.
+    */
+   private boolean isImpedanceEnabled = false;
+
+   /**
     * Creates an empty command.
     */
    public OrientationFeedbackControlCommand()
@@ -105,6 +111,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       angularGainsFrame = other.angularGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
+      isImpedanceEnabled = other.isImpedanceEnabled;
    }
 
    /**
@@ -215,6 +222,17 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
       this.controlMode = controlMode;
+   }
+
+   /**
+    * Sets the impedance control mode to be used for this command.
+    *
+    *    @param isImpedanceEnabled whether to enable impedance control
+    */
+
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
+   {
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    /**
@@ -546,6 +564,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   public boolean getIsImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public PID3DGains getGains()

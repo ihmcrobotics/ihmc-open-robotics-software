@@ -44,6 +44,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Collection;
@@ -241,6 +242,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       // Weights
       Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
       Vector3DReadOnly taskspaceLinearWeight = taskspaceLinearWeightMap.get(bodyName);
+      PID3DGainsReadOnly taskspaceOrientationImpedanceGains = taskspaceOrientationGainMap.get(bodyName + "_Impedance");
+      PID3DGainsReadOnly taskspacePositionImpedanceGains = taskspacePositionGainMap.get(bodyName + "_Impedance");
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
@@ -253,6 +256,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
       boolean enableFunctionGenerators = walkingControllerParameters.enableFunctionGeneratorMode(bodyName);
 
+      YoBoolean isImpedanceEnabled = new YoBoolean(bodyName + "-EnableImpedanceControl", registry);
+      isImpedanceEnabled.set(walkingControllerParameters.enableImpedanceControl(bodyName));
+
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
                                                                     baseBody,
                                                                     elevator,
@@ -264,10 +270,13 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
                                                                     taskspaceLinearWeight,
                                                                     taskspaceOrientationGains,
                                                                     taskspacePositionGains,
+                                                                    taskspaceOrientationImpedanceGains,
+                                                                    taskspacePositionImpedanceGains,
                                                                     contactableBody,
                                                                     loadBearingParameters,
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
+                                                                    isImpedanceEnabled,
                                                                     momentumOptimizationSettings.getRhoWeight(),
                                                                     controllerToolbox.getPostureAdjustmentProvider(),
                                                                     yoTime,

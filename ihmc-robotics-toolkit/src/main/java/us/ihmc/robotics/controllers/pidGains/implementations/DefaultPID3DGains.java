@@ -65,6 +65,12 @@ public class DefaultPID3DGains implements PID3DGains, Settable<DefaultPID3DGains
    }
 
    @Override
+   public double[] getDampingRatios()
+   {
+      return dampingRatios;
+   }
+
+   @Override
    public double getMaximumIntegralError()
    {
       return maxIntegralError;

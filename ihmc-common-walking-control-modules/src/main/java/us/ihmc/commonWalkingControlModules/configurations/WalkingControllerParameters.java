@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -236,6 +237,16 @@ public abstract class WalkingControllerParameters
       return new ArrayList<>();
    }
 
+   public PID3DGainsReadOnly getImpedanceHandPositionControlGains()
+   {
+      return null;
+   }
+
+   public PID3DGainsReadOnly getImpedanceHandOrientationControlGains()
+   {
+      return null;
+   }
+
    /**
     * Returns a map with default control modes for each rigid body.
     * <p>
@@ -268,6 +279,15 @@ public abstract class WalkingControllerParameters
     * with function generators
     */
    public boolean enableFunctionGeneratorMode(String rigidBodyName)
+   {
+      return false;
+   }
+
+   /**
+    * If true, the rigid body spatial control state for the given rigid body will be setup
+    * with impedance control
+    */
+   public boolean enableImpedanceControl(String rigidBodyName)
    {
       return false;
    }

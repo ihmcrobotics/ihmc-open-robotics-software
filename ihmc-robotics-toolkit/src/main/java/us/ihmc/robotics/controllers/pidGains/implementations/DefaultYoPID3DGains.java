@@ -197,6 +197,13 @@ public class DefaultYoPID3DGains implements YoPID3DGains
       return tempIntegralGains;
    }
 
+   @Override
+   public double[] getDampingRatios()
+   {
+      fillFromMap(zetaMap, tempIntegralGains);
+      return tempIntegralGains;
+   }
+
    static void fillFromMap(Map<Axis3D, YoDouble> map, double[] arrayToFill)
    {
       arrayToFill[0] = map.get(Axis3D.X).getDoubleValue();

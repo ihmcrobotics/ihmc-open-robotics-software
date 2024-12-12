@@ -4,6 +4,8 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -462,5 +464,33 @@ public class MatrixMissingToolsTest
       }
 
       assertThrows(IllegalArgumentException.class, () -> MatrixMissingTools.elementWiseLessThan(new DMatrixRMaj(1, 2), new DMatrixRMaj(2, 2)));
+   }
+
+   @Test
+   public void testSqrt()
+   {
+      Random random = new Random(41584L);
+      int iters = 1000;
+      DMatrixRMaj U = new DMatrixRMaj(0, 0);
+      DMatrixRMaj W = new DMatrixRMaj(0, 0);
+      DMatrixRMaj Vt = new DMatrixRMaj(0, 0);
+      DMatrixRMaj temp = new DMatrixRMaj(0, 0);
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
+
+      for (int matrixSize = 2; matrixSize < 10; matrixSize++)
+      {
+         for (int i = 0; i < iters; i++)
+         {
+            DMatrixRMaj A = RandomMatrices_DDRM.symmetricPosDef(matrixSize, random);
+            DMatrixRMaj A_sqrt = new DMatrixRMaj(matrixSize, matrixSize);
+
+            MatrixMissingTools.sqrt(A, A_sqrt, temp, U, W, Vt, svd);
+
+            DMatrixRMaj Asqrt_times_Asqrt = new DMatrixRMaj(matrixSize, matrixSize);
+            CommonOps_DDRM.mult(A_sqrt, A_sqrt, Asqrt_times_Asqrt);
+
+            MatrixTestTools.assertMatrixEquals(A, Asqrt_times_Asqrt, 1.0e-7);
+         }
+      }
    }
 }

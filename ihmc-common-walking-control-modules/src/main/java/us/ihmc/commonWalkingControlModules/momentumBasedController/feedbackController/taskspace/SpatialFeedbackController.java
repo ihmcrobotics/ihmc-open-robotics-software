@@ -1,5 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.lu.LUDecompositionAlt_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.dense.row.linsol.lu.LinearSolverLu_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -14,20 +21,30 @@ import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
+import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
@@ -40,6 +57,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected final YoBoolean isEnabled;
+   protected boolean isImpedanceEnabled;
 
    protected final FBPose3D yoDesiredPose;
    protected final FBPose3D yoCurrentPose;
@@ -77,6 +95,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final FBVector3D yoDesiredRotationVector;
    protected final FBVector3D yoCurrentRotationVector;
+
+   protected final YoFrameVector3D yoPositionFeedback;
+   protected final YoFrameVector3D yoOrientationFeedback;
+
+   protected final YoMatrix yoDerivativeTermMatrix;
+   protected final YoMatrix yoCoriolisMatrix;
+   protected final YoMatrix yoTestMatrix;
 
    protected final FramePoint3D controlFramePosition = new FramePoint3D();
    protected final FrameQuaternion controlFrameOrientation = new FrameQuaternion();
@@ -118,9 +143,40 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoPID3DGains positionGains;
    protected final YoPID3DGains orientationGains;
    protected final Matrix3D tempGainMatrix = new Matrix3D();
+   protected final DMatrixRMaj dampingRatioMatrix = new DMatrixRMaj(6, 6);
+
+   protected final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+   protected final DMatrixRMaj inverseInertiaMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj inverseInertiaTempMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj coriolisMatrix = new DMatrixRMaj(0,0);
+   protected final TIntArrayList activeAxis = new TIntArrayList();
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempFeedbackMatrix = new DMatrixRMaj(6, 1);
+
+   private final DMatrixRMaj tempLinearMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempAngularMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj feedbacktermsMatrix = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj sqrtInertiaMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj sqrtProportionalGainMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempDerivativeGainMatrix = new DMatrixRMaj(0, 0);
+   private final Matrix3D tempMatrix3D = new Matrix3D();
+   private final DMatrixRMaj tempSqrtMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Vt = new DMatrixRMaj(0, 0);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(true, true, true);
+
+   protected final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj subMassMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj subMassInverseMatrix = new DMatrixRMaj(0, 0);
+   protected final DMatrixRMaj identityMatrix = CommonOps_DDRM.identity(6, 6);
+   private final DMatrixRMaj inertiaMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj savedInertiaMatrix = new DMatrixRMaj(0, 0);
 
    protected final RigidBodyTwistProvider rigidBodyTwistProvider;
    protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
+   protected final LinearSolverLu_DDRM inverseSolver = new LinearSolverLu_DDRM(new LUDecompositionAlt_DDRM());
 
    protected final RigidBodyBasics rootBody;
    protected RigidBodyBasics base;
@@ -130,6 +186,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final RigidBodyBasics endEffector;
    protected final YoSE3OffsetFrame controlFrame;
+   protected final JointIndexHandler jointIndexHandler;
+   protected final TIntArrayList jointIndices = new TIntArrayList();
+   protected final List<JointBasics> jointPath = new ArrayList<>();
 
    protected final double dt;
    protected final boolean isRootBody;
@@ -170,9 +229,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          isRootBody = false;
          rootBody = null;
       }
+      jointIndexHandler = ccToolbox.getJointIndexHandler();
 
       rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
+      massMatrixCalculator = ccToolbox.getMassMatrixCalculator();
 
       String endEffectorName = endEffector.getName();
       dt = ccToolbox.getControlDT();
@@ -186,11 +247,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
+      isImpedanceEnabled = false;
+
+      yoPositionFeedback = new YoFrameVector3D(endEffector.getName() + "positionFeedback", worldFrame, parentRegistry);
+      yoOrientationFeedback = new YoFrameVector3D(endEffector.getName() + "orientationFeedback", worldFrame, parentRegistry);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
       yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled, true);
       yoErrorVector = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, POSE, isEnabled, false);
       yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled, false);
+
+      yoDerivativeTermMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "DerivativeTermMatrix", 6, 6, fbToolbox.getRegistry());
+      yoCoriolisMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "CoriolisMatrix", 6, 6, fbToolbox.getRegistry());
+      yoTestMatrix = new YoMatrix(appendIndex(endEffectorName, controllerIndex) + "TestMatrix", 6, 6, fbToolbox.getRegistry());
 
       if (computeIntegralTerm)
       {
@@ -328,14 +397,36 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentCommandId = command.getCommandId();
       base = command.getBase();
       controlBaseFrame = command.getControlBaseFrame();
+      setImpedanceEnabled(command.getIsImpedanceEnabled());
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
       virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
+      dampingRatioMatrix.set(0,0, gains.getOrientationGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(1,1, gains.getOrientationGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(2,2, gains.getOrientationGains().getDampingRatios()[2]);
+      dampingRatioMatrix.set(3,3, gains.getPositionGains().getDampingRatios()[0]);
+      dampingRatioMatrix.set(4,4, gains.getPositionGains().getDampingRatios()[1]);
+      dampingRatioMatrix.set(5,5, gains.getPositionGains().getDampingRatios()[2]);
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
+      selectionMatrix.getAngularPart().setAxisSelection(false, false, true);
       angularGainsFrame = command.getAngularGainsFrame();
       linearGainsFrame = command.getLinearGainsFrame();
+
+      if (isImpedanceEnabled())
+      {
+         MultiBodySystemTools.collectJointPath(base.getChildrenJoints().get(0).getSuccessor(), endEffector, jointPath);
+         jointIndices.clear();
+
+         for (int i = 0; i < jointPath.size(); i++)
+         {
+            jointIndices.add(jointIndexHandler.getJointIndices(jointPath.get(i)));
+         }
+
+         activeAxis.reset();
+         selectionMatrix.getActiveAxes(activeAxis);
+      }
 
       command.getControlFramePoseIncludingFrame(controlFramePosition, controlFrameOrientation);
       controlFrame.setOffsetToParent(controlFramePosition, controlFrameOrientation);
@@ -368,8 +459,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    @Override
    public void setEnabled(boolean isEnabled)
+
+   @Override
+   public void setImpedanceEnabled(boolean isImpedanceEnabled)
    {
-      this.isEnabled.set(isEnabled);
+      this.isImpedanceEnabled = isImpedanceEnabled;
    }
 
    @Override
@@ -425,10 +519,50 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
 
+      if (isImpedanceEnabled())
+      {
+         computeInverseInertiaMatrix();
+      }
+
       computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
       computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
       if (computeIntegralTerm)
          computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
+
+      updateFeedForward();
+
+      if (isImpedanceEnabled())
+      {
+         tempMatrix.reshape(6, 1);
+
+         tempFeedbackMatrix.set(0, 0, angularProportionalFeedback.getX());
+         tempFeedbackMatrix.set(1, 0, angularProportionalFeedback.getY());
+         tempFeedbackMatrix.set(2, 0, angularProportionalFeedback.getZ());
+         tempFeedbackMatrix.set(3, 0, linearProportionalFeedback.getX());
+         tempFeedbackMatrix.set(4, 0, linearProportionalFeedback.getY());
+         tempFeedbackMatrix.set(5, 0, linearProportionalFeedback.getZ());
+         CommonOps_DDRM.mult(inverseInertiaMatrix, tempFeedbackMatrix, tempMatrix);
+         angularProportionalFeedback.setX(tempMatrix.get(0, 0));
+         angularProportionalFeedback.setY(tempMatrix.get(1, 0));
+         angularProportionalFeedback.setZ(tempMatrix.get(2, 0));
+         linearProportionalFeedback.setX(tempMatrix.get(3, 0));
+         linearProportionalFeedback.setY(tempMatrix.get(4, 0));
+         linearProportionalFeedback.setZ(tempMatrix.get(5, 0));
+
+         tempFeedbackMatrix.set(0, 0, angularDerivativeFeedback.getX());
+         tempFeedbackMatrix.set(1, 0, angularDerivativeFeedback.getY());
+         tempFeedbackMatrix.set(2, 0, angularDerivativeFeedback.getZ());
+         tempFeedbackMatrix.set(3, 0, linearDerivativeFeedback.getX());
+         tempFeedbackMatrix.set(4, 0, linearDerivativeFeedback.getY());
+         tempFeedbackMatrix.set(5, 0, linearDerivativeFeedback.getZ());
+         CommonOps_DDRM.mult(inverseInertiaMatrix, tempFeedbackMatrix, tempMatrix);
+         angularDerivativeFeedback.setX(tempMatrix.get(0, 0));
+         angularDerivativeFeedback.setY(tempMatrix.get(1, 0));
+         angularDerivativeFeedback.setZ(tempMatrix.get(2, 0));
+         linearDerivativeFeedback.setX(tempMatrix.get(3, 0));
+         linearDerivativeFeedback.setY(tempMatrix.get(4, 0));
+         linearDerivativeFeedback.setZ(tempMatrix.get(5, 0));
+      }
       feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
       feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
       feedForwardLinearAction.changeFrame(controlFrame);
@@ -477,7 +611,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoDesiredAcceleration.changeFrame(trajectoryFrame);
       yoDesiredAcceleration.setCommandId(currentCommandId);
 
-      addCoriolisAcceleration(desiredLinearAcceleration);
+      if (!isImpedanceEnabled())
+      {
+         addCoriolisAcceleration(desiredLinearAcceleration);
+      }
 
       inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
    }
@@ -487,6 +624,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          return;
+
+      if (isImpedanceEnabled())
+      {
+         throw new FeedbackControllerException("Impedance control is not implemented in computeInverseKinematics.");
+      }
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
@@ -530,6 +672,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          return;
+
+      if (isImpedanceEnabled())
+      {
+         throw new FeedbackControllerException("Impedance control is not implemented in computeVirtualModelControl.");
+      }
 
       computeFeedbackWrench();
 
@@ -746,10 +893,76 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(linearFeedbackTermToPack);
+      orientationGains.getDerivativeGainMatrix(tempMatrix3D);
 
-      orientationGains.getDerivativeGainMatrix(tempGainMatrix);
-      tempGainMatrix.transform(angularFeedbackTermToPack);
+      if (isImpedanceEnabled())
+      {
+         positionGains.getFullProportionalGainMatrix(tempLinearMatrix, 3);
+         orientationGains.getFullProportionalGainMatrix(tempAngularMatrix, 0);
+
+         CommonOps_DDRM.mult(tempAngularMatrix, tempLinearMatrix, tempMatrix);
+
+         sqrtProportionalGainMatrix.reshape(6,6);
+         sqrtInertiaMatrix.reshape(6,6);
+
+         MatrixMissingTools.sqrt(tempMatrix, sqrtProportionalGainMatrix, tempSqrtMatrix, U, W, Vt, svd);
+         //         LogTools.info("K_p^{1/2} = " + sqrtProportionalGainMatrix);
+
+         tempMatrix.set(inverseInertiaMatrix);
+
+         MatrixMissingTools.invert(tempMatrix, inverseSolver);
+         MatrixMissingTools.sqrt(tempMatrix, sqrtInertiaMatrix, tempSqrtMatrix, U, W, Vt, svd);
+
+         //         for (int row = 0; row < tempMatrix.getNumRows(); row++)
+         //         {
+         //            for (int col = 0; col < tempMatrix.getNumCols(); col++)
+         //            {
+         //               yoTestMatrix.set(row, col, tempMatrix.get(row, col));
+         //            }
+         //         }
+         //         LogTools.info("End effector: " + endEffector.getName() + " - Inertia matrix: " + tempMatrix);
+
+         tempMatrix.reshape(6,6);
+         CommonOps_DDRM.mult(sqrtInertiaMatrix, dampingRatioMatrix, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, sqrtProportionalGainMatrix, tempDerivativeGainMatrix);
+         CommonOps_DDRM.mult(sqrtProportionalGainMatrix, dampingRatioMatrix, tempMatrix);
+         CommonOps_DDRM.multAdd(tempMatrix, sqrtInertiaMatrix, tempDerivativeGainMatrix);
+
+         computeCoriolisMatrix();
+         CommonOps_DDRM.add(tempDerivativeGainMatrix,-1, coriolisMatrix, tempDerivativeGainMatrix);
+
+         feedbacktermsMatrix.set(0, 0, angularFeedbackTermToPack.getX());
+         feedbacktermsMatrix.set(1, 0, angularFeedbackTermToPack.getY());
+         feedbacktermsMatrix.set(2, 0, angularFeedbackTermToPack.getZ());
+         feedbacktermsMatrix.set(3, 0, linearFeedbackTermToPack.getX());
+         feedbacktermsMatrix.set(4, 0, linearFeedbackTermToPack.getY());
+         feedbacktermsMatrix.set(5, 0, linearFeedbackTermToPack.getZ());
+
+         tempMatrix.reshape(6,1);
+         CommonOps_DDRM.mult(tempDerivativeGainMatrix, feedbacktermsMatrix, tempMatrix);
+
+         linearFeedbackTermToPack.setX(tempMatrix.get(3, 0));
+         linearFeedbackTermToPack.setY(tempMatrix.get(4, 0));
+         linearFeedbackTermToPack.setZ(tempMatrix.get(5, 0));
+
+         angularFeedbackTermToPack.setX(tempMatrix.get(0, 0));
+         angularFeedbackTermToPack.setY(tempMatrix.get(1, 0));
+         angularFeedbackTermToPack.setZ(tempMatrix.get(2, 0));
+
+         //         for (int row = 0; row < 6; row++)
+         //         {
+         //            for (int col = 0; col < 6; col++)
+         //            {
+         //               yoDerivativeTermMatrix.set(row, col, tempDerivativeGainMatrix.get(row, col));
+         //               yoCoriolisMatrix.set(row, col, coriolisMatrix.get(row, col));
+         //            }
+         //         }
+      }
+      else
+      {
+         tempGainMatrix.transform(linearFeedbackTermToPack);
+         tempMatrix3D.transform(angularFeedbackTermToPack);
+      }
 
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
@@ -952,10 +1165,87 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
    }
 
+   private void computeInverseInertiaMatrix()
+   {
+      jacobianCalculator.clear();
+      jacobianCalculator.setKinematicChain(bodyBase, endEffector);
+      jacobianCalculator.setJacobianFrame(controlFrame);
+      jacobianCalculator.reset();
+
+      //      Jacobian is an M x N matrix, M is called the task size and
+      //    * N is the overall number of degrees of freedom (DoFs) to be controlled.
+      jacobianMatrix.set(jacobianCalculator.getJacobianMatrix());
+      jacobianMatrix.reshape(jacobianMatrix.getNumRows(), jacobianMatrix.getNumCols());
+
+      tempMatrix.reshape(activeAxis.size(), jacobianMatrix.getNumCols());
+      MatrixMissingTools.extractRows(jacobianMatrix, activeAxis, tempMatrix);
+      jacobianMatrix.set(tempMatrix);
+
+      subMassMatrix.set(massMatrixCalculator.getMassMatrix());
+      massMatrixCalculator.reset();
+      subMassMatrix.reshape(subMassMatrix.getNumRows(), subMassMatrix.getNumCols());
+
+      subMassInverseMatrix.reshape(jointIndices.size(), jointIndices.size());
+      MatrixMissingTools.extract(subMassMatrix, jointIndices, jointIndices, subMassInverseMatrix);
+
+      MatrixMissingTools.invert(subMassInverseMatrix, inverseSolver);
+
+      inverseInertiaTempMatrix.reshape(jointIndices.size(), jointIndices.size());
+      CommonOps_DDRM.mult(jacobianMatrix, subMassInverseMatrix, inverseInertiaTempMatrix);
+      CommonOps_DDRM.multTransB(inverseInertiaTempMatrix, jacobianMatrix, tempMatrix);
+
+      inverseInertiaMatrix.set(identityMatrix);
+      MatrixMissingTools.insert(tempMatrix, inverseInertiaMatrix, activeAxis, activeAxis);
+   }
+
+   // This is \bar{C} for the Derivative term
+   private void computeCoriolisMatrix()
+   {
+      inertiaMatrix.reshape(inverseInertiaMatrix.getNumRows(), inverseInertiaMatrix.getNumCols());
+      inertiaMatrix.set(inverseInertiaMatrix);
+      MatrixMissingTools.invert(inertiaMatrix, inverseSolver);
+
+      if (savedInertiaMatrix.getNumCols()==0)
+      {
+         savedInertiaMatrix.set(inertiaMatrix);
+         savedInertiaMatrix.reshape(savedInertiaMatrix.getNumRows(), savedInertiaMatrix.getNumCols());
+         coriolisMatrix.reshape(savedInertiaMatrix.getNumRows(), savedInertiaMatrix.getNumCols());
+         coriolisMatrix.zero();
+         return;
+      }
+
+      coriolisMatrix.reshape(inertiaMatrix.getNumRows(), inertiaMatrix.getNumCols());
+      CommonOps_DDRM.add(inertiaMatrix, -1, savedInertiaMatrix, coriolisMatrix);
+      CommonOps_DDRM.scale(0.5/dt, coriolisMatrix);
+      savedInertiaMatrix.set(inertiaMatrix);
+   }
+
+   private void updateFeedForward()
+   {
+      linearProportionalFeedback.changeFrame(worldFrame);
+      angularProportionalFeedback.changeFrame(worldFrame);
+      linearDerivativeFeedback.changeFrame(worldFrame);
+      angularDerivativeFeedback.changeFrame(worldFrame);
+      yoPositionFeedback.set(linearProportionalFeedback);
+      yoPositionFeedback.add(linearDerivativeFeedback);
+      yoOrientationFeedback.set(angularProportionalFeedback);
+      yoOrientationFeedback.add(angularDerivativeFeedback);
+      linearProportionalFeedback.changeFrame(controlFrame);
+      angularProportionalFeedback.changeFrame(controlFrame);
+      linearDerivativeFeedback.changeFrame(controlFrame);
+      angularDerivativeFeedback.changeFrame(controlFrame);
+   }
+
    @Override
    public boolean isEnabled()
    {
       return isEnabled.getBooleanValue();
+   }
+
+   @Override
+   public boolean isImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    @Override

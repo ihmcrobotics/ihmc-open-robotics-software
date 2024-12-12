@@ -10,6 +10,10 @@ public interface FeedbackControllerInterface
 
    void setEnabled(boolean isEnabled);
 
+   default void setImpedanceEnabled(boolean isImpedanceEnabled){
+      // Empty default implementation to avoid breaking existing implementations.
+   };
+
    void computeInverseDynamics();
 
    void computeInverseKinematics();
@@ -24,6 +28,10 @@ public interface FeedbackControllerInterface
    }
 
    boolean isEnabled();
+
+   default boolean isImpedanceEnabled() {
+      return false;
+   };
 
    InverseDynamicsCommand<?> getInverseDynamicsOutput();
 
