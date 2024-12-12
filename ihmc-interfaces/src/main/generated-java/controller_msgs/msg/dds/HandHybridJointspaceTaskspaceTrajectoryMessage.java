@@ -25,6 +25,10 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
             */
    public boolean force_execution_;
    /**
+            * Whether impedance control should be enabled or not.
+            */
+   public boolean impedance_enabled_;
+   /**
             * Specifies the side of the robot that will execute the trajectory.
             */
    public byte robot_side_ = (byte) 255;
@@ -66,6 +70,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       force_execution_ = other.force_execution_;
 
+      impedance_enabled_ = other.impedance_enabled_;
+
       robot_side_ = other.robot_side_;
 
       ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
@@ -104,6 +110,21 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    public boolean getForceExecution()
    {
       return force_execution_;
+   }
+
+   /**
+            * Whether impedance control should be enabled or not.
+            */
+   public void setImpedanceEnabled(boolean impedance_enabled)
+   {
+      impedance_enabled_ = impedance_enabled;
+   }
+   /**
+            * Whether impedance control should be enabled or not.
+            */
+   public boolean getImpedanceEnabled()
+   {
+      return impedance_enabled_;
    }
 
    /**
@@ -180,6 +201,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_execution_, other.force_execution_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.impedance_enabled_, other.impedance_enabled_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!this.taskspace_trajectory_message_.epsilonEquals(other.taskspace_trajectory_message_, epsilon)) return false;
@@ -203,6 +226,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
       if(this.force_execution_ != otherMyClass.force_execution_) return false;
 
+      if(this.impedance_enabled_ != otherMyClass.impedance_enabled_) return false;
+
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.taskspace_trajectory_message_.equals(otherMyClass.taskspace_trajectory_message_)) return false;
@@ -223,6 +248,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("force_execution=");
       builder.append(this.force_execution_);      builder.append(", ");
+      builder.append("impedance_enabled=");
+      builder.append(this.impedance_enabled_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("taskspace_trajectory_message=");

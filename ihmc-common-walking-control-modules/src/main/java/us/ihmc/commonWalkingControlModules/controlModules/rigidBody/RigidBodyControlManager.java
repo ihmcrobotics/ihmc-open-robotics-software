@@ -58,6 +58,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    private final String bodyName;
    private final RigidBodyBasics bodyToControl;
+   private final YoBoolean isImpedanceEnabled;
    private final YoRegistry registry;
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
@@ -106,6 +107,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   YoRegistry parentRegistry)
    {
       this.bodyToControl = bodyToControl;
+      this.isImpedanceEnabled = isImpedanceEnabled;
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
@@ -761,6 +763,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
             ret.addCommand(state.createFeedbackControlTemplate());
       }
       return ret;
+   }
+
+   public YoBoolean getImpedanceEnabled()
+   {
+      return isImpedanceEnabled;
    }
 
    public RigidBodyBasics getBodyToControl()

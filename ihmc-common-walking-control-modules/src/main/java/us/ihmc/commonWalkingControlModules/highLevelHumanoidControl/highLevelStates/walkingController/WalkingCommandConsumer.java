@@ -413,6 +413,7 @@ public class WalkingCommandConsumer
          HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
          RobotSide robotSide = command.getRobotSide();
          RigidBodyControlManager handManager = handManagers.get(robotSide);
+         handManager.getImpedanceEnabled().set(command.getImpedanceEnabled());
          if (handManager != null && (allowCommand || command.getForceExecution()))
          {
             SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();

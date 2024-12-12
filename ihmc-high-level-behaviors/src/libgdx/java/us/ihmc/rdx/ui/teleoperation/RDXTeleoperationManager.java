@@ -403,8 +403,10 @@ public class RDXTeleoperationManager extends RDXPanel
                {
                   for (RobotSide side : interactableHands.sides())
                   {
-                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted()
-                                                && (armManager.getArmControlMode() == RDXArmControlMode.JOINTSPACE || armManager.getArmControlMode() == RDXArmControlMode.HYBRID));
+                     desiredRobot.setArmShowing(side,
+                                                !interactableHands.get(side).isDeleted() && (armManager.getArmControlMode() == RDXArmControlMode.JOINTSPACE
+                                                                                             || armManager.getArmControlMode() == RDXArmControlMode.HYBRID
+                                                                                             || armManager.getArmControlMode() == RDXArmControlMode.HYBRID_IMPEDANCE));
                      desiredRobot.setArmColor(side, RDXIKSolverColors.getColor(armManager.getArmIKSolvers().get(side).getQuality()));
                   }
                }

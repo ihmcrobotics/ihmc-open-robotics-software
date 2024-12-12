@@ -12,6 +12,9 @@ uint32 sequence_id
 # To by-pass the safety check and force the execution of this message, set this field to true.
 bool force_execution false
 
+# Whether impedance control should be enabled or not.
+bool impedance_enabled false
+
 # Specifies the side of the robot that will execute the trajectory.
 byte robot_side 255
 # The taskspace trajectory information.
