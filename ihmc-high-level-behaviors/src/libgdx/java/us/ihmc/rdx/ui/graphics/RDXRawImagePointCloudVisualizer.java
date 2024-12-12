@@ -10,6 +10,7 @@ import imgui.type.ImInt;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.robotics.time.TimeTools;
 
@@ -20,6 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Visualizer for visualizing point cloud from depth and color images.
+ * Attempts to compensate for de-synchronization of images using the acquisition times.
+ */
 public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 {
    // The first element in the history is the newest, and the last is the oldest
@@ -53,7 +58,8 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
     */
    private final ImFloat maxDeSync = new ImFloat(0.1f);
 
-   private boolean wasUsingColorImage = true;
+   // FIXME: This is kinda buggy
+   private boolean switchBackToColor = false;
 
    public RDXRawImagePointCloudVisualizer(String title)
    {
@@ -134,15 +140,19 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
          depthImage = depthImageHistory.getFirst();
          colorImage = null;
 
-         if (coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal())
-            wasUsingColorImage = true;
-         coloringMethod.set(ColoringMethod.GRADIENT_WORLD_Z.ordinal());
-
+         if (!switchBackToColor && coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal())
+         {
+            coloringMethod.set(ColoringMethod.GRADIENT_WORLD_Z.ordinal());
+            switchBackToColor = true;
+         }
       }
       else
       {
-         if (wasUsingColorImage && coloringMethod.get() != ColoringMethod.COLOR_IMAGE.ordinal())
+         if (switchBackToColor)
+         {
             coloringMethod.set(ColoringMethod.COLOR_IMAGE.ordinal());
+            switchBackToColor = false;
+         }
       }
 
       // Ensure the renderer is initialized with a large enough max size
@@ -187,7 +197,8 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 
    private static void clearExpiredHistory(Deque<RawImage> imageHistory, double maxDuration)
    {
-      while (TimeTools.secondsBetween(imageHistory.getLast().getAcquisitionTime(), imageHistory.getFirst().getAcquisitionTime()) > maxDuration)
+      while (!imageHistory.isEmpty()
+             && TimeTools.secondsBetween(imageHistory.getLast().getAcquisitionTime(), imageHistory.getFirst().getAcquisitionTime()) > maxDuration)
       {
          imageHistory.removeLast().release();
       }
@@ -209,7 +220,10 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
          if (maxDeSync.get() > 0.5f * historyLength.get())
             maxDeSync.set(0.5f * historyLength.get());
       }
-      ImGui.sliderFloat("Max De-Synchronization (S)", maxDeSync.getData(), 0.0f, 0.5f * historyLength.get());
+      ImGuiTools.previousWidgetTooltip("Affects how much de-sync the visualizer can compensate for.");
+
+      ImGui.sliderFloat("Max De-Sync (S)", maxDeSync.getData(), 0.0f, 0.5f * historyLength.get());
+      ImGuiTools.previousWidgetTooltip("Amount of de-sync allowed for the images, after compensation.");
    }
 
    @Override
