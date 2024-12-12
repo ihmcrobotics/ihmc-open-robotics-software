@@ -442,9 +442,14 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 //      StepConstraintRegionsList.getAsMessage(stepConstraints, messasgeToPack.getStepConstraints());
    }
 
-   public void addFoostepConsumptionListener(Listener<?> listener)
+   public void addFootstepConsumptionListener(Listener<?> listener)
    {
       footstepConsumptionListenerList.add(listener);
+   }
+
+   public void removeFootstepConsumptionListener(Listener<?> listener)
+   {
+      footstepConsumptionListenerList.remove(listener);
    }
 
    public interface Listener<S extends Settable<S>>

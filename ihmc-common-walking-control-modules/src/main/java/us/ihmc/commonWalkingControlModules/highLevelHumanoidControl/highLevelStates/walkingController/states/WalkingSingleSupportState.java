@@ -81,6 +81,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleProvider swingFootCoPWeight;
    private final CenterOfPressureCommand copCommand = new CenterOfPressureCommand();
 
+   private final YoBoolean updateFootstepContinuouslyThroughoutSwing;
    private final WalkingMessageHandler.Listener listener = this::handleNewFootstep;
 
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
@@ -135,7 +136,18 @@ public class WalkingSingleSupportState extends SingleSupportState
       copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
       swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
 
-      walkingMessageHandler.addFoostepConsumptionListener(listener);
+      updateFootstepContinuouslyThroughoutSwing = new YoBoolean("updateFootstepContinuouslyThroughoutSwing", registry);
+
+      updateFootstepContinuouslyThroughoutSwing.addListener(value ->
+                                                       {
+                                                          if (updateFootstepContinuouslyThroughoutSwing.getBooleanValue())
+                                                             walkingMessageHandler.addFootstepConsumptionListener(listener);
+                                                          else
+                                                             walkingMessageHandler.removeFootstepConsumptionListener(listener);
+
+                                                       });
+
+      updateFootstepContinuouslyThroughoutSwing.set(true);
    }
 
    int stepsToAdd;
