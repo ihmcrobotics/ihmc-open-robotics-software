@@ -13,29 +13,47 @@ import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.robotics.time.TimeTools;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
 {
    // The first element in the history is the newest, and the last is the oldest
-   private final Deque<RawImage> depthImageHistory = new LinkedList<>();
-   private final Deque<RawImage> colorImageHistory = new LinkedList<>();
-   private Duration maxHistoryDuration = Duration.ofSeconds(1L);
+   private final LinkedList<RawImage> depthImageHistory = new LinkedList<>();
+   private final LinkedList<RawImage> colorImageHistory = new LinkedList<>();
    private final Notification newImageNotification = new Notification();
 
    private RDXRawImagePointCloudRenderer pointCloudRenderer;
    private int maxPoints = 0;
    private String[] availableColoringMethods = new String[0];
 
-   private final ImInt coloringMethod = new ImInt();
+   private final ImInt coloringMethod = new ImInt(ColoringMethod.COLOR_IMAGE.ordinal());
    private final float[] defaultColor = new float[] {1.0f, 1.0f, 1.0f};
-   private final ImFloat maxImageAgeDifference = new ImFloat(1.0f);
+   private final ImFloat pointScale = new ImFloat(0.005f);
+
+   /**
+    * The duration of history kept in the image histories.
+    * Affects how much delay difference the visualizer can compensate for.
+    * For example, if the color images have one second of delay compared to depth,
+    * at least one second of history is required to sync the color and depth.
+    */
+   private final ImFloat historyLength = new ImFloat(1.0f);
+
+   /**
+    * Maximum de-synchronization allowed between color and depth images,
+    * after attempting to compensate using the image history.
+    * If the newest depth image and the oldest color image are
+    * de-synchronized by more than  {@code maxDeSync} seconds,
+    * the visualizer will default to rendering depth with gradient colors.
+    * This value should not be more than half the history length.
+    */
+   private final ImFloat maxDeSync = new ImFloat(0.1f);
+
+   private boolean wasUsingColorImage = true;
 
    public RDXRawImagePointCloudVisualizer(String title)
    {
@@ -45,8 +63,12 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    public void setDepthImage(RawImage depthImage)
    {
       RawImage image = depthImage.get();
-      if (image != null)
-         depthImageHistory.addFirst(depthImage);
+
+      synchronized (depthImageHistory)
+      {
+         if (image != null)
+            depthImageHistory.addFirst(depthImage);
+      }
 
       newImageNotification.set();
    }
@@ -54,18 +76,14 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
    public void setColorImage(RawImage colorImage)
    {
       RawImage image = colorImage.get();
-      if (image != null)
-         colorImageHistory.addFirst(colorImage);
+
+      synchronized (colorImageHistory)
+      {
+         if (image != null)
+            colorImageHistory.addFirst(colorImage);
+      }
 
       newImageNotification.set();
-   }
-
-   private static void updateHistory(Deque<RawImage> imageHistory, Duration maxDuration)
-   {
-      while (Duration.between(imageHistory.getLast().getAcquisitionTime(), imageHistory.getFirst().getAcquisitionTime()).compareTo(maxDuration) > 0)
-      {
-         imageHistory.removeLast().release();
-      }
    }
 
    @Override
@@ -81,28 +99,53 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
       if (depthImageHistory.isEmpty())
          return;
 
-      RawImage depthImage;
-      RawImage colorImage;
+      RawImage depthImage = null;
+      RawImage colorImage = null;
+      boolean foundMatchingColorImage = false;
 
-      if (colorImageHistory.isEmpty())
-      {
-         depthImage = depthImageHistory.getFirst();
-         colorImage = null;
-      }
-      else
+      if (!colorImageHistory.isEmpty()) // Otherwise, we try to match the color and depth images according to acquisition time
       {
          depthImage = depthImageHistory.getFirst();
          colorImage = colorImageHistory.getFirst();
 
          if (depthImage.getAcquisitionTime().isBefore(colorImage.getAcquisitionTime()))
-            colorImage = findClosest(colorImageHistory, depthImage.getAcquisitionTime());
+         {
+            synchronized (colorImageHistory)
+            {  // Newest depth image is older than the newest color image, so we find an older color image
+               colorImage = findClosest(depthImage, colorImageHistory);
+            }
+         }
          else
-            depthImage = findClosest(depthImageHistory, colorImage.getAcquisitionTime());
+         {
+            synchronized (depthImageHistory)
+            {  // Newest depth image is newer than the newest color image, so we find an older depth image
+               depthImage = findClosest(colorImage, depthImageHistory);
+            }
+         }
 
-         if (!isWithinDifferenceTolerance(depthImage.getAcquisitionTime(), colorImage.getAcquisitionTime(), maxImageAgeDifference.get()))
-            colorImage = null;
+         // If the closest images are too far apart, we default to rendering the newest depth image without color
+         double secondsBetweenImages = Math.abs(TimeTools.secondsBetween(depthImage.getAcquisitionTime(), colorImage.getAcquisitionTime()));
+         foundMatchingColorImage = secondsBetweenImages < maxDeSync.get();
       }
 
+      // If no matching color image was found, use the newest depth image and set coloring method to gradient
+      if (!foundMatchingColorImage)
+      {
+         depthImage = depthImageHistory.getFirst();
+         colorImage = null;
+
+         if (coloringMethod.get() == ColoringMethod.COLOR_IMAGE.ordinal())
+            wasUsingColorImage = true;
+         coloringMethod.set(ColoringMethod.GRADIENT_WORLD_Z.ordinal());
+
+      }
+      else
+      {
+         if (wasUsingColorImage && coloringMethod.get() != ColoringMethod.COLOR_IMAGE.ordinal())
+            coloringMethod.set(ColoringMethod.COLOR_IMAGE.ordinal());
+      }
+
+      // Ensure the renderer is initialized with a large enough max size
       int size = depthImage.getWidth() * depthImage.getHeight();
       if (maxPoints < size)
       {
@@ -115,56 +158,58 @@ public class RDXRawImagePointCloudVisualizer extends RDXVisualizer
          availableColoringMethods = Arrays.stream(pointCloudRenderer.getAvailableColoringMethods()).map(Enum::name).toArray(String[]::new);
       }
 
+      // Update the coloring method
+      pointCloudRenderer.setColoringMethod(ColoringMethod.values()[coloringMethod.get()]);
+
+      // Update the mesh
       if (colorImage == null)
-      {
          pointCloudRenderer.updateMesh(depthImage);
-      }
       else
-      {
          pointCloudRenderer.updateMesh(depthImage, colorImage);
-      }
 
-      updateHistory(depthImageHistory, maxHistoryDuration);
-      updateHistory(colorImageHistory, maxHistoryDuration);
-   }
-
-   private RawImage findClosest(Deque<RawImage> imageHistory, Instant targetInstant)
-   {
-      Iterator<RawImage> historyIterator = imageHistory.iterator();
-      RawImage closestAfter = null;
-      RawImage closestBefore = null;
-      while (historyIterator.hasNext())
+      // Remove images that are too old from history
+      synchronized (depthImageHistory)
       {
-         closestAfter = closestBefore;
-         closestBefore = historyIterator.next();
-         if (closestBefore.getAcquisitionTime().isBefore(targetInstant))
-            break;
+         clearExpiredHistory(depthImageHistory, historyLength.get());
       }
-
-      if (closestAfter == null)
-         return closestBefore;
-
-      double secondsBetweenTargetAndAfter = Math.abs(TimeTools.secondsBetween(closestAfter.getAcquisitionTime(), targetInstant));
-      double secondsBetweenTargetAndBefore = Math.abs(TimeTools.secondsBetween(closestBefore.getAcquisitionTime(), targetInstant));
-
-      return secondsBetweenTargetAndAfter < secondsBetweenTargetAndBefore ? closestAfter : closestBefore;
+      synchronized (colorImageHistory)
+      {
+         clearExpiredHistory(colorImageHistory, historyLength.get());
+      }
    }
 
-   private boolean isWithinDifferenceTolerance(Instant instantA, Instant instantB, double maxDifference)
+   private RawImage findClosest(RawImage targetImage, List<RawImage> imageHistory)
    {
-      return Math.abs(TimeTools.secondsBetween(instantA, instantB)) < maxDifference;
+      List<Instant> imageAcquisitionTimes = imageHistory.stream().map(RawImage::getAcquisitionTime).toList();
+      int closestColorImageIndex = TimeTools.findClosestTimeIndex(targetImage.getAcquisitionTime(), imageAcquisitionTimes);
+      return imageHistory.get(closestColorImageIndex);
+   }
+
+   private static void clearExpiredHistory(Deque<RawImage> imageHistory, double maxDuration)
+   {
+      while (TimeTools.secondsBetween(imageHistory.getLast().getAcquisitionTime(), imageHistory.getFirst().getAcquisitionTime()) > maxDuration)
+      {
+         imageHistory.removeLast().release();
+      }
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.combo("Coloring Method", coloringMethod, availableColoringMethods))
-         pointCloudRenderer.setColoringMethod(ColoringMethod.values()[coloringMethod.get()]);
+      ImGui.combo("Coloring Method", coloringMethod, availableColoringMethods);
+
       if (ImGui.colorEdit3("Default Color", defaultColor))
          pointCloudRenderer.setDefaultPointColor(new Color(defaultColor[0], defaultColor[1], defaultColor[2], 1.0f));
 
-      ImGui.sliderFloat("Max Image Age Difference", maxImageAgeDifference.getData(), 0.0f, 30.0f);
+      if (ImGui.sliderFloat("Point Scale", pointScale.getData(), 0.0f, 0.1f))
+         pointCloudRenderer.setPointScale(pointScale.get());
 
+      if (ImGui.sliderFloat("History Length (S)", historyLength.getData(), 0.0f, 3.0f))
+      {
+         if (maxDeSync.get() > 0.5f * historyLength.get())
+            maxDeSync.set(0.5f * historyLength.get());
+      }
+      ImGui.sliderFloat("Max De-Synchronization (S)", maxDeSync.getData(), 0.0f, 0.5f * historyLength.get());
    }
 
    @Override

@@ -5,6 +5,8 @@ import us.ihmc.commons.Conversions;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.Temporal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,5 +77,33 @@ public class TimeToolsTest
          double afterToStart = TimeTools.secondsBetween(secondsAfter, start);
          assertEquals(-i, afterToStart, 1E-6);
       }
+   }
+
+   @Test
+   public void testFindClosestTime()
+   {
+      Instant target = Instant.now();
+      Instant milliAfter = target.plusMillis(1L);
+      Instant twoMillisAfter = target.plusMillis(2L);
+      Instant secondAfter = target.plusSeconds(1L);
+      Instant twoSecondsAfter = target.plusSeconds(2L);
+
+      Instant milliBefore = target.minusMillis(1L);
+      Instant twoMillisBefore = target.minusMillis(2L);
+      Instant secondBefore = target.minusSeconds(1L);
+      Instant twoSecondsBefore = target.minusSeconds(2L);
+
+      testFindClosestTime(target, List.of(), -1);
+      testFindClosestTime(target, List.of(twoSecondsBefore, milliBefore, twoMillisAfter, secondAfter), 1);
+      testFindClosestTime(target, List.of(milliAfter, twoMillisBefore, secondBefore), 0);
+      testFindClosestTime(target, List.of(milliBefore, milliAfter, target, twoSecondsAfter), 2);
+      testFindClosestTime(target, List.of(twoSecondsBefore, twoSecondsAfter), 0);
+      testFindClosestTime(target, List.of(secondAfter, secondBefore), 0);
+   }
+
+   private void testFindClosestTime(Temporal target, List<? extends Temporal> times, int expectedResult)
+   {
+      int closestIndex = TimeTools.findClosestTimeIndex(target, times);
+      assertEquals(expectedResult, closestIndex);
    }
 }
