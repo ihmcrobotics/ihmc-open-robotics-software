@@ -24,7 +24,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -68,13 +68,13 @@ public class RDXIterativeClosestPointWorkerDemo
    private ModelInstance mousePickSphere;
    FramePoint3D pickFramePoint = new FramePoint3D();
 
-   private final RDXPointCloudRenderer icpBoxRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld icpBoxRenderer = new RDXPointCloudRendererOld();
    private List<Point3D32> objectPointCloud;
    private final RecyclingArrayList<Point3D32> icpBoxPointCloud = new RecyclingArrayList<>(Point3D32::new);
 
-   private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer correspondingObjectPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer correspondingMeasurementPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld segmentedPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld correspondingObjectPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld correspondingMeasurementPointCloudRenderer = new RDXPointCloudRendererOld();
    private final RecyclingArrayList<Point3D32> segmentedPtCld = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<Point3D32> correspondingObjectPtCld = new RecyclingArrayList<>(Point3D32::new);
    private final RecyclingArrayList<Point3D32> correspondingMeasurementPtCld = new RecyclingArrayList<>(Point3D32::new);

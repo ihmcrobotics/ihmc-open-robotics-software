@@ -9,7 +9,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -33,7 +33,7 @@ public class RDXPlanarRegionMappingDemo
    private PlanarRegionMappingHandler mappingManager;
    private RDXPlanarRegionMappingUI mappingUI;
 
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
 
    private final RDXLineGraphic mocapGraphic = new RDXLineGraphic(0.02f, Color.YELLOW);
    private final RDXLineGraphic rootJointGraphic = new RDXLineGraphic(0.02f, Color.RED);

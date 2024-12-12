@@ -46,7 +46,7 @@ import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -94,7 +94,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final CameraIntrinsics depthCameraIntrinsics;
    private final int imageWidth;
    private final int imageHeight;
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
    private final Mat rgba8Mat;
    private final Mat bgr8Mat;
    private final Mat depthDiscretizedMat;
@@ -510,7 +510,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             float discreteResolution = 0.003f;
             int numberOfSegments = segmentationDivisor.get();
             int pointsPerSegment = depthSensorSimulator.getNumberOfPoints() / numberOfSegments;
-            parametersBuffer.getBytedecoFloatBufferPointer().put(0, RDXPointCloudRenderer.FLOATS_PER_VERTEX);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(0, RDXPointCloudRendererOld.FLOATS_PER_VERTEX);
             parametersBuffer.getBytedecoFloatBufferPointer().put(1, DiscretizedColoredPointCloud.DISCRETE_INTS_PER_POINT);
             parametersBuffer.getBytedecoFloatBufferPointer().put(2, discreteResolution);
             parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) segmentIndex);
