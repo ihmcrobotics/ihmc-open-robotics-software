@@ -94,6 +94,24 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
    }
 
+   public RigidBodyPositionController(RigidBodyBasics bodyToControl,
+                                      RigidBodyBasics baseBody,
+                                      RigidBodyBasics elevator,
+                                      ReferenceFrame controlFrame,
+                                      ReferenceFrame baseFrame,
+                                      YoDouble yoTime,
+                                      boolean enableFunctionGenerators,
+                                      boolean enableImpedanceControl,
+                                      YoRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(bodyToControl, baseBody, elevator, controlFrame, baseFrame, yoTime, enableFunctionGenerators,
+           new YoBoolean(bodyToControl.getName() + "EnableImpedanceControlPosition", parentRegistry),
+           parentRegistry, graphicsListRegistry);
+      YoBoolean enableImpedanceControlYoBoolean = (YoBoolean) parentRegistry.getVariable(bodyToControl.getName() + "EnableImpedanceControlPosition");
+      enableImpedanceControlYoBoolean.set(enableImpedanceControl);
+   }
+
    public void setGains(PID3DGainsReadOnly gains)
    {
       positionHelper.setGains(gains);
