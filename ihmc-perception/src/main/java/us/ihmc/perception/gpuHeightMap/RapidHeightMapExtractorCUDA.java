@@ -36,6 +36,9 @@ import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 public class RapidHeightMapExtractorCUDA
 {
    private static final int BLOCK_SIZE_XY = 32;
+   private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private static final boolean computeSteppability = true;
+
 
    private GpuMat inputDepthImage;
    private GpuMat transformedInputDepthImage;
@@ -59,11 +62,11 @@ public class RapidHeightMapExtractorCUDA
    private CameraIntrinsics cameraIntrinsics;
 
    private TerrainMapData terrainMapData;
-   private static HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+
    private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
 
    private Rect cropWindowRectangle;
-   private static final boolean computeSteppability = true;
+
    private CUDAProgram heightMapCUDAProgram;
    private CUstream_st stream;
 
@@ -109,7 +112,7 @@ public class RapidHeightMapExtractorCUDA
    private dim3 registerKernelGridDim;
    private dim3 croppingKernelGridDim;
 
-   float[] paramsArray;
+   private float[] paramsArray;
 
    public RapidHeightMapExtractorCUDA(ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
    {
@@ -140,11 +143,6 @@ public class RapidHeightMapExtractorCUDA
    public int getSequenceNumber()
    {
       return sequenceNumber;
-   }
-
-   public boolean isInitialized()
-   {
-      return initialized;
    }
 
    public TerrainMapData getTerrainMapData()
@@ -208,23 +206,14 @@ public class RapidHeightMapExtractorCUDA
       denoisedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       steppableRegionAssignmentMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
       steppableRegionRingMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-
       localHeightMapImage = new GpuMat(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
-
       transformedInputDepthImage = new GpuMat(inputDepthImage.cols(), inputDepthImage.rows(), opencv_core.CV_16UC1);
-
       globalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
-
       globalHeightVarianceImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-
       terrainCostImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-
       contactMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-
       sensorCroppedHeightMapImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-
       sensorCroppedTerrainCostImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-
       sensorCroppedContactMapImage = new GpuMat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
 
       // Initialize transformation pointers
@@ -422,8 +411,6 @@ public class RapidHeightMapExtractorCUDA
 
    public void destroy()
    {
-      System.out.println("here destroy");
-
       heightMapCUDAProgram.close();
       updateKernel.close();
       registerKernel.close();
@@ -453,7 +440,6 @@ public class RapidHeightMapExtractorCUDA
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
-
    }
 
    public int getCenterIndex()
@@ -501,7 +487,6 @@ public class RapidHeightMapExtractorCUDA
                                  (float) parameters.getVerticalSearchResolution(),
                                  (float) parameters.getFastSearchSize()};
 
-      initialized = true;
    }
 
    public static HeightMapData packHeightMapData(RapidHeightMapExtractorCUDA heightMapExtractor, HeightMapData heightMapDataToPack)
