@@ -11,7 +11,7 @@ import us.ihmc.perception.cuda.CUDAProgram;
 import java.net.URL;
 
 import us.ihmc.perception.cuda.CUDAStreamManager;
-
+import us.ihmc.perception.cuda.CUDATools;
 
 public class CUDAFlyingPointsFilter
 {
@@ -50,7 +50,7 @@ public class CUDAFlyingPointsFilter
       flyingPointFilterKernel.withPointer(deviceOutputImage.data()).withLong(deviceOutputImage.step());
       flyingPointFilterKernel.withInt(inputImage.rows()).withInt(inputImage.cols());
       flyingPointFilterKernel.run(stream, gridSize, blockSize, 0);
-      cudart.cudaStreamSynchronize(stream);
+      CUDATools.checkCUDAError(cudart.cudaStreamSynchronize(stream));
 
       blockSize.close();
       gridSize.close();

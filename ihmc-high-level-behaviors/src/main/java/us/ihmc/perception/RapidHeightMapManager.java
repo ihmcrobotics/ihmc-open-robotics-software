@@ -86,6 +86,8 @@ public class RapidHeightMapManager
       filteredDepthMat.copyTo(deviceDepthImage);
       filteredDepthMat.close();
 
+
+
       if (resetHeightMapRequested.poll())
       {
          rapidHeightMapExtractor.reset();
